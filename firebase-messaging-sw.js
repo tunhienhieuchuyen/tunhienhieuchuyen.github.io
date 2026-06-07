@@ -17,12 +17,6 @@ const messaging = firebase.messaging();
 // Hàm hứng tin nhắn khi App ĐÃ TẮT hoặc ẨN DƯỚI NỀN
 messaging.onBackgroundMessage((payload) => {
   console.log('[Firebase SW] Nhận thông báo ngầm: ', payload);
-  const notificationTitle = (payload.notification && payload.notification.title) || 'Góc Gia Đình';
-  const notificationOptions = {
-    body: (payload.notification && payload.notification.body) || 'Bạn có tin nhắn mới',
-    icon: 'https://tunhienhieuchuyen.github.io/icon-192x192.png',
-    badge: 'https://tunhienhieuchuyen.github.io/icon-192x192.png',
-    vibrate: [200, 100, 200]
-  };
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  // Không gọi self.registration.showNotification nữa để tránh nổ 2 lần
+  // Firebase FCM SDK sẽ tự động hiển thị payload.notification
 });
