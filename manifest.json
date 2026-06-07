@@ -1,0 +1,26 @@
+{
+  "id": "tunhienhieuchuyen-app",
+  "name": "Tự Nhiên Hiểu Chuyện",
+  "short_name": "TNHC",
+  "description": "Giải Mã Vạn Vật",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
