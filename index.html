@@ -5028,11 +5028,6 @@ window.ChatEngine = {
     },
     async sendFile(file, currentIndex = 1, totalFiles = 1) {
         if(!file) return;
-        if(file.type && file.type.startsWith('image/')) {
-            window.showToast?.('Đang tối ưu ảnh...', 'ph-arrows-in-line-horizontal');
-            file = await this.compressImage(file);
-        }
-
         // PHA 12: Chặn 50MB theo giới hạn Telegram Bot API, resolve để queue tiếp tục.
         const MAX_SIZE = 50 * 1024 * 1024;
         if (file.size > MAX_SIZE) {
@@ -6825,7 +6820,8 @@ Trả về đúng 2 dòng khóa, không thêm dòng thứ ba.`;
     }
 };
 
-window.fetchWeather=window.fetchWeather=async function(locationKey,options={}){const key=locationKey||window.weatherState?.selected||'hanoi';const loc=window.WEATHER_LOCATIONS?.[key]||window.WEATHER_LOCATIONS.hanoi;window.weatherState.selected=loc.key;window.renderWeatherLocationTabs(loc.key);const cache=window.getWeatherCache(loc.key);const cacheFresh=cache&&cache.savedAt&&(Date.now()-cache.savedAt<window.WEATHER_CACHE_TTL_MS);if(cacheFresh&&!options.force){window.renderWeather(cache.data,{fromCache:true});return cache.data}try{window.setWeatherStatus('Đang lấy thời tiết...', 'warn');const res=await fetch(window.weatherApiUrl(loc),{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const raw=await res.json();const data=window.normalizeOpenMeteoWeather(raw,loc);window.setWeatherCache(loc.key,data);window.renderWeather(data,{fromCache:false});return data}catch(err){console.warn('[WEATHER FETCH FAIL]',loc.key,err);if(cache?.data){window.renderWeather(cache.data,{fromCache:true});window.setWeatherStatus('Không lấy được dữ liệu mới. Đang hiển thị dữ liệu gần nhất.', 'error');return cache.data}window.setWeatherStatus('Không lấy được thời tiết lúc này. Vui lòng thử lại.', 'error');throw err}};
+window.fetchWeather=window.fetchWeather=async function(locationKey,options={}){const key=locationKey||window.weatherState?.selected||'hanoi';const loc=window.WEATHER_LOCATIONS?.[key]||window.WEATHER_LOCATIONS.hanoi;window.weatherState.selected=loc.key;window.renderWeatherLocationTabs(loc.key);const cache=window.getWeatherCache(loc.key);const cacheFresh=cache&&cache.savedAt&&(Date.now()-cache.savedAt<window.WEATHER_CACHE_TTL_MS);if(cacheFresh&&!options.force){window.renderWeather(cache.data,{fromCache:true});return cache.data}try{window.setWeatherStatus('Đang lấy thời tiết...', 'warn');// Định tuyến qua trạm Cloudflare Worker Proxy đã bọc thép
+const workerWeatherUrl = `https://lifeos-push-server.xiemsansang.workers.dev/weather?lat=${loc.lat}&lon=${loc.lon}`;const res = await fetch(workerWeatherUrl);if(!res.ok)throw new Error(`HTTP ${res.status}`);const raw = await res.json();const data=window.normalizeOpenMeteoWeather(raw,loc);window.setWeatherCache(loc.key,data);window.renderWeather(data,{fromCache:false});return data}catch(err){console.warn('[WEATHER FETCH FAIL]',loc.key,err);if(cache?.data){window.renderWeather(cache.data,{fromCache:true});window.setWeatherStatus('Không lấy được dữ liệu mới. Đang hiển thị dữ liệu gần nhất.', 'error');return cache.data}window.setWeatherStatus('Không lấy được thời tiết lúc này. Vui lòng thử lại.', 'error');throw err}};
 window.setWeatherLocation=function(locationKey){window.vibrate?.(10);return window.fetchWeather(locationKey,{force:false})};
 window.refreshWeather=function(){window.vibrate?.(10);return window.fetchWeather(window.weatherState?.selected||'hanoi',{force:true})};
 window.startWeatherPanel=function(){if(!window.weatherState)window.weatherState={selected:'hanoi'};window.fetchWeather(window.weatherState.selected||'hanoi',{force:false}).catch(e=>console.warn('[WEATHER PANEL START FAIL]',e))};
