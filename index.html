@@ -5516,22 +5516,22 @@ window.ChatEngine = {
             if (!window.FirebaseSync || !window.FirebaseSync._d) return;
 
             const profilesSnap = await window.FirebaseSync._d.collection('LifeOS_Profiles').get();
-            const tokens = [];
+            const tokenSet = new Set(); // Dùng Set để khử trùng lặp Token cùng 1 thiết bị
             const myKey = this.getKey();
             profilesSnap.forEach(doc => {
                 const d = doc.data ? doc.data() : {};
                 if (String(doc.id) !== String(myKey) && d && d.fcmToken) {
-                    tokens.push(d.fcmToken);
+                    tokenSet.add(d.fcmToken);
                 }
             });
 
-            if (tokens.length === 0) return;
+            if (tokenSet.size === 0) return;
 
             const senderName = window.PROFILES?.[myKey]?.name || 'Gia đình';
             const title = `Tin nhắn mới từ ${senderName}`;
             const bodyText = String(msgText || 'Bạn có tin nhắn mới').slice(0, 180);
 
-            for (const token of tokens) {
+            for (const token of tokenSet) { // Sửa ở dòng này
                 fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
