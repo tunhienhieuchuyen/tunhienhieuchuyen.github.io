@@ -5800,7 +5800,36 @@ window.ChatEngine = {
 };
 window.FirebaseSync={
     _d:null,_u:null,_i:false,_k:'',
-    init(k){
+    
+    async requestPushPermission() {
+        if (!this._d || !this._k) {
+            window.showToast('Lỗi: Firebase chưa kết nối', 'ph-warning-circle');
+            return;
+        }
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                window.showToast('Đang tạo mã định danh thiết bị...', 'ph-spinner animate-spin');
+                const token = await firebase.messaging().getToken();
+                
+                if (token) {
+                    await this._d.collection('LifeOS_Profiles').doc(this._k).set({
+                        fcmToken: token,
+                        updatedAt: Date.now()
+                    }, { merge: true });
+                    window.showToast('Đã bật thông báo thành công!', 'ph-bell-ringing');
+                } else {
+                    window.showToast('Không lấy được Token', 'ph-warning-circle');
+                }
+            } else {
+                window.showToast('Bạn đã từ chối quyền thông báo', 'ph-bell-slash');
+            }
+        } catch (error) {
+            console.error('Lỗi Push:', error);
+            window.showToast('Lỗi cấp quyền thông báo', 'ph-warning-circle');
+        }
+    },
+    init(k){
         console.log('[FB:init] profile=', k);
         this._k=k;
         try{ window.ChatEngine?.init?.(); }catch(e){ console.warn('[ChatEngine init before Firebase]', e); }
@@ -10830,42 +10859,5 @@ setTimeout(() => {
     }
 }, 3000); // Trễ 3s để không chặn quá trình load UI ban đầu
 </script>
-
-
-<script id="pha41-family-app-lock">
-  // Chạy ngay khi load xong để khóa vào tab Chat và ẩn thanh điều hướng
-  window.addEventListener('DOMContentLoaded', () => {
-      // 1. Chuyển thẳng sang Tab Chat
-      setTimeout(() => {
-          if(typeof window.switchTab === 'function') {
-              window.switchTab('view-chat', document.querySelector('.nav-btn[onclick*="view-chat"]'));
-          }
-      }, 300);
-
-      // 2. Ẩn thanh Navigation bên dưới để tối ưu diện tích màn hình cho App
-      const bottomNav = document.getElementById('bottom-nav');
-      if (bottomNav) {
-          bottomNav.style.display = 'none';
-      }
-
-      // 3. Chỉnh lại CSS một chút để khung chat tràn đáy (do đã bỏ thanh Nav)
-      const style = document.createElement('style');
-      style.innerHTML = `
-          body { padding-bottom: 0 !important; }
-          #mobile-input { display: none !important; }
-          #view-chat > div {
-              min-height: 100dvh !important;
-              max-height: 100dvh !important;
-              border-radius: 0 !important;
-              border: none !important;
-          }
-          /* Căn lại vị trí các menu nổi/Emoji */
-          #chat-emoji-container { bottom: 80px !important; }
-          header { display: none !important; } /* Ẩn luôn header gốc vì chat đã có header riêng */
-      `;
-      document.head.appendChild(style);
-  });
-</script>
-
 </body>
 </html>
