@@ -6726,7 +6726,11 @@ Trả về đúng 2 dòng khóa, không thêm dòng thứ ba.`;
 
                 const p = Number(h.precipProb || 0);
                 if (p >= 30 && rainHoursFuture.length < 5) {
-                    const timeStr = this.formatWeatherHour(h.time);
+                    let timeStr = this.formatWeatherHour(h.time);
+                    // Nếu mốc giờ dự báo nằm ở ngày mai, bổ sung chữ (mai) để phân biệt
+                    if (hTime.getDate() !== now.getDate()) {
+                        timeStr += ' (mai)';
+                    }
                     if(!rainHoursFuture.includes(timeStr)) rainHoursFuture.push(timeStr);
                 }
             });
