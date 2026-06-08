@@ -28,13 +28,16 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 <style>
-.media-focused {
+/* LÕI ĐIỀU HƯỚNG ĐA VÙNG (PHA 60.1) */
+.media-focused, .sidebar-focused, .tab-focused, .player-btn-focused {
   border-color: var(--c-primary) !important;
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-primary) 30%, transparent) !important;
-  transform: scale(1.02) !important;
-  background-color: var(--c-sub) !important;
+  transform: scale(1.05) !important;
+  z-index: 10;
+  outline: none !important;
 }
-
+.media-focused { background-color: var(--c-sub) !important; }
+.player-btn-focused { background-color: var(--c-sub) !important; color: var(--c-primary) !important; }
 /* Custom CSS Dự Báo Thời Tiết (Pha 02) */
 .weather-daily-card {
     min-width: 90px; flex: 1 1 0; scroll-snap-align: start;
@@ -3629,32 +3632,26 @@ body.music-player-active #mini-player {
 
 <div class="lg:col-span-12 flex flex-col h-full view-section mt-2" id="view-music">
 <div class="bg-white p-3 sm:p-5 lg:p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col h-full relative overflow-hidden min-h-[600px] lg:max-h-[800px]">
-    
-    <div class="music-titlebar flex items-center justify-between mb-4 border-b border-slate-100 pb-3 flex-wrap gap-2">
-        <h2 class="text-lg font-black text-primary uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-headphones text-2xl"></i> Giải trí Đa phương tiện</h2>
-        <div class="music-header-actions flex gap-2 items-center">
-<select id="music-sleep-timer" onchange="window.MusicApp.setSleepTimer(this.value)" class="bg-slate-50 border border-slate-200 text-slate-600 text-[11px] font-bold rounded-xl px-2 py-2 outline-none focus:border-primary cursor-pointer shadow-sm">
-                <option value="0">Tắt hẹn giờ</option>
-                <option value="15">Tắt sau 15p</option>
-                <option value="30">Tắt sau 30p</option>
-                <option value="60">Tắt sau 1h</option>
-                <option value="120">Tắt sau 2h</option>
-            </select>
-            <button onclick="window.MusicApp.clearCache()" class="w-9 h-9 flex justify-center items-center rounded-xl bg-rose-50 text-rose-600 active:scale-90 transition shadow-sm border border-rose-100" title="Xóa bộ nhớ đệm và Tải lại trang"><i class="ph-bold ph-trash text-lg"></i></button>
-            <button onclick="window.MusicApp.refetch()" class="w-9 h-9 flex justify-center items-center rounded-xl bg-slate-50 text-slate-600 border border-slate-200 active:scale-90 transition shadow-sm" title="Tải lại danh sách"><i class="ph-bold ph-arrows-clockwise text-lg"></i></button>
+    <div class="music-titlebar flex items-center justify-between mb-4 border-b border-slate-100 pb-3 flex-wrap gap-2 shrink-0">
+        <h2 class="text-lg font-black text-primary uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-headphones text-2xl"></i> Giải trí Đa phương tiện</h2>
+        <div class="music-header-actions flex gap-2 items-center">
+            <select id="music-sleep-timer" onchange="window.MusicApp.setSleepTimer(this.value)" class="bg-slate-50 border border-slate-200 text-slate-600 text-[11px] font-bold rounded-xl px-2 py-2 outline-none focus:border-primary cursor-pointer shadow-sm">
+                <option value="0">Tắt hẹn giờ</option>
+                <option value="15">Tắt sau 15p</option>
+                <option value="30">Tắt sau 30p</option>
+                <option value="60">Tắt sau 1h</option>
+                <option value="120">Tắt sau 2h</option>
+            </select>
+            <button onclick="window.MusicApp.clearCache()" class="w-9 h-9 flex justify-center items-center rounded-xl bg-rose-50 text-rose-600 active:scale-90 transition shadow-sm border border-rose-100" title="Xóa bộ nhớ đệm"><i class="ph-bold ph-trash text-lg"></i></button>
+            <button onclick="window.MusicApp.refetch()" class="w-9 h-9 flex justify-center items-center rounded-xl bg-slate-50 text-slate-600 border border-slate-200 active:scale-90 transition shadow-sm" title="Tải lại danh sách"><i class="ph-bold ph-arrows-clockwise text-lg"></i></button>
             <button onclick="window.MediaHub.init(true)" class="w-9 h-9 flex justify-center items-center rounded-xl bg-purple-50 text-purple-600 border border-purple-200 active:scale-90 transition shadow-sm" title="Tải lại kênh Tivi/Radio"><i class="ph-bold ph-broadcast text-lg"></i></button>
-<a id="music-admin-btn" href="/upload.html" target="_blank" rel="noopener noreferrer" title="Admin nhạc - mở trang upload nhạc" aria-label="Admin nhạc">
-                <i class="ph-bold ph-upload-simple" aria-hidden="true"></i>
-                <span class="music-admin-label">Admin nhạc</span>
-                <span class="music-admin-label-mobile">Admin</span>
-            </a>
-        
-        </div>
-    </div>
+            <a id="music-admin-btn" href="/upload.html" target="_blank" rel="noopener noreferrer" class="hidden lg:inline-flex" title="Admin nhạc"><i class="ph-bold ph-upload-simple"></i><span class="music-admin-label ml-1">Admin nhạc</span></a>
+        </div>
+    </div>
 
-    <div class="px-2 mb-3 shrink-0">
-        <input type="text" id="music-search" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:border-primary shadow-inner text-sm font-medium" placeholder="Tìm tên bài hát..." oninput="window.MusicApp.filterList(this.value)">
-    </div>
+    <div class="px-2 mb-2 shrink-0">
+        <input type="text" id="music-search" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:border-primary shadow-inner text-sm font-medium" placeholder="Tìm kiếm tên bài hát hoặc tên kênh..." oninput="window.MediaHub.handleSearch(this.value)">
+    </div>
 
     <div class="flex gap-2 mb-3 px-2 overflow-x-auto custom-scroll-area shrink-0" id="media-subtabs">
         <button onclick="window.MediaHub.switchTab('music')" id="tab-media-music" class="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-sm active:scale-95 transition whitespace-nowrap border border-primary">🎵 Nhạc MP3</button>
@@ -3662,44 +3659,53 @@ body.music-player-active #mini-player {
         <button onclick="window.MediaHub.switchTab('tv')" id="tab-media-tv" class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap">📺 Tivi Live</button>
     </div>
 
-    <div id="tv-player-container" style="display: none;" class="px-2 mb-4 sticky top-0 z-40 bg-white/90 backdrop-blur pb-2">
-        <video id="tv-video-element" controls playsinline class="w-full aspect-video bg-black rounded-2xl shadow-lg border border-slate-700"></video>
-        <div class="mt-2 flex flex-col gap-2">
-            <div class="text-sm font-black text-rose-500 truncate" id="tv-channel-name">📺 Cần thao tác: <span class="text-rose-600 italic">Vui lòng chọn kênh bên dưới để xem</span></div>
-            <div class="flex items-center justify-center gap-4 bg-slate-50 border border-slate-200 rounded-xl p-2 shadow-sm">
-                <button onclick="window.MediaHub.playPrev('tv')" class="w-10 h-10 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition hover:text-rose-500" title="Kênh trước"><i class="ph-fill ph-skip-back text-xl"></i></button>
-                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Chuyển Kênh</div>
-                <button onclick="window.MediaHub.playNext('tv')" class="w-10 h-10 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition hover:text-rose-500" title="Kênh sau"><i class="ph-fill ph-skip-forward text-xl"></i></button>
-            </div>
-        </div>
-    </div>
+    <div class="flex-grow min-h-0 w-full grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
 
-    <div id="radio-player-container" style="display: none;" class="px-2 mb-4 sticky top-0 z-40 bg-white/90 backdrop-blur pb-2">
-        <div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-2xl p-3 shadow-md">
-            <div class="flex items-center gap-3 min-w-0">
-                <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm" id="radio-disk-icon">
-                    <i class="ph-fill ph-radio text-xl"></i>
-                </div>
-                <div class="min-w-0">
-                    <div class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">📻 Radio</div>
-                    <div class="text-sm font-bold text-rose-500 truncate italic" id="radio-channel-name">Chưa chọn kênh đài!</div>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-                <button onclick="window.MediaHub.playPrev('radio')" class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center shrink-0 shadow-sm border border-emerald-200 active:scale-90 transition"><i class="ph-fill ph-skip-back text-lg"></i></button>
-                <button id="radio-play-btn" onclick="window.MediaHub.toggleRadio()" class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg active:scale-90 transition hover:brightness-110"><i class="ph-fill ph-play text-2xl"></i></button>
-                <button onclick="window.MediaHub.playNext('radio')" class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center shrink-0 shadow-sm border border-emerald-200 active:scale-90 transition"><i class="ph-fill ph-skip-forward text-lg"></i></button>
-            </div>
+        <div id="media-group-sidebar" class="hidden lg:flex lg:col-span-3 flex-col gap-1.5 overflow-y-auto pr-1">
         </div>
-        <audio id="radio-audio-element" class="hidden"></audio>
-    </div>
 
-    <div class="flex-grow overflow-y-auto custom-scroll-area relative border border-slate-200 bg-slate-50/50 rounded-2xl shadow-inner mb-[120px]" id="music-list-container">
-        <div id="mp3-list-container" class="w-full min-h-full">
-            <div id="music-loading" class="p-10 text-center text-primary font-bold animate-pulse">Đang đồng bộ máy chủ Archive.org...</div>
+        <div id="media-group-mobile-bar" class="flex lg:hidden w-full gap-2 px-2 pb-2 overflow-x-auto custom-scroll-area shrink-0">
         </div>
-        <div id="radio-list-container" style="display: none;" class="space-y-2 p-2"></div>
-        <div id="tv-list-container" style="display: none;" class="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-2"></div>
+
+        <div class="col-span-1 lg:col-span-5 flex flex-col h-full min-h-0 border border-slate-200 bg-slate-50/50 rounded-2xl shadow-inner overflow-hidden relative">
+            <div class="flex-grow overflow-y-auto p-2" id="music-list-container">
+                <div id="mp3-list-container" class="w-full min-h-full">
+                    <div id="music-loading" class="p-10 text-center text-primary font-bold animate-pulse">Đang đồng bộ máy chủ Archive.org...</div>
+                </div>
+                <div id="radio-list-container" class="hidden space-y-2"></div>
+                <div id="tv-list-container" class="hidden grid grid-cols-2 gap-3"></div>
+            </div>
+        </div>
+
+        <div class="col-span-1 lg:col-span-4 flex flex-col gap-3 justify-start">
+            <div id="tv-player-container" style="display: none;" class="w-full bg-white rounded-2xl border border-slate-200 p-2 shadow-sm">
+                <video id="tv-video-element" controls playsinline class="w-full aspect-video bg-black rounded-xl shadow-inner border border-slate-800"></video>
+                <div class="mt-2 text-xs font-black text-rose-500 line-clamp-2 leading-snug p-1" id="tv-channel-name">📺 Cần thao tác: <span class="text-rose-600 italic font-medium">Vui lòng chọn kênh danh sách để bật xem</span></div>
+                <div class="flex items-center justify-center gap-3 mt-1 bg-slate-50 border border-slate-200 rounded-xl p-1.5">
+                    <button onclick="window.MediaHub.playPrev('tv')" class="w-9 h-9 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition"><i class="ph-fill ph-skip-back text-lg"></i></button>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Đổi Kênh</span>
+                    <button onclick="window.MediaHub.playNext('tv')" class="w-9 h-9 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition"><i class="ph-fill ph-skip-forward text-lg"></i></button>
+                </div>
+            </div>
+
+            <div id="radio-player-container" style="display: none;" class="w-full">
+                <div class="flex flex-col gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl p-3 shadow-md">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm" id="radio-disk-icon"><i class="ph-fill ph-radio text-xl"></i></div>
+                        <div class="min-w-0 flex-grow">
+                            <div class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">📻 Đài phát thanh</div>
+                            <div class="text-sm font-bold text-rose-500 truncate italic" id="radio-channel-name">Chưa chọn kênh đài! Vui lòng chọn bên dưới</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center gap-4 border-t border-emerald-200/60 pt-2 mt-1">
+                        <button onclick="window.MediaHub.playPrev('radio')" class="w-9 h-9 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm border border-emerald-200 active:scale-90 transition"><i class="ph-fill ph-skip-back text-base"></i></button>
+                        <button id="radio-play-btn" onclick="window.MediaHub.toggleRadio()" class="w-11 h-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg active:scale-90 transition"><i class="ph-fill ph-play text-xl"></i></button>
+                        <button onclick="window.MediaHub.playNext('radio')" class="w-9 h-9 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm border border-emerald-200 active:scale-90 transition"><i class="ph-fill ph-skip-forward text-base"></i></button>
+                    </div>
+                </div>
+                <audio id="radio-audio-element" class="hidden"></audio>
+            </div>
+        </div>
     </div>
 </div>
 </div>
@@ -10915,201 +10921,316 @@ setTimeout(() => {
 window.MediaHub = {
     hlsTv: null,
     hlsRadio: null,
+    rawGroups: [],
+    allChannels: [],
     tvData: [],
     radioData: [],
+    currentTab: 'music',
+    currentGroup: 'all',
     focusIdx: -1,
-    currentRadioUrl: '',
     currentTvIdx: -1,
     currentRadioIdx: -1,
     isRadioPlaying: false,
-    
+    currentRadioUrl: '',
+    numpadBuffer: '', // Lưu các số bấm liên tiếp
+    numpadTimer: null, // Đếm ngược chờ bấm phím tiếp theo
+    activeZone: 'tabs', // 'tabs' | 'sidebar' | 'list' | 'player'
+    idxTabs: 0,
+    idxSidebar: 0,
+    idxList: 0,
+    idxPlayer: 1, // Mặc định focus vào nút giữa (Play)
+    lastTabIdx: 0,
+    lastSidebarIdx: 0,
+    lastListIdx: 0,
+    lastPlayerIdx: 1,
+
     async init(force = false) {
-        if(force) { window.vibrate?.(15); window.showToast?.('Đang tải lại danh sách kênh...', 'ph-spinner animate-spin'); if(window.soundEnabled) window.playSpeechTTS('Đang cập nhật danh sách kênh'); }
+        if(force) { window.vibrate?.(15); window.showToast?.('Đang đồng bộ dữ liệu Smartbox...', 'ph-spinner animate-spin'); if(window.soundEnabled) window.playSpeechTTS('Cập nhật danh sách kênh'); }
         try {
             const stamp = force ? '?t=' + Date.now() : '';
-            const [tvRes, radioRes] = await Promise.all([
-                fetch('TV_APP_READY.json' + stamp).catch(() => null),
-                fetch('RADIO_APP_READY.json' + stamp).catch(() => null)
-            ]);
-            if (tvRes && tvRes.ok) {
-                this.tvData = await tvRes.json();
-                this.renderTvList();
-            }
-            if (radioRes && radioRes.ok) {
-                this.radioData = await radioRes.json();
-                this.renderRadioList();
-            }
-            if(force) window.showToast?.('Cập nhật kênh thành công!', 'ph-check-circle');
-            
+            const res = await fetch('smartbox_channels.json' + stamp);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+
+            const pack = await res.json();
+            this.rawGroups = Array.isArray(pack.groups) ? pack.groups : [];
+
+            // Gom toàn bộ kênh từ các danh mục trong json v9
+            this.allChannels = [];
+            Object.keys(pack).forEach(key => {
+                if (Array.isArray(pack[key]) && key !== 'groups') {
+                    pack[key].forEach(ch => { if(ch && ch.url) this.allChannels.push(ch); });
+                }
+            });
+
+            // Phân loại tài nguyên nhanh
+            this.tvData = this.allChannels.filter(c => c.type === 'tv');
+            this.radioData = this.allChannels.filter(c => c.type === 'radio');
+
+            this.switchTab(this.currentTab);
+            if(force) window.showToast?.('Cập nhật 194 kênh kim cương thành công!', 'ph-check-circle');
+
             if (!this.remoteBound) {
                 this.initRemoteControl();
                 this.remoteBound = true;
-                
+                // Auto-Skip cho Radio
                 const rAudio = document.getElementById('radio-audio-element');
                 if(rAudio) {
                     rAudio.onplay = () => { this.isRadioPlaying = true; this.updateRadioUI(); };
                     rAudio.onpause = () => { this.isRadioPlaying = false; this.updateRadioUI(); };
-                    rAudio.onerror = () => { window.showToast?.('Kênh lỗi hoặc mất mạng', 'ph-warning-circle'); this.isRadioPlaying = false; this.updateRadioUI(); };
+                    rAudio.onerror = () => { 
+                        this.isRadioPlaying = false; this.updateRadioUI(); 
+                        this.setRadioInstruction('Lỗi mạng. Tự động chuyển đài sau 3s...', 'error');
+                        setTimeout(() => this.playNext('radio'), 3000); // Tự cứu thương
+                    };
+                }
+                // Auto-Skip cho Tivi
+                const tVideo = document.getElementById('tv-video-element');
+                if(tVideo) {
+                    tVideo.onerror = () => { 
+                        this.setTvInstruction('Lỗi tín hiệu. Tự động chuyển kênh sau 3s...', 'error');
+                        setTimeout(() => this.playNext('tv'), 3000); // Tự cứu thương
+                    };
                 }
             }
-        } catch (e) { 
-            console.warn('Lỗi load Media JSON', e); 
-            if(force) window.showToast?.('Lỗi kết nối tải kênh!', 'ph-warning-circle');
+        } catch (e) {
+            console.warn('Lỗi đồng bộ lõi MediaHub', e);
+            if(force) window.showToast?.('Lỗi đường truyền dữ liệu!', 'ph-warning-circle');
+        }
+    },
+    setTvInstruction(msg, type = 'info') {
+        const titleWrap = document.getElementById('tv-channel-name');
+        if(!titleWrap) return;
+        if (type === 'error') {
+            titleWrap.innerHTML = `📺 <span class="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded border border-rose-200 animate-pulse">${msg}</span>`;
+        } else if (type === 'action') {
+            titleWrap.innerHTML = `📺 Cần thao tác: <span class="text-rose-600 font-bold animate-pulse">${msg}</span>`;
+        } else {
+            titleWrap.innerHTML = `📺 Đang phát: <span class="text-slate-800 font-bold">${msg}</span>`;
         }
     },
 
+    setRadioInstruction(msg, type = 'info') {
+        const titleEl = document.getElementById('radio-channel-name');
+        if(!titleEl) return;
+        if (type === 'error') {
+            titleEl.innerHTML = `<span class="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded border border-rose-200 animate-pulse">${msg}</span>`;
+        } else if (type === 'action') {
+            titleEl.innerHTML = `<span class="text-rose-600 font-bold animate-pulse">${msg}</span>`;
+        } else {
+            titleEl.textContent = msg;
+        }
+    },
+
+
     switchTab(tab) {
+        this.currentTab = tab;
+        this.currentGroup = 'all';
         this.focusIdx = -1;
-        window.vibrate?.(10);
-        
+
         const btnColors = {
             'music': 'bg-primary text-white shadow-sm border-primary',
             'radio': 'bg-emerald-500 text-white shadow-sm border-emerald-500',
             'tv': 'bg-rose-500 text-white shadow-sm border-rose-500'
         };
         const idleCls = 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100';
-        
+
         ['music', 'radio', 'tv'].forEach(t => {
             const btn = document.getElementById('tab-media-' + t);
             if (btn) btn.className = 'px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap ' + (t === tab ? btnColors[t] : idleCls);
         });
 
+        // Ẩn hiện rổ danh sách chính
         const mp3List = document.getElementById('mp3-list-container');
         const radioList = document.getElementById('radio-list-container');
         const tvList = document.getElementById('tv-list-container');
-        
         if (mp3List) mp3List.style.display = (tab === 'music') ? 'block' : 'none';
         if (radioList) radioList.style.display = (tab === 'radio') ? 'block' : 'none';
-        if (tvList) tvList.style.display = (tab === 'tv') ? 'grid' : 'none'; 
-        
+        if (tvList) tvList.style.display = (tab === 'tv') ? 'grid' : 'none';
+
+        // Ẩn hiện Players dọc phải
         const tvPlayer = document.getElementById('tv-player-container');
         const radioPlayer = document.getElementById('radio-player-container');
         if (tvPlayer) tvPlayer.style.display = (tab === 'tv') ? 'block' : 'none';
         if (radioPlayer) radioPlayer.style.display = (tab === 'radio') ? 'block' : 'none';
-        
-        if(tab !== 'music' && window.MusicApp && window.MusicApp.hideMiniPlayerIfIdle) {
+
+        // Quản lý thanh Menu bên cạnh
+        const sidebar = document.getElementById('media-group-sidebar');
+        const mobBar = document.getElementById('media-group-mobile-bar');
+        if (tab === 'music') {
+            if(sidebar) sidebar.className = 'hidden';
+            if(mobBar) mobBar.className = 'hidden';
+        } else {
+            if(sidebar) sidebar.className = 'hidden lg:flex lg:col-span-3 flex-col gap-1.5 overflow-y-auto pr-1';
+            if(mobBar) mobBar.className = 'flex lg:hidden w-full gap-2 px-2 pb-2 overflow-x-auto custom-scroll-area shrink-0';
+            this.renderGroupMenus();
+        }
+
+        if(tab !== 'music' && window.MusicApp?.hideMiniPlayerIfIdle) {
             window.MusicApp.hideMiniPlayerIfIdle();
             const mini = document.getElementById('mini-player');
             if(mini) mini.style.display = 'none';
-        } else if (tab === 'music' && window.MusicApp && window.MusicApp.playing) {
+        } else if (tab === 'music' && window.MusicApp?.playing) {
             window.MusicApp.showMiniPlayer();
         }
 
+        this.renderLists();
         if(window.soundEnabled) {
-            const names = {'music': 'Nhạc MP3', 'radio': 'Đài phát thanh Radio', 'tv': 'Xem Ti vi'};
-            window.playSpeechTTS('Đã chuyển sang ' + names[tab]);
+            const names = {'music': 'Danh sách nhạc', 'radio': 'Đài phát thanh rát đi ô', 'tv': 'Truyền hình ti vi'};
+            window.playSpeechTTS('Mục ' + names[tab]);
         }
     },
 
-    renderTvList() {
-        const container = document.getElementById('tv-list-container');
-        if(!container) return;
-        container.innerHTML = this.tvData.map((c, i) => `
-            <div onclick="window.MediaHub.playStream(${i}, 'tv')" class="media-item bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer active:scale-95 hover:border-rose-500 hover:shadow-md transition text-center">
-                <i class="ph-duotone ph-television text-3xl text-rose-500 mb-2"></i>
-                <span class="text-xs font-bold text-slate-700 w-full truncate">${c.name}</span>
-            </div>
+    renderGroupMenus() {
+        const sidebar = document.getElementById('media-group-sidebar');
+        const mobBar = document.getElementById('media-group-mobile-bar');
+        const filteredGroups = this.rawGroups.filter(g => g.type === this.currentTab);
+
+        const activeColor = this.currentTab === 'tv' ? 'bg-rose-500 text-white border-rose-500' : 'bg-emerald-500 text-white border-emerald-500';
+        const idleColor = 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50';
+
+        let htmlItems = `<button onclick="window.MediaHub.setGroup('all')" class="px-3 py-2 text-xs font-black rounded-xl border transition text-left shrink-0 active:scale-95 ${this.currentGroup === 'all' ? activeColor : idleColor}">📺 Tất cả kênh</button>`;
+        htmlItems += filteredGroups.map(g => `
+            <button onclick="window.MediaHub.setGroup('${g.id}')" class="px-3 py-2 text-xs font-black rounded-xl border transition text-left shrink-0 active:scale-95 ${this.currentGroup === g.id ? activeColor : idleColor}">📁 ${g.name}</button>
         `).join('');
+
+        if(sidebar) sidebar.innerHTML = htmlItems;
+        if(mobBar) mobBar.innerHTML = htmlItems;
     },
 
-    renderRadioList() {
-        const container = document.getElementById('radio-list-container');
-        if(!container) return;
-        container.innerHTML = this.radioData.map((c, i) => `
-            <div onclick="window.MediaHub.playStream(${i}, 'radio')" class="media-item song-row bg-white border border-slate-200 cursor-pointer active:scale-95 transition hover:border-emerald-500">
-                <div class="song-left text-emerald-500"><i class="ph-bold ph-radio text-xl"></i></div>
-                <div class="song-main">
-                    <div class="song-title font-bold text-slate-800">${c.name}</div>
-                    <div class="song-artist text-[10px] text-slate-500">Live Streaming</div>
-                </div>
-            </div>
-        `).join('');
+    setGroup(groupId) {
+        window.vibrate?.(10);
+        this.currentGroup = groupId;
+        this.focusIdx = -1;
+        this.renderGroupMenus();
+        this.renderLists();
+        if(window.soundEnabled) {
+            const gObj = this.rawGroups.find(x => x.id === groupId);
+            window.playSpeechTTS(gObj ? 'Nhóm ' + gObj.name : 'Tất cả các kênh');
+        }
+    },
+    renderLists() {
+        const query = (document.getElementById('music-search')?.value || '').trim().toLowerCase();
+
+        if (this.currentTab === 'tv') {
+            const container = document.getElementById('tv-list-container');
+            if (!container) return;
+            let list = this.tvData.filter(c => this.currentGroup === 'all' || c.group === this.currentGroup);
+            if (query) list = list.filter(c => c.name.toLowerCase().includes(query));
+
+            container.innerHTML = list.map((c, idxInList) => {
+                const actualIdx = this.tvData.findIndex(x => x.id === c.id);
+                const isPlaying = this.currentTvIdx === actualIdx;
+                const borderCls = isPlaying ? 'border-rose-500 shadow-md ring-2 ring-rose-200' : 'border-slate-200 hover:border-rose-500';
+                const stt = String(idxInList + 1).padStart(3, '0'); // Tạo STT dạng 001, 002
+
+                return `
+                    <div onclick="window.MediaHub.playStream(${actualIdx}, 'tv')" class="media-item bg-white border rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition text-center ${borderCls}">
+                        <div class="flex items-center gap-1 w-full justify-center">
+                            <span class="text-xs font-black text-rose-500 bg-rose-50 px-1 rounded">[${stt}]</span>
+                        </div>
+                        <i class="ph-duotone ph-television text-3xl ${isPlaying ? 'text-rose-600 animate-pulse' : 'text-rose-500'} mb-1 mt-1"></i>
+                        <span class="text-[11px] font-bold ${isPlaying ? 'text-rose-600' : 'text-slate-800'} w-full truncate">${c.name}</span>
+                    </div>`;
+            }).join('');
+        } else if (this.currentTab === 'radio') {
+            const container = document.getElementById('radio-list-container');
+            if (!container) return;
+            let list = this.radioData.filter(c => this.currentGroup === 'all' || c.group === this.currentGroup);
+            if (query) list = list.filter(c => c.name.toLowerCase().includes(query));
+
+            container.innerHTML = list.map((c, idxInList) => {
+                const actualIdx = this.radioData.findIndex(x => x.id === c.id);
+                const isPlaying = this.currentRadioIdx === actualIdx;
+                const borderCls = isPlaying ? 'border-emerald-500 shadow-md bg-emerald-50' : 'border-slate-200 bg-white hover:border-emerald-500';
+                const stt = String(idxInList + 1).padStart(3, '0');
+
+                return `
+                    <div onclick="window.MediaHub.playStream(${actualIdx}, 'radio')" class="media-item song-row border cursor-pointer active:scale-95 transition ${borderCls}">
+                        <div class="song-left ${isPlaying ? 'text-emerald-600 animate-pulse' : 'text-emerald-500'} font-black text-xs">[${stt}]</div>
+                        <div class="song-main">
+                            <div class="song-title font-bold ${isPlaying ? 'text-emerald-700' : 'text-slate-800'} text-sm">${c.name}</div>
+                            <div class="song-artist text-[10px] ${isPlaying ? 'text-emerald-600' : 'text-slate-400'} font-medium">${c.group_name || 'Radio Live'}</div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+    },
+
+    handleSearch(val) {
+        if (this.currentTab === 'music' && window.MusicApp?.filterList) {
+            window.MusicApp.filterList(val);
+        } else {
+            this.renderLists();
+        }
     },
 
     playStream(idx, type) {
         window.vibrate?.(10);
-        if(window.MusicApp && window.MusicApp.playing) window.MusicApp.togglePlay();
+        if(window.MusicApp?.playing) window.MusicApp.togglePlay();
 
         if (type === 'tv') {
             const c = this.tvData[idx];
             if(!c) return;
             this.currentTvIdx = idx;
-            const url = c.final_url || c.url;
-            
             const rAudio = document.getElementById('radio-audio-element');
             if (rAudio && !rAudio.paused) rAudio.pause();
-            
+
             const video = document.getElementById('tv-video-element');
-            document.getElementById('tv-channel-name').innerHTML = `📺 Đang phát: <span class="text-slate-700">${c.name}</span>`;
-            
+            const titleWrap = document.getElementById('tv-channel-name');
+            if(titleWrap) titleWrap.innerHTML = `📺 Đang phát: <span class="text-slate-800 font-bold">${c.name}</span>`;
+
             if (Hls.isSupported()) {
                 if (this.hlsTv) this.hlsTv.destroy();
                 this.hlsTv = new Hls();
-                this.hlsTv.loadSource(url);
+                this.hlsTv.loadSource(c.url);
                 this.hlsTv.attachMedia(video);
                 this.hlsTv.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(()=>{}));
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = url;
-                video.play().catch(()=>{});
+                video.src = c.url; video.play().catch(()=>{});
             }
-            document.getElementById('tv-player-container').scrollIntoView({behavior: 'smooth', block: 'start'});
-            if(window.soundEnabled) window.playSpeechTTS('Đang bật kênh Tivi ' + c.name);
-            
+            if(window.soundEnabled) window.playSpeechTTS('Mở kênh ' + c.name);
+
         } else if (type === 'radio') {
             const c = this.radioData[idx];
             if(!c) return;
             this.currentRadioIdx = idx;
-            const url = c.final_url || c.url;
-
             const video = document.getElementById('tv-video-element');
             if (video && !video.paused) video.pause();
-            
-            this.currentRadioUrl = url;
+
+            this.currentRadioUrl = c.url;
             const titleEl = document.getElementById('radio-channel-name');
-            titleEl.textContent = c.name;
-            titleEl.className = "text-sm font-bold text-slate-800 truncate"; 
-            
+            if(titleEl) { titleEl.textContent = c.name; titleEl.className = "text-sm font-bold text-slate-800 truncate"; }
+
             const rAudio = document.getElementById('radio-audio-element');
-            
             if (Hls.isSupported()) {
                 if (this.hlsRadio) this.hlsRadio.destroy();
                 this.hlsRadio = new Hls();
-                this.hlsRadio.loadSource(url);
+                this.hlsRadio.loadSource(c.url);
                 this.hlsRadio.attachMedia(rAudio);
                 this.hlsRadio.on(Hls.Events.MANIFEST_PARSED, () => rAudio.play().catch(()=>{}));
-            } else if (rAudio.canPlayType('application/vnd.apple.mpegurl') || url.includes('.mp3') || url.includes('.aac')) {
-                rAudio.src = url;
-                rAudio.play().catch(()=>{});
+            } else if (rAudio.canPlayType('application/vnd.apple.mpegurl') || c.url.includes('.mp3') || c.url.includes('.aac')) {
+                rAudio.src = c.url; rAudio.play().catch(()=>{});
             }
-            document.getElementById('radio-player-container').scrollIntoView({behavior: 'smooth', block: 'start'});
-            if(window.soundEnabled) window.playSpeechTTS('Đang bật đài ' + c.name);
-        }
-    },
-    
-    playNext(type) {
-        window.vibrate?.(10);
-        if (type === 'tv' && this.tvData.length > 0) {
-            let next = this.currentTvIdx + 1;
-            if (next >= this.tvData.length) next = 0;
-            this.playStream(next, 'tv');
-        } else if (type === 'radio' && this.radioData.length > 0) {
-            let next = this.currentRadioIdx + 1;
-            if (next >= this.radioData.length) next = 0;
-            this.playStream(next, 'radio');
+            if(window.soundEnabled) window.playSpeechTTS('Mở đài ' + c.name);
         }
     },
 
+    playNext(type) {
+        const dataset = type === 'tv' ? this.tvData : this.radioData;
+        let current = type === 'tv' ? this.currentTvIdx : this.currentRadioIdx;
+        if (dataset.length === 0) return;
+        let next = current + 1;
+        if (next >= dataset.length) next = 0;
+        this.playStream(next, type);
+    },
+
     playPrev(type) {
-        window.vibrate?.(10);
-        if (type === 'tv' && this.tvData.length > 0) {
-            let prev = this.currentTvIdx - 1;
-            if (prev < 0) prev = this.tvData.length - 1;
-            this.playStream(prev, 'tv');
-        } else if (type === 'radio' && this.radioData.length > 0) {
-            let prev = this.currentRadioIdx - 1;
-            if (prev < 0) prev = this.radioData.length - 1;
-            this.playStream(prev, 'radio');
-        }
+        const dataset = type === 'tv' ? this.tvData : this.radioData;
+        let current = type === 'tv' ? this.currentTvIdx : this.currentRadioIdx;
+        if (dataset.length === 0) return;
+        let prev = current - 1;
+        if (prev < 0) prev = dataset.length - 1;
+        this.playStream(prev, type);
     },
 
     toggleRadio() {
@@ -11120,18 +11241,16 @@ window.MediaHub = {
             rAudio.pause();
             if(window.soundEnabled) window.playSpeechTTS('Tạm dừng Radio');
         } else {
-            if (!rAudio.src && this.currentRadioIdx >= 0) {
-                this.playStream(this.currentRadioIdx, 'radio');
-            } else if (!rAudio.src && this.currentRadioIdx === -1) {
+            if (!rAudio.src && this.currentRadioIdx >= 0) this.playStream(this.currentRadioIdx, 'radio');
+            else if (!rAudio.src) {
                 window.showToast?.('Vui lòng chọn kênh bên dưới', 'ph-warning-circle');
                 if(window.soundEnabled) window.playSpeechTTS('Vui lòng chọn kênh bên dưới để nghe');
             } else {
-                rAudio.play().catch(()=>{ window.showToast?.('Đang tải luồng...', 'ph-spinner animate-spin'); });
-                if(window.soundEnabled) window.playSpeechTTS('Tiếp tục nghe Radio');
+                rAudio.play().catch(()=>{});
             }
         }
     },
-    
+
     updateRadioUI() {
         const btn = document.getElementById('radio-play-btn');
         const icon = document.getElementById('radio-disk-icon');
@@ -11141,48 +11260,342 @@ window.MediaHub = {
             else icon.classList.remove('animate-spin');
         }
     },
+    getZoneElements() {
+        const isDesktop = window.innerWidth >= 1024;
+        const visible = (el) => {
+            if (!el) return false;
+            const cs = getComputedStyle(el);
+            return el.offsetParent !== null && cs.display !== 'none' && cs.visibility !== 'hidden';
+        };
+
+        let listEls = [];
+        let playerEls = [];
+
+        if (this.currentTab === 'tv') {
+            listEls = document.querySelectorAll('#tv-list-container .media-item');
+            playerEls = document.querySelectorAll('#tv-player-container button');
+        } else if (this.currentTab === 'radio') {
+            listEls = document.querySelectorAll('#radio-list-container .media-item');
+            playerEls = document.querySelectorAll('#radio-player-container button');
+        } else {
+            listEls = document.querySelectorAll('#mp3-list-container .song-row');
+            const mp = document.getElementById('mini-player');
+            if (visible(mp)) {
+                playerEls = mp.querySelectorAll('button');
+            }
+        }
+
+        return {
+            tabs: Array.from(document.querySelectorAll('#media-subtabs button')).filter(visible),
+            sidebar: Array.from(document.querySelectorAll(isDesktop ? '#media-group-sidebar button' : '#media-group-mobile-bar button')).filter(visible),
+            list: Array.from(listEls).filter(visible),
+            player: Array.from(playerEls).filter(visible)
+        };
+    },
+
+    highlightRemoteZones() {
+        const els = this.getZoneElements();
+        const clamp = (v, len) => (!len || len <= 0) ? 0 : Math.max(0, Math.min(v || 0, len - 1));
+
+        this.idxTabs = clamp(this.idxTabs, els.tabs.length);
+        this.idxSidebar = clamp(this.idxSidebar, els.sidebar.length);
+        this.idxList = clamp(this.idxList, els.list.length);
+        this.idxPlayer = clamp(this.idxPlayer, els.player.length);
+
+        els.tabs.forEach(el => { el.classList.remove('tab-focused'); el.style.boxShadow = ''; });
+        els.sidebar.forEach(el => { el.classList.remove('sidebar-focused'); el.style.boxShadow = ''; });
+        els.list.forEach(el => { el.classList.remove('media-focused'); el.style.boxShadow = ''; });
+        els.player.forEach(el => { el.classList.remove('player-btn-focused'); el.style.boxShadow = ''; });
+
+        const soft = (el, cls) => {
+            if (!el) return;
+            el.classList.add(cls);
+            el.style.boxShadow = 'none';
+        };
+
+        let target = null;
+
+        if (this.activeZone === 'tabs') {
+            target = els.tabs[this.idxTabs];
+            if (target) target.classList.add('tab-focused');
+        } else if (this.activeZone === 'sidebar') {
+            soft(els.tabs[this.idxTabs], 'tab-focused');
+            target = els.sidebar[this.idxSidebar];
+            if (target) target.classList.add('sidebar-focused');
+        } else if (this.activeZone === 'list') {
+            soft(els.tabs[this.idxTabs], 'tab-focused');
+            if (this.currentTab !== 'music') soft(els.sidebar[this.idxSidebar], 'sidebar-focused');
+            target = els.list[this.idxList];
+            if (target) target.classList.add('media-focused');
+        } else if (this.activeZone === 'player') {
+            soft(els.tabs[this.idxTabs], 'tab-focused');
+            if (this.currentTab !== 'music') soft(els.sidebar[this.idxSidebar], 'sidebar-focused');
+            soft(els.list[this.idxList], 'media-focused');
+            target = els.player[this.idxPlayer];
+            if (target) target.classList.add('player-btn-focused');
+        }
+
+        if (target && typeof target.scrollIntoView === 'function') {
+            target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
+    },
 
     initRemoteControl() {
+        if (this.remoteMatrixBound) return;
+        this.remoteMatrixBound = true;
+        this.activeZone = 'tabs';
+        this.idxTabs = 0;
+
+        const clamp = (v, len) => (!len || len <= 0) ? 0 : Math.max(0, Math.min(v || 0, len - 1));
+
+        const isBackKey = (e) => {
+            return e.key === 'Escape' || e.key === 'Backspace' || e.key === 'BrowserBack' || e.key === 'GoBack' || e.key === 'XF86Back' || e.keyCode === 461 || e.keyCode === 10009;
+        };
+
+        const preferPlayButtonIndex = (buttons) => {
+            if (!buttons || buttons.length === 0) return 0;
+            const idx = buttons.findIndex(btn => {
+                const id = String(btn.id || '').toLowerCase();
+                const html = String(btn.innerHTML || '').toLowerCase();
+                const label = String(btn.getAttribute('aria-label') || btn.getAttribute('title') || '').toLowerCase();
+                return id.includes('play') || id.includes('pause') || html.includes('ph-play') || html.includes('ph-pause') || label.includes('play') || label.includes('pause') || label.includes('phát') || label.includes('dừng');
+            });
+            return idx >= 0 ? idx : Math.floor(buttons.length / 2);
+        };
+
+        const afterRender = (fn) => requestAnimationFrame(() => setTimeout(fn, 40));
+
+        const saveMemory = () => {
+            this.lastTabIdx = this.idxTabs;
+            this.lastSidebarIdx = this.idxSidebar;
+            this.lastListIdx = this.idxList;
+            this.lastPlayerIdx = this.idxPlayer;
+        };
+
         document.addEventListener('keydown', (e) => {
-            const tvList = document.getElementById('tv-list-container');
-            const radioList = document.getElementById('radio-list-container');
-            if (!tvList || !radioList) return;
-            
-            const isTv = tvList.style.display !== 'none';
-            const isRadio = radioList.style.display !== 'none';
-            if (!isTv && !isRadio) return;
+            if (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-            const container = isTv ? tvList : radioList;
-            const items = Array.from(container.querySelectorAll('.media-item'));
-            if (items.length === 0) return;
+            const mediaView = document.getElementById('view-music');
+            if (mediaView && !mediaView.classList.contains('active') && window.innerWidth < 1024) return;
+            if (window.innerWidth >= 1024 && document.body.dataset.desktopWorkspace !== 'music' && document.body.dataset.desktopWorkspace !== 'overview') return;
 
-            const cols = isTv ? (window.innerWidth >= 1024 ? 4 : (window.innerWidth >= 640 ? 3 : 2)) : 1;
+            const validKeys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape', 'Backspace', 'BrowserBack', 'GoBack', 'XF86Back', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            if (!validKeys.includes(e.key) && ![461, 10009].includes(e.keyCode)) return;
+            e.preventDefault();
 
-            if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
-                e.preventDefault();
-                if (this.focusIdx === -1) this.focusIdx = 0;
-                else {
-                    if (e.key === 'ArrowRight') this.focusIdx++;
-                    else if (e.key === 'ArrowLeft') this.focusIdx--;
-                    else if (e.key === 'ArrowDown') this.focusIdx += cols;
-                    else if (e.key === 'ArrowUp') this.focusIdx -= cols;
+            // XỬ LÝ PHÍM SỐ (NUMPAD CHUYỂN KÊNH)
+            if (/^[0-9]$/.test(e.key)) {
+                if (this.currentTab === 'music') return; // Không áp dụng cho tab Nhạc
+
+                this.numpadBuffer += e.key;
+
+                // Hiển thị số đang bấm lên màn hình
+                if (this.currentTab === 'tv') this.setTvInstruction('Đang chuyển kênh: ' + this.numpadBuffer, 'action');
+                else if (this.currentTab === 'radio') this.setRadioInstruction('Đang chuyển đài: ' + this.numpadBuffer, 'action');
+
+                if (this.numpadTimer) clearTimeout(this.numpadTimer);
+
+                // Đợi 2 giây sau khi bấm số cuối cùng thì thực thi
+                this.numpadTimer = setTimeout(() => {
+                    let targetIdx = parseInt(this.numpadBuffer, 10) - 1; // Vì STT hiển thị từ 1, array index từ 0
+                    this.numpadBuffer = ''; // Reset buffer
+
+                    // Lấy danh sách kênh hiện tại (theo nhóm đang chọn)
+                    let list = this.currentTab === 'tv' ? this.tvData : this.radioData;
+                    if (this.currentGroup !== 'all') {
+                        list = list.filter(c => c.group === this.currentGroup);
+                    }
+
+                    if (targetIdx >= 0 && targetIdx < list.length) {
+                        const targetChannel = list[targetIdx];
+                        // Lấy index thật sự trong toàn bộ list
+                        const actualIdx = (this.currentTab === 'tv' ? this.tvData : this.radioData).findIndex(x => x.id === targetChannel.id);
+
+                        if (actualIdx !== -1) {
+                            this.idxList = targetIdx; // Cập nhật focus
+                            this.playStream(actualIdx, this.currentTab);
+                        }
+                    } else {
+                        window.showToast?.('Không tìm thấy kênh số ' + (targetIdx + 1), 'ph-warning-circle');
+                        if(window.soundEnabled) window.playSpeechTTS('Không tìm thấy kênh số ' + (targetIdx + 1));
+                        // Phục hồi lại dòng text cũ
+                        const currentName = this.currentTab === 'tv' 
+                            ? (this.currentTvIdx >= 0 ? this.tvData[this.currentTvIdx].name : '') 
+                            : (this.currentRadioIdx >= 0 ? this.radioData[this.currentRadioIdx].name : '');
+
+                        if(currentName) {
+                            if(this.currentTab === 'tv') this.setTvInstruction(currentName);
+                            else this.setRadioInstruction(currentName);
+                        }
+                    }
+                }, 2000);
+                return; // Dừng xử lý các phím khác
+            }
+
+            const isDesktop = window.innerWidth >= 1024;
+            let els = this.getZoneElements();
+
+            if (isBackKey(e)) {
+                if (this.activeZone === 'player') {
+                    this.activeZone = 'list';
+                    this.idxList = clamp(this.lastListIdx ?? this.idxList, els.list.length);
+                } else if (this.activeZone === 'list') {
+                    if (this.currentTab === 'music') {
+                        this.activeZone = 'tabs';
+                        this.idxTabs = clamp(this.lastTabIdx ?? this.idxTabs, els.tabs.length);
+                    } else {
+                        this.activeZone = 'sidebar';
+                        this.idxSidebar = clamp(this.lastSidebarIdx ?? this.idxSidebar, els.sidebar.length);
+                    }
+                } else if (this.activeZone === 'sidebar') {
+                    this.activeZone = 'tabs';
+                    this.idxTabs = clamp(this.lastTabIdx ?? this.idxTabs, els.tabs.length);
                 }
+                this.highlightRemoteZones();
+                return;
+            }
 
-                if (this.focusIdx < 0) this.focusIdx = 0;
-                if (this.focusIdx >= items.length) this.focusIdx = items.length - 1;
-
-                if (e.key === 'Enter') {
-                    items[this.focusIdx].click();
+            if (this.activeZone === 'tabs') {
+                if (e.key === 'ArrowRight') {
+                    this.idxTabs = clamp(this.idxTabs + 1, els.tabs.length);
+                } else if (e.key === 'ArrowLeft') {
+                    this.idxTabs = clamp(this.idxTabs - 1, els.tabs.length);
+                } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    // Lên/Xuống không đổi cột.
+                } else if (e.key === 'Enter' && els.tabs[this.idxTabs]) {
+                    saveMemory();
+                    els.tabs[this.idxTabs].click();
+                    afterRender(() => {
+                        els = this.getZoneElements();
+                        this.idxTabs = clamp(this.idxTabs, els.tabs.length);
+                        this.idxSidebar = clamp(this.lastSidebarIdx || 0, els.sidebar.length);
+                        this.idxList = 0;
+                        if (this.currentTab === 'music') {
+                            this.activeZone = els.list.length > 0 ? 'list' : 'tabs';
+                        } else {
+                            this.activeZone = els.sidebar.length > 0 ? 'sidebar' : (els.list.length > 0 ? 'list' : 'tabs');
+                        }
+                        saveMemory();
+                        this.highlightRemoteZones();
+                    });
                     return;
                 }
-
-                items.forEach(el => el.classList.remove('media-focused'));
-                const target = items[this.focusIdx];
-                target.classList.add('media-focused');
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+
+            else if (this.activeZone === 'sidebar') {
+                if (e.key === 'ArrowDown') {
+                    this.idxSidebar = clamp(this.idxSidebar + 1, els.sidebar.length);
+                } else if (e.key === 'ArrowUp') {
+                    this.idxSidebar = clamp(this.idxSidebar - 1, els.sidebar.length);
+                } else if (e.key === 'ArrowRight') {
+                    if (els.list.length > 0) {
+                        saveMemory();
+                        this.activeZone = 'list';
+                        this.idxList = clamp(this.lastListIdx || 0, els.list.length);
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    saveMemory();
+                    this.activeZone = 'tabs';
+                } else if (e.key === 'Enter' && els.sidebar[this.idxSidebar]) {
+                    saveMemory();
+                    els.sidebar[this.idxSidebar].click();
+                    afterRender(() => {
+                        els = this.getZoneElements();
+                        this.idxSidebar = clamp(this.idxSidebar, els.sidebar.length);
+                        this.idxList = 0;
+                        this.activeZone = els.list.length > 0 ? 'list' : 'sidebar';
+                        saveMemory();
+                        this.highlightRemoteZones();
+                    });
+                    return;
+                }
+            }
+
+            else if (this.activeZone === 'list') {
+                const cols = (!isDesktop && this.currentTab === 'tv') ? (window.innerWidth >= 640 ? 3 : 2) : 1;
+
+                if (e.key === 'ArrowDown') {
+                    this.idxList = clamp(this.idxList + cols, els.list.length);
+                } else if (e.key === 'ArrowUp') {
+                    this.idxList = clamp(this.idxList - cols, els.list.length);
+                } else if (e.key === 'ArrowRight') {
+                    if (els.player.length > 0) {
+                        saveMemory();
+                        this.activeZone = 'player';
+                        this.idxPlayer = clamp(this.lastPlayerIdx ?? preferPlayButtonIndex(els.player), els.player.length);
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    saveMemory();
+                    if (this.currentTab === 'music') {
+                        this.activeZone = 'tabs';
+                    } else if (els.sidebar.length > 0) {
+                        this.activeZone = 'sidebar';
+                        this.idxSidebar = clamp(this.lastSidebarIdx ?? this.idxSidebar, els.sidebar.length);
+                    }
+                } else if (e.key === 'Enter' && els.list[this.idxList]) {
+                    saveMemory();
+                    els.list[this.idxList].click();
+                    this.lastListIdx = this.idxList;
+                    afterRender(() => {
+                        els = this.getZoneElements();
+                        this.idxList = clamp(this.lastListIdx, els.list.length);
+                        if (els.player.length > 0) {
+                            this.activeZone = 'player';
+                            this.idxPlayer = preferPlayButtonIndex(els.player);
+                            this.lastPlayerIdx = this.idxPlayer;
+                        }
+                        saveMemory();
+                        this.highlightRemoteZones();
+                    });
+                    return;
+                }
+            }
+
+            else if (this.activeZone === 'player') {
+                if (e.key === 'ArrowRight') {
+                    this.idxPlayer = clamp(this.idxPlayer + 1, els.player.length);
+                } else if (e.key === 'ArrowLeft') {
+                    const playIdx = preferPlayButtonIndex(els.player);
+                    if (this.idxPlayer <= playIdx) {
+                        saveMemory();
+                        this.activeZone = 'list';
+                        if (this.currentTab === 'tv') this.idxList = clamp(this.currentTvIdx >= 0 ? this.currentTvIdx : (this.lastListIdx ?? this.idxList), els.list.length);
+                        else if (this.currentTab === 'radio') this.idxList = clamp(this.currentRadioIdx >= 0 ? this.currentRadioIdx : (this.lastListIdx ?? this.idxList), els.list.length);
+                        else this.idxList = clamp(this.lastListIdx ?? this.idxList, els.list.length);
+                        this.lastListIdx = this.idxList;
+                        this.highlightRemoteZones();
+                        return;
+                    } else {
+                        this.idxPlayer = clamp(this.idxPlayer - 1, els.player.length);
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    if (this.currentTab === 'music' && window.MusicApp) window.MusicApp.playNext();
+                    else this.playNext(this.currentTab);
+                    if (this.currentTab === 'tv') this.idxList = clamp(this.currentTvIdx, els.list.length);
+                    else if (this.currentTab === 'radio') this.idxList = clamp(this.currentRadioIdx, els.list.length);
+                    this.lastListIdx = this.idxList;
+                    this.lastPlayerIdx = this.idxPlayer;
+                    afterRender(() => this.highlightRemoteZones());
+                    return;
+                } else if (e.key === 'ArrowUp') {
+                    if (this.currentTab === 'music' && window.MusicApp) window.MusicApp.playPrev();
+                    else this.playPrev(this.currentTab);
+                    if (this.currentTab === 'tv') this.idxList = clamp(this.currentTvIdx, els.list.length);
+                    else if (this.currentTab === 'radio') this.idxList = clamp(this.currentRadioIdx, els.list.length);
+                    this.lastListIdx = this.idxList;
+                    this.lastPlayerIdx = this.idxPlayer;
+                    afterRender(() => this.highlightRemoteZones());
+                    return;
+                } else if (e.key === 'Enter' && els.player[this.idxPlayer]) {
+                    saveMemory();
+                    els.player[this.idxPlayer].click();
+                }
+            }
+
+            saveMemory();
+            this.highlightRemoteZones();
         });
-    }
+    },
 };
 
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => window.MediaHub.init(), 1500); });
