@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartBox JSON Admin Studio V10.8.1 Diagnostic</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+:root{
+  --bg:#fff7df;--card:#fffef7;--line:#efc36c;--hot:#e85d04;--text:#2b1900;
+  --soft:#fff0bf;--green:#dcfce7;--red:#fee2e2;--blue:#dbeafe;--muted:#6b4a12;--purple:#f3e8ff;
+}
+*{box-sizing:border-box}
+body{font-family:Arial,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);margin:0;padding:12px}
+.wrap{max-width:1780px;margin:auto;display:grid;grid-template-columns:330px 1fr 460px;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:12px;box-shadow:0 8px 20px rgba(80,50,0,.06)}
+button,input,select,textarea{border:1px solid #f28a00;border-radius:10px;background:white;color:#9a3b00;padding:8px;margin:3px;font-weight:700}
+button{cursor:pointer}button:hover{background:var(--soft)}button.active{background:var(--hot);color:#fff}
+button.good{background:var(--green);color:#166534} button.dead{background:var(--red);color:#991b1b} button.maybe{background:var(--blue);color:#1d4ed8} button.cors{background:var(--purple);color:#6b21a8}
+input,select,textarea{width:100%;font-weight:600}
+textarea{min-height:72px;font-family:Consolas,monospace;font-size:12px}
+audio,video{width:100%} video{min-height:430px;background:#111}
+.list{max-height:760px;overflow:auto}.item{border-bottom:1px solid #f1d99d;padding:8px;border-radius:10px}
+.item.activeRow{background:#fff0bf;border:2px solid #e85d04;box-shadow:0 0 0 3px rgba(232,93,4,.12)}
+.item.deadRow{opacity:.45;background:#fff1f2}.item.corsRow{background:#faf5ff}
+.rowbtn{text-align:left;width:100%}.name{font-size:15px;font-weight:900}.sub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.35}
+.badge{display:inline-block;background:#fff0bf;border:1px solid var(--line);border-radius:999px;padding:4px 8px;margin:2px}
+.diag{border-radius:12px;padding:10px;margin-top:8px;border:1px solid #ddd;background:#f8fafc}
+.diag.ok{background:#dcfce7;border-color:#16a34a}.diag.err{background:#fee2e2;border-color:#dc2626}.diag.warn{background:#fff7ed;border-color:#f97316}.diag.cors{background:#f3e8ff;border-color:#9333ea}
+.small{font-size:12px;color:var(--muted)}code{font-size:11px;word-break:break-all}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.statusBar{position:sticky;top:0;background:#fffef7;border:1px solid var(--line);border-radius:12px;padding:8px;z-index:5}
+hr{border:0;border-top:1px dashed var(--line);margin:10px 0}
+@media(max-width:1200px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside class="card">
+  <h1>SmartBox V10.8.1</h1>
+  <p><b>Standalone + Diagnostic</b></p>
+  <p class="small">Có 2 chế độ test: phát thẳng hoặc qua proxy nếu ông chạy proxy. Không xóa nhầm vàng sống vì CORS.</p>
+
+  <div class="statusBar">
+    <span class="badge" id="statTotal">0 kênh</span>
+    <span class="badge" id="statGood">0 Good</span>
+    <span class="badge" id="statCors">0 CORS</span>
+    <span class="badge" id="statDead">0 Dead</span>
+  </div>
+
+  <div class="card">
+    <h3>Nạp dữ liệu</h3>
+    <input type="file" accept=".json" multiple onchange="loadManyJson(this.files)">
+    <button onclick="restoreDraft()">Khôi phục bản nhớ tạm</button>
+    <button onclick="clearDraft()">Xóa nhớ tạm</button>
+    <p class="small">Chọn nhiều file JSON cùng lúc: bản gốc + kênh mới + review/deadlist.</p>
+    <p class="small"><code id="loadedFrom">Chưa nạp file</code></p>
+  </div>
+
+  <div class="card">
+    <h3>Chế độ phát / kiểm</h3>
+    <select id="playMode" onchange="onPlayModeChange()">
+      <option value="direct">Phát thẳng HTML/GitHub</option>
+      <option value="proxy">Qua proxy localhost</option>
+    </select>
+    <input id="proxyBase" value="http://localhost:8899/proxy?url=" placeholder="Proxy base">
+    <button onclick="explainMode()">Giải thích chế độ</button>
+    <p class="small" id="modeHelp">Phát thẳng: tiện, không cần server, nhưng một số .m3u8 có thể bị CORS.</p>
+  </div>
+
+  <input id="q" placeholder="Tìm kênh..." oninput="render()">
+  <select id="typeFilter" onchange="renderGroups();render()">
+    <option value="">Tất cả TV/Radio</option><option value="tv">TV</option><option value="radio">Radio</option>
+  </select>
+  <select id="stateFilter" onchange="render()">
+    <option value="">Tất cả trạng thái</option><option value="alive">Chưa Dead</option><option value="good">Good</option><option value="cors_suspect">Nghi CORS</option><option value="proxy_needed">Cần proxy</option><option value="dead">Dead</option><option value="maybe">Maybe</option><option value="new">Kênh mới</option><option value="edited">Đã sửa</option>
+  </select>
+  <div id="groups"></div>
+</aside>
+
+<main>
+  <div class="card">
+    <h2 id="nowName">Chưa chọn kênh</h2>
+    <audio id="audio" controls autoplay></audio>
+    <video id="video" controls autoplay playsinline style="display:none"></video>
+    <p><code id="nowUrl"></code></p>
+    <div id="diagnosticBox" class="diag warn">Chưa test kênh.</div>
+    <div class="grid3">
+      <button onclick="playCurrentDirect()">Test thẳng</button>
+      <button onclick="playCurrentProxy()">Test proxy</button>
+      <button onclick="tryBackup()">Thử backup tiếp</button>
+    </div>
+    <div class="grid3">
+      <button onclick="markCurrent('good')" class="good">Good</button>
+      <button onclick="markCurrent('cors_suspect')" class="cors">Nghi CORS</button>
+      <button onclick="markCurrent('proxy_needed')" class="maybe">Cần proxy</button>
+      <button onclick="markCurrent('maybe')" class="maybe">Maybe</button>
+      <button onclick="markCurrent('dead')" class="dead">Dead</button>
+      <button onclick="copyDiag()">Copy lỗi</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Danh sách bảo trì</h2>
+    <div id="list" class="list"></div>
+  </div>
+</main>
+
+<aside>
+  <div class="card">
+    <h2>Sửa / thêm kênh</h2>
+    <div class="grid2">
+      <button onclick="newChannel()">+ Thêm kênh</button><button onclick="saveForm()">Lưu sửa</button>
+      <button onclick="deleteCurrent()" class="dead">Xóa kênh</button><button onclick="duplicateCurrent()">Nhân bản</button>
+    </div>
+    <hr>
+    <label>Tên hiển thị</label><input id="f_display_name">
+    <div class="grid2">
+      <div><label>Loại</label><select id="f_type" onchange="syncGroupOptions()"><option value="tv">TV</option><option value="radio">Radio</option></select></div>
+      <div><label>Nhóm</label><select id="f_group"></select></div>
+    </div>
+    <label>Mô tả ngắn</label><input id="f_subtitle">
+    <label>URL chính</label><textarea id="f_url"></textarea>
+    <label>Backup URLs, mỗi dòng 1 link</label><textarea id="f_backups"></textarea>
+    <label>Ghi chú</label><textarea id="f_note"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>Quản lý nhóm</h2>
+    <div class="grid2">
+      <button onclick="newGroup()">+ Thêm nhóm</button><button onclick="saveGroupForm()">Lưu nhóm</button>
+      <button onclick="deleteGroup()" class="dead">Xóa nhóm rỗng</button><button onclick="selectCurrentGroupForEdit()">Sửa nhóm đang lọc</button>
+    </div>
+    <label>Tên nhóm</label><input id="g_name">
+    <div class="grid3">
+      <div><label>ID</label><input id="g_id"></div>
+      <div><label>Loại</label><select id="g_type"><option value="tv">TV</option><option value="radio">Radio</option></select></div>
+      <div><label>Icon</label><input id="g_icon" placeholder="📻"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Xuất file</h2>
+    <button onclick="exportCleanJson()">Xuất 1 JSON sạch dùng thật</button>
+    <button onclick="exportReviewJson()">Xuất review/deadlist</button>
+    <button onclick="exportGoodOnly()">Xuất Good-only</button>
+    <button onclick="exportDeadOnly()">Xuất Dead/CORS-only</button>
+  </div>
+
+  <div class="card">
+    <h2>Coverage</h2>
+    <div id="coverage"></div>
+  </div>
+</aside>
+</div>
+
+<script>
+let GROUPS = [
+  {id:"tv_thoi_su",name:"Thời sự",type:"tv",priority:1,icon:"📰"},{id:"tv_viet_nam",name:"TV Việt Nam",type:"tv",priority:2,icon:"🇻🇳"},{id:"tv_dia_phuong",name:"TV địa phương",type:"tv",priority:3,icon:"📍"},{id:"tv_kham_pha",name:"Khám phá",type:"tv",priority:4,icon:"🌍"},{id:"tv_khoa_hoc_vu_tru",name:"Khoa học / Vũ trụ",type:"tv",priority:5,icon:"🚀"},{id:"tv_thien_nhien_dong_vat",name:"Thiên nhiên / Động vật",type:"tv",priority:6,icon:"🐾"},{id:"tv_thieu_nhi_hoat_hinh",name:"Thiếu nhi / Hoạt hình",type:"tv",priority:7,icon:"🧒"},{id:"tv_ca_nhac",name:"Ca nhạc",type:"tv",priority:8,icon:"🎵"},{id:"tv_hai_giai_tri",name:"Hài / Giải trí",type:"tv",priority:9,icon:"😄"},{id:"tv_meo_vat_doi_song",name:"Mẹo vặt / Đời sống",type:"tv",priority:10,icon:"💡"},{id:"tv_quoc_te_gia_tri",name:"Quốc tế giá trị",type:"tv",priority:11,icon:"🌐"},{id:"tv_review_them",name:"TV khác",type:"tv",priority:99,icon:"📺"},
+  {id:"radio_chinh_thong",name:"Radio chính thống",type:"radio",priority:1,icon:"📻"},{id:"radio_tin_tuc_giao_thong",name:"Tin tức / Giao thông",type:"radio",priority:2,icon:"🚦"},{id:"radio_dia_phuong",name:"Radio địa phương",type:"radio",priority:3,icon:"📍"},{id:"radio_nhac_viet",name:"Nhạc Việt",type:"radio",priority:4,icon:"🎶"},{id:"radio_nhac_vang_bolero",name:"Nhạc vàng / Bolero",type:"radio",priority:5,icon:"🎙️"},{id:"radio_nhac_tre",name:"Nhạc trẻ",type:"radio",priority:6,icon:"🎧"},{id:"radio_khong_loi_thu_gian",name:"Không lời / Thư giãn",type:"radio",priority:7,icon:"🌿"},{id:"radio_thieu_nhi",name:"Radio thiếu nhi",type:"radio",priority:8,icon:"🧸"},{id:"radio_quoc_te_tieng_viet",name:"Quốc tế tiếng Việt",type:"radio",priority:9,icon:"🌐"},{id:"radio_quoc_te_gia_tri",name:"Radio quốc tế giá trị",type:"radio",priority:10,icon:"🌎"},{id:"radio_review_them",name:"Radio khác",type:"radio",priority:99,icon:"📻"}
+];
+let CHANNELS=[], SOURCES=[], currentGroup='', currentId=null, current=null, hls=null, backupIndex=-1, editGroupId=null;
+let diagTimer=null, lastDiag={status:'idle', message:'Chưa test kênh.', detail:''};
+const DRAFT_KEY='SMARTBOX_V10_8_1_DIAGNOSTIC_ADMIN_DRAFT';
+
+function groupMap(){ return Object.fromEntries(GROUPS.map(g=>[g.id,g])); }
+function nowIso(){ return new Date().toISOString(); }
+function makeId(){ return 'ch_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
+function safeSlug(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'') || 'group'; }
+function cleanLines(s){ return (s||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean); }
+function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function canonicalUrl(u){ try{const x=new URL(u);['n','_','cache','t','ts','rnd','r','time'].forEach(k=>x.searchParams.delete(k));x.hash='';return x.toString();}catch(e){return String(u||'').trim();}}
+function isRadioUrl(u){ return String(u||'').toLowerCase().match(/\.(mp3|aac|m4a|ogg|opus|pls)(\?|$)/); }
+function selectedGroupName(id){ return groupMap()[id]?.name || id || ''; }
+function selectedGroupIcon(id){ return groupMap()[id]?.icon || ''; }
+function directOrProxyUrl(u, mode){ if(mode==='proxy') return document.getElementById('proxyBase').value + encodeURIComponent(u||''); return u||''; }
+function showDiag(status,msg,detail=''){ lastDiag={status,message:msg,detail}; const box=document.getElementById('diagnosticBox'); box.className='diag '+(status==='ok'?'ok':status==='cors'?'cors':status==='err'?'err':'warn'); box.innerHTML='<b>'+escapeHTML(msg)+'</b>'+(detail?'<br><span class="small">'+escapeHTML(detail)+'</span>':''); }
+function copyDiag(){ navigator.clipboard?.writeText(JSON.stringify({channel:current?.display_name,url:current?.url,diag:lastDiag},null,2)); alert('Đã copy diagnostic.'); }
+function explainMode(){ alert(document.getElementById('playMode').value==='proxy' ? 'Proxy: cần chạy SMARTBOX_V10_8_1_PROXY_SERVER.py. Dùng để phân biệt CORS với link chết thật.' : 'Phát thẳng: mở HTML/GitHub là dùng được. Nếu .m3u8 đen hoặc báo manifestLoadError/status 0 thì nhiều khả năng bị CORS, chưa chắc link chết.'); }
+function onPlayModeChange(){ document.getElementById('modeHelp').textContent = document.getElementById('playMode').value==='proxy' ? 'Proxy: cần chạy server localhost. Dùng khi nghi CORS hoặc cần test chắc hơn.' : 'Phát thẳng: tiện, không cần server, nhưng một số .m3u8 có thể bị CORS.'; }
+
+function normalizeChannel(c, sourceName, idx){
+  c.id=c.id||makeId(); c.type=c.type||(isRadioUrl(c.url)?'radio':'tv');
+  if(!groupMap()[c.group]) c.group=c.type==='radio'?'radio_review_them':'tv_review_them';
+  c.group_name=selectedGroupName(c.group); c.display_name=c.display_name||c.name||c.ui?.title||('Kênh '+(idx+1)); c.name=c.display_name;
+  c.subtitle=c.subtitle||c.ui?.subtitle||c.group_name; c.url=c.url||''; c.backup_urls=Array.isArray(c.backup_urls)?c.backup_urls:[];
+  c.status_admin=c.status_admin||''; c.note=c.note||''; c.source_files=Array.from(new Set([...(c.source_files||[]),sourceName].filter(Boolean))); c.source_label=c.source_files.join(', ');
+  c.ui={title:c.display_name,subtitle:c.subtitle,badge:c.group_name,icon:selectedGroupIcon(c.group),backup_count:c.backup_urls.length};
+  return c;
+}
+function mergeChannels(newChannels, sourceName){
+  const byUrl=new Map(CHANNELS.map(c=>[canonicalUrl(c.url),c])); let added=0,merged=0;
+  newChannels.forEach((raw,idx)=>{const c=normalizeChannel({...raw},sourceName,idx); const key=canonicalUrl(c.url); if(!key)return;
+    if(byUrl.has(key)){const old=byUrl.get(key); old.backup_urls=Array.from(new Set([...(old.backup_urls||[]),...(c.backup_urls||[])].filter(u=>u&&canonicalUrl(u)!==canonicalUrl(old.url)))); old.source_files=Array.from(new Set([...(old.source_files||[]),sourceName])); old.source_label=old.source_files.join(', '); merged++;}
+    else{c.status_admin=c.status_admin||'new'; CHANNELS.push(c); byUrl.set(key,c); added++;}
+  }); return {added,merged};
+}
+function applyReviewObject(obj){ let n=0; if(!obj||typeof obj!=='object'||Array.isArray(obj)) return n; Object.values(obj).forEach(row=>{if(!row||typeof row!=='object')return; const ch=CHANNELS.find(c=>canonicalUrl(c.url)===canonicalUrl(row.url||'')); if(ch&&row.value){ch.status_admin=row.value==='bad'?'dead':row.value; ch.reviewed_at=row.at||nowIso(); n++;}}); return n; }
+function extractChannels(obj){ if(Array.isArray(obj))return obj.filter(x=>x&&typeof x==='object'); if(obj&&Array.isArray(obj.channels))return obj.channels.filter(x=>x&&typeof x==='object'); return []; }
+function extractGroups(obj){ if(obj&&Array.isArray(obj.groups))return obj.groups.filter(g=>g&&g.id&&g.name&&g.type); return []; }
+function mergeGroups(groups){ let n=0; groups.forEach(g=>{ if(!GROUPS.some(x=>x.id===g.id)){GROUPS.push({...g,priority:g.priority||99,icon:g.icon||(g.type==='radio'?'📻':'📺')}); n++;} }); return n; }
+async function loadManyJson(files){
+  if(!files||!files.length)return; let logs=[];
+  for(const file of files){try{const obj=JSON.parse(await file.text()); const gAdd=mergeGroups(extractGroups(obj)); const channels=extractChannels(obj); let r={added:0,merged:0}; if(channels.length)r=mergeChannels(channels,file.name); const rev=applyReviewObject(obj); SOURCES.push({name:file.name,channels:channels.length,groups:gAdd,review:rev,added:r.added,merged:r.merged,at:nowIso()}); logs.push(`${file.name}: +${r.added}, gộp ${r.merged}, nhóm +${gAdd}, review ${rev}`);}catch(e){logs.push(`${file.name}: LỖI ${e.message}`);}}
+  document.getElementById('loadedFrom').textContent=logs.join(' | '); renderGroups();render();renderCoverage();saveDraft();
+}
+function saveDraft(){ try{localStorage.setItem(DRAFT_KEY,JSON.stringify({GROUPS,CHANNELS,SOURCES,currentId,saved_at:nowIso()}));}catch(e){} }
+function restoreDraft(){ const raw=localStorage.getItem(DRAFT_KEY); if(!raw)return; try{const d=JSON.parse(raw); GROUPS=d.GROUPS||GROUPS; CHANNELS=d.CHANNELS||[]; SOURCES=d.SOURCES||[]; currentId=d.currentId||null; current=CHANNELS.find(c=>c.id===currentId)||null; document.getElementById('loadedFrom').textContent='Khôi phục draft: '+(d.saved_at||''); renderGroups();render();renderCoverage();fillForm(current);}catch(e){alert('Khôi phục lỗi: '+e.message);} }
+function clearDraft(){ if(confirm('Xóa bản nhớ tạm?')){localStorage.removeItem(DRAFT_KEY);alert('Đã xóa.');} }
+
+function syncGroupOptions(){ const type=document.getElementById('f_type').value; const sel=document.getElementById('f_group'); const old=sel.value; sel.innerHTML=''; GROUPS.filter(g=>g.type===type).forEach(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=(g.icon||'')+' '+g.name;sel.appendChild(o);}); if([...sel.options].some(o=>o.value===old))sel.value=old; }
+function fillForm(c){ syncGroupOptions(); document.getElementById('f_display_name').value=c?.display_name||''; document.getElementById('f_type').value=c?.type||'tv'; syncGroupOptions(); document.getElementById('f_group').value=c?.group||(document.getElementById('f_type').value==='radio'?'radio_review_them':'tv_review_them'); document.getElementById('f_subtitle').value=c?.subtitle||''; document.getElementById('f_url').value=c?.url||''; document.getElementById('f_backups').value=(c?.backup_urls||[]).join('\n'); document.getElementById('f_note').value=c?.note||''; }
+function selectChannel(id,doPlay=true){ currentId=id; current=CHANNELS.find(c=>c.id===id)||null; fillForm(current); render(); if(current&&doPlay) play(current); saveDraft(); }
+function setWatchdog(media, mode){
+  if(diagTimer)clearTimeout(diagTimer);
+  media.onloadedmetadata=()=>showDiag('ok','Đã nhận metadata, có tín hiệu phát.',`readyState=${media.readyState}, mode=${mode}`);
+  media.onplaying=()=>showDiag('ok','Đang phát được.',`mode=${mode}`);
+  media.onerror=()=>{ const err=media.error; const msg=err?`Media error code ${err.code}`:'Media error'; showDiag(mode==='direct'?'cors':'err', mode==='direct'?'Không phát trực tiếp được — nghi CORS/MIME/link':'Proxy cũng không phát — nghi link chết hoặc nguồn nghỉ', msg); if(current) current.last_diag=lastDiag; };
+  diagTimer=setTimeout(()=>{ if(media.readyState===0){ showDiag(mode==='direct'?'cors':'warn', mode==='direct'?'Quá 10 giây chưa có tín hiệu — nghi CORS hoặc nguồn chặn trình duyệt':'Proxy quá 10 giây chưa có tín hiệu — có thể link nghỉ/chết',`readyState=${media.readyState}, mode=${mode}`); if(current) current.last_diag=lastDiag; } },10000);
+}
+function playUrl(c,u,mode){
+  document.getElementById('nowName').textContent=c.display_name+' · '+c.group_name; document.getElementById('nowUrl').textContent=u; showDiag('warn','Đang thử phát...',`mode=${mode}`);
+  if(hls){hls.destroy();hls=null;} const a=document.getElementById('audio'),v=document.getElementById('video'); a.pause();v.pause(); a.removeAttribute('src'); v.removeAttribute('src');
+  const finalUrl=directOrProxyUrl(u,mode);
+  if(c.type==='radio'){ v.style.display='none'; a.style.display='block'; setWatchdog(a,mode); a.src=finalUrl; a.play().catch(e=>showDiag(mode==='direct'?'cors':'err', mode==='direct'?'Trình duyệt chặn phát trực tiếp hoặc cần người dùng bấm play':'Proxy/Media play lỗi', e.message)); }
+  else{ a.style.display='none'; v.style.display='block'; setWatchdog(v,mode); if(window.Hls&&Hls.isSupported()&&String(finalUrl).toLowerCase().includes('.m3u8')){ hls=new Hls(); hls.loadSource(finalUrl); hls.attachMedia(v); hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(e=>showDiag('warn','Đã load manifest nhưng play bị chặn',e.message))); hls.on(Hls.Events.ERROR,(ev,data)=>{ let detail=JSON.stringify({type:data.type,details:data.details,fatal:data.fatal,response:data.response||null}); let st=(mode==='direct' && (data.details||'').toLowerCase().includes('manifest'))?'cors':'err'; showDiag(st, st==='cors'?'HLS lỗi manifest — nghi CORS/MIME, chưa kết luận link chết':'HLS báo lỗi, cần thử proxy/backup', detail); if(current)current.last_diag=lastDiag; }); } else { v.src=finalUrl; v.play().catch(e=>showDiag(mode==='direct'?'cors':'err','Video play lỗi',e.message)); } }
+}
+function play(c){ current=c; currentId=c.id; backupIndex=-1; playUrl(c,c.url,document.getElementById('playMode').value); }
+function playCurrentDirect(){ if(!current)return alert('Chưa chọn kênh.'); playUrl(current,current.url,'direct'); }
+function playCurrentProxy(){ if(!current)return alert('Chưa chọn kênh.'); playUrl(current,current.url,'proxy'); }
+function tryBackup(){ if(!current)return alert('Chưa chọn kênh.'); const arr=current.backup_urls||[]; if(!arr.length)return alert('Kênh này không có backup.'); backupIndex=(backupIndex+1)%arr.length; playUrl(current,arr[backupIndex],document.getElementById('playMode').value); }
+function markChannel(c,state){ c.status_admin=state; c.reviewed_at=nowIso(); c.last_diag=lastDiag; if(state==='good'){c.status='ready';c.quality='owner_good';} if(state==='dead'){c.status='dead';c.quality='dead_marked';} if(state==='cors_suspect'){c.status='cors_suspect';c.quality='cors_suspect';} if(state==='proxy_needed'){c.status='proxy_needed';} saveDraft();render();renderCoverage(); }
+function markCurrent(state){ if(!current)return alert('Chưa chọn kênh.'); markChannel(current,state); }
+function saveForm(){ let c=current; if(!c){c={id:makeId(),added_at:nowIso(),status_admin:'new'};CHANNELS.push(c);current=c;currentId=c.id;} c.display_name=document.getElementById('f_display_name').value.trim()||'Kênh mới'; c.name=c.display_name; c.type=document.getElementById('f_type').value; c.group=document.getElementById('f_group').value; c.group_name=selectedGroupName(c.group); c.subtitle=document.getElementById('f_subtitle').value.trim()||c.group_name; c.url=document.getElementById('f_url').value.trim(); c.backup_urls=cleanLines(document.getElementById('f_backups').value).filter(u=>u!==c.url); c.note=document.getElementById('f_note').value.trim(); c.ui={title:c.display_name,subtitle:c.subtitle,badge:c.group_name,icon:selectedGroupIcon(c.group),backup_count:c.backup_urls.length}; c.updated_at=nowIso(); if(c.status_admin!=='new')c.status_admin='edited'; saveDraft();renderGroups();render();renderCoverage();fillForm(c); }
+function newChannel(){current=null;currentId=null;fillForm(null);document.getElementById('f_display_name').focus();}
+function duplicateCurrent(){ if(!current)return alert('Chưa chọn kênh.'); const clone=JSON.parse(JSON.stringify(current)); clone.id=makeId(); clone.display_name+=' copy'; clone.name=clone.display_name; clone.status_admin='new'; clone.added_at=nowIso(); CHANNELS.push(clone); selectChannel(clone.id,false); }
+function deleteCurrent(){ if(!current)return alert('Chưa chọn kênh.'); if(confirm('Xóa kênh khỏi danh sách?')){current.status_admin='deleted';current.deleted_at=nowIso();saveDraft();render();renderCoverage();} }
+function newGroup(){editGroupId=null;document.getElementById('g_name').value='';document.getElementById('g_id').value='';document.getElementById('g_type').value='tv';document.getElementById('g_icon').value='📺';}
+function selectCurrentGroupForEdit(){ if(!currentGroup)return alert('Chưa lọc nhóm nào.'); const g=GROUPS.find(x=>x.id===currentGroup); if(!g)return; editGroupId=g.id; document.getElementById('g_name').value=g.name; document.getElementById('g_id').value=g.id; document.getElementById('g_type').value=g.type; document.getElementById('g_icon').value=g.icon||''; }
+function saveGroupForm(){ const name=document.getElementById('g_name').value.trim(); if(!name)return alert('Chưa nhập tên nhóm.'); const id=document.getElementById('g_id').value.trim()||safeSlug(name); const type=document.getElementById('g_type').value; const icon=document.getElementById('g_icon').value.trim()||(type==='radio'?'📻':'📺'); let g=GROUPS.find(x=>x.id===editGroupId||x.id===id); if(g){const oldId=g.id;Object.assign(g,{id,name,type,icon});CHANNELS.forEach(c=>{if(c.group===oldId){c.group=id;c.type=type;c.group_name=name;c.ui=c.ui||{};c.ui.badge=name;c.ui.icon=icon;}});}else GROUPS.push({id,name,type,icon,priority:99}); editGroupId=id; saveDraft();syncGroupOptions();renderGroups();render();renderCoverage(); }
+function deleteGroup(){ const id=document.getElementById('g_id').value.trim()||editGroupId; if(!id)return alert('Chưa chọn nhóm.'); const n=CHANNELS.filter(c=>c.group===id&&c.status_admin!=='deleted').length; if(n>0)return alert('Chỉ xóa nhóm rỗng. Nhóm còn '+n+' kênh.'); GROUPS=GROUPS.filter(g=>g.id!==id);currentGroup='';editGroupId=null;saveDraft();syncGroupOptions();renderGroups();renderCoverage(); }
+function renderGroups(){ const box=document.getElementById('groups');box.innerHTML='';const type=document.getElementById('typeFilter').value; const all=document.createElement('button'); all.textContent='Tất cả'; all.className=currentGroup===''?'active':''; all.onclick=()=>{currentGroup='';renderGroups();render();}; box.appendChild(all); GROUPS.filter(g=>!type||g.type===type).forEach(g=>{const n=CHANNELS.filter(c=>c.group===g.id&&c.status_admin!=='deleted'&&c.status_admin!=='dead').length; const b=document.createElement('button'); b.textContent=(g.icon||'')+' '+g.name+' ('+n+')'; b.className=currentGroup===g.id?'active':''; b.onclick=()=>{currentGroup=g.id;renderGroups();render();}; box.appendChild(b);}); }
+function pass(c){ const q=document.getElementById('q').value.toLowerCase().trim(), t=document.getElementById('typeFilter').value, st=document.getElementById('stateFilter').value; if(t&&c.type!==t)return false; if(currentGroup&&c.group!==currentGroup)return false; if(st==='alive'&&(c.status_admin==='dead'||c.status_admin==='deleted'))return false; if(st&&st!=='alive'&&c.status_admin!==st)return false; if(c.status_admin==='deleted')return false; if(q&&!(c.display_name+' '+c.group_name+' '+c.subtitle+' '+c.url+' '+(c.note||'')+' '+(c.source_label||'')).toLowerCase().includes(q))return false; return true; }
+function render(){ const box=document.getElementById('list');box.innerHTML=''; CHANNELS.filter(pass).forEach((c,i)=>{ const d=document.createElement('div'); d.className='item'+(c.id===currentId?' activeRow':'')+(c.status_admin==='dead'?' deadRow':'')+(c.status_admin==='cors_suspect'?' corsRow':''); const b=document.createElement('button'); b.className='rowbtn'; b.innerHTML='<div class="name">'+(i+1)+'. '+escapeHTML(c.display_name)+'</div><div class="sub">'+escapeHTML(c.group_name)+' · '+escapeHTML(c.subtitle||'')+(c.backup_urls?.length?' · '+c.backup_urls.length+' backup':'')+(c.status_admin?' · trạng thái: '+c.status_admin:'')+(c.source_label?' · nguồn: '+escapeHTML(c.source_label):'')+'</div>'; b.onclick=()=>selectChannel(c.id,true); const good=document.createElement('button');good.textContent='Good';good.className='good';good.onclick=()=>markChannel(c,'good'); const cors=document.createElement('button');cors.textContent='CORS';cors.className='cors';cors.onclick=()=>markChannel(c,'cors_suspect'); const dead=document.createElement('button');dead.textContent='Dead';dead.className='dead';dead.onclick=()=>markChannel(c,'dead'); d.appendChild(b);d.appendChild(good);d.appendChild(cors);d.appendChild(dead);box.appendChild(d);}); renderStats(); }
+function renderStats(){ const live=CHANNELS.filter(c=>c.status_admin!=='deleted'); document.getElementById('statTotal').textContent=live.length+' kênh'; document.getElementById('statGood').textContent=live.filter(c=>c.status_admin==='good').length+' Good'; document.getElementById('statCors').textContent=live.filter(c=>c.status_admin==='cors_suspect'||c.status_admin==='proxy_needed').length+' CORS'; document.getElementById('statDead').textContent=live.filter(c=>c.status_admin==='dead').length+' Dead'; }
+function renderCoverage(){ const box=document.getElementById('coverage');box.innerHTML=''; GROUPS.forEach(g=>{const n=CHANNELS.filter(c=>c.group===g.id&&c.status_admin!=='dead'&&c.status_admin!=='deleted').length; const d=document.createElement('div'); d.innerHTML='<b>'+escapeHTML(g.name)+': '+n+'</b>'; box.appendChild(d);});}
+function buildCleanPackage(){ const clean=CHANNELS.filter(c=>c.status_admin!=='dead'&&c.status_admin!=='deleted'&&c.url).map(c=>{const cc=JSON.parse(JSON.stringify(c)); cc.name=cc.display_name; cc.group_name=selectedGroupName(cc.group); cc.play_url=cc.url; cc.backup_urls=Array.isArray(cc.backup_urls)?[...new Set(cc.backup_urls.filter(u=>u&&u!==cc.url))]:[]; cc.backup_play_urls=cc.backup_urls; cc.status=c.status_admin==='cors_suspect'?'cors_suspect':'ready'; cc.quality=c.status_admin==='new'?'owner_added':(c.status_admin==='cors_suspect'?'cors_suspect':'owner_clean'); cc.ui={title:cc.display_name,subtitle:cc.subtitle,badge:cc.group_name,icon:selectedGroupIcon(cc.group),backup_count:cc.backup_urls.length}; return cc;}); const used=new Set(clean.map(c=>c.group)); const groups=GROUPS.filter(g=>used.has(g.id)).map(g=>({...g,count:clean.filter(c=>c.group===g.id).length})); const coverage=groups.map(g=>({group:g.id,group_name:g.name,type:g.type,count:g.count,status:g.count>=3?'OK':'LOW'})); return {version:'smartbox_channels_v10_8_1_DIAGNOSTIC_ADMIN_CLEAN',generated_at:nowIso(),note:'Xuất từ V10.8.1 Diagnostic Admin: Dead/Deleted bị bỏ; CORS suspect được giữ nhưng có trạng thái riêng.',groups,coverage,channels:clean};}
+function buildReview(){ const rows={}; CHANNELS.forEach(c=>{if(!c.status_admin)return; rows[c.url||c.id]={kind:c.type,url:c.url,value:c.status_admin,at:c.reviewed_at||c.updated_at||c.added_at||nowIso(),name:c.display_name,group:c.group,group_name:c.group_name,note:c.note||'',diag:c.last_diag||null};}); return rows;}
+function download(name,obj){ const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); }
+function exportCleanJson(){download('smartbox_channels_v10_8_1_DIAGNOSTIC_ADMIN_CLEAN.json',buildCleanPackage());}
+function exportReviewJson(){download('SMARTBOX_REVIEW_V10_8_1_'+nowIso().replace(/[:.]/g,'-')+'.json',buildReview());}
+function exportGoodOnly(){download('SMARTBOX_GOOD_ONLY_V10_8_1_'+nowIso().replace(/[:.]/g,'-')+'.json',buildCleanPackage().channels.filter(c=>c.status_admin==='good'||c.quality==='owner_clean'||c.quality==='owner_added'));}
+function exportDeadOnly(){download('SMARTBOX_DEAD_CORS_ONLY_V10_8_1_'+nowIso().replace(/[:.]/g,'-')+'.json',CHANNELS.filter(c=>['dead','deleted','cors_suspect','proxy_needed'].includes(c.status_admin)));}
+syncGroupOptions();renderGroups();render();renderCoverage();restoreDraft();
+</script>
+</body>
+</html>
