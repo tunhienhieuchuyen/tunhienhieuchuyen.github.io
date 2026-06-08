@@ -28,6 +28,13 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 <style>
+.media-focused {
+  border-color: var(--c-primary) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-primary) 30%, transparent) !important;
+  transform: scale(1.02) !important;
+  background-color: var(--c-sub) !important;
+}
+
 /* Custom CSS Dự Báo Thời Tiết (Pha 02) */
 .weather-daily-card {
     min-width: 90px; flex: 1 1 0; scroll-snap-align: start;
@@ -3351,6 +3358,7 @@ body.music-player-active #mini-player {
 }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 
@@ -3623,7 +3631,7 @@ body.music-player-active #mini-player {
 <div class="bg-white p-3 sm:p-5 lg:p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col h-full relative overflow-hidden min-h-[600px] lg:max-h-[800px]">
     
     <div class="music-titlebar flex items-center justify-between mb-4 border-b border-slate-100 pb-3 flex-wrap gap-2">
-        <h2 class="text-lg font-black text-primary uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-headphones text-2xl"></i> Nghe nhạc cả ngày</h2>
+        <h2 class="text-lg font-black text-primary uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-headphones text-2xl"></i> Giải trí Đa phương tiện</h2>
         <div class="music-header-actions flex gap-2 items-center">
 <select id="music-sleep-timer" onchange="window.MusicApp.setSleepTimer(this.value)" class="bg-slate-50 border border-slate-200 text-slate-600 text-[11px] font-bold rounded-xl px-2 py-2 outline-none focus:border-primary cursor-pointer shadow-sm">
                 <option value="0">Tắt hẹn giờ</option>
@@ -3634,7 +3642,8 @@ body.music-player-active #mini-player {
             </select>
             <button onclick="window.MusicApp.clearCache()" class="w-9 h-9 flex justify-center items-center rounded-xl bg-rose-50 text-rose-600 active:scale-90 transition shadow-sm border border-rose-100" title="Xóa bộ nhớ đệm và Tải lại trang"><i class="ph-bold ph-trash text-lg"></i></button>
             <button onclick="window.MusicApp.refetch()" class="w-9 h-9 flex justify-center items-center rounded-xl bg-slate-50 text-slate-600 border border-slate-200 active:scale-90 transition shadow-sm" title="Tải lại danh sách"><i class="ph-bold ph-arrows-clockwise text-lg"></i></button>
-            <a id="music-admin-btn" href="/upload.html" target="_blank" rel="noopener noreferrer" title="Admin nhạc - mở trang upload nhạc" aria-label="Admin nhạc">
+            <button onclick="window.MediaHub.init(true)" class="w-9 h-9 flex justify-center items-center rounded-xl bg-purple-50 text-purple-600 border border-purple-200 active:scale-90 transition shadow-sm" title="Tải lại kênh Tivi/Radio"><i class="ph-bold ph-broadcast text-lg"></i></button>
+<a id="music-admin-btn" href="/upload.html" target="_blank" rel="noopener noreferrer" title="Admin nhạc - mở trang upload nhạc" aria-label="Admin nhạc">
                 <i class="ph-bold ph-upload-simple" aria-hidden="true"></i>
                 <span class="music-admin-label">Admin nhạc</span>
                 <span class="music-admin-label-mobile">Admin</span>
@@ -3647,9 +3656,51 @@ body.music-player-active #mini-player {
         <input type="text" id="music-search" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:border-primary shadow-inner text-sm font-medium" placeholder="Tìm tên bài hát..." oninput="window.MusicApp.filterList(this.value)">
     </div>
 
+    <div class="flex gap-2 mb-3 px-2 overflow-x-auto custom-scroll-area shrink-0" id="media-subtabs">
+        <button onclick="window.MediaHub.switchTab('music')" id="tab-media-music" class="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-sm active:scale-95 transition whitespace-nowrap border border-primary">🎵 Nhạc MP3</button>
+        <button onclick="window.MediaHub.switchTab('radio')" id="tab-media-radio" class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap">📻 Radio Live</button>
+        <button onclick="window.MediaHub.switchTab('tv')" id="tab-media-tv" class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap">📺 Tivi Live</button>
+    </div>
+
+    <div id="tv-player-container" style="display: none;" class="px-2 mb-4 sticky top-0 z-40 bg-white/90 backdrop-blur pb-2">
+        <video id="tv-video-element" controls playsinline class="w-full aspect-video bg-black rounded-2xl shadow-lg border border-slate-700"></video>
+        <div class="mt-2 flex flex-col gap-2">
+            <div class="text-sm font-black text-rose-500 truncate" id="tv-channel-name">📺 Cần thao tác: <span class="text-rose-600 italic">Vui lòng chọn kênh bên dưới để xem</span></div>
+            <div class="flex items-center justify-center gap-4 bg-slate-50 border border-slate-200 rounded-xl p-2 shadow-sm">
+                <button onclick="window.MediaHub.playPrev('tv')" class="w-10 h-10 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition hover:text-rose-500" title="Kênh trước"><i class="ph-fill ph-skip-back text-xl"></i></button>
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Chuyển Kênh</div>
+                <button onclick="window.MediaHub.playNext('tv')" class="w-10 h-10 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition hover:text-rose-500" title="Kênh sau"><i class="ph-fill ph-skip-forward text-xl"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="radio-player-container" style="display: none;" class="px-2 mb-4 sticky top-0 z-40 bg-white/90 backdrop-blur pb-2">
+        <div class="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-2xl p-3 shadow-md">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm" id="radio-disk-icon">
+                    <i class="ph-fill ph-radio text-xl"></i>
+                </div>
+                <div class="min-w-0">
+                    <div class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">📻 Radio</div>
+                    <div class="text-sm font-bold text-rose-500 truncate italic" id="radio-channel-name">Chưa chọn kênh đài!</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="window.MediaHub.playPrev('radio')" class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center shrink-0 shadow-sm border border-emerald-200 active:scale-90 transition"><i class="ph-fill ph-skip-back text-lg"></i></button>
+                <button id="radio-play-btn" onclick="window.MediaHub.toggleRadio()" class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg active:scale-90 transition hover:brightness-110"><i class="ph-fill ph-play text-2xl"></i></button>
+                <button onclick="window.MediaHub.playNext('radio')" class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center shrink-0 shadow-sm border border-emerald-200 active:scale-90 transition"><i class="ph-fill ph-skip-forward text-lg"></i></button>
+            </div>
+        </div>
+        <audio id="radio-audio-element" class="hidden"></audio>
+    </div>
+
     <div class="flex-grow overflow-y-auto custom-scroll-area relative border border-slate-200 bg-slate-50/50 rounded-2xl shadow-inner mb-[120px]" id="music-list-container">
-        <div id="music-loading" class="p-10 text-center text-primary font-bold animate-pulse">Đang đồng bộ máy chủ Archive.org...</div>
-    </div>
+        <div id="mp3-list-container" class="w-full min-h-full">
+            <div id="music-loading" class="p-10 text-center text-primary font-bold animate-pulse">Đang đồng bộ máy chủ Archive.org...</div>
+        </div>
+        <div id="radio-list-container" style="display: none;" class="space-y-2 p-2"></div>
+        <div id="tv-list-container" style="display: none;" class="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-2"></div>
+    </div>
 </div>
 </div>
 
@@ -7196,7 +7247,7 @@ window.MusicApp = {
         const input = el('music-search');
         if(input) input.focus({preventScroll:true});
     },    renderList() {
-        const container = el('music-list-container'); if(!container) return;
+        const container = el('mp3-list-container'); if(!container) return;
         Array.from(container.children).forEach(c => { if(c.id !== 'music-loading') c.remove(); });
         const keyword = (this.filterText || '').trim().toLowerCase();
         const list = keyword
@@ -10858,6 +10909,283 @@ setTimeout(() => {
         // window.WeatherAIEngine.primeGeminiNano().catch(e=>console.log('Nano Prime Skip'));
     }
 }, 3000); // Trễ 3s để không chặn quá trình load UI ban đầu
+</script>
+
+<script id="pha51-media-hub">
+window.MediaHub = {
+    hlsTv: null,
+    hlsRadio: null,
+    tvData: [],
+    radioData: [],
+    focusIdx: -1,
+    currentRadioUrl: '',
+    currentTvIdx: -1,
+    currentRadioIdx: -1,
+    isRadioPlaying: false,
+    
+    async init(force = false) {
+        if(force) { window.vibrate?.(15); window.showToast?.('Đang tải lại danh sách kênh...', 'ph-spinner animate-spin'); if(window.soundEnabled) window.playSpeechTTS('Đang cập nhật danh sách kênh'); }
+        try {
+            const stamp = force ? '?t=' + Date.now() : '';
+            const [tvRes, radioRes] = await Promise.all([
+                fetch('TV_APP_READY.json' + stamp).catch(() => null),
+                fetch('RADIO_APP_READY.json' + stamp).catch(() => null)
+            ]);
+            if (tvRes && tvRes.ok) {
+                this.tvData = await tvRes.json();
+                this.renderTvList();
+            }
+            if (radioRes && radioRes.ok) {
+                this.radioData = await radioRes.json();
+                this.renderRadioList();
+            }
+            if(force) window.showToast?.('Cập nhật kênh thành công!', 'ph-check-circle');
+            
+            if (!this.remoteBound) {
+                this.initRemoteControl();
+                this.remoteBound = true;
+                
+                const rAudio = document.getElementById('radio-audio-element');
+                if(rAudio) {
+                    rAudio.onplay = () => { this.isRadioPlaying = true; this.updateRadioUI(); };
+                    rAudio.onpause = () => { this.isRadioPlaying = false; this.updateRadioUI(); };
+                    rAudio.onerror = () => { window.showToast?.('Kênh lỗi hoặc mất mạng', 'ph-warning-circle'); this.isRadioPlaying = false; this.updateRadioUI(); };
+                }
+            }
+        } catch (e) { 
+            console.warn('Lỗi load Media JSON', e); 
+            if(force) window.showToast?.('Lỗi kết nối tải kênh!', 'ph-warning-circle');
+        }
+    },
+
+    switchTab(tab) {
+        this.focusIdx = -1;
+        window.vibrate?.(10);
+        
+        const btnColors = {
+            'music': 'bg-primary text-white shadow-sm border-primary',
+            'radio': 'bg-emerald-500 text-white shadow-sm border-emerald-500',
+            'tv': 'bg-rose-500 text-white shadow-sm border-rose-500'
+        };
+        const idleCls = 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100';
+        
+        ['music', 'radio', 'tv'].forEach(t => {
+            const btn = document.getElementById('tab-media-' + t);
+            if (btn) btn.className = 'px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap ' + (t === tab ? btnColors[t] : idleCls);
+        });
+
+        const mp3List = document.getElementById('mp3-list-container');
+        const radioList = document.getElementById('radio-list-container');
+        const tvList = document.getElementById('tv-list-container');
+        
+        if (mp3List) mp3List.style.display = (tab === 'music') ? 'block' : 'none';
+        if (radioList) radioList.style.display = (tab === 'radio') ? 'block' : 'none';
+        if (tvList) tvList.style.display = (tab === 'tv') ? 'grid' : 'none'; 
+        
+        const tvPlayer = document.getElementById('tv-player-container');
+        const radioPlayer = document.getElementById('radio-player-container');
+        if (tvPlayer) tvPlayer.style.display = (tab === 'tv') ? 'block' : 'none';
+        if (radioPlayer) radioPlayer.style.display = (tab === 'radio') ? 'block' : 'none';
+        
+        if(tab !== 'music' && window.MusicApp && window.MusicApp.hideMiniPlayerIfIdle) {
+            window.MusicApp.hideMiniPlayerIfIdle();
+            const mini = document.getElementById('mini-player');
+            if(mini) mini.style.display = 'none';
+        } else if (tab === 'music' && window.MusicApp && window.MusicApp.playing) {
+            window.MusicApp.showMiniPlayer();
+        }
+
+        if(window.soundEnabled) {
+            const names = {'music': 'Nhạc MP3', 'radio': 'Đài phát thanh Radio', 'tv': 'Xem Ti vi'};
+            window.playSpeechTTS('Đã chuyển sang ' + names[tab]);
+        }
+    },
+
+    renderTvList() {
+        const container = document.getElementById('tv-list-container');
+        if(!container) return;
+        container.innerHTML = this.tvData.map((c, i) => `
+            <div onclick="window.MediaHub.playStream(${i}, 'tv')" class="media-item bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer active:scale-95 hover:border-rose-500 hover:shadow-md transition text-center">
+                <i class="ph-duotone ph-television text-3xl text-rose-500 mb-2"></i>
+                <span class="text-xs font-bold text-slate-700 w-full truncate">${c.name}</span>
+            </div>
+        `).join('');
+    },
+
+    renderRadioList() {
+        const container = document.getElementById('radio-list-container');
+        if(!container) return;
+        container.innerHTML = this.radioData.map((c, i) => `
+            <div onclick="window.MediaHub.playStream(${i}, 'radio')" class="media-item song-row bg-white border border-slate-200 cursor-pointer active:scale-95 transition hover:border-emerald-500">
+                <div class="song-left text-emerald-500"><i class="ph-bold ph-radio text-xl"></i></div>
+                <div class="song-main">
+                    <div class="song-title font-bold text-slate-800">${c.name}</div>
+                    <div class="song-artist text-[10px] text-slate-500">Live Streaming</div>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    playStream(idx, type) {
+        window.vibrate?.(10);
+        if(window.MusicApp && window.MusicApp.playing) window.MusicApp.togglePlay();
+
+        if (type === 'tv') {
+            const c = this.tvData[idx];
+            if(!c) return;
+            this.currentTvIdx = idx;
+            const url = c.final_url || c.url;
+            
+            const rAudio = document.getElementById('radio-audio-element');
+            if (rAudio && !rAudio.paused) rAudio.pause();
+            
+            const video = document.getElementById('tv-video-element');
+            document.getElementById('tv-channel-name').innerHTML = `📺 Đang phát: <span class="text-slate-700">${c.name}</span>`;
+            
+            if (Hls.isSupported()) {
+                if (this.hlsTv) this.hlsTv.destroy();
+                this.hlsTv = new Hls();
+                this.hlsTv.loadSource(url);
+                this.hlsTv.attachMedia(video);
+                this.hlsTv.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(()=>{}));
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.play().catch(()=>{});
+            }
+            document.getElementById('tv-player-container').scrollIntoView({behavior: 'smooth', block: 'start'});
+            if(window.soundEnabled) window.playSpeechTTS('Đang bật kênh Tivi ' + c.name);
+            
+        } else if (type === 'radio') {
+            const c = this.radioData[idx];
+            if(!c) return;
+            this.currentRadioIdx = idx;
+            const url = c.final_url || c.url;
+
+            const video = document.getElementById('tv-video-element');
+            if (video && !video.paused) video.pause();
+            
+            this.currentRadioUrl = url;
+            const titleEl = document.getElementById('radio-channel-name');
+            titleEl.textContent = c.name;
+            titleEl.className = "text-sm font-bold text-slate-800 truncate"; 
+            
+            const rAudio = document.getElementById('radio-audio-element');
+            
+            if (Hls.isSupported()) {
+                if (this.hlsRadio) this.hlsRadio.destroy();
+                this.hlsRadio = new Hls();
+                this.hlsRadio.loadSource(url);
+                this.hlsRadio.attachMedia(rAudio);
+                this.hlsRadio.on(Hls.Events.MANIFEST_PARSED, () => rAudio.play().catch(()=>{}));
+            } else if (rAudio.canPlayType('application/vnd.apple.mpegurl') || url.includes('.mp3') || url.includes('.aac')) {
+                rAudio.src = url;
+                rAudio.play().catch(()=>{});
+            }
+            document.getElementById('radio-player-container').scrollIntoView({behavior: 'smooth', block: 'start'});
+            if(window.soundEnabled) window.playSpeechTTS('Đang bật đài ' + c.name);
+        }
+    },
+    
+    playNext(type) {
+        window.vibrate?.(10);
+        if (type === 'tv' && this.tvData.length > 0) {
+            let next = this.currentTvIdx + 1;
+            if (next >= this.tvData.length) next = 0;
+            this.playStream(next, 'tv');
+        } else if (type === 'radio' && this.radioData.length > 0) {
+            let next = this.currentRadioIdx + 1;
+            if (next >= this.radioData.length) next = 0;
+            this.playStream(next, 'radio');
+        }
+    },
+
+    playPrev(type) {
+        window.vibrate?.(10);
+        if (type === 'tv' && this.tvData.length > 0) {
+            let prev = this.currentTvIdx - 1;
+            if (prev < 0) prev = this.tvData.length - 1;
+            this.playStream(prev, 'tv');
+        } else if (type === 'radio' && this.radioData.length > 0) {
+            let prev = this.currentRadioIdx - 1;
+            if (prev < 0) prev = this.radioData.length - 1;
+            this.playStream(prev, 'radio');
+        }
+    },
+
+    toggleRadio() {
+        const rAudio = document.getElementById('radio-audio-element');
+        if(!rAudio) return;
+        window.vibrate?.(10);
+        if (this.isRadioPlaying) {
+            rAudio.pause();
+            if(window.soundEnabled) window.playSpeechTTS('Tạm dừng Radio');
+        } else {
+            if (!rAudio.src && this.currentRadioIdx >= 0) {
+                this.playStream(this.currentRadioIdx, 'radio');
+            } else if (!rAudio.src && this.currentRadioIdx === -1) {
+                window.showToast?.('Vui lòng chọn kênh bên dưới', 'ph-warning-circle');
+                if(window.soundEnabled) window.playSpeechTTS('Vui lòng chọn kênh bên dưới để nghe');
+            } else {
+                rAudio.play().catch(()=>{ window.showToast?.('Đang tải luồng...', 'ph-spinner animate-spin'); });
+                if(window.soundEnabled) window.playSpeechTTS('Tiếp tục nghe Radio');
+            }
+        }
+    },
+    
+    updateRadioUI() {
+        const btn = document.getElementById('radio-play-btn');
+        const icon = document.getElementById('radio-disk-icon');
+        if (btn) btn.innerHTML = this.isRadioPlaying ? '<i class="ph-fill ph-pause text-2xl"></i>' : '<i class="ph-fill ph-play text-2xl"></i>';
+        if (icon) {
+            if(this.isRadioPlaying) icon.classList.add('animate-spin');
+            else icon.classList.remove('animate-spin');
+        }
+    },
+
+    initRemoteControl() {
+        document.addEventListener('keydown', (e) => {
+            const tvList = document.getElementById('tv-list-container');
+            const radioList = document.getElementById('radio-list-container');
+            if (!tvList || !radioList) return;
+            
+            const isTv = tvList.style.display !== 'none';
+            const isRadio = radioList.style.display !== 'none';
+            if (!isTv && !isRadio) return;
+
+            const container = isTv ? tvList : radioList;
+            const items = Array.from(container.querySelectorAll('.media-item'));
+            if (items.length === 0) return;
+
+            const cols = isTv ? (window.innerWidth >= 1024 ? 4 : (window.innerWidth >= 640 ? 3 : 2)) : 1;
+
+            if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
+                e.preventDefault();
+                if (this.focusIdx === -1) this.focusIdx = 0;
+                else {
+                    if (e.key === 'ArrowRight') this.focusIdx++;
+                    else if (e.key === 'ArrowLeft') this.focusIdx--;
+                    else if (e.key === 'ArrowDown') this.focusIdx += cols;
+                    else if (e.key === 'ArrowUp') this.focusIdx -= cols;
+                }
+
+                if (this.focusIdx < 0) this.focusIdx = 0;
+                if (this.focusIdx >= items.length) this.focusIdx = items.length - 1;
+
+                if (e.key === 'Enter') {
+                    items[this.focusIdx].click();
+                    return;
+                }
+
+                items.forEach(el => el.classList.remove('media-focused'));
+                const target = items[this.focusIdx];
+                target.classList.add('media-focused');
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => { setTimeout(() => window.MediaHub.init(), 1500); });
 </script>
 </body>
 </html>
