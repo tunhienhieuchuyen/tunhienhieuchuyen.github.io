@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SmartBox Proxy Doctor V2 ISO</title>
+<style>
+:root{
+  --bg:#fff6dc;--panel:#fffdf6;--panel2:#fff9e8;--line:#e8bd63;--line2:#f3d492;
+  --text:#2b1900;--muted:#7a5a1b;--hot:#e85d04;--blue:#2563eb;--green:#16a34a;
+  --red:#dc2626;--purple:#7e22ce;--cyan:#0891b2;--amber:#d97706;--shadow:0 12px 28px #00000014;
+}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:linear-gradient(180deg,#fff1c2,#fff8e8 48%,#fff6dc);font-family:Arial,"Segoe UI",sans-serif;color:var(--text)}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:10px 12px;font-weight:900;background:#fff;border:1px solid var(--line);color:#873500;transition:.12s}button:hover{transform:translateY(-1px);box-shadow:0 4px 12px #0001}button.primary{background:var(--hot);color:#fff;border-color:var(--hot)}button.good{background:#dcfce7;color:#166534;border-color:#86efac}button.warn{background:#fef3c7;color:#92400e;border-color:#fbbf24}button.bad{background:#fee2e2;color:#991b1b;border-color:#fca5a5}button.info{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd}button.purple{background:#f3e8ff;color:#6b21a8;border-color:#d8b4fe}button.ghost{background:#fffaf0;color:#7a3b00}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text);padding:10px;font-weight:700}textarea{min-height:74px;font-family:Consolas,monospace;font-size:12px;line-height:1.35}.app{height:100%;display:grid;grid-template-rows:auto 1fr;gap:10px;padding:12px}.top{background:rgba(255,253,246,.96);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow);display:grid;grid-template-columns:1.2fr 2fr auto;gap:12px;align-items:center}.brand h1{margin:0;font-size:22px;letter-spacing:.2px}.brand .small{margin-top:4px}.small{font-size:12px;color:var(--muted);line-height:1.35}.metricGrid{display:grid;grid-template-columns:repeat(6,minmax(90px,1fr));gap:8px}.metric{border:1px solid var(--line2);background:#fffaf0;border-radius:14px;padding:10px;text-align:center}.metric b{display:block;font-size:22px}.metric span{display:block;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase}.toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.layout{min-height:0;display:grid;grid-template-columns:350px minmax(460px,1fr) 480px;gap:10px}.panel{min-height:0;background:rgba(255,253,246,.96);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}.panelHead{padding:12px;border-bottom:1px solid var(--line2);background:linear-gradient(180deg,#fffef7,#fff7df);display:flex;gap:8px;align-items:center;justify-content:space-between}.panelHead h2{margin:0;font-size:16px}.panelBody{padding:12px;overflow:auto;max-height:calc(100vh - 152px)}.formBlock{border:1px solid var(--line2);background:#fffaf0;border-radius:16px;padding:10px;margin-bottom:10px}.formBlock h3{margin:0 0 8px;font-size:14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.gap{display:flex;gap:8px;flex-wrap:wrap}.progress{height:12px;background:#fff;border:1px solid var(--line);border-radius:999px;overflow:hidden}.bar{height:100%;width:0%;background:linear-gradient(90deg,#16a34a,#e85d04);transition:.2s}.filters{display:grid;grid-template-columns:1.5fr .9fr .9fr .9fr;gap:8px;padding:12px;border-bottom:1px solid var(--line2);background:#fffaf0}.tableWrap{overflow:auto;max-height:calc(100vh - 240px)}table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}th{position:sticky;top:0;background:#fff7df;z-index:2;border-bottom:1px solid var(--line);text-align:left;padding:8px;color:#6b3b00}td{border-bottom:1px solid #f4dfad;padding:7px;vertical-align:top}tr{cursor:pointer}tr:hover{background:#fff3c8}tr.selected{outline:3px solid #e85d04;background:#fff0bf}.nameCell b{font-size:14px}.url{font-family:Consolas,monospace;font-size:11px;word-break:break-all;color:#5a3b00}.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900;border:1px solid #ddd;white-space:nowrap}.pill.direct{background:#dcfce7;color:#166534;border-color:#86efac}.pill.proxy{background:#f3e8ff;color:#6b21a8;border-color:#d8b4fe}.pill.review{background:#fee2e2;color:#991b1b;border-color:#fca5a5}.pill.untested{background:#f1f5f9;color:#475569;border-color:#cbd5e1}.pill.testing{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd}.pill.paused{background:#fef3c7;color:#92400e;border-color:#fbbf24}.pill.smallP{font-size:10px;padding:3px 7px}.detailTitle{font-size:20px;margin:0 0 4px}.detailBox{border:1px solid var(--line2);background:#fffaf0;border-radius:16px;padding:10px;margin-bottom:10px}.kv{display:grid;grid-template-columns:120px 1fr;gap:6px;font-size:12px}.kv b{color:#6b3b00}.log{height:180px;overflow:auto;background:#1f1608;color:#fff0c2;border-radius:14px;padding:10px;font-family:Consolas,monospace;font-size:12px;line-height:1.35;white-space:pre-wrap}.stickyActions{position:sticky;bottom:0;background:linear-gradient(0deg,#fffdf6 70%,#fffdf600);padding-top:8px}.rowWarn{background:#fff7ed}.rowBad{background:#fff1f2}.rowGood{background:#f0fdf4}.rowProxy{background:#faf5ff}.rowUntested{opacity:.92}.twoLine{line-height:1.3}.dangerText{color:#b91c1c;font-weight:900}.okText{color:#166534;font-weight:900}.proxyText{color:#6b21a8;font-weight:900}@media(max-width:1250px){.top{grid-template-columns:1fr}.metricGrid{grid-template-columns:repeat(3,1fr)}.layout{grid-template-columns:1fr}.panelBody{max-height:none}.tableWrap{max-height:none}.filters{grid-template-columns:1fr 1fr}.app{height:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <h1>🩺 SmartBox Proxy Doctor V2 ISO</h1>
+      <div class="small">Bác sĩ proxy chuyên dụng: tự test direct/proxy, resume kênh chưa test, xuất JSON proxy-ready không phá link gốc.</div>
+    </div>
+    <div>
+      <div class="metricGrid">
+        <div class="metric"><b id="mTotal">0</b><span>Tổng</span></div>
+        <div class="metric"><b id="mDirect">0</b><span>Direct OK</span></div>
+        <div class="metric"><b id="mProxy">0</b><span>Cần proxy</span></div>
+        <div class="metric"><b id="mReview">0</b><span>Review</span></div>
+        <div class="metric"><b id="mUntested">0</b><span>Chưa test</span></div>
+        <div class="metric"><b id="mDone">0%</b><span>Tiến độ</span></div>
+      </div>
+      <div class="progress" style="margin-top:8px"><div class="bar" id="progressBar"></div></div>
+    </div>
+    <div class="toolbar">
+      <button class="primary" onclick="runMode('untested')">Test chưa test</button>
+      <button class="info" onclick="runMode('review')">Test review</button>
+      <button class="ghost" onclick="runMode('all')">Test tất cả</button>
+      <button class="warn" onclick="pauseRun()">Tạm dừng</button>
+    </div>
+  </header>
+
+  <section class="layout">
+    <aside class="panel">
+      <div class="panelHead"><h2>1) Nạp dữ liệu & cấu hình</h2><span class="pill untested" id="runState">Idle</span></div>
+      <div class="panelBody">
+        <div class="formBlock">
+          <h3>Dữ liệu kênh</h3>
+          <label class="small">Nạp file JSON từ máy</label>
+          <input type="file" accept=".json" onchange="loadChannelsFile(this.files[0])">
+          <div style="height:8px"></div>
+          <label class="small">Hoặc tải từ URL GitHub Pages</label>
+          <input id="jsonUrl" value="https://tunhienhieuchuyen.github.io/smartbox_channels_full.json">
+          <div class="grid2" style="margin-top:8px">
+            <button onclick="loadFromUrl()">Tải URL</button>
+            <button onclick="restoreLocal()">Khôi phục phiên</button>
+          </div>
+          <p class="small" id="loadedInfo">Chưa nạp dữ liệu.</p>
+        </div>
+
+        <div class="formBlock">
+          <h3>Proxy Worker</h3>
+          <label class="small">Cloudflare Worker base</label>
+          <input id="proxyBase" value="https://sua-json-proxy-kenhtivi.xiemsansang.workers.dev/proxy?url=">
+          <div class="grid2" style="margin-top:8px">
+            <button onclick="saveConfig()">Lưu cấu hình</button>
+            <button onclick="testWorkerHealth()">Test /health</button>
+          </div>
+          <p class="small">Quy tắc: direct OK thì giữ nguyên; direct lỗi mà proxy OK thì chỉ đổi <b>play_url</b>, vẫn giữ <b>url</b> gốc.</p>
+        </div>
+
+        <div class="formBlock">
+          <h3>Nhập kết quả cũ để resume</h3>
+          <label class="small">Nạp smartbox_proxy_doctor_report.json hoặc proxy_ready.json</label>
+          <input type="file" accept=".json" onchange="importPrevious(this.files[0])">
+          <div class="grid2" style="margin-top:8px">
+            <button onclick="clearResults()" class="bad">Xóa kết quả test</button>
+            <button onclick="saveLocal()">Lưu phiên</button>
+          </div>
+        </div>
+
+        <div class="formBlock">
+          <h3>Chế độ ISO</h3>
+          <div class="grid2">
+            <label class="small"><input type="checkbox" id="optSegment" checked style="width:auto"> Test segment đầu</label>
+            <label class="small"><input type="checkbox" id="optBackups" style="width:auto"> Soi backup</label>
+            <label class="small"><input type="checkbox" id="optSkipDirect" checked style="width:auto"> Direct OK thì bỏ proxy</label>
+            <label class="small"><input type="checkbox" id="optKeepReview" checked style="width:auto"> Không sửa review</label>
+          </div>
+          <div class="grid2" style="margin-top:8px">
+            <div><label class="small">Timeout / kênh</label><input id="timeoutMs" type="number" value="12000"></div>
+            <div><label class="small">Nghỉ giữa kênh</label><input id="delayMs" type="number" value="250"></div>
+          </div>
+        </div>
+
+        <div class="formBlock">
+          <h3>Xuất file</h3>
+          <div class="grid2">
+            <button class="good" onclick="exportProxyReady()">Xuất proxy-ready</button>
+            <button class="info" onclick="exportReport()">Xuất report</button>
+            <button onclick="exportReviewCsv()">Xuất review CSV</button>
+            <button onclick="copySummary()">Copy tổng kết</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="panel">
+      <div class="panelHead"><h2>2) Bảng điều khiển toàn cảnh</h2><span class="small" id="visibleInfo">0 dòng</span></div>
+      <div class="filters">
+        <input id="q" placeholder="Tìm tên / nhóm / URL..." oninput="renderTable()">
+        <select id="filterDecision" onchange="renderTable()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="untested">Chưa test</option>
+          <option value="direct">Direct OK</option>
+          <option value="requires_proxy">Cần proxy</option>
+          <option value="review_needed">Cần review</option>
+          <option value="testing">Đang test</option>
+        </select>
+        <select id="filterType" onchange="renderTable()">
+          <option value="">TV + Radio</option><option value="tv">TV</option><option value="radio">Radio</option><option value="mixed">Mixed</option>
+        </select>
+        <select id="filterGroup" onchange="renderTable()"><option value="">Tất cả nhóm</option></select>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th style="width:55px">#</th><th>Kênh</th><th style="width:160px">Trạng thái</th><th>URL</th><th style="width:92px">ms</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <aside class="panel">
+      <div class="panelHead"><h2>3) Chi tiết & quyết định</h2><button class="info" onclick="retestSelected()">Retest kênh này</button></div>
+      <div class="panelBody">
+        <div class="detailBox">
+          <h2 class="detailTitle" id="dName">Chưa chọn kênh</h2>
+          <div class="small" id="dSub">Chọn một dòng để xem chi tiết.</div>
+        </div>
+        <div class="detailBox">
+          <h3 style="margin:0 0 8px">Quyết định</h3>
+          <div id="dDecision" class="pill untested">Chưa test</div>
+          <div style="height:8px"></div>
+          <div class="grid2">
+            <button class="good" onclick="forceDecision('direct')">Ép giữ direct</button>
+            <button class="purple" onclick="forceDecision('requires_proxy')">Ép qua proxy</button>
+            <button class="bad" onclick="forceDecision('review_needed')">Đưa review</button>
+            <button onclick="forceDecision('untested')">Trả chưa test</button>
+          </div>
+        </div>
+        <div class="detailBox">
+          <h3 style="margin:0 0 8px">Thông tin kỹ thuật</h3>
+          <div class="kv" id="dKv"></div>
+        </div>
+        <div class="detailBox">
+          <h3 style="margin:0 0 8px">Log chạy</h3>
+          <div class="log" id="log"></div>
+        </div>
+        <div class="stickyActions">
+          <div class="grid2">
+            <button onclick="openDirect()">Mở URL gốc</button>
+            <button onclick="openProxy()">Mở qua proxy</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </section>
+</div>
+<script>
+const STORE_KEY='SMARTBOX_PROXY_DOCTOR_V2_SESSION';
+let channels=[], results={}, selectedId='', running=false, paused=false, startedAt=null, lastReportMeta=null;
+function el(id){return document.getElementById(id)}
+function now(){return new Date().toISOString()}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function esc(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[m]))}
+function shortUrl(u){u=String(u||'');return u.length>110?u.slice(0,70)+'…'+u.slice(-32):u}
+function hash(s){let h=2166136261; for(let i=0;i<String(s).length;i++){h^=String(s).charCodeAt(i); h=Math.imul(h,16777619)} return (h>>>0).toString(16)}
+function channelKey(c){return c.id || hash((c.name||c.display_name||'')+'|'+(c.url||''))}
+function absUrl(line, base){try{return new URL(line,base).toString()}catch(e){return ''}}
+function makeProxyUrl(u){const base=el('proxyBase').value.trim(); return base + encodeURIComponent(u||'')}
+function isM3UText(t){return /^#EXTM3U/m.test(String(t||'')) || /#EXT-X-|#EXTINF/m.test(String(t||''))}
+function firstMediaLine(text){const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean); for(const line of lines){if(line.startsWith('#')) continue; return line} return ''}
+function resultOf(c){return results[channelKey(c)] || {decision:'untested'} }
+function setResult(c,r){results[channelKey(c)]={...r,id:channelKey(c),name:c.name||c.display_name,group:c.group_name||c.group,type:c.type,url:c.url,checked_at:now()}; saveLocal(false)}
+function addLog(msg){const box=el('log'); const line='['+new Date().toLocaleTimeString()+'] '+msg; box.textContent += (box.textContent?'\n':'')+line; box.scrollTop=box.scrollHeight}
+function setRunState(text, cls='untested'){const p=el('runState');p.textContent=text;p.className='pill '+cls}
+function normalizePackage(obj){ if(Array.isArray(obj)) return {channels:obj,groups:[]}; return {channels:obj.channels||[], groups:obj.groups||[], meta:obj}; }
+function normalizeChannel(c,idx){
+  const name=c.display_name||c.name||c.ui?.title||('Kênh '+(idx+1));
+  const id=c.id||('ch_'+hash(name+'|'+(c.url||'')));
+  return {...c,id,name,display_name:name,type:c.type||'tv',group:c.group||'kenh_khac',group_name:c.group_name||c.group||'Kênh khác',url:c.url||'',backup_urls:Array.isArray(c.backup_urls)?c.backup_urls:[]};
+}
+function refreshGroupFilter(){const sel=el('filterGroup'); const old=sel.value; const groups=[...new Set(channels.map(c=>c.group_name||c.group||'Kênh khác'))].sort(); sel.innerHTML='<option value="">Tất cả nhóm</option>'+groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join(''); if([...sel.options].some(o=>o.value===old)) sel.value=old;}
+async function loadChannelsFile(file){ if(!file)return; const obj=JSON.parse(await file.text()); loadPackage(obj,file.name); }
+async function loadFromUrl(){ const u=el('jsonUrl').value.trim(); addLog('Tải JSON: '+u); const res=await fetch(u,{cache:'no-store'}); if(!res.ok) throw new Error('HTTP '+res.status); const obj=await res.json(); loadPackage(obj,u); }
+function loadPackage(obj,source){ const p=normalizePackage(obj); channels=p.channels.map(normalizeChannel); lastReportMeta={source,loaded_at:now(),input_version:p.meta?.version||''}; el('loadedInfo').textContent=`Đã nạp ${channels.length} kênh từ ${source}`; refreshGroupFilter(); renderAll(); saveLocal(); addLog('Đã nạp '+channels.length+' kênh.'); }
+async function importPrevious(file){ if(!file)return; const obj=JSON.parse(await file.text()); let imported=0; if(obj.results && Array.isArray(obj.results)){ for(const r of obj.results){ if(!r)continue; const c=channels.find(x=>x.id===r.id || x.url===r.url || channelKey(x)===r.id); if(c){results[channelKey(c)]=r; imported++;} } }
+  if(obj.channels && Array.isArray(obj.channels)){ for(const c2 of obj.channels){ const c=channels.find(x=>x.id===c2.id || x.url===c2.url); if(c && c2.proxy_doctor){results[channelKey(c)]={...c2.proxy_doctor,id:channelKey(c),name:c.name,group:c.group_name,type:c.type,url:c.url,decision:c2.proxy_doctor.decision||c2.proxy_doctor.decision}; imported++;} } }
+  addLog('Import kết quả cũ: '+imported+' dòng.'); renderAll(); saveLocal(); }
+function clearResults(){ if(!confirm('Xóa toàn bộ kết quả test hiện tại?'))return; results={}; renderAll(); saveLocal(); addLog('Đã xóa kết quả test.'); }
+function saveConfig(){ localStorage.setItem('SMARTBOX_PROXY_DOCTOR_V2_PROXY',el('proxyBase').value.trim()); localStorage.setItem('SMARTBOX_PROXY_DOCTOR_V2_URL',el('jsonUrl').value.trim()); addLog('Đã lưu cấu hình.'); }
+function loadConfig(){ const p=localStorage.getItem('SMARTBOX_PROXY_DOCTOR_V2_PROXY'); if(p)el('proxyBase').value=p; const u=localStorage.getItem('SMARTBOX_PROXY_DOCTOR_V2_URL'); if(u)el('jsonUrl').value=u; }
+function saveLocal(verbose=true){ try{localStorage.setItem(STORE_KEY,JSON.stringify({channels,results,selectedId,lastReportMeta,saved_at:now()})); if(verbose)addLog('Đã lưu phiên local.')}catch(e){addLog('Không lưu được local: '+e.message)} }
+function restoreLocal(){ const raw=localStorage.getItem(STORE_KEY); if(!raw)return addLog('Không có phiên lưu.'); const d=JSON.parse(raw); channels=d.channels||[]; results=d.results||{}; selectedId=d.selectedId||''; lastReportMeta=d.lastReportMeta||null; el('loadedInfo').textContent=`Khôi phục ${channels.length} kênh từ phiên local`; refreshGroupFilter(); renderAll(); addLog('Đã khôi phục phiên local.'); }
+async function testWorkerHealth(){ const base=el('proxyBase').value.trim(); const origin=base.split('/proxy')[0]; try{const r=await fetch(origin+'/health',{cache:'no-store'}); addLog('Worker /health: HTTP '+r.status+' '+await r.text());}catch(e){addLog('Worker /health lỗi: '+e.message)} }
+async function fetchCheck(url, route, timeoutMs){
+  const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  const t0=performance.now(); let finalUrl=route==='proxy'?makeProxyUrl(url):url;
+  try{
+    const res=await fetch(finalUrl,{method:'GET',cache:'no-store',signal:controller.signal});
+    const ms=Math.round(performance.now()-t0); const ct=res.headers.get('content-type')||'';
+    if(!res.ok){return {ok:false,route,status:res.status,ms,reason:'HTTP '+res.status,final_url:finalUrl,content_type:ct};}
+    const text=await res.text();
+    if(!isM3UText(text)){ return {ok:false,route,status:res.status,ms,reason:'NOT_PLAYLIST',final_url:finalUrl,content_type:ct,peek:text.slice(0,80)}; }
+    let segment={ok:null,reason:'SKIP_SEGMENT'};
+    if(el('optSegment').checked){
+      const line=firstMediaLine(text);
+      if(line){
+        const segUrl=route==='proxy' ? (line.startsWith('http')?line:absUrl(line,finalUrl)) : absUrl(line,url);
+        segment=await segmentCheck(segUrl,route,timeoutMs);
+      } else segment={ok:null,reason:'NO_SEGMENT_LINE'};
+    }
+    return {ok:true,route,status:res.status,ms,reason:'playlist',final_url:finalUrl,content_type:ct,segment};
+  }catch(e){return {ok:false,route,status:0,ms:Math.round(performance.now()-t0),reason:(e.name==='AbortError'?'TIMEOUT':String(e.message||e)),final_url:finalUrl};}
+  finally{clearTimeout(timer)}
+}
+async function segmentCheck(segUrl, route, timeoutMs){
+  if(!segUrl) return {ok:null,reason:'NO_SEGMENT'};
+  const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),Math.min(timeoutMs,9000)); const t0=performance.now();
+  try{ const res=await fetch(segUrl,{method:'GET',cache:'no-store',signal:controller.signal}); const ms=Math.round(performance.now()-t0); if(res.ok){try{await res.body?.cancel?.()}catch(e){} return {ok:true,status:res.status,ms,reason:'segment_ok',url:segUrl};} return {ok:false,status:res.status,ms,reason:'SEG_HTTP '+res.status,url:segUrl}; }
+  catch(e){return {ok:false,status:0,ms:Math.round(performance.now()-t0),reason:(e.name==='AbortError'?'SEG_TIMEOUT':String(e.message||e)),url:segUrl};}
+  finally{clearTimeout(timer)}
+}
+async function testChannel(c){
+  setResult(c,{decision:'testing',direct:null,proxy:null,requires_proxy:false}); renderAll(false);
+  const timeout=Number(el('timeoutMs').value)||12000;
+  addLog('Test: '+c.name);
+  const direct=await fetchCheck(c.url,'direct',timeout);
+  if(direct.ok && el('optSkipDirect').checked){ const r={decision:'direct',direct,proxy:{ok:null,reason:'SKIP_PROXY_DIRECT_OK'},requires_proxy:false}; setResult(c,r); addLog('Direct OK: '+c.name); return r; }
+  const proxy=await fetchCheck(c.url,'proxy',timeout);
+  let decision='review_needed', requires_proxy=false;
+  if(direct.ok){decision='direct'} else if(proxy.ok){decision='requires_proxy'; requires_proxy=true;} else decision='review_needed';
+  const r={decision,direct,proxy,requires_proxy}; setResult(c,r); addLog(`${c.name}: ${decision}`); return r;
+}
+function pauseRun(){paused=true;running=false;setRunState('Paused','paused');addLog('Đã yêu cầu tạm dừng sau kênh hiện tại.');}
+function queueFor(mode){return channels.filter(c=>{const r=resultOf(c); if(mode==='all')return true; if(mode==='untested')return !r.decision||r.decision==='untested'; if(mode==='review')return r.decision==='review_needed'; return true;});}
+async function runMode(mode){ if(running)return; if(!channels.length)return alert('Chưa nạp kênh.'); running=true; paused=false; startedAt=Date.now(); setRunState('Running','testing'); const q=queueFor(mode); addLog('Bắt đầu '+mode+': '+q.length+' kênh.');
+  for(let i=0;i<q.length;i++){ if(paused)break; selectedId=q[i].id; await testChannel(q[i]); renderAll(false); await sleep(Number(el('delayMs').value)||250); }
+  running=false; setRunState(paused?'Paused':'Done', paused?'paused':'direct'); renderAll(); addLog(paused?'Đã tạm dừng.':'Hoàn tất lượt chạy.'); }
+async function retestSelected(){const c=channels.find(x=>x.id===selectedId); if(!c)return; await testChannel(c); renderAll();}
+function forceDecision(dec){const c=channels.find(x=>x.id===selectedId); if(!c)return; const old=resultOf(c); const r={...old,decision:dec,forced:true,forced_at:now(),requires_proxy:dec==='requires_proxy'}; setResult(c,r); renderAll(); addLog('Ép quyết định '+c.name+' => '+dec);}
+function decisionPill(r){const d=r.decision||'untested'; if(d==='direct')return '<span class="pill direct">Direct OK</span>'; if(d==='requires_proxy')return '<span class="pill proxy">Cần proxy</span>'; if(d==='review_needed')return '<span class="pill review">Review</span>'; if(d==='testing')return '<span class="pill testing">Testing</span>'; return '<span class="pill untested">Chưa test</span>';}
+function rowClass(r){if(r.decision==='direct')return 'rowGood'; if(r.decision==='requires_proxy')return 'rowProxy'; if(r.decision==='review_needed')return 'rowBad'; if(r.decision==='testing')return 'rowWarn'; return 'rowUntested';}
+function filteredChannels(){const q=el('q').value.toLowerCase().trim(), fd=el('filterDecision').value, ft=el('filterType').value, fg=el('filterGroup').value; return channels.filter(c=>{const r=resultOf(c); const d=r.decision||'untested'; if(fd && d!==fd)return false; if(ft && c.type!==ft)return false; if(fg && (c.group_name||c.group)!==fg)return false; if(q && !((c.name+' '+c.group_name+' '+c.url+' '+(c.backup_urls||[]).join(' ')).toLowerCase().includes(q)))return false; return true;});}
+function renderTable(){const body=el('tbody'); const rows=filteredChannels(); el('visibleInfo').textContent=rows.length+' dòng'; body.innerHTML=rows.map((c,i)=>{const r=resultOf(c); const ms=r.direct?.ms||r.proxy?.ms||''; return `<tr class="${rowClass(r)} ${selectedId===c.id?'selected':''}" onclick="selectRow('${esc(c.id)}')"><td>${i+1}</td><td class="nameCell"><b>${esc(c.name)}</b><div class="small">${esc(c.group_name||c.group)} · ${esc(c.type)}</div></td><td>${decisionPill(r)}${r.forced?'<div class="pill smallP paused">ép tay</div>':''}</td><td><div class="url">${esc(shortUrl(c.url))}</div></td><td>${esc(ms)}</td></tr>`}).join('');}
+function renderMetrics(){const total=channels.length; let direct=0,proxy=0,review=0,untested=0,testing=0; for(const c of channels){const d=resultOf(c).decision||'untested'; if(d==='direct')direct++; else if(d==='requires_proxy')proxy++; else if(d==='review_needed')review++; else if(d==='testing')testing++; else untested++;} const done=total?Math.round(((total-untested-testing)/total)*100):0; el('mTotal').textContent=total; el('mDirect').textContent=direct; el('mProxy').textContent=proxy; el('mReview').textContent=review; el('mUntested').textContent=untested; el('mDone').textContent=done+'%'; el('progressBar').style.width=done+'%';}
+function renderDetail(){const c=channels.find(x=>x.id===selectedId); if(!c){el('dName').textContent='Chưa chọn kênh';el('dSub').textContent='Chọn một dòng để xem chi tiết.';el('dDecision').outerHTML='<div id="dDecision" class="pill untested">Chưa test</div>';el('dKv').innerHTML='';return;} const r=resultOf(c); el('dName').textContent=c.name; el('dSub').textContent=(c.group_name||c.group)+' · '+c.type; const temp=document.createElement('div'); temp.innerHTML=decisionPill(r); const p=temp.firstChild; p.id='dDecision'; el('dDecision').replaceWith(p); el('dKv').innerHTML=`<b>ID</b><span>${esc(c.id)}</span><b>URL gốc</b><span class="url">${esc(c.url)}</span><b>Play URL mới</b><span class="url">${esc(r.decision==='requires_proxy'?makeProxyUrl(c.url):(c.play_url||c.url))}</span><b>Direct</b><span>${esc(r.direct?JSON.stringify({ok:r.direct.ok,status:r.direct.status,reason:r.direct.reason,ms:r.direct.ms}):'chưa test')}</span><b>Proxy</b><span>${esc(r.proxy?JSON.stringify({ok:r.proxy.ok,status:r.proxy.status,reason:r.proxy.reason,ms:r.proxy.ms}):'chưa test')}</span><b>Backup</b><span>${(c.backup_urls||[]).length} link</span>`;}
+function selectRow(id){selectedId=id; renderAll(false); saveLocal(false)}
+function renderAll(doDetail=true){renderMetrics(); renderTable(); if(doDetail)renderDetail(); else renderDetail();}
+function buildSummary(){let s={total:channels.length,direct_ok:0,requires_proxy:0,review_needed:0,untested:0,testing:0}; for(const c of channels){const d=resultOf(c).decision||'untested'; if(d==='direct')s.direct_ok++; else if(d==='requires_proxy')s.requires_proxy++; else if(d==='review_needed')s.review_needed++; else if(d==='testing')s.testing++; else s.untested++;} return s;}
+function buildReport(){const summary=buildSummary(); return {version:'SMARTBOX_PROXY_DOCTOR_V2_ISO',generated_at:now(),proxy_base:el('proxyBase').value.trim(),summary,options:{segment_check:el('optSegment').checked,backups_check:el('optBackups').checked,timeout_ms:Number(el('timeoutMs').value)||12000},results:channels.map(c=>{const r=resultOf(c); return {id:c.id,name:c.name,group:c.group_name,type:c.type,url:c.url,decision:r.decision||'untested',direct:r.direct||null,proxy:r.proxy||null,checked_at:r.checked_at||null,requires_proxy:r.decision==='requires_proxy'||r.requires_proxy===true,forced:r.forced||false};})};}
+function buildProxyReady(){const report=buildReport(); const out=channels.map(c=>{const r=resultOf(c); const cc=JSON.parse(JSON.stringify(c)); cc.url=c.url; cc.proxy_doctor={version:'SMARTBOX_PROXY_DOCTOR_V2_ISO',checked_at:r.checked_at||now(),decision:r.decision||'untested',direct:r.direct||null,proxy:r.proxy||null,forced:r.forced||false}; cc.requires_proxy=(r.decision==='requires_proxy'||r.requires_proxy===true); cc.proxy_profile=cc.requires_proxy?'cloudflare_worker_v10_9':''; cc.play_url=cc.requires_proxy?makeProxyUrl(c.url):(c.play_url||c.url); cc.backup_urls=Array.isArray(cc.backup_urls)?cc.backup_urls:[]; cc.backup_play_urls=cc.backup_urls.map(u=>u); if(r.decision==='review_needed') cc.review_needed=true; return cc;});
+  const groupMap=new Map(); channels.forEach(c=>{const id=c.group||'kenh_khac'; if(!groupMap.has(id))groupMap.set(id,{id,name:c.group_name||id,type:c.type||'mixed',priority:groupMap.size+1,icon:c.type==='radio'?'📻':'📺',count:0}); groupMap.get(id).count++;});
+  return {version:'smartbox_channels_full_proxy_ready_v2_iso',generated_at:now(),source:lastReportMeta?.source||'SMARTBOX_PROXY_DOCTOR_V2_ISO',note:'Proxy-ready từ SmartBox Proxy Doctor V2 ISO: giữ URL gốc, chỉ đổi play_url cho kênh cần proxy; kênh review không tự sửa bừa.',proxy_doctor_summary:report.summary,proxy_base:report.proxy_base,groups:[...groupMap.values()],coverage:[...groupMap.values()].map(g=>({group:g.id,group_name:g.name,type:g.type,count:g.count,status:g.count>0?'OK':'EMPTY'})),channels:out};}
+function download(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function exportReport(){download('smartbox_proxy_doctor_report_v2_iso.json',buildReport())}
+function exportProxyReady(){download('smartbox_channels_full_proxy_ready_v2_iso.json',buildProxyReady())}
+function exportReviewCsv(){const rows=channels.filter(c=>(resultOf(c).decision||'untested')==='review_needed').map(c=>{const r=resultOf(c); return [c.name,c.group_name,c.url,r.direct?.status||'',r.direct?.reason||'',r.proxy?.status||'',r.proxy?.reason||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')}); const csv='name,group,url,direct_status,direct_reason,proxy_status,proxy_reason\n'+rows.join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='smartbox_proxy_doctor_review_v2_iso.csv';a.click();}
+function copySummary(){const s=buildSummary(); const txt=`SMARTBOX PROXY DOCTOR V2 ISO\nTổng: ${s.total}\nDirect OK: ${s.direct_ok}\nCần proxy: ${s.requires_proxy}\nReview: ${s.review_needed}\nChưa test: ${s.untested}`; navigator.clipboard?.writeText(txt); addLog('Đã copy tổng kết.');}
+function openDirect(){const c=channels.find(x=>x.id===selectedId); if(c)open(c.url,'_blank')}
+function openProxy(){const c=channels.find(x=>x.id===selectedId); if(c)open(makeProxyUrl(c.url),'_blank')}
+loadConfig(); renderAll();
+</script>
+</body>
+</html>
