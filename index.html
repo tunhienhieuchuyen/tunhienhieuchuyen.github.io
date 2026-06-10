@@ -5079,55 +5079,67 @@ window.ChatEngine = {
         this.setUploadStatus(`Đang gửi 0/${arr.length}: chuẩn bị...`, 'info', false);
         window.playSpeechTTS?.(`Bắt đầu gửi ${arr.length} file. Vui lòng giữ ứng dụng mở.`);
         let okCount = 0;
-        let failCount = 0;
+        const failDetails = [];
 
         for (let i = 0; i < arr.length; i++) {
             try {
-                const ok = await this.sendFile(arr[i], i + 1, arr.length);
-                if (ok) okCount++;
-                else failCount++;
+                const result = await this.sendFile(arr[i], i + 1, arr.length);
+                if (result && result.ok) {
+                    okCount++;
+                    if (result.note) this.setUploadStatus(result.note, 'done', true);
+                } else {
+                    const detail = result?.error || `Không rõ lý do: ${arr[i]?.name || (i + 1)}`;
+                    failDetails.push(detail);
+                    this.setUploadStatus(detail, 'error', false);
+                }
             } catch(e) {
-                failCount++;
+                const detail = `Gửi lỗi: ${arr[i]?.name || (i + 1)} — ${e.message || e}`;
+                failDetails.push(detail);
                 console.warn('[ChatEngine direct file queue]', arr[i]?.name, e);
-                this.setUploadStatus(`Lỗi gửi: ${arr[i]?.name || (i + 1)} — ${e.message || e}`, 'error', false);
+                this.setUploadStatus(detail, 'error', false);
             }
         }
 
-        if (failCount > 0) {
-            this.setUploadStatus(`Hoàn tất: ${okCount} file thành công, ${failCount} file lỗi.`, 'error', false);
+        if (failDetails.length > 0) {
+            const summary = `Hoàn tất: ${okCount} file thành công, ${failDetails.length} file lỗi: ${failDetails.join(' | ')}`;
+            console.warn('[ChatEngine file batch summary]', { okCount, failDetails });
+            this.setUploadStatus(summary, 'error', false);
             window.playSpeechTTS?.('Có file gửi lỗi. Vui lòng xem thông báo chi tiết.');
-        } else {
-            this.setUploadStatus('Đã gửi file', 'done', true);
-            window.playSpeechTTS?.('Đã gửi xong toàn bộ file.');
+            return { ok: false, okCount, failCount: failDetails.length, errors: failDetails };
         }
-        return failCount === 0;
+
+        const summary = `Hoàn tất: ${okCount} file thành công, 0 file lỗi`;
+        this.setUploadStatus(summary, 'done', true);
+        window.playSpeechTTS?.('Đã gửi xong toàn bộ file.');
+        return { ok: true, okCount, failCount: 0, errors: [] };
     },
     async sendFile(file, currentIndex = 1, totalFiles = 1) {
-        if(!file) return false;
+        if(!file) return { ok: false, error: 'Không có file để gửi' };
 
-        // PHA 63B: Family Chat direct file send. Không nén hoặc biến đổi file trước khi gửi.
+        // PHA 63C: Direct Document First. Ảnh cũng gửi bằng file gốc qua sendDocument.
         const MAX_SIZE = 50 * 1024 * 1024;
         const fileName = file.name || 'Tập tin';
         const fileSize = Number(file.size || 0);
         const mime = String(file.type || '').toLowerCase();
         const ext = (fileName.split('.').pop() || '').toLowerCase();
+        const isImageFile = mime.startsWith('image/') || ['jpg','jpeg','png','gif','webp','heic','heif','bmp'].includes(ext);
 
         if (fileSize > MAX_SIZE) {
-            const msg = `File ${fileName} vượt quá 50MB. Đã bỏ qua!`;
-            console.warn('[ChatEngine direct file blocked]', { fileName, fileSize, mime, reason: 'over_50MB' });
+            const msg = `Gửi thất bại: ${fileName} — sendDocument: file vượt quá 50MB`;
+            console.warn('[ChatEngine direct file blocked]', { fileName, fileSize, mime, endpoint: 'sendDocument', reason: 'over_50MB' });
             this.setUploadStatus(msg, 'error', false);
             window.playSpeechTTS?.('Một file quá lớn đã bị bỏ qua do vượt giới hạn tải lên.');
-            return false;
+            return { ok: false, fileName, endpoint: 'sendDocument', error: msg };
         }
 
         let endpoint = 'sendDocument';
         let fileField = 'document';
         let msgType = 'file';
 
-        // APK/MIME rỗng/lạ luôn đi document. Ảnh/video/audio cũ vẫn giữ nếu Telegram hỗ trợ.
-        if (ext !== 'apk') {
-            if(mime.startsWith('image/')) { endpoint = 'sendPhoto'; fileField = 'photo'; msgType = 'image'; }
-            else if(mime.startsWith('video/')) { endpoint = 'sendVideo'; fileField = 'video'; msgType = 'video'; }
+        // Ảnh luôn đi sendDocument để tránh giới hạn riêng của endpoint ảnh.
+        // APK/MIME rỗng/lạ cũng đi document. Video/audio giữ luồng cũ nếu đang ổn.
+        if (!isImageFile && ext !== 'apk') {
+            if(mime.startsWith('video/')) { endpoint = 'sendVideo'; fileField = 'video'; msgType = 'video'; }
             else if(mime.startsWith('audio/')) { endpoint = 'sendAudio'; fileField = 'audio'; msgType = 'audio'; }
         }
 
@@ -5140,7 +5152,8 @@ window.ChatEngine = {
             size: fileSize,
             mime: file.type || '',
             endpoint,
-            field: fileField
+            field: fileField,
+            strategy: isImageFile ? 'image_as_document' : 'direct_file'
         });
         this.setUploadStatus(`Đang gửi ${currentIndex}/${totalFiles}: ${fileName} — 0%`, 'info', false);
 
@@ -5162,11 +5175,12 @@ window.ChatEngine = {
                 let data = {};
                 try { data = JSON.parse(xhr.responseText || '{}'); }
                 catch(parseErr) {
+                    const msg = `Gửi lỗi: ${fileName} — ${endpoint} HTTP ${xhr.status || 0}: lỗi phân tích phản hồi Telegram`;
                     console.warn('[ChatEngine Telegram response parse]', {
                         fileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, responseText: xhr.responseText, parseErr
                     });
-                    this.setUploadStatus(`Lỗi phân tích phản hồi Telegram HTTP ${xhr.status || 0}: ${fileName}`, 'error', false);
-                    resolve(false);
+                    this.setUploadStatus(msg, 'error', false);
+                    resolve({ ok: false, fileName, endpoint, error: msg });
                     return;
                 }
 
@@ -5182,37 +5196,32 @@ window.ChatEngine = {
                 if (xhr.status < 200 || xhr.status >= 300 || data.ok !== true) {
                     const errCode = data.error_code !== undefined ? data.error_code : '';
                     const desc = data.description || 'Không có mô tả lỗi';
-                    const msg = `Gửi thất bại: ${fileName} — ${endpoint} HTTP ${xhr.status || 0}${errCode !== '' ? ' | Telegram ' + errCode : ''}: ${desc}`;
+                    const msg = `Gửi lỗi: ${fileName} — ${endpoint} HTTP ${xhr.status || 0}${errCode !== '' ? ' | Telegram ' + errCode : ''}: ${desc}`;
                     console.warn('[ChatEngine Telegram API fail]', {
                         fileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, error_code: data.error_code, description: data.description, response: data
                     });
                     this.setUploadStatus(msg, 'error', false);
                     window.playSpeechTTS?.('Gửi file bị lỗi. Telegram đã trả lỗi.');
-                    resolve(false);
+                    resolve({ ok: false, fileName, endpoint, error: msg, response: data });
                     return;
                 }
 
                 try {
-                    let tgFile = null;
-                    if(msgType === 'image') {
-                        const photoArr = data.result?.photo || [];
-                        tgFile = photoArr[photoArr.length - 1] || null;
-                    } else {
-                        tgFile = data.result?.[fileField] || null;
-                    }
+                    let tgFile = data.result?.[fileField] || null;
                     const fileId = tgFile && tgFile.file_id;
                     if (!fileId) throw new Error('Missing Telegram file_id');
 
                     const telegramMsgId = data.result.message_id;
                     const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+                    const finalMsgType = isImageFile ? 'file' : msgType;
                     const msg = {
                         id: Date.now().toString() + '_' + Math.floor(Math.random() * 100000),
-                        type: msgType,
+                        type: finalMsgType,
                         file_id: fileId,
                         file_unique_id: tgFile.file_unique_id || '',
                         file_name: fileName,
                         file_size: tgFile.file_size || fileSize,
-                        mime_type: tgFile.mime_type || file.type || '',
+                        mime_type: tgFile.mime_type || file.type || (isImageFile ? 'image/*' : ''),
                         sender: this.getKey(),
                         timestamp: Date.now(),
                         sentAt: Date.now(),
@@ -5220,46 +5229,55 @@ window.ChatEngine = {
                         isPrivate: isPriv,
                         telegram_msg_id: telegramMsgId,
                         chat_id: this.chatId,
+                        sent_via_endpoint: endpoint,
                         topic_id: this.currentTopic !== 'all' ? this.currentTopic : null
                     };
                     window.chatHistory.push(msg);
                     if (!file.__lifeosSkipPush) {
-                        this.triggerPushNotification(msgType === 'audio' ? '🎤 [Tin nhắn thoại]' : (msgType === 'image' ? '📸 [Hình ảnh]' : (msgType === 'video' ? '🎥 [Video]' : '📎 [Tập tin đính kèm]')));
+                        this.triggerPushNotification(finalMsgType === 'audio' ? '🎤 [Tin nhắn thoại]' : (finalMsgType === 'video' ? '🎥 [Video]' : (isImageFile ? '🖼️ [Ảnh gửi dạng file gốc]' : '📎 [Tập tin đính kèm]')));
                     }
                     this.cancelReply();
                     this.saveAndSync();
                     this.render();
-                    this.setUploadStatus(`Đã gửi: ${fileName}`, 'done', true);
+
+                    const note = isImageFile
+                        ? `Ảnh đã gửi bằng file gốc qua sendDocument: ${fileName}`
+                        : `Đã gửi: ${fileName}`;
+                    this.setUploadStatus(note, 'done', true);
                     window.playSpeechTTS?.('Đã gửi file');
-                    resolve(true);
+                    resolve({ ok: true, fileName, endpoint, note });
                 } catch(err) {
+                    const msg = `Gửi lỗi: ${fileName} — ${endpoint} Telegram trả ok nhưng thiếu file_id`;
                     console.warn('[ChatEngine Telegram ok but invalid payload]', {
                         fileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, response: data, err
                     });
-                    this.setUploadStatus(`Telegram đã nhận nhưng thiếu file_id cho ${fileName}`, 'error', false);
-                    resolve(false);
+                    this.setUploadStatus(msg, 'error', false);
+                    resolve({ ok: false, fileName, endpoint, error: msg, response: data });
                 }
             };
 
             xhr.onerror = () => {
+                const msg = `Gửi lỗi: ${fileName} — ${endpoint}: lỗi mạng khi gửi file`;
                 console.warn('[ChatEngine direct file network error]', { fileName, size: fileSize, mime: file.type || '', endpoint });
-                this.setUploadStatus(`Lỗi mạng khi gửi file: ${fileName}`, 'error', false);
+                this.setUploadStatus(msg, 'error', false);
                 window.playSpeechTTS?.('Lỗi mạng khi gửi file');
-                resolve(false);
+                resolve({ ok: false, fileName, endpoint, error: msg });
             };
 
             xhr.ontimeout = () => {
+                const msg = `Gửi lỗi: ${fileName} — ${endpoint}: quá thời gian gửi file`;
                 console.warn('[ChatEngine direct file timeout]', { fileName, size: fileSize, mime: file.type || '', endpoint, timeout: xhr.timeout });
-                this.setUploadStatus(`Quá thời gian gửi file: ${fileName}`, 'error', false);
+                this.setUploadStatus(msg, 'error', false);
                 window.playSpeechTTS?.('Quá thời gian gửi file');
-                resolve(false);
+                resolve({ ok: false, fileName, endpoint, error: msg });
             };
 
             try { xhr.send(formData); }
             catch(e) {
+                const msg = `Gửi lỗi: ${fileName} — ${endpoint}: ${e.message || e}`;
                 console.warn('[ChatEngine XHR send]', { fileName, size: fileSize, mime: file.type || '', endpoint, error: e });
-                this.setUploadStatus(`Lỗi gửi file ${fileName}: ${e.message || e}`, 'error', false);
-                resolve(false);
+                this.setUploadStatus(msg, 'error', false);
+                resolve({ ok: false, fileName, endpoint, error: msg });
             }
         });
     },
@@ -5855,7 +5873,7 @@ window.ChatEngine = {
         const label = window.escapeHTML(meta.label);
         const sizeText = window.escapeHTML(meta.sizeText);
         const sentTime = new Date(m.sentAt || m.timestamp || Date.now()).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
-        const primaryBtn = meta.ext === 'apk' ? 'Tải APK' : 'Tải file';
+        const primaryBtn = meta.ext === 'apk' ? 'Tải APK' : (meta.mime.startsWith('image/') ? 'Tải ảnh' : 'Tải file');
         const status = m.uploadStatus ? `<div class="text-[10px] font-bold text-amber-600 mt-1">${window.escapeHTML(String(m.uploadStatus))}</div>` : '';
 
         return `
