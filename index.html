@@ -4953,18 +4953,33 @@ window.ChatEngine = {
     },
     bindTextareaAutosize() {
         const input = document.getElementById('chat-input');
-        if (!input || input.__lifeosChatBound) return;
-        input.__lifeosChatBound = true;
-        input.addEventListener('input', () => {
-            input.style.height = 'auto';
-            input.style.height = Math.min(input.scrollHeight, 128) + 'px';
-        });
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.handleSubmit();
-            }
-        });
+        if (input && !input.__lifeosChatBound) {
+            input.__lifeosChatBound = true;
+            input.addEventListener('input', () => {
+                input.style.height = 'auto';
+                input.style.height = Math.min(input.scrollHeight, 128) + 'px';
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.handleSubmit();
+                }
+            });
+            input.addEventListener('paste', (e) => this.handleClipboardPaste(e));
+        }
+
+        if (!this.__lightboxKeyBound) {
+            this.__lightboxKeyBound = true;
+            document.addEventListener('keydown', (e) => {
+                const lb = document.getElementById('chat-lightbox');
+                if (!lb || lb.classList.contains('hidden')) return;
+                if (e.key === 'Escape') { e.preventDefault(); this.closeLightbox(); }
+                else if (e.key === 'ArrowLeft') { e.preventDefault(); this.prevLightbox(); }
+                else if (e.key === 'ArrowRight') { e.preventDefault(); this.nextLightbox(); }
+            });
+        }
+
+        this.ensureLightboxEnhancements();
     },
     renderEmojiPicker() {
         const list = document.getElementById('chat-emoji-list');
@@ -5302,22 +5317,50 @@ window.ChatEngine = {
                 .catch(e => console.warn('[ChatEngine shared push]', e));
         }
     },
-
     openMsgMenu(id) {
         window.vibrate?.(15);
         const active = document.getElementById('chat-msg-active-id');
         if (active) active.value = String(id || '');
         const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        const isImg = m && this.isImageMessage(m);
+
         const txtPin = document.getElementById('chat-menu-pin-text');
         if (txtPin) txtPin.textContent = m?.isPinned ? 'Bỏ ghim tin nhắn' : 'Ghim tin nhắn';
+
         const btnDl = document.getElementById('chat-menu-download');
         if(btnDl) {
-            if(m && m.type !== 'text') { btnDl.classList.remove('hidden'); btnDl.classList.add('flex'); }
-            else { btnDl.classList.remove('flex'); btnDl.classList.add('hidden'); }
+            if(m && m.type !== 'text') {
+                btnDl.classList.remove('hidden'); btnDl.classList.add('flex');
+                btnDl.innerHTML = isImg
+                    ? '<i class="ph-bold ph-download-simple text-xl text-purple-500 pointer-events-none"></i> Tải ảnh'
+                    : '<i class="ph-bold ph-download-simple text-xl text-purple-500 pointer-events-none"></i> Tải / Xem File';
+            } else { btnDl.classList.remove('flex'); btnDl.classList.add('hidden'); }
         }
+
+        let btnView = document.getElementById('chat-menu-view-image');
+        if(!btnView && btnDl?.parentNode) {
+            btnView = document.createElement('button');
+            btnView.type = 'button';
+            btnView.id = 'chat-menu-view-image';
+            btnView.onclick = () => window.ChatEngine.openActiveImage();
+            btnView.className = 'hidden items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition';
+            btnView.innerHTML = '<i class="ph-bold ph-image-square text-xl text-sky-500 pointer-events-none"></i> Xem ảnh';
+            btnDl.parentNode.insertBefore(btnView, btnDl);
+        }
+        if(btnView) {
+            if(isImg) { btnView.classList.remove('hidden'); btnView.classList.add('flex'); }
+            else { btnView.classList.remove('flex'); btnView.classList.add('hidden'); }
+        }
+
+        const copyBtn = Array.from(document.querySelectorAll('#chat-msg-menu button')).find(b => (b.getAttribute('onclick') || '').includes('copyMsg'));
+        if(copyBtn) {
+            copyBtn.innerHTML = (m && m.type !== 'text')
+                ? '<i class="ph-bold ph-copy text-xl text-blue-500 pointer-events-none"></i> Sao chép link'
+                : '<i class="ph-bold ph-copy text-xl text-blue-500 pointer-events-none"></i> Sao chép';
+        }
+
         const btnEdit = document.getElementById('chat-menu-edit');
         if(btnEdit) {
-            // Chỉ cho sửa tin nhắn dạng TEXT và phải là TIN DO CHÍNH MÌNH GỬI
             if(m && m.type === 'text' && m.sender === window.viewingUser) { btnEdit.classList.remove('hidden'); btnEdit.classList.add('flex'); }
             else { btnEdit.classList.remove('flex'); btnEdit.classList.add('hidden'); }
         }
@@ -5367,11 +5410,16 @@ window.ChatEngine = {
         }
         this.closeMsgMenu();
     },
-    copyMsg() {
+    async copyMsg() {
         const id = document.getElementById('chat-msg-active-id')?.value;
         const msg = (window.chatHistory || []).find(m => String(m.id) === String(id));
         if(msg) {
-            const textToCopy = msg.type === 'text' ? String(msg.text || '') : `[${String(msg.type || 'FILE').toUpperCase()}] đính kèm.`;
+            if (msg.type !== 'text' && msg.file_id) {
+                await this.copyFileLink(String(msg.id));
+                this.closeMsgMenu();
+                return;
+            }
+            const textToCopy = String(msg.text || '');
             if(navigator.clipboard) navigator.clipboard.writeText(textToCopy).catch(()=>{});
             window.showToast?.('Đã sao chép!', 'ph-check-circle');
             window.playSpeechTTS?.('Đã sao chép tin nhắn');
@@ -5693,10 +5741,11 @@ window.ChatEngine = {
     // --- KẾT THÚC PHA 36 ---
     openLightbox(msgId) {
         const profileKey = this.getKey();
-        this.lightboxImages = (window.chatHistory || []).filter(m => m.type === 'image' && (!m.isPrivate || String(m.sender || '') === String(profileKey)));
+        this.lightboxImages = this.getGalleryImages();
         if(!this.lightboxImages.length) return;
         this.lightboxIndex = this.lightboxImages.findIndex(m => String(m.id) === String(msgId));
         if(this.lightboxIndex === -1) this.lightboxIndex = 0;
+        this.ensureLightboxEnhancements();
         this.updateLightboxView();
         const lb = document.getElementById('chat-lightbox');
         if(lb) { lb.classList.remove('hidden'); lb.style.display = 'flex'; }
@@ -5716,14 +5765,20 @@ window.ChatEngine = {
         this.updateLightboxView();
     },
     async updateLightboxView() {
+        this.ensureLightboxEnhancements();
         const imgEl = document.getElementById('lightbox-img');
         const counterEl = document.getElementById('lightbox-counter');
+        const titleEl = document.getElementById('lightbox-title');
         const msg = this.lightboxImages[this.lightboxIndex];
         if(!msg || !imgEl) return;
+        const meta = this.getFileMeta(msg);
         if(counterEl) counterEl.textContent = `${this.lightboxIndex + 1} / ${this.lightboxImages.length}`;
+        if(titleEl) titleEl.textContent = `${meta.name} · ${this.lightboxIndex + 1}/${this.lightboxImages.length}`;
         imgEl.style.opacity = '0.3';
+        imgEl.alt = meta.name;
         const url = await this.getImageUrl(msg.file_id);
         if(url) { imgEl.src = url; imgEl.style.opacity = '1'; }
+        else this.setUploadStatus(`Không lấy được link xem ảnh: ${meta.name}`, 'error', false);
     },
     renderFolders() {
         const c = document.getElementById('chat-dynamic-folders');
@@ -5847,6 +5902,126 @@ window.ChatEngine = {
         return String(part || '').toLowerCase();
     },
 
+    isImageMessage(m = {}) {
+        const name = String(m.file_name || m.name || '').toLowerCase();
+        const mime = String(m.mime_type || m.mime || '').toLowerCase();
+        const ext = this.getFileExt(name);
+        return String(m.type || '') === 'image'
+            || mime.startsWith('image/')
+            || ['jpg','jpeg','png','webp','gif','bmp','heic','heif'].includes(ext);
+    },
+
+    renderImagePreview(m, elId) {
+        const meta = this.getFileMeta(m);
+        const msgId = window.escapeHTML(String(m.id || ''));
+        const name = window.escapeHTML(meta.name);
+        const sizeText = window.escapeHTML(meta.sizeText);
+        return `
+        <div class="chat-image-doc flex flex-col gap-2 max-w-[260px]">
+            <button type="button" onclick="event.stopPropagation(); window.ChatEngine.openLightbox('${msgId}')" class="block rounded-2xl overflow-hidden bg-slate-200 border border-slate-200 shadow-sm active:scale-95">
+                <img src="" id="${elId}" class="w-[230px] max-w-[70vw] h-[170px] object-cover animate-pulse bg-slate-200" alt="${name}">
+            </button>
+            <div class="bg-white border border-slate-200 rounded-2xl p-2 text-slate-800">
+                <div class="text-xs font-black truncate">${name}</div>
+                <div class="text-[10px] font-bold text-slate-500 mt-0.5">${sizeText} · Ảnh file gốc</div>
+                <div class="grid grid-cols-3 gap-1.5 mt-2">
+                    <button type="button" onclick="event.stopPropagation(); window.ChatEngine.openLightbox('${msgId}')" class="px-2 py-1.5 rounded-lg bg-primary text-white text-[10px] font-black active:scale-95">Xem ảnh</button>
+                    <button type="button" onclick="event.stopPropagation(); window.ChatEngine.downloadChatFile('${msgId}')" class="px-2 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-[10px] font-black active:scale-95">Tải ảnh</button>
+                    <button type="button" onclick="event.stopPropagation(); window.ChatEngine.copyFileLink('${msgId}')" class="px-2 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-[10px] font-black active:scale-95">Copy link</button>
+                </div>
+            </div>
+        </div>`;
+    },
+
+    ensureLightboxEnhancements() {
+        const lb = document.getElementById('chat-lightbox');
+        if (!lb || lb.__lifeosEnhanced) return;
+        lb.__lifeosEnhanced = true;
+
+        const title = document.createElement('div');
+        title.id = 'lightbox-title';
+        title.className = 'absolute top-4 left-4 right-20 z-50 text-white font-black text-sm sm:text-base truncate bg-black/40 px-3 py-2 rounded-2xl';
+        title.textContent = 'Ảnh';
+        lb.appendChild(title);
+
+        const btn = document.createElement('button');
+        btn.id = 'lightbox-download-btn';
+        btn.type = 'button';
+        btn.className = 'absolute bottom-6 right-4 z-50 text-white bg-white/15 hover:bg-white/25 border border-white/25 px-3 py-2 rounded-2xl text-xs font-black active:scale-95';
+        btn.innerHTML = '<i class="ph-bold ph-download-simple pointer-events-none"></i> Tải ảnh';
+        btn.onclick = (e) => { e.stopPropagation(); this.downloadCurrentLightboxImage(); };
+        lb.appendChild(btn);
+
+        let sx = 0, sy = 0;
+        lb.addEventListener('touchstart', (e) => {
+            const t = e.changedTouches && e.changedTouches[0];
+            if (!t) return;
+            sx = t.clientX; sy = t.clientY;
+        }, { passive: true });
+        lb.addEventListener('touchend', (e) => {
+            const t = e.changedTouches && e.changedTouches[0];
+            if (!t) return;
+            const dx = t.clientX - sx;
+            const dy = t.clientY - sy;
+            if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+                if (dx < 0) this.nextLightbox();
+                else this.prevLightbox();
+            }
+        }, { passive: true });
+    },
+
+    getGalleryImages() {
+        const profileKey = this.getKey();
+        return (window.chatHistory || []).filter(m =>
+            this.isImageMessage(m) && (!m.isPrivate || String(m.sender || '') === String(profileKey)) && m.file_id
+        );
+    },
+
+    async openActiveImage() {
+        const id = document.getElementById('chat-msg-active-id')?.value;
+        if (id) await this.openLightbox(id);
+        this.closeMsgMenu();
+    },
+
+    async downloadCurrentLightboxImage() {
+        const msg = this.lightboxImages[this.lightboxIndex];
+        if (msg) await this.downloadChatFile(msg.id);
+    },
+
+    async handleClipboardPaste(e) {
+        try {
+            const items = Array.from(e.clipboardData?.items || []);
+            const imageItems = items.filter(item => item && item.type && item.type.startsWith('image/'));
+            if (!imageItems.length) return;
+
+            e.preventDefault();
+            const pad = n => String(n).padStart(2, '0');
+            const now = new Date();
+            const stamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+            const files = [];
+
+            imageItems.forEach((item, idx) => {
+                const blob = item.getAsFile?.();
+                if (!blob) return;
+                const ext = (blob.type || 'image/png').split('/')[1] || 'png';
+                const safeExt = ext === 'jpeg' ? 'jpg' : ext.replace(/[^a-z0-9]/gi, '').toLowerCase() || 'png';
+                const name = `clipboard_${stamp}${imageItems.length > 1 ? '_' + (idx + 1) : ''}.${safeExt}`;
+                files.push(new File([blob], name, { type: blob.type || 'image/png', lastModified: Date.now() }));
+            });
+
+            if (!files.length) {
+                this.setUploadStatus('Trình duyệt không cung cấp ảnh trong clipboard', 'error', false);
+                return;
+            }
+
+            this.setUploadStatus('Đã nhận ảnh từ clipboard, đang gửi...', 'info', false);
+            await this.sendMultipleFiles(files);
+        } catch(err) {
+            console.warn('[ChatEngine clipboard image paste]', err);
+            this.setUploadStatus('Trình duyệt không cung cấp ảnh trong clipboard', 'error', false);
+        }
+    },
+
     getFileMeta(m = {}) {
         const name = String(m.file_name || m.name || 'Tập tin');
         const ext = this.getFileExt(name);
@@ -5859,13 +6034,12 @@ window.ChatEngine = {
         else if (ext === 'pdf') { icon = 'ph-file-pdf'; tone = 'text-rose-700 bg-rose-50 border-rose-200'; label = 'PDF'; }
         else if (['zip','rar','7z'].includes(ext)) { icon = 'ph-file-zip'; tone = 'text-amber-700 bg-amber-50 border-amber-200'; label = ext.toUpperCase(); }
         else if (['doc','docx','xls','xlsx','ppt','pptx'].includes(ext)) { icon = 'ph-file-doc'; tone = 'text-blue-700 bg-blue-50 border-blue-200'; label = ext.toUpperCase(); }
-        else if (mime.startsWith('image/')) { icon = 'ph-image'; tone = 'text-sky-700 bg-sky-50 border-sky-200'; label = 'Ảnh'; }
+        else if (this.isImageMessage({file_name: name, mime_type: mime, type: m.type})) { icon = 'ph-image'; tone = 'text-sky-700 bg-sky-50 border-sky-200'; label = 'Ảnh'; }
         else if (mime.startsWith('video/')) { icon = 'ph-video'; tone = 'text-purple-700 bg-purple-50 border-purple-200'; label = 'Video'; }
         else if (mime.startsWith('audio/')) { icon = 'ph-speaker-high'; tone = 'text-fuchsia-700 bg-fuchsia-50 border-fuchsia-200'; label = 'Audio'; }
 
         return { name, ext, mime, icon, tone, label, sizeText: this.formatFileSize(m.file_size || m.size || 0) };
     },
-
     renderFileCard(m) {
         const meta = this.getFileMeta(m);
         const msgId = window.escapeHTML(String(m.id || ''));
@@ -5873,8 +6047,12 @@ window.ChatEngine = {
         const label = window.escapeHTML(meta.label);
         const sizeText = window.escapeHTML(meta.sizeText);
         const sentTime = new Date(m.sentAt || m.timestamp || Date.now()).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
-        const primaryBtn = meta.ext === 'apk' ? 'Tải APK' : (meta.mime.startsWith('image/') ? 'Tải ảnh' : 'Tải file');
+        const isImg = this.isImageMessage(m);
+        const primaryBtn = meta.ext === 'apk' ? 'Tải APK' : (isImg ? 'Tải ảnh' : 'Tải file');
         const status = m.uploadStatus ? `<div class="text-[10px] font-bold text-amber-600 mt-1">${window.escapeHTML(String(m.uploadStatus))}</div>` : '';
+        const viewBtn = isImg
+            ? `<button type="button" onclick="event.stopPropagation(); window.ChatEngine.openLightbox('${msgId}')" class="px-3 py-2 rounded-xl bg-primary text-white text-xs font-black active:scale-95 shadow-sm">Xem ảnh</button>`
+            : '';
 
         return `
         <div class="chat-file-card min-w-[230px] max-w-[280px] bg-white border border-slate-200 rounded-2xl p-3 shadow-sm text-slate-800" onclick="event.stopPropagation(); window.ChatEngine.openMsgMenu('${msgId}')">
@@ -5892,8 +6070,9 @@ window.ChatEngine = {
                     ${status}
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-2 mt-3">
-                <button type="button" onclick="event.stopPropagation(); window.ChatEngine.downloadChatFile('${msgId}')" class="px-3 py-2 rounded-xl bg-primary text-white text-xs font-black active:scale-95 shadow-sm">${primaryBtn}</button>
+            <div class="grid ${isImg ? 'grid-cols-3' : 'grid-cols-2'} gap-2 mt-3">
+                ${viewBtn}
+                <button type="button" onclick="event.stopPropagation(); window.ChatEngine.downloadChatFile('${msgId}')" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-black active:scale-95 border border-slate-200">${primaryBtn}</button>
                 <button type="button" onclick="event.stopPropagation(); window.ChatEngine.copyFileLink('${msgId}')" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-black active:scale-95 border border-slate-200">Sao chép link</button>
             </div>
         </div>`;
@@ -6057,9 +6236,8 @@ window.ChatEngine = {
                                ${m.isEdited ? '<span class="text-[9px] text-slate-400 italic mt-1 block">(Đã chỉnh sửa)</span>' : ''}`;
             } else {
                 const elId = 'file-' + String(m.id).replace(/[^a-zA-Z0-9_-]/g, '_');
-                if(m.type === 'image') {
-                    const imgMsgId = window.escapeHTML(String(m.id || ''));
-                    contentHtml = `<img src="" id="${elId}" onclick="event.stopPropagation(); window.ChatEngine.openLightbox('${imgMsgId}')" class="max-w-[200px] sm:max-w-[250px] rounded-lg animate-pulse bg-slate-200 h-[150px] object-cover cursor-pointer hover:brightness-95 transition" alt="Photo">`;
+                if(this.isImageMessage(m)) {
+                    contentHtml = this.renderImagePreview(m, elId);
                 } else if(m.type === 'video') {
                     contentHtml = `<video src="" id="${elId}" controls class="max-w-[200px] sm:max-w-[250px] rounded-lg animate-pulse bg-slate-200 h-[150px] object-cover"></video>`;
                 } else if(m.type === 'audio') {
@@ -6078,10 +6256,10 @@ window.ChatEngine = {
                     contentHtml = this.renderFileCard(m);
                 }
 
-                if(m.type !== 'audio_offline' && ['image','video','audio'].includes(m.type)) this.getImageUrl(m.file_id).then(url => {
+                if(m.type !== 'audio_offline' && (this.isImageMessage(m) || ['video','audio'].includes(m.type))) this.getImageUrl(m.file_id).then(url => {
                     const el = document.getElementById(elId);
                     if(el && url) {
-                        if (m.type === 'image' || m.type === 'video') {
+                        if (this.isImageMessage(m) || m.type === 'video') {
                             el.src = url;
                             el.classList.remove('animate-pulse', 'h-[150px]');
                         } else if (m.type === 'audio') {
