@@ -5076,103 +5076,190 @@ window.ChatEngine = {
     async sendMultipleFiles(files) {
         const arr = Array.from(files || []).filter(Boolean);
         if (!arr.length) return;
-        window.playSpeechTTS?.(`Bắt đầu tải lên ${arr.length} file. Vui lòng giữ ứng dụng mở.`);
+        this.setUploadStatus(`Đang gửi 0/${arr.length}: chuẩn bị...`, 'info', false);
+        window.playSpeechTTS?.(`Bắt đầu gửi ${arr.length} file. Vui lòng giữ ứng dụng mở.`);
+        let okCount = 0;
+        let failCount = 0;
+
         for (let i = 0; i < arr.length; i++) {
-            await this.sendFile(arr[i], i + 1, arr.length);
+            try {
+                const ok = await this.sendFile(arr[i], i + 1, arr.length);
+                if (ok) okCount++;
+                else failCount++;
+            } catch(e) {
+                failCount++;
+                console.warn('[ChatEngine direct file queue]', arr[i]?.name, e);
+                this.setUploadStatus(`Lỗi gửi: ${arr[i]?.name || (i + 1)} — ${e.message || e}`, 'error', false);
+            }
         }
-        window.showToast?.('Đã tải xong toàn bộ file!', 'ph-check-circle');
-        window.playSpeechTTS?.('Đã hoàn tất tải lên toàn bộ file.');
+
+        if (failCount > 0) {
+            this.setUploadStatus(`Hoàn tất: ${okCount} file thành công, ${failCount} file lỗi.`, 'error', false);
+            window.playSpeechTTS?.('Có file gửi lỗi. Vui lòng xem thông báo chi tiết.');
+        } else {
+            this.setUploadStatus('Đã gửi file', 'done', true);
+            window.playSpeechTTS?.('Đã gửi xong toàn bộ file.');
+        }
+        return failCount === 0;
     },
     async sendFile(file, currentIndex = 1, totalFiles = 1) {
-        if(!file) return;
-        // PHA 12: Chặn 50MB theo giới hạn Telegram Bot API, resolve để queue tiếp tục.
+        if(!file) return false;
+
+        // PHA 63B: Family Chat direct file send. Không nén hoặc biến đổi file trước khi gửi.
         const MAX_SIZE = 50 * 1024 * 1024;
-        if (file.size > MAX_SIZE) {
-            window.showToast?.(`File ${file.name || 'không tên'} vượt quá 50MB. Đã bỏ qua!`, 'ph-warning-circle');
+        const fileName = file.name || 'Tập tin';
+        const fileSize = Number(file.size || 0);
+        const mime = String(file.type || '').toLowerCase();
+        const ext = (fileName.split('.').pop() || '').toLowerCase();
+
+        if (fileSize > MAX_SIZE) {
+            const msg = `File ${fileName} vượt quá 50MB. Đã bỏ qua!`;
+            console.warn('[ChatEngine direct file blocked]', { fileName, fileSize, mime, reason: 'over_50MB' });
+            this.setUploadStatus(msg, 'error', false);
             window.playSpeechTTS?.('Một file quá lớn đã bị bỏ qua do vượt giới hạn tải lên.');
-            return Promise.resolve();
+            return false;
         }
 
         let endpoint = 'sendDocument';
         let fileField = 'document';
         let msgType = 'file';
-        const mime = String(file.type || '').toLowerCase();
-        if(mime.startsWith('image/')) { endpoint = 'sendPhoto'; fileField = 'photo'; msgType = 'image'; }
-        else if(mime.startsWith('video/')) { endpoint = 'sendVideo'; fileField = 'video'; msgType = 'video'; }
-        else if(mime.startsWith('audio/')) { endpoint = 'sendAudio'; fileField = 'audio'; msgType = 'audio'; }
+
+        // APK/MIME rỗng/lạ luôn đi document. Ảnh/video/audio cũ vẫn giữ nếu Telegram hỗ trợ.
+        if (ext !== 'apk') {
+            if(mime.startsWith('image/')) { endpoint = 'sendPhoto'; fileField = 'photo'; msgType = 'image'; }
+            else if(mime.startsWith('video/')) { endpoint = 'sendVideo'; fileField = 'video'; msgType = 'video'; }
+            else if(mime.startsWith('audio/')) { endpoint = 'sendAudio'; fileField = 'audio'; msgType = 'audio'; }
+        }
 
         const formData = new FormData();
         formData.append('chat_id', this.chatId);
-        formData.append(fileField, file);
+        formData.append(fileField, file, fileName);
+
+        console.info('[ChatEngine direct file send start]', {
+            fileName,
+            size: fileSize,
+            mime: file.type || '',
+            endpoint,
+            field: fileField
+        });
+        this.setUploadStatus(`Đang gửi ${currentIndex}/${totalFiles}: ${fileName} — 0%`, 'info', false);
 
         return new Promise((resolve) => {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', `https://api.telegram.org/bot${this.token}/${endpoint}`, true);
+            xhr.timeout = 120000;
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
                     const percent = Math.round((e.loaded / e.total) * 100);
-                    window.showToast?.(`Đang tải file ${currentIndex}/${totalFiles}: ${percent}%`, 'ph-spinner animate-spin');
+                    this.setUploadStatus(`Đang gửi ${currentIndex}/${totalFiles}: ${fileName} — ${percent}%`, 'info', false);
+                } else {
+                    this.setUploadStatus(`Đang gửi ${currentIndex}/${totalFiles}: ${fileName}`, 'info', false);
                 }
             };
 
             xhr.onload = () => {
-                try {
-                    const data = JSON.parse(xhr.responseText || '{}');
-                    if(data.ok) {
-                        let fileId = '';
-                        if(msgType === 'image') {
-                            const photoArr = data.result.photo || [];
-                            const best = photoArr[photoArr.length - 1];
-                            fileId = best && best.file_id;
-                        } else {
-                            fileId = data.result[fileField] && data.result[fileField].file_id;
-                        }
-                        if (!fileId) throw new Error('Missing Telegram file_id');
-
-                        const telegramMsgId = data.result.message_id;
-                        const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
-                        const fileName = file.name || 'Tập tin';
-                        const msg = {
-                            id: Date.now().toString() + '_' + Math.floor(Math.random() * 100000),
-                            type: msgType,
-                            file_id: fileId,
-                            file_name: fileName,
-                            sender: this.getKey(),
-                            timestamp: Date.now(),
-                            reply_to: this.replyingTo,
-                            isPrivate: isPriv,
-                            telegram_msg_id: telegramMsgId,
-                            topic_id: this.currentTopic !== 'all' ? this.currentTopic : null
-                        };
-                        window.chatHistory.push(msg);
-                        if (!file.__lifeosSkipPush) {
-                            this.triggerPushNotification(msgType === 'audio' ? '🎤 [Tin nhắn thoại]' : (msgType === 'image' ? '📸 [Hình ảnh]' : (msgType === 'video' ? '🎥 [Video]' : '📎 [Tập tin đính kèm]')));
-                        }
-                        this.cancelReply();
-                        this.saveAndSync();
-                        this.render();
-                    } else {
-                        console.warn('[ChatEngine Telegram API]', data);
-                        window.showToast?.(`Lỗi API Telegram ở file thứ ${currentIndex}`, 'ph-warning-circle');
-                    }
-                } catch(err) {
-                    console.warn('[ChatEngine XHR parse]', err);
-                    window.showToast?.('Lỗi phân tích phản hồi', 'ph-warning-circle');
+                let data = {};
+                try { data = JSON.parse(xhr.responseText || '{}'); }
+                catch(parseErr) {
+                    console.warn('[ChatEngine Telegram response parse]', {
+                        fileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, responseText: xhr.responseText, parseErr
+                    });
+                    this.setUploadStatus(`Lỗi phân tích phản hồi Telegram HTTP ${xhr.status || 0}: ${fileName}`, 'error', false);
+                    resolve(false);
+                    return;
                 }
-                resolve();
+
+                console.info('[ChatEngine Telegram response]', {
+                    fileName,
+                    size: fileSize,
+                    mime: file.type || '',
+                    endpoint,
+                    status: xhr.status,
+                    response: data
+                });
+
+                if (xhr.status < 200 || xhr.status >= 300 || data.ok !== true) {
+                    const errCode = data.error_code !== undefined ? data.error_code : '';
+                    const desc = data.description || 'Không có mô tả lỗi';
+                    const msg = `Gửi thất bại: ${fileName} — ${endpoint} HTTP ${xhr.status || 0}${errCode !== '' ? ' | Telegram ' + errCode : ''}: ${desc}`;
+                    console.warn('[ChatEngine Telegram API fail]', {
+                        fileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, error_code: data.error_code, description: data.description, response: data
+                    });
+                    this.setUploadStatus(msg, 'error', false);
+                    window.playSpeechTTS?.('Gửi file bị lỗi. Telegram đã trả lỗi.');
+                    resolve(false);
+                    return;
+                }
+
+                try {
+                    let tgFile = null;
+                    if(msgType === 'image') {
+                        const photoArr = data.result?.photo || [];
+                        tgFile = photoArr[photoArr.length - 1] || null;
+                    } else {
+                        tgFile = data.result?.[fileField] || null;
+                    }
+                    const fileId = tgFile && tgFile.file_id;
+                    if (!fileId) throw new Error('Missing Telegram file_id');
+
+                    const telegramMsgId = data.result.message_id;
+                    const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+                    const msg = {
+                        id: Date.now().toString() + '_' + Math.floor(Math.random() * 100000),
+                        type: msgType,
+                        file_id: fileId,
+                        file_unique_id: tgFile.file_unique_id || '',
+                        file_name: fileName,
+                        file_size: tgFile.file_size || fileSize,
+                        mime_type: tgFile.mime_type || file.type || '',
+                        sender: this.getKey(),
+                        timestamp: Date.now(),
+                        sentAt: Date.now(),
+                        reply_to: this.replyingTo,
+                        isPrivate: isPriv,
+                        telegram_msg_id: telegramMsgId,
+                        chat_id: this.chatId,
+                        topic_id: this.currentTopic !== 'all' ? this.currentTopic : null
+                    };
+                    window.chatHistory.push(msg);
+                    if (!file.__lifeosSkipPush) {
+                        this.triggerPushNotification(msgType === 'audio' ? '🎤 [Tin nhắn thoại]' : (msgType === 'image' ? '📸 [Hình ảnh]' : (msgType === 'video' ? '🎥 [Video]' : '📎 [Tập tin đính kèm]')));
+                    }
+                    this.cancelReply();
+                    this.saveAndSync();
+                    this.render();
+                    this.setUploadStatus(`Đã gửi: ${fileName}`, 'done', true);
+                    window.playSpeechTTS?.('Đã gửi file');
+                    resolve(true);
+                } catch(err) {
+                    console.warn('[ChatEngine Telegram ok but invalid payload]', {
+                        fileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, response: data, err
+                    });
+                    this.setUploadStatus(`Telegram đã nhận nhưng thiếu file_id cho ${fileName}`, 'error', false);
+                    resolve(false);
+                }
             };
 
             xhr.onerror = () => {
-                window.showToast?.(`Lỗi mạng tải file ${currentIndex}`, 'ph-warning-circle');
-                resolve();
+                console.warn('[ChatEngine direct file network error]', { fileName, size: fileSize, mime: file.type || '', endpoint });
+                this.setUploadStatus(`Lỗi mạng khi gửi file: ${fileName}`, 'error', false);
+                window.playSpeechTTS?.('Lỗi mạng khi gửi file');
+                resolve(false);
+            };
+
+            xhr.ontimeout = () => {
+                console.warn('[ChatEngine direct file timeout]', { fileName, size: fileSize, mime: file.type || '', endpoint, timeout: xhr.timeout });
+                this.setUploadStatus(`Quá thời gian gửi file: ${fileName}`, 'error', false);
+                window.playSpeechTTS?.('Quá thời gian gửi file');
+                resolve(false);
             };
 
             try { xhr.send(formData); }
             catch(e) {
-                console.warn('[ChatEngine XHR send]', e);
-                window.showToast?.(`Lỗi gửi file ${currentIndex}`, 'ph-warning-circle');
-                resolve();
+                console.warn('[ChatEngine XHR send]', { fileName, size: fileSize, mime: file.type || '', endpoint, error: e });
+                this.setUploadStatus(`Lỗi gửi file ${fileName}: ${e.message || e}`, 'error', false);
+                resolve(false);
             }
         });
     },
@@ -5197,19 +5284,7 @@ window.ChatEngine = {
                 .catch(e => console.warn('[ChatEngine shared push]', e));
         }
     },
-    async getImageUrl(fileId) {
-        if(this.fileCache[fileId]) return this.fileCache[fileId];
-        try {
-            const res = await fetch(`https://api.telegram.org/bot${this.token}/getFile?file_id=${encodeURIComponent(fileId)}`);
-            const data = await res.json();
-            if(data.ok) {
-                const url = `https://api.telegram.org/file/bot${this.token}/${data.result.file_path}`;
-                this.fileCache[fileId] = url;
-                return url;
-            }
-        } catch(e) { console.warn('[ChatEngine getImageUrl]', e); }
-        return '';
-    },
+
     openMsgMenu(id) {
         window.vibrate?.(15);
         const active = document.getElementById('chat-msg-active-id');
@@ -5238,12 +5313,7 @@ window.ChatEngine = {
     },
     async downloadActiveFile() {
         const id = document.getElementById('chat-msg-active-id')?.value;
-        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
-        if(m && m.file_id) {
-            window.showToast?.('Đang mở file...', 'ph-spinner animate-spin');
-            const url = await this.getImageUrl(m.file_id);
-            if(url) window.open(url, '_blank');
-        }
+        await this.downloadChatFile(id);
         this.closeMsgMenu();
     },
     replyMsg() {
@@ -5291,49 +5361,56 @@ window.ChatEngine = {
         this.closeMsgMenu();
     },
     async deleteMsg() {
-        const id = document.getElementById('chat-msg-active-id').value;
-        const msg = window.chatHistory.find(m => m.id === id);
+        const id = document.getElementById('chat-msg-active-id')?.value;
+        const msg = (window.chatHistory || []).find(m => String(m.id) === String(id));
         if(!msg) return;
 
-        // BƯỚC 1: NẾU CÓ TELEGRAM ID, PHẢI XÓA BÊN TELEGRAM TRƯỚC
-        if (msg.telegram_msg_id) {
-            window.showToast("Đang đồng bộ xóa trên Telegram...", "ph-spinner animate-spin");
-            try {
-                const res = await fetch(`https://api.telegram.org/bot${this.token}/deleteMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: this.chatId,
-                        message_id: msg.telegram_msg_id
-                    })
-                });
-                const data = await res.json();
-                
-                // NẾU TELEGRAM TỪ CHỐI -> DỪNG LẠI NGAY LẬP TỨC
-                if (!data.ok) {
-                    console.error('Telegram từ chối xóa:', data);
-                    window.showToast(`Lỗi Telegram: ${data.description}`, "ph-warning-circle");
-                    window.playSpeechTTS('Không thể xóa file. Lệnh bị hệ thống lưu trữ từ chối.');
-                    this.closeMsgMenu();
-                    return; // KHÔNG ĐƯỢC XÓA TRÊN WEB
-                }
-            } catch(e) {
-                console.error('Lỗi mạng API Telegram:', e);
-                window.showToast("Lỗi kết nối đến Telegram", "ph-warning-circle");
-                window.playSpeechTTS('Mất kết nối mạng. Không thể xóa.');
-                this.closeMsgMenu();
-                return; // KHÔNG ĐƯỢC XÓA TRÊN WEB
-            }
+        const hasTelegram = !!(msg.telegram_msg_id || msg.message_id);
+        const confirmText = hasTelegram
+            ? 'Xóa tin này khỏi app? Có thể thử xóa cả trên Telegram nếu còn được phép.'
+            : 'Xóa tin này khỏi app?';
+        if (!window.confirm(confirmText)) {
+            this.closeMsgMenu();
+            return;
         }
 
-        // BƯỚC 2: TELEGRAM ĐÃ XÓA THÀNH CÔNG (HOẶC TIN CŨ KHÔNG CÓ TELEGRAM ID) -> TIẾN HÀNH XÓA TRÊN WEB
-        window.chatHistory = window.chatHistory.filter(m => m.id !== id);
+        // Local/app trước: không để Telegram làm kẹt lịch sử trong app.
+        window.chatHistory = (window.chatHistory || []).filter(m => String(m.id) !== String(id));
         this.saveAndSync();
         this.render();
-        
-        window.showToast("Đã xóa vĩnh viễn tin nhắn!", "ph-trash");
-        window.playSpeechTTS('Đã xóa thành công khỏi hệ thống');
         this.closeMsgMenu();
+
+        if (!hasTelegram) {
+            window.showToast?.('Đã xóa khỏi app', 'ph-trash');
+            window.playSpeechTTS?.('Đã xóa khỏi app');
+            return;
+        }
+
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${this.token}/deleteMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: this.chatId,
+                    message_id: msg.telegram_msg_id || msg.message_id
+                })
+            });
+            let data = {};
+            try { data = await res.json(); } catch(e) {}
+            console.info('[ChatEngine deleteMessage response]', { endpoint: 'deleteMessage', status: res.status, response: data, file_name: msg.file_name || '' });
+
+            if (res.ok && data.ok) {
+                window.showToast?.('Đã xóa tin nhắn', 'ph-trash');
+                window.playSpeechTTS?.('Đã xóa tin nhắn');
+            } else {
+                const code = data.error_code !== undefined ? data.error_code : '';
+                const desc = data.description || 'Telegram không cho xóa hoặc tin đã quá hạn';
+                window.showToast?.(`Đã xóa khỏi app. Telegram có thể không cho xóa tin cũ. deleteMessage HTTP ${res.status || 0}${code !== '' ? ' | ' + code : ''}: ${desc}`, 'ph-warning-circle');
+            }
+        } catch(e) {
+            console.warn('[ChatEngine deleteMessage network]', { endpoint: 'deleteMessage', file_name: msg.file_name || '', error: e });
+            window.showToast?.('Đã xóa khỏi app. Lỗi mạng khi gọi deleteMessage Telegram.', 'ph-warning-circle');
+        }
     },
     // --- BẮT ĐẦU PHA 36: VOICE NOTE ENGINE ---
     mediaRecorder: null,
@@ -5489,6 +5566,7 @@ window.ChatEngine = {
         }
     },
     // --- BẮT ĐẦU PHA 38: UX & PERFORMANCE ---
+    // DEPRECATED for Family Chat: do not use compression before sending files.
     async compressImage(file) {
         if (!file || !file.type || !file.type.startsWith('image/')) return file;
         const MAX_WIDTH = 1600, MAX_HEIGHT = 1600, QUALITY = 0.8;
@@ -5737,6 +5815,190 @@ window.ChatEngine = {
         window.showToast?.('Đã xóa thư mục (Giữ nguyên tin nhắn)', 'ph-trash');
         this.closeFolderManager();
     },
+    formatFileSize(bytes) {
+        const n = Number(bytes || 0);
+        if (!n) return 'Không rõ dung lượng';
+        if (n < 1024) return n + ' B';
+        if (n < 1024 * 1024) return (n / 1024).toFixed(n < 10 * 1024 ? 1 : 0) + ' KB';
+        return (n / (1024 * 1024)).toFixed(n < 10 * 1024 * 1024 ? 1 : 0) + ' MB';
+    },
+
+    getFileExt(name = '') {
+        const clean = String(name || '').split('?')[0].split('#')[0];
+        const part = clean.includes('.') ? clean.split('.').pop() : '';
+        return String(part || '').toLowerCase();
+    },
+
+    getFileMeta(m = {}) {
+        const name = String(m.file_name || m.name || 'Tập tin');
+        const ext = this.getFileExt(name);
+        const mime = String(m.mime_type || m.mime || '').toLowerCase();
+        let icon = 'ph-file';
+        let tone = 'text-slate-600 bg-slate-100 border-slate-200';
+        let label = ext ? ext.toUpperCase() : (mime || 'FILE');
+
+        if (ext === 'apk') { icon = 'ph-android-logo'; tone = 'text-emerald-700 bg-emerald-50 border-emerald-200'; label = 'APK Android'; }
+        else if (ext === 'pdf') { icon = 'ph-file-pdf'; tone = 'text-rose-700 bg-rose-50 border-rose-200'; label = 'PDF'; }
+        else if (['zip','rar','7z'].includes(ext)) { icon = 'ph-file-zip'; tone = 'text-amber-700 bg-amber-50 border-amber-200'; label = ext.toUpperCase(); }
+        else if (['doc','docx','xls','xlsx','ppt','pptx'].includes(ext)) { icon = 'ph-file-doc'; tone = 'text-blue-700 bg-blue-50 border-blue-200'; label = ext.toUpperCase(); }
+        else if (mime.startsWith('image/')) { icon = 'ph-image'; tone = 'text-sky-700 bg-sky-50 border-sky-200'; label = 'Ảnh'; }
+        else if (mime.startsWith('video/')) { icon = 'ph-video'; tone = 'text-purple-700 bg-purple-50 border-purple-200'; label = 'Video'; }
+        else if (mime.startsWith('audio/')) { icon = 'ph-speaker-high'; tone = 'text-fuchsia-700 bg-fuchsia-50 border-fuchsia-200'; label = 'Audio'; }
+
+        return { name, ext, mime, icon, tone, label, sizeText: this.formatFileSize(m.file_size || m.size || 0) };
+    },
+
+    renderFileCard(m) {
+        const meta = this.getFileMeta(m);
+        const msgId = window.escapeHTML(String(m.id || ''));
+        const name = window.escapeHTML(meta.name);
+        const label = window.escapeHTML(meta.label);
+        const sizeText = window.escapeHTML(meta.sizeText);
+        const sentTime = new Date(m.sentAt || m.timestamp || Date.now()).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+        const primaryBtn = meta.ext === 'apk' ? 'Tải APK' : 'Tải file';
+        const status = m.uploadStatus ? `<div class="text-[10px] font-bold text-amber-600 mt-1">${window.escapeHTML(String(m.uploadStatus))}</div>` : '';
+
+        return `
+        <div class="chat-file-card min-w-[230px] max-w-[280px] bg-white border border-slate-200 rounded-2xl p-3 shadow-sm text-slate-800" onclick="event.stopPropagation(); window.ChatEngine.openMsgMenu('${msgId}')">
+            <div class="flex gap-3 items-start">
+                <div class="w-12 h-12 rounded-2xl border ${meta.tone} flex items-center justify-center shrink-0">
+                    <i class="ph-bold ${meta.icon} text-2xl"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="font-black text-sm leading-tight text-slate-800 break-words">${name}</div>
+                    <div class="flex flex-wrap gap-1 mt-1 text-[10px] font-bold text-slate-500">
+                        <span class="px-1.5 py-0.5 rounded bg-slate-100">${label}</span>
+                        <span class="px-1.5 py-0.5 rounded bg-slate-100">${sizeText}</span>
+                        <span class="px-1.5 py-0.5 rounded bg-slate-100">${sentTime}</span>
+                    </div>
+                    ${status}
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-3">
+                <button type="button" onclick="event.stopPropagation(); window.ChatEngine.downloadChatFile('${msgId}')" class="px-3 py-2 rounded-xl bg-primary text-white text-xs font-black active:scale-95 shadow-sm">${primaryBtn}</button>
+                <button type="button" onclick="event.stopPropagation(); window.ChatEngine.copyFileLink('${msgId}')" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-black active:scale-95 border border-slate-200">Sao chép link</button>
+            </div>
+        </div>`;
+    },
+
+    ensureUploadStatus() {
+        let bar = document.getElementById('chat-upload-status');
+        if (bar) return bar;
+        const form = document.getElementById('chat-form');
+        if (!form || !form.parentNode) return null;
+        bar = document.createElement('div');
+        bar.id = 'chat-upload-status';
+        bar.className = 'hidden mx-3 mb-2 px-3 py-2 rounded-2xl border text-xs font-bold shadow-sm flex items-center justify-between gap-2';
+        form.parentNode.insertBefore(bar, form);
+        return bar;
+    },
+
+    setUploadStatus(text, state = 'info', autoHide = false) {
+        const bar = this.ensureUploadStatus();
+        if (!bar) {
+            if (state === 'error') window.showToast?.(text, 'ph-warning-circle');
+            return;
+        }
+        const tone = state === 'error'
+            ? 'bg-rose-50 text-rose-700 border-rose-200'
+            : (state === 'done' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-sky-50 text-sky-700 border-sky-200');
+        bar.className = `mx-3 mb-2 px-3 py-2 rounded-2xl border text-xs font-bold shadow-sm flex items-center justify-between gap-2 ${tone}`;
+        bar.innerHTML = `<span class="truncate">${window.escapeHTML(String(text || ''))}</span><button type="button" onclick="this.closest('#chat-upload-status')?.classList.add('hidden')" class="w-7 h-7 rounded-full bg-white/70 border border-white/80 flex items-center justify-center active:scale-95"><i class="ph-bold ph-x text-xs pointer-events-none"></i></button>`;
+        if (this._uploadStatusTimer) clearTimeout(this._uploadStatusTimer);
+        if (autoHide) {
+            this._uploadStatusTimer = setTimeout(() => { bar.classList.add('hidden'); }, 2800);
+        }
+    },
+
+    async getFileUrl(fileId, fileName = '') {
+        if(!fileId) throw new Error('Thiếu file_id Telegram');
+        if(this.fileCache[fileId]) return this.fileCache[fileId];
+
+        let res, data;
+        try {
+            res = await fetch(`https://api.telegram.org/bot${this.token}/getFile?file_id=${encodeURIComponent(fileId)}`);
+            data = await res.json();
+        } catch(e) {
+            console.warn('[ChatEngine getFile network]', { fileName, fileId, error: e });
+            throw new Error(`Lỗi mạng khi tải link file ${fileName || fileId}`);
+        }
+
+        if(!res.ok || !data.ok) {
+            const msg = `getFile HTTP ${res.status || 0}${data?.error_code ? ' | Telegram ' + data.error_code : ''}: ${data?.description || 'Không có mô tả lỗi'}`;
+            console.warn('[ChatEngine getFile fail]', { fileName, fileId, status: res.status, response: data });
+            throw new Error(msg);
+        }
+
+        if(!data.result || !data.result.file_path) {
+            console.warn('[ChatEngine getFile missing path]', { fileName, fileId, response: data });
+            throw new Error('Tải thất bại: Telegram không trả file_path');
+        }
+
+        const url = `https://api.telegram.org/file/bot${this.token}/${data.result.file_path}`;
+        this.fileCache[fileId] = url;
+        return url;
+    },
+
+    async downloadChatFile(id) {
+        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        if(!m || !m.file_id) {
+            window.showToast?.('Tải thất bại: thiếu file_id', 'ph-warning-circle');
+            return false;
+        }
+        const meta = this.getFileMeta(m);
+        try {
+            this.setUploadStatus(`Đang lấy link tải: ${meta.name}`, 'info', false);
+            const url = await this.getFileUrl(m.file_id, meta.name);
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.download = meta.name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            this.setUploadStatus(`Đã mở link tải: ${meta.name}`, 'done', true);
+            return true;
+        } catch(e) {
+            const msg = `Tải thất bại: ${meta.name} — ${e.message || e}`;
+            console.warn('[ChatEngine download file fail]', { file: meta.name, endpoint: 'getFile', error: e });
+            this.setUploadStatus(msg, 'error', false);
+            window.showToast?.(msg, 'ph-warning-circle');
+            return false;
+        }
+    },
+
+    async copyFileLink(id) {
+        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        if(!m || !m.file_id) {
+            window.showToast?.('Sao chép thất bại: thiếu file_id', 'ph-warning-circle');
+            return false;
+        }
+        const meta = this.getFileMeta(m);
+        try {
+            const url = await this.getFileUrl(m.file_id, meta.name);
+            await navigator.clipboard.writeText(url);
+            this.setUploadStatus('Đã sao chép link tải', 'done', true);
+            window.showToast?.('Đã sao chép link tải', 'ph-check-circle');
+            return true;
+        } catch(e) {
+            const msg = `Sao chép link thất bại: ${meta.name} — ${e.message || e}`;
+            console.warn('[ChatEngine copy file link fail]', { file: meta.name, endpoint: 'getFile', error: e });
+            this.setUploadStatus(msg, 'error', false);
+            window.showToast?.(msg, 'ph-warning-circle');
+            return false;
+        }
+    },
+
+    async getImageUrl(fileId) {
+        try {
+            return await this.getFileUrl(fileId);
+        } catch(e) {
+            console.warn('[ChatEngine getImageUrl]', e);
+            return '';
+        }
+    },
+
     render() {
         const container = document.getElementById('chat-messages');
         if(!container) return;
@@ -5795,10 +6057,10 @@ window.ChatEngine = {
                         </div>
                     </div>`;
                 } else {
-                    contentHtml = `<div id="${elId}" class="flex items-center gap-2 text-primary font-bold bg-white/50 p-2 rounded-lg pointer-events-none"><i class="ph-bold ph-file-text text-2xl"></i> <span class="text-xs truncate max-w-[150px]">${window.escapeHTML(m.file_name||'Tập tin')}</span></div>`;
+                    contentHtml = this.renderFileCard(m);
                 }
 
-                if(m.type !== 'audio_offline') this.getImageUrl(m.file_id).then(url => {
+                if(m.type !== 'audio_offline' && ['image','video','audio'].includes(m.type)) this.getImageUrl(m.file_id).then(url => {
                     const el = document.getElementById(elId);
                     if(el && url) {
                         if (m.type === 'image' || m.type === 'video') {
@@ -5807,9 +6069,6 @@ window.ChatEngine = {
                         } else if (m.type === 'audio') {
                             el.src = url;
                             el.classList.remove('animate-pulse');
-                        } else {
-                            el.classList.remove('bg-white/50');
-                            el.classList.add('bg-white');
                         }
                     }
                 });
@@ -5848,7 +6107,7 @@ window.ChatEngine = {
             </div>`;
         }).join('');
         setTimeout(() => { container.scrollTop = container.scrollHeight; }, 80);
-    }
+    },
 };
 window.FirebaseSync={
     _d:null,_u:null,_i:false,_k:'',
@@ -10966,7 +11225,41 @@ window.MediaHub = {
             this.tvData = this.allChannels.filter(c => c.type === 'tv');
             this.radioData = this.allChannels.filter(c => c.type === 'radio');
 
-            this.switchTab(this.currentTab);
+            // ĐỌC TRÍ NHỚ TIVI/RADIO TỪ LOCALSTORAGE - SAFE RESUME
+            let resumeTab = this.currentTab;
+            let resumeGroup = 'all';
+            let resumeTvIdx = -1;
+            let resumeRadioIdx = -1;
+
+            if (!force) {
+                try {
+                    const mem = JSON.parse(localStorage.getItem('lifeos_media_memory'));
+                    if (mem && ['tv', 'radio', 'music'].includes(mem.tab)) {
+                        resumeTab = mem.tab;
+                        resumeGroup = mem.group || 'all';
+                        resumeTvIdx = Number.isInteger(mem.tvIdx) ? mem.tvIdx : -1;
+                        resumeRadioIdx = Number.isInteger(mem.radioIdx) ? mem.radioIdx : -1;
+                    }
+                } catch(e) {}
+            }
+
+            this.currentTab = resumeTab;
+            this.currentGroup = resumeGroup;
+            this.currentTvIdx = resumeTvIdx;
+            this.currentRadioIdx = resumeRadioIdx;
+            this.switchTab(this.currentTab, true);
+
+            // TỰ ĐỘNG BẬT KÊNH CŨ SAU KHI KHỞI TẠO
+            if (!force) {
+                setTimeout(() => {
+                    if (this.currentTab === 'tv' && this.currentTvIdx >= 0 && this.tvData[this.currentTvIdx]) {
+                        this.playStream(this.currentTvIdx, 'tv');
+                    }
+                    else if (this.currentTab === 'radio' && this.currentRadioIdx >= 0 && this.radioData[this.currentRadioIdx]) {
+                        this.playStream(this.currentRadioIdx, 'radio');
+                    }
+                }, 500);
+            }
             if(force) window.showToast?.('Cập nhật 194 kênh kim cương thành công!', 'ph-check-circle');
 
             if (!this.remoteBound) {
@@ -10979,16 +11272,14 @@ window.MediaHub = {
                     rAudio.onpause = () => { this.isRadioPlaying = false; this.updateRadioUI(); };
                     rAudio.onerror = () => { 
                         this.isRadioPlaying = false; this.updateRadioUI(); 
-                        this.setRadioInstruction('Lỗi mạng. Tự động chuyển đài sau 3s...', 'error');
-                        setTimeout(() => this.playNext('radio'), 3000); // Tự cứu thương
+                        this.setRadioInstruction('Kênh này cần thử lại hoặc link không hỗ trợ trình phát hiện tại', 'error');
                     };
                 }
                 // Auto-Skip cho Tivi
                 const tVideo = document.getElementById('tv-video-element');
                 if(tVideo) {
                     tVideo.onerror = () => { 
-                        this.setTvInstruction('Lỗi tín hiệu. Tự động chuyển kênh sau 3s...', 'error');
-                        setTimeout(() => this.playNext('tv'), 3000); // Tự cứu thương
+                        this.setTvInstruction('Kênh này cần thử lại hoặc link không hỗ trợ trình phát hiện tại', 'error');
                     };
                 }
             }
@@ -11020,11 +11311,28 @@ window.MediaHub = {
             titleEl.textContent = msg;
         }
     },
+    switchTab(tab, keepGroup = false) {
+        const validTabs = ['music', 'radio', 'tv'];
+        if (!validTabs.includes(tab)) tab = 'music';
 
-
-    switchTab(tab) {
         this.currentTab = tab;
-        this.currentGroup = 'all';
+
+        if (!keepGroup || tab === 'music') {
+            this.currentGroup = 'all';
+        } else {
+            const validGroups = this.rawGroups.filter(g => g.type === tab).map(g => g.id);
+            if (this.currentGroup !== 'all' && !validGroups.includes(this.currentGroup)) {
+                const dataset = tab === 'tv' ? this.tvData : this.radioData;
+                const savedIdx = tab === 'tv' ? this.currentTvIdx : this.currentRadioIdx;
+                const savedChannel = dataset[savedIdx];
+                if (savedChannel && savedChannel.group && validGroups.includes(savedChannel.group)) {
+                    this.currentGroup = savedChannel.group;
+                } else {
+                    this.currentGroup = 'all';
+                }
+            }
+        }
+
         this.focusIdx = -1;
 
         const btnColors = {
@@ -11074,6 +11382,36 @@ window.MediaHub = {
         }
 
         this.renderLists();
+
+        if (tab !== 'music') {
+            const groups = this.rawGroups.filter(g => g.type === tab);
+            this.idxSidebar = this.currentGroup === 'all' ? 0 : Math.max(0, groups.findIndex(g => g.id === this.currentGroup) + 1);
+
+            if (keepGroup) {
+                const dataset = tab === 'tv' ? this.tvData : this.radioData;
+                const currentIdx = tab === 'tv' ? this.currentTvIdx : this.currentRadioIdx;
+                if (currentIdx >= 0 && currentIdx < dataset.length) {
+                    let visibleList = dataset.filter(c => this.currentGroup === 'all' || c.group === this.currentGroup);
+                    let visibleIdx = visibleList.findIndex(ch => ch === dataset[currentIdx] || (ch.id !== undefined && dataset[currentIdx]?.id !== undefined && ch.id === dataset[currentIdx].id));
+                    if (visibleIdx < 0) {
+                        this.currentGroup = 'all';
+                        this.renderGroupMenus();
+                        this.renderLists();
+                        visibleList = dataset;
+                        visibleIdx = currentIdx;
+                        this.idxSidebar = 0;
+                    }
+                    this.idxList = Math.max(0, visibleIdx);
+                    this.lastListIdx = this.idxList;
+                    this.lastSidebarIdx = this.idxSidebar;
+                } else {
+                    if (tab === 'tv') this.currentTvIdx = -1;
+                    else this.currentRadioIdx = -1;
+                    this.idxList = 0;
+                }
+            }
+        }
+
         if(window.soundEnabled) {
             const names = {'music': 'Danh sách nhạc', 'radio': 'Đài phát thanh rát đi ô', 'tv': 'Truyền hình ti vi'};
             window.playSpeechTTS('Mục ' + names[tab]);
@@ -11163,7 +11501,212 @@ window.MediaHub = {
             this.renderLists();
         }
     },
+    cleanupMediaElement(el) {
+        if (!el) return;
+        try { el.pause(); } catch(e) {}
+        try { el.removeAttribute('src'); } catch(e) {}
+        try { el.load(); } catch(e) {}
+    },
 
+    normalizePostPlayVolume(el, type) {
+        if (!el) return;
+        const apply = () => {
+            try {
+                if (!el.paused || el.readyState >= 3) {
+                    el.volume = 0.9;
+                    console.log('[MediaHub] playing', type);
+                }
+            } catch(e) {}
+        };
+        el.addEventListener('playing', apply, { once: true });
+        el.addEventListener('canplay', apply, { once: true });
+    },
+
+    showPlayerLoadError(type) {
+        const msg = 'Kênh này cần proxy/nguồn dự phòng';
+        if (type === 'tv') this.setTvInstruction(msg, 'error');
+        else this.setRadioInstruction(msg, 'error');
+        window.showToast?.(msg, 'ph-warning-circle');
+    },
+    buildSourceQueue(channel) {
+        const raw = [
+            channel?.url,
+            channel?.backupUrl,
+            channel?.url2,
+            channel?.proxyUrl
+        ];
+
+        if (typeof this.buildProxyUrl === 'function' && channel?.url) {
+            try { raw.push(this.buildProxyUrl(channel.url)); } catch(e) {}
+        }
+
+        const seen = new Set();
+        return raw
+            .map(u => (u || '').trim())
+            .filter(u => {
+                if (!u || seen.has(u)) return false;
+                seen.add(u);
+                return true;
+            });
+    },
+
+    loadMediaStream(el, sourceQueue, type) {
+        const queue = Array.isArray(sourceQueue) ? sourceQueue.slice() : [sourceQueue];
+        const sources = queue.map(u => (u || '').trim()).filter((u, i, arr) => u && arr.indexOf(u) === i);
+        if (!el || sources.length === 0) {
+            this.showPlayerLoadError(type);
+            return;
+        }
+
+        const hlsKey = type === 'tv' ? 'hlsTv' : 'hlsRadio';
+        let sourceIndex = 0;
+        let retryCount = 0;
+        let nativeRetryCount = 0;
+        const loadToken = (this._mediaLoadSeq = (this._mediaLoadSeq || 0) + 1);
+
+        const destroyHls = () => {
+            if (this[hlsKey]) {
+                try { this[hlsKey].destroy(); } catch(e) {}
+                this[hlsKey] = null;
+            }
+        };
+
+        const classifyError = (data) => {
+            const details = String(data?.details || data?.type || data?.response?.text || '').toLowerCase();
+            const code = Number(data?.response?.code || data?.networkDetails?.status || 0);
+            if (code === 403 || code === 404 || details.includes('403') || details.includes('404')) {
+                console.warn('[MediaHub] source blocked or not found', type, sources[sourceIndex]);
+            } else if (details.includes('manifest') || details.includes('mime') || details.includes('cors')) {
+                console.warn('[MediaHub] source needs proxy or backup', type, sources[sourceIndex]);
+            }
+        };
+
+        const playSafe = () => {
+            if (this._mediaLoadSeq !== loadToken) return;
+            el.play().catch(err => console.warn('[MediaHub] play blocked', type, err));
+        };
+
+        const failSource = () => {
+            if (this._mediaLoadSeq !== loadToken) return;
+            sourceIndex++;
+            retryCount = 0;
+            nativeRetryCount = 0;
+
+            if (sourceIndex < sources.length) {
+                console.warn('[MediaHub] source needs proxy or backup', type, `${sourceIndex + 1}/${sources.length}`);
+                loadCurrentSource();
+            } else {
+                destroyHls();
+                this.cleanupMediaElement(el);
+                this.showPlayerLoadError(type);
+            }
+        };
+
+        const loadCurrentSource = () => {
+            if (this._mediaLoadSeq !== loadToken) return;
+
+            const url = sources[sourceIndex];
+            const isM3u8 = /\.m3u8($|\?)/i.test(url) || String(url).includes('m3u8');
+
+            console.log('[MediaHub] load start', type, `${sourceIndex + 1}/${sources.length}`);
+
+            destroyHls();
+            this.cleanupMediaElement(el);
+            this.normalizePostPlayVolume(el, type);
+
+            if (isM3u8 && el.canPlayType('application/vnd.apple.mpegurl')) {
+                el.onerror = () => {
+                    if (this._mediaLoadSeq !== loadToken) return;
+                    console.warn('[MediaHub] hls error', type, 'native', `${sourceIndex + 1}/${sources.length}`);
+                    if (nativeRetryCount < 2) {
+                        nativeRetryCount++;
+                        try {
+                            this.cleanupMediaElement(el);
+                            el.src = url;
+                            el.load();
+                            playSafe();
+                        } catch(e) {
+                            failSource();
+                        }
+                    } else {
+                        failSource();
+                    }
+                };
+                el.src = url;
+                el.load();
+                playSafe();
+                return;
+            }
+
+            if (isM3u8 && window.Hls && Hls.isSupported()) {
+                const hls = new Hls();
+                this[hlsKey] = hls;
+
+                hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                    if (this._mediaLoadSeq === loadToken) console.log('[MediaHub] media attached', type);
+                });
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (this._mediaLoadSeq !== loadToken) return;
+                    console.log('[MediaHub] hls manifest parsed', type);
+                    playSafe();
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (this._mediaLoadSeq !== loadToken) return;
+                    console.warn('[MediaHub] hls error', type, data);
+                    classifyError(data);
+                    if (!data || !data.fatal) return;
+
+                    if (data.type === Hls.ErrorTypes.MEDIA_ERROR && retryCount < 2) {
+                        retryCount++;
+                        try { hls.recoverMediaError(); } catch(e) { failSource(); }
+                        return;
+                    }
+
+                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR && retryCount < 2) {
+                        retryCount++;
+                        try {
+                            hls.stopLoad();
+                            hls.startLoad();
+                        } catch(e) {
+                            try { hls.loadSource(url); } catch(err) { failSource(); }
+                        }
+                        return;
+                    }
+
+                    failSource();
+                });
+
+                hls.attachMedia(el);
+                hls.loadSource(url);
+                return;
+            }
+
+            el.onerror = () => {
+                if (this._mediaLoadSeq !== loadToken) return;
+                console.warn('[MediaHub] hls error', type, 'plain', `${sourceIndex + 1}/${sources.length}`);
+                if (retryCount < 2) {
+                    retryCount++;
+                    try {
+                        this.cleanupMediaElement(el);
+                        el.src = url;
+                        el.load();
+                        playSafe();
+                    } catch(e) {
+                        failSource();
+                    }
+                } else {
+                    failSource();
+                }
+            };
+            el.src = url;
+            el.load();
+            playSafe();
+        };
+
+        loadCurrentSource();
+    },
     playStream(idx, type) {
         window.vibrate?.(10);
         if(window.MusicApp?.playing) window.MusicApp.togglePlay();
@@ -11179,15 +11722,8 @@ window.MediaHub = {
             const titleWrap = document.getElementById('tv-channel-name');
             if(titleWrap) titleWrap.innerHTML = `📺 Đang phát: <span class="text-slate-800 font-bold">${c.name}</span>`;
 
-            if (Hls.isSupported()) {
-                if (this.hlsTv) this.hlsTv.destroy();
-                this.hlsTv = new Hls();
-                this.hlsTv.loadSource(c.url);
-                this.hlsTv.attachMedia(video);
-                this.hlsTv.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(()=>{}));
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = c.url; video.play().catch(()=>{});
-            }
+            const sourceQueue = this.buildSourceQueue(c);
+            this.loadMediaStream(video, sourceQueue, 'tv');
             if(window.soundEnabled) window.playSpeechTTS('Mở kênh ' + c.name);
 
         } else if (type === 'radio') {
@@ -11197,22 +11733,25 @@ window.MediaHub = {
             const video = document.getElementById('tv-video-element');
             if (video && !video.paused) video.pause();
 
-            this.currentRadioUrl = c.url;
+            const sourceQueue = this.buildSourceQueue(c);
+            this.currentRadioUrl = sourceQueue[0] || c.url;
             const titleEl = document.getElementById('radio-channel-name');
             if(titleEl) { titleEl.textContent = c.name; titleEl.className = "text-sm font-bold text-slate-800 truncate"; }
 
             const rAudio = document.getElementById('radio-audio-element');
-            if (Hls.isSupported()) {
-                if (this.hlsRadio) this.hlsRadio.destroy();
-                this.hlsRadio = new Hls();
-                this.hlsRadio.loadSource(c.url);
-                this.hlsRadio.attachMedia(rAudio);
-                this.hlsRadio.on(Hls.Events.MANIFEST_PARSED, () => rAudio.play().catch(()=>{}));
-            } else if (rAudio.canPlayType('application/vnd.apple.mpegurl') || c.url.includes('.mp3') || c.url.includes('.aac')) {
-                rAudio.src = c.url; rAudio.play().catch(()=>{});
-            }
+            this.loadMediaStream(rAudio, sourceQueue, 'radio');
             if(window.soundEnabled) window.playSpeechTTS('Mở đài ' + c.name);
         }
+
+        // GHI NHỚ LẠI TRẠNG THÁI HIỆN TẠI
+        try {
+            localStorage.setItem('lifeos_media_memory', JSON.stringify({
+                tab: this.currentTab,
+                group: this.currentGroup,
+                tvIdx: this.currentTvIdx,
+                radioIdx: this.currentRadioIdx
+            }));
+        } catch(e) {}
     },
 
     playNext(type) {
@@ -11379,15 +11918,22 @@ window.MediaHub = {
             if (mediaView && !mediaView.classList.contains('active') && window.innerWidth < 1024) return;
             if (window.innerWidth >= 1024 && document.body.dataset.desktopWorkspace !== 'music' && document.body.dataset.desktopWorkspace !== 'overview') return;
 
-            const validKeys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape', 'Backspace', 'BrowserBack', 'GoBack', 'XF86Back', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            if (!validKeys.includes(e.key) && ![461, 10009].includes(e.keyCode)) return;
+            const rawKeyCode = Number(e.keyCode || e.which || 0);
+            const digitKey = /^[0-9]$/.test(e.key) ? e.key :
+                (rawKeyCode >= 48 && rawKeyCode <= 57) ? String(rawKeyCode - 48) :
+                (rawKeyCode >= 96 && rawKeyCode <= 105) ? String(rawKeyCode - 96) : null;
+            const validKeys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape', 'Backspace', 'BrowserBack', 'GoBack', 'XF86Back'];
+            if (!validKeys.includes(e.key) && digitKey === null && ![461, 10009].includes(rawKeyCode)) return;
             e.preventDefault();
 
             // XỬ LÝ PHÍM SỐ (NUMPAD CHUYỂN KÊNH)
-            if (/^[0-9]$/.test(e.key)) {
+            if (digitKey !== null) {
                 if (this.currentTab === 'music') return; // Không áp dụng cho tab Nhạc
+                // Đọc số vừa bấm bằng tiếng Việt
+                const numMap = {'0':'Không', '1':'Một', '2':'Hai', '3':'Ba', '4':'Bốn', '5':'Năm', '6':'Sáu', '7':'Bảy', '8':'Tám', '9':'Chín'};
+                if (window.soundEnabled) window.playSpeechTTS(numMap[digitKey]);
 
-                this.numpadBuffer += e.key;
+                this.numpadBuffer += digitKey;
 
                 // Hiển thị số đang bấm lên màn hình
                 if (this.currentTab === 'tv') this.setTvInstruction('Đang chuyển kênh: ' + this.numpadBuffer, 'action');
@@ -11408,11 +11954,16 @@ window.MediaHub = {
 
                     if (targetIdx >= 0 && targetIdx < list.length) {
                         const targetChannel = list[targetIdx];
-                        // Lấy index thật sự trong toàn bộ list
-                        const actualIdx = (this.currentTab === 'tv' ? this.tvData : this.radioData).findIndex(x => x.id === targetChannel.id);
+                        const dataset = this.currentTab === 'tv' ? this.tvData : this.radioData;
+                        // Lấy index thật sự trong toàn bộ list, không phụ thuộc duy nhất vào id
+                        let actualIdx = dataset.indexOf(targetChannel);
+                        if (actualIdx === -1 && targetChannel && targetChannel.id !== undefined && targetChannel.id !== null) {
+                            actualIdx = dataset.findIndex(x => x && x.id === targetChannel.id);
+                        }
+                        if (actualIdx === -1) actualIdx = targetIdx;
 
-                        if (actualIdx !== -1) {
-                            this.idxList = targetIdx; // Cập nhật focus
+                        if (actualIdx !== -1 && dataset[actualIdx]) {
+                            this.idxList = targetIdx; // Cập nhật focus theo danh sách đang hiển thị
                             this.playStream(actualIdx, this.currentTab);
                         }
                     } else {
@@ -11596,6 +12147,7 @@ window.MediaHub = {
             this.highlightRemoteZones();
         });
     },
+
 };
 
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => window.MediaHub.init(), 1500); });
