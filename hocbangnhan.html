@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="vi">
 <head>
+  <link rel="manifest" href="./manifest_bangnhan.json">
+  <meta name="theme-color" content="#ffd76a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Bé Học Bảng Nhân">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Bảng Nhân">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="./icon-192.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Bé Học Bảng Nhân HTML5 - Grid Quest V8 Vertical Hint WhiteBoard</title>
@@ -1701,5 +1709,18 @@
   init();
 })();
 </script>
+
+<script>
+(function(){
+  "use strict";
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("./sw_bangnhan.js", { scope: "./" })
+        .catch(function(err){ console.log("BangNhan SW register failed:", err); });
+    });
+  }
+})();
+</script>
+
 </body>
 </html>

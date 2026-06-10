@@ -1,0 +1,37 @@
+{
+  "id": "/hocbangnhan.html",
+  "name": "Bé Học Bảng Nhân",
+  "short_name": "Bảng Nhân",
+  "description": "Game HTML5 học bảng nhân cho trẻ em, chạy offline sau lần mở đầu tiên.",
+  "lang": "vi-VN",
+  "start_url": "/hocbangnhan.html",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
+  "orientation": "landscape-primary",
+  "background_color": "#fff5c9",
+  "theme_color": "#ffd76a",
+  "categories": [
+    "education",
+    "games",
+    "kids"
+  ],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
