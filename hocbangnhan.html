@@ -1,0 +1,1705 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Bé Học Bảng Nhân HTML5 - Grid Quest V8 Vertical Hint WhiteBoard</title>
+  <style>
+    :root{
+      --bg1:#fff5c9;
+      --bg2:#ffd9ec;
+      --panel:#fffaf0;
+      --panel2:#ffe6b5;
+      --ink:#251707;
+      --muted:#744719;
+      --line:#b56a15;
+      --accent:#d2679d;
+      --accent2:#f5a623;
+      --good:#21a764;
+      --bad:#e45662;
+      --blue:#3f7ee8;
+      --cell:#fffdf6;
+      --cell2:#fff0c9;
+      --header:#c28a62;
+      --shadow:rgba(87,50,8,.18);
+      --gridSize:560px;
+      --btnGlow:rgba(255,255,255,.88);
+      --heart:#e3344a;
+      --heartGlow:rgba(227,52,74,.32);
+    }
+    body[data-skin="retro"]{
+      --bg1:#f4e3a3;
+      --bg2:#cfb45f;
+      --panel:#f5e8ba;
+      --panel2:#dec576;
+      --ink:#201b0a;
+      --muted:#5d4b14;
+      --line:#80681c;
+      --accent:#6f7428;
+      --accent2:#9b7811;
+      --good:#3f7a29;
+      --bad:#b75b43;
+      --blue:#2f7f73;
+      --cell:#eceaab;
+      --cell2:#d7ce7c;
+      --header:#938050;
+      --shadow:rgba(58,47,9,.22);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden}
+    body{
+      min-height:100vh;
+      min-height:100dvh;
+      color:var(--ink);
+      font-family:"Segoe UI","Arial Rounded MT Bold",Arial,sans-serif;
+      background:
+        radial-gradient(circle at 16% 10%,rgba(255,255,255,.78),transparent 28%),
+        radial-gradient(circle at 92% 18%,rgba(255,255,255,.44),transparent 24%),
+        linear-gradient(135deg,var(--bg1),var(--bg2));
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .app{
+      width:100vw;
+      height:100vh;
+      height:100dvh;
+      display:grid;
+      grid-template-rows:44px minmax(0,1fr) 20px;
+      overflow:hidden;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:5px 11px;
+      border-bottom:2px solid rgba(130,77,8,.18);
+      background:linear-gradient(180deg,rgba(255,255,255,.84),rgba(255,255,255,.28));
+      box-shadow:0 6px 16px rgba(0,0,0,.05);
+    }
+    .title{
+      font-weight:900;
+      font-size:19px;
+      line-height:1;
+      letter-spacing:.1px;
+      color:var(--ink);
+      text-shadow:2px 2px 0 rgba(255,255,255,.7);
+      white-space:nowrap;
+    }
+    .subtitle{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:10px;
+      font-weight:800;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:70vw;
+    }
+    .status-pill{
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:7px 12px;
+      background:var(--accent);
+      color:#fff;
+      font-weight:900;
+      font-size:11px;
+      box-shadow:inset 0 -2px rgba(0,0,0,.16),0 5px 12px rgba(0,0,0,.08);
+    }
+    .status-dot{
+      width:10px;height:10px;border-radius:50%;
+      background:#74ff72;
+      box-shadow:0 0 8px #74ff72;
+    }
+    .main{
+      min-width:0;min-height:0;
+      display:grid;
+      grid-template-columns:225px minmax(0,1fr) 292px;
+      gap:5px;
+      padding:5px;
+    }
+    .board-card,.side-card{
+      border:2px solid rgba(130,77,8,.30);
+      border-radius:18px;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      box-shadow:0 10px 26px var(--shadow),inset 0 0 0 2px rgba(255,255,255,.36);
+      overflow:hidden;
+    }
+    .board-card{
+      min-width:0;min-height:0;
+      position:relative;
+      padding:2px;
+      overflow:hidden;
+    }
+    .question-row{
+      min-width:0;min-height:0;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 110px;
+      gap:8px;
+    }
+    .question-box,.timer-box{
+      border:2px solid rgba(130,77,8,.24);
+      border-radius:17px;
+      background:rgba(255,255,255,.66);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.42);
+    }
+    .question-box{
+      min-width:0;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 100px;
+      gap:8px;
+      align-items:center;
+      padding:8px 12px;
+    }
+    .q-kicker{
+      color:var(--muted);
+      font-size:11px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.25px;
+    }
+    .equation{
+      margin-top:2px;
+      color:var(--accent);
+      font-family:"Segoe UI","Arial Rounded MT Bold",Arial,sans-serif;
+      font-weight:900;
+      line-height:1;
+      font-size:clamp(34px,4.8vw,62px);
+      white-space:nowrap;
+    }
+    .reward{
+      text-align:center;
+      border-radius:15px;
+      padding:7px 5px;
+      background:linear-gradient(180deg,#fff7da,#ffd26e);
+      border:1px solid rgba(130,77,8,.22);
+      font-weight:900;
+    }
+    .reward span{
+      display:block;
+      color:var(--muted);
+      font-size:10px;
+    }
+    .reward b{
+      display:block;
+      font-size:26px;
+      line-height:1;
+    }
+    .timer-box{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+    }
+    .timer-box span{
+      color:var(--muted);
+      font-size:11px;
+    }
+    .timer-box b{
+      font-size:21px;
+      line-height:1.05;
+      color:var(--ink);
+    }
+    .grid-zone{
+      min-width:0;min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      position:relative;
+    }
+    .times-grid{
+      width:var(--gridSize);
+      height:var(--gridSize);
+      flex:0 0 auto;
+      display:grid;
+      grid-template-columns:repeat(11,1fr);
+      grid-template-rows:repeat(11,1fr);
+      gap:3px;
+      padding:4px;
+      border-radius:18px;
+      background:rgba(255,255,255,.46);
+      border:2px solid rgba(130,77,8,.24);
+      box-shadow:0 8px 18px rgba(108,79,10,.10), inset 0 0 0 2px rgba(255,255,255,.38);
+    }
+    .grid-cell{
+      position:relative;
+      overflow:hidden;
+      min-width:0;min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(130,77,8,.24);
+      border-radius:11px;
+      background:
+        radial-gradient(circle at 26% 20%, rgba(255,255,255,.96), rgba(255,255,255,.10) 28%, transparent 38%),
+        radial-gradient(circle at 78% 25%, rgba(255,255,255,.42), transparent 28%),
+        linear-gradient(180deg, #ffffff 0%, #fffefc 55%, #f2f2ef 100%);
+      box-shadow:
+        0 4px 0 rgba(94,56,8,.18),
+        0 9px 15px rgba(166,125,49,.16),
+        inset 0 2px 0 rgba(255,255,255,.95),
+        inset 0 -3px 0 rgba(0,0,0,.06);
+      color:var(--ink);
+      font-family:"Segoe UI","Arial Rounded MT Bold",Arial,sans-serif;
+      font-size:clamp(10px,1.65vw,23px);
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .08s ease,filter .12s ease,background .12s ease,outline .12s ease, box-shadow .12s ease;
+      touch-action:manipulation;
+    }
+    .grid-cell::after{
+      content:"";
+      position:absolute;
+      inset:3px auto auto 5px;
+      width:55%;
+      height:34%;
+      border-radius:999px;
+      background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,0));
+      opacity:.95;
+      pointer-events:none;
+    }
+    .grid-cell.header{
+      cursor:default;
+      color:#fff;
+      background:linear-gradient(180deg,var(--header),#996b45);
+      box-shadow:0 2px 0 rgba(58,30,4,.26);
+      font-size:clamp(8px,1.2vw,16px);
+    }
+    .grid-cell.corner{
+      color:#fff;
+      background:linear-gradient(180deg,var(--accent),#a84578);
+    }
+    .grid-cell.playable:hover{filter:saturate(1.22) brightness(1.05);transform:translateY(-2px) scale(1.02);box-shadow:0 6px 0 rgba(94,56,8,.18),0 12px 18px rgba(166,125,49,.18), inset 0 2px 0 rgba(255,255,255,.98), inset 0 -3px 0 rgba(0,0,0,.06)}
+    .grid-cell.playable:active{transform:translateY(3px) scale(.99);box-shadow:0 2px 0 rgba(94,56,8,.18),0 4px 8px rgba(166,125,49,.14), inset 0 2px 0 rgba(255,255,255,.92)}
+    .grid-cell.focus-row,.grid-cell.focus-col{outline:1px solid rgba(63,126,232,.16)}
+    .grid-cell.current-line{outline:3px solid rgba(245,166,35,.86); color:#4a3b00; background:radial-gradient(circle at 26% 20%, rgba(255,255,255,.95), rgba(255,255,255,.14) 28%, transparent 38%), radial-gradient(circle at 78% 25%, rgba(255,255,255,.45), transparent 28%), linear-gradient(180deg,#fff9cf 0%, #ffe572 42%, #ffd54c 100%); filter:saturate(1.16) brightness(1.05); box-shadow:0 0 0 2px rgba(255,232,170,.55), 0 4px 0 rgba(94,56,8,.18), 0 9px 15px rgba(166,125,49,.16), inset 0 2px 0 rgba(255,255,255,.98), inset 0 -3px 0 rgba(0,0,0,.05)}
+    .grid-cell.correct{
+      color:#fff;
+      background:linear-gradient(180deg,#7df1ae,var(--good));
+      outline:3px solid rgba(255,255,255,.82);
+      animation:pop .26s ease;
+    }
+    .grid-cell.wrong{
+      color:#fff;
+      background:linear-gradient(180deg,#ffaaa0,var(--bad));
+      animation:shake .22s ease;
+    }
+    .grid-cell.answer{
+      color:#fff;
+      background:linear-gradient(180deg,#8fc1ff,var(--blue));
+      outline:3px solid rgba(255,255,255,.82);
+    }
+    .feedback{
+      min-height:0;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:8px;
+      align-items:center;
+      border:2px solid rgba(130,77,8,.22);
+      border-radius:16px;
+      background:rgba(255,255,255,.66);
+      padding:8px 10px;
+    }
+    .feedback strong{
+      display:block;
+      color:var(--accent);
+      font-size:15px;
+      line-height:1.12;
+      font-weight:900;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .feedback span{
+      display:block;
+      margin-top:2px;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.24;
+      font-weight:800;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .side{
+      min-width:0;min-height:0;
+      display:grid;
+      grid-template-rows:auto auto auto auto minmax(0,1fr);
+      gap:8px;
+      overflow:auto;
+      padding-right:2px;
+    }
+    .side-card{
+      padding:6px;
+      overflow:hidden;
+    }
+    .side-card h3{
+      margin:0 0 9px;
+      color:var(--accent);
+      font-size:11px;
+      line-height:1;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.25px;
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:6px;
+    }
+    .stat{
+      min-width:0;
+      border:1px solid rgba(130,77,8,.22);
+      border-radius:12px;
+      background:rgba(255,255,255,.62);
+      padding:5px;
+    }
+    .stat span{
+      display:block;
+      color:var(--muted);
+      font-size:8px;
+      font-weight:900;
+      letter-spacing:.15px;
+    }
+    .stat b{
+      display:block;
+      margin-top:2px;
+      font-size:16px;
+      line-height:1;
+      font-weight:900;
+    }
+    .chips,.modes,.controls,.skin-grid{
+      display:grid;
+      gap:6px;
+    }
+    .chips{grid-template-columns:repeat(6,1fr)}
+    .modes{grid-template-columns:1fr 1fr 1fr}
+    .controls{grid-template-columns:1fr 1fr; gap:8px;}
+    .skin-grid{grid-template-columns:1fr 1fr;margin-top:6px}
+    button{
+      position:relative;
+      border:0;
+      border-radius:13px;
+      min-height:34px;
+      padding:6px 7px;
+      cursor:pointer;
+      color:var(--ink);
+      font-family:"Segoe UI","Arial Rounded MT Bold",Arial,sans-serif;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.05px;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,0) 42%),
+        linear-gradient(180deg,#ffe277,#efa512);
+      box-shadow:
+        0 5px 0 rgba(84,47,4,.56),
+        0 10px 18px rgba(92,52,6,.18),
+        inset 0 2px 0 var(--btnGlow),
+        inset 0 -2px 0 rgba(0,0,0,.10);
+      touch-action:manipulation;
+      transition:transform .06s ease, filter .12s ease, box-shadow .12s ease;
+    }
+    button:hover{filter:saturate(1.18) brightness(1.04)}
+    button:active{transform:translateY(3px) scale(.99);box-shadow:0 2px 0 rgba(84,47,4,.56),0 4px 10px rgba(92,52,6,.14),inset 0 2px 0 var(--btnGlow)}
+    button.secondary{background:linear-gradient(180deg,#fff8df,#d8be73);box-shadow:0 3px 0 #806833}
+    button.green{background:linear-gradient(180deg,#c8ffbb,#55ca5f);box-shadow:0 3px 0 #2e7e34}
+    button.danger{background:linear-gradient(180deg,#ffaaa0,#e8615b);box-shadow:0 3px 0 #8a2c2b}
+    button.blue{background:linear-gradient(180deg,#b8dcff,#5d9cec);box-shadow:0 3px 0 #2a5b91}
+    button.active{
+      outline:3px solid rgba(255,255,255,.82);
+      filter:saturate(1.28) contrast(1.04);
+      transform:translateY(1px);
+    }
+    .input-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 78px;
+      gap:5px;
+      margin-top:5px;
+    }
+    input{
+      width:100%;
+      border:2px solid rgba(130,77,8,.22);
+      border-radius:11px;
+      background:rgba(255,255,255,.72);
+      padding:7px 9px;
+      font:800 10px "Segoe UI",Arial,sans-serif;
+      color:var(--ink);
+      outline:none;
+    }
+    input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(210,103,157,.14)}
+    .note{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:9px;
+      line-height:1.26;
+      font-weight:800;
+    }
+    .progress-wrap{
+      height:12px;
+      border-radius:999px;
+      overflow:hidden;
+      background:rgba(255,255,255,.62);
+      border:1px solid rgba(130,77,8,.18);
+      margin-top:7px;
+    }
+    .progress-bar{
+      width:0%;
+      height:100%;
+      background:linear-gradient(90deg,#ffb53b,var(--accent));
+      transition:width .22s ease;
+    }
+    
+    .stat.lives-stat b{
+      color:var(--heart);
+      text-shadow:0 0 10px var(--heartGlow), 0 1px 0 rgba(255,255,255,.52);
+      letter-spacing:1px;
+    }
+
+    .review-list{
+      min-height:0;
+      max-height:86px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+      padding-right:2px;
+    }
+    .review-item{
+      border:1px solid rgba(130,77,8,.20);
+      border-radius:10px;
+      padding:6px 7px;
+      background:rgba(255,255,255,.55);
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      font-weight:900;
+      font-size:12px;
+    }
+    .footer{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:3px 8px;
+      border-top:1px solid rgba(130,77,8,.16);
+      background:rgba(255,255,255,.28);
+      color:var(--muted);
+      font-size:11px;
+      font-weight:800;
+      overflow:hidden;
+    }
+    .footer span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .overlay{
+      position:fixed;
+      inset:0;
+      z-index:30;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(87,50,8,.45);
+      backdrop-filter:blur(3px);
+    }
+    .overlay.show{display:flex}
+    .modal{
+      width:min(580px,100%);
+      border:3px solid var(--line);
+      border-radius:24px;
+      padding:22px;
+      text-align:center;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      box-shadow:0 24px 70px rgba(56,29,3,.35),inset 0 0 0 2px rgba(255,255,255,.36);
+    }
+    .modal h2{
+      margin:0 0 9px;
+      color:var(--accent);
+      font-size:30px;
+      line-height:1.06;
+      font-weight:900;
+    }
+    .modal p{
+      margin:0 0 13px;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.42;
+    }
+    .mini-stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:7px;
+      margin:12px 0;
+    }
+    .spark{
+      position:absolute;
+      z-index:5;
+      pointer-events:none;
+      font-size:22px;
+      animation:spark .85s ease-out forwards;
+    }
+    @keyframes pop{0%{transform:scale(.92)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+    @keyframes spark{0%{opacity:1;transform:translateY(0) scale(.9)}100%{opacity:0;transform:translateY(-60px) scale(1.35)}}
+
+
+    .big-action{
+      min-height:36px;
+      font-size:11px;
+      text-transform:uppercase;
+    }
+    .green.big-action{
+      animation:breathButton 1.15s ease-in-out infinite alternate;
+    }
+    
+    .left-panel{
+      min-width:0;min-height:0;
+      display:grid;
+      grid-template-rows:66px minmax(0,1fr) 68px;
+      gap:6px;
+    }
+    .mini-top-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:6px;
+      min-height:0;
+    }
+    .top-chip,
+    .left-timer{
+      border:2px solid rgba(130,77,8,.24);
+      border-radius:14px;
+      background:rgba(255,255,255,.74);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.42);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-height:0;
+      padding:5px;
+    }
+    .top-chip span,
+    .left-timer span{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .top-chip b,
+    .left-timer b{
+      margin-top:4px;
+      font-size:28px;
+      line-height:1;
+      font-weight:900;
+      color:var(--ink);
+    }
+    .question-large{
+      min-height:0;
+      border:2px solid rgba(130,77,8,.24);
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.72));
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.42);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding:10px 10px 12px;
+      overflow:hidden;
+      gap:8px;
+    }
+    .question-large .q-kicker{
+      font-size:13px;
+      margin-bottom:2px;
+    }
+    .equation-vertical{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      flex:1 1 auto;
+      min-height:0;
+    }
+    .eq-tile{
+      width:min(100%, 138px);
+      min-height:54px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(circle at 28% 20%, rgba(255,255,255,.96), rgba(255,255,255,.10) 30%, transparent 40%),
+        linear-gradient(180deg,#ffffff 0%, #fffdf7 36%, #f9f6ea 100%);
+      box-shadow:
+        0 4px 0 rgba(94,56,8,.14),
+        0 10px 16px rgba(166,125,49,.12),
+        inset 0 2px 0 rgba(255,255,255,.98),
+        inset 0 -3px 0 rgba(0,0,0,.04);
+      border:1px solid rgba(130,77,8,.16);
+      color:var(--accent);
+      font-weight:900;
+      text-shadow:0 2px 0 rgba(255,255,255,.55);
+      font-family:"Segoe UI","Arial Rounded MT Bold",Arial,sans-serif;
+      font-size:clamp(42px,3.6vw,58px);
+      line-height:1;
+    }
+    .eq-a,.eq-b{ color:#7f8521; }
+    .eq-op,.eq-op-equals{ color:var(--accent); font-size:clamp(36px,3vw,48px); }
+    .eq-answer{ color:var(--accent); }
+    .hint-btn{
+      width:min(100%, 160px);
+      min-height:42px;
+      font-size:14px;
+      border-radius:16px;
+      align-self:center;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,0) 42%),
+        linear-gradient(180deg,#ffe87d,#f3b318);
+    }
+    .left-feedback{
+      min-height:0;
+      align-items:center;
+      padding:10px 12px;
+    }
+    .left-feedback strong,
+    .left-feedback span{
+      white-space:normal;
+      overflow:visible;
+      text-overflow:clip;
+    }
+    .center-board{
+      display:flex;
+      align-items:stretch;
+      justify-content:stretch;
+    }
+    .center-board .grid-zone{
+      width:100%;
+      height:100%;
+      padding:0;
+    }
+    .center-board .times-grid{
+      margin:auto;
+    }
+
+    .reward-badge{
+      position:absolute;
+      left:50%;
+      top:18px;
+      transform:translateX(-50%);
+      z-index:9;
+      display:none;
+      min-width:300px;
+      max-width:92%;
+      border:3px solid rgba(255,255,255,.86);
+      border-radius:22px;
+      padding:12px 16px;
+      text-align:center;
+      color:#fff;
+      font-weight:900;
+      background:linear-gradient(180deg,#ff7bbf,#f6a313);
+      box-shadow:0 18px 36px rgba(120,64,0,.28),inset 0 2px 0 rgba(255,255,255,.6);
+      animation:rewardPop .92s ease forwards;
+    }
+    .reward-badge.show{display:block}
+    .reward-badge b{
+      display:block;
+      font-size:26px;
+      line-height:1.05;
+      text-shadow:0 2px 0 rgba(0,0,0,.13);
+    }
+    .reward-badge span{
+      display:block;
+      margin-top:3px;
+      font-size:13px;
+    }
+    @keyframes breathButton{from{filter:saturate(1.05) brightness(1)}to{filter:saturate(1.45) brightness(1.08)}}
+    @keyframes rewardPop{
+      0%{opacity:0;transform:translateX(-50%) translateY(18px) scale(.82)}
+      18%{opacity:1;transform:translateX(-50%) translateY(0) scale(1.08)}
+      75%{opacity:1;transform:translateX(-50%) translateY(-4px) scale(1)}
+      100%{opacity:0;transform:translateX(-50%) translateY(-22px) scale(.94)}
+    }
+
+    @media (max-width:1040px){
+      .app{grid-template-rows:50px minmax(0,1fr) 23px}
+      .main{grid-template-columns:190px minmax(0,1fr) 248px;gap:5px;padding:5px}
+      .board-card{padding:4px;border-radius:15px}
+      .question-row{grid-template-columns:minmax(0,1fr) 88px}
+      .question-box{grid-template-columns:minmax(0,1fr) 80px;padding:7px 9px}
+      .equation{font-size:clamp(28px,4.2vw,48px)}
+      .reward b{font-size:21px}
+      .timer-box b{font-size:22px}
+      .side-card{padding:6px;border-radius:13px}
+      .side-card h3{font-size:11px;margin-bottom:5px}
+      .stat{padding:5px;border-radius:9px}
+      .stat span{font-size:8px}
+      .stat b{font-size:15px}
+      button{font-size:9px;min-height:27px;padding:4px 3px;border-radius:9px}
+      .note{font-size:9px}
+      input{font-size:10px;padding:5px 7px}
+      .feedback strong{font-size:13px}
+      .feedback span{font-size:10px}
+    }
+    @media (max-width:740px){
+      html,body{overflow:auto}
+      .app{
+        height:auto;
+        min-height:100vh;
+        min-height:100dvh;
+        grid-template-rows:auto auto auto;
+        overflow:visible;
+      }
+      .topbar{padding:7px 8px}
+      .title{font-size:16px}
+      .subtitle{display:none}
+      .status-pill{font-size:9px;padding:6px 7px}
+      .main{
+        display:flex;
+        flex-direction:column;
+        padding:6px;
+        overflow:visible;
+      }
+      .left-panel{grid-template-rows:auto auto auto}
+      .mini-top-grid{grid-template-columns:1fr 1fr}
+      .question-large{padding:12px 14px}
+      .question-large .q-kicker{font-size:12px;margin-bottom:6px}
+      .question-large .equation{font-size:40px}
+      .center-board{min-height:0}
+      .board-card{
+        overflow:visible;
+      }
+      .question-row{grid-template-columns:1fr}
+      .question-box{grid-template-columns:1fr 72px}
+      .timer-box{min-height:38px;flex-direction:row;gap:8px}
+      .grid-zone{overflow:visible}
+      .times-grid{
+        width:100%;
+        height:auto;
+        aspect-ratio:1/1;
+        gap:2px;
+        padding:4px;
+        border-radius:14px;
+      }
+      .grid-cell{border-radius:6px;font-size:clamp(8px,3.15vw,15px)}
+      .grid-cell.header{font-size:clamp(7px,2.6vw,12px)}
+      .feedback{grid-template-columns:1fr;min-height:auto}
+      .feedback strong,.feedback span{white-space:normal}
+      .side{display:grid;grid-template-columns:1fr;overflow:visible}
+      .chips{grid-template-columns:repeat(6,1fr)}
+      
+    .stat.lives-stat b{
+      color:var(--heart);
+      text-shadow:0 0 10px var(--heartGlow), 0 1px 0 rgba(255,255,255,.52);
+      letter-spacing:1px;
+    }
+
+    .review-list{max-height:120px}
+      .footer{font-size:9px;padding:4px 7px}
+      .modal{padding:17px;border-radius:19px}
+      .modal h2{font-size:23px}
+    }
+    @media (max-width:390px){
+      .chips{grid-template-columns:repeat(4,1fr)}
+      .modes{grid-template-columns:1fr}
+      .controls{grid-template-columns:1fr 1fr; gap:8px;}
+      .equation{font-size:27px}
+    }
+  </style>
+</head>
+<body data-skin="candy">
+  <div class="app" id="app">
+    <header class="topbar">
+      <div>
+        <div class="title">Bé Học Bảng Nhân HTML5</div>
+        <div class="subtitle">V8 · câu hỏi dọc rõ hơn · có nút gợi ý · bảng trắng nổi bật hàng cột vàng</div>
+      </div>
+      <div class="status-pill"><span class="status-dot"></span><span id="statusText">SẴN SÀNG</span></div>
+    </header>
+
+    
+    <main class="main">
+      <section class="left-panel">
+        <div class="mini-top-grid">
+          <div class="top-chip">
+            <span>SAO</span>
+            <b id="stars">0 ⭐</b>
+          </div>
+          <div class="timer-box left-timer">
+            <span id="timerLabel">GIỜ</span>
+            <b id="timer">00:00</b>
+          </div>
+        </div>
+
+        <div class="question-large">
+          <div class="q-kicker" id="questionLabel">Chọn bảng rồi bấm Chơi</div>
+          <div class="equation-vertical" id="equationWrap">
+            <div class="eq-tile eq-a" id="eqA">3</div>
+            <div class="eq-tile eq-op">×</div>
+            <div class="eq-tile eq-b" id="eqB">5</div>
+            <div class="eq-tile eq-op eq-op-equals">=</div>
+            <div class="eq-tile eq-answer" id="eqAnswer">?</div>
+          </div>
+          <button id="hintBtn" class="hint-btn">💡 Gợi ý</button>
+        </div>
+
+        <div class="feedback left-feedback">
+          <div>
+            <strong id="feedbackTitle">V8 ưu tiên câu hỏi nhìn to rõ theo chiều dọc, hàng cột liên quan nổi vàng rõ hơn.</strong>
+            <span id="feedbackText">Cột trái chỉ để bé nhìn câu hỏi thật rõ. Cột giữa là nơi bấm chính. Cột phải là nơi điều khiển.</span>
+          </div>
+          <button id="speakBtn" class="blue">Đọc</button>
+        </div>
+      </section>
+
+      <section class="board-card center-board" id="boardCard">
+        <div class="reward-badge" id="rewardBadge"><b>Thưởng!</b><span>+1 tim · +30 điểm · +1 sao</span></div>
+        <div class="grid-zone" id="gridZone">
+          <div class="times-grid" id="timesGrid" role="grid" aria-label="Bảng nhân 10 nhân 10"></div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="side-card">
+          <h3>Điểm khuyến khích</h3>
+          <div class="stats">
+            <div class="stat"><span>ĐIỂM</span><b id="score">0</b></div>
+            <div class="stat"><span>ĐÚNG</span><b id="correct">0</b></div>
+            <div class="stat"><span>SAI</span><b id="wrong">0</b></div>
+            <div class="stat lives-stat"><span>TIM</span><b id="lives">❤❤❤❤❤</b></div>
+            <div class="stat"><span>LIÊN TIẾP</span><b id="streak">0</b></div>
+            <div class="stat"><span>KỶ LỤC</span><b id="best">0</b></div>
+          </div>
+          <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+          <p class="note" id="missionText">Mục tiêu: hoàn thành bài học hôm nay.</p>
+        </section>
+
+        <section class="side-card">
+          <h3>Bé đang học bảng nào?</h3>
+          <div class="chips" id="tableChips"></div>
+          <div class="input-row">
+            <input id="tableInput" value="1,2,3,4,5,6,7,8,9,10" aria-label="Nhập danh sách bảng cần học">
+            <button id="applyTablesBtn">Áp dụng</button>
+          </div>
+          <p class="note" id="tableNote">Có thể nhập: 1,3,5,10 để chỉ trộn trong các bảng đó.</p>
+        </section>
+
+        <section class="side-card">
+          <h3>Cách ra bài</h3>
+          <div class="modes">
+            <button id="orderSeq">Tuần tự</button>
+            <button id="orderMix" class="secondary">Trộn</button>
+            <button id="orderMistake" class="secondary">Ôn lỗi</button>
+          </div>
+          <p class="note" id="orderNote">Tuần tự: đi từ ×1 đến ×10 theo bảng đã chọn.</p>
+        </section>
+
+        <section class="side-card">
+          <h3>Điều khiển</h3>
+          <div class="controls">
+            <button id="startBtn" class="green big-action">▶ Chơi</button>
+            <button id="pauseBtn" class="secondary big-action">⏸ Dừng</button>
+            <button id="skipBtn" class="secondary">⏭ Bỏ qua</button>
+            <button id="restartBtn" class="danger">↻ Lại</button>
+            <button id="voiceBtn" class="secondary">Giọng luôn bật</button>
+            <button id="sfxBtn" class="secondary">SFX bật</button>
+            <button id="musicBtn" class="secondary">Nhạc vui</button>
+            <button id="fullBtn">Full</button>
+          </div>
+          <div class="skin-grid">
+            <button id="skinCandy">Kẹo</button>
+            <button id="skinRetro" class="secondary">Retro</button>
+          </div>
+        </section>
+
+        <section class="side-card">
+          <h3>Ôn lỗi / tiến độ</h3>
+          <div class="review-list" id="reviewList"></div>
+        </section>
+      </aside>
+    </main>
+
+
+    <footer class="footer">
+      <span id="footerText">V2 · HTML5 một file · không SWF/Ruffle/Flash/CDN</span>
+      <span>GRID-QUEST-V8</span>
+    </footer>
+  </div>
+
+  <div class="overlay show" id="overlay">
+    <div class="modal">
+      <h2 id="overlayTitle">Sẵn sàng học bảng nhân?</h2>
+      <p id="overlayText">Bản này giữ toàn bộ tính năng học và đưa bố cục về dạng 3 cột rõ ràng, dễ nhìn, dễ bấm.</p>
+      <div class="mini-stats">
+        <div class="stat"><span>KỶ LỤC</span><b id="modalBest">0</b></div>
+        <div class="stat"><span>TỔNG ĐÚNG</span><b id="modalTotalCorrect">0</b></div>
+        <div class="stat"><span>CẦN ÔN</span><b id="modalMistakes">0</b></div>
+      </div>
+      <button id="overlayStartBtn" class="green big-action">▶ Bắt đầu vui học</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  const VERSION = "GridQuest_V8_VerticalHint_20260610";
+  const STORE = "multiplication_gridquest_v2";
+  const MAX = 10;
+  const DEFAULT_TABLES = [1,2,3,4,5,6,7,8,9,10];
+  const PLAY = {
+    learn:{label:"Học", lives:5, seconds:0},
+    rush:{label:"Nhanh", lives:3, seconds:90}
+  };
+
+  const $ = id => document.getElementById(id);
+  const els = {
+    app:$("app"), boardCard:$("boardCard"), gridZone:$("gridZone"), grid:$("timesGrid"), rewardBadge:$("rewardBadge"),
+    status:$("statusText"), questionLabel:$("questionLabel"), eqA:$("eqA"), eqB:$("eqB"), eqAnswer:$("eqAnswer"), hintBtn:$("hintBtn"),
+    feedbackTitle:$("feedbackTitle"), feedbackText:$("feedbackText"), speakBtn:$("speakBtn"),
+    score:$("score"), correct:$("correct"), wrong:$("wrong"), lives:$("lives"),
+    streak:$("streak"), best:$("best"), stars:$("stars"), timer:$("timer"), timerLabel:$("timerLabel"),
+    progressBar:$("progressBar"), missionText:$("missionText"), tableChips:$("tableChips"),
+    tableInput:$("tableInput"), tableNote:$("tableNote"), orderNote:$("orderNote"),
+    reviewList:$("reviewList"), overlay:$("overlay"), overlayTitle:$("overlayTitle"),
+    overlayText:$("overlayText"), modalBest:$("modalBest"), modalTotalCorrect:$("modalTotalCorrect"),
+    modalMistakes:$("modalMistakes"), footerText:$("footerText")
+  };
+
+  let profile = loadProfile();
+  let selectedTables = loadTables();
+  let orderMode = localStorage.getItem("gq2_order") || "seq";
+  if(!["seq","mix","mistake"].includes(orderMode)) orderMode = "seq";
+  let playMode = localStorage.getItem("gq2_play") || "learn";
+  if(!PLAY[playMode]) playMode = "learn";
+  let skin = localStorage.getItem("gq2_skin") || "candy";
+  if(!["candy","retro"].includes(skin)) skin = "candy";
+  document.body.dataset.skin = skin;
+
+  let state = freshState();
+  let pool = [];
+  let seqIndex = 0;
+  let ticker = null;
+  let audioCtx = null;
+  let musicTimer = null;
+  let musicStep = 0;
+  let sfxOn = localStorage.getItem("gq2_sfx") !== "off";
+  let voiceOn = true;
+  let musicOn = localStorage.getItem("gq2_music") !== "off";
+  let chosenVoice = null;
+
+  function freshState(){
+    return {
+      active:false, paused:false, ended:false, locked:false,
+      score:0, correct:0, wrong:0, lives:PLAY[playMode].lives,
+      streak:0, maxStreak:0, stars:0, answered:0, targetRounds:10,
+      secondsLeft:PLAY[playMode].seconds, elapsed:0, question:null, hintUsed:false
+    };
+  }
+
+  function loadProfile(){
+    const base = {best:0,totalCorrect:0,totalWrong:0,totalPlayed:0,bestStreak:0,mistakes:{},tables:{}};
+    try{
+      const got = JSON.parse(localStorage.getItem(STORE) || "null");
+      if(got && typeof got === "object") return Object.assign(base, got);
+    }catch(e){}
+    return base;
+  }
+  function saveProfile(){try{localStorage.setItem(STORE, JSON.stringify(profile));}catch(e){}}
+
+  function loadTables(){
+    try{
+      const got = JSON.parse(localStorage.getItem("gq2_tables") || "null");
+      if(Array.isArray(got)) return sanitizeTables(got);
+    }catch(e){}
+    return DEFAULT_TABLES.slice();
+  }
+  function saveTables(){
+    localStorage.setItem("gq2_tables", JSON.stringify(selectedTables));
+    els.tableInput.value = selectedTables.join(",");
+  }
+  function sanitizeTables(list){
+    const out = [];
+    list.forEach(v=>{
+      const n = Number(String(v).trim());
+      if(Number.isInteger(n) && n>=1 && n<=10 && !out.includes(n)) out.push(n);
+    });
+    return out.length ? out.sort((a,b)=>a-b) : DEFAULT_TABLES.slice();
+  }
+  function parseInputTables(){
+    return sanitizeTables(els.tableInput.value.split(/[,\s;]+/));
+  }
+  function tableLabel(){
+    return selectedTables.length === 10 ? "Tất cả 1–10" : selectedTables.join(", ");
+  }
+
+  function fmt(sec){
+    sec = Math.max(0, Math.floor(sec));
+    return String(Math.floor(sec/60)).padStart(2,"0") + ":" + String(sec%60).padStart(2,"0");
+  }
+  function rand(n){return Math.floor(Math.random()*n)}
+  function choice(arr){return arr[rand(arr.length)]}
+  function qKey(q){return q.a + "x" + q.b}
+
+  function buildPool(){
+    pool = [];
+    if(orderMode === "mistake"){
+      Object.entries(profile.mistakes || {})
+        .filter(([,v])=>v>0)
+        .sort((a,b)=>b[1]-a[1])
+        .forEach(([k])=>{
+          const parts = k.split("x").map(Number);
+          if(parts.length === 2 && parts[0] && parts[1]) pool.push({a:parts[0], b:parts[1], answer:parts[0]*parts[1]});
+        });
+      if(pool.length) return pool;
+    }
+    selectedTables.forEach(t=>{
+      for(let n=1;n<=MAX;n++) pool.push({a:t,b:n,answer:t*n});
+    });
+    return pool;
+  }
+
+  function makeQuestion(){
+    buildPool();
+    if(!pool.length) buildPool();
+    let q;
+    if(orderMode === "seq"){
+      q = pool[seqIndex % pool.length];
+      seqIndex++;
+    }else if(orderMode === "mistake" && pool.length){
+      q = choice(pool.slice(0, Math.min(pool.length, 12)));
+    }else{
+      q = choice(pool);
+      if(Math.random() < .45){
+        q = {a:q.b,b:q.a,answer:q.answer};
+      }
+    }
+    return {a:q.a,b:q.b,answer:q.answer,startedAt:Date.now()};
+  }
+
+  function targetRounds(){
+    buildPool();
+    if(orderMode === "seq") return pool.length;
+    if(orderMode === "mistake") return Math.max(10, Math.min(25, pool.length || 10));
+    return playMode === "rush" ? 999 : 20;
+  }
+
+  function buildGrid(){
+    els.grid.innerHTML = "";
+    for(let r=0;r<=MAX;r++){
+      for(let c=0;c<=MAX;c++){
+        const cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "grid-cell";
+        if(r===0 && c===0){
+          cell.classList.add("header","corner");
+          cell.textContent = "×";
+          cell.disabled = true;
+        }else if(r===0){
+          cell.classList.add("header");
+          cell.textContent = c;
+          cell.disabled = true;
+        }else if(c===0){
+          cell.classList.add("header");
+          cell.textContent = r;
+          cell.disabled = true;
+        }else{
+          cell.classList.add("playable");
+          cell.textContent = r*c;
+          cell.dataset.a = r;
+          cell.dataset.b = c;
+          cell.dataset.answer = r*c;
+          cell.setAttribute("aria-label", r + " nhân " + c + " bằng " + (r*c));
+          cell.addEventListener("click",()=>selectCell(cell));
+        }
+        els.grid.appendChild(cell);
+      }
+    }
+    applyGridFocus();
+    fitGrid();
+  }
+
+  function fitGrid(){
+    if(window.innerWidth <= 740) return;
+    const r = els.gridZone.getBoundingClientRect();
+    const side = Math.max(455, Math.floor(Math.min(r.width - 1, r.height - 1)));
+    document.documentElement.style.setProperty("--gridSize", side + "px");
+  }
+
+  function setupResize(){
+    window.addEventListener("resize", fitGrid);
+    window.addEventListener("orientationchange",()=>setTimeout(fitGrid,150));
+    if("ResizeObserver" in window){
+      new ResizeObserver(fitGrid).observe(els.gridZone);
+    }
+    setTimeout(fitGrid,60);
+  }
+
+  function applyGridFocus(){
+    els.grid.querySelectorAll(".grid-cell").forEach(cell=>{
+      cell.classList.remove("focus-row","focus-col","current-line","correct","wrong","answer");
+      if(!cell.dataset.a) return;
+      const a = Number(cell.dataset.a), b = Number(cell.dataset.b);
+      if(selectedTables.includes(a)) cell.classList.add("focus-row");
+      if(selectedTables.includes(b)) cell.classList.add("focus-col");
+      if(state.question && (a===state.question.a || b===state.question.b)) cell.classList.add("current-line");
+    });
+  }
+  function clearMarks(){
+    els.grid.querySelectorAll(".grid-cell").forEach(cell=>cell.classList.remove("correct","wrong","answer","current-line"));
+    applyGridFocus();
+  }
+  function markAnswer(cls){
+    if(!state.question) return;
+    els.grid.querySelectorAll(".grid-cell.playable").forEach(cell=>{
+      if(Number(cell.dataset.answer) === state.question.answer) cell.classList.add(cls);
+    });
+  }
+
+  function renderChips(){
+    els.tableChips.innerHTML = "";
+    const allBtn = document.createElement("button");
+    allBtn.type = "button";
+    allBtn.textContent = "ALL";
+    allBtn.className = selectedTables.length === 10 ? "" : "secondary";
+    allBtn.classList.toggle("active", selectedTables.length === 10);
+    allBtn.addEventListener("click",()=>{
+      selectedTables = DEFAULT_TABLES.slice();
+      saveTables(); renderAll(); setFeedback("Đã chọn toàn bộ bảng 1–10.", "Chế độ này hợp khi bé đã học đủ 10 bảng.");
+      chime([523,659]);
+    });
+    els.tableChips.appendChild(allBtn);
+
+    for(let i=1;i<=10;i++){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = String(i);
+      const active = selectedTables.includes(i);
+      b.className = active ? "" : "secondary";
+      b.classList.toggle("active", active);
+      b.addEventListener("click",()=>{
+        if(selectedTables.includes(i)){
+          if(selectedTables.length > 1) selectedTables = selectedTables.filter(x=>x!==i);
+        }else selectedTables.push(i);
+        selectedTables = sanitizeTables(selectedTables);
+        saveTables(); renderAll();
+        setFeedback("Phạm vi học: " + tableLabel() + ".", "Chỉ ra câu hỏi trong các bảng bé đang học.");
+        chime([600,760]);
+      });
+      els.tableChips.appendChild(b);
+    }
+  }
+
+  function renderOrderButtons(){
+    const map = {orderSeq:"seq", orderMix:"mix", orderMistake:"mistake"};
+    Object.entries(map).forEach(([id,val])=>{
+      const b = $(id);
+      b.classList.toggle("active", orderMode === val);
+      b.classList.toggle("secondary", orderMode !== val);
+    });
+    if(orderMode === "seq") els.orderNote.textContent = "Tuần tự: đi từ ×1 đến ×10 theo từng bảng đã chọn.";
+    if(orderMode === "mix") els.orderNote.textContent = "Trộn: hỏi ngẫu nhiên nhưng chỉ trong phạm vi bảng bé đang học.";
+    if(orderMode === "mistake") els.orderNote.textContent = "Ôn lỗi: ưu tiên các phép bé từng trả lời sai.";
+  }
+
+  function renderReview(){
+    const entries = Object.entries(profile.mistakes || {})
+      .filter(([,v])=>v>0)
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,8);
+    els.reviewList.innerHTML = "";
+    if(!entries.length){
+      const div = document.createElement("div");
+      div.className = "review-item";
+      div.innerHTML = "<span>Chưa có lỗi cần ôn</span><b>✓</b>";
+      els.reviewList.appendChild(div);
+      return;
+    }
+    entries.forEach(([k,v])=>{
+      const [a,b] = k.split("x").map(Number);
+      const item = document.createElement("div");
+      item.className = "review-item";
+      item.innerHTML = "<span>" + a + " × " + b + " = " + (a*b) + "</span><b>x" + v + "</b>";
+      item.addEventListener("click",()=>{
+        selectedTables = sanitizeTables([a]);
+        orderMode = "seq";
+        saveTables();
+        localStorage.setItem("gq2_order", orderMode);
+        renderAll();
+        setFeedback("Đã chuyển sang ôn bảng " + a + ".", a + " × " + b + " = " + (a*b));
+      });
+      els.reviewList.appendChild(item);
+    });
+  }
+
+  function renderAll(){
+    renderChips();
+    renderOrderButtons();
+    applyGridFocus();
+    updateUI();
+    els.tableNote.textContent = "Phạm vi hiện tại: " + tableLabel() + ". Có thể nhập ví dụ: 1,3,5,10.";
+    els.footerText.textContent = VERSION + " · Phạm vi: " + tableLabel() + " · Cách học: " + orderName();
+  }
+
+  function orderName(){
+    return orderMode === "seq" ? "Tuần tự" : orderMode === "mix" ? "Trộn" : "Ôn lỗi";
+  }
+
+  function updateUI(){
+    els.score.textContent = state.score;
+    els.correct.textContent = state.correct;
+    els.wrong.textContent = state.wrong;
+    els.lives.textContent = "❤".repeat(Math.max(0,state.lives)) || "0";
+    els.streak.textContent = state.streak;
+    els.best.textContent = profile.best || 0;
+    els.stars.textContent = state.stars + " ⭐";
+    els.modalBest.textContent = profile.best || 0;
+    els.modalTotalCorrect.textContent = profile.totalCorrect || 0;
+    els.modalMistakes.textContent = Object.keys(profile.mistakes || {}).filter(k=>profile.mistakes[k]>0).length;
+    els.status.textContent = state.paused ? "TẠM DỪNG" : (state.active ? "ĐANG CHƠI" : "SẴN SÀNG");
+    if(PLAY[playMode].seconds){
+      els.timerLabel.textContent = "CÒN";
+      els.timer.textContent = fmt(state.secondsLeft);
+    }else{
+      els.timerLabel.textContent = "GIỜ";
+      els.timer.textContent = fmt(state.elapsed);
+    }
+    const pct = state.targetRounds ? Math.min(100, Math.round(state.answered / state.targetRounds * 100)) : 0;
+    els.progressBar.style.width = pct + "%";
+    els.missionText.textContent = "Mục tiêu: " + state.answered + "/" + state.targetRounds + " câu · " + tableLabel() + " · " + orderName() + ".";
+    $("voiceBtn").textContent = "Giọng luôn bật";
+    $("sfxBtn").textContent = sfxOn ? "SFX bật" : "SFX tắt";
+    $("musicBtn").textContent = musicOn ? "Nhạc vui" : "Nhạc tắt";
+    $("skinCandy").classList.toggle("active", skin === "candy");
+    $("skinCandy").classList.toggle("secondary", skin !== "candy");
+    $("skinRetro").classList.toggle("active", skin === "retro");
+    $("skinRetro").classList.toggle("secondary", skin !== "retro");
+    renderReview();
+  }
+
+  function setFeedback(title,text){
+    els.feedbackTitle.textContent = title;
+    els.feedbackText.textContent = text;
+  }
+
+  function startGame(){
+    unlockAudio();
+    hideOverlay();
+    stopTicker();
+    speechCancel();
+    seqIndex = 0;
+    buildPool();
+    state = freshState();
+    state.active = true;
+    state.targetRounds = targetRounds();
+    if(orderMode === "mistake" && !Object.values(profile.mistakes || {}).some(v=>v>0)){
+      setFeedback("Chưa có lỗi cũ, chuyển sang học tuần tự.", "Sau khi bé trả lời sai, mục Ôn lỗi sẽ có dữ liệu.");
+      orderMode = "seq";
+      localStorage.setItem("gq2_order", orderMode);
+      buildPool();
+      state.targetRounds = targetRounds();
+    }
+    nextQuestion(true);
+    startTicker();
+    startMusic();
+    chime([523,659,784,1046],.028,.04);
+    updateUI();
+    speakQuestion(true);
+  }
+
+  function restartGame(){ startGame(); }
+
+  function pauseGame(){
+    if(!state.active || state.ended) return;
+    state.paused = !state.paused;
+    setFeedback(state.paused ? "Đã tạm dừng." : "Chơi tiếp nào!", state.paused ? "Bấm Dừng lần nữa để tiếp tục." : "Tập trung nhìn phép tính và bấm ô kết quả.");
+    if(state.paused){ stopMusic(); tone(196,.07,.026); }
+    else { startMusic(); tone(784,.07,.026); }
+    updateUI();
+    speakQuestion(true);
+  }
+
+  function renderEquation(a,b,showAnswer=false,answerValue="?"){
+    els.eqA.textContent = a ?? "";
+    els.eqB.textContent = b ?? "";
+    els.eqAnswer.textContent = showAnswer ? String(answerValue) : "?";
+  }
+
+  function showHint(){
+    if(!state.active || state.paused || state.ended || !state.question) return;
+    state.hintUsed = true;
+    renderEquation(state.question.a, state.question.b, true, state.question.answer);
+    setFeedback("Gợi ý: đáp án là " + state.question.answer + ".", "Kết quả là " + state.question.answer + ". Bé tìm số rồi ấn vào nhé.");
+    chime([784,1046,1318], .035, .04);
+    speak("Gợi ý nhé. Kết quả là " + state.question.answer + ". Bé tìm số rồi ấn vào nhé.");
+  }
+
+  function nextQuestion(fromStart){
+    if(!state.active || state.ended) return;
+    state.locked = false;
+    state.hintUsed = false;
+    clearMarks();
+    state.question = makeQuestion();
+    els.questionLabel.textContent = "Câu " + (state.answered + 1) + "/" + state.targetRounds + " · " + tableLabel() + " · " + orderName();
+    renderEquation(state.question.a, state.question.b, false, "?");
+    applyGridFocus();
+    if(fromStart) setFeedback("Bắt đầu bài học.", "Bấm vào ô kết quả đúng trong bảng tổng quan. Nếu cần thì bấm Gợi ý.");
+    updateUI();
+    speakQuestion(true);
+  }
+
+
+  function correctPraiseText(){
+    const list = [
+      "Bạn đúng rồi! Giỏi lắm!",
+      "Chính xác! Con làm rất tốt!",
+      "Tuyệt vời! Tiếp tục nào!",
+      "Đúng rồi! Thêm một bước tiến!",
+      "Rất nhanh và rất đúng!",
+      "Con đang học bảng nhân rất tốt!"
+    ];
+    return choice(list);
+  }
+
+  function rewardEveryThree(){
+    state.lives = Math.min(9, state.lives + 1);
+    state.score += 30;
+    state.stars += 1;
+    showReward("+1 tim · +30 điểm · +1 sao", "3 câu đúng liên tiếp!");
+    burstStars();
+    chime([523,659,784,1046,1318,1568], .050, .042);
+    speak("Thưởng lớn! Con đúng 3 câu liên tiếp, được thêm một tim!");
+  }
+
+  function showReward(line1,line2){
+    if(!els.rewardBadge) return;
+    els.rewardBadge.innerHTML = "<b>" + line1 + "</b><span>" + line2 + "</span>";
+    els.rewardBadge.classList.remove("show");
+    void els.rewardBadge.offsetWidth;
+    els.rewardBadge.classList.add("show");
+    setTimeout(()=>els.rewardBadge.classList.remove("show"), 1050);
+  }
+
+  function selectCell(cell){
+    if(!state.active || state.paused || state.ended || state.locked || !state.question) return;
+    unlockAudio();
+    const picked = Number(cell.dataset.answer);
+    const q = state.question;
+    if(picked === q.answer){
+      cell.classList.add("correct");
+      markAnswer("correct");
+      state.correct++;
+      state.answered++;
+      state.streak++;
+      state.maxStreak = Math.max(state.maxStreak, state.streak);
+      const speedBonus = Math.max(0, 6 - Math.floor((Date.now() - q.startedAt)/1000));
+      const comboBonus = Math.min(20, state.streak * 2);
+      state.score += 10 + speedBonus + comboBonus;
+      state.stars = Math.floor(state.score / 50);
+      recordCorrect(q);
+      renderEquation(q.a, q.b, true, q.answer);
+      const praiseText = correctPraiseText();
+      setFeedback("Đúng rồi! " + q.a + " × " + q.b + " = " + q.answer, praiseText);
+      chime(state.streak % 3 === 0 ? [660,880,1108,1320] : [660,880,1046],.042,.040);
+      speak(praiseText);
+      if(state.streak > 0 && state.streak % 3 === 0) rewardEveryThree();
+      else if(state.streak % 5 === 0) burstStars();
+      if(checkEnd()) return;
+      state.locked = true;
+      setTimeout(()=>nextQuestion(false), 620);
+    }else{
+      cell.classList.add("wrong");
+      state.wrong++;
+      state.lives--;
+      state.streak = 0;
+      recordMistake(q);
+      setFeedback("Chưa đúng. Ô vừa bấm là " + picked + ".", explain(q));
+      tone(120,.10,.030,0,70);
+      if(navigator.vibrate) navigator.vibrate(70);
+      speak("Chưa đúng. " + q.a + " nhân " + q.b + " bằng " + q.answer + ".");
+      if(state.lives <= 0){
+        markAnswer("answer");
+        setTimeout(()=>endGame("Hết tim rồi!", "Không sao, mình xem lại lỗi rồi chơi lại nhé."), 850);
+      }
+    }
+    updateUI();
+  }
+
+  function skipQuestion(){
+    if(!state.active || state.paused || state.ended || state.locked) return;
+    const q = state.question;
+    renderEquation(q.a, q.b, true, q.answer);
+    state.wrong++;
+    state.answered++;
+    state.lives--;
+    state.streak = 0;
+    recordMistake(q);
+    markAnswer("answer");
+    setFeedback("Đáp án là " + q.answer + ".", explain(q));
+    tone(150,.08,.028,0,90);
+    if(checkEnd()) return;
+    state.locked = true;
+    setTimeout(()=>nextQuestion(false), 850);
+    updateUI();
+  }
+
+  function checkEnd(){
+    if(!state.active) return true;
+    if(state.answered >= state.targetRounds){
+      setTimeout(()=>endGame("Hoàn thành bài học!", "Bé đã hoàn thành mục tiêu hôm nay."), 720);
+      return true;
+    }
+    if(state.lives <= 0){
+      setTimeout(()=>endGame("Hết tim rồi!", "Không sao, mình ôn lại phép sai rồi thử lại."), 720);
+      return true;
+    }
+    return false;
+  }
+
+  function endGame(title,text){
+    if(state.ended) return;
+    state.active = false;
+    state.ended = true;
+    state.paused = false;
+    stopTicker();
+    stopMusic();
+    speechCancel();
+    profile.totalPlayed++;
+    profile.best = Math.max(profile.best || 0, state.score);
+    profile.bestStreak = Math.max(profile.bestStreak || 0, state.maxStreak);
+    saveProfile();
+    updateUI();
+    showOverlay(title, text + " Điểm: " + state.score + " · Đúng: " + state.correct + " · Sai: " + state.wrong + " · Sao: " + state.stars + ".");
+    chime([1046,784,587,392,247],.03,.055);
+  }
+
+  function recordCorrect(q){
+    profile.totalCorrect = (profile.totalCorrect || 0) + 1;
+    profile.mistakes = profile.mistakes || {};
+    const k = qKey(q);
+    const k2 = q.b + "x" + q.a;
+    if(profile.mistakes[k]) profile.mistakes[k] = Math.max(0, profile.mistakes[k] - 1);
+    if(profile.mistakes[k2]) profile.mistakes[k2] = Math.max(0, profile.mistakes[k2] - 1);
+    tableRecord(q.a,"correct"); tableRecord(q.b,"correct");
+    saveProfile();
+  }
+  function recordMistake(q){
+    profile.totalWrong = (profile.totalWrong || 0) + 1;
+    profile.mistakes = profile.mistakes || {};
+    const k = qKey(q);
+    profile.mistakes[k] = (profile.mistakes[k] || 0) + 1;
+    tableRecord(q.a,"wrong"); tableRecord(q.b,"wrong");
+    saveProfile();
+  }
+  function tableRecord(t,kind){
+    profile.tables = profile.tables || {};
+    profile.tables[t] = profile.tables[t] || {correct:0,wrong:0};
+    profile.tables[t][kind] = (profile.tables[t][kind] || 0) + 1;
+  }
+
+  function explain(q){
+    let base = q.a + " × " + q.b + " nghĩa là " + q.a + " nhóm, mỗi nhóm " + q.b + ". ";
+    if(q.a <= 6){
+      base += "Có thể cộng: " + Array.from({length:q.a},()=>q.b).join(" + ") + " = " + q.answer + ".";
+    }else{
+      base += "Có thể đổi chỗ thành " + q.b + " × " + q.a + ", kết quả vẫn là " + q.answer + ".";
+    }
+    if(q.a === 10 || q.b === 10) base += " Mẹo ×10: thêm số 0.";
+    else if(q.a === 5 || q.b === 5) base += " Mẹo ×5: kết quả thường tận cùng 0 hoặc 5.";
+    else if(q.a === 9 || q.b === 9) base += " Mẹo ×9: tổng chữ số thường bằng 9.";
+    return base;
+  }
+
+  function praise(){
+    const list = [
+      "Rất tốt, bé đang nhớ bảng nhân tốt hơn!",
+      "Giỏi lắm, tiếp tục giữ nhịp nhé!",
+      "Chính xác! Một ngôi sao đang đến gần.",
+      "Tuyệt vời, nhìn bảng rất nhanh!",
+      "Đúng rồi, bài tiếp theo nào!"
+    ];
+    return choice(list);
+  }
+
+  function burstStars(){
+    const icons = ["⭐","🌟","✨","🎉","🏆"];
+    const rect = els.boardCard.getBoundingClientRect();
+    for(let i=0;i<16;i++){
+      const s = document.createElement("div");
+      s.className = "spark";
+      s.textContent = choice(icons);
+      s.style.left = (20 + Math.random() * (rect.width - 50)) + "px";
+      s.style.top = (80 + Math.random() * 210) + "px";
+      s.style.animationDelay = (Math.random() * .16) + "s";
+      els.boardCard.appendChild(s);
+      setTimeout(()=>s.remove(),1100);
+    }
+  }
+
+  function startTicker(){
+    stopTicker();
+    ticker = setInterval(()=>{
+      if(!state.active || state.paused || state.ended) return;
+      state.elapsed++;
+      if(PLAY[playMode].seconds){
+        state.secondsLeft--;
+        if(state.secondsLeft <= 0){
+          state.secondsLeft = 0;
+          updateUI();
+          endGame("Hết giờ!", "Bé đã hoàn thành lượt chơi nhanh.");
+          return;
+        }
+      }
+      updateUI();
+    },1000);
+  }
+  function stopTicker(){ if(ticker){clearInterval(ticker); ticker=null;} }
+
+  function showOverlay(title,text){
+    els.overlayTitle.textContent = title;
+    els.overlayText.textContent = text;
+    els.overlay.classList.add("show");
+    updateUI();
+  }
+  function hideOverlay(){ els.overlay.classList.remove("show"); }
+
+  function unlockAudio(){
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === "suspended") audioCtx.resume();
+    }catch(e){}
+  }
+  function tone(freq=440,dur=.05,gain=.035,delay=0,slideTo=null){
+    if(!sfxOn && gain > .018) return;
+    try{
+      unlockAudio();
+      const ac = audioCtx, t0 = ac.currentTime + delay;
+      const osc = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(freq,t0);
+      if(slideTo) osc.frequency.exponentialRampToValueAtTime(Math.max(40,slideTo),t0+dur);
+      f.type = "lowpass";
+      f.frequency.setValueAtTime(skin === "retro" ? 1500 : 2400,t0);
+      g.gain.setValueAtTime(.0001,t0);
+      g.gain.exponentialRampToValueAtTime(gain,t0+.006);
+      g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+      osc.connect(f); f.connect(g); g.connect(ac.destination);
+      osc.start(t0); osc.stop(t0+dur+.025);
+    }catch(e){}
+  }
+  function chime(freqs,g=.035,step=.045){ if(!sfxOn) return; freqs.forEach((f,i)=>tone(f,step*1.25,g,i*step)); }
+
+  const MUSIC = {
+    candy:[523,659,784,1046,784,659,523,659,698,880,698,659,587,659,784,988,784,659,587,523,659,784,659,523,0],
+    retro:[392,523,659,784,659,523,392,494,587,740,587,494,440,523,659,784,659,523,440,392,523,659,523,392,0]
+  };
+  function startMusic(){
+    stopMusic();
+    if(!musicOn || !state.active || state.paused || state.ended) return;
+    const tick = ()=>{
+      if(!musicOn || !state.active || state.paused || state.ended){musicTimer=null;return;}
+      const seq = MUSIC[skin] || MUSIC.candy;
+      const note = seq[musicStep % seq.length]; 
+      if(note){
+        tone(note,.12,skin === "retro" ? .070 : .090);
+        if(musicStep % 2 === 0) tone(note*1.25,.06,skin === "retro" ? .026 : .035,.02);
+        if(musicStep % 4 === 0) tone(note/2,.09,skin === "retro" ? .034 : .045,.04);
+      }
+      musicStep++;
+      musicTimer = setTimeout(tick,220);
+    };
+    tick();
+  }
+  function stopMusic(){ if(musicTimer){clearTimeout(musicTimer);musicTimer=null;} }
+
+  function initVoices(){
+    if(!("speechSynthesis" in window)) return;
+    const voices = speechSynthesis.getVoices();
+    if(!voices || !voices.length) return;
+    const cached = localStorage.getItem("gq2_voice_name");
+    chosenVoice =
+      voices.find(v=>v.name === cached) ||
+      voices.find(v=>/Microsoft An/i.test(v.name) && /vi/i.test(v.lang)) ||
+      voices.find(v=>/vi[-_]?VN/i.test(v.lang) && /Google/i.test(v.name)) ||
+      voices.find(v=>/vi/i.test(v.lang)) ||
+      voices[0];
+    if(chosenVoice) localStorage.setItem("gq2_voice_name", chosenVoice.name);
+  }
+  if("speechSynthesis" in window){
+    initVoices();
+    speechSynthesis.onvoiceschanged = initVoices;
+  }
+  function speechCancel(){ try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} }
+  function speak(text){
+    if(!voiceOn || !("speechSynthesis" in window)) return;
+    try{
+      initVoices();
+      speechCancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "vi-VN";
+      u.rate = 1.02;
+      u.pitch = 1;
+      u.volume = 1;
+      if(chosenVoice) u.voice = chosenVoice;
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  function speakQuestion(force){
+    if(!state.question) return;
+    speak(state.question.a + " nhân " + state.question.b + " bằng bao nhiêu?");
+  }
+
+  function bind(){
+    $("overlayStartBtn").addEventListener("click",startGame);
+    $("startBtn").addEventListener("click",startGame);
+    $("pauseBtn").addEventListener("click",pauseGame);
+    $("restartBtn").addEventListener("click",restartGame);
+    $("skipBtn").addEventListener("click",skipQuestion);
+    $("speakBtn").addEventListener("click",()=>{unlockAudio();speakQuestion(true);});
+    $("hintBtn").addEventListener("click",showHint);
+    $("applyTablesBtn").addEventListener("click",()=>{
+      selectedTables = parseInputTables();
+      saveTables(); renderAll();
+      setFeedback("Đã áp dụng phạm vi: " + tableLabel() + ".", "Bài sẽ chỉ hỏi trong các bảng bé đang học.");
+      chime([523,659,784]);
+    });
+    $("orderSeq").addEventListener("click",()=>{orderMode="seq";localStorage.setItem("gq2_order",orderMode);renderAll();setFeedback("Đã chọn học tuần tự.", "Đi từ ×1 đến ×10 theo từng bảng.");});
+    $("orderMix").addEventListener("click",()=>{orderMode="mix";localStorage.setItem("gq2_order",orderMode);renderAll();setFeedback("Đã chọn trộn trong phạm vi.", "Chỉ trộn các bảng: " + tableLabel() + ".");});
+    $("orderMistake").addEventListener("click",()=>{orderMode="mistake";localStorage.setItem("gq2_order",orderMode);renderAll();setFeedback("Đã chọn ôn lỗi.", "Ưu tiên các phép bé từng làm sai.");});
+    $("voiceBtn").addEventListener("click",()=>{voiceOn=true; updateUI(); speakQuestion(true);});
+    $("sfxBtn").addEventListener("click",()=>{unlockAudio();sfxOn=!sfxOn;localStorage.setItem("gq2_sfx",sfxOn?"on":"off");updateUI(); if(sfxOn)chime([523,659,784]);});
+    $("musicBtn").addEventListener("click",()=>{unlockAudio();musicOn=!musicOn;localStorage.setItem("gq2_music",musicOn?"on":"off");updateUI(); if(musicOn)startMusic(); else stopMusic();});
+    $("skinCandy").addEventListener("click",()=>{skin="candy";document.body.dataset.skin=skin;localStorage.setItem("gq2_skin",skin);renderAll();chime([660,880]);});
+    $("skinRetro").addEventListener("click",()=>{skin="retro";document.body.dataset.skin=skin;localStorage.setItem("gq2_skin",skin);renderAll();chime([660,880]);});
+    $("fullBtn").addEventListener("click",async()=>{try{if(!document.fullscreenElement)await els.app.requestFullscreen();else await document.exitFullscreen();setTimeout(fitGrid,120);}catch(e){}});
+    document.addEventListener("keydown",e=>{
+      if(e.key==="Enter" && (!state.active || state.ended)) startGame();
+      if(e.key.toLowerCase()==="p") pauseGame();
+      if(e.key.toLowerCase()==="r") restartGame();
+      if(e.key.toLowerCase()==="s") skipQuestion();
+      if(e.key.toLowerCase()==="d") speakQuestion(true);
+    });
+    document.addEventListener("visibilitychange",()=>{
+      if(document.hidden){stopMusic();speechCancel();}
+      else if(musicOn && state.active && !state.paused && !state.ended) startMusic();
+    });
+  }
+
+  function init(){
+    buildGrid();
+    setupResize();
+    bind();
+    saveTables();
+    renderAll();
+    setFeedback("V8 giữ bảng giữa là trung tâm nhưng đổi cách hiển thị câu hỏi để rõ hơn với trẻ nhỏ.", "Ví dụ nhập 1,3,5,10 rồi bấm Áp dụng, sau đó chọn Trộn.");
+    showOverlay("Sẵn sàng học bảng nhân?", "Chọn các bảng bé đang học. Nếu mới học bảng 1,3,5,10 thì nhập đúng 1,3,5,10. Khi học đủ rồi hãy chọn ALL để trộn toàn bộ.");
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
