@@ -933,7 +933,7 @@
 
     <footer class="footer">
       <span id="footerText">V2 · HTML5 một file · không SWF/Ruffle/Flash/CDN</span>
-      <span>GRID-QUEST-V8</span>
+      <span>GRID-QUEST-V8-VOICEBANK</span>
     </footer>
   </div>
 
@@ -954,7 +954,7 @@
 (function(){
   "use strict";
 
-  const VERSION = "GridQuest_V8_VerticalHint_20260610";
+  const VERSION = "GridQuest_V8_VoiceBankReady_20260610";
   const STORE = "multiplication_gridquest_v2";
   const MAX = 10;
   const DEFAULT_TABLES = [1,2,3,4,5,6,7,8,9,10];
@@ -964,6 +964,51 @@
   };
 
   const $ = id => document.getElementById(id);
+
+  const BangNhanVoiceBank = {
+    ready:false,
+    loading:false,
+    map:Object.create(null),
+    current:null,
+    init:function(){
+      if(this.loading || this.ready) return;
+      this.loading = true;
+      fetch("./voicebank_bangnhan/voice_manifest.json", {cache:"force-cache"})
+        .then(r => r.ok ? r.json() : Promise.reject(new Error("voice_manifest missing")))
+        .then(j => {
+          this.map = j.map || {};
+          this.ready = true;
+          console.log("BangNhan voicebank ready:", Object.keys(this.map).length);
+        })
+        .catch(err => {
+          console.log("BangNhan voicebank not available, will use browser vi-VN voice if present:", err.message);
+        });
+    },
+    speak:function(text){
+      if(!text || !this.ready || !this.map[text]) return false;
+      try{
+        if(this.current){ this.current.pause(); this.current.currentTime = 0; }
+        const a = new Audio(this.map[text]);
+        this.current = a;
+        a.volume = 1.0;
+        a.play().catch(function(err){ console.log("VoiceBank play blocked:", err); });
+        return true;
+      }catch(e){
+        console.log("VoiceBank error:", e);
+        return false;
+      }
+    }
+  };
+  BangNhanVoiceBank.init();
+
+  function bangNhanHasVietnameseBrowserVoice(){
+    try{
+      if(!("speechSynthesis" in window)) return false;
+      const voices = speechSynthesis.getVoices() || [];
+      return voices.some(v => /vi/i.test(v.lang) || /Vietnam|Vietnamese|Tiếng Việt|Tieng Viet|Hoai|NamMinh|An/i.test(v.name));
+    }catch(e){ return false; }
+  }
+
   const els = {
     app:$("app"), boardCard:$("boardCard"), gridZone:$("gridZone"), grid:$("timesGrid"), rewardBadge:$("rewardBadge"),
     status:$("statusText"), questionLabel:$("questionLabel"), eqA:$("eqA"), eqB:$("eqB"), eqAnswer:$("eqAnswer"), hintBtn:$("hintBtn"),
@@ -1642,16 +1687,34 @@
   }
   function speechCancel(){ try{ if("speechSynthesis" in window) speechSynthesis.cancel(); }catch(e){} }
   function speak(text){
-    if(!voiceOn || !("speechSynthesis" in window)) return;
+    if(!voiceOn) return;
+
+    // Ưu tiên voicebank MP3/WAV đã tạo sẵn. Cách này không phụ thuộc Windows/Chrome có voice Việt.
+    if(BangNhanVoiceBank && BangNhanVoiceBank.speak(text)) return;
+
+    // Nếu không có voicebank, chỉ dùng Web Speech khi trình duyệt thật sự có voice tiếng Việt.
+    // Tuyệt đối không rơi về giọng tiếng Anh để tránh đọc sai cho trẻ.
+    if(!("speechSynthesis" in window)) return;
     try{
       initVoices();
+      const voices = speechSynthesis.getVoices() || [];
+      const viVoice =
+        voices.find(v => /vi/i.test(v.lang) && /An|Hoai|NamMinh|Vietnam/i.test(v.name)) ||
+        voices.find(v => /vi/i.test(v.lang)) ||
+        voices.find(v => /Vietnam|Vietnamese|Tiếng Việt|Tieng Viet/i.test(v.name));
+
+      if(!viVoice){
+        console.warn("Không có voice vi-VN và chưa có voicebank; bỏ qua đọc để không bị tiếng Anh.");
+        return;
+      }
+
       speechCancel();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "vi-VN";
       u.rate = 1.02;
       u.pitch = 1;
       u.volume = 1;
-      if(chosenVoice) u.voice = chosenVoice;
+      u.voice = viVoice;
       speechSynthesis.speak(u);
     }catch(e){}
   }
