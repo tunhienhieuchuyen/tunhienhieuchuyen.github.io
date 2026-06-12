@@ -1370,6 +1370,92 @@ body{
 </div>
 
 <div class="overlay show" id="overlay"><div class="modal"><h2>🔤 Sẵn sàng học chữ cái?</h2><p>Phát triển: @tunhienhieuchuyen. Có trên các nền tảng MXH. Bấm bắt đầu rồi chạm vào chữ để nghe đọc.</p><button id="startBtn" class="green" onclick="try{document.getElementById('overlay').classList.remove('show')}catch(e){}">▶ Bắt đầu học</button></div></div>
+
+<script id="chucai-voicebank-v5-loader">
+/* VOICEBANK V5 SCREENREADER SLOW LOUD — GitHub/PWA bridge
+   Folder requirement: /chucai/voicebank_chucai/ next to hoccungducphuc.html
+   Manifest: ./voicebank_chucai/voice_manifest.json
+*/
+(function(){
+  'use strict';
+  if(window.ChuCaiVoiceBankV5) return;
+  const VB_VERSION='CHUCAI_VOICEBANK_V5_SCREENREADER_SLOW_LOUD_20260612';
+  const state={ready:false,loading:false,base:'',manifest:null,map:Object.create(null),index:Object.create(null),audio:null,lastError:''};
+  const BASE_CANDIDATES=['voicebank_chucai/','./voicebank_chucai/','/chucai/voicebank_chucai/'];
+  function norm(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
+  function stripEmojiPrefix(s){return norm(s).replace(/^[^\wÀ-ỹ0-9]+\s*/u,'');}
+  function addIndex(k,file){
+    k=norm(k); if(!k||!file) return;
+    const vars=[k,stripEmojiPrefix(k),k.replace(/\s*\/\s*/g,' '),stripEmojiPrefix(k).replace(/\s*\/\s*/g,' ')];
+    vars.forEach(v=>{v=norm(v); if(v){state.index[v]=file; state.index[v.toLowerCase()]=file; if(/[.!?]$/.test(v)) state.index[v.replace(/[.!?]+$/,'')]=file;}});
+  }
+  function indexManifest(m){
+    state.map=m&&m.map?m.map:Object.create(null);
+    state.index=Object.create(null);
+    Object.keys(state.map).forEach(k=>addIndex(k,state.map[k]));
+    if(m&&Array.isArray(m.items)){
+      m.items.forEach(it=>{ if(it&&it.text&&it.file) addIndex(it.text,it.file); });
+    }
+  }
+  async function load(){
+    if(state.ready) return true;
+    if(state.loading) return false;
+    state.loading=true;
+    for(const base of BASE_CANDIDATES){
+      try{
+        const url=base+'voice_manifest.json?v=20260612_v5';
+        const res=await fetch(url,{cache:'no-cache'});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const m=await res.json();
+        indexManifest(m);
+        state.base=base;
+        state.manifest=m;
+        state.ready=true;
+        state.loading=false;
+        document.documentElement.classList.add('chucai-voicebank-ready');
+        console.info('[ChuCaiVoiceBankV5] ready', base, Object.keys(state.index).length);
+        return true;
+      }catch(e){state.lastError=String(e&&e.message||e);}
+    }
+    state.loading=false;
+    console.warn('[ChuCaiVoiceBankV5] not ready:', state.lastError);
+    return false;
+  }
+  function findFile(text){
+    const k=norm(text); if(!k) return '';
+    return state.index[k] || state.index[k.toLowerCase()] || state.index[stripEmojiPrefix(k)] || state.index[k.replace(/\s*\/\s*/g,' ')] || '';
+  }
+  function stop(){
+    try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+    try{ if(state.audio){ state.audio.pause(); state.audio.currentTime=0; } }catch(e){}
+  }
+  function play(text,onend){
+    const k=norm(text);
+    if(!k) return false;
+    if(!state.ready){ load(); return false; }
+    const file=findFile(k);
+    if(!file) return false;
+    try{
+      stop();
+      const src=state.base + file;
+      const a=new Audio(src);
+      state.audio=a;
+      a.preload='auto';
+      a.volume=1;
+      let done=false;
+      const finish=()=>{ if(done) return; done=true; if(typeof onend==='function') setTimeout(onend,120); };
+      a.onended=finish;
+      a.onerror=function(){ console.warn('[ChuCaiVoiceBankV5] audio error', k, src); finish(); };
+      const p=a.play();
+      if(p&&p.catch) p.catch(err=>{ console.warn('[ChuCaiVoiceBankV5] play blocked', err); finish(); });
+      return true;
+    }catch(e){ console.warn('[ChuCaiVoiceBankV5] play fail', e); return false; }
+  }
+  window.ChuCaiVoiceBankV5={version:VB_VERSION,state,load,play,findFile,stop,norm};
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>load(),{once:true}); else load();
+})();
+</script>
+
 <script>
 (function(){
   'use strict';
@@ -1604,6 +1690,40 @@ function play(it){
     $('infoBtn').onclick=()=>{alert('Phát triển: @tunhienhieuchuyen\nCó trên các nền tảng MXH\nBé học chữ cái tiếng Việt qua âm thanh, hình ảnh và trò chơi.');};
     $('setAll').onclick=()=>setSet('all'); $('setVowels').onclick=()=>setSet('vowels'); $('setDigits').onclick=()=>setSet('digits'); $('modeLearn').onclick=()=>setMode('learn'); $('modeHear').onclick=()=>setMode('hear'); $('modeFind').onclick=()=>setMode('find');
   }
+
+
+  /* === VOICEBANK V5 BRIDGE: home letters/digits use /chucai/voicebank_chucai first === */
+  try{ if(window.ChuCaiVoiceBankV5) window.ChuCaiVoiceBankV5.load(); }catch(e){}
+  const __v5_oldSpeakStandardVoice=speakStandardVoice;
+  speakStandardVoice=function(text,onend){
+    try{ if(window.ChuCaiVoiceBankV5 && window.ChuCaiVoiceBankV5.play(text,onend)) return true; }catch(e){}
+    return __v5_oldSpeakStandardVoice(text,onend);
+  };
+  const __v5_oldPlayGnaVoice=playGnaVoice;
+  playGnaVoice=function(it){
+    try{
+      const key=standardSpeechForItem(it);
+      if(window.ChuCaiVoiceBankV5 && window.ChuCaiVoiceBankV5.play(key)) return;
+      const pair=(it&&it.upper&&it.lower&&it.upper!==it.lower)?(it.upper+' '+it.lower):(it&&it.upper||'');
+      if(pair && window.ChuCaiVoiceBankV5 && window.ChuCaiVoiceBankV5.play(pair)) return;
+    }catch(e){}
+    return __v5_oldPlayGnaVoice(it);
+  };
+  const __v5_oldPlay=play;
+  play=function(it){
+    try{
+      if(!it) return __v5_oldPlay(it);
+      const shown=(it.upper===it.lower?it.upper:it.upper+' '+it.lower);
+      const key=standardSpeechForItem(it);
+      if(currentAudio){try{currentAudio.pause();currentAudio.currentTime=0;}catch(e){}}
+      if(window.ChuCaiVoiceBankV5 && (window.ChuCaiVoiceBankV5.play(key) || window.ChuCaiVoiceBankV5.play(shown))){
+        $('statusText').textContent='Đang đọc: '+shown+' · voicebank';
+        return;
+      }
+    }catch(e){}
+    return __v5_oldPlay(it);
+  };
+
   load(); bind(); setSet(state.set||'all'); setMode(state.mode||'learn'); updateStats();
   window.__HocChuCaiTV={version:VERSION, letters:LETTERS.length, digits:DIGITS.length, audio:Object.keys(AUDIO).length};
 })();
@@ -1737,7 +1857,23 @@ document.addEventListener('click',function(ev){
   const btn=ev.target.closest&&ev.target.closest('#p4GardenBtn,#safeGardenBtn,#gardenBtn,.p4-garden-open-btn,.safe-garden-open-btn,.garden-open-btn');
   if(btn){ev.preventDefault();openGarden();}
 });
-load();bind();update();window.__HocChuCaiGardenPha05={version:'CHUCAI_V26_BRAND_PORTRAIT_2LINE_FINAL_20260612',zones:ZONES.length,verifiedAnimals:DATA.verifiedAnimals.length,verifiedObjects:DATA.verifiedObjects.length,verifiedFoods:DATA.verifiedFoods.length,writing:DATA.writing.length,clock:true,autonext_after_speech:true,arithmetic:true,relation3:true,writeVisual:true,tonhoRowFixed:true,pvwAudit:true,write3Step:true,inkGuard:true,mobilePixelPlan:true,mobileFirstHomeRebuild:true,mobileGardenRebuild:true,singleBrandClean:true,realSTXAudio:false,standardVoiceClean:true,voiceToggleAiGna:true,desktopTextFitFinal:true,cleanDataApplied:true,manualEyecheckPhase32:true,finalCleanRelease:true,pwaReady:true,aiVoiceMaxVolume:true,separatePwaScope:true,separatePwaIcon:true,phoneLandscapePcOverview:true,brandPortrait2Line:true,verifiedExplore:4,startButtonGuard:true,guidedMatchWrite:true,compareSigns:true};
+
+
+/* === VOICEBANK V5 BRIDGE: garden speaks from /chucai/voicebank_chucai first === */
+try{ if(window.ChuCaiVoiceBankV5) window.ChuCaiVoiceBankV5.load(); }catch(e){}
+const __v5_oldGardenSpeak=speak;
+speak=function(text,opts){
+  opts=opts||{};
+  try{
+    const raw=String(text||'').replace(/\s+/g,' ').trim();
+    if(raw && window.ChuCaiVoiceBankV5 && window.ChuCaiVoiceBankV5.play(raw, opts.onend)){
+      return;
+    }
+  }catch(e){}
+  return __v5_oldGardenSpeak(text,opts);
+};
+
+load();bind();update();window.__HocChuCaiGardenPha05={voicebankV5:true,voicebankFolder:"voicebank_chucai",version:'CHUCAI_V26_BRAND_PORTRAIT_2LINE_FINAL_20260612',zones:ZONES.length,verifiedAnimals:DATA.verifiedAnimals.length,verifiedObjects:DATA.verifiedObjects.length,verifiedFoods:DATA.verifiedFoods.length,writing:DATA.writing.length,clock:true,autonext_after_speech:true,arithmetic:true,relation3:true,writeVisual:true,tonhoRowFixed:true,pvwAudit:true,write3Step:true,inkGuard:true,mobilePixelPlan:true,mobileFirstHomeRebuild:true,mobileGardenRebuild:true,singleBrandClean:true,realSTXAudio:false,standardVoiceClean:true,voiceToggleAiGna:true,desktopTextFitFinal:true,cleanDataApplied:true,manualEyecheckPhase32:true,finalCleanRelease:true,pwaReady:true,aiVoiceMaxVolume:true,separatePwaScope:true,separatePwaIcon:true,phoneLandscapePcOverview:true,brandPortrait2Line:true,verifiedExplore:4,startButtonGuard:true,guidedMatchWrite:true,compareSigns:true};
 
 })();
 </script>
