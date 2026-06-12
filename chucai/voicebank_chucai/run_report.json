@@ -1,0 +1,18 @@
+{
+  "created_at": "2026-06-12T22:57:42",
+  "tool": "tao_voicebank_chucai_v7_docchuan_full",
+  "studio_root": "D:\\DAUTU\\GET_link_tiktok\\Sieu_Conten\\Youtube_Chanel\\tts\\Docvanban_AIO",
+  "voice": "vi-VN-Standard-D",
+  "voice_label": "Nam Danh Thép — DOC CHUAN FULL",
+  "language_code": "vi-VN",
+  "engine_mode": "GOOGLE_CLIENT",
+  "speed": 0.88,
+  "target_peak": 0.985,
+  "normalize": true,
+  "total": 2053,
+  "ok": 2053,
+  "errors": 0,
+  "skipped_existing": 0,
+  "dry_run": false,
+  "mp3": false
+}
