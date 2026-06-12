@@ -1,9 +1,9 @@
 /* Bé Học Bảng Nhân - PWA Service Worker - VOICEBANK + MUSIC TOGGLE
    Upload under repo root /bangnhan/sw_bangnhan.js
    App file: /bangnhan/hocbangnhan.html
-   Voicebank folder remains at repo root: /voicebank_bangnhan/
+   Voicebank folder is inside app: /bangnhan/voicebank_bangnhan/
 */
-const BANGNHAN_CACHE = "bangnhan-voicebank-music-toggle-20260612-01";
+const BANGNHAN_CACHE = "bangnhan-internal-voicebank-nam-danh-v1-20260612";
 
 const CORE_ASSETS = [
   "./",
@@ -11,13 +11,12 @@ const CORE_ASSETS = [
   "./manifest_bangnhan.json",
   "./icon-bangnhan-192.png",
   "./icon-bangnhan-512.png",
-  "../voicebank_bangnhan/voice_manifest.json"
+  "./voicebank_bangnhan/voice_manifest.json"
 ];
 
 function normalizeVoicePath(p) {
-  return String(p || "")
-    .replace(/^\.\/voicebank_bangnhan\//, "../voicebank_bangnhan/")
-    .replace(/^\/voicebank_bangnhan\//, "../voicebank_bangnhan/");
+  const file = String(p || "").split("/").pop();
+  return file ? "./voicebank_bangnhan/" + file : "";
 }
 
 async function cacheCoreAndVoiceBank() {
@@ -25,10 +24,10 @@ async function cacheCoreAndVoiceBank() {
   await cache.addAll(CORE_ASSETS.map(u => new Request(u, { cache: "reload" }))).catch(() => {});
 
   try {
-    const res = await fetch("../voicebank_bangnhan/voice_manifest.json", { cache: "reload" });
+    const res = await fetch("./voicebank_bangnhan/voice_manifest.json", { cache: "reload" });
     if (!res.ok) return;
     const manifest = await res.clone().json();
-    await cache.put("../voicebank_bangnhan/voice_manifest.json", res);
+    await cache.put("./voicebank_bangnhan/voice_manifest.json", res);
     const files = Object.values(manifest.map || {});
     for (const f of files) {
       const normalized = normalizeVoicePath(f);
