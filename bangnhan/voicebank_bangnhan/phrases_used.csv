@@ -1,0 +1,259 @@
+﻿id,text,speak,group,note
+p0001,1 nhân 1 bằng bao nhiêu?,một nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0002,Gợi ý nhé. Kết quả là 1. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là một. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0003,Chưa đúng. 1 nhân 1 bằng 1.,Chưa đúng. một nhân một bằng một.,wrong,from_uploaded_html_embedded_map
+p0004,1 nhân 2 bằng bao nhiêu?,một nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0005,Gợi ý nhé. Kết quả là 2. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là hai. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0006,Chưa đúng. 1 nhân 2 bằng 2.,Chưa đúng. một nhân hai bằng hai.,wrong,from_uploaded_html_embedded_map
+p0007,1 nhân 3 bằng bao nhiêu?,một nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0008,Gợi ý nhé. Kết quả là 3. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là ba. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0009,Chưa đúng. 1 nhân 3 bằng 3.,Chưa đúng. một nhân ba bằng ba.,wrong,from_uploaded_html_embedded_map
+p0010,1 nhân 4 bằng bao nhiêu?,một nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0011,Gợi ý nhé. Kết quả là 4. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là bốn. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0012,Chưa đúng. 1 nhân 4 bằng 4.,Chưa đúng. một nhân bốn bằng bốn.,wrong,from_uploaded_html_embedded_map
+p0013,1 nhân 5 bằng bao nhiêu?,một nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0014,Gợi ý nhé. Kết quả là 5. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là năm. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0015,Chưa đúng. 1 nhân 5 bằng 5.,Chưa đúng. một nhân năm bằng năm.,wrong,from_uploaded_html_embedded_map
+p0016,1 nhân 6 bằng bao nhiêu?,một nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0017,Gợi ý nhé. Kết quả là 6. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là sáu. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0018,Chưa đúng. 1 nhân 6 bằng 6.,Chưa đúng. một nhân sáu bằng sáu.,wrong,from_uploaded_html_embedded_map
+p0019,1 nhân 7 bằng bao nhiêu?,một nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0020,Gợi ý nhé. Kết quả là 7. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là bảy. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0021,Chưa đúng. 1 nhân 7 bằng 7.,Chưa đúng. một nhân bảy bằng bảy.,wrong,from_uploaded_html_embedded_map
+p0022,1 nhân 8 bằng bao nhiêu?,một nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0023,Gợi ý nhé. Kết quả là 8. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là tám. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0024,Chưa đúng. 1 nhân 8 bằng 8.,Chưa đúng. một nhân tám bằng tám.,wrong,from_uploaded_html_embedded_map
+p0025,1 nhân 9 bằng bao nhiêu?,một nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0026,Gợi ý nhé. Kết quả là 9. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là chín. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0027,Chưa đúng. 1 nhân 9 bằng 9.,Chưa đúng. một nhân chín bằng chín.,wrong,from_uploaded_html_embedded_map
+p0028,1 nhân 10 bằng bao nhiêu?,một nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0029,Gợi ý nhé. Kết quả là 10. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là mười. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0030,Chưa đúng. 1 nhân 10 bằng 10.,Chưa đúng. một nhân mười bằng mười.,wrong,from_uploaded_html_embedded_map
+p0031,2 nhân 1 bằng bao nhiêu?,hai nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0032,Chưa đúng. 2 nhân 1 bằng 2.,Chưa đúng. hai nhân một bằng hai.,wrong,from_uploaded_html_embedded_map
+p0033,2 nhân 2 bằng bao nhiêu?,hai nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0034,Chưa đúng. 2 nhân 2 bằng 4.,Chưa đúng. hai nhân hai bằng bốn.,wrong,from_uploaded_html_embedded_map
+p0035,2 nhân 3 bằng bao nhiêu?,hai nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0036,Chưa đúng. 2 nhân 3 bằng 6.,Chưa đúng. hai nhân ba bằng sáu.,wrong,from_uploaded_html_embedded_map
+p0037,2 nhân 4 bằng bao nhiêu?,hai nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0038,Chưa đúng. 2 nhân 4 bằng 8.,Chưa đúng. hai nhân bốn bằng tám.,wrong,from_uploaded_html_embedded_map
+p0039,2 nhân 5 bằng bao nhiêu?,hai nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0040,Chưa đúng. 2 nhân 5 bằng 10.,Chưa đúng. hai nhân năm bằng mười.,wrong,from_uploaded_html_embedded_map
+p0041,2 nhân 6 bằng bao nhiêu?,hai nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0042,Gợi ý nhé. Kết quả là 12. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là mười hai. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0043,Chưa đúng. 2 nhân 6 bằng 12.,Chưa đúng. hai nhân sáu bằng mười hai.,wrong,from_uploaded_html_embedded_map
+p0044,2 nhân 7 bằng bao nhiêu?,hai nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0045,Gợi ý nhé. Kết quả là 14. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là mười bốn. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0046,Chưa đúng. 2 nhân 7 bằng 14.,Chưa đúng. hai nhân bảy bằng mười bốn.,wrong,from_uploaded_html_embedded_map
+p0047,2 nhân 8 bằng bao nhiêu?,hai nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0048,Gợi ý nhé. Kết quả là 16. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là mười sáu. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0049,Chưa đúng. 2 nhân 8 bằng 16.,Chưa đúng. hai nhân tám bằng mười sáu.,wrong,from_uploaded_html_embedded_map
+p0050,2 nhân 9 bằng bao nhiêu?,hai nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0051,Gợi ý nhé. Kết quả là 18. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là mười tám. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0052,Chưa đúng. 2 nhân 9 bằng 18.,Chưa đúng. hai nhân chín bằng mười tám.,wrong,from_uploaded_html_embedded_map
+p0053,2 nhân 10 bằng bao nhiêu?,hai nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0054,Gợi ý nhé. Kết quả là 20. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là hai mươi. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0055,Chưa đúng. 2 nhân 10 bằng 20.,Chưa đúng. hai nhân mười bằng hai mươi.,wrong,from_uploaded_html_embedded_map
+p0056,3 nhân 1 bằng bao nhiêu?,ba nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0057,Chưa đúng. 3 nhân 1 bằng 3.,Chưa đúng. ba nhân một bằng ba.,wrong,from_uploaded_html_embedded_map
+p0058,3 nhân 2 bằng bao nhiêu?,ba nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0059,Chưa đúng. 3 nhân 2 bằng 6.,Chưa đúng. ba nhân hai bằng sáu.,wrong,from_uploaded_html_embedded_map
+p0060,3 nhân 3 bằng bao nhiêu?,ba nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0061,Chưa đúng. 3 nhân 3 bằng 9.,Chưa đúng. ba nhân ba bằng chín.,wrong,from_uploaded_html_embedded_map
+p0062,3 nhân 4 bằng bao nhiêu?,ba nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0063,Chưa đúng. 3 nhân 4 bằng 12.,Chưa đúng. ba nhân bốn bằng mười hai.,wrong,from_uploaded_html_embedded_map
+p0064,3 nhân 5 bằng bao nhiêu?,ba nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0065,Gợi ý nhé. Kết quả là 15. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là mười lăm. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0066,Chưa đúng. 3 nhân 5 bằng 15.,Chưa đúng. ba nhân năm bằng mười lăm.,wrong,from_uploaded_html_embedded_map
+p0067,3 nhân 6 bằng bao nhiêu?,ba nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0068,Chưa đúng. 3 nhân 6 bằng 18.,Chưa đúng. ba nhân sáu bằng mười tám.,wrong,from_uploaded_html_embedded_map
+p0069,3 nhân 7 bằng bao nhiêu?,ba nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0070,Gợi ý nhé. Kết quả là 21. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là hai mươi mốt. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0071,Chưa đúng. 3 nhân 7 bằng 21.,Chưa đúng. ba nhân bảy bằng hai mươi mốt.,wrong,from_uploaded_html_embedded_map
+p0072,3 nhân 8 bằng bao nhiêu?,ba nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0073,Gợi ý nhé. Kết quả là 24. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là hai mươi bốn. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0074,Chưa đúng. 3 nhân 8 bằng 24.,Chưa đúng. ba nhân tám bằng hai mươi bốn.,wrong,from_uploaded_html_embedded_map
+p0075,3 nhân 9 bằng bao nhiêu?,ba nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0076,Gợi ý nhé. Kết quả là 27. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là hai mươi bảy. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0077,Chưa đúng. 3 nhân 9 bằng 27.,Chưa đúng. ba nhân chín bằng hai mươi bảy.,wrong,from_uploaded_html_embedded_map
+p0078,3 nhân 10 bằng bao nhiêu?,ba nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0079,Gợi ý nhé. Kết quả là 30. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là ba mươi. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0080,Chưa đúng. 3 nhân 10 bằng 30.,Chưa đúng. ba nhân mười bằng ba mươi.,wrong,from_uploaded_html_embedded_map
+p0081,4 nhân 1 bằng bao nhiêu?,bốn nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0082,Chưa đúng. 4 nhân 1 bằng 4.,Chưa đúng. bốn nhân một bằng bốn.,wrong,from_uploaded_html_embedded_map
+p0083,4 nhân 2 bằng bao nhiêu?,bốn nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0084,Chưa đúng. 4 nhân 2 bằng 8.,Chưa đúng. bốn nhân hai bằng tám.,wrong,from_uploaded_html_embedded_map
+p0085,4 nhân 3 bằng bao nhiêu?,bốn nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0086,Chưa đúng. 4 nhân 3 bằng 12.,Chưa đúng. bốn nhân ba bằng mười hai.,wrong,from_uploaded_html_embedded_map
+p0087,4 nhân 4 bằng bao nhiêu?,bốn nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0088,Chưa đúng. 4 nhân 4 bằng 16.,Chưa đúng. bốn nhân bốn bằng mười sáu.,wrong,from_uploaded_html_embedded_map
+p0089,4 nhân 5 bằng bao nhiêu?,bốn nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0090,Chưa đúng. 4 nhân 5 bằng 20.,Chưa đúng. bốn nhân năm bằng hai mươi.,wrong,from_uploaded_html_embedded_map
+p0091,4 nhân 6 bằng bao nhiêu?,bốn nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0092,Chưa đúng. 4 nhân 6 bằng 24.,Chưa đúng. bốn nhân sáu bằng hai mươi bốn.,wrong,from_uploaded_html_embedded_map
+p0093,4 nhân 7 bằng bao nhiêu?,bốn nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0094,Gợi ý nhé. Kết quả là 28. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là hai mươi tám. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0095,Chưa đúng. 4 nhân 7 bằng 28.,Chưa đúng. bốn nhân bảy bằng hai mươi tám.,wrong,from_uploaded_html_embedded_map
+p0096,4 nhân 8 bằng bao nhiêu?,bốn nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0097,Gợi ý nhé. Kết quả là 32. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là ba mươi hai. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0098,Chưa đúng. 4 nhân 8 bằng 32.,Chưa đúng. bốn nhân tám bằng ba mươi hai.,wrong,from_uploaded_html_embedded_map
+p0099,4 nhân 9 bằng bao nhiêu?,bốn nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0100,Gợi ý nhé. Kết quả là 36. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là ba mươi sáu. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0101,Chưa đúng. 4 nhân 9 bằng 36.,Chưa đúng. bốn nhân chín bằng ba mươi sáu.,wrong,from_uploaded_html_embedded_map
+p0102,4 nhân 10 bằng bao nhiêu?,bốn nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0103,Gợi ý nhé. Kết quả là 40. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là bốn mươi. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0104,Chưa đúng. 4 nhân 10 bằng 40.,Chưa đúng. bốn nhân mười bằng bốn mươi.,wrong,from_uploaded_html_embedded_map
+p0105,5 nhân 1 bằng bao nhiêu?,năm nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0106,Chưa đúng. 5 nhân 1 bằng 5.,Chưa đúng. năm nhân một bằng năm.,wrong,from_uploaded_html_embedded_map
+p0107,5 nhân 2 bằng bao nhiêu?,năm nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0108,Chưa đúng. 5 nhân 2 bằng 10.,Chưa đúng. năm nhân hai bằng mười.,wrong,from_uploaded_html_embedded_map
+p0109,5 nhân 3 bằng bao nhiêu?,năm nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0110,Chưa đúng. 5 nhân 3 bằng 15.,Chưa đúng. năm nhân ba bằng mười lăm.,wrong,from_uploaded_html_embedded_map
+p0111,5 nhân 4 bằng bao nhiêu?,năm nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0112,Chưa đúng. 5 nhân 4 bằng 20.,Chưa đúng. năm nhân bốn bằng hai mươi.,wrong,from_uploaded_html_embedded_map
+p0113,5 nhân 5 bằng bao nhiêu?,năm nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0114,Gợi ý nhé. Kết quả là 25. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là hai mươi lăm. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0115,Chưa đúng. 5 nhân 5 bằng 25.,Chưa đúng. năm nhân năm bằng hai mươi lăm.,wrong,from_uploaded_html_embedded_map
+p0116,5 nhân 6 bằng bao nhiêu?,năm nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0117,Chưa đúng. 5 nhân 6 bằng 30.,Chưa đúng. năm nhân sáu bằng ba mươi.,wrong,from_uploaded_html_embedded_map
+p0118,5 nhân 7 bằng bao nhiêu?,năm nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0119,Gợi ý nhé. Kết quả là 35. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là ba mươi lăm. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0120,Chưa đúng. 5 nhân 7 bằng 35.,Chưa đúng. năm nhân bảy bằng ba mươi lăm.,wrong,from_uploaded_html_embedded_map
+p0121,5 nhân 8 bằng bao nhiêu?,năm nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0122,Chưa đúng. 5 nhân 8 bằng 40.,Chưa đúng. năm nhân tám bằng bốn mươi.,wrong,from_uploaded_html_embedded_map
+p0123,5 nhân 9 bằng bao nhiêu?,năm nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0124,Gợi ý nhé. Kết quả là 45. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là bốn mươi lăm. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0125,Chưa đúng. 5 nhân 9 bằng 45.,Chưa đúng. năm nhân chín bằng bốn mươi lăm.,wrong,from_uploaded_html_embedded_map
+p0126,5 nhân 10 bằng bao nhiêu?,năm nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0127,Gợi ý nhé. Kết quả là 50. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là năm mươi. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0128,Chưa đúng. 5 nhân 10 bằng 50.,Chưa đúng. năm nhân mười bằng năm mươi.,wrong,from_uploaded_html_embedded_map
+p0129,6 nhân 1 bằng bao nhiêu?,sáu nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0130,Chưa đúng. 6 nhân 1 bằng 6.,Chưa đúng. sáu nhân một bằng sáu.,wrong,from_uploaded_html_embedded_map
+p0131,6 nhân 2 bằng bao nhiêu?,sáu nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0132,Chưa đúng. 6 nhân 2 bằng 12.,Chưa đúng. sáu nhân hai bằng mười hai.,wrong,from_uploaded_html_embedded_map
+p0133,6 nhân 3 bằng bao nhiêu?,sáu nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0134,Chưa đúng. 6 nhân 3 bằng 18.,Chưa đúng. sáu nhân ba bằng mười tám.,wrong,from_uploaded_html_embedded_map
+p0135,6 nhân 4 bằng bao nhiêu?,sáu nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0136,Chưa đúng. 6 nhân 4 bằng 24.,Chưa đúng. sáu nhân bốn bằng hai mươi bốn.,wrong,from_uploaded_html_embedded_map
+p0137,6 nhân 5 bằng bao nhiêu?,sáu nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0138,Chưa đúng. 6 nhân 5 bằng 30.,Chưa đúng. sáu nhân năm bằng ba mươi.,wrong,from_uploaded_html_embedded_map
+p0139,6 nhân 6 bằng bao nhiêu?,sáu nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0140,Chưa đúng. 6 nhân 6 bằng 36.,Chưa đúng. sáu nhân sáu bằng ba mươi sáu.,wrong,from_uploaded_html_embedded_map
+p0141,6 nhân 7 bằng bao nhiêu?,sáu nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0142,Gợi ý nhé. Kết quả là 42. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là bốn mươi hai. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0143,Chưa đúng. 6 nhân 7 bằng 42.,Chưa đúng. sáu nhân bảy bằng bốn mươi hai.,wrong,from_uploaded_html_embedded_map
+p0144,6 nhân 8 bằng bao nhiêu?,sáu nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0145,Gợi ý nhé. Kết quả là 48. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là bốn mươi tám. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0146,Chưa đúng. 6 nhân 8 bằng 48.,Chưa đúng. sáu nhân tám bằng bốn mươi tám.,wrong,from_uploaded_html_embedded_map
+p0147,6 nhân 9 bằng bao nhiêu?,sáu nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0148,Gợi ý nhé. Kết quả là 54. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là năm mươi bốn. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0149,Chưa đúng. 6 nhân 9 bằng 54.,Chưa đúng. sáu nhân chín bằng năm mươi bốn.,wrong,from_uploaded_html_embedded_map
+p0150,6 nhân 10 bằng bao nhiêu?,sáu nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0151,Gợi ý nhé. Kết quả là 60. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là sáu mươi. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0152,Chưa đúng. 6 nhân 10 bằng 60.,Chưa đúng. sáu nhân mười bằng sáu mươi.,wrong,from_uploaded_html_embedded_map
+p0153,7 nhân 1 bằng bao nhiêu?,bảy nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0154,Chưa đúng. 7 nhân 1 bằng 7.,Chưa đúng. bảy nhân một bằng bảy.,wrong,from_uploaded_html_embedded_map
+p0155,7 nhân 2 bằng bao nhiêu?,bảy nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0156,Chưa đúng. 7 nhân 2 bằng 14.,Chưa đúng. bảy nhân hai bằng mười bốn.,wrong,from_uploaded_html_embedded_map
+p0157,7 nhân 3 bằng bao nhiêu?,bảy nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0158,Chưa đúng. 7 nhân 3 bằng 21.,Chưa đúng. bảy nhân ba bằng hai mươi mốt.,wrong,from_uploaded_html_embedded_map
+p0159,7 nhân 4 bằng bao nhiêu?,bảy nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0160,Chưa đúng. 7 nhân 4 bằng 28.,Chưa đúng. bảy nhân bốn bằng hai mươi tám.,wrong,from_uploaded_html_embedded_map
+p0161,7 nhân 5 bằng bao nhiêu?,bảy nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0162,Chưa đúng. 7 nhân 5 bằng 35.,Chưa đúng. bảy nhân năm bằng ba mươi lăm.,wrong,from_uploaded_html_embedded_map
+p0163,7 nhân 6 bằng bao nhiêu?,bảy nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0164,Chưa đúng. 7 nhân 6 bằng 42.,Chưa đúng. bảy nhân sáu bằng bốn mươi hai.,wrong,from_uploaded_html_embedded_map
+p0165,7 nhân 7 bằng bao nhiêu?,bảy nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0166,Gợi ý nhé. Kết quả là 49. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là bốn mươi chín. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0167,Chưa đúng. 7 nhân 7 bằng 49.,Chưa đúng. bảy nhân bảy bằng bốn mươi chín.,wrong,from_uploaded_html_embedded_map
+p0168,7 nhân 8 bằng bao nhiêu?,bảy nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0169,Gợi ý nhé. Kết quả là 56. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là năm mươi sáu. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0170,Chưa đúng. 7 nhân 8 bằng 56.,Chưa đúng. bảy nhân tám bằng năm mươi sáu.,wrong,from_uploaded_html_embedded_map
+p0171,7 nhân 9 bằng bao nhiêu?,bảy nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0172,Gợi ý nhé. Kết quả là 63. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là sáu mươi ba. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0173,Chưa đúng. 7 nhân 9 bằng 63.,Chưa đúng. bảy nhân chín bằng sáu mươi ba.,wrong,from_uploaded_html_embedded_map
+p0174,7 nhân 10 bằng bao nhiêu?,bảy nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0175,Gợi ý nhé. Kết quả là 70. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là bảy mươi. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0176,Chưa đúng. 7 nhân 10 bằng 70.,Chưa đúng. bảy nhân mười bằng bảy mươi.,wrong,from_uploaded_html_embedded_map
+p0177,8 nhân 1 bằng bao nhiêu?,tám nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0178,Chưa đúng. 8 nhân 1 bằng 8.,Chưa đúng. tám nhân một bằng tám.,wrong,from_uploaded_html_embedded_map
+p0179,8 nhân 2 bằng bao nhiêu?,tám nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0180,Chưa đúng. 8 nhân 2 bằng 16.,Chưa đúng. tám nhân hai bằng mười sáu.,wrong,from_uploaded_html_embedded_map
+p0181,8 nhân 3 bằng bao nhiêu?,tám nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0182,Chưa đúng. 8 nhân 3 bằng 24.,Chưa đúng. tám nhân ba bằng hai mươi bốn.,wrong,from_uploaded_html_embedded_map
+p0183,8 nhân 4 bằng bao nhiêu?,tám nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0184,Chưa đúng. 8 nhân 4 bằng 32.,Chưa đúng. tám nhân bốn bằng ba mươi hai.,wrong,from_uploaded_html_embedded_map
+p0185,8 nhân 5 bằng bao nhiêu?,tám nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0186,Chưa đúng. 8 nhân 5 bằng 40.,Chưa đúng. tám nhân năm bằng bốn mươi.,wrong,from_uploaded_html_embedded_map
+p0187,8 nhân 6 bằng bao nhiêu?,tám nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0188,Chưa đúng. 8 nhân 6 bằng 48.,Chưa đúng. tám nhân sáu bằng bốn mươi tám.,wrong,from_uploaded_html_embedded_map
+p0189,8 nhân 7 bằng bao nhiêu?,tám nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0190,Chưa đúng. 8 nhân 7 bằng 56.,Chưa đúng. tám nhân bảy bằng năm mươi sáu.,wrong,from_uploaded_html_embedded_map
+p0191,8 nhân 8 bằng bao nhiêu?,tám nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0192,Gợi ý nhé. Kết quả là 64. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là sáu mươi bốn. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0193,Chưa đúng. 8 nhân 8 bằng 64.,Chưa đúng. tám nhân tám bằng sáu mươi bốn.,wrong,from_uploaded_html_embedded_map
+p0194,8 nhân 9 bằng bao nhiêu?,tám nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0195,Gợi ý nhé. Kết quả là 72. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là bảy mươi hai. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0196,Chưa đúng. 8 nhân 9 bằng 72.,Chưa đúng. tám nhân chín bằng bảy mươi hai.,wrong,from_uploaded_html_embedded_map
+p0197,8 nhân 10 bằng bao nhiêu?,tám nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0198,Gợi ý nhé. Kết quả là 80. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là tám mươi. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0199,Chưa đúng. 8 nhân 10 bằng 80.,Chưa đúng. tám nhân mười bằng tám mươi.,wrong,from_uploaded_html_embedded_map
+p0200,9 nhân 1 bằng bao nhiêu?,chín nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0201,Chưa đúng. 9 nhân 1 bằng 9.,Chưa đúng. chín nhân một bằng chín.,wrong,from_uploaded_html_embedded_map
+p0202,9 nhân 2 bằng bao nhiêu?,chín nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0203,Chưa đúng. 9 nhân 2 bằng 18.,Chưa đúng. chín nhân hai bằng mười tám.,wrong,from_uploaded_html_embedded_map
+p0204,9 nhân 3 bằng bao nhiêu?,chín nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0205,Chưa đúng. 9 nhân 3 bằng 27.,Chưa đúng. chín nhân ba bằng hai mươi bảy.,wrong,from_uploaded_html_embedded_map
+p0206,9 nhân 4 bằng bao nhiêu?,chín nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0207,Chưa đúng. 9 nhân 4 bằng 36.,Chưa đúng. chín nhân bốn bằng ba mươi sáu.,wrong,from_uploaded_html_embedded_map
+p0208,9 nhân 5 bằng bao nhiêu?,chín nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0209,Chưa đúng. 9 nhân 5 bằng 45.,Chưa đúng. chín nhân năm bằng bốn mươi lăm.,wrong,from_uploaded_html_embedded_map
+p0210,9 nhân 6 bằng bao nhiêu?,chín nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0211,Chưa đúng. 9 nhân 6 bằng 54.,Chưa đúng. chín nhân sáu bằng năm mươi bốn.,wrong,from_uploaded_html_embedded_map
+p0212,9 nhân 7 bằng bao nhiêu?,chín nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0213,Chưa đúng. 9 nhân 7 bằng 63.,Chưa đúng. chín nhân bảy bằng sáu mươi ba.,wrong,from_uploaded_html_embedded_map
+p0214,9 nhân 8 bằng bao nhiêu?,chín nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0215,Chưa đúng. 9 nhân 8 bằng 72.,Chưa đúng. chín nhân tám bằng bảy mươi hai.,wrong,from_uploaded_html_embedded_map
+p0216,9 nhân 9 bằng bao nhiêu?,chín nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0217,Gợi ý nhé. Kết quả là 81. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là tám mươi mốt. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0218,Chưa đúng. 9 nhân 9 bằng 81.,Chưa đúng. chín nhân chín bằng tám mươi mốt.,wrong,from_uploaded_html_embedded_map
+p0219,9 nhân 10 bằng bao nhiêu?,chín nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0220,Gợi ý nhé. Kết quả là 90. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là chín mươi. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0221,Chưa đúng. 9 nhân 10 bằng 90.,Chưa đúng. chín nhân mười bằng chín mươi.,wrong,from_uploaded_html_embedded_map
+p0222,10 nhân 1 bằng bao nhiêu?,mười nhân một bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0223,Chưa đúng. 10 nhân 1 bằng 10.,Chưa đúng. mười nhân một bằng mười.,wrong,from_uploaded_html_embedded_map
+p0224,10 nhân 2 bằng bao nhiêu?,mười nhân hai bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0225,Chưa đúng. 10 nhân 2 bằng 20.,Chưa đúng. mười nhân hai bằng hai mươi.,wrong,from_uploaded_html_embedded_map
+p0226,10 nhân 3 bằng bao nhiêu?,mười nhân ba bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0227,Chưa đúng. 10 nhân 3 bằng 30.,Chưa đúng. mười nhân ba bằng ba mươi.,wrong,from_uploaded_html_embedded_map
+p0228,10 nhân 4 bằng bao nhiêu?,mười nhân bốn bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0229,Chưa đúng. 10 nhân 4 bằng 40.,Chưa đúng. mười nhân bốn bằng bốn mươi.,wrong,from_uploaded_html_embedded_map
+p0230,10 nhân 5 bằng bao nhiêu?,mười nhân năm bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0231,Chưa đúng. 10 nhân 5 bằng 50.,Chưa đúng. mười nhân năm bằng năm mươi.,wrong,from_uploaded_html_embedded_map
+p0232,10 nhân 6 bằng bao nhiêu?,mười nhân sáu bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0233,Chưa đúng. 10 nhân 6 bằng 60.,Chưa đúng. mười nhân sáu bằng sáu mươi.,wrong,from_uploaded_html_embedded_map
+p0234,10 nhân 7 bằng bao nhiêu?,mười nhân bảy bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0235,Chưa đúng. 10 nhân 7 bằng 70.,Chưa đúng. mười nhân bảy bằng bảy mươi.,wrong,from_uploaded_html_embedded_map
+p0236,10 nhân 8 bằng bao nhiêu?,mười nhân tám bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0237,Chưa đúng. 10 nhân 8 bằng 80.,Chưa đúng. mười nhân tám bằng tám mươi.,wrong,from_uploaded_html_embedded_map
+p0238,10 nhân 9 bằng bao nhiêu?,mười nhân chín bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0239,Chưa đúng. 10 nhân 9 bằng 90.,Chưa đúng. mười nhân chín bằng chín mươi.,wrong,from_uploaded_html_embedded_map
+p0240,10 nhân 10 bằng bao nhiêu?,mười nhân mười bằng bao nhiêu?,question,from_uploaded_html_embedded_map
+p0241,Gợi ý nhé. Kết quả là 100. Bé tìm số rồi ấn vào nhé.,Gợi ý nhé. Kết quả là một trăm. Bé tìm số rồi ấn vào nhé.,hint,from_uploaded_html_embedded_map
+p0242,Chưa đúng. 10 nhân 10 bằng 100.,Chưa đúng. mười nhân mười bằng một trăm.,wrong,from_uploaded_html_embedded_map
+p0243,Bạn đúng rồi! Giỏi lắm!,Bạn đúng rồi! Giỏi lắm!,ui_feedback,from_uploaded_html_embedded_map
+p0244,Chính xác! Con làm rất tốt!,Chính xác! Con làm rất tốt!,ui_feedback,from_uploaded_html_embedded_map
+p0245,Tuyệt vời! Tiếp tục nào!,Tuyệt vời! Tiếp tục nào!,ui_feedback,from_uploaded_html_embedded_map
+p0246,Đúng rồi! Thêm một bước tiến!,Đúng rồi! Thêm một bước tiến!,ui_feedback,from_uploaded_html_embedded_map
+p0247,Rất nhanh và rất đúng!,Rất nhanh và rất đúng!,ui_feedback,from_uploaded_html_embedded_map
+p0248,Con đang học bảng nhân rất tốt!,Con đang học bảng nhân rất tốt!,ui_feedback,from_uploaded_html_embedded_map
+p0249,"Thưởng lớn! Con đúng 3 câu liên tiếp, được thêm một tim!","Thưởng lớn! Con đúng ba câu liên tiếp, được thêm một tim!",ui_feedback,from_uploaded_html_embedded_map
+p0250,Đã bật giọng đọc.,Đã bật giọng đọc.,ui_feedback,from_uploaded_html_embedded_map
+p0251,Bé học bảng nhân.,Bé học bảng nhân.,ui_extra,safety_extra
+p0252,Bắt đầu luyện bảng nhân nào!,Bắt đầu luyện bảng nhân nào!,ui_extra,safety_extra
+p0253,Bấm vào ô kết quả đúng.,Bấm vào ô kết quả đúng.,ui_extra,safety_extra
+p0254,Bấm Đọc để nghe lại câu hỏi.,Bấm Đọc để nghe lại câu hỏi.,ui_extra,safety_extra
+p0255,Gợi ý nhé.,Gợi ý nhé.,ui_extra,safety_extra
+p0256,Làm lại nào.,Làm lại nào.,ui_extra,safety_extra
+p0257,Hết tim rồi!,Hết tim rồi!,ui_extra,safety_extra
+p0258,"Không sao, mình xem lại lỗi rồi chơi lại nhé.","Không sao, mình xem lại lỗi rồi chơi lại nhé.",ui_extra,safety_extra

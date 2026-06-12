@@ -1,0 +1,2595 @@
+{
+  "version": "voicebank_bangnhan_nam_danh_thep_v1",
+  "created_at": "2026-06-13T00:20:12",
+  "voice": "vi-VN-Standard-D",
+  "voice_label": "Nam Đanh Thép Bắc",
+  "language_code": "vi-VN",
+  "audio_format": "wav",
+  "relative_base": "voicebank_bangnhan",
+  "speed": 0.92,
+  "target_peak": 0.985,
+  "map": {
+    "1 nhân 1 bằng bao nhiêu?": "v_abe261b46a1b7c46.wav",
+    "Gợi ý nhé. Kết quả là 1. Bé tìm số rồi ấn vào nhé.": "v_71ca0e1af3b0a075.wav",
+    "Chưa đúng. 1 nhân 1 bằng 1.": "v_3ae958a0c8851e8f.wav",
+    "1 nhân 2 bằng bao nhiêu?": "v_d48367f8ba82bdd2.wav",
+    "Gợi ý nhé. Kết quả là 2. Bé tìm số rồi ấn vào nhé.": "v_f1ded42819bd8a6d.wav",
+    "Chưa đúng. 1 nhân 2 bằng 2.": "v_263183f1d032371f.wav",
+    "1 nhân 3 bằng bao nhiêu?": "v_0234e5d017605092.wav",
+    "Gợi ý nhé. Kết quả là 3. Bé tìm số rồi ấn vào nhé.": "v_9c8230d918a3e2a4.wav",
+    "Chưa đúng. 1 nhân 3 bằng 3.": "v_73737f35294e4571.wav",
+    "1 nhân 4 bằng bao nhiêu?": "v_02f87a6b1ddfd351.wav",
+    "Gợi ý nhé. Kết quả là 4. Bé tìm số rồi ấn vào nhé.": "v_53f40c4eb677e41d.wav",
+    "Chưa đúng. 1 nhân 4 bằng 4.": "v_07d177f959086620.wav",
+    "1 nhân 5 bằng bao nhiêu?": "v_1efcf2e2f94646f6.wav",
+    "Gợi ý nhé. Kết quả là 5. Bé tìm số rồi ấn vào nhé.": "v_faf1b754c1ad96bf.wav",
+    "Chưa đúng. 1 nhân 5 bằng 5.": "v_5eece2dff539e1b2.wav",
+    "1 nhân 6 bằng bao nhiêu?": "v_1e412ddae82442f4.wav",
+    "Gợi ý nhé. Kết quả là 6. Bé tìm số rồi ấn vào nhé.": "v_c0b78c6a2dfadcc7.wav",
+    "Chưa đúng. 1 nhân 6 bằng 6.": "v_d41c1a9db06deb9a.wav",
+    "1 nhân 7 bằng bao nhiêu?": "v_6761279de8d0460a.wav",
+    "Gợi ý nhé. Kết quả là 7. Bé tìm số rồi ấn vào nhé.": "v_d891a7c81b4c749b.wav",
+    "Chưa đúng. 1 nhân 7 bằng 7.": "v_2a23714f8cdfbb32.wav",
+    "1 nhân 8 bằng bao nhiêu?": "v_c4410193f8083363.wav",
+    "Gợi ý nhé. Kết quả là 8. Bé tìm số rồi ấn vào nhé.": "v_79cd0f4d81b31a69.wav",
+    "Chưa đúng. 1 nhân 8 bằng 8.": "v_608b245a4e55d7ae.wav",
+    "1 nhân 9 bằng bao nhiêu?": "v_5af6cf1368b8081a.wav",
+    "Gợi ý nhé. Kết quả là 9. Bé tìm số rồi ấn vào nhé.": "v_25b3b299d22dba2e.wav",
+    "Chưa đúng. 1 nhân 9 bằng 9.": "v_72b03e4321609a86.wav",
+    "1 nhân 10 bằng bao nhiêu?": "v_6f40c2ae545e15ab.wav",
+    "Gợi ý nhé. Kết quả là 10. Bé tìm số rồi ấn vào nhé.": "v_4f79bd592d93966a.wav",
+    "Chưa đúng. 1 nhân 10 bằng 10.": "v_994a6331221ed442.wav",
+    "2 nhân 1 bằng bao nhiêu?": "v_0440f86074dd8a61.wav",
+    "Chưa đúng. 2 nhân 1 bằng 2.": "v_02a352dd42debf50.wav",
+    "2 nhân 2 bằng bao nhiêu?": "v_771cde8a84a48320.wav",
+    "Chưa đúng. 2 nhân 2 bằng 4.": "v_d08ac985a820d302.wav",
+    "2 nhân 3 bằng bao nhiêu?": "v_cb0d2ccddff816cf.wav",
+    "Chưa đúng. 2 nhân 3 bằng 6.": "v_33674999cdcb652c.wav",
+    "2 nhân 4 bằng bao nhiêu?": "v_29f1da7ddf49210d.wav",
+    "Chưa đúng. 2 nhân 4 bằng 8.": "v_52bc6e9f54e7403c.wav",
+    "2 nhân 5 bằng bao nhiêu?": "v_0f9057e5a1bc6a43.wav",
+    "Chưa đúng. 2 nhân 5 bằng 10.": "v_ca2391abd709fbb1.wav",
+    "2 nhân 6 bằng bao nhiêu?": "v_0ff69de3bc532969.wav",
+    "Gợi ý nhé. Kết quả là 12. Bé tìm số rồi ấn vào nhé.": "v_085da6d01d426f1a.wav",
+    "Chưa đúng. 2 nhân 6 bằng 12.": "v_c68a2b32910668a8.wav",
+    "2 nhân 7 bằng bao nhiêu?": "v_3aba9fd13ac3b745.wav",
+    "Gợi ý nhé. Kết quả là 14. Bé tìm số rồi ấn vào nhé.": "v_c3cde1eb85f35ceb.wav",
+    "Chưa đúng. 2 nhân 7 bằng 14.": "v_9e2b382f7f60d2ce.wav",
+    "2 nhân 8 bằng bao nhiêu?": "v_d49ede5b062bd7c1.wav",
+    "Gợi ý nhé. Kết quả là 16. Bé tìm số rồi ấn vào nhé.": "v_4a78c7b0f5c5f9d0.wav",
+    "Chưa đúng. 2 nhân 8 bằng 16.": "v_43a97cfa8c7c74ce.wav",
+    "2 nhân 9 bằng bao nhiêu?": "v_3096fd4316673280.wav",
+    "Gợi ý nhé. Kết quả là 18. Bé tìm số rồi ấn vào nhé.": "v_d5dd492aa7ff0d8b.wav",
+    "Chưa đúng. 2 nhân 9 bằng 18.": "v_901690974504ca81.wav",
+    "2 nhân 10 bằng bao nhiêu?": "v_b75c8a646d05d219.wav",
+    "Gợi ý nhé. Kết quả là 20. Bé tìm số rồi ấn vào nhé.": "v_df7b69b52b9c1129.wav",
+    "Chưa đúng. 2 nhân 10 bằng 20.": "v_c57c9d91396e5390.wav",
+    "3 nhân 1 bằng bao nhiêu?": "v_bae572c0291e1987.wav",
+    "Chưa đúng. 3 nhân 1 bằng 3.": "v_6d5826c0dc6034a4.wav",
+    "3 nhân 2 bằng bao nhiêu?": "v_9431e07dddb23308.wav",
+    "Chưa đúng. 3 nhân 2 bằng 6.": "v_4417b2d173841841.wav",
+    "3 nhân 3 bằng bao nhiêu?": "v_a323a8e4bbf22504.wav",
+    "Chưa đúng. 3 nhân 3 bằng 9.": "v_656bb4ee9e0bc2c8.wav",
+    "3 nhân 4 bằng bao nhiêu?": "v_290e7994bcc9c199.wav",
+    "Chưa đúng. 3 nhân 4 bằng 12.": "v_c3d82ddd3fff72a9.wav",
+    "3 nhân 5 bằng bao nhiêu?": "v_214e7ad4d31c2873.wav",
+    "Gợi ý nhé. Kết quả là 15. Bé tìm số rồi ấn vào nhé.": "v_048aa12684cda661.wav",
+    "Chưa đúng. 3 nhân 5 bằng 15.": "v_e7cdc93ae5f4a221.wav",
+    "3 nhân 6 bằng bao nhiêu?": "v_b7d48c93443a1395.wav",
+    "Chưa đúng. 3 nhân 6 bằng 18.": "v_6f44c763479176a8.wav",
+    "3 nhân 7 bằng bao nhiêu?": "v_6a4e04e5b1385efd.wav",
+    "Gợi ý nhé. Kết quả là 21. Bé tìm số rồi ấn vào nhé.": "v_46210b980d7a29dd.wav",
+    "Chưa đúng. 3 nhân 7 bằng 21.": "v_03bfbd3608f12295.wav",
+    "3 nhân 8 bằng bao nhiêu?": "v_4aa8629adf3a0d14.wav",
+    "Gợi ý nhé. Kết quả là 24. Bé tìm số rồi ấn vào nhé.": "v_4b664b095181e039.wav",
+    "Chưa đúng. 3 nhân 8 bằng 24.": "v_2e30256c8daef247.wav",
+    "3 nhân 9 bằng bao nhiêu?": "v_58f4e57f7142fb67.wav",
+    "Gợi ý nhé. Kết quả là 27. Bé tìm số rồi ấn vào nhé.": "v_9604710dde6b7cfb.wav",
+    "Chưa đúng. 3 nhân 9 bằng 27.": "v_48d3ed4ea078740c.wav",
+    "3 nhân 10 bằng bao nhiêu?": "v_8c4b8cf4ea9b465e.wav",
+    "Gợi ý nhé. Kết quả là 30. Bé tìm số rồi ấn vào nhé.": "v_f0ffe8cb390c99b4.wav",
+    "Chưa đúng. 3 nhân 10 bằng 30.": "v_c1ee4adbe884cc6f.wav",
+    "4 nhân 1 bằng bao nhiêu?": "v_0daf22879ff2497a.wav",
+    "Chưa đúng. 4 nhân 1 bằng 4.": "v_bbdb75935444a040.wav",
+    "4 nhân 2 bằng bao nhiêu?": "v_58c25ab4df2862a9.wav",
+    "Chưa đúng. 4 nhân 2 bằng 8.": "v_eefc6757b276f089.wav",
+    "4 nhân 3 bằng bao nhiêu?": "v_50b227fd6e6fbfbd.wav",
+    "Chưa đúng. 4 nhân 3 bằng 12.": "v_c6e91a2f70abed75.wav",
+    "4 nhân 4 bằng bao nhiêu?": "v_3570e6be72c8843d.wav",
+    "Chưa đúng. 4 nhân 4 bằng 16.": "v_c2e5e5c52617cab1.wav",
+    "4 nhân 5 bằng bao nhiêu?": "v_4e832e3f5f968d63.wav",
+    "Chưa đúng. 4 nhân 5 bằng 20.": "v_6be86ac1963ab883.wav",
+    "4 nhân 6 bằng bao nhiêu?": "v_17314d0a5228f7e0.wav",
+    "Chưa đúng. 4 nhân 6 bằng 24.": "v_bd8a76189d6868b3.wav",
+    "4 nhân 7 bằng bao nhiêu?": "v_5fedda1ebc3ec6f1.wav",
+    "Gợi ý nhé. Kết quả là 28. Bé tìm số rồi ấn vào nhé.": "v_a1d36734cfa3011c.wav",
+    "Chưa đúng. 4 nhân 7 bằng 28.": "v_82b0236e0171decb.wav",
+    "4 nhân 8 bằng bao nhiêu?": "v_6a3f36e8eaa5fc2a.wav",
+    "Gợi ý nhé. Kết quả là 32. Bé tìm số rồi ấn vào nhé.": "v_eb2919308448ce1a.wav",
+    "Chưa đúng. 4 nhân 8 bằng 32.": "v_dfec4feeb207649f.wav",
+    "4 nhân 9 bằng bao nhiêu?": "v_6a28285d5ce5f8e8.wav",
+    "Gợi ý nhé. Kết quả là 36. Bé tìm số rồi ấn vào nhé.": "v_19a36b7d64ac8168.wav",
+    "Chưa đúng. 4 nhân 9 bằng 36.": "v_8772639e7e74be1b.wav",
+    "4 nhân 10 bằng bao nhiêu?": "v_7462e8631b2dac13.wav",
+    "Gợi ý nhé. Kết quả là 40. Bé tìm số rồi ấn vào nhé.": "v_bcf77631367c5365.wav",
+    "Chưa đúng. 4 nhân 10 bằng 40.": "v_897cbd672917d4f9.wav",
+    "5 nhân 1 bằng bao nhiêu?": "v_37f9d0af1994dc95.wav",
+    "Chưa đúng. 5 nhân 1 bằng 5.": "v_55310f3e99d32897.wav",
+    "5 nhân 2 bằng bao nhiêu?": "v_c5ad6cbcc0cd0a99.wav",
+    "Chưa đúng. 5 nhân 2 bằng 10.": "v_d89c421e28dad28b.wav",
+    "5 nhân 3 bằng bao nhiêu?": "v_ccdf081305747780.wav",
+    "Chưa đúng. 5 nhân 3 bằng 15.": "v_f2fa32326f74aa52.wav",
+    "5 nhân 4 bằng bao nhiêu?": "v_1a09f61d6bbb518c.wav",
+    "Chưa đúng. 5 nhân 4 bằng 20.": "v_b5652b7af195b145.wav",
+    "5 nhân 5 bằng bao nhiêu?": "v_f09d53eb344a1ace.wav",
+    "Gợi ý nhé. Kết quả là 25. Bé tìm số rồi ấn vào nhé.": "v_d7b559c2daf4cc2d.wav",
+    "Chưa đúng. 5 nhân 5 bằng 25.": "v_794db35d7e261611.wav",
+    "5 nhân 6 bằng bao nhiêu?": "v_bbb4665b31aaf15e.wav",
+    "Chưa đúng. 5 nhân 6 bằng 30.": "v_f0f83b461ed89912.wav",
+    "5 nhân 7 bằng bao nhiêu?": "v_c07535e24859bdb0.wav",
+    "Gợi ý nhé. Kết quả là 35. Bé tìm số rồi ấn vào nhé.": "v_b8512af3c0f5cc67.wav",
+    "Chưa đúng. 5 nhân 7 bằng 35.": "v_b0b58a6725f842c2.wav",
+    "5 nhân 8 bằng bao nhiêu?": "v_668057a3b7938c0c.wav",
+    "Chưa đúng. 5 nhân 8 bằng 40.": "v_668df95f943db2d4.wav",
+    "5 nhân 9 bằng bao nhiêu?": "v_0ed2fb584fcd519d.wav",
+    "Gợi ý nhé. Kết quả là 45. Bé tìm số rồi ấn vào nhé.": "v_8eaf97a544c2c827.wav",
+    "Chưa đúng. 5 nhân 9 bằng 45.": "v_ffda00c39f85f365.wav",
+    "5 nhân 10 bằng bao nhiêu?": "v_5226ef5925c12334.wav",
+    "Gợi ý nhé. Kết quả là 50. Bé tìm số rồi ấn vào nhé.": "v_dadb2a2282941de4.wav",
+    "Chưa đúng. 5 nhân 10 bằng 50.": "v_176dd941d334f9a4.wav",
+    "6 nhân 1 bằng bao nhiêu?": "v_dcb92d4b195469f5.wav",
+    "Chưa đúng. 6 nhân 1 bằng 6.": "v_a70a1d43e984b83f.wav",
+    "6 nhân 2 bằng bao nhiêu?": "v_676fe31a56ff9d78.wav",
+    "Chưa đúng. 6 nhân 2 bằng 12.": "v_1c88971838055ef5.wav",
+    "6 nhân 3 bằng bao nhiêu?": "v_8a60f735b61e4259.wav",
+    "Chưa đúng. 6 nhân 3 bằng 18.": "v_b296d2bb0b7b651c.wav",
+    "6 nhân 4 bằng bao nhiêu?": "v_25339dc0c93f6fa8.wav",
+    "Chưa đúng. 6 nhân 4 bằng 24.": "v_a11506b62d925d4f.wav",
+    "6 nhân 5 bằng bao nhiêu?": "v_28964bc4f5a1e784.wav",
+    "Chưa đúng. 6 nhân 5 bằng 30.": "v_814c67cd6e300da5.wav",
+    "6 nhân 6 bằng bao nhiêu?": "v_9b3530fd85122ccd.wav",
+    "Chưa đúng. 6 nhân 6 bằng 36.": "v_8f19e57485b0f293.wav",
+    "6 nhân 7 bằng bao nhiêu?": "v_b3cf6a397f386806.wav",
+    "Gợi ý nhé. Kết quả là 42. Bé tìm số rồi ấn vào nhé.": "v_cc3c8c073373c853.wav",
+    "Chưa đúng. 6 nhân 7 bằng 42.": "v_91da7da4b219b23f.wav",
+    "6 nhân 8 bằng bao nhiêu?": "v_b734329182196992.wav",
+    "Gợi ý nhé. Kết quả là 48. Bé tìm số rồi ấn vào nhé.": "v_bddda3d95d20fa6e.wav",
+    "Chưa đúng. 6 nhân 8 bằng 48.": "v_93bd28eff8a06e71.wav",
+    "6 nhân 9 bằng bao nhiêu?": "v_d3109a8b2819788d.wav",
+    "Gợi ý nhé. Kết quả là 54. Bé tìm số rồi ấn vào nhé.": "v_8282117314488b29.wav",
+    "Chưa đúng. 6 nhân 9 bằng 54.": "v_271d79d31d0c0b11.wav",
+    "6 nhân 10 bằng bao nhiêu?": "v_3f1e4818a7f8aa47.wav",
+    "Gợi ý nhé. Kết quả là 60. Bé tìm số rồi ấn vào nhé.": "v_80469fe716c3612c.wav",
+    "Chưa đúng. 6 nhân 10 bằng 60.": "v_275d01d348ff8196.wav",
+    "7 nhân 1 bằng bao nhiêu?": "v_199ce2873c056297.wav",
+    "Chưa đúng. 7 nhân 1 bằng 7.": "v_05fb46ca73614f5d.wav",
+    "7 nhân 2 bằng bao nhiêu?": "v_fe4d02c17d8d7177.wav",
+    "Chưa đúng. 7 nhân 2 bằng 14.": "v_6937c024407ea173.wav",
+    "7 nhân 3 bằng bao nhiêu?": "v_98fb91e1fa60ff66.wav",
+    "Chưa đúng. 7 nhân 3 bằng 21.": "v_5d7528da39f52fec.wav",
+    "7 nhân 4 bằng bao nhiêu?": "v_cd1339ad89bbaeb1.wav",
+    "Chưa đúng. 7 nhân 4 bằng 28.": "v_672fb2f52a7bb5dc.wav",
+    "7 nhân 5 bằng bao nhiêu?": "v_e5525f4e527a08dc.wav",
+    "Chưa đúng. 7 nhân 5 bằng 35.": "v_b1a79d83a8f4c16d.wav",
+    "7 nhân 6 bằng bao nhiêu?": "v_1619efd9cacd2f9f.wav",
+    "Chưa đúng. 7 nhân 6 bằng 42.": "v_4480a0bc459c0403.wav",
+    "7 nhân 7 bằng bao nhiêu?": "v_ca11c26db04396b7.wav",
+    "Gợi ý nhé. Kết quả là 49. Bé tìm số rồi ấn vào nhé.": "v_51b37b854ac39ce6.wav",
+    "Chưa đúng. 7 nhân 7 bằng 49.": "v_94d5b34d669e2b92.wav",
+    "7 nhân 8 bằng bao nhiêu?": "v_e237c52249379e20.wav",
+    "Gợi ý nhé. Kết quả là 56. Bé tìm số rồi ấn vào nhé.": "v_d4639aae44661900.wav",
+    "Chưa đúng. 7 nhân 8 bằng 56.": "v_59d1b4886efc8f87.wav",
+    "7 nhân 9 bằng bao nhiêu?": "v_20b4f353bb82c676.wav",
+    "Gợi ý nhé. Kết quả là 63. Bé tìm số rồi ấn vào nhé.": "v_64bb2b992512b9ea.wav",
+    "Chưa đúng. 7 nhân 9 bằng 63.": "v_5fa947792c429522.wav",
+    "7 nhân 10 bằng bao nhiêu?": "v_08b093bb1f45aa28.wav",
+    "Gợi ý nhé. Kết quả là 70. Bé tìm số rồi ấn vào nhé.": "v_4e50ac7a84fa02f5.wav",
+    "Chưa đúng. 7 nhân 10 bằng 70.": "v_507afe987ecd2551.wav",
+    "8 nhân 1 bằng bao nhiêu?": "v_ad2f882b36d371ef.wav",
+    "Chưa đúng. 8 nhân 1 bằng 8.": "v_37c4aa74d7b8c630.wav",
+    "8 nhân 2 bằng bao nhiêu?": "v_49db7cfeb2782df5.wav",
+    "Chưa đúng. 8 nhân 2 bằng 16.": "v_13695c506b1ab91f.wav",
+    "8 nhân 3 bằng bao nhiêu?": "v_a8d1b47a1e5c7777.wav",
+    "Chưa đúng. 8 nhân 3 bằng 24.": "v_4a724b11c5d43e40.wav",
+    "8 nhân 4 bằng bao nhiêu?": "v_8fb3931b147d8f08.wav",
+    "Chưa đúng. 8 nhân 4 bằng 32.": "v_3cbeccb2153c193f.wav",
+    "8 nhân 5 bằng bao nhiêu?": "v_52cc4ab9f1ce4432.wav",
+    "Chưa đúng. 8 nhân 5 bằng 40.": "v_9d35095bc4a74552.wav",
+    "8 nhân 6 bằng bao nhiêu?": "v_7dfa1834ad409ad4.wav",
+    "Chưa đúng. 8 nhân 6 bằng 48.": "v_e250ac8e416f11e1.wav",
+    "8 nhân 7 bằng bao nhiêu?": "v_87b23d66ac3271a4.wav",
+    "Chưa đúng. 8 nhân 7 bằng 56.": "v_ec3c5342a314b3ff.wav",
+    "8 nhân 8 bằng bao nhiêu?": "v_a579140f093f0de9.wav",
+    "Gợi ý nhé. Kết quả là 64. Bé tìm số rồi ấn vào nhé.": "v_ea09e05116ecab74.wav",
+    "Chưa đúng. 8 nhân 8 bằng 64.": "v_0da3e931c9957dd3.wav",
+    "8 nhân 9 bằng bao nhiêu?": "v_1d223fd858765601.wav",
+    "Gợi ý nhé. Kết quả là 72. Bé tìm số rồi ấn vào nhé.": "v_fd847a3481a0201a.wav",
+    "Chưa đúng. 8 nhân 9 bằng 72.": "v_b957ea9ce1690b20.wav",
+    "8 nhân 10 bằng bao nhiêu?": "v_e05794bf9a65b3b2.wav",
+    "Gợi ý nhé. Kết quả là 80. Bé tìm số rồi ấn vào nhé.": "v_17a2fb60b67219da.wav",
+    "Chưa đúng. 8 nhân 10 bằng 80.": "v_c2f0887cb5fad823.wav",
+    "9 nhân 1 bằng bao nhiêu?": "v_0aaf4201d31b1592.wav",
+    "Chưa đúng. 9 nhân 1 bằng 9.": "v_cdea1ea998e3c6f1.wav",
+    "9 nhân 2 bằng bao nhiêu?": "v_e91280b7c048a2b9.wav",
+    "Chưa đúng. 9 nhân 2 bằng 18.": "v_27b44f09aa6231e0.wav",
+    "9 nhân 3 bằng bao nhiêu?": "v_2774741116748827.wav",
+    "Chưa đúng. 9 nhân 3 bằng 27.": "v_b3c94a3f3ce42396.wav",
+    "9 nhân 4 bằng bao nhiêu?": "v_2e59f2d87a7a09ae.wav",
+    "Chưa đúng. 9 nhân 4 bằng 36.": "v_eb237a33ccd64868.wav",
+    "9 nhân 5 bằng bao nhiêu?": "v_4cd44c1b0c854341.wav",
+    "Chưa đúng. 9 nhân 5 bằng 45.": "v_b61df9f4945eea5e.wav",
+    "9 nhân 6 bằng bao nhiêu?": "v_042287d752145fae.wav",
+    "Chưa đúng. 9 nhân 6 bằng 54.": "v_b62db35974d80844.wav",
+    "9 nhân 7 bằng bao nhiêu?": "v_e0c55aa1283dc113.wav",
+    "Chưa đúng. 9 nhân 7 bằng 63.": "v_cd7a858f18c4b99d.wav",
+    "9 nhân 8 bằng bao nhiêu?": "v_818fd6b27e9095f7.wav",
+    "Chưa đúng. 9 nhân 8 bằng 72.": "v_a7cc57ce5dbef1ed.wav",
+    "9 nhân 9 bằng bao nhiêu?": "v_0a5a33e7b41e3dcb.wav",
+    "Gợi ý nhé. Kết quả là 81. Bé tìm số rồi ấn vào nhé.": "v_67d658256c4e37e4.wav",
+    "Chưa đúng. 9 nhân 9 bằng 81.": "v_09ad08d433243d3b.wav",
+    "9 nhân 10 bằng bao nhiêu?": "v_28e5c881f2a7301b.wav",
+    "Gợi ý nhé. Kết quả là 90. Bé tìm số rồi ấn vào nhé.": "v_7992649d7c9972b2.wav",
+    "Chưa đúng. 9 nhân 10 bằng 90.": "v_0d42a5f26a072f78.wav",
+    "10 nhân 1 bằng bao nhiêu?": "v_c56ecd8b00e1d606.wav",
+    "Chưa đúng. 10 nhân 1 bằng 10.": "v_6b93f27d4e6062ae.wav",
+    "10 nhân 2 bằng bao nhiêu?": "v_47e468bda22dc015.wav",
+    "Chưa đúng. 10 nhân 2 bằng 20.": "v_e27025a6e8eea3ed.wav",
+    "10 nhân 3 bằng bao nhiêu?": "v_1134e14b41f273fb.wav",
+    "Chưa đúng. 10 nhân 3 bằng 30.": "v_231c760420d9d5e1.wav",
+    "10 nhân 4 bằng bao nhiêu?": "v_facf3a595881c5cd.wav",
+    "Chưa đúng. 10 nhân 4 bằng 40.": "v_1d99ff6c7ca27d98.wav",
+    "10 nhân 5 bằng bao nhiêu?": "v_364cf19a4a90dceb.wav",
+    "Chưa đúng. 10 nhân 5 bằng 50.": "v_5bcf7edb45284a94.wav",
+    "10 nhân 6 bằng bao nhiêu?": "v_033db3b53c61ef52.wav",
+    "Chưa đúng. 10 nhân 6 bằng 60.": "v_3857b7a274a92052.wav",
+    "10 nhân 7 bằng bao nhiêu?": "v_57a69d3c49090a8d.wav",
+    "Chưa đúng. 10 nhân 7 bằng 70.": "v_a5610f6e702628f4.wav",
+    "10 nhân 8 bằng bao nhiêu?": "v_57e3c02538d54fce.wav",
+    "Chưa đúng. 10 nhân 8 bằng 80.": "v_6e544fe7675eb115.wav",
+    "10 nhân 9 bằng bao nhiêu?": "v_b1caedf239454309.wav",
+    "Chưa đúng. 10 nhân 9 bằng 90.": "v_4520453bbfcad901.wav",
+    "10 nhân 10 bằng bao nhiêu?": "v_9aceb6f7b5c98ef7.wav",
+    "Gợi ý nhé. Kết quả là 100. Bé tìm số rồi ấn vào nhé.": "v_1322beb3acafae39.wav",
+    "Chưa đúng. 10 nhân 10 bằng 100.": "v_63b495376fbdeaf8.wav",
+    "Bạn đúng rồi! Giỏi lắm!": "v_a1217882d2dbf582.wav",
+    "Chính xác! Con làm rất tốt!": "v_b1fa1579f53ef760.wav",
+    "Tuyệt vời! Tiếp tục nào!": "v_88f16fee3a19c99a.wav",
+    "Đúng rồi! Thêm một bước tiến!": "v_494e48fbc7ab7279.wav",
+    "Rất nhanh và rất đúng!": "v_69ebc5c001eb6234.wav",
+    "Con đang học bảng nhân rất tốt!": "v_652d84f2fdd5bf36.wav",
+    "Thưởng lớn! Con đúng 3 câu liên tiếp, được thêm một tim!": "v_58b730b36baed2bd.wav",
+    "Đã bật giọng đọc.": "v_a8ef8f07148284ab.wav",
+    "Bé học bảng nhân.": "v_e638684b9f9b5cff.wav",
+    "Bắt đầu luyện bảng nhân nào!": "v_24aee97c21196a0e.wav",
+    "Bấm vào ô kết quả đúng.": "v_4577b030fe8aa1f9.wav",
+    "Bấm Đọc để nghe lại câu hỏi.": "v_44345d358317bf89.wav",
+    "Gợi ý nhé.": "v_361fe88c1828eb41.wav",
+    "Làm lại nào.": "v_21d2e8b3bc0fc228.wav",
+    "Hết tim rồi!": "v_6bac28c3fca5bf4f.wav",
+    "Không sao, mình xem lại lỗi rồi chơi lại nhé.": "v_06333ca65e5940c0.wav"
+  },
+  "items": [
+    {
+      "id": "p0001",
+      "text": "1 nhân 1 bằng bao nhiêu?",
+      "speak": "một nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_abe261b46a1b7c46.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0002",
+      "text": "Gợi ý nhé. Kết quả là 1. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là một. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_71ca0e1af3b0a075.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0003",
+      "text": "Chưa đúng. 1 nhân 1 bằng 1.",
+      "speak": "Chưa đúng. một nhân một bằng một.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_3ae958a0c8851e8f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0004",
+      "text": "1 nhân 2 bằng bao nhiêu?",
+      "speak": "một nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d48367f8ba82bdd2.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0005",
+      "text": "Gợi ý nhé. Kết quả là 2. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là hai. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_f1ded42819bd8a6d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0006",
+      "text": "Chưa đúng. 1 nhân 2 bằng 2.",
+      "speak": "Chưa đúng. một nhân hai bằng hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_263183f1d032371f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0007",
+      "text": "1 nhân 3 bằng bao nhiêu?",
+      "speak": "một nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0234e5d017605092.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0008",
+      "text": "Gợi ý nhé. Kết quả là 3. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là ba. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_9c8230d918a3e2a4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0009",
+      "text": "Chưa đúng. 1 nhân 3 bằng 3.",
+      "speak": "Chưa đúng. một nhân ba bằng ba.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_73737f35294e4571.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0010",
+      "text": "1 nhân 4 bằng bao nhiêu?",
+      "speak": "một nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_02f87a6b1ddfd351.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0011",
+      "text": "Gợi ý nhé. Kết quả là 4. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là bốn. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_53f40c4eb677e41d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0012",
+      "text": "Chưa đúng. 1 nhân 4 bằng 4.",
+      "speak": "Chưa đúng. một nhân bốn bằng bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_07d177f959086620.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0013",
+      "text": "1 nhân 5 bằng bao nhiêu?",
+      "speak": "một nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_1efcf2e2f94646f6.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0014",
+      "text": "Gợi ý nhé. Kết quả là 5. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là năm. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_faf1b754c1ad96bf.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0015",
+      "text": "Chưa đúng. 1 nhân 5 bằng 5.",
+      "speak": "Chưa đúng. một nhân năm bằng năm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_5eece2dff539e1b2.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0016",
+      "text": "1 nhân 6 bằng bao nhiêu?",
+      "speak": "một nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_1e412ddae82442f4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0017",
+      "text": "Gợi ý nhé. Kết quả là 6. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là sáu. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c0b78c6a2dfadcc7.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0018",
+      "text": "Chưa đúng. 1 nhân 6 bằng 6.",
+      "speak": "Chưa đúng. một nhân sáu bằng sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d41c1a9db06deb9a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0019",
+      "text": "1 nhân 7 bằng bao nhiêu?",
+      "speak": "một nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6761279de8d0460a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0020",
+      "text": "Gợi ý nhé. Kết quả là 7. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là bảy. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d891a7c81b4c749b.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0021",
+      "text": "Chưa đúng. 1 nhân 7 bằng 7.",
+      "speak": "Chưa đúng. một nhân bảy bằng bảy.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_2a23714f8cdfbb32.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0022",
+      "text": "1 nhân 8 bằng bao nhiêu?",
+      "speak": "một nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c4410193f8083363.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0023",
+      "text": "Gợi ý nhé. Kết quả là 8. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là tám. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_79cd0f4d81b31a69.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0024",
+      "text": "Chưa đúng. 1 nhân 8 bằng 8.",
+      "speak": "Chưa đúng. một nhân tám bằng tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_608b245a4e55d7ae.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0025",
+      "text": "1 nhân 9 bằng bao nhiêu?",
+      "speak": "một nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_5af6cf1368b8081a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0026",
+      "text": "Gợi ý nhé. Kết quả là 9. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là chín. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_25b3b299d22dba2e.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0027",
+      "text": "Chưa đúng. 1 nhân 9 bằng 9.",
+      "speak": "Chưa đúng. một nhân chín bằng chín.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_72b03e4321609a86.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0028",
+      "text": "1 nhân 10 bằng bao nhiêu?",
+      "speak": "một nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6f40c2ae545e15ab.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0029",
+      "text": "Gợi ý nhé. Kết quả là 10. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là mười. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4f79bd592d93966a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0030",
+      "text": "Chưa đúng. 1 nhân 10 bằng 10.",
+      "speak": "Chưa đúng. một nhân mười bằng mười.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_994a6331221ed442.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0031",
+      "text": "2 nhân 1 bằng bao nhiêu?",
+      "speak": "hai nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0440f86074dd8a61.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0032",
+      "text": "Chưa đúng. 2 nhân 1 bằng 2.",
+      "speak": "Chưa đúng. hai nhân một bằng hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_02a352dd42debf50.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0033",
+      "text": "2 nhân 2 bằng bao nhiêu?",
+      "speak": "hai nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_771cde8a84a48320.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0034",
+      "text": "Chưa đúng. 2 nhân 2 bằng 4.",
+      "speak": "Chưa đúng. hai nhân hai bằng bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d08ac985a820d302.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0035",
+      "text": "2 nhân 3 bằng bao nhiêu?",
+      "speak": "hai nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_cb0d2ccddff816cf.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0036",
+      "text": "Chưa đúng. 2 nhân 3 bằng 6.",
+      "speak": "Chưa đúng. hai nhân ba bằng sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_33674999cdcb652c.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0037",
+      "text": "2 nhân 4 bằng bao nhiêu?",
+      "speak": "hai nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_29f1da7ddf49210d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0038",
+      "text": "Chưa đúng. 2 nhân 4 bằng 8.",
+      "speak": "Chưa đúng. hai nhân bốn bằng tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_52bc6e9f54e7403c.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0039",
+      "text": "2 nhân 5 bằng bao nhiêu?",
+      "speak": "hai nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0f9057e5a1bc6a43.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0040",
+      "text": "Chưa đúng. 2 nhân 5 bằng 10.",
+      "speak": "Chưa đúng. hai nhân năm bằng mười.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_ca2391abd709fbb1.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0041",
+      "text": "2 nhân 6 bằng bao nhiêu?",
+      "speak": "hai nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0ff69de3bc532969.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0042",
+      "text": "Gợi ý nhé. Kết quả là 12. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là mười hai. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_085da6d01d426f1a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0043",
+      "text": "Chưa đúng. 2 nhân 6 bằng 12.",
+      "speak": "Chưa đúng. hai nhân sáu bằng mười hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c68a2b32910668a8.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0044",
+      "text": "2 nhân 7 bằng bao nhiêu?",
+      "speak": "hai nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_3aba9fd13ac3b745.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0045",
+      "text": "Gợi ý nhé. Kết quả là 14. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là mười bốn. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c3cde1eb85f35ceb.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0046",
+      "text": "Chưa đúng. 2 nhân 7 bằng 14.",
+      "speak": "Chưa đúng. hai nhân bảy bằng mười bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_9e2b382f7f60d2ce.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0047",
+      "text": "2 nhân 8 bằng bao nhiêu?",
+      "speak": "hai nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d49ede5b062bd7c1.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0048",
+      "text": "Gợi ý nhé. Kết quả là 16. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là mười sáu. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4a78c7b0f5c5f9d0.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0049",
+      "text": "Chưa đúng. 2 nhân 8 bằng 16.",
+      "speak": "Chưa đúng. hai nhân tám bằng mười sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_43a97cfa8c7c74ce.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0050",
+      "text": "2 nhân 9 bằng bao nhiêu?",
+      "speak": "hai nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_3096fd4316673280.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0051",
+      "text": "Gợi ý nhé. Kết quả là 18. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là mười tám. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d5dd492aa7ff0d8b.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0052",
+      "text": "Chưa đúng. 2 nhân 9 bằng 18.",
+      "speak": "Chưa đúng. hai nhân chín bằng mười tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_901690974504ca81.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0053",
+      "text": "2 nhân 10 bằng bao nhiêu?",
+      "speak": "hai nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b75c8a646d05d219.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0054",
+      "text": "Gợi ý nhé. Kết quả là 20. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là hai mươi. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_df7b69b52b9c1129.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0055",
+      "text": "Chưa đúng. 2 nhân 10 bằng 20.",
+      "speak": "Chưa đúng. hai nhân mười bằng hai mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c57c9d91396e5390.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0056",
+      "text": "3 nhân 1 bằng bao nhiêu?",
+      "speak": "ba nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_bae572c0291e1987.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0057",
+      "text": "Chưa đúng. 3 nhân 1 bằng 3.",
+      "speak": "Chưa đúng. ba nhân một bằng ba.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6d5826c0dc6034a4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0058",
+      "text": "3 nhân 2 bằng bao nhiêu?",
+      "speak": "ba nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_9431e07dddb23308.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0059",
+      "text": "Chưa đúng. 3 nhân 2 bằng 6.",
+      "speak": "Chưa đúng. ba nhân hai bằng sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4417b2d173841841.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0060",
+      "text": "3 nhân 3 bằng bao nhiêu?",
+      "speak": "ba nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a323a8e4bbf22504.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0061",
+      "text": "Chưa đúng. 3 nhân 3 bằng 9.",
+      "speak": "Chưa đúng. ba nhân ba bằng chín.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_656bb4ee9e0bc2c8.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0062",
+      "text": "3 nhân 4 bằng bao nhiêu?",
+      "speak": "ba nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_290e7994bcc9c199.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0063",
+      "text": "Chưa đúng. 3 nhân 4 bằng 12.",
+      "speak": "Chưa đúng. ba nhân bốn bằng mười hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c3d82ddd3fff72a9.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0064",
+      "text": "3 nhân 5 bằng bao nhiêu?",
+      "speak": "ba nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_214e7ad4d31c2873.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0065",
+      "text": "Gợi ý nhé. Kết quả là 15. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là mười lăm. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_048aa12684cda661.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0066",
+      "text": "Chưa đúng. 3 nhân 5 bằng 15.",
+      "speak": "Chưa đúng. ba nhân năm bằng mười lăm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_e7cdc93ae5f4a221.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0067",
+      "text": "3 nhân 6 bằng bao nhiêu?",
+      "speak": "ba nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b7d48c93443a1395.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0068",
+      "text": "Chưa đúng. 3 nhân 6 bằng 18.",
+      "speak": "Chưa đúng. ba nhân sáu bằng mười tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6f44c763479176a8.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0069",
+      "text": "3 nhân 7 bằng bao nhiêu?",
+      "speak": "ba nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6a4e04e5b1385efd.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0070",
+      "text": "Gợi ý nhé. Kết quả là 21. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là hai mươi mốt. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_46210b980d7a29dd.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0071",
+      "text": "Chưa đúng. 3 nhân 7 bằng 21.",
+      "speak": "Chưa đúng. ba nhân bảy bằng hai mươi mốt.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_03bfbd3608f12295.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0072",
+      "text": "3 nhân 8 bằng bao nhiêu?",
+      "speak": "ba nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4aa8629adf3a0d14.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0073",
+      "text": "Gợi ý nhé. Kết quả là 24. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là hai mươi bốn. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4b664b095181e039.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0074",
+      "text": "Chưa đúng. 3 nhân 8 bằng 24.",
+      "speak": "Chưa đúng. ba nhân tám bằng hai mươi bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_2e30256c8daef247.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0075",
+      "text": "3 nhân 9 bằng bao nhiêu?",
+      "speak": "ba nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_58f4e57f7142fb67.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0076",
+      "text": "Gợi ý nhé. Kết quả là 27. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là hai mươi bảy. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_9604710dde6b7cfb.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0077",
+      "text": "Chưa đúng. 3 nhân 9 bằng 27.",
+      "speak": "Chưa đúng. ba nhân chín bằng hai mươi bảy.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_48d3ed4ea078740c.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0078",
+      "text": "3 nhân 10 bằng bao nhiêu?",
+      "speak": "ba nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_8c4b8cf4ea9b465e.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0079",
+      "text": "Gợi ý nhé. Kết quả là 30. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là ba mươi. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_f0ffe8cb390c99b4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0080",
+      "text": "Chưa đúng. 3 nhân 10 bằng 30.",
+      "speak": "Chưa đúng. ba nhân mười bằng ba mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c1ee4adbe884cc6f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0081",
+      "text": "4 nhân 1 bằng bao nhiêu?",
+      "speak": "bốn nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0daf22879ff2497a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0082",
+      "text": "Chưa đúng. 4 nhân 1 bằng 4.",
+      "speak": "Chưa đúng. bốn nhân một bằng bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_bbdb75935444a040.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0083",
+      "text": "4 nhân 2 bằng bao nhiêu?",
+      "speak": "bốn nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_58c25ab4df2862a9.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0084",
+      "text": "Chưa đúng. 4 nhân 2 bằng 8.",
+      "speak": "Chưa đúng. bốn nhân hai bằng tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_eefc6757b276f089.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0085",
+      "text": "4 nhân 3 bằng bao nhiêu?",
+      "speak": "bốn nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_50b227fd6e6fbfbd.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0086",
+      "text": "Chưa đúng. 4 nhân 3 bằng 12.",
+      "speak": "Chưa đúng. bốn nhân ba bằng mười hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c6e91a2f70abed75.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0087",
+      "text": "4 nhân 4 bằng bao nhiêu?",
+      "speak": "bốn nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_3570e6be72c8843d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0088",
+      "text": "Chưa đúng. 4 nhân 4 bằng 16.",
+      "speak": "Chưa đúng. bốn nhân bốn bằng mười sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c2e5e5c52617cab1.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0089",
+      "text": "4 nhân 5 bằng bao nhiêu?",
+      "speak": "bốn nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4e832e3f5f968d63.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0090",
+      "text": "Chưa đúng. 4 nhân 5 bằng 20.",
+      "speak": "Chưa đúng. bốn nhân năm bằng hai mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6be86ac1963ab883.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0091",
+      "text": "4 nhân 6 bằng bao nhiêu?",
+      "speak": "bốn nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_17314d0a5228f7e0.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0092",
+      "text": "Chưa đúng. 4 nhân 6 bằng 24.",
+      "speak": "Chưa đúng. bốn nhân sáu bằng hai mươi bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_bd8a76189d6868b3.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0093",
+      "text": "4 nhân 7 bằng bao nhiêu?",
+      "speak": "bốn nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_5fedda1ebc3ec6f1.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0094",
+      "text": "Gợi ý nhé. Kết quả là 28. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là hai mươi tám. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a1d36734cfa3011c.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0095",
+      "text": "Chưa đúng. 4 nhân 7 bằng 28.",
+      "speak": "Chưa đúng. bốn nhân bảy bằng hai mươi tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_82b0236e0171decb.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0096",
+      "text": "4 nhân 8 bằng bao nhiêu?",
+      "speak": "bốn nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6a3f36e8eaa5fc2a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0097",
+      "text": "Gợi ý nhé. Kết quả là 32. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là ba mươi hai. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_eb2919308448ce1a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0098",
+      "text": "Chưa đúng. 4 nhân 8 bằng 32.",
+      "speak": "Chưa đúng. bốn nhân tám bằng ba mươi hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_dfec4feeb207649f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0099",
+      "text": "4 nhân 9 bằng bao nhiêu?",
+      "speak": "bốn nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6a28285d5ce5f8e8.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0100",
+      "text": "Gợi ý nhé. Kết quả là 36. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là ba mươi sáu. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_19a36b7d64ac8168.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0101",
+      "text": "Chưa đúng. 4 nhân 9 bằng 36.",
+      "speak": "Chưa đúng. bốn nhân chín bằng ba mươi sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_8772639e7e74be1b.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0102",
+      "text": "4 nhân 10 bằng bao nhiêu?",
+      "speak": "bốn nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_7462e8631b2dac13.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0103",
+      "text": "Gợi ý nhé. Kết quả là 40. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là bốn mươi. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_bcf77631367c5365.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0104",
+      "text": "Chưa đúng. 4 nhân 10 bằng 40.",
+      "speak": "Chưa đúng. bốn nhân mười bằng bốn mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_897cbd672917d4f9.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0105",
+      "text": "5 nhân 1 bằng bao nhiêu?",
+      "speak": "năm nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_37f9d0af1994dc95.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0106",
+      "text": "Chưa đúng. 5 nhân 1 bằng 5.",
+      "speak": "Chưa đúng. năm nhân một bằng năm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_55310f3e99d32897.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0107",
+      "text": "5 nhân 2 bằng bao nhiêu?",
+      "speak": "năm nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c5ad6cbcc0cd0a99.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0108",
+      "text": "Chưa đúng. 5 nhân 2 bằng 10.",
+      "speak": "Chưa đúng. năm nhân hai bằng mười.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d89c421e28dad28b.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0109",
+      "text": "5 nhân 3 bằng bao nhiêu?",
+      "speak": "năm nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_ccdf081305747780.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0110",
+      "text": "Chưa đúng. 5 nhân 3 bằng 15.",
+      "speak": "Chưa đúng. năm nhân ba bằng mười lăm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_f2fa32326f74aa52.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0111",
+      "text": "5 nhân 4 bằng bao nhiêu?",
+      "speak": "năm nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_1a09f61d6bbb518c.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0112",
+      "text": "Chưa đúng. 5 nhân 4 bằng 20.",
+      "speak": "Chưa đúng. năm nhân bốn bằng hai mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b5652b7af195b145.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0113",
+      "text": "5 nhân 5 bằng bao nhiêu?",
+      "speak": "năm nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_f09d53eb344a1ace.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0114",
+      "text": "Gợi ý nhé. Kết quả là 25. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là hai mươi lăm. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d7b559c2daf4cc2d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0115",
+      "text": "Chưa đúng. 5 nhân 5 bằng 25.",
+      "speak": "Chưa đúng. năm nhân năm bằng hai mươi lăm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_794db35d7e261611.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0116",
+      "text": "5 nhân 6 bằng bao nhiêu?",
+      "speak": "năm nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_bbb4665b31aaf15e.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0117",
+      "text": "Chưa đúng. 5 nhân 6 bằng 30.",
+      "speak": "Chưa đúng. năm nhân sáu bằng ba mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_f0f83b461ed89912.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0118",
+      "text": "5 nhân 7 bằng bao nhiêu?",
+      "speak": "năm nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c07535e24859bdb0.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0119",
+      "text": "Gợi ý nhé. Kết quả là 35. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là ba mươi lăm. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b8512af3c0f5cc67.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0120",
+      "text": "Chưa đúng. 5 nhân 7 bằng 35.",
+      "speak": "Chưa đúng. năm nhân bảy bằng ba mươi lăm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b0b58a6725f842c2.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0121",
+      "text": "5 nhân 8 bằng bao nhiêu?",
+      "speak": "năm nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_668057a3b7938c0c.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0122",
+      "text": "Chưa đúng. 5 nhân 8 bằng 40.",
+      "speak": "Chưa đúng. năm nhân tám bằng bốn mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_668df95f943db2d4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0123",
+      "text": "5 nhân 9 bằng bao nhiêu?",
+      "speak": "năm nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0ed2fb584fcd519d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0124",
+      "text": "Gợi ý nhé. Kết quả là 45. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là bốn mươi lăm. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_8eaf97a544c2c827.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0125",
+      "text": "Chưa đúng. 5 nhân 9 bằng 45.",
+      "speak": "Chưa đúng. năm nhân chín bằng bốn mươi lăm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_ffda00c39f85f365.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0126",
+      "text": "5 nhân 10 bằng bao nhiêu?",
+      "speak": "năm nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_5226ef5925c12334.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0127",
+      "text": "Gợi ý nhé. Kết quả là 50. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là năm mươi. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_dadb2a2282941de4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0128",
+      "text": "Chưa đúng. 5 nhân 10 bằng 50.",
+      "speak": "Chưa đúng. năm nhân mười bằng năm mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_176dd941d334f9a4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0129",
+      "text": "6 nhân 1 bằng bao nhiêu?",
+      "speak": "sáu nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_dcb92d4b195469f5.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0130",
+      "text": "Chưa đúng. 6 nhân 1 bằng 6.",
+      "speak": "Chưa đúng. sáu nhân một bằng sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a70a1d43e984b83f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0131",
+      "text": "6 nhân 2 bằng bao nhiêu?",
+      "speak": "sáu nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_676fe31a56ff9d78.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0132",
+      "text": "Chưa đúng. 6 nhân 2 bằng 12.",
+      "speak": "Chưa đúng. sáu nhân hai bằng mười hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_1c88971838055ef5.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0133",
+      "text": "6 nhân 3 bằng bao nhiêu?",
+      "speak": "sáu nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_8a60f735b61e4259.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0134",
+      "text": "Chưa đúng. 6 nhân 3 bằng 18.",
+      "speak": "Chưa đúng. sáu nhân ba bằng mười tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b296d2bb0b7b651c.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0135",
+      "text": "6 nhân 4 bằng bao nhiêu?",
+      "speak": "sáu nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_25339dc0c93f6fa8.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0136",
+      "text": "Chưa đúng. 6 nhân 4 bằng 24.",
+      "speak": "Chưa đúng. sáu nhân bốn bằng hai mươi bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a11506b62d925d4f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0137",
+      "text": "6 nhân 5 bằng bao nhiêu?",
+      "speak": "sáu nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_28964bc4f5a1e784.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0138",
+      "text": "Chưa đúng. 6 nhân 5 bằng 30.",
+      "speak": "Chưa đúng. sáu nhân năm bằng ba mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_814c67cd6e300da5.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0139",
+      "text": "6 nhân 6 bằng bao nhiêu?",
+      "speak": "sáu nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_9b3530fd85122ccd.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0140",
+      "text": "Chưa đúng. 6 nhân 6 bằng 36.",
+      "speak": "Chưa đúng. sáu nhân sáu bằng ba mươi sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_8f19e57485b0f293.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0141",
+      "text": "6 nhân 7 bằng bao nhiêu?",
+      "speak": "sáu nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b3cf6a397f386806.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0142",
+      "text": "Gợi ý nhé. Kết quả là 42. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là bốn mươi hai. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_cc3c8c073373c853.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0143",
+      "text": "Chưa đúng. 6 nhân 7 bằng 42.",
+      "speak": "Chưa đúng. sáu nhân bảy bằng bốn mươi hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_91da7da4b219b23f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0144",
+      "text": "6 nhân 8 bằng bao nhiêu?",
+      "speak": "sáu nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b734329182196992.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0145",
+      "text": "Gợi ý nhé. Kết quả là 48. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là bốn mươi tám. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_bddda3d95d20fa6e.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0146",
+      "text": "Chưa đúng. 6 nhân 8 bằng 48.",
+      "speak": "Chưa đúng. sáu nhân tám bằng bốn mươi tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_93bd28eff8a06e71.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0147",
+      "text": "6 nhân 9 bằng bao nhiêu?",
+      "speak": "sáu nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d3109a8b2819788d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0148",
+      "text": "Gợi ý nhé. Kết quả là 54. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là năm mươi bốn. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_8282117314488b29.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0149",
+      "text": "Chưa đúng. 6 nhân 9 bằng 54.",
+      "speak": "Chưa đúng. sáu nhân chín bằng năm mươi bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_271d79d31d0c0b11.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0150",
+      "text": "6 nhân 10 bằng bao nhiêu?",
+      "speak": "sáu nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_3f1e4818a7f8aa47.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0151",
+      "text": "Gợi ý nhé. Kết quả là 60. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là sáu mươi. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_80469fe716c3612c.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0152",
+      "text": "Chưa đúng. 6 nhân 10 bằng 60.",
+      "speak": "Chưa đúng. sáu nhân mười bằng sáu mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_275d01d348ff8196.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0153",
+      "text": "7 nhân 1 bằng bao nhiêu?",
+      "speak": "bảy nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_199ce2873c056297.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0154",
+      "text": "Chưa đúng. 7 nhân 1 bằng 7.",
+      "speak": "Chưa đúng. bảy nhân một bằng bảy.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_05fb46ca73614f5d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0155",
+      "text": "7 nhân 2 bằng bao nhiêu?",
+      "speak": "bảy nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_fe4d02c17d8d7177.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0156",
+      "text": "Chưa đúng. 7 nhân 2 bằng 14.",
+      "speak": "Chưa đúng. bảy nhân hai bằng mười bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6937c024407ea173.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0157",
+      "text": "7 nhân 3 bằng bao nhiêu?",
+      "speak": "bảy nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_98fb91e1fa60ff66.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0158",
+      "text": "Chưa đúng. 7 nhân 3 bằng 21.",
+      "speak": "Chưa đúng. bảy nhân ba bằng hai mươi mốt.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_5d7528da39f52fec.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0159",
+      "text": "7 nhân 4 bằng bao nhiêu?",
+      "speak": "bảy nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_cd1339ad89bbaeb1.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0160",
+      "text": "Chưa đúng. 7 nhân 4 bằng 28.",
+      "speak": "Chưa đúng. bảy nhân bốn bằng hai mươi tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_672fb2f52a7bb5dc.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0161",
+      "text": "7 nhân 5 bằng bao nhiêu?",
+      "speak": "bảy nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_e5525f4e527a08dc.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0162",
+      "text": "Chưa đúng. 7 nhân 5 bằng 35.",
+      "speak": "Chưa đúng. bảy nhân năm bằng ba mươi lăm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b1a79d83a8f4c16d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0163",
+      "text": "7 nhân 6 bằng bao nhiêu?",
+      "speak": "bảy nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_1619efd9cacd2f9f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0164",
+      "text": "Chưa đúng. 7 nhân 6 bằng 42.",
+      "speak": "Chưa đúng. bảy nhân sáu bằng bốn mươi hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4480a0bc459c0403.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0165",
+      "text": "7 nhân 7 bằng bao nhiêu?",
+      "speak": "bảy nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_ca11c26db04396b7.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0166",
+      "text": "Gợi ý nhé. Kết quả là 49. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là bốn mươi chín. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_51b37b854ac39ce6.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0167",
+      "text": "Chưa đúng. 7 nhân 7 bằng 49.",
+      "speak": "Chưa đúng. bảy nhân bảy bằng bốn mươi chín.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_94d5b34d669e2b92.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0168",
+      "text": "7 nhân 8 bằng bao nhiêu?",
+      "speak": "bảy nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_e237c52249379e20.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0169",
+      "text": "Gợi ý nhé. Kết quả là 56. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là năm mươi sáu. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_d4639aae44661900.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0170",
+      "text": "Chưa đúng. 7 nhân 8 bằng 56.",
+      "speak": "Chưa đúng. bảy nhân tám bằng năm mươi sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_59d1b4886efc8f87.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0171",
+      "text": "7 nhân 9 bằng bao nhiêu?",
+      "speak": "bảy nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_20b4f353bb82c676.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0172",
+      "text": "Gợi ý nhé. Kết quả là 63. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là sáu mươi ba. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_64bb2b992512b9ea.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0173",
+      "text": "Chưa đúng. 7 nhân 9 bằng 63.",
+      "speak": "Chưa đúng. bảy nhân chín bằng sáu mươi ba.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_5fa947792c429522.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0174",
+      "text": "7 nhân 10 bằng bao nhiêu?",
+      "speak": "bảy nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_08b093bb1f45aa28.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0175",
+      "text": "Gợi ý nhé. Kết quả là 70. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là bảy mươi. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4e50ac7a84fa02f5.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0176",
+      "text": "Chưa đúng. 7 nhân 10 bằng 70.",
+      "speak": "Chưa đúng. bảy nhân mười bằng bảy mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_507afe987ecd2551.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0177",
+      "text": "8 nhân 1 bằng bao nhiêu?",
+      "speak": "tám nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_ad2f882b36d371ef.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0178",
+      "text": "Chưa đúng. 8 nhân 1 bằng 8.",
+      "speak": "Chưa đúng. tám nhân một bằng tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_37c4aa74d7b8c630.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0179",
+      "text": "8 nhân 2 bằng bao nhiêu?",
+      "speak": "tám nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_49db7cfeb2782df5.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0180",
+      "text": "Chưa đúng. 8 nhân 2 bằng 16.",
+      "speak": "Chưa đúng. tám nhân hai bằng mười sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_13695c506b1ab91f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0181",
+      "text": "8 nhân 3 bằng bao nhiêu?",
+      "speak": "tám nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a8d1b47a1e5c7777.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0182",
+      "text": "Chưa đúng. 8 nhân 3 bằng 24.",
+      "speak": "Chưa đúng. tám nhân ba bằng hai mươi bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4a724b11c5d43e40.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0183",
+      "text": "8 nhân 4 bằng bao nhiêu?",
+      "speak": "tám nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_8fb3931b147d8f08.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0184",
+      "text": "Chưa đúng. 8 nhân 4 bằng 32.",
+      "speak": "Chưa đúng. tám nhân bốn bằng ba mươi hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_3cbeccb2153c193f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0185",
+      "text": "8 nhân 5 bằng bao nhiêu?",
+      "speak": "tám nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_52cc4ab9f1ce4432.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0186",
+      "text": "Chưa đúng. 8 nhân 5 bằng 40.",
+      "speak": "Chưa đúng. tám nhân năm bằng bốn mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_9d35095bc4a74552.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0187",
+      "text": "8 nhân 6 bằng bao nhiêu?",
+      "speak": "tám nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_7dfa1834ad409ad4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0188",
+      "text": "Chưa đúng. 8 nhân 6 bằng 48.",
+      "speak": "Chưa đúng. tám nhân sáu bằng bốn mươi tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_e250ac8e416f11e1.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0189",
+      "text": "8 nhân 7 bằng bao nhiêu?",
+      "speak": "tám nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_87b23d66ac3271a4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0190",
+      "text": "Chưa đúng. 8 nhân 7 bằng 56.",
+      "speak": "Chưa đúng. tám nhân bảy bằng năm mươi sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_ec3c5342a314b3ff.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0191",
+      "text": "8 nhân 8 bằng bao nhiêu?",
+      "speak": "tám nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a579140f093f0de9.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0192",
+      "text": "Gợi ý nhé. Kết quả là 64. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là sáu mươi bốn. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_ea09e05116ecab74.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0193",
+      "text": "Chưa đúng. 8 nhân 8 bằng 64.",
+      "speak": "Chưa đúng. tám nhân tám bằng sáu mươi bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0da3e931c9957dd3.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0194",
+      "text": "8 nhân 9 bằng bao nhiêu?",
+      "speak": "tám nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_1d223fd858765601.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0195",
+      "text": "Gợi ý nhé. Kết quả là 72. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là bảy mươi hai. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_fd847a3481a0201a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0196",
+      "text": "Chưa đúng. 8 nhân 9 bằng 72.",
+      "speak": "Chưa đúng. tám nhân chín bằng bảy mươi hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b957ea9ce1690b20.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0197",
+      "text": "8 nhân 10 bằng bao nhiêu?",
+      "speak": "tám nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_e05794bf9a65b3b2.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0198",
+      "text": "Gợi ý nhé. Kết quả là 80. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là tám mươi. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_17a2fb60b67219da.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0199",
+      "text": "Chưa đúng. 8 nhân 10 bằng 80.",
+      "speak": "Chưa đúng. tám nhân mười bằng tám mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c2f0887cb5fad823.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0200",
+      "text": "9 nhân 1 bằng bao nhiêu?",
+      "speak": "chín nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0aaf4201d31b1592.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0201",
+      "text": "Chưa đúng. 9 nhân 1 bằng 9.",
+      "speak": "Chưa đúng. chín nhân một bằng chín.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_cdea1ea998e3c6f1.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0202",
+      "text": "9 nhân 2 bằng bao nhiêu?",
+      "speak": "chín nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_e91280b7c048a2b9.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0203",
+      "text": "Chưa đúng. 9 nhân 2 bằng 18.",
+      "speak": "Chưa đúng. chín nhân hai bằng mười tám.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_27b44f09aa6231e0.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0204",
+      "text": "9 nhân 3 bằng bao nhiêu?",
+      "speak": "chín nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_2774741116748827.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0205",
+      "text": "Chưa đúng. 9 nhân 3 bằng 27.",
+      "speak": "Chưa đúng. chín nhân ba bằng hai mươi bảy.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b3c94a3f3ce42396.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0206",
+      "text": "9 nhân 4 bằng bao nhiêu?",
+      "speak": "chín nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_2e59f2d87a7a09ae.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0207",
+      "text": "Chưa đúng. 9 nhân 4 bằng 36.",
+      "speak": "Chưa đúng. chín nhân bốn bằng ba mươi sáu.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_eb237a33ccd64868.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0208",
+      "text": "9 nhân 5 bằng bao nhiêu?",
+      "speak": "chín nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4cd44c1b0c854341.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0209",
+      "text": "Chưa đúng. 9 nhân 5 bằng 45.",
+      "speak": "Chưa đúng. chín nhân năm bằng bốn mươi lăm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b61df9f4945eea5e.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0210",
+      "text": "9 nhân 6 bằng bao nhiêu?",
+      "speak": "chín nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_042287d752145fae.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0211",
+      "text": "Chưa đúng. 9 nhân 6 bằng 54.",
+      "speak": "Chưa đúng. chín nhân sáu bằng năm mươi bốn.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b62db35974d80844.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0212",
+      "text": "9 nhân 7 bằng bao nhiêu?",
+      "speak": "chín nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_e0c55aa1283dc113.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0213",
+      "text": "Chưa đúng. 9 nhân 7 bằng 63.",
+      "speak": "Chưa đúng. chín nhân bảy bằng sáu mươi ba.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_cd7a858f18c4b99d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0214",
+      "text": "9 nhân 8 bằng bao nhiêu?",
+      "speak": "chín nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_818fd6b27e9095f7.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0215",
+      "text": "Chưa đúng. 9 nhân 8 bằng 72.",
+      "speak": "Chưa đúng. chín nhân tám bằng bảy mươi hai.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a7cc57ce5dbef1ed.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0216",
+      "text": "9 nhân 9 bằng bao nhiêu?",
+      "speak": "chín nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0a5a33e7b41e3dcb.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0217",
+      "text": "Gợi ý nhé. Kết quả là 81. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là tám mươi mốt. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_67d658256c4e37e4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0218",
+      "text": "Chưa đúng. 9 nhân 9 bằng 81.",
+      "speak": "Chưa đúng. chín nhân chín bằng tám mươi mốt.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_09ad08d433243d3b.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0219",
+      "text": "9 nhân 10 bằng bao nhiêu?",
+      "speak": "chín nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_28e5c881f2a7301b.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0220",
+      "text": "Gợi ý nhé. Kết quả là 90. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là chín mươi. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_7992649d7c9972b2.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0221",
+      "text": "Chưa đúng. 9 nhân 10 bằng 90.",
+      "speak": "Chưa đúng. chín nhân mười bằng chín mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_0d42a5f26a072f78.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0222",
+      "text": "10 nhân 1 bằng bao nhiêu?",
+      "speak": "mười nhân một bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_c56ecd8b00e1d606.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0223",
+      "text": "Chưa đúng. 10 nhân 1 bằng 10.",
+      "speak": "Chưa đúng. mười nhân một bằng mười.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6b93f27d4e6062ae.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0224",
+      "text": "10 nhân 2 bằng bao nhiêu?",
+      "speak": "mười nhân hai bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_47e468bda22dc015.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0225",
+      "text": "Chưa đúng. 10 nhân 2 bằng 20.",
+      "speak": "Chưa đúng. mười nhân hai bằng hai mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_e27025a6e8eea3ed.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0226",
+      "text": "10 nhân 3 bằng bao nhiêu?",
+      "speak": "mười nhân ba bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_1134e14b41f273fb.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0227",
+      "text": "Chưa đúng. 10 nhân 3 bằng 30.",
+      "speak": "Chưa đúng. mười nhân ba bằng ba mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_231c760420d9d5e1.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0228",
+      "text": "10 nhân 4 bằng bao nhiêu?",
+      "speak": "mười nhân bốn bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_facf3a595881c5cd.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0229",
+      "text": "Chưa đúng. 10 nhân 4 bằng 40.",
+      "speak": "Chưa đúng. mười nhân bốn bằng bốn mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_1d99ff6c7ca27d98.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0230",
+      "text": "10 nhân 5 bằng bao nhiêu?",
+      "speak": "mười nhân năm bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_364cf19a4a90dceb.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0231",
+      "text": "Chưa đúng. 10 nhân 5 bằng 50.",
+      "speak": "Chưa đúng. mười nhân năm bằng năm mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_5bcf7edb45284a94.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0232",
+      "text": "10 nhân 6 bằng bao nhiêu?",
+      "speak": "mười nhân sáu bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_033db3b53c61ef52.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0233",
+      "text": "Chưa đúng. 10 nhân 6 bằng 60.",
+      "speak": "Chưa đúng. mười nhân sáu bằng sáu mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_3857b7a274a92052.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0234",
+      "text": "10 nhân 7 bằng bao nhiêu?",
+      "speak": "mười nhân bảy bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_57a69d3c49090a8d.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0235",
+      "text": "Chưa đúng. 10 nhân 7 bằng 70.",
+      "speak": "Chưa đúng. mười nhân bảy bằng bảy mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a5610f6e702628f4.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0236",
+      "text": "10 nhân 8 bằng bao nhiêu?",
+      "speak": "mười nhân tám bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_57e3c02538d54fce.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0237",
+      "text": "Chưa đúng. 10 nhân 8 bằng 80.",
+      "speak": "Chưa đúng. mười nhân tám bằng tám mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_6e544fe7675eb115.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0238",
+      "text": "10 nhân 9 bằng bao nhiêu?",
+      "speak": "mười nhân chín bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b1caedf239454309.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0239",
+      "text": "Chưa đúng. 10 nhân 9 bằng 90.",
+      "speak": "Chưa đúng. mười nhân chín bằng chín mươi.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_4520453bbfcad901.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0240",
+      "text": "10 nhân 10 bằng bao nhiêu?",
+      "speak": "mười nhân mười bằng bao nhiêu?",
+      "group": "question",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_9aceb6f7b5c98ef7.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0241",
+      "text": "Gợi ý nhé. Kết quả là 100. Bé tìm số rồi ấn vào nhé.",
+      "speak": "Gợi ý nhé. Kết quả là một trăm. Bé tìm số rồi ấn vào nhé.",
+      "group": "hint",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_1322beb3acafae39.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0242",
+      "text": "Chưa đúng. 10 nhân 10 bằng 100.",
+      "speak": "Chưa đúng. mười nhân mười bằng một trăm.",
+      "group": "wrong",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_63b495376fbdeaf8.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0243",
+      "text": "Bạn đúng rồi! Giỏi lắm!",
+      "speak": "Bạn đúng rồi! Giỏi lắm!",
+      "group": "ui_feedback",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a1217882d2dbf582.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0244",
+      "text": "Chính xác! Con làm rất tốt!",
+      "speak": "Chính xác! Con làm rất tốt!",
+      "group": "ui_feedback",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_b1fa1579f53ef760.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0245",
+      "text": "Tuyệt vời! Tiếp tục nào!",
+      "speak": "Tuyệt vời! Tiếp tục nào!",
+      "group": "ui_feedback",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_88f16fee3a19c99a.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0246",
+      "text": "Đúng rồi! Thêm một bước tiến!",
+      "speak": "Đúng rồi! Thêm một bước tiến!",
+      "group": "ui_feedback",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_494e48fbc7ab7279.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0247",
+      "text": "Rất nhanh và rất đúng!",
+      "speak": "Rất nhanh và rất đúng!",
+      "group": "ui_feedback",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_69ebc5c001eb6234.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0248",
+      "text": "Con đang học bảng nhân rất tốt!",
+      "speak": "Con đang học bảng nhân rất tốt!",
+      "group": "ui_feedback",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_652d84f2fdd5bf36.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0249",
+      "text": "Thưởng lớn! Con đúng 3 câu liên tiếp, được thêm một tim!",
+      "speak": "Thưởng lớn! Con đúng ba câu liên tiếp, được thêm một tim!",
+      "group": "ui_feedback",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_58b730b36baed2bd.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0250",
+      "text": "Đã bật giọng đọc.",
+      "speak": "Đã bật giọng đọc.",
+      "group": "ui_feedback",
+      "note": "from_uploaded_html_embedded_map",
+      "file": "v_a8ef8f07148284ab.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0251",
+      "text": "Bé học bảng nhân.",
+      "speak": "Bé học bảng nhân.",
+      "group": "ui_extra",
+      "note": "safety_extra",
+      "file": "v_e638684b9f9b5cff.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0252",
+      "text": "Bắt đầu luyện bảng nhân nào!",
+      "speak": "Bắt đầu luyện bảng nhân nào!",
+      "group": "ui_extra",
+      "note": "safety_extra",
+      "file": "v_24aee97c21196a0e.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0253",
+      "text": "Bấm vào ô kết quả đúng.",
+      "speak": "Bấm vào ô kết quả đúng.",
+      "group": "ui_extra",
+      "note": "safety_extra",
+      "file": "v_4577b030fe8aa1f9.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0254",
+      "text": "Bấm Đọc để nghe lại câu hỏi.",
+      "speak": "Bấm Đọc để nghe lại câu hỏi.",
+      "group": "ui_extra",
+      "note": "safety_extra",
+      "file": "v_44345d358317bf89.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0255",
+      "text": "Gợi ý nhé.",
+      "speak": "Gợi ý nhé.",
+      "group": "ui_extra",
+      "note": "safety_extra",
+      "file": "v_361fe88c1828eb41.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0256",
+      "text": "Làm lại nào.",
+      "speak": "Làm lại nào.",
+      "group": "ui_extra",
+      "note": "safety_extra",
+      "file": "v_21d2e8b3bc0fc228.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0257",
+      "text": "Hết tim rồi!",
+      "speak": "Hết tim rồi!",
+      "group": "ui_extra",
+      "note": "safety_extra",
+      "file": "v_6bac28c3fca5bf4f.wav",
+      "status": "OK"
+    },
+    {
+      "id": "p0258",
+      "text": "Không sao, mình xem lại lỗi rồi chơi lại nhé.",
+      "speak": "Không sao, mình xem lại lỗi rồi chơi lại nhé.",
+      "group": "ui_extra",
+      "note": "safety_extra",
+      "file": "v_06333ca65e5940c0.wav",
+      "status": "OK"
+    }
+  ]
+}
