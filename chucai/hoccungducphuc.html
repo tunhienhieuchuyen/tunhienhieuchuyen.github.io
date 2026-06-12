@@ -1737,7 +1737,7 @@ document.addEventListener('click',function(ev){
   const btn=ev.target.closest&&ev.target.closest('#p4GardenBtn,#safeGardenBtn,#gardenBtn,.p4-garden-open-btn,.safe-garden-open-btn,.garden-open-btn');
   if(btn){ev.preventDefault();openGarden();}
 });
-load();bind();update();window.__HocChuCaiGardenPha05={version:'FINAL_CLEAN_PWA_SEPARATE_ICON_20260612',zones:ZONES.length,verifiedAnimals:DATA.verifiedAnimals.length,verifiedObjects:DATA.verifiedObjects.length,verifiedFoods:DATA.verifiedFoods.length,writing:DATA.writing.length,clock:true,autonext_after_speech:true,arithmetic:true,relation3:true,writeVisual:true,tonhoRowFixed:true,pvwAudit:true,write3Step:true,inkGuard:true,mobilePixelPlan:true,mobileFirstHomeRebuild:true,mobileGardenRebuild:true,singleBrandClean:true,realSTXAudio:false,standardVoiceClean:true,voiceToggleAiGna:true,desktopTextFitFinal:true,cleanDataApplied:true,manualEyecheckPhase32:true,finalCleanRelease:true,pwaReady:true,aiVoiceMaxVolume:true,separatePwaScope:true,separatePwaIcon:true,verifiedExplore:4,startButtonGuard:true,guidedMatchWrite:true,compareSigns:true};
+load();bind();update();window.__HocChuCaiGardenPha05={version:'CHUCAI_V26_BRAND_PORTRAIT_2LINE_FINAL_20260612',zones:ZONES.length,verifiedAnimals:DATA.verifiedAnimals.length,verifiedObjects:DATA.verifiedObjects.length,verifiedFoods:DATA.verifiedFoods.length,writing:DATA.writing.length,clock:true,autonext_after_speech:true,arithmetic:true,relation3:true,writeVisual:true,tonhoRowFixed:true,pvwAudit:true,write3Step:true,inkGuard:true,mobilePixelPlan:true,mobileFirstHomeRebuild:true,mobileGardenRebuild:true,singleBrandClean:true,realSTXAudio:false,standardVoiceClean:true,voiceToggleAiGna:true,desktopTextFitFinal:true,cleanDataApplied:true,manualEyecheckPhase32:true,finalCleanRelease:true,pwaReady:true,aiVoiceMaxVolume:true,separatePwaScope:true,separatePwaIcon:true,phoneLandscapePcOverview:true,brandPortrait2Line:true,verifiedExplore:4,startButtonGuard:true,guidedMatchWrite:true,compareSigns:true};
 
 })();
 </script>
@@ -1774,3 +1774,606 @@ load();bind();update();window.__HocChuCaiGardenPha05={version:'FINAL_CLEAN_PWA_S
 </script>
 </body>
 </html>
+
+
+<style id="chucai-v25-phone-landscape-pc-overview">
+/* CHUCAI_V25_PHONE_LANDSCAPE_PC_OVERVIEW
+   Chỉ xử lý điện thoại xoay ngang.
+   PC và điện thoại dọc giữ nguyên bản đã nghiệm thu.
+   Mục tiêu: xoay ngang phải nhìn toàn cảnh kiểu PC: trái / bảng / phải.
+*/
+html.chucai-v25-ls,
+html.chucai-v25-ls body{
+  width:100vw!important;
+  height:100vh!important;
+  height:100dvh!important;
+  margin:0!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .app15-clean{
+  width:100vw!important;
+  height:100vh!important;
+  height:100dvh!important;
+  max-width:none!important;
+  min-width:0!important;
+  display:grid!important;
+  grid-template-rows:28px minmax(0,1fr)!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-topbar{
+  min-height:28px!important;
+  height:28px!important;
+  padding:2px 8px!important;
+  gap:6px!important;
+  align-items:center!important;
+}
+html.chucai-v25-ls .home15-brand{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-brand .title{
+  font-size:11px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.chucai-v25-ls .home15-brand .subtitle{
+  font-size:8px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.chucai-v25-ls .status-pill{
+  padding:4px 8px!important;
+  font-size:8px!important;
+  transform:scale(.84)!important;
+  transform-origin:right center!important;
+  white-space:nowrap!important;
+}
+html.chucai-v25-ls .status-dot{
+  width:7px!important;
+  height:7px!important;
+}
+
+html.chucai-v25-ls .home15-shell{
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:190px minmax(0,1fr) 188px!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  gap:4px!important;
+  padding:4px!important;
+  overflow:hidden!important;
+  align-items:stretch!important;
+}
+html.chucai-v25-ls .home15-focus{
+  min-width:0!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:52% 48%!important;
+  gap:4px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-hero,
+html.chucai-v25-ls .home15-feedback,
+html.chucai-v25-ls .home15-board,
+html.chucai-v25-ls .home15-card{
+  min-width:0!important;
+  min-height:0!important;
+  border-radius:12px!important;
+}
+html.chucai-v25-ls .home15-hero{
+  display:grid!important;
+  grid-template-rows:13px minmax(0,1fr) 18px 18px 14px!important;
+  place-items:center!important;
+  padding:5px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .hero-kicker{
+  font-size:7px!important;
+  line-height:1!important;
+  max-height:13px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-hero .big-letter{
+  width:min(96px,34vh)!important;
+  height:min(82px,30vh)!important;
+  min-height:0!important;
+  font-size:min(62px,18vh)!important;
+  line-height:.95!important;
+  border-radius:18px!important;
+  display:grid!important;
+  place-items:center!important;
+}
+html.chucai-v25-ls .home15-hero .pair{
+  font-size:15px!important;
+  line-height:1!important;
+}
+html.chucai-v25-ls .home15-hero .word{
+  font-size:10px!important;
+  line-height:1!important;
+  min-width:0!important;
+  max-width:110px!important;
+  padding:2px 7px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.chucai-v25-ls .home15-hero .source-note{
+  display:none!important;
+}
+html.chucai-v25-ls .home15-feedback{
+  display:grid!important;
+  grid-template-rows:minmax(0,1fr) 28px!important;
+  gap:4px!important;
+  padding:5px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-feedback-copy{
+  min-height:0!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-feedback-copy strong{
+  display:block!important;
+  font-size:9px!important;
+  line-height:1.05!important;
+  max-height:22px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-feedback-copy span{
+  display:block!important;
+  font-size:7px!important;
+  line-height:1.08!important;
+  max-height:22px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .voice-toggle-row{
+  margin-top:3px!important;
+  min-height:18px!important;
+  height:18px!important;
+  padding:1px 4px!important;
+  gap:3px!important;
+  grid-template-columns:auto minmax(0,1fr)!important;
+  font-size:7px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .voice-toggle-row input{
+  width:11px!important;
+  height:11px!important;
+}
+html.chucai-v25-ls .voice-toggle-row em{
+  display:none!important;
+}
+html.chucai-v25-ls .home15-actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:4px!important;
+  height:28px!important;
+}
+html.chucai-v25-ls .home15-actions button{
+  min-height:28px!important;
+  height:28px!important;
+  font-size:7.2px!important;
+  line-height:1!important;
+  padding:1px 3px!important;
+  border-radius:8px!important;
+}
+
+html.chucai-v25-ls .home15-board{
+  display:grid!important;
+  grid-template-rows:46px minmax(0,1fr)!important;
+  gap:4px!important;
+  padding:5px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-board .reward{
+  display:none!important;
+}
+html.chucai-v25-ls .home15-board-head{
+  min-height:0!important;
+  height:46px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 118px!important;
+  gap:4px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-board-head .question{
+  min-height:0!important;
+  padding:5px 7px!important;
+  overflow:hidden!important;
+  border-radius:10px!important;
+}
+html.chucai-v25-ls .home15-board-head .question b{
+  display:block!important;
+  font-size:10px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.chucai-v25-ls .home15-board-head .question span{
+  display:block!important;
+  font-size:7px!important;
+  line-height:1.08!important;
+  max-height:16px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .mini-score{
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  gap:3px!important;
+}
+html.chucai-v25-ls .mini-score .stat{
+  min-height:0!important;
+  padding:2px!important;
+  border-radius:8px!important;
+}
+html.chucai-v25-ls .mini-score .stat span{
+  font-size:5.5px!important;
+  line-height:1!important;
+}
+html.chucai-v25-ls .mini-score .stat b{
+  font-size:10px!important;
+  line-height:1!important;
+}
+html.chucai-v25-ls .home15-grid-wrap{
+  min-width:0!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-board .letter-grid{
+  width:100%!important;
+  height:100%!important;
+  display:grid!important;
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  grid-auto-rows:1fr!important;
+  gap:4px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-board .tile{
+  min-width:0!important;
+  min-height:0!important;
+  height:auto!important;
+  padding:3px 2px!important;
+  border-radius:9px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-board .tile .ch{
+  font-size:19px!important;
+  line-height:.9!important;
+}
+html.chucai-v25-ls .home15-board .tile .lo{
+  font-size:9px!important;
+  line-height:1!important;
+}
+html.chucai-v25-ls .home15-board .tile .tiny{
+  display:block!important;
+  font-size:6px!important;
+  line-height:1!important;
+  max-height:12px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+html.chucai-v25-ls .home15-board .tile .star{
+  font-size:8px!important;
+  top:2px!important;
+  right:3px!important;
+}
+
+/* right column remains PC-style stack, compressed */
+html.chucai-v25-ls .home15-control-stack{
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:62px 62px 78px minmax(0,1fr)!important;
+  gap:4px!important;
+  overflow:hidden!important;
+  align-content:stretch!important;
+}
+html.chucai-v25-ls .home15-card{
+  padding:5px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-card h3{
+  font-size:8px!important;
+  line-height:1!important;
+  margin:0 0 4px!important;
+}
+html.chucai-v25-ls .home15-card .btn-grid{
+  gap:3px!important;
+}
+html.chucai-v25-ls .home15-card .btn3{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+html.chucai-v25-ls .home15-card .btn4{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+html.chucai-v25-ls .home15-card button{
+  min-height:22px!important;
+  height:22px!important;
+  padding:1px 2px!important;
+  font-size:6.6px!important;
+  line-height:1!important;
+  border-radius:7px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.chucai-v25-ls .home15-card .note{
+  display:block!important;
+  margin-top:3px!important;
+  font-size:6px!important;
+  line-height:1.05!important;
+  max-height:14px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .home15-progress-card .btn4{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:3px!important;
+}
+html.chucai-v25-ls .home15-progress-card .stat{
+  min-height:18px!important;
+  padding:2px!important;
+  border-radius:7px!important;
+}
+html.chucai-v25-ls .home15-progress-card .stat span{
+  font-size:5.5px!important;
+  line-height:1!important;
+}
+html.chucai-v25-ls .home15-progress-card .stat b{
+  font-size:9px!important;
+  line-height:1!important;
+}
+html.chucai-v25-ls .home15-progress-card .progress{
+  height:5px!important;
+  margin-top:4px!important;
+}
+html.chucai-v25-ls .home15-more-controls .btn4{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+
+/* Garden landscape also keeps PC-like 3-column overview */
+html.chucai-v25-ls .p4-garden.show{
+  grid-template-rows:30px minmax(0,1fr)!important;
+}
+html.chucai-v25-ls .p4-top{
+  height:30px!important;
+  min-height:30px!important;
+  padding:3px 8px!important;
+}
+html.chucai-v25-ls .p4-title{
+  font-size:13px!important;
+  line-height:1!important;
+}
+html.chucai-v25-ls .p4-sub{
+  font-size:7px!important;
+  line-height:1!important;
+}
+html.chucai-v25-ls .p4-tools{
+  gap:4px!important;
+}
+html.chucai-v25-ls .p4-tools button{
+  min-height:22px!important;
+  height:22px!important;
+  padding:2px 6px!important;
+  font-size:7px!important;
+  border-radius:8px!important;
+}
+html.chucai-v25-ls .p4-layout{
+  display:grid!important;
+  grid-template-columns:156px minmax(0,1fr) 150px!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  gap:4px!important;
+  padding:4px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .p4-left,
+html.chucai-v25-ls .p4-right,
+html.chucai-v25-ls .p4-stage{
+  min-width:0!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .p4-left{
+  display:grid!important;
+  grid-auto-flow:row!important;
+  grid-template-columns:1fr!important;
+  grid-auto-rows:38px!important;
+  gap:3px!important;
+  padding:4px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+}
+html.chucai-v25-ls .p4-zone{
+  min-height:38px!important;
+  padding:3px 5px!important;
+  border-radius:8px!important;
+}
+html.chucai-v25-ls .p4-zone b{
+  font-size:8px!important;
+  line-height:1!important;
+}
+html.chucai-v25-ls .p4-zone span{
+  display:none!important;
+}
+html.chucai-v25-ls .p4-stage{
+  display:grid!important;
+  grid-template-rows:46px minmax(0,1fr) 30px!important;
+  gap:4px!important;
+  padding:4px!important;
+}
+html.chucai-v25-ls .p4-head{
+  padding:5px 7px!important;
+  border-radius:10px!important;
+  min-height:0!important;
+}
+html.chucai-v25-ls .p4-head h2{
+  font-size:12px!important;
+  line-height:1!important;
+  margin:0!important;
+}
+html.chucai-v25-ls .p4-head p{
+  font-size:7px!important;
+  line-height:1.05!important;
+  max-height:16px!important;
+  overflow:hidden!important;
+}
+html.chucai-v25-ls .p4-scene{
+  min-width:0!important;
+  min-height:0!important;
+  overflow:auto!important;
+}
+html.chucai-v25-ls .p4-bottom{
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  gap:4px!important;
+}
+html.chucai-v25-ls .p4-bottom button,
+html.chucai-v25-ls .p4-btn{
+  min-height:26px!important;
+  height:26px!important;
+  padding:2px 4px!important;
+  font-size:7px!important;
+  border-radius:8px!important;
+}
+html.chucai-v25-ls .p4-right{
+  padding:4px!important;
+}
+html.chucai-v25-ls .p4-stats{
+  grid-template-columns:repeat(2,1fr)!important;
+  gap:3px!important;
+}
+html.chucai-v25-ls .p4-stat{
+  padding:3px!important;
+  border-radius:8px!important;
+}
+html.chucai-v25-ls .p4-stat span{
+  font-size:5.5px!important;
+}
+html.chucai-v25-ls .p4-stat b{
+  font-size:12px!important;
+}
+html.chucai-v25-ls .p4-log{
+  font-size:6.5px!important;
+  line-height:1.05!important;
+}
+</style>
+<script id="chucai-v25-phone-landscape-pc-overview-js">
+(function(){
+  function isPhoneLandscape(){
+    try{
+      return innerWidth > innerHeight && innerHeight <= 560 &&
+        ((matchMedia && matchMedia('(pointer: coarse)').matches) || innerWidth <= 980);
+    }catch(e){
+      return innerWidth > innerHeight && innerHeight <= 560;
+    }
+  }
+  function imp(el,k,v){ if(el) el.style.setProperty(k,v,'important'); }
+  function apply(){
+    if(!isPhoneLandscape()){
+      document.documentElement.classList.remove('chucai-v25-ls');
+      return;
+    }
+    document.documentElement.classList.add('chucai-v25-ls');
+
+    var main = document.querySelector('.home15-shell');
+    var app = document.querySelector('.app15-clean');
+    var board = document.querySelector('.home15-board');
+    var grid = document.querySelector('.letter-grid');
+
+    imp(app,'grid-template-rows','28px minmax(0,1fr)');
+    imp(main,'grid-template-columns','190px minmax(0,1fr) 188px');
+    imp(main,'grid-template-rows','minmax(0,1fr)');
+    imp(main,'height','100%');
+    imp(main,'overflow','hidden');
+
+    imp(board,'grid-template-rows','46px minmax(0,1fr)');
+    if(grid){
+      imp(grid,'grid-template-columns','repeat(6,minmax(0,1fr))');
+      imp(grid,'grid-auto-rows','1fr');
+      imp(grid,'height','100%');
+    }
+  }
+  function schedule(){
+    apply();
+    setTimeout(apply,80);
+    setTimeout(apply,250);
+    setTimeout(apply,800);
+    setTimeout(apply,1600);
+  }
+  document.addEventListener('DOMContentLoaded', schedule);
+  window.addEventListener('load', schedule);
+  window.addEventListener('resize', schedule);
+  window.addEventListener('orientationchange', schedule);
+})();
+</script>
+
+
+<style id="chucai-v26-brand-portrait-2line-final">
+/* CHUCAI_V26_BRAND_PORTRAIT_2LINE_FINAL
+   Chỉ tinh chỉnh chữ thương hiệu:
+   - Điện thoại dọc: thương hiệu tách 2 dòng cho đẹp.
+   - PC và điện thoại xoay ngang giữ gọn 1 dòng/không phá layout V25.
+*/
+@media (orientation:portrait), (max-width:740px){
+  .home15-brand .subtitle{
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    display:block!important;
+    font-size:8.8px!important;
+    line-height:1.05!important;
+    max-height:22px!important;
+  }
+  .home15-brand .subtitle::before{
+    content:"Phát triển: @tunhienhieuchuyen";
+    display:block;
+  }
+  .home15-brand .subtitle{
+    font-size:0!important;
+  }
+  .home15-brand .subtitle::before,
+  .home15-brand .subtitle::after{
+    font-size:8.8px!important;
+    line-height:1.05!important;
+    color:#9b0060!important;
+    font-weight:900!important;
+  }
+  .home15-brand .subtitle::after{
+    content:"Có trên các nền tảng MXH";
+    display:block;
+  }
+  .home15-topbar{
+    min-height:54px!important;
+  }
+}
+
+/* PC giữ thương hiệu 1 dòng để không cao header */
+@media (min-width:741px) and (pointer:fine){
+  .home15-brand .subtitle{
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+}
+
+/* Điện thoại xoay ngang V25 giữ gọn, không tách 2 dòng */
+html.chucai-v25-ls .home15-brand .subtitle{
+  font-size:8px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  max-height:10px!important;
+}
+html.chucai-v25-ls .home15-brand .subtitle::before,
+html.chucai-v25-ls .home15-brand .subtitle::after{
+  content:none!important;
+}
+</style>
