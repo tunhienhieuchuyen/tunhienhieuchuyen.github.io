@@ -3,7 +3,7 @@
    App file: /chucai/hoccungducphuc.html
    Scope: /chucai/  -- separate from Bảng Nhân PWA at root.
 */
-const CHUCAI_CACHE = "chucai-v6-gna-voicebank-20260612-01";
+const CHUCAI_CACHE = "chucai-v7-docchuan-voicebank-20260612-01";
 
 const CORE_ASSETS = [
   "./",
@@ -58,7 +58,7 @@ self.addEventListener("fetch", (event) => {
 
 
 
-  // Voicebank V6: cache-first on demand. Do not pre-cache 1539 WAV files during install.
+  // Voicebank V7: cache-first on demand. Do not pre-cache 1539 WAV files during install.
   if (url.pathname.includes("/chucai/voicebank_chucai/")) {
     event.respondWith(
       caches.match(req).then(cached => {
