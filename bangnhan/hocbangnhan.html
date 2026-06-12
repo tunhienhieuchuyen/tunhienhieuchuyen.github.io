@@ -2771,14 +2771,48 @@
   }
 }
 
+
+/* BANGNHAN_V23_BRAND_HEADER_FINAL
+   Header chốt: thay tên app + mô tả cũ bằng 1 dòng thương hiệu.
+*/
+.brand-title-v23{
+  font-weight:900!important;
+  color:#9b0060!important;
+  letter-spacing:.1px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.topbar{
+  align-items:center!important;
+}
+@media (min-width:741px){
+  .brand-title-v23{
+    font-size:14px!important;
+    line-height:1.05!important;
+  }
+}
+@media (orientation:portrait), (max-width:740px){
+  .brand-title-v23{
+    font-size:10px!important;
+    line-height:1!important;
+  }
+}
+html.bnv22-landscape .brand-title-v23,
+@media (orientation:landscape) and (pointer:coarse), (orientation:landscape) and (max-height:560px){
+  .brand-title-v23{
+    font-size:9px!important;
+    line-height:1!important;
+  }
+}
+
 </style>
 </head>
 <body data-skin="candy">
   <div class="app" id="app">
     <header class="topbar">
       <div>
-        <div class="title">Bé Học Bảng Nhân HTML5</div>
-        <div class="subtitle">V8 · câu hỏi dọc rõ hơn · có nút gợi ý · bảng trắng nổi bật hàng cột vàng</div>
+        <div class="title brand-title-v23">Phát triển: @tunhienhieuchuyen - Có trên các nền tảng MXH</div>
       </div>
       <div class="status-pill"><span class="status-dot"></span><span id="statusText">SẴN SÀNG</span></div>
     </header>
@@ -2889,7 +2923,7 @@
 
     <footer class="footer">
       <span id="footerText">V2 · HTML5 một file · không SWF/Ruffle/Flash/CDN</span>
-      <span>GRID-QUEST-V21-LANDSCAPE-PC</span>
+      <span>GRID-QUEST-V24-LANDSCAPE-VOICE</span>
     </footer>
   </div>
 
@@ -2910,7 +2944,7 @@
 (function(){
   "use strict";
 
-  const VERSION = "GridQuest_V21_PhoneLandscapePCOverview_20260612";
+  const VERSION = "GridQuest_V24_LandscapeSingleVoiceClean_20260612";
   const STORE = "multiplication_gridquest_v2";
   const MAX = 10;
   const DEFAULT_TABLES = [1,2,3,4,5,6,7,8,9,10];
@@ -7195,3 +7229,673 @@ body[data-skin="night"]{
 </html>
 
 <!-- PHA 13.1 REAL CORE PATCH: board horizontal alignment + happy kids music redo. -->
+
+
+<style id="bangnhan-v22-phone-landscape-true-pc-view">
+/* BANGNHAN_V22_PHONE_LANDSCAPE_TRUE_PC_VIEW
+   Chỉ xử lý điện thoại xoay ngang.
+   Dọc điện thoại và PC giữ nguyên bản đã nghiệm thu.
+*/
+html.bnv22-landscape body{
+  overflow:hidden!important;
+}
+html.bnv22-landscape .app{
+  width:100vw!important;
+  height:100vh!important;
+  height:100dvh!important;
+  display:grid!important;
+  grid-template-rows:24px minmax(0,1fr) 10px!important;
+  overflow:hidden!important;
+}
+html.bnv22-landscape .topbar{
+  min-height:24px!important;
+  height:24px!important;
+  padding:2px 7px!important;
+  gap:5px!important;
+}
+html.bnv22-landscape .title{font-size:12px!important;line-height:1!important;}
+html.bnv22-landscape .subtitle{display:none!important;}
+html.bnv22-landscape .status-pill{
+  padding:4px 8px!important;
+  font-size:8px!important;
+  transform:scale(.82)!important;
+  transform-origin:right center!important;
+}
+html.bnv22-landscape .main{
+  display:grid!important;
+  grid-template-columns:128px minmax(0,1fr) 164px!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  gap:3px!important;
+  padding:3px!important;
+  overflow:hidden!important;
+  min-width:0!important;
+  min-height:0!important;
+}
+html.bnv22-landscape .left-panel{
+  position:static!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:48px minmax(0,1fr) 64px!important;
+  gap:3px!important;
+  overflow:hidden!important;
+  min-width:0!important;
+  min-height:0!important;
+}
+html.bnv22-landscape .mini-top-grid,
+html.bnv22-landscape .score-row{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:3px!important;
+}
+html.bnv22-landscape .top-chip,
+html.bnv22-landscape .timer-box,
+html.bnv22-landscape .score-box{
+  min-height:0!important;
+  padding:2px!important;
+  border-radius:8px!important;
+}
+html.bnv22-landscape .top-chip span,
+html.bnv22-landscape .timer-box span,
+html.bnv22-landscape .score-label{
+  font-size:6px!important;
+  line-height:1!important;
+}
+html.bnv22-landscape .top-chip b,
+html.bnv22-landscape .timer-box b,
+html.bnv22-landscape .score-value{
+  font-size:14px!important;
+  line-height:1!important;
+}
+html.bnv22-landscape .question-large{
+  position:static!important;
+  min-height:0!important;
+  padding:3px!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  align-items:center!important;
+  justify-items:center!important;
+  gap:2px!important;
+  overflow:hidden!important;
+  border-radius:9px!important;
+}
+html.bnv22-landscape .q-kicker{
+  font-size:7px!important;
+  line-height:1!important;
+  max-height:12px!important;
+  overflow:hidden!important;
+}
+html.bnv22-landscape .equation-vertical{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:2px!important;
+  place-items:center!important;
+}
+html.bnv22-landscape .q-token,
+html.bnv22-landscape .eq-tile{
+  width:52px!important;
+  height:24px!important;
+  min-height:24px!important;
+  padding:0!important;
+  margin:0!important;
+  font-size:17px!important;
+  line-height:24px!important;
+  border-radius:8px!important;
+}
+html.bnv22-landscape .hint-voice-row{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  max-width:116px!important;
+  width:116px!important;
+  gap:0!important;
+}
+html.bnv22-landscape .hint-voice-row .hint-btn{
+  width:100%!important;
+  height:22px!important;
+  min-height:22px!important;
+  font-size:7px!important;
+  padding:1px 3px!important;
+  border-radius:7px!important;
+}
+html.bnv22-landscape .voice-mobile-only{display:none!important;}
+
+html.bnv22-landscape .left-feedback{
+  position:static!important;
+  display:grid!important;
+  grid-template-rows:minmax(0,1fr) 20px!important;
+  gap:2px!important;
+  padding:2px!important;
+  overflow:hidden!important;
+  min-height:0!important;
+  border-radius:8px!important;
+}
+html.bnv22-landscape .left-feedback strong{
+  display:block!important;
+  font-size:6.5px!important;
+  line-height:1.05!important;
+  max-height:24px!important;
+  overflow:hidden!important;
+}
+html.bnv22-landscape .left-feedback span{display:none!important;}
+html.bnv22-landscape .read-music-row{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:3px!important;
+  width:100%!important;
+  height:20px!important;
+  min-height:20px!important;
+  position:static!important;
+}
+html.bnv22-landscape .read-music-row button{
+  width:100%!important;
+  height:20px!important;
+  min-height:20px!important;
+  font-size:6.5px!important;
+  padding:1px 2px!important;
+  border-radius:7px!important;
+}
+
+/* Center board must be full square, never flattened */
+html.bnv22-landscape .board-card.center-board,
+html.bnv22-landscape .center-board,
+html.bnv22-landscape #boardCard{
+  position:static!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:0!important;
+  min-height:0!important;
+  width:auto!important;
+  height:auto!important;
+  padding:3px!important;
+  overflow:hidden!important;
+  border-radius:10px!important;
+}
+html.bnv22-landscape .grid-zone,
+html.bnv22-landscape #gridZone{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+html.bnv22-landscape .times-grid,
+html.bnv22-landscape #timesGrid{
+  width:var(--bnv22-board,340px)!important;
+  height:var(--bnv22-board,340px)!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(11,1fr)!important;
+  grid-template-rows:repeat(11,1fr)!important;
+  gap:2px!important;
+  padding:3px!important;
+  margin:auto!important;
+  border-radius:10px!important;
+}
+html.bnv22-landscape .cell{
+  min-width:0!important;
+  min-height:0!important;
+  border-radius:6px!important;
+  font-size:10px!important;
+  line-height:1!important;
+  padding:0!important;
+}
+html.bnv22-landscape .cell.head{font-size:8px!important;}
+
+/* Right side remains PC-style side column */
+html.bnv22-landscape .side,
+html.bnv22-landscape .right-panel{
+  position:static!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:56px 86px 62px 82px minmax(0,1fr)!important;
+  gap:3px!important;
+  min-width:0!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+html.bnv22-landscape .side-card{
+  min-width:0!important;
+  min-height:0!important;
+  padding:3px!important;
+  border-radius:8px!important;
+  overflow:hidden!important;
+}
+html.bnv22-landscape .side-card h3{display:none!important;}
+html.bnv22-landscape .stats{
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  gap:3px!important;
+}
+html.bnv22-landscape .stat{
+  min-height:0!important;
+  padding:2px!important;
+  border-radius:7px!important;
+}
+html.bnv22-landscape .stat span{font-size:5.8px!important;line-height:1!important;}
+html.bnv22-landscape .stat b{font-size:11px!important;line-height:1!important;}
+html.bnv22-landscape .progress-wrap{height:6px!important;margin-top:2px!important;}
+html.bnv22-landscape .note{
+  font-size:6.2px!important;
+  line-height:1.05!important;
+  max-height:18px!important;
+  overflow:hidden!important;
+  margin:2px 0 0!important;
+}
+html.bnv22-landscape .chips{
+  display:grid!important;
+  grid-template-columns:repeat(6,1fr)!important;
+  gap:3px!important;
+}
+html.bnv22-landscape .chips button{
+  height:18px!important;
+  min-height:18px!important;
+  font-size:6.5px!important;
+  padding:1px!important;
+  border-radius:7px!important;
+}
+html.bnv22-landscape .input-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 45px!important;
+  gap:3px!important;
+  margin-top:3px!important;
+}
+html.bnv22-landscape #tableInput,
+html.bnv22-landscape #applyTablesBtn{
+  height:19px!important;
+  min-height:19px!important;
+  font-size:6.5px!important;
+  padding:1px 3px!important;
+  border-radius:7px!important;
+}
+html.bnv22-landscape .modes,
+html.bnv22-landscape .controls,
+html.bnv22-landscape .skin-grid{
+  display:grid!important;
+  gap:3px!important;
+}
+html.bnv22-landscape .modes{grid-template-columns:repeat(3,1fr)!important;}
+html.bnv22-landscape .controls{grid-template-columns:repeat(3,1fr)!important;}
+html.bnv22-landscape .skin-grid{
+  grid-template-columns:1fr 1fr!important;
+  margin-top:3px!important;
+}
+html.bnv22-landscape .modes button,
+html.bnv22-landscape .controls button,
+html.bnv22-landscape .skin-grid button{
+  height:20px!important;
+  min-height:20px!important;
+  font-size:6.5px!important;
+  padding:1px 2px!important;
+  border-radius:7px!important;
+}
+html.bnv22-landscape .controls #startBtn,
+html.bnv22-landscape .controls #voiceBtn,
+html.bnv22-landscape .controls #sfxBtn,
+html.bnv22-landscape .controls #fullBtn,
+html.bnv22-landscape .bn-mobile-controls-v11,
+html.bnv22-landscape .bn-mobile-controls-v12,
+html.bnv22-landscape .bn-phase3-quickbar{
+  display:none!important;
+}
+html.bnv22-landscape .controls #pauseBtn,
+html.bnv22-landscape .controls #skipBtn,
+html.bnv22-landscape .controls #restartBtn,
+html.bnv22-landscape .controls #voiceModeBtn,
+html.bnv22-landscape .controls #musicBtn{
+  display:block!important;
+}
+html.bnv22-landscape .review-list{
+  height:100%!important;
+  overflow:auto!important;
+  font-size:6.5px!important;
+  line-height:1.05!important;
+}
+html.bnv22-landscape .review-item{
+  padding:2px 4px!important;
+  margin-bottom:2px!important;
+  border-radius:6px!important;
+}
+html.bnv22-landscape .footer{
+  height:10px!important;
+  min-height:10px!important;
+  padding:0 4px!important;
+  font-size:6px!important;
+  line-height:10px!important;
+}
+</style>
+<script id="bangnhan-v22-phone-landscape-true-pc-view-js">
+(function(){
+  function phoneLandscape(){
+    try{
+      return innerWidth > innerHeight && innerHeight <= 560 &&
+        ((matchMedia && matchMedia('(pointer: coarse)').matches) || innerWidth <= 980);
+    }catch(e){
+      return innerWidth > innerHeight && innerHeight <= 560;
+    }
+  }
+  function imp(el,k,v){ if(el) el.style.setProperty(k,v,'important'); }
+  function show(el,on){ if(el) el.style.setProperty('display',on?'block':'none','important'); }
+  function clearInline(){
+    document.documentElement.classList.remove('bnv22-landscape');
+    document.documentElement.style.removeProperty('--bnv22-board');
+  }
+  function apply(){
+    if(!phoneLandscape()){ clearInline(); return; }
+    document.documentElement.classList.add('bnv22-landscape');
+    var left = 128, right = 164, gaps = 12;
+    var board = Math.floor(Math.min(innerHeight - 46, innerWidth - left - right - gaps));
+    board = Math.max(252, Math.min(board, 390));
+    document.documentElement.style.setProperty('--bnv22-board', board + 'px');
+
+    var $ = function(s){ return document.querySelector(s); };
+    var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+    imp($('.app'),'grid-template-rows','24px minmax(0,1fr) 10px');
+    imp($('.main'),'display','grid');
+    imp($('.main'),'grid-template-columns','128px minmax(0,1fr) 164px');
+    imp($('.main'),'grid-template-rows','minmax(0,1fr)');
+    imp($('.main'),'gap','3px');
+    imp($('.main'),'padding','3px');
+    imp($('.main'),'overflow','hidden');
+
+    imp($('.left-panel'),'display','grid');
+    imp($('.left-panel'),'grid-template-columns','1fr');
+    imp($('.left-panel'),'grid-template-rows','48px minmax(0,1fr) 64px');
+
+    imp($('#boardCard'),'display','flex');
+    imp($('#boardCard'),'align-items','center');
+    imp($('#boardCard'),'justify-content','center');
+    imp($('#boardCard'),'position','static');
+    imp($('#boardCard'),'padding','3px');
+
+    imp($('#gridZone'),'display','flex');
+    imp($('#gridZone'),'align-items','center');
+    imp($('#gridZone'),'justify-content','center');
+    imp($('#gridZone'),'width','100%');
+    imp($('#gridZone'),'height','100%');
+
+    imp($('#timesGrid'),'width',board+'px');
+    imp($('#timesGrid'),'height',board+'px');
+    imp($('#timesGrid'),'grid-template-columns','repeat(11,1fr)');
+    imp($('#timesGrid'),'grid-template-rows','repeat(11,1fr)');
+
+    imp($('.side'),'display','grid');
+    imp($('.side'),'grid-template-columns','1fr');
+    imp($('.side'),'grid-template-rows','56px 86px 62px 82px minmax(0,1fr)');
+    imp($('.side'),'gap','3px');
+
+    $$('.side-card h3').forEach(function(h){ show(h,false); });
+    ['startBtn','voiceBtn','sfxBtn','fullBtn'].forEach(function(id){ show(document.getElementById(id), false); });
+    ['pauseBtn','skipBtn','restartBtn','voiceModeBtn','musicBtn'].forEach(function(id){ show(document.getElementById(id), true); });
+    $$('.bn-mobile-controls-v11,.bn-mobile-controls-v12,.bn-phase3-quickbar').forEach(function(e){ show(e,false); });
+  }
+  function schedule(){
+    apply();
+    setTimeout(apply,80);
+    setTimeout(apply,260);
+    setTimeout(apply,900);
+    setTimeout(apply,1700);
+    setTimeout(apply,2600);
+  }
+  document.addEventListener('DOMContentLoaded', schedule);
+  window.addEventListener('load', schedule);
+  window.addEventListener('resize', schedule);
+  window.addEventListener('orientationchange', schedule);
+})();
+</script>
+
+
+<style id="bangnhan-v23-brand-header-final-end">
+/* Final end override for brand header */
+.topbar .brand-title-v23{
+  font-weight:900!important;
+  color:#9b0060!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  letter-spacing:.1px!important;
+}
+@media (min-width:741px){
+  .topbar .brand-title-v23{font-size:14px!important;line-height:1.05!important;}
+}
+@media (orientation:portrait), (max-width:740px){
+  .topbar .brand-title-v23{font-size:10px!important;line-height:1!important;}
+}
+@media (orientation:landscape) and (pointer:coarse), (orientation:landscape) and (max-height:560px){
+  .topbar .brand-title-v23{font-size:9px!important;line-height:1!important;}
+}
+html.bnv22-landscape .topbar .brand-title-v23{font-size:9px!important;line-height:1!important;}
+</style>
+
+
+<style id="bangnhan-v24-landscape-single-voice-clean">
+/* BANGNHAN_V24_LANDSCAPE_SINGLE_VOICE_CLEAN
+   Chỉ sửa điện thoại xoay ngang:
+   - Ẩn nút Voicebank/AI local bản mobile cạnh Gợi ý để không còn 2 nút.
+   - Giữ nút Voicebank/AI local ở panel phải.
+   - Nới lại card Điều khiển để các nút không chồng/đè.
+   PC và điện thoại dọc giữ nguyên.
+*/
+@media (orientation:landscape) and (max-height:560px){
+  html.bnv22-landscape .voice-mobile-only,
+  html.bnv22-landscape #voiceModeHintBtn{
+    display:none!important;
+    visibility:hidden!important;
+    width:0!important;
+    min-width:0!important;
+    max-width:0!important;
+    padding:0!important;
+    margin:0!important;
+    overflow:hidden!important;
+  }
+
+  html.bnv22-landscape .hint-voice-row{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    width:118px!important;
+    max-width:118px!important;
+    gap:0!important;
+  }
+
+  html.bnv22-landscape .hint-voice-row #hintBtn{
+    display:block!important;
+    width:100%!important;
+  }
+
+  html.bnv22-landscape .side,
+  html.bnv22-landscape .right-panel{
+    grid-template-rows:52px 78px 56px 106px minmax(0,1fr)!important;
+    gap:3px!important;
+  }
+
+  html.bnv22-landscape .side-card:nth-child(4){
+    padding:4px!important;
+    overflow:hidden!important;
+  }
+
+  html.bnv22-landscape .side-card:nth-child(4) .controls{
+    display:grid!important;
+    grid-template-columns:repeat(3,1fr)!important;
+    grid-auto-rows:22px!important;
+    gap:4px!important;
+    align-content:start!important;
+    height:auto!important;
+    overflow:visible!important;
+  }
+
+  html.bnv22-landscape .side-card:nth-child(4) .controls button{
+    height:22px!important;
+    min-height:22px!important;
+    max-height:22px!important;
+    padding:1px 2px!important;
+    font-size:6.6px!important;
+    line-height:1!important;
+    border-radius:7px!important;
+    overflow:hidden!important;
+    white-space:nowrap!important;
+    text-overflow:ellipsis!important;
+  }
+
+  html.bnv22-landscape .side-card:nth-child(4) #pauseBtn,
+  html.bnv22-landscape .side-card:nth-child(4) #skipBtn,
+  html.bnv22-landscape .side-card:nth-child(4) #restartBtn,
+  html.bnv22-landscape .side-card:nth-child(4) #voiceModeBtn,
+  html.bnv22-landscape .side-card:nth-child(4) #musicBtn{
+    display:block!important;
+  }
+
+  html.bnv22-landscape .side-card:nth-child(4) #voiceModeBtn{
+    grid-column:1 / 2!important;
+  }
+
+  html.bnv22-landscape .side-card:nth-child(4) #musicBtn{
+    grid-column:2 / 4!important;
+  }
+
+  html.bnv22-landscape .side-card:nth-child(4) .skin-grid{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:4px!important;
+    margin-top:4px!important;
+    height:22px!important;
+  }
+
+  html.bnv22-landscape .side-card:nth-child(4) .skin-grid button{
+    height:22px!important;
+    min-height:22px!important;
+    max-height:22px!important;
+    padding:1px 2px!important;
+    font-size:7px!important;
+    line-height:1!important;
+    border-radius:7px!important;
+  }
+
+  html.bnv22-landscape .side-card:nth-child(5){
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+}
+</style>
+
+<script id="bangnhan-v24-landscape-single-voice-clean-js">
+(function(){
+  function phoneLandscape(){
+    try{
+      return innerWidth > innerHeight && innerHeight <= 560 && innerWidth <= 980;
+    }catch(e){
+      return innerWidth > innerHeight && innerHeight <= 560;
+    }
+  }
+  function imp(el,k,v){ if(el) el.style.setProperty(k,v,'important'); }
+  function show(el,on){ if(el) el.style.setProperty('display',on?'block':'none','important'); }
+  function apply(){
+    if(!phoneLandscape()) return;
+
+    var vh = document.getElementById('voiceModeHintBtn');
+    show(vh,false);
+    if(vh){
+      imp(vh,'visibility','hidden');
+      imp(vh,'width','0');
+      imp(vh,'min-width','0');
+      imp(vh,'max-width','0');
+      imp(vh,'padding','0');
+      imp(vh,'margin','0');
+      imp(vh,'overflow','hidden');
+    }
+
+    var hintRow = document.querySelector('.hint-voice-row');
+    if(hintRow){
+      imp(hintRow,'grid-template-columns','1fr');
+      imp(hintRow,'width','118px');
+      imp(hintRow,'max-width','118px');
+      imp(hintRow,'gap','0');
+    }
+
+    var hint = document.getElementById('hintBtn');
+    if(hint){
+      show(hint,true);
+      imp(hint,'width','100%');
+    }
+
+    var side = document.querySelector('.side');
+    if(side){
+      imp(side,'grid-template-rows','52px 78px 56px 106px minmax(0,1fr)');
+      imp(side,'gap','3px');
+    }
+
+    var card4 = document.querySelector('.side-card:nth-child(4)');
+    if(card4){
+      imp(card4,'padding','4px');
+      imp(card4,'overflow','hidden');
+    }
+
+    var controls = document.querySelector('.side-card:nth-child(4) .controls');
+    if(controls){
+      imp(controls,'display','grid');
+      imp(controls,'grid-template-columns','repeat(3,1fr)');
+      imp(controls,'grid-auto-rows','22px');
+      imp(controls,'gap','4px');
+      imp(controls,'height','auto');
+      imp(controls,'overflow','visible');
+    }
+
+    ['pauseBtn','skipBtn','restartBtn','voiceModeBtn','musicBtn'].forEach(function(id){
+      var b=document.getElementById(id);
+      show(b,true);
+      if(b){
+        imp(b,'height','22px');
+        imp(b,'min-height','22px');
+        imp(b,'max-height','22px');
+        imp(b,'font-size','6.6px');
+        imp(b,'padding','1px 2px');
+        imp(b,'line-height','1');
+        imp(b,'white-space','nowrap');
+      }
+    });
+
+    ['startBtn','voiceBtn','sfxBtn','fullBtn'].forEach(function(id){
+      show(document.getElementById(id), false);
+    });
+
+    var voice = document.getElementById('voiceModeBtn');
+    if(voice) imp(voice,'grid-column','1 / 2');
+
+    var music = document.getElementById('musicBtn');
+    if(music) imp(music,'grid-column','2 / 4');
+
+    var skin = document.querySelector('.side-card:nth-child(4) .skin-grid');
+    if(skin){
+      imp(skin,'display','grid');
+      imp(skin,'grid-template-columns','1fr 1fr');
+      imp(skin,'gap','4px');
+      imp(skin,'margin-top','4px');
+      imp(skin,'height','22px');
+    }
+    document.querySelectorAll('.side-card:nth-child(4) .skin-grid button').forEach(function(b){
+      imp(b,'height','22px');
+      imp(b,'min-height','22px');
+      imp(b,'font-size','7px');
+      imp(b,'padding','1px 2px');
+      imp(b,'line-height','1');
+    });
+  }
+  function schedule(){
+    apply();
+    setTimeout(apply,60);
+    setTimeout(apply,180);
+    setTimeout(apply,600);
+    setTimeout(apply,1200);
+    setTimeout(apply,2200);
+  }
+  document.addEventListener('DOMContentLoaded', schedule);
+  window.addEventListener('load', schedule);
+  window.addEventListener('resize', schedule);
+  window.addEventListener('orientationchange', schedule);
+})();
+</script>
