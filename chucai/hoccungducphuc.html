@@ -1373,7 +1373,7 @@ body{
         <div class="p4-stat"><span>Đúng</span><b id="p4Correct">0</b></div>
         <div class="p4-stat"><span>Chuỗi</span><b id="p4Streak">0</b></div>
       </div>
-      <div class="p4-safe">✅ Bé chọn đúng thì app sẽ khen, đọc hết câu rồi tự sang bài mới.</div>
+      <div class="p4-safe">✅ Đúng thì qua bài. Sai sẽ đọc đáp án đúng và giữ nguyên bài để bé chọn lại.</div>
       <div class="p4-log"><h3>Nhật ký</h3><div id="p4Log"></div></div>
     </div>
   </div>
@@ -1382,14 +1382,14 @@ body{
 <div class="overlay show" id="overlay"><div class="modal"><h2>🔤 Sẵn sàng học chữ cái?</h2><p>Phát triển: @tunhienhieuchuyen. Có trên các nền tảng MXH. Bấm bắt đầu rồi chạm vào chữ để nghe đọc.</p><button id="startBtn" class="green" onclick="try{document.getElementById('overlay').classList.remove('show')}catch(e){}">▶ Bắt đầu học</button></div></div>
 
 <script id="chucai-voicebank-v5-loader">
-/* VOICEBANK V5 SCREENREADER SLOW LOUD — GitHub/PWA bridge
+/* VOICEBANK V7 DOC CHUAN — GitHub/PWA bridge — GitHub/PWA bridge
    Folder requirement: /chucai/voicebank_chucai/ next to hoccungducphuc.html
    Manifest: ./voicebank_chucai/voice_manifest.json
 */
 (function(){
   'use strict';
   if(window.ChuCaiVoiceBankV5) return;
-  const VB_VERSION='CHUCAI_VOICEBANK_V5_SCREENREADER_SLOW_LOUD_20260612';
+  const VB_VERSION='CHUCAI_VOICEBANK_V7_DOCCHUAN_FULL_20260612';
   const state={ready:false,loading:false,base:'',manifest:null,map:Object.create(null),index:Object.create(null),audio:null,lastError:''};
   const BASE_CANDIDATES=['voicebank_chucai/','./voicebank_chucai/','/chucai/voicebank_chucai/'];
   function norm(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
@@ -1701,8 +1701,14 @@ function play(it){
     $('setAll').onclick=()=>setSet('all'); $('setVowels').onclick=()=>setSet('vowels'); $('setDigits').onclick=()=>setSet('digits'); $('modeLearn').onclick=()=>setMode('learn'); $('modeHear').onclick=()=>setMode('hear'); $('modeFind').onclick=()=>setMode('find');
   }
 
-  /* === V6 HOME VOICE ROUTER: 3 voices + exact case reading === */
+  /* === V7 HOME VOICE ROUTER: GNA raw / Nam Đanh full / AI local, no mixed fallback === */
   try{ if(window.ChuCaiVoiceBankV5) window.ChuCaiVoiceBankV5.load(); }catch(e){}
+  const V7_LETTER_NAMES={
+    'A':'a','Ă':'á','Â':'ớ','B':'bờ','C':'cờ','D':'dờ','Đ':'đờ','E':'e','Ê':'ê','G':'gờ','H':'hờ','I':'i','K':'ca','L':'lờ','M':'mờ','N':'nờ','O':'o','Ô':'ô','Ơ':'ơ','P':'pờ','Q':'quy','R':'rờ','S':'sờ','T':'tờ','U':'u','Ư':'ư','V':'vờ','X':'xờ','Y':'i dài'
+  };
+  const V7_NUM_WORDS={'0':'không','1':'một','2':'hai','3':'ba','4':'bốn','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín'};
+  function v7LetterName(it){return V7_LETTER_NAMES[String(it&&it.upper||'')]||String(it&&it.upper||'');}
+  function v7DigitName(it){return V7_NUM_WORDS[String(it&&it.upper||it&&it.id||'')]||String(it&&it.upper||'');}
   function caseName(){return state.caseMode==='lower'?'a thường':'A hoa'}
   function refreshCaseBtns(){
     const txt=state.caseMode==='lower'?'a thường':'A hoa';
@@ -1716,7 +1722,7 @@ function play(it){
   }
   function refreshHomeVoiceBtn(){
     const b=$('homeVoiceModeBtn'); if(b) b.textContent=voiceModeLabel();
-    $('statusText').textContent= state.homeVoiceMode==='voicebank'?'Giọng chữ cái: Nam Đanh':(state.homeVoiceMode==='ai'?'Giọng chữ cái: AI local':'Giọng chữ cái: GNA chuẩn');
+    if($('statusText')) $('statusText').textContent= state.homeVoiceMode==='voicebank'?'Giọng chữ cái: Nam Đanh':(state.homeVoiceMode==='ai'?'Giọng chữ cái: AI local':'Giọng chữ cái: GNA chuẩn');
   }
   function setHomeVoiceMode(mode){
     state.homeVoiceMode = ['gna','voicebank','ai'].includes(mode)?mode:'gna';
@@ -1728,15 +1734,24 @@ function play(it){
     const i=order.indexOf(state.homeVoiceMode);
     setHomeVoiceMode(order[(i+1+order.length)%order.length]);
   }
-  function letterSpeechForMode(it){
+  function letterSpeechForMode(it,mode){
+    mode=mode||state.caseMode;
     if(!it) return '';
-    if(it.upper===it.lower) return /^\d+$/.test(String(it.upper)) ? ('Số '+it.upper+'.') : String(it.upper)+'.';
-    return state.caseMode==='lower' ? ('Chữ '+it.lower+' thường.') : ('Chữ '+it.upper+' hoa.');
+    if(it.upper===it.lower) return /^\d+$/.test(String(it.upper)) ? ('Số '+v7DigitName(it)+'.') : String(it.upper)+'.';
+    return mode==='lower' ? ('Chữ '+v7LetterName(it)+' thường.') : ('Chữ '+v7LetterName(it)+' hoa.');
   }
   function letterFeedbackTitle(it){
     if(!it) return 'Bé vừa nghe chữ';
-    if(it.upper===it.lower) return 'Bé vừa nghe số '+it.upper;
-    return state.caseMode==='lower' ? ('Bé vừa nghe chữ '+it.lower+' thường') : ('Bé vừa nghe chữ '+it.upper+' hoa');
+    if(it.upper===it.lower) return 'Bé vừa nghe số '+v7DigitName(it);
+    return state.caseMode==='lower' ? ('Bé vừa nghe chữ '+v7LetterName(it)+' thường') : ('Bé vừa nghe chữ '+v7LetterName(it)+' hoa');
+  }
+  function v7Key(it,mode,kind){
+    if(!it) return '';
+    if(kind==='word') return 'v7_word:'+String(it.id||it.upper||'');
+    if(it.upper===it.lower) return 'v7_digit:'+String(it.upper);
+    if(kind==='upper') return 'v7_upper:'+String(it.upper);
+    if(kind==='lower') return 'v7_lower:'+String(it.lower);
+    return mode==='lower' ? 'v7_lower:'+String(it.lower) : 'v7_upper:'+String(it.upper);
   }
   function playAudioSrc(src,onend){
     if(!src) return false;
@@ -1746,7 +1761,7 @@ function play(it){
       currentAudio=new Audio(src); currentAudio.volume=1;
       let done=false; const finish=()=>{if(done)return;done=true;if(typeof onend==='function')setTimeout(onend,120)};
       currentAudio.onended=finish; currentAudio.onerror=finish;
-      const p=currentAudio.play(); if(p&&p.catch)p.catch(()=>{speakStandardVoice(letterSpeechForMode(state.current),onend);});
+      const p=currentAudio.play(); if(p&&p.catch)p.catch(()=>{finish();});
       return true;
     }catch(e){return false;}
   }
@@ -1754,48 +1769,44 @@ function play(it){
     if(!it) return false;
     const key=String(it.upper||it.id||'').trim();
     const src=GNA_AUDIO_SOURCE[key] || AUDIO[it.audio];
+    if(!src){ if($('statusText')) $('statusText').textContent='GNA chưa có âm cho '+key; if(onend) setTimeout(onend,120); return false; }
     return playAudioSrc(src,onend);
   }
   function playVoicebankText(key,onend){
-    try{ if(window.ChuCaiVoiceBankV5 && window.ChuCaiVoiceBankV5.play(key,onend)) return true; }catch(e){}
+    try{ if(key && window.ChuCaiVoiceBankV5 && window.ChuCaiVoiceBankV5.play(key,onend)) return true; }catch(e){}
+    if($('statusText')) $('statusText').textContent='Thiếu voicebank: '+key;
+    if(typeof onend==='function') setTimeout(onend,160);
     return false;
   }
   function playHomeCurrent(it,onend){
     if(!it) return;
     const shown = state.caseMode==='lower'?it.lower:it.upper;
     $('statusText').textContent='Đang đọc: '+shown+' · '+(state.homeVoiceMode==='voicebank'?'Nam Đanh':state.homeVoiceMode==='ai'?'AI local':'GNA');
-    if(state.homeVoiceMode==='gna'){
-      if(playGnaItem(it,onend)) return;
-      speakStandardVoice(letterSpeechForMode(it),onend); return;
-    }
-    if(state.homeVoiceMode==='voicebank'){
-      const key = (it.upper===it.lower) ? it.upper : (state.caseMode==='lower' ? it.lower : it.upper);
-      if(playVoicebankText(key,onend)) return;
-      // voicebank V5 có chữ hoa đầy đủ; chữ thường chưa có file riêng nên dùng AI local để không đọc sai gộp hoa/thường.
-      speakStandardVoice(letterSpeechForMode(it),onend); return;
-    }
+    if(state.homeVoiceMode==='gna'){ playGnaItem(it,onend); return; }
+    if(state.homeVoiceMode==='voicebank'){ playVoicebankText(v7Key(it,state.caseMode),onend); return; }
     speakStandardVoice(letterSpeechForMode(it),onend);
   }
   function playFullLetter(it){
     if(!it) return;
     const steps=[];
-    if(it.upper===it.lower){steps.push({type:'text',text:/^\d+$/.test(String(it.upper))?('Số '+it.upper+'.'):String(it.upper)+'.'});}
+    if(it.upper===it.lower){steps.push({mode:'digit',key:v7Key(it),text:letterSpeechForMode(it)});}
     else{
-      steps.push({type:'upper',text:'Chữ '+it.upper+' hoa.'});
-      steps.push({type:'text',text:'Chữ '+it.lower+' thường.'});
-      if(it.word) steps.push({type:'word',text:'Từ gợi nhớ: '+it.word+'.'});
+      steps.push({mode:'upper',key:v7Key(it,'upper','upper'),text:letterSpeechForMode(it,'upper')});
+      steps.push({mode:'lower',key:v7Key(it,'lower','lower'),text:letterSpeechForMode(it,'lower')});
+      if(it.word) steps.push({mode:'word',key:v7Key(it,null,'word'),text:'Từ gợi nhớ: '+it.word+'.'});
     }
-    let i=0; const next=()=>{const st=steps[i++]; if(!st) return; if(st.type==='upper'){
-        if(state.homeVoiceMode==='gna' && playGnaItem(it,next)) return;
-        if(playVoicebankText(it.upper,next)) return;
+    let i=0; const next=()=>{
+      const st=steps[i++]; if(!st) return;
+      if(state.homeVoiceMode==='gna'){
+        // GNA/PPSM chỉ có âm chữ/số gốc. Không trộn AI hoặc Nam Đanh để tránh hai giọng lẫn nhau.
+        if(st.mode==='upper'||st.mode==='lower'||st.mode==='digit') { playGnaItem(it,next); return; }
+        if(next) setTimeout(next,120); return;
       }
-      if(st.type==='word' && playVoicebankText('Từ gợi nhớ: '+it.word+'. Bấm Đọc lại nếu muốn nghe thêm.',next)) return;
-      if(state.homeVoiceMode==='voicebank' && playVoicebankText(st.text,next)) return;
+      if(state.homeVoiceMode==='voicebank'){ playVoicebankText(st.key,next); return; }
       speakStandardVoice(st.text,next);
     };
     next();
   }
-  const __v6_oldShowItem=showItem;
   showItem=function(it,announce=true){
     state.current=it; setActiveTile(it.id,'active');
     $('bigLetter').textContent=shownChar(it);
@@ -1810,18 +1821,19 @@ function play(it){
     state.caseMode=state.caseMode==='lower'?'upper':'lower';
     refreshCaseBtns(); renderGrid(); if(state.current) showItem(state.current,false); save();
   };
-  const __v6_oldBind=bind;
+  const __v7_oldBind=bind;
   bind=function(){
-    __v6_oldBind();
+    __v7_oldBind();
     const vb=$('homeVoiceModeBtn'); if(vb) vb.onclick=cycleHomeVoiceMode;
     const cm=$('caseBtnMobile'); if(cm) cm.onclick=cycleCase;
+    if($('caseBtn')) $('caseBtn').onclick=cycleCase;
     if($('speakBtn')) $('speakBtn').onclick=()=>playFullLetter(state.current||pool()[0]);
     if($('playQuestion')) $('playQuestion').onclick=()=>play(state.current||pool()[0]);
     refreshHomeVoiceBtn(); refreshCaseBtns();
   };
 
   load(); bind(); setSet(state.set||'all'); setMode(state.mode||'learn'); refreshHomeVoiceBtn(); refreshCaseBtns(); updateStats();
-  window.__HocChuCaiTV={version:'CHUCAI_V6_GNA_THREE_VOICE_GARDEN_LOGIC_FIX_20260612', letters:LETTERS.length, digits:DIGITS.length, audio:Object.keys(AUDIO).length, threeVoices:true, defaultLetterVoice:'gna', defaultGardenVoice:'voicebank'};
+  window.__HocChuCaiTV={version:'CHUCAI_V7_DOCCHUAN_NO_MIXED_FALLBACK_20260612', letters:LETTERS.length, digits:DIGITS.length, audio:Object.keys(AUDIO).length, threeVoices:true, defaultLetterVoice:'gna', defaultGardenVoice:'voicebank', noMixedFallback:true};
 })();
 
 document.addEventListener('click',function(ev){
@@ -1884,8 +1896,20 @@ function clearNext(){if(state.timer){clearTimeout(state.timer);state.timer=null}
 function scheduleNext(delay){clearNext();state.timer=setTimeout(()=>{state.timer=null;newTask()},delay||520)}
 function markAnswered(){const scene=$('p4Scene');if(scene)scene.classList.add('answered')}
 function good(msg){markAnswered();state.score+=10;state.correct+=1;state.streak+=1;if(state.streak%3===0)state.stars+=1;save();update();log('✅ '+msg+' → app đọc xong rồi tự sang bài mới');speak(msg,{onend:()=>scheduleNext(520)})}
-function bad(msg){state.streak=0;save();update();let say=String(msg||'');if(!/^Chưa đúng/i.test(say)){const a=state.answer&&state.answer.label?String(state.answer.label):'';const clean=a.replace(/^Đúng rồi,?\s*/i,'').replace(/^Chính xác:?\s*/i,'').trim();if(clean)say='Chưa đúng. Đáp án đúng là '+clean;else say='Chưa đúng. '+say.replace(/^Đúng rồi,?\s*/i,'').trim();}log('❌ '+say);speak(say)}
-function renderZones(){const z=$('p4Zones');z.innerHTML=ZONES.map(a=>'<button class="p4-zone '+(state.zone===a.id?'active':'')+'" data-zone="'+a.id+'"><b>'+a.name+'</b><span>'+a.desc+'</span></button>').join('');z.querySelectorAll('.p4-zone').forEach(b=>b.onclick=()=>startZone(b.dataset.zone))}
+function bad(msg){
+  state.streak=0;save();update();
+  let say=String(msg||'').replace(/\s+/g,' ').trim();
+  if(/^Chưa đúng\.\s*Đây là\s*/i.test(say)) say=say.replace(/^Chưa đúng\.\s*Đây là\s*/i,'Chưa đúng. Đáp án đúng là ');
+  else if(/^Chưa đúng\.\s*Đó là\s*/i.test(say)) say=say.replace(/^Chưa đúng\.\s*Đó là\s*/i,'Chưa đúng. Đáp án đúng là ');
+  else if(!/^Chưa đúng/i.test(say)){
+    const a=state.answer&&state.answer.label?String(state.answer.label):'';
+    let clean=a.replace(/^Đúng rồi,?\s*/i,'').replace(/^Chính xác:?\s*/i,'').replace(/^đây là\s*/i,'').trim();
+    if(clean) say='Chưa đúng. Đáp án đúng là '+clean;
+    else say='Chưa đúng. '+say.replace(/^Đúng rồi,?\s*/i,'').trim();
+  }
+  if(!/[.!?]$/.test(say)) say+='.';
+  log('❌ '+say);speak(say)
+} function renderZones(){const z=$('p4Zones');z.innerHTML=ZONES.map(a=>'<button class="p4-zone '+(state.zone===a.id?'active':'')+'" data-zone="'+a.id+'"><b>'+a.name+'</b><span>'+a.desc+'</span></button>').join('');z.querySelectorAll('.p4-zone').forEach(b=>b.onclick=()=>startZone(b.dataset.zone))}
 function renderMap(){clearNext();state.zone='map';renderZones();const garden=$('p4Garden');if(garden)garden.classList.add('garden-map-home');const scene=$('p4Scene');$('p4Title').textContent='Bản đồ vườn học';$('p4Sub').textContent='Chọn khu học để bé bắt đầu vui học.';scene.classList.remove('answered');scene.classList.add('map-mode');const cards=[['🧩','Nhận dạng hình','shape','Học đúng tên hình'],['🎨','Màu sắc','color','Nhìn hình rồi chọn màu'],['📏','To / nhỏ','size','Lớn hơn, nhỏ hơn, bằng nhau'],['🧠','Ghép mẫu','match','Chọn hình giống mẫu'],['👂','Nghe chọn hình','listen','Nghe lời đọc rồi chọn'],['🕘','Xem giờ','clock','Nhìn đồng hồ rồi chọn giờ'],['🐾','Con gì','animal','Nhìn con vật rồi chọn tên'],['🧸','Đồ vật','object','Ảnh thật đã rà tay'],['🍎','Rau quả','food','Rau quả đã rà tay'],['✍️','Tập viết','write','Tô chữ trên bảng'],['🔤','Chữ đầu','letters','Hình bắt đầu bằng chữ gì'],['🔢','Số đếm','numbers','Đếm rồi chọn số'],['⚖️','So sánh','compare','So sánh hình chuẩn'],['➕➖','Cộng trừ','arith','Phép cộng trừ ngẫu nhiên'],['🧭','Khám phá','explore','Xem hình đã xác minh']];scene.innerHTML='<div class="p4-map">'+cards.map(x=>'<button class="p4-map-card" data-zone="'+x[2]+'"><div class="ico">'+x[0]+'</div><b>'+x[1]+'</b><span>'+x[3]+'</span></button>').join('')+'</div>';scene.querySelectorAll('.p4-map-card').forEach(b=>b.onclick=()=>startZone(b.dataset.zone));scene.scrollTop=0;log('Đã vào bản đồ vườn học.')}
 function svgUri(svg){return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)))}
 function makeShapeSvg(shapeKey,colorHex,sizeKey){const size=sizeKey||'normal';let s=size==='big'?130:size==='small'?72:102;let w=s,h=s;if(shapeKey==='rectangle'){w=size==='big'?150:size==='small'?84:122;h=size==='big'?92:size==='small'?52:76}if(shapeKey==='oval'){w=size==='big'?150:size==='small'?84:122;h=size==='big'?96:size==='small'?54:78}const x=100-w/2,y=100-h/2;let body='';if(shapeKey==='circle')body='<circle cx="100" cy="100" r="'+(s/2)+'" fill="'+colorHex+'" stroke="#1e1e1e" stroke-width="8"/>';if(shapeKey==='square')body='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="10" fill="'+colorHex+'" stroke="#1e1e1e" stroke-width="8"/>';if(shapeKey==='rectangle')body='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="10" fill="'+colorHex+'" stroke="#1e1e1e" stroke-width="8"/>';if(shapeKey==='triangle')body='<polygon points="100,'+(100-h/2)+' '+(100+w/2)+','+(100+h/2)+' '+(100-w/2)+','+(100+h/2)+'" fill="'+colorHex+'" stroke="#1e1e1e" stroke-width="8" stroke-linejoin="round"/>';if(shapeKey==='oval')body='<ellipse cx="100" cy="100" rx="'+(w/2)+'" ry="'+(h/2)+'" fill="'+colorHex+'" stroke="#1e1e1e" stroke-width="8"/>';const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" rx="24" fill="#fff8e8"/>'+body+'</svg>';return svgUri(svg)}
@@ -1893,8 +1917,21 @@ function shapeCombo(shape,color,sizeKey){return{id:shape.key+'_'+color.key+'_'+(
 function answerTextAnimal(label){return /^con\s/i.test(label)?('Đúng rồi, đây là '+label):('Đúng rồi, đây là con '+label)}
 function renderChoiceTask(cfg){clearNext();const ans=rand(cfg.list);state.answer={label:cfg.answerText(ans)};state.current=ans;const pool=cfg.choiceSource?cfg.choiceSource(ans):cfg.list.filter(x=>x.id!==ans.id);const choices=uniqueChoiceSet(ans,pool,3);$('p4Title').textContent=cfg.title;$('p4Sub').textContent=cfg.sub;$('p4Scene').classList.remove('answered');$('p4Scene').innerHTML='<div class="p4-task"><div class="p4-hero">'+cfg.heroHTML(ans)+'</div><div class="p4-choices"><div class="p4-grid">'+choices.map(c=>cfg.choiceHTML(c)).join('')+'</div><div class="p4-okhint">Chọn đúng xong app sẽ đọc hết câu rồi tự sang bài mới.</div></div></div>';cfg.bind(ans);speak(cfg.speech(ans))}
 function renderShapeTask(){const list=SHAPES.map(s=>shapeCombo(s,COLORS[3],'normal'));renderChoiceTask({title:'🧩 Nhận dạng hình',sub:'Nhìn hình lớn ở giữa rồi chọn tên hình đúng.',list,answerText:a=>'Đúng rồi, đây là '+a.shapeLabel,heroHTML:ans=>'<img src="'+ans.img+'" alt="'+ans.shapeLabel+'"><div class="lbl">Đây là hình gì?</div><div class="sub-lbl"></div>',speech:()=> 'Đây là hình gì?',choiceHTML:c=>'<button class="p4-choice" data-id="'+c.id+'"><span class="p4-big">'+c.shapeLabel.replace('hình ','')+'</span><span class="p4-small">'+c.shapeLabel+'</span></button>',bind:ans=>{$('p4Scene').querySelectorAll('.p4-choice').forEach(b=>b.onclick=()=>{const ok=b.dataset.id===ans.id;b.classList.add(ok?'ok':'bad');ok?good('Đúng rồi, đây là '+ans.shapeLabel):bad('Chưa đúng. Đây là '+ans.shapeLabel)})}})}
-function renderColorTask(){const ans=shapeCombo(rand(SHAPES),rand(COLORS),'normal');const list=COLORS.map(c=>({id:c.key,label:c.label,hex:c.hex}));renderChoiceTask({title:'🎨 Màu sắc',sub:'Nhìn hình rồi chọn màu đúng.',list,choiceSource:()=>list.filter(x=>x.id!==ans.color),answerText:()=> 'Đúng rồi, đây là '+ans.colorLabel,heroHTML:()=>'<img src="'+ans.img+'" alt="'+ans.colorLabel+'"><div class="lbl">Hình này màu gì?</div><div class="sub-lbl"></div>',speech:()=> 'Hình này màu gì?',choiceHTML:c=>'<button class="p4-choice" data-id="'+c.id+'"><span class="p4-big">'+c.label.replace('màu ','')+'</span><span class="p4-small">'+c.label+'</span></button>',bind:()=>{$('p4Scene').querySelectorAll('.p4-choice').forEach(b=>b.onclick=()=>{const ok=b.dataset.id===ans.color;b.classList.add(ok?'ok':'bad');ok?good('Đúng rồi, đây là '+ans.colorLabel):bad('Chưa đúng. Đây là '+ans.colorLabel)})}})}
-function renderSizeTask(){clearNext();const relation=rand(['bigger','smaller','equal']);const shape=rand(SHAPES),color=rand(COLORS);let left='big',right='small',answerMsg='Đúng rồi, hình bên trái lớn hơn hình bên phải';if(relation==='smaller'){left='small';right='big';answerMsg='Đúng rồi, hình bên trái nhỏ hơn hình bên phải';}if(relation==='equal'){const same=rand(['small','normal','big']);left=same;right=same;answerMsg='Đúng rồi, hai hình bằng nhau';}const options=[{id:'bigger',label:'lớn hơn'},{id:'smaller',label:'nhỏ hơn'},{id:'equal',label:'bằng nhau'}];state.answer={label:answerMsg};$('p4Title').textContent='📏 To / nhỏ';$('p4Sub').textContent='Nhìn hai hình. Con nhìn dấu > = < ở giữa rồi chọn lớn hơn, nhỏ hơn hoặc bằng nhau.';$('p4Scene').classList.remove('answered');$('p4Scene').innerHTML='<div class="p4-relation-wrap"><div class="p4-pair-board"><div class="p4-pair-row"><div class="p4-pair-cell"><img src="'+makeShapeSvg(shape.key,color.hex,left)+'" alt="hình bên trái"><span>Bên trái</span></div><div class="p4-vs"><div class="p4-signs"><span>&gt;</span><span>=</span><span>&lt;</span></div><div class="p4-vs-word">so với</div></div><div class="p4-pair-cell"><img src="'+makeShapeSvg(shape.key,color.hex,right)+'" alt="hình bên phải"><span>Bên phải</span></div></div><div class="p4-rel-q">Hình bên trái so với hình bên phải như thế nào?</div></div><div class="p4-choices"><div class="p4-grid">'+options.map(c=>'<button class="p4-choice" data-id="'+c.id+'"><span class="p4-big">'+c.label+'</span><span class="p4-small">chọn '+c.label+'</span></button>').join('')+'</div><div class="p4-okhint">Có 3 đáp án để bé chọn: lớn hơn, bằng nhau, nhỏ hơn.</div></div></div>';$('p4Scene').querySelectorAll('.p4-choice').forEach(b=>b.onclick=()=>{const ok=b.dataset.id===relation;b.classList.add(ok?'ok':'bad');ok?good(answerMsg):bad(answerMsg)});speak('Hình bên trái so với hình bên phải như thế nào?');}
+function renderColorTask(){
+  clearNext();
+  const ans=shapeCombo(rand(SHAPES),rand(COLORS),'normal');
+  const correct={id:ans.color,label:ans.colorLabel,hex:(COLORS.find(c=>c.key===ans.color)||{}).hex};
+  const pool=COLORS.filter(c=>c.key!==ans.color).map(c=>({id:c.key,label:c.label,hex:c.hex}));
+  const choices=uniqueChoiceSet(correct,pool,3);
+  state.answer={label:'Đúng rồi, đây là '+ans.colorLabel};
+  state.current=correct;
+  $('p4Title').textContent='🎨 Màu sắc';
+  $('p4Sub').textContent='Nhìn hình rồi chọn màu đúng.';
+  $('p4Scene').classList.remove('answered');
+  $('p4Scene').innerHTML='<div class="p4-task"><div class="p4-hero"><img src="'+ans.img+'" alt="'+ans.colorLabel+'"><div class="lbl">Hình này màu gì?</div><div class="sub-lbl"></div></div><div class="p4-choices"><div class="p4-grid">'+choices.map(c=>'<button class="p4-choice" data-id="'+c.id+'"><span class="p4-big">'+c.label.replace('màu ','')+'</span><span class="p4-small">'+c.label+'</span></button>').join('')+'</div><div class="p4-okhint">Chọn đúng xong app sẽ đọc hết câu rồi tự sang bài mới.</div></div></div>';
+  $('p4Scene').querySelectorAll('.p4-choice').forEach(b=>b.onclick=()=>{const ok=b.dataset.id===ans.color;b.classList.add(ok?'ok':'bad');ok?good('Đúng rồi, đây là '+ans.colorLabel):bad('Chưa đúng. Đáp án đúng là '+ans.colorLabel)});
+  speak('Hình này màu gì?')
+} function renderSizeTask(){clearNext();const relation=rand(['bigger','smaller','equal']);const shape=rand(SHAPES),color=rand(COLORS);let left='big',right='small',answerMsg='Đúng rồi, hình bên trái lớn hơn hình bên phải';if(relation==='smaller'){left='small';right='big';answerMsg='Đúng rồi, hình bên trái nhỏ hơn hình bên phải';}if(relation==='equal'){const same=rand(['small','normal','big']);left=same;right=same;answerMsg='Đúng rồi, hai hình bằng nhau';}const options=[{id:'bigger',label:'lớn hơn'},{id:'smaller',label:'nhỏ hơn'},{id:'equal',label:'bằng nhau'}];state.answer={label:answerMsg};$('p4Title').textContent='📏 To / nhỏ';$('p4Sub').textContent='Nhìn hai hình. Con nhìn dấu > = < ở giữa rồi chọn lớn hơn, nhỏ hơn hoặc bằng nhau.';$('p4Scene').classList.remove('answered');$('p4Scene').innerHTML='<div class="p4-relation-wrap"><div class="p4-pair-board"><div class="p4-pair-row"><div class="p4-pair-cell"><img src="'+makeShapeSvg(shape.key,color.hex,left)+'" alt="hình bên trái"><span>Bên trái</span></div><div class="p4-vs"><div class="p4-signs"><span>&gt;</span><span>=</span><span>&lt;</span></div><div class="p4-vs-word">so với</div></div><div class="p4-pair-cell"><img src="'+makeShapeSvg(shape.key,color.hex,right)+'" alt="hình bên phải"><span>Bên phải</span></div></div><div class="p4-rel-q">Hình bên trái so với hình bên phải như thế nào?</div></div><div class="p4-choices"><div class="p4-grid">'+options.map(c=>'<button class="p4-choice" data-id="'+c.id+'"><span class="p4-big">'+c.label+'</span><span class="p4-small">chọn '+c.label+'</span></button>').join('')+'</div><div class="p4-okhint">Có 3 đáp án để bé chọn: lớn hơn, bằng nhau, nhỏ hơn.</div></div></div>';$('p4Scene').querySelectorAll('.p4-choice').forEach(b=>b.onclick=()=>{const ok=b.dataset.id===relation;b.classList.add(ok?'ok':'bad');ok?good(answerMsg):bad(answerMsg)});speak('Hình bên trái so với hình bên phải như thế nào?');}
 function renderMatchTask(){clearNext();const ans=shapeCombo(rand(SHAPES),rand(COLORS),'normal');const distractors=[];while(distractors.length<3){const c=shapeCombo(rand(SHAPES),rand(COLORS),'normal');if(c.id!==ans.id&&!distractors.some(x=>x.id===c.id))distractors.push(c)}const choices=distractors.concat([ans]).sort(()=>Math.random()-.5);state.answer={label:'Đúng rồi, con đã ghép đúng mẫu'};state.current=ans;$('p4Title').textContent='🧠 Ghép hình theo mẫu';$('p4Sub').textContent='Cầm tay chỉ việc: nhìn hình mẫu rồi chạm vào hình giống y như mẫu.';$('p4Scene').classList.remove('answered');$('p4Scene').innerHTML='<div class="p4-task"><div class="p4-hero"><img src="'+ans.img+'" alt="Mẫu"><div class="lbl">Mẫu</div><div class="sub-lbl">Con nhìn mẫu rồi chạm vào hình giống y như mẫu</div></div><div class="p4-choices"><div class="p4-grid">'+choices.map(c=>'<button class="p4-choice" data-id="'+c.id+'"><img src="'+c.img+'" alt="'+c.shapeLabel+' '+c.colorLabel+'"><span>'+c.shapeLabel.replace('hình ','')+'</span></button>').join('')+'</div><div class="p4-okhint">Đúng rồi app sẽ đọc xong rồi tự sang bài khác.</div></div></div>';$('p4Scene').querySelectorAll('.p4-choice').forEach(b=>b.onclick=()=>{const ok=b.dataset.id===ans.id;b.classList.add(ok?'ok':'bad');ok?good('Đúng rồi, con đã ghép đúng mẫu'):bad('Chưa đúng. Con nhìn lại mẫu rồi chạm vào hình giống y như mẫu nhé')});speak('Con nhìn mẫu rồi chọn hình giống y như mẫu.')}
 function renderListenTask(){clearNext();const ans=shapeCombo(rand(SHAPES),rand(COLORS),'normal');const distractors=[];while(distractors.length<3){const c=shapeCombo(rand(SHAPES),rand(COLORS),'normal');if(c.id!==ans.id&&!distractors.some(x=>x.id===c.id))distractors.push(c)}const choices=distractors.concat([ans]).sort(()=>Math.random()-.5);const phrase='Hãy chọn '+ans.shapeLabel+' '+ans.colorLabel;state.answer={label:'Đúng rồi, đây là '+ans.shapeLabel+' '+ans.colorLabel};state.current=ans;$('p4Title').textContent='👂 Nghe chọn hình';$('p4Sub').textContent='Nghe lời đọc rồi chọn hình đúng.';$('p4Scene').classList.remove('answered');$('p4Scene').innerHTML='<div class="p4-task"><div class="p4-hero"><div class="lbl">Nghe rồi chọn</div><div class="sub-lbl">'+phrase+'</div></div><div class="p4-choices"><div class="p4-grid">'+choices.map(c=>'<button class="p4-choice" data-id="'+c.id+'"><img src="'+c.img+'" alt="'+c.shapeLabel+' '+c.colorLabel+'"><span>'+c.shapeLabel.replace('hình ','')+'</span><span class="p4-small">'+c.colorLabel+'</span></button>').join('')+'</div><div class="p4-okhint">Bé có thể bấm Nghe lại nếu muốn nghe lần nữa.</div></div></div>';$('p4Scene').querySelectorAll('.p4-choice').forEach(b=>b.onclick=()=>{const ok=b.dataset.id===ans.id;b.classList.add(ok?'ok':'bad');ok?good('Đúng rồi, đây là '+ans.shapeLabel+' '+ans.colorLabel):bad('Chưa đúng. Đó là '+ans.shapeLabel+' '+ans.colorLabel)});speak(phrase)}
 
@@ -1957,22 +1994,25 @@ document.addEventListener('click',function(ev){
 });
 
 
-/* === V6 GARDEN VOICE ROUTER: Nam Đanh default / AI local optional === */
+/* === V7 GARDEN VOICE ROUTER: Nam Đanh default / AI local optional, no mixed fallback === */
 try{ if(window.ChuCaiVoiceBankV5) window.ChuCaiVoiceBankV5.load(); }catch(e){}
 state.gardenVoiceMode='voicebank';
 function updateGardenVoiceBtn(){const b=$('p4VoiceModeBtn');if(b)b.textContent=state.gardenVoiceMode==='ai'?'🎙 Vườn: AI local':'🎙 Vườn: Nam Đanh'}
-function cycleGardenVoiceMode(){state.gardenVoiceMode=state.gardenVoiceMode==='ai'?'voicebank':'ai';updateGardenVoiceBtn();speak(state.gardenVoiceMode==='ai'?'Đã chuyển vườn học sang giọng ây ai cục bộ.':'Đã chuyển vườn học sang giọng Nam Đanh Thép.')}
-const __v6_oldGardenSpeak=speak;
+function cycleGardenVoiceMode(){state.gardenVoiceMode=state.gardenVoiceMode==='ai'?'voicebank':'ai';updateGardenVoiceBtn(); if(state.gardenVoiceMode==='ai') __v7_oldGardenSpeak('Đã chuyển vườn học sang giọng ây ai cục bộ.'); else speak('Đã chuyển vườn học sang giọng Nam Đanh Thép.')}
+const __v7_oldGardenSpeak=speak;
 speak=function(text,opts){
   opts=opts||{};
   const raw=String(text||'').replace(/\s+/g,' ').trim();
   if(state.gardenVoiceMode!=='ai'){
     try{ if(raw && window.ChuCaiVoiceBankV5 && window.ChuCaiVoiceBankV5.play(raw, opts.onend)) return; }catch(e){}
+    log('⚠️ Thiếu audio voicebank: '+raw);
+    if(typeof opts.onend==='function') setTimeout(opts.onend,220);
+    return;
   }
-  return __v6_oldGardenSpeak(text,opts);
+  return __v7_oldGardenSpeak(text,opts);
 };
 
-load();bind();update();window.__HocChuCaiGardenPha05={voicebankV6:true,voicebankFolder:"voicebank_chucai",version:'CHUCAI_V6_GNA_THREE_VOICE_GARDEN_LOGIC_FIX_20260612',zones:ZONES.length,verifiedAnimals:DATA.verifiedAnimals.length,verifiedObjects:DATA.verifiedObjects.length,verifiedFoods:DATA.verifiedFoods.length,writing:DATA.writing.length,clock:true,autonext_after_speech:true,arithmetic:true,relation3:true,writeVisual:true,tonhoRowFixed:true,pvwAudit:true,write3Step:true,inkGuard:true,mobilePixelPlan:true,mobileFirstHomeRebuild:true,mobileGardenRebuild:true,singleBrandClean:true,realSTXAudio:false,standardVoiceClean:true,voiceToggleAiGna:true,desktopTextFitFinal:true,cleanDataApplied:true,manualEyecheckPhase32:true,finalCleanRelease:true,pwaReady:true,aiVoiceMaxVolume:true,separatePwaScope:true,separatePwaIcon:true,phoneLandscapePcOverview:true,brandPortrait2Line:true,verifiedExplore:4,startButtonGuard:true,guidedMatchWrite:true,compareSigns:true};
+load();bind();update();window.__HocChuCaiGardenPha05={voicebankV7:true,voicebankFolder:"voicebank_chucai",version:'CHUCAI_V7_DOCCHUAN_NO_MIXED_FALLBACK_20260612',zones:ZONES.length,verifiedAnimals:DATA.verifiedAnimals.length,verifiedObjects:DATA.verifiedObjects.length,verifiedFoods:DATA.verifiedFoods.length,writing:DATA.writing.length,clock:true,autonext_after_speech:true,arithmetic:true,relation3:true,writeVisual:true,tonhoRowFixed:true,pvwAudit:true,write3Step:true,inkGuard:true,mobilePixelPlan:true,mobileFirstHomeRebuild:true,mobileGardenRebuild:true,singleBrandClean:true,standardVoiceClean:true,voiceToggleAiGna:true,desktopTextFitFinal:true,cleanDataApplied:true,manualEyecheckPhase32:true,finalCleanRelease:true,pwaReady:true,aiVoiceMaxVolume:true,separatePwaScope:true,separatePwaIcon:true,phoneLandscapePcOverview:true,brandPortrait2Line:true,verifiedExplore:4,startButtonGuard:true,guidedMatchWrite:true,compareSigns:true,noMixedFallback:true};
 
 })();
 </script>
