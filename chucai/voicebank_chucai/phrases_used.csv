@@ -1,0 +1,1540 @@
+﻿id,text,speak,group,note
+p0001,Giọng AI local,Giọng ây ai cục bộ.,home_ui,home/static
+p0002,Bỏ tích: gna.ppsm,"Bỏ tích để dùng gờ en a, chấm, pê pê ét em.",home_ui,home/static
+p0003,Vào vườn,Vào vườn học.,home_ui,home/static
+p0004,Bấm chữ để nghe đọc.,Bấm chữ để nghe đọc.,home_ui,home/static
+p0005,Bé học chữ cái tiếng Việt.,Bé học chữ cái tiếng Việt.,home_ui,home/static
+p0006,Đúng rồi.,Đúng rồi.,home_ui,home/static
+p0007,"Chưa đúng, bé thử lại nhé.","Chưa đúng, bé thử lại nhé.",home_ui,home/static
+p0008,Đọc lại.,Đọc lại.,home_ui,home/static
+p0009,Vào vườn học.,Vào vườn học.,home_ui,home/static
+p0010,Bài mới.,Bài mới.,home_ui,home/static
+p0011,Nghe lại.,Nghe lại.,home_ui,home/static
+p0012,Phát triển: tunhienhieuchuyen.,Phát triển: tunhienhieuchuyen.,home_ui,home/static
+p0013,Có trên các nền tảng mạng xã hội.,Có trên các nền tảng mạng xã hội.,home_ui,home/static
+p0014,Đã xóa điểm và tiến độ trên máy này.,Đã xóa điểm và tiến độ trên máy này.,home_ui,home/static
+p0015,Giỏi lắm!,Giỏi lắm!,home_ui,home/static
+p0016,Vườn học thông minh,Vườn học thông minh,home_ui,home/static
+p0017,Chọn một khu học nhé,Con hãy chọn một khu học nhé.,home_ui,home/static
+p0018,"Chào bé, mời bé vào vườn học thông minh.","Chào bé, mời bé vào vườn học thông minh.",home_ui,home/static
+p0019,A,Chữ A hoa.,home_letter,standard speech
+p0020,A a,"Chữ A hoa, chữ a thường.",home_letter_pair,clear hoa/thuong
+p0021,A / a,"Chữ A hoa, chữ a thường.",home_letter_pair,exact feedback slash
+p0022,áo,áo.,home_word,word
+p0023,A là chữ a,A là chữ a.,home_label,label
+p0024,Bé vừa nghe chữ A / a,"Bé vừa nghe chữ A hoa, chữ a thường.",home_feedback,exact app feedback
+p0025,Bé vừa nghe chữ A a.,"Bé vừa nghe chữ A hoa, chữ a thường.",home_feedback,seed compatibility
+p0026,Từ gợi nhớ: áo. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: áo. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0027,Ă,Chữ Ă hoa.,home_letter,standard speech
+p0028,Ă ă,"Chữ Ă hoa, chữ ă thường.",home_letter_pair,clear hoa/thuong
+p0029,Ă / ă,"Chữ Ă hoa, chữ ă thường.",home_letter_pair,exact feedback slash
+p0030,ăn,ăn.,home_word,word
+p0031,Ă là chữ á,Ă là chữ á.,home_label,label
+p0032,Bé vừa nghe chữ Ă / ă,"Bé vừa nghe chữ Ă hoa, chữ ă thường.",home_feedback,exact app feedback
+p0033,Bé vừa nghe chữ Ă ă.,"Bé vừa nghe chữ Ă hoa, chữ ă thường.",home_feedback,seed compatibility
+p0034,Từ gợi nhớ: ăn. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: ăn. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0035,Â,Chữ Â hoa.,home_letter,standard speech
+p0036,Â â,"Chữ Â hoa, chữ â thường.",home_letter_pair,clear hoa/thuong
+p0037,Â / â,"Chữ Â hoa, chữ â thường.",home_letter_pair,exact feedback slash
+p0038,ấm,ấm.,home_word,word
+p0039,Â là chữ ớ,Â là chữ ớ.,home_label,label
+p0040,Bé vừa nghe chữ Â / â,"Bé vừa nghe chữ Â hoa, chữ â thường.",home_feedback,exact app feedback
+p0041,Bé vừa nghe chữ Â â.,"Bé vừa nghe chữ Â hoa, chữ â thường.",home_feedback,seed compatibility
+p0042,Từ gợi nhớ: ấm. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: ấm. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0043,B,Chữ B hoa.,home_letter,standard speech
+p0044,B b,"Chữ B hoa, chữ b thường.",home_letter_pair,clear hoa/thuong
+p0045,B / b,"Chữ B hoa, chữ b thường.",home_letter_pair,exact feedback slash
+p0046,bóng,bóng.,home_word,word
+p0047,B là chữ bờ,B là chữ bờ.,home_label,label
+p0048,Bé vừa nghe chữ B / b,"Bé vừa nghe chữ B hoa, chữ b thường.",home_feedback,exact app feedback
+p0049,Bé vừa nghe chữ B b.,"Bé vừa nghe chữ B hoa, chữ b thường.",home_feedback,seed compatibility
+p0050,Từ gợi nhớ: bóng. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: bóng. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0051,C,Chữ C hoa.,home_letter,standard speech
+p0052,C c,"Chữ C hoa, chữ c thường.",home_letter_pair,clear hoa/thuong
+p0053,C / c,"Chữ C hoa, chữ c thường.",home_letter_pair,exact feedback slash
+p0054,cá,cá.,home_word,word
+p0055,C là chữ cờ,C là chữ cờ.,home_label,label
+p0056,Bé vừa nghe chữ C / c,"Bé vừa nghe chữ C hoa, chữ c thường.",home_feedback,exact app feedback
+p0057,Bé vừa nghe chữ C c.,"Bé vừa nghe chữ C hoa, chữ c thường.",home_feedback,seed compatibility
+p0058,Từ gợi nhớ: cá. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: cá. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0059,D,Chữ D hoa.,home_letter,standard speech
+p0060,D d,"Chữ D hoa, chữ d thường.",home_letter_pair,clear hoa/thuong
+p0061,D / d,"Chữ D hoa, chữ d thường.",home_letter_pair,exact feedback slash
+p0062,dê,dê.,home_word,word
+p0063,D là chữ dờ,D là chữ dờ.,home_label,label
+p0064,Bé vừa nghe chữ D / d,"Bé vừa nghe chữ D hoa, chữ d thường.",home_feedback,exact app feedback
+p0065,Bé vừa nghe chữ D d.,"Bé vừa nghe chữ D hoa, chữ d thường.",home_feedback,seed compatibility
+p0066,Từ gợi nhớ: dê. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: dê. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0067,Đ,Chữ Đ hoa.,home_letter,standard speech
+p0068,Đ đ,"Chữ Đ hoa, chữ đ thường.",home_letter_pair,clear hoa/thuong
+p0069,Đ / đ,"Chữ Đ hoa, chữ đ thường.",home_letter_pair,exact feedback slash
+p0070,đèn,đèn.,home_word,word
+p0071,Đ là chữ đờ,Đ là chữ đờ.,home_label,label
+p0072,Bé vừa nghe chữ Đ / đ,"Bé vừa nghe chữ Đ hoa, chữ đ thường.",home_feedback,exact app feedback
+p0073,Bé vừa nghe chữ Đ đ.,"Bé vừa nghe chữ Đ hoa, chữ đ thường.",home_feedback,seed compatibility
+p0074,Từ gợi nhớ: đèn. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: đèn. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0075,E,Chữ E hoa.,home_letter,standard speech
+p0076,E e,"Chữ E hoa, chữ e thường.",home_letter_pair,clear hoa/thuong
+p0077,E / e,"Chữ E hoa, chữ e thường.",home_letter_pair,exact feedback slash
+p0078,em bé,em bé.,home_word,word
+p0079,E là chữ e,E là chữ e.,home_label,label
+p0080,Bé vừa nghe chữ E / e,"Bé vừa nghe chữ E hoa, chữ e thường.",home_feedback,exact app feedback
+p0081,Bé vừa nghe chữ E e.,"Bé vừa nghe chữ E hoa, chữ e thường.",home_feedback,seed compatibility
+p0082,Từ gợi nhớ: em bé. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: em bé. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0083,Ê,Chữ Ê hoa.,home_letter,standard speech
+p0084,Ê ê,"Chữ Ê hoa, chữ ê thường.",home_letter_pair,clear hoa/thuong
+p0085,Ê / ê,"Chữ Ê hoa, chữ ê thường.",home_letter_pair,exact feedback slash
+p0086,ếch,ếch.,home_word,word
+p0087,Ê là chữ ê,Ê là chữ ê.,home_label,label
+p0088,Bé vừa nghe chữ Ê / ê,"Bé vừa nghe chữ Ê hoa, chữ ê thường.",home_feedback,exact app feedback
+p0089,Bé vừa nghe chữ Ê ê.,"Bé vừa nghe chữ Ê hoa, chữ ê thường.",home_feedback,seed compatibility
+p0090,Từ gợi nhớ: ếch. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: ếch. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0091,G,Chữ G hoa.,home_letter,standard speech
+p0092,G g,"Chữ G hoa, chữ g thường.",home_letter_pair,clear hoa/thuong
+p0093,G / g,"Chữ G hoa, chữ g thường.",home_letter_pair,exact feedback slash
+p0094,gà,gà.,home_word,word
+p0095,G là chữ gờ,G là chữ gờ.,home_label,label
+p0096,Bé vừa nghe chữ G / g,"Bé vừa nghe chữ G hoa, chữ g thường.",home_feedback,exact app feedback
+p0097,Bé vừa nghe chữ G g.,"Bé vừa nghe chữ G hoa, chữ g thường.",home_feedback,seed compatibility
+p0098,Từ gợi nhớ: gà. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: gà. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0099,H,Chữ H hoa.,home_letter,standard speech
+p0100,H h,"Chữ H hoa, chữ h thường.",home_letter_pair,clear hoa/thuong
+p0101,H / h,"Chữ H hoa, chữ h thường.",home_letter_pair,exact feedback slash
+p0102,hoa,hoa.,home_word,word
+p0103,H là chữ hờ,H là chữ hờ.,home_label,label
+p0104,Bé vừa nghe chữ H / h,"Bé vừa nghe chữ H hoa, chữ h thường.",home_feedback,exact app feedback
+p0105,Bé vừa nghe chữ H h.,"Bé vừa nghe chữ H hoa, chữ h thường.",home_feedback,seed compatibility
+p0106,Từ gợi nhớ: hoa. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: hoa. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0107,I,Chữ I hoa.,home_letter,standard speech
+p0108,I i,"Chữ I hoa, chữ i thường.",home_letter_pair,clear hoa/thuong
+p0109,I / i,"Chữ I hoa, chữ i thường.",home_letter_pair,exact feedback slash
+p0110,in,in.,home_word,word
+p0111,I là chữ i,I là chữ i.,home_label,label
+p0112,Bé vừa nghe chữ I / i,"Bé vừa nghe chữ I hoa, chữ i thường.",home_feedback,exact app feedback
+p0113,Bé vừa nghe chữ I i.,"Bé vừa nghe chữ I hoa, chữ i thường.",home_feedback,seed compatibility
+p0114,Từ gợi nhớ: in. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: in. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0115,K,Chữ K hoa.,home_letter,standard speech
+p0116,K k,"Chữ K hoa, chữ k thường.",home_letter_pair,clear hoa/thuong
+p0117,K / k,"Chữ K hoa, chữ k thường.",home_letter_pair,exact feedback slash
+p0118,kem,kem.,home_word,word
+p0119,K là chữ ca,K là chữ ca.,home_label,label
+p0120,Bé vừa nghe chữ K / k,"Bé vừa nghe chữ K hoa, chữ k thường.",home_feedback,exact app feedback
+p0121,Bé vừa nghe chữ K k.,"Bé vừa nghe chữ K hoa, chữ k thường.",home_feedback,seed compatibility
+p0122,Từ gợi nhớ: kem. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: kem. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0123,L,Chữ L hoa.,home_letter,standard speech
+p0124,L l,"Chữ L hoa, chữ l thường.",home_letter_pair,clear hoa/thuong
+p0125,L / l,"Chữ L hoa, chữ l thường.",home_letter_pair,exact feedback slash
+p0126,lá,lá.,home_word,word
+p0127,L là chữ lờ,L là chữ lờ.,home_label,label
+p0128,Bé vừa nghe chữ L / l,"Bé vừa nghe chữ L hoa, chữ l thường.",home_feedback,exact app feedback
+p0129,Bé vừa nghe chữ L l.,"Bé vừa nghe chữ L hoa, chữ l thường.",home_feedback,seed compatibility
+p0130,Từ gợi nhớ: lá. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: lá. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0131,M,Chữ M hoa.,home_letter,standard speech
+p0132,M m,"Chữ M hoa, chữ m thường.",home_letter_pair,clear hoa/thuong
+p0133,M / m,"Chữ M hoa, chữ m thường.",home_letter_pair,exact feedback slash
+p0134,mèo,mèo.,home_word,word
+p0135,M là chữ mờ,M là chữ mờ.,home_label,label
+p0136,Bé vừa nghe chữ M / m,"Bé vừa nghe chữ M hoa, chữ m thường.",home_feedback,exact app feedback
+p0137,Bé vừa nghe chữ M m.,"Bé vừa nghe chữ M hoa, chữ m thường.",home_feedback,seed compatibility
+p0138,Từ gợi nhớ: mèo. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: mèo. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0139,N,Chữ N hoa.,home_letter,standard speech
+p0140,N n,"Chữ N hoa, chữ n thường.",home_letter_pair,clear hoa/thuong
+p0141,N / n,"Chữ N hoa, chữ n thường.",home_letter_pair,exact feedback slash
+p0142,nón,nón.,home_word,word
+p0143,N là chữ nờ,N là chữ nờ.,home_label,label
+p0144,Bé vừa nghe chữ N / n,"Bé vừa nghe chữ N hoa, chữ n thường.",home_feedback,exact app feedback
+p0145,Bé vừa nghe chữ N n.,"Bé vừa nghe chữ N hoa, chữ n thường.",home_feedback,seed compatibility
+p0146,Từ gợi nhớ: nón. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: nón. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0147,O,Chữ O hoa.,home_letter,standard speech
+p0148,O o,"Chữ O hoa, chữ o thường.",home_letter_pair,clear hoa/thuong
+p0149,O / o,"Chữ O hoa, chữ o thường.",home_letter_pair,exact feedback slash
+p0150,ong,ong.,home_word,word
+p0151,O là chữ o,O là chữ o.,home_label,label
+p0152,Bé vừa nghe chữ O / o,"Bé vừa nghe chữ O hoa, chữ o thường.",home_feedback,exact app feedback
+p0153,Bé vừa nghe chữ O o.,"Bé vừa nghe chữ O hoa, chữ o thường.",home_feedback,seed compatibility
+p0154,Từ gợi nhớ: ong. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: ong. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0155,Ô,Chữ Ô hoa.,home_letter,standard speech
+p0156,Ô ô,"Chữ Ô hoa, chữ ô thường.",home_letter_pair,clear hoa/thuong
+p0157,Ô / ô,"Chữ Ô hoa, chữ ô thường.",home_letter_pair,exact feedback slash
+p0158,ô tô,ô tô.,home_word,word
+p0159,Ô là chữ ô,Ô là chữ ô.,home_label,label
+p0160,Bé vừa nghe chữ Ô / ô,"Bé vừa nghe chữ Ô hoa, chữ ô thường.",home_feedback,exact app feedback
+p0161,Bé vừa nghe chữ Ô ô.,"Bé vừa nghe chữ Ô hoa, chữ ô thường.",home_feedback,seed compatibility
+p0162,Từ gợi nhớ: ô tô. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: ô tô. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0163,Ơ,Chữ Ơ hoa.,home_letter,standard speech
+p0164,Ơ ơ,"Chữ Ơ hoa, chữ ơ thường.",home_letter_pair,clear hoa/thuong
+p0165,Ơ / ơ,"Chữ Ơ hoa, chữ ơ thường.",home_letter_pair,exact feedback slash
+p0166,ớt,ớt.,home_word,word
+p0167,Ơ là chữ ơ,Ơ là chữ ơ.,home_label,label
+p0168,Bé vừa nghe chữ Ơ / ơ,"Bé vừa nghe chữ Ơ hoa, chữ ơ thường.",home_feedback,exact app feedback
+p0169,Bé vừa nghe chữ Ơ ơ.,"Bé vừa nghe chữ Ơ hoa, chữ ơ thường.",home_feedback,seed compatibility
+p0170,Từ gợi nhớ: ớt. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: ớt. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0171,P,Chữ P hoa.,home_letter,standard speech
+p0172,P p,"Chữ P hoa, chữ p thường.",home_letter_pair,clear hoa/thuong
+p0173,P / p,"Chữ P hoa, chữ p thường.",home_letter_pair,exact feedback slash
+p0174,pin,pin.,home_word,word
+p0175,P là chữ pờ,P là chữ pờ.,home_label,label
+p0176,Bé vừa nghe chữ P / p,"Bé vừa nghe chữ P hoa, chữ p thường.",home_feedback,exact app feedback
+p0177,Bé vừa nghe chữ P p.,"Bé vừa nghe chữ P hoa, chữ p thường.",home_feedback,seed compatibility
+p0178,Từ gợi nhớ: pin. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: pin. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0179,Q,Chữ Q hoa.,home_letter,standard speech
+p0180,Q q,"Chữ Q hoa, chữ q thường.",home_letter_pair,clear hoa/thuong
+p0181,Q / q,"Chữ Q hoa, chữ q thường.",home_letter_pair,exact feedback slash
+p0182,quả,quả.,home_word,word
+p0183,Q là chữ quy,Q là chữ quy.,home_label,label
+p0184,Bé vừa nghe chữ Q / q,"Bé vừa nghe chữ Q hoa, chữ q thường.",home_feedback,exact app feedback
+p0185,Bé vừa nghe chữ Q q.,"Bé vừa nghe chữ Q hoa, chữ q thường.",home_feedback,seed compatibility
+p0186,Từ gợi nhớ: quả. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: quả. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0187,R,Chữ R hoa.,home_letter,standard speech
+p0188,R r,"Chữ R hoa, chữ r thường.",home_letter_pair,clear hoa/thuong
+p0189,R / r,"Chữ R hoa, chữ r thường.",home_letter_pair,exact feedback slash
+p0190,rùa,rùa.,home_word,word
+p0191,R là chữ rờ,R là chữ rờ.,home_label,label
+p0192,Bé vừa nghe chữ R / r,"Bé vừa nghe chữ R hoa, chữ r thường.",home_feedback,exact app feedback
+p0193,Bé vừa nghe chữ R r.,"Bé vừa nghe chữ R hoa, chữ r thường.",home_feedback,seed compatibility
+p0194,Từ gợi nhớ: rùa. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: rùa. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0195,S,Chữ S hoa.,home_letter,standard speech
+p0196,S s,"Chữ S hoa, chữ s thường.",home_letter_pair,clear hoa/thuong
+p0197,S / s,"Chữ S hoa, chữ s thường.",home_letter_pair,exact feedback slash
+p0198,sao,sao.,home_word,word
+p0199,S là chữ sờ,S là chữ sờ.,home_label,label
+p0200,Bé vừa nghe chữ S / s,"Bé vừa nghe chữ S hoa, chữ s thường.",home_feedback,exact app feedback
+p0201,Bé vừa nghe chữ S s.,"Bé vừa nghe chữ S hoa, chữ s thường.",home_feedback,seed compatibility
+p0202,Từ gợi nhớ: sao. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: sao. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0203,T,Chữ T hoa.,home_letter,standard speech
+p0204,T t,"Chữ T hoa, chữ t thường.",home_letter_pair,clear hoa/thuong
+p0205,T / t,"Chữ T hoa, chữ t thường.",home_letter_pair,exact feedback slash
+p0206,táo,táo.,home_word,word
+p0207,T là chữ tờ,T là chữ tờ.,home_label,label
+p0208,Bé vừa nghe chữ T / t,"Bé vừa nghe chữ T hoa, chữ t thường.",home_feedback,exact app feedback
+p0209,Bé vừa nghe chữ T t.,"Bé vừa nghe chữ T hoa, chữ t thường.",home_feedback,seed compatibility
+p0210,Từ gợi nhớ: táo. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: táo. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0211,U,Chữ U hoa.,home_letter,standard speech
+p0212,U u,"Chữ U hoa, chữ u thường.",home_letter_pair,clear hoa/thuong
+p0213,U / u,"Chữ U hoa, chữ u thường.",home_letter_pair,exact feedback slash
+p0214,ủng,ủng.,home_word,word
+p0215,U là chữ u,U là chữ u.,home_label,label
+p0216,Bé vừa nghe chữ U / u,"Bé vừa nghe chữ U hoa, chữ u thường.",home_feedback,exact app feedback
+p0217,Bé vừa nghe chữ U u.,"Bé vừa nghe chữ U hoa, chữ u thường.",home_feedback,seed compatibility
+p0218,Từ gợi nhớ: ủng. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: ủng. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0219,Ư,Chữ Ư hoa.,home_letter,standard speech
+p0220,Ư ư,"Chữ Ư hoa, chữ ư thường.",home_letter_pair,clear hoa/thuong
+p0221,Ư / ư,"Chữ Ư hoa, chữ ư thường.",home_letter_pair,exact feedback slash
+p0222,ướt,ướt.,home_word,word
+p0223,Ư là chữ ư,Ư là chữ ư.,home_label,label
+p0224,Bé vừa nghe chữ Ư / ư,"Bé vừa nghe chữ Ư hoa, chữ ư thường.",home_feedback,exact app feedback
+p0225,Bé vừa nghe chữ Ư ư.,"Bé vừa nghe chữ Ư hoa, chữ ư thường.",home_feedback,seed compatibility
+p0226,Từ gợi nhớ: ướt. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: ướt. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0227,V,Chữ V hoa.,home_letter,standard speech
+p0228,V v,"Chữ V hoa, chữ v thường.",home_letter_pair,clear hoa/thuong
+p0229,V / v,"Chữ V hoa, chữ v thường.",home_letter_pair,exact feedback slash
+p0230,voi,voi.,home_word,word
+p0231,V là chữ vờ,V là chữ vờ.,home_label,label
+p0232,Bé vừa nghe chữ V / v,"Bé vừa nghe chữ V hoa, chữ v thường.",home_feedback,exact app feedback
+p0233,Bé vừa nghe chữ V v.,"Bé vừa nghe chữ V hoa, chữ v thường.",home_feedback,seed compatibility
+p0234,Từ gợi nhớ: voi. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: voi. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0235,X,Chữ X hoa.,home_letter,standard speech
+p0236,X x,"Chữ X hoa, chữ x thường.",home_letter_pair,clear hoa/thuong
+p0237,X / x,"Chữ X hoa, chữ x thường.",home_letter_pair,exact feedback slash
+p0238,xe,xe.,home_word,word
+p0239,X là chữ xờ,X là chữ xờ.,home_label,label
+p0240,Bé vừa nghe chữ X / x,"Bé vừa nghe chữ X hoa, chữ x thường.",home_feedback,exact app feedback
+p0241,Bé vừa nghe chữ X x.,"Bé vừa nghe chữ X hoa, chữ x thường.",home_feedback,seed compatibility
+p0242,Từ gợi nhớ: xe. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: xe. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0243,Y,Chữ Y hoa.,home_letter,standard speech
+p0244,Y y,"Chữ Y hoa, chữ y thường.",home_letter_pair,clear hoa/thuong
+p0245,Y / y,"Chữ Y hoa, chữ y thường.",home_letter_pair,exact feedback slash
+p0246,y tá,y tá.,home_word,word
+p0247,Y là chữ y,Y là chữ y.,home_label,label
+p0248,Bé vừa nghe chữ Y / y,"Bé vừa nghe chữ Y hoa, chữ y thường.",home_feedback,exact app feedback
+p0249,Bé vừa nghe chữ Y y.,"Bé vừa nghe chữ Y hoa, chữ y thường.",home_feedback,seed compatibility
+p0250,Từ gợi nhớ: y tá. Bấm Đọc lại nếu muốn nghe thêm.,Từ gợi nhớ: y tá. Bấm Đọc lại nếu muốn nghe thêm.,home_feedback,word hint
+p0251,0,Số không.,home_digit,digit
+p0252,số 0,số 0.,home_digit_word,digit word
+p0253,Bé vừa nghe chữ 0,Bé vừa nghe số không.,home_digit_feedback,digit feedback
+p0254,1,Số một.,home_digit,digit
+p0255,số 1,số 1.,home_digit_word,digit word
+p0256,Bé vừa nghe chữ 1,Bé vừa nghe số một.,home_digit_feedback,digit feedback
+p0257,2,Số hai.,home_digit,digit
+p0258,số 2,số 2.,home_digit_word,digit word
+p0259,Bé vừa nghe chữ 2,Bé vừa nghe số hai.,home_digit_feedback,digit feedback
+p0260,3,Số ba.,home_digit,digit
+p0261,số 3,số 3.,home_digit_word,digit word
+p0262,Bé vừa nghe chữ 3,Bé vừa nghe số ba.,home_digit_feedback,digit feedback
+p0263,4,Số bốn.,home_digit,digit
+p0264,số 4,số 4.,home_digit_word,digit word
+p0265,Bé vừa nghe chữ 4,Bé vừa nghe số bốn.,home_digit_feedback,digit feedback
+p0266,5,Số năm.,home_digit,digit
+p0267,số 5,số 5.,home_digit_word,digit word
+p0268,Bé vừa nghe chữ 5,Bé vừa nghe số năm.,home_digit_feedback,digit feedback
+p0269,6,Số sáu.,home_digit,digit
+p0270,số 6,số 6.,home_digit_word,digit word
+p0271,Bé vừa nghe chữ 6,Bé vừa nghe số sáu.,home_digit_feedback,digit feedback
+p0272,7,Số bảy.,home_digit,digit
+p0273,số 7,số 7.,home_digit_word,digit word
+p0274,Bé vừa nghe chữ 7,Bé vừa nghe số bảy.,home_digit_feedback,digit feedback
+p0275,8,Số tám.,home_digit,digit
+p0276,số 8,số 8.,home_digit_word,digit word
+p0277,Bé vừa nghe chữ 8,Bé vừa nghe số tám.,home_digit_feedback,digit feedback
+p0278,9,Số chín.,home_digit,digit
+p0279,số 9,số 9.,home_digit_word,digit word
+p0280,Bé vừa nghe chữ 9,Bé vừa nghe số chín.,home_digit_feedback,digit feedback
+p0281,Vườn học,Vườn học.,garden_ui,title
+p0282,Bản đồ,Bản đồ.,garden_ui,button
+p0283,Bản đồ vườn học,Bản đồ vườn học.,garden_map,title
+p0284,Chọn khu học để bé bắt đầu vui học.,Chọn khu học để bé bắt đầu vui học.,garden_map,subtitle
+p0285,Đã vào bản đồ vườn học.,Đã vào bản đồ vườn học.,garden_map,log
+p0286,🧩 Nhận dạng hình,Nhận dạng hình.,garden_zone_name,shape
+p0287,"Tam giác, vuông, chữ nhật, tròn, bầu dục.","Tam giác, vuông, chữ nhật, tròn, bầu dục.",garden_zone_desc,shape
+p0288,🎨 Màu sắc,Màu sắc.,garden_zone_name,color
+p0289,Nhìn hình rồi chọn màu đúng.,Nhìn hình rồi chọn màu đúng.,garden_zone_desc,color
+p0290,📏 To / nhỏ,"To, nhỏ.",garden_zone_name,size
+p0291,"Nâng cấp: lớn hơn, nhỏ hơn, bằng nhau.","Nâng cấp: lớn hơn, nhỏ hơn, bằng nhau.",garden_zone_desc,size
+p0292,🧠 Ghép mẫu,Ghép mẫu.,garden_zone_name,match
+p0293,Cầm tay chỉ việc: nhìn mẫu rồi chạm vào hình giống y như mẫu.,Cầm tay chỉ việc: nhìn mẫu rồi chạm vào hình giống y như mẫu.,garden_zone_desc,match
+p0294,👂 Nghe chọn hình,Nghe chọn hình.,garden_zone_name,listen
+p0295,Nghe lời đọc rồi chọn hình đúng.,Nghe lời đọc rồi chọn hình đúng.,garden_zone_desc,listen
+p0296,🕘 Xem giờ,Xem giờ.,garden_zone_name,clock
+p0297,Nhìn đồng hồ kim rồi chọn đúng giờ.,Nhìn đồng hồ kim rồi chọn đúng giờ.,garden_zone_desc,clock
+p0298,🐾 Con gì,Con gì.,garden_zone_name,animal
+p0299,Nhìn con vật lớn rồi chọn tên đúng.,Nhìn con vật lớn rồi chọn tên đúng.,garden_zone_desc,animal
+p0300,🧸 Đồ vật,Đồ vật.,garden_zone_name,object
+p0301,"Ảnh thật đã rà tay, chọn tên đúng.","Ảnh thật đã rà tay, chọn tên đúng.",garden_zone_desc,object
+p0302,🍎 Rau quả,Rau quả.,garden_zone_name,food
+p0303,"Rau quả đã rà tay, không trộn nhãn.","Rau quả đã rà tay, không trộn nhãn.",garden_zone_desc,food
+p0304,✍️ Tập viết,Tập viết.,garden_zone_name,write
+p0305,"Cầm tay chỉ việc: bắt đầu ở chân bên trái, đi theo chữ rồi dừng ở chân bên phải.","Cầm tay chỉ việc: bắt đầu ở chân bên trái, đi theo chữ rồi dừng ở chân bên phải.",garden_zone_desc,write
+p0306,🔤 Chữ đầu an toàn,Chữ đầu an toàn.,garden_zone_name,letters
+p0307,Chỉ dùng bộ chữ đã khóa dữ liệu 1-1.,Chỉ dùng bộ chữ đã khóa dữ liệu 1-1.,garden_zone_desc,letters
+p0308,🔢 Số đếm,Số đếm.,garden_zone_name,numbers
+p0309,Đếm hình rồi chọn số đúng.,Đếm hình rồi chọn số đúng.,garden_zone_desc,numbers
+p0310,⚖️ So sánh,So sánh.,garden_zone_name,compare
+p0311,So sánh to/nhỏ bằng hình tạo chuẩn.,"So sánh to, nhỏ bằng hình tạo chuẩn.",garden_zone_desc,compare
+p0312,➕➖ Cộng trừ,Cộng trừ.,garden_zone_name,arith
+p0313,Phép cộng trừ cơ bản ngẫu nhiên.,Phép cộng trừ cơ bản ngẫu nhiên.,garden_zone_desc,arith
+p0314,🧭 Khám phá,Khám phá.,garden_zone_name,explore
+p0315,Chạm xem hình và nghe đáp án đúng.,Chạm xem hình và nghe đáp án đúng.,garden_zone_desc,explore
+p0316,Nhận dạng hình,Nhận dạng hình.,garden_map_card,label
+p0317,Học đúng tên hình,Học đúng tên hình.,garden_map_card,desc
+p0318,Màu sắc,Màu sắc.,garden_map_card,label
+p0319,Nhìn hình rồi chọn màu,Nhìn hình rồi chọn màu,garden_map_card,desc
+p0320,To / nhỏ,"To, nhỏ.",garden_map_card,label
+p0321,"Lớn hơn, nhỏ hơn, bằng nhau","Lớn hơn, nhỏ hơn, bằng nhau",garden_map_card,desc
+p0322,Ghép mẫu,Ghép mẫu.,garden_map_card,label
+p0323,Chọn hình giống mẫu,Chọn hình giống mẫu,garden_map_card,desc
+p0324,Nghe chọn hình,Nghe chọn hình.,garden_map_card,label
+p0325,Nghe lời đọc rồi chọn,Nghe lời đọc rồi chọn,garden_map_card,desc
+p0326,Xem giờ,Xem giờ.,garden_map_card,label
+p0327,Nhìn đồng hồ rồi chọn giờ,Nhìn đồng hồ rồi chọn giờ,garden_map_card,desc
+p0328,Con gì,Con gì.,garden_map_card,label
+p0329,Nhìn con vật rồi chọn tên,Nhìn con vật rồi chọn tên,garden_map_card,desc
+p0330,Đồ vật,Đồ vật.,garden_map_card,label
+p0331,Ảnh thật đã rà tay,Ảnh thật đã rà tay.,garden_map_card,desc
+p0332,Rau quả,Rau quả.,garden_map_card,label
+p0333,Rau quả đã rà tay,Rau quả đã rà tay.,garden_map_card,desc
+p0334,Tập viết,Tập viết.,garden_map_card,label
+p0335,Tô chữ trên bảng,Tô chữ trên bảng.,garden_map_card,desc
+p0336,Chữ đầu,Chữ đầu.,garden_map_card,label
+p0337,Hình bắt đầu bằng chữ gì,Hình bắt đầu bằng chữ gì,garden_map_card,desc
+p0338,Số đếm,Số đếm.,garden_map_card,label
+p0339,Đếm rồi chọn số,Đếm rồi chọn số.,garden_map_card,desc
+p0340,So sánh,So sánh.,garden_map_card,label
+p0341,So sánh hình chuẩn,So sánh hình chuẩn.,garden_map_card,desc
+p0342,Cộng trừ,Cộng trừ.,garden_map_card,label
+p0343,Phép cộng trừ ngẫu nhiên,Phép cộng trừ ngẫu nhiên,garden_map_card,desc
+p0344,Khám phá,Khám phá.,garden_map_card,label
+p0345,Xem hình đã xác minh,Xem hình đã xác minh,garden_map_card,desc
+p0346,hình tam giác,hình tam giác.,shape_label,
+p0347,"Đúng rồi, đây là hình tam giác","Đúng rồi, đây là hình tam giác",shape_answer,right
+p0348,Chưa đúng. Đây là hình tam giác,Chưa đúng. Đây là hình tam giác,shape_answer,wrong
+p0349,hình vuông,hình vuông.,shape_label,
+p0350,"Đúng rồi, đây là hình vuông","Đúng rồi, đây là hình vuông",shape_answer,right
+p0351,Chưa đúng. Đây là hình vuông,Chưa đúng. Đây là hình vuông,shape_answer,wrong
+p0352,hình chữ nhật,hình chữ nhật.,shape_label,
+p0353,"Đúng rồi, đây là hình chữ nhật","Đúng rồi, đây là hình chữ nhật",shape_answer,right
+p0354,Chưa đúng. Đây là hình chữ nhật,Chưa đúng. Đây là hình chữ nhật,shape_answer,wrong
+p0355,hình tròn,hình tròn.,shape_label,
+p0356,"Đúng rồi, đây là hình tròn","Đúng rồi, đây là hình tròn",shape_answer,right
+p0357,Chưa đúng. Đây là hình tròn,Chưa đúng. Đây là hình tròn,shape_answer,wrong
+p0358,hình bầu dục,hình bầu dục.,shape_label,
+p0359,"Đúng rồi, đây là hình bầu dục","Đúng rồi, đây là hình bầu dục",shape_answer,right
+p0360,Chưa đúng. Đây là hình bầu dục,Chưa đúng. Đây là hình bầu dục,shape_answer,wrong
+p0361,màu đỏ,màu đỏ.,color_label,
+p0362,"Đúng rồi, đây là màu đỏ","Đúng rồi, đây là màu đỏ",color_answer,right
+p0363,Chưa đúng. Đây là màu đỏ,Chưa đúng. Đây là màu đỏ,color_answer,wrong
+p0364,màu xanh dương,màu xanh dương.,color_label,
+p0365,"Đúng rồi, đây là màu xanh dương","Đúng rồi, đây là màu xanh dương",color_answer,right
+p0366,Chưa đúng. Đây là màu xanh dương,Chưa đúng. Đây là màu xanh dương,color_answer,wrong
+p0367,màu xanh lá,màu xanh lá.,color_label,
+p0368,"Đúng rồi, đây là màu xanh lá","Đúng rồi, đây là màu xanh lá",color_answer,right
+p0369,Chưa đúng. Đây là màu xanh lá,Chưa đúng. Đây là màu xanh lá,color_answer,wrong
+p0370,màu vàng,màu vàng.,color_label,
+p0371,"Đúng rồi, đây là màu vàng","Đúng rồi, đây là màu vàng",color_answer,right
+p0372,Chưa đúng. Đây là màu vàng,Chưa đúng. Đây là màu vàng,color_answer,wrong
+p0373,màu cam,màu cam.,color_label,
+p0374,"Đúng rồi, đây là màu cam","Đúng rồi, đây là màu cam",color_answer,right
+p0375,Chưa đúng. Đây là màu cam,Chưa đúng. Đây là màu cam,color_answer,wrong
+p0376,màu tím,màu tím.,color_label,
+p0377,"Đúng rồi, đây là màu tím","Đúng rồi, đây là màu tím",color_answer,right
+p0378,Chưa đúng. Đây là màu tím,Chưa đúng. Đây là màu tím,color_answer,wrong
+p0379,Đây là hình gì?,Đây là hình gì?,shape_prompt,
+p0380,Hình này màu gì?,Hình này màu gì?,color_prompt,
+p0381,Nhìn hình lớn ở giữa rồi chọn tên hình đúng.,Nhìn hình lớn ở giữa rồi chọn tên hình đúng.,shape_sub,
+p0382,hình tam giác màu đỏ,hình tam giác màu đỏ,shape_color_combo,
+p0383,Hãy chọn hình tam giác màu đỏ,Hãy chọn hình tam giác màu đỏ,listen_prompt,
+p0384,"Đúng rồi, đây là hình tam giác màu đỏ","Đúng rồi, đây là hình tam giác màu đỏ",listen_answer,right
+p0385,Chưa đúng. Đó là hình tam giác màu đỏ,Chưa đúng. Đó là hình tam giác màu đỏ,listen_answer,wrong
+p0386,hình tam giác màu xanh dương,hình tam giác màu xanh dương,shape_color_combo,
+p0387,Hãy chọn hình tam giác màu xanh dương,Hãy chọn hình tam giác màu xanh dương,listen_prompt,
+p0388,"Đúng rồi, đây là hình tam giác màu xanh dương","Đúng rồi, đây là hình tam giác màu xanh dương",listen_answer,right
+p0389,Chưa đúng. Đó là hình tam giác màu xanh dương,Chưa đúng. Đó là hình tam giác màu xanh dương,listen_answer,wrong
+p0390,hình tam giác màu xanh lá,hình tam giác màu xanh lá,shape_color_combo,
+p0391,Hãy chọn hình tam giác màu xanh lá,Hãy chọn hình tam giác màu xanh lá,listen_prompt,
+p0392,"Đúng rồi, đây là hình tam giác màu xanh lá","Đúng rồi, đây là hình tam giác màu xanh lá",listen_answer,right
+p0393,Chưa đúng. Đó là hình tam giác màu xanh lá,Chưa đúng. Đó là hình tam giác màu xanh lá,listen_answer,wrong
+p0394,hình tam giác màu vàng,hình tam giác màu vàng,shape_color_combo,
+p0395,Hãy chọn hình tam giác màu vàng,Hãy chọn hình tam giác màu vàng,listen_prompt,
+p0396,"Đúng rồi, đây là hình tam giác màu vàng","Đúng rồi, đây là hình tam giác màu vàng",listen_answer,right
+p0397,Chưa đúng. Đó là hình tam giác màu vàng,Chưa đúng. Đó là hình tam giác màu vàng,listen_answer,wrong
+p0398,hình tam giác màu cam,hình tam giác màu cam,shape_color_combo,
+p0399,Hãy chọn hình tam giác màu cam,Hãy chọn hình tam giác màu cam,listen_prompt,
+p0400,"Đúng rồi, đây là hình tam giác màu cam","Đúng rồi, đây là hình tam giác màu cam",listen_answer,right
+p0401,Chưa đúng. Đó là hình tam giác màu cam,Chưa đúng. Đó là hình tam giác màu cam,listen_answer,wrong
+p0402,hình tam giác màu tím,hình tam giác màu tím,shape_color_combo,
+p0403,Hãy chọn hình tam giác màu tím,Hãy chọn hình tam giác màu tím,listen_prompt,
+p0404,"Đúng rồi, đây là hình tam giác màu tím","Đúng rồi, đây là hình tam giác màu tím",listen_answer,right
+p0405,Chưa đúng. Đó là hình tam giác màu tím,Chưa đúng. Đó là hình tam giác màu tím,listen_answer,wrong
+p0406,hình vuông màu đỏ,hình vuông màu đỏ.,shape_color_combo,
+p0407,Hãy chọn hình vuông màu đỏ,Hãy chọn hình vuông màu đỏ,listen_prompt,
+p0408,"Đúng rồi, đây là hình vuông màu đỏ","Đúng rồi, đây là hình vuông màu đỏ",listen_answer,right
+p0409,Chưa đúng. Đó là hình vuông màu đỏ,Chưa đúng. Đó là hình vuông màu đỏ,listen_answer,wrong
+p0410,hình vuông màu xanh dương,hình vuông màu xanh dương,shape_color_combo,
+p0411,Hãy chọn hình vuông màu xanh dương,Hãy chọn hình vuông màu xanh dương,listen_prompt,
+p0412,"Đúng rồi, đây là hình vuông màu xanh dương","Đúng rồi, đây là hình vuông màu xanh dương",listen_answer,right
+p0413,Chưa đúng. Đó là hình vuông màu xanh dương,Chưa đúng. Đó là hình vuông màu xanh dương,listen_answer,wrong
+p0414,hình vuông màu xanh lá,hình vuông màu xanh lá,shape_color_combo,
+p0415,Hãy chọn hình vuông màu xanh lá,Hãy chọn hình vuông màu xanh lá,listen_prompt,
+p0416,"Đúng rồi, đây là hình vuông màu xanh lá","Đúng rồi, đây là hình vuông màu xanh lá",listen_answer,right
+p0417,Chưa đúng. Đó là hình vuông màu xanh lá,Chưa đúng. Đó là hình vuông màu xanh lá,listen_answer,wrong
+p0418,hình vuông màu vàng,hình vuông màu vàng,shape_color_combo,
+p0419,Hãy chọn hình vuông màu vàng,Hãy chọn hình vuông màu vàng,listen_prompt,
+p0420,"Đúng rồi, đây là hình vuông màu vàng","Đúng rồi, đây là hình vuông màu vàng",listen_answer,right
+p0421,Chưa đúng. Đó là hình vuông màu vàng,Chưa đúng. Đó là hình vuông màu vàng,listen_answer,wrong
+p0422,hình vuông màu cam,hình vuông màu cam.,shape_color_combo,
+p0423,Hãy chọn hình vuông màu cam,Hãy chọn hình vuông màu cam,listen_prompt,
+p0424,"Đúng rồi, đây là hình vuông màu cam","Đúng rồi, đây là hình vuông màu cam",listen_answer,right
+p0425,Chưa đúng. Đó là hình vuông màu cam,Chưa đúng. Đó là hình vuông màu cam,listen_answer,wrong
+p0426,hình vuông màu tím,hình vuông màu tím.,shape_color_combo,
+p0427,Hãy chọn hình vuông màu tím,Hãy chọn hình vuông màu tím,listen_prompt,
+p0428,"Đúng rồi, đây là hình vuông màu tím","Đúng rồi, đây là hình vuông màu tím",listen_answer,right
+p0429,Chưa đúng. Đó là hình vuông màu tím,Chưa đúng. Đó là hình vuông màu tím,listen_answer,wrong
+p0430,hình chữ nhật màu đỏ,hình chữ nhật màu đỏ,shape_color_combo,
+p0431,Hãy chọn hình chữ nhật màu đỏ,Hãy chọn hình chữ nhật màu đỏ,listen_prompt,
+p0432,"Đúng rồi, đây là hình chữ nhật màu đỏ","Đúng rồi, đây là hình chữ nhật màu đỏ",listen_answer,right
+p0433,Chưa đúng. Đó là hình chữ nhật màu đỏ,Chưa đúng. Đó là hình chữ nhật màu đỏ,listen_answer,wrong
+p0434,hình chữ nhật màu xanh dương,hình chữ nhật màu xanh dương,shape_color_combo,
+p0435,Hãy chọn hình chữ nhật màu xanh dương,Hãy chọn hình chữ nhật màu xanh dương,listen_prompt,
+p0436,"Đúng rồi, đây là hình chữ nhật màu xanh dương","Đúng rồi, đây là hình chữ nhật màu xanh dương",listen_answer,right
+p0437,Chưa đúng. Đó là hình chữ nhật màu xanh dương,Chưa đúng. Đó là hình chữ nhật màu xanh dương,listen_answer,wrong
+p0438,hình chữ nhật màu xanh lá,hình chữ nhật màu xanh lá,shape_color_combo,
+p0439,Hãy chọn hình chữ nhật màu xanh lá,Hãy chọn hình chữ nhật màu xanh lá,listen_prompt,
+p0440,"Đúng rồi, đây là hình chữ nhật màu xanh lá","Đúng rồi, đây là hình chữ nhật màu xanh lá",listen_answer,right
+p0441,Chưa đúng. Đó là hình chữ nhật màu xanh lá,Chưa đúng. Đó là hình chữ nhật màu xanh lá,listen_answer,wrong
+p0442,hình chữ nhật màu vàng,hình chữ nhật màu vàng,shape_color_combo,
+p0443,Hãy chọn hình chữ nhật màu vàng,Hãy chọn hình chữ nhật màu vàng,listen_prompt,
+p0444,"Đúng rồi, đây là hình chữ nhật màu vàng","Đúng rồi, đây là hình chữ nhật màu vàng",listen_answer,right
+p0445,Chưa đúng. Đó là hình chữ nhật màu vàng,Chưa đúng. Đó là hình chữ nhật màu vàng,listen_answer,wrong
+p0446,hình chữ nhật màu cam,hình chữ nhật màu cam,shape_color_combo,
+p0447,Hãy chọn hình chữ nhật màu cam,Hãy chọn hình chữ nhật màu cam,listen_prompt,
+p0448,"Đúng rồi, đây là hình chữ nhật màu cam","Đúng rồi, đây là hình chữ nhật màu cam",listen_answer,right
+p0449,Chưa đúng. Đó là hình chữ nhật màu cam,Chưa đúng. Đó là hình chữ nhật màu cam,listen_answer,wrong
+p0450,hình chữ nhật màu tím,hình chữ nhật màu tím,shape_color_combo,
+p0451,Hãy chọn hình chữ nhật màu tím,Hãy chọn hình chữ nhật màu tím,listen_prompt,
+p0452,"Đúng rồi, đây là hình chữ nhật màu tím","Đúng rồi, đây là hình chữ nhật màu tím",listen_answer,right
+p0453,Chưa đúng. Đó là hình chữ nhật màu tím,Chưa đúng. Đó là hình chữ nhật màu tím,listen_answer,wrong
+p0454,hình tròn màu đỏ,hình tròn màu đỏ.,shape_color_combo,
+p0455,Hãy chọn hình tròn màu đỏ,Hãy chọn hình tròn màu đỏ,listen_prompt,
+p0456,"Đúng rồi, đây là hình tròn màu đỏ","Đúng rồi, đây là hình tròn màu đỏ",listen_answer,right
+p0457,Chưa đúng. Đó là hình tròn màu đỏ,Chưa đúng. Đó là hình tròn màu đỏ,listen_answer,wrong
+p0458,hình tròn màu xanh dương,hình tròn màu xanh dương,shape_color_combo,
+p0459,Hãy chọn hình tròn màu xanh dương,Hãy chọn hình tròn màu xanh dương,listen_prompt,
+p0460,"Đúng rồi, đây là hình tròn màu xanh dương","Đúng rồi, đây là hình tròn màu xanh dương",listen_answer,right
+p0461,Chưa đúng. Đó là hình tròn màu xanh dương,Chưa đúng. Đó là hình tròn màu xanh dương,listen_answer,wrong
+p0462,hình tròn màu xanh lá,hình tròn màu xanh lá,shape_color_combo,
+p0463,Hãy chọn hình tròn màu xanh lá,Hãy chọn hình tròn màu xanh lá,listen_prompt,
+p0464,"Đúng rồi, đây là hình tròn màu xanh lá","Đúng rồi, đây là hình tròn màu xanh lá",listen_answer,right
+p0465,Chưa đúng. Đó là hình tròn màu xanh lá,Chưa đúng. Đó là hình tròn màu xanh lá,listen_answer,wrong
+p0466,hình tròn màu vàng,hình tròn màu vàng.,shape_color_combo,
+p0467,Hãy chọn hình tròn màu vàng,Hãy chọn hình tròn màu vàng,listen_prompt,
+p0468,"Đúng rồi, đây là hình tròn màu vàng","Đúng rồi, đây là hình tròn màu vàng",listen_answer,right
+p0469,Chưa đúng. Đó là hình tròn màu vàng,Chưa đúng. Đó là hình tròn màu vàng,listen_answer,wrong
+p0470,hình tròn màu cam,hình tròn màu cam.,shape_color_combo,
+p0471,Hãy chọn hình tròn màu cam,Hãy chọn hình tròn màu cam,listen_prompt,
+p0472,"Đúng rồi, đây là hình tròn màu cam","Đúng rồi, đây là hình tròn màu cam",listen_answer,right
+p0473,Chưa đúng. Đó là hình tròn màu cam,Chưa đúng. Đó là hình tròn màu cam,listen_answer,wrong
+p0474,hình tròn màu tím,hình tròn màu tím.,shape_color_combo,
+p0475,Hãy chọn hình tròn màu tím,Hãy chọn hình tròn màu tím,listen_prompt,
+p0476,"Đúng rồi, đây là hình tròn màu tím","Đúng rồi, đây là hình tròn màu tím",listen_answer,right
+p0477,Chưa đúng. Đó là hình tròn màu tím,Chưa đúng. Đó là hình tròn màu tím,listen_answer,wrong
+p0478,hình bầu dục màu đỏ,hình bầu dục màu đỏ,shape_color_combo,
+p0479,Hãy chọn hình bầu dục màu đỏ,Hãy chọn hình bầu dục màu đỏ,listen_prompt,
+p0480,"Đúng rồi, đây là hình bầu dục màu đỏ","Đúng rồi, đây là hình bầu dục màu đỏ",listen_answer,right
+p0481,Chưa đúng. Đó là hình bầu dục màu đỏ,Chưa đúng. Đó là hình bầu dục màu đỏ,listen_answer,wrong
+p0482,hình bầu dục màu xanh dương,hình bầu dục màu xanh dương,shape_color_combo,
+p0483,Hãy chọn hình bầu dục màu xanh dương,Hãy chọn hình bầu dục màu xanh dương,listen_prompt,
+p0484,"Đúng rồi, đây là hình bầu dục màu xanh dương","Đúng rồi, đây là hình bầu dục màu xanh dương",listen_answer,right
+p0485,Chưa đúng. Đó là hình bầu dục màu xanh dương,Chưa đúng. Đó là hình bầu dục màu xanh dương,listen_answer,wrong
+p0486,hình bầu dục màu xanh lá,hình bầu dục màu xanh lá,shape_color_combo,
+p0487,Hãy chọn hình bầu dục màu xanh lá,Hãy chọn hình bầu dục màu xanh lá,listen_prompt,
+p0488,"Đúng rồi, đây là hình bầu dục màu xanh lá","Đúng rồi, đây là hình bầu dục màu xanh lá",listen_answer,right
+p0489,Chưa đúng. Đó là hình bầu dục màu xanh lá,Chưa đúng. Đó là hình bầu dục màu xanh lá,listen_answer,wrong
+p0490,hình bầu dục màu vàng,hình bầu dục màu vàng,shape_color_combo,
+p0491,Hãy chọn hình bầu dục màu vàng,Hãy chọn hình bầu dục màu vàng,listen_prompt,
+p0492,"Đúng rồi, đây là hình bầu dục màu vàng","Đúng rồi, đây là hình bầu dục màu vàng",listen_answer,right
+p0493,Chưa đúng. Đó là hình bầu dục màu vàng,Chưa đúng. Đó là hình bầu dục màu vàng,listen_answer,wrong
+p0494,hình bầu dục màu cam,hình bầu dục màu cam,shape_color_combo,
+p0495,Hãy chọn hình bầu dục màu cam,Hãy chọn hình bầu dục màu cam,listen_prompt,
+p0496,"Đúng rồi, đây là hình bầu dục màu cam","Đúng rồi, đây là hình bầu dục màu cam",listen_answer,right
+p0497,Chưa đúng. Đó là hình bầu dục màu cam,Chưa đúng. Đó là hình bầu dục màu cam,listen_answer,wrong
+p0498,hình bầu dục màu tím,hình bầu dục màu tím,shape_color_combo,
+p0499,Hãy chọn hình bầu dục màu tím,Hãy chọn hình bầu dục màu tím,listen_prompt,
+p0500,"Đúng rồi, đây là hình bầu dục màu tím","Đúng rồi, đây là hình bầu dục màu tím",listen_answer,right
+p0501,Chưa đúng. Đó là hình bầu dục màu tím,Chưa đúng. Đó là hình bầu dục màu tím,listen_answer,wrong
+p0502,Con nhìn mẫu rồi chọn hình giống y như mẫu.,Con nhìn mẫu rồi chọn hình giống y như mẫu.,garden_static,shape/size/match
+p0503,"Đúng rồi, con đã ghép đúng mẫu","Đúng rồi, con đã ghép đúng mẫu",garden_static,shape/size/match
+p0504,Chưa đúng. Con nhìn lại mẫu rồi chạm vào hình giống y như mẫu nhé,Chưa đúng. Con nhìn lại mẫu rồi chạm vào hình giống y như mẫu nhé,garden_static,shape/size/match
+p0505,Cầm tay chỉ việc: nhìn hình mẫu rồi chạm vào hình giống y như mẫu.,Cầm tay chỉ việc: nhìn hình mẫu rồi chạm vào hình giống y như mẫu.,garden_static,shape/size/match
+p0506,Mẫu,Mẫu.,garden_static,shape/size/match
+p0507,Con nhìn mẫu rồi chạm vào hình giống y như mẫu,Con nhìn mẫu rồi chạm vào hình giống y như mẫu,garden_static,shape/size/match
+p0508,Hình bên trái so với hình bên phải như thế nào?,Hình bên trái so với hình bên phải như thế nào?,garden_static,shape/size/match
+p0509,"Đúng rồi, hình bên trái lớn hơn hình bên phải","Đúng rồi, hình bên trái lớn hơn hình bên phải",garden_static,shape/size/match
+p0510,"Đúng rồi, hình bên trái nhỏ hơn hình bên phải","Đúng rồi, hình bên trái nhỏ hơn hình bên phải",garden_static,shape/size/match
+p0511,"Đúng rồi, hai hình bằng nhau","Đúng rồi, hai hình bằng nhau",garden_static,shape/size/match
+p0512,lớn hơn,lớn hơn.,garden_static,shape/size/match
+p0513,nhỏ hơn,nhỏ hơn.,garden_static,shape/size/match
+p0514,bằng nhau,bằng nhau.,garden_static,shape/size/match
+p0515,Bên trái,Bên trái.,garden_static,shape/size/match
+p0516,Bên phải,Bên phải.,garden_static,shape/size/match
+p0517,so với,so với.,garden_static,shape/size/match
+p0518,"Có 3 đáp án để bé chọn: lớn hơn, bằng nhau, nhỏ hơn.","Có 3 đáp án để bé chọn: lớn hơn, bằng nhau, nhỏ hơn.",garden_static,shape/size/match
+p0519,Đồng hồ chỉ mấy giờ?,Đồng hồ chỉ mấy giờ?,clock_prompt,
+p0520,Chọn số giờ đúng,Chọn số giờ đúng.,clock_ui,
+p0521,1 giờ,1 giờ.,clock_hour,
+p0522,"Đúng rồi, đồng hồ chỉ 1 giờ","Đúng rồi, đồng hồ chỉ 1 giờ",clock_answer,right
+p0523,Chưa đúng. Đồng hồ chỉ 1 giờ,Chưa đúng. Đồng hồ chỉ 1 giờ,clock_answer,wrong
+p0524,2 giờ,2 giờ.,clock_hour,
+p0525,"Đúng rồi, đồng hồ chỉ 2 giờ","Đúng rồi, đồng hồ chỉ 2 giờ",clock_answer,right
+p0526,Chưa đúng. Đồng hồ chỉ 2 giờ,Chưa đúng. Đồng hồ chỉ 2 giờ,clock_answer,wrong
+p0527,3 giờ,3 giờ.,clock_hour,
+p0528,"Đúng rồi, đồng hồ chỉ 3 giờ","Đúng rồi, đồng hồ chỉ 3 giờ",clock_answer,right
+p0529,Chưa đúng. Đồng hồ chỉ 3 giờ,Chưa đúng. Đồng hồ chỉ 3 giờ,clock_answer,wrong
+p0530,4 giờ,4 giờ.,clock_hour,
+p0531,"Đúng rồi, đồng hồ chỉ 4 giờ","Đúng rồi, đồng hồ chỉ 4 giờ",clock_answer,right
+p0532,Chưa đúng. Đồng hồ chỉ 4 giờ,Chưa đúng. Đồng hồ chỉ 4 giờ,clock_answer,wrong
+p0533,5 giờ,5 giờ.,clock_hour,
+p0534,"Đúng rồi, đồng hồ chỉ 5 giờ","Đúng rồi, đồng hồ chỉ 5 giờ",clock_answer,right
+p0535,Chưa đúng. Đồng hồ chỉ 5 giờ,Chưa đúng. Đồng hồ chỉ 5 giờ,clock_answer,wrong
+p0536,6 giờ,6 giờ.,clock_hour,
+p0537,"Đúng rồi, đồng hồ chỉ 6 giờ","Đúng rồi, đồng hồ chỉ 6 giờ",clock_answer,right
+p0538,Chưa đúng. Đồng hồ chỉ 6 giờ,Chưa đúng. Đồng hồ chỉ 6 giờ,clock_answer,wrong
+p0539,7 giờ,7 giờ.,clock_hour,
+p0540,"Đúng rồi, đồng hồ chỉ 7 giờ","Đúng rồi, đồng hồ chỉ 7 giờ",clock_answer,right
+p0541,Chưa đúng. Đồng hồ chỉ 7 giờ,Chưa đúng. Đồng hồ chỉ 7 giờ,clock_answer,wrong
+p0542,8 giờ,8 giờ.,clock_hour,
+p0543,"Đúng rồi, đồng hồ chỉ 8 giờ","Đúng rồi, đồng hồ chỉ 8 giờ",clock_answer,right
+p0544,Chưa đúng. Đồng hồ chỉ 8 giờ,Chưa đúng. Đồng hồ chỉ 8 giờ,clock_answer,wrong
+p0545,9 giờ,9 giờ.,clock_hour,
+p0546,"Đúng rồi, đồng hồ chỉ 9 giờ","Đúng rồi, đồng hồ chỉ 9 giờ",clock_answer,right
+p0547,Chưa đúng. Đồng hồ chỉ 9 giờ,Chưa đúng. Đồng hồ chỉ 9 giờ,clock_answer,wrong
+p0548,10 giờ,10 giờ.,clock_hour,
+p0549,"Đúng rồi, đồng hồ chỉ 10 giờ","Đúng rồi, đồng hồ chỉ 10 giờ",clock_answer,right
+p0550,Chưa đúng. Đồng hồ chỉ 10 giờ,Chưa đúng. Đồng hồ chỉ 10 giờ,clock_answer,wrong
+p0551,11 giờ,11 giờ.,clock_hour,
+p0552,"Đúng rồi, đồng hồ chỉ 11 giờ","Đúng rồi, đồng hồ chỉ 11 giờ",clock_answer,right
+p0553,Chưa đúng. Đồng hồ chỉ 11 giờ,Chưa đúng. Đồng hồ chỉ 11 giờ,clock_answer,wrong
+p0554,12 giờ,12 giờ.,clock_hour,
+p0555,"Đúng rồi, đồng hồ chỉ 12 giờ","Đúng rồi, đồng hồ chỉ 12 giờ",clock_answer,right
+p0556,Chưa đúng. Đồng hồ chỉ 12 giờ,Chưa đúng. Đồng hồ chỉ 12 giờ,clock_answer,wrong
+p0557,bóng đá,bóng đá.,data_verifiedObjects_label,label
+p0558,"Đúng rồi, đây là bóng đá","Đúng rồi, đây là bóng đá",object_answer,right
+p0559,Chưa đúng. Đây là bóng đá,Chưa đúng. Đây là bóng đá,object_answer,wrong
+p0560,bóng đá bắt đầu bằng chữ B,bóng đá bắt đầu bằng chữ B,explore_info,letter info
+p0561,quả địa cầu,quả địa cầu.,data_verifiedObjects_label,label
+p0562,"Đúng rồi, đây là quả địa cầu","Đúng rồi, đây là quả địa cầu",object_answer,right
+p0563,Chưa đúng. Đây là quả địa cầu,Chưa đúng. Đây là quả địa cầu,object_answer,wrong
+p0564,quả địa cầu bắt đầu bằng chữ Q,quả địa cầu bắt đầu bằng chữ Q,explore_info,letter info
+p0565,đồng hồ,đồng hồ.,data_verifiedObjects_label,label
+p0566,"Đúng rồi, đây là đồng hồ","Đúng rồi, đây là đồng hồ",object_answer,right
+p0567,Chưa đúng. Đây là đồng hồ,Chưa đúng. Đây là đồng hồ,object_answer,wrong
+p0568,đồng hồ bắt đầu bằng chữ Đ,đồng hồ bắt đầu bằng chữ Đ,explore_info,letter info
+p0569,phong bì,phong bì.,data_verifiedObjects_label,label
+p0570,"Đúng rồi, đây là phong bì","Đúng rồi, đây là phong bì",object_answer,right
+p0571,Chưa đúng. Đây là phong bì,Chưa đúng. Đây là phong bì,object_answer,wrong
+p0572,phong bì bắt đầu bằng chữ P,phong bì bắt đầu bằng chữ P,explore_info,letter info
+p0573,cánh cửa,cánh cửa.,data_verifiedObjects_label,label
+p0574,"Đúng rồi, đây là cánh cửa","Đúng rồi, đây là cánh cửa",object_answer,right
+p0575,Chưa đúng. Đây là cánh cửa,Chưa đúng. Đây là cánh cửa,object_answer,wrong
+p0576,cánh cửa bắt đầu bằng chữ C,cánh cửa bắt đầu bằng chữ C,explore_info,letter info
+p0577,bảng đen,bảng đen.,data_verifiedObjects_label,label
+p0578,"Đúng rồi, đây là bảng đen","Đúng rồi, đây là bảng đen",object_answer,right
+p0579,Chưa đúng. Đây là bảng đen,Chưa đúng. Đây là bảng đen,object_answer,wrong
+p0580,bảng đen bắt đầu bằng chữ B,bảng đen bắt đầu bằng chữ B,explore_info,letter info
+p0581,bánh kem,bánh kem.,data_verifiedObjects_label,label
+p0582,"Đúng rồi, đây là bánh kem","Đúng rồi, đây là bánh kem",object_answer,right
+p0583,Chưa đúng. Đây là bánh kem,Chưa đúng. Đây là bánh kem,object_answer,wrong
+p0584,bánh kem bắt đầu bằng chữ B,bánh kem bắt đầu bằng chữ B,explore_info,letter info
+p0585,bóng tennis,bóng tennis.,data_verifiedObjects_label,label
+p0586,"Đúng rồi, đây là bóng tennis","Đúng rồi, đây là bóng tennis",object_answer,right
+p0587,Chưa đúng. Đây là bóng tennis,Chưa đúng. Đây là bóng tennis,object_answer,wrong
+p0588,bóng tennis bắt đầu bằng chữ B,bóng tennis bắt đầu bằng chữ B,explore_info,letter info
+p0589,bút vẽ,bút vẽ.,data_verifiedObjects_label,label
+p0590,"Đúng rồi, đây là bút vẽ","Đúng rồi, đây là bút vẽ",object_answer,right
+p0591,Chưa đúng. Đây là bút vẽ,Chưa đúng. Đây là bút vẽ,object_answer,wrong
+p0592,bút vẽ bắt đầu bằng chữ B,bút vẽ bắt đầu bằng chữ B,explore_info,letter info
+p0593,đôi tất,đôi tất.,data_verifiedObjects_label,label
+p0594,"Đúng rồi, đây là đôi tất","Đúng rồi, đây là đôi tất",object_answer,right
+p0595,Chưa đúng. Đây là đôi tất,Chưa đúng. Đây là đôi tất,object_answer,wrong
+p0596,đôi tất bắt đầu bằng chữ Đ,đôi tất bắt đầu bằng chữ Đ,explore_info,letter info
+p0597,cà vạt,cà vạt.,data_verifiedObjects_label,label
+p0598,"Đúng rồi, đây là cà vạt","Đúng rồi, đây là cà vạt",object_answer,right
+p0599,Chưa đúng. Đây là cà vạt,Chưa đúng. Đây là cà vạt,object_answer,wrong
+p0600,cà vạt bắt đầu bằng chữ C,cà vạt bắt đầu bằng chữ C,explore_info,letter info
+p0601,đàn piano,đàn piano.,data_verifiedObjects_label,label
+p0602,"Đúng rồi, đây là đàn piano","Đúng rồi, đây là đàn piano",object_answer,right
+p0603,Chưa đúng. Đây là đàn piano,Chưa đúng. Đây là đàn piano,object_answer,wrong
+p0604,đàn piano bắt đầu bằng chữ Đ,đàn piano bắt đầu bằng chữ Đ,explore_info,letter info
+p0605,ấm trà,ấm trà.,data_verifiedObjects_label,label
+p0606,"Đúng rồi, đây là ấm trà","Đúng rồi, đây là ấm trà",object_answer,right
+p0607,Chưa đúng. Đây là ấm trà,Chưa đúng. Đây là ấm trà,object_answer,wrong
+p0608,ấm trà bắt đầu bằng chữ Â,ấm trà bắt đầu bằng chữ Â,explore_info,letter info
+p0609,cái bàn,cái bàn.,data_verifiedObjects_label,label
+p0610,"Đúng rồi, đây là cái bàn","Đúng rồi, đây là cái bàn",object_answer,right
+p0611,Chưa đúng. Đây là cái bàn,Chưa đúng. Đây là cái bàn,object_answer,wrong
+p0612,cái bàn bắt đầu bằng chữ B,cái bàn bắt đầu bằng chữ B,explore_info,letter info
+p0613,"Đúng rồi, đây là ô tô","Đúng rồi, đây là ô tô",object_answer,right
+p0614,Chưa đúng. Đây là ô tô,Chưa đúng. Đây là ô tô,object_answer,wrong
+p0615,ô tô bắt đầu bằng chữ Ô,ô tô bắt đầu bằng chữ Ô,explore_info,letter info
+p0616,chìa khóa,chìa khóa.,data_verifiedObjects_label,label
+p0617,"Đúng rồi, đây là chìa khóa","Đúng rồi, đây là chìa khóa",object_answer,right
+p0618,Chưa đúng. Đây là chìa khóa,Chưa đúng. Đây là chìa khóa,object_answer,wrong
+p0619,chìa khóa bắt đầu bằng chữ C,chìa khóa bắt đầu bằng chữ C,explore_info,letter info
+p0620,cái búa,cái búa.,data_verifiedObjects_label,label
+p0621,"Đúng rồi, đây là cái búa","Đúng rồi, đây là cái búa",object_answer,right
+p0622,Chưa đúng. Đây là cái búa,Chưa đúng. Đây là cái búa,object_answer,wrong
+p0623,cái búa bắt đầu bằng chữ B,cái búa bắt đầu bằng chữ B,explore_info,letter info
+p0624,bút mực,bút mực.,data_verifiedObjects_label,label
+p0625,"Đúng rồi, đây là bút mực","Đúng rồi, đây là bút mực",object_answer,right
+p0626,Chưa đúng. Đây là bút mực,Chưa đúng. Đây là bút mực,object_answer,wrong
+p0627,bút mực bắt đầu bằng chữ B,bút mực bắt đầu bằng chữ B,explore_info,letter info
+p0628,cái thìa,cái thìa.,data_verifiedObjects_label,label
+p0629,"Đúng rồi, đây là cái thìa","Đúng rồi, đây là cái thìa",object_answer,right
+p0630,Chưa đúng. Đây là cái thìa,Chưa đúng. Đây là cái thìa,object_answer,wrong
+p0631,cái thìa bắt đầu bằng chữ T,cái thìa bắt đầu bằng chữ T,explore_info,letter info
+p0632,khăn tắm,khăn tắm.,data_verifiedObjects_label,label
+p0633,"Đúng rồi, đây là khăn tắm","Đúng rồi, đây là khăn tắm",object_answer,right
+p0634,Chưa đúng. Đây là khăn tắm,Chưa đúng. Đây là khăn tắm,object_answer,wrong
+p0635,khăn tắm bắt đầu bằng chữ K,khăn tắm bắt đầu bằng chữ K,explore_info,letter info
+p0636,gương soi,gương soi.,data_verifiedObjects_label,label
+p0637,"Đúng rồi, đây là gương soi","Đúng rồi, đây là gương soi",object_answer,right
+p0638,Chưa đúng. Đây là gương soi,Chưa đúng. Đây là gương soi,object_answer,wrong
+p0639,gương soi bắt đầu bằng chữ G,gương soi bắt đầu bằng chữ G,explore_info,letter info
+p0640,cuộn len,cuộn len.,data_verifiedObjects_label,label
+p0641,"Đúng rồi, đây là cuộn len","Đúng rồi, đây là cuộn len",object_answer,right
+p0642,Chưa đúng. Đây là cuộn len,Chưa đúng. Đây là cuộn len,object_answer,wrong
+p0643,cuộn len bắt đầu bằng chữ L,cuộn len bắt đầu bằng chữ L,explore_info,letter info
+p0644,áo khoác,áo khoác.,data_verifiedObjects_label,label
+p0645,"Đúng rồi, đây là áo khoác","Đúng rồi, đây là áo khoác",object_answer,right
+p0646,Chưa đúng. Đây là áo khoác,Chưa đúng. Đây là áo khoác,object_answer,wrong
+p0647,áo khoác bắt đầu bằng chữ A,áo khoác bắt đầu bằng chữ A,explore_info,letter info
+p0648,đài radio,đài radio.,data_verifiedObjects_label,label
+p0649,"Đúng rồi, đây là đài radio","Đúng rồi, đây là đài radio",object_answer,right
+p0650,Chưa đúng. Đây là đài radio,Chưa đúng. Đây là đài radio,object_answer,wrong
+p0651,đài radio bắt đầu bằng chữ R,đài radio bắt đầu bằng chữ R,explore_info,letter info
+p0652,mặt trăng,mặt trăng.,data_verifiedObjects_label,label
+p0653,"Đúng rồi, đây là mặt trăng","Đúng rồi, đây là mặt trăng",object_answer,right
+p0654,Chưa đúng. Đây là mặt trăng,Chưa đúng. Đây là mặt trăng,object_answer,wrong
+p0655,mặt trăng bắt đầu bằng chữ M,mặt trăng bắt đầu bằng chữ M,explore_info,letter info
+p0656,hộp bút,hộp bút.,data_verifiedObjects_label,label
+p0657,"Đúng rồi, đây là hộp bút","Đúng rồi, đây là hộp bút",object_answer,right
+p0658,Chưa đúng. Đây là hộp bút,Chưa đúng. Đây là hộp bút,object_answer,wrong
+p0659,hộp bút bắt đầu bằng chữ H,hộp bút bắt đầu bằng chữ H,explore_info,letter info
+p0660,tivi,tivi.,data_verifiedObjects_label,label
+p0661,"Đúng rồi, đây là tivi","Đúng rồi, đây là tivi",object_answer,right
+p0662,Chưa đúng. Đây là tivi,Chưa đúng. Đây là tivi,object_answer,wrong
+p0663,tivi bắt đầu bằng chữ T,tivi bắt đầu bằng chữ T,explore_info,letter info
+p0664,xe nôi,xe nôi.,data_verifiedObjects_label,label
+p0665,"Đúng rồi, đây là xe nôi","Đúng rồi, đây là xe nôi",object_answer,right
+p0666,Chưa đúng. Đây là xe nôi,Chưa đúng. Đây là xe nôi,object_answer,wrong
+p0667,xe nôi bắt đầu bằng chữ X,xe nôi bắt đầu bằng chữ X,explore_info,letter info
+p0668,cái ô,cái ô.,data_verifiedObjects_label,label
+p0669,"Đúng rồi, đây là cái ô","Đúng rồi, đây là cái ô",object_answer,right
+p0670,Chưa đúng. Đây là cái ô,Chưa đúng. Đây là cái ô,object_answer,wrong
+p0671,cái ô bắt đầu bằng chữ Ô,cái ô bắt đầu bằng chữ Ô,explore_info,letter info
+p0672,vợt cầu lông,vợt cầu lông.,data_verifiedObjects_label,label
+p0673,"Đúng rồi, đây là vợt cầu lông","Đúng rồi, đây là vợt cầu lông",object_answer,right
+p0674,Chưa đúng. Đây là vợt cầu lông,Chưa đúng. Đây là vợt cầu lông,object_answer,wrong
+p0675,vợt cầu lông bắt đầu bằng chữ V,vợt cầu lông bắt đầu bằng chữ V,explore_info,letter info
+p0676,bảng màu,bảng màu.,data_verifiedObjects_label,label
+p0677,"Đúng rồi, đây là bảng màu","Đúng rồi, đây là bảng màu",object_answer,right
+p0678,Chưa đúng. Đây là bảng màu,Chưa đúng. Đây là bảng màu,object_answer,wrong
+p0679,bảng màu bắt đầu bằng chữ B,bảng màu bắt đầu bằng chữ B,explore_info,letter info
+p0680,cốc nước,cốc nước.,data_verifiedObjects_label,label
+p0681,"Đúng rồi, đây là cốc nước","Đúng rồi, đây là cốc nước",object_answer,right
+p0682,Chưa đúng. Đây là cốc nước,Chưa đúng. Đây là cốc nước,object_answer,wrong
+p0683,cốc nước bắt đầu bằng chữ C,cốc nước bắt đầu bằng chữ C,explore_info,letter info
+p0684,đèn giao thông,đèn giao thông.,data_verifiedObjects_label,label
+p0685,"Đúng rồi, đây là đèn giao thông","Đúng rồi, đây là đèn giao thông",object_answer,right
+p0686,Chưa đúng. Đây là đèn giao thông,Chưa đúng. Đây là đèn giao thông,object_answer,wrong
+p0687,đèn giao thông bắt đầu bằng chữ Đ,đèn giao thông bắt đầu bằng chữ Đ,explore_info,letter info
+p0688,ổ khóa,ổ khóa.,data_verifiedObjects_label,label
+p0689,"Đúng rồi, đây là ổ khóa","Đúng rồi, đây là ổ khóa",object_answer,right
+p0690,Chưa đúng. Đây là ổ khóa,Chưa đúng. Đây là ổ khóa,object_answer,wrong
+p0691,ổ khóa bắt đầu bằng chữ Ô,ổ khóa bắt đầu bằng chữ Ô,explore_info,letter info
+p0692,cái gối,cái gối.,data_verifiedObjects_label,label
+p0693,"Đúng rồi, đây là cái gối","Đúng rồi, đây là cái gối",object_answer,right
+p0694,Chưa đúng. Đây là cái gối,Chưa đúng. Đây là cái gối,object_answer,wrong
+p0695,cái gối bắt đầu bằng chữ G,cái gối bắt đầu bằng chữ G,explore_info,letter info
+p0696,bàn chải,bàn chải.,data_verifiedObjects_label,label
+p0697,"Đúng rồi, đây là bàn chải","Đúng rồi, đây là bàn chải",object_answer,right
+p0698,Chưa đúng. Đây là bàn chải,Chưa đúng. Đây là bàn chải,object_answer,wrong
+p0699,bàn chải bắt đầu bằng chữ B,bàn chải bắt đầu bằng chữ B,explore_info,letter info
+p0700,cái lược,cái lược.,data_verifiedObjects_label,label
+p0701,"Đúng rồi, đây là cái lược","Đúng rồi, đây là cái lược",object_answer,right
+p0702,Chưa đúng. Đây là cái lược,Chưa đúng. Đây là cái lược,object_answer,wrong
+p0703,cái lược bắt đầu bằng chữ L,cái lược bắt đầu bằng chữ L,explore_info,letter info
+p0704,tai nghe,tai nghe.,data_verifiedObjects_label,label
+p0705,"Đúng rồi, đây là tai nghe","Đúng rồi, đây là tai nghe",object_answer,right
+p0706,Chưa đúng. Đây là tai nghe,Chưa đúng. Đây là tai nghe,object_answer,wrong
+p0707,tai nghe bắt đầu bằng chữ T,tai nghe bắt đầu bằng chữ T,explore_info,letter info
+p0708,quả bóng chày,quả bóng chày.,data_verifiedObjects_label,label
+p0709,"Đúng rồi, đây là quả bóng chày","Đúng rồi, đây là quả bóng chày",object_answer,right
+p0710,Chưa đúng. Đây là quả bóng chày,Chưa đúng. Đây là quả bóng chày,object_answer,wrong
+p0711,quả bóng chày bắt đầu bằng chữ B,quả bóng chày bắt đầu bằng chữ B,explore_info,letter info
+p0712,bút bi,bút bi.,data_verifiedObjects_label,label
+p0713,"Đúng rồi, đây là bút bi","Đúng rồi, đây là bút bi",object_answer,right
+p0714,Chưa đúng. Đây là bút bi,Chưa đúng. Đây là bút bi,object_answer,wrong
+p0715,bút bi bắt đầu bằng chữ B,bút bi bắt đầu bằng chữ B,explore_info,letter info
+p0716,bể cá mini,bể cá mini.,data_verifiedObjects_label,label
+p0717,"Đúng rồi, đây là bể cá mini","Đúng rồi, đây là bể cá mini",object_answer,right
+p0718,Chưa đúng. Đây là bể cá mini,Chưa đúng. Đây là bể cá mini,object_answer,wrong
+p0719,bể cá mini bắt đầu bằng chữ B,bể cá mini bắt đầu bằng chữ B,explore_info,letter info
+p0720,cái kéo,cái kéo.,data_verifiedObjects_label,label
+p0721,"Đúng rồi, đây là cái kéo","Đúng rồi, đây là cái kéo",object_answer,right
+p0722,Chưa đúng. Đây là cái kéo,Chưa đúng. Đây là cái kéo,object_answer,wrong
+p0723,cái kéo bắt đầu bằng chữ K,cái kéo bắt đầu bằng chữ K,explore_info,letter info
+p0724,con dao,con dao.,data_verifiedObjects_label,label
+p0725,"Đúng rồi, đây là con dao","Đúng rồi, đây là con dao",object_answer,right
+p0726,Chưa đúng. Đây là con dao,Chưa đúng. Đây là con dao,object_answer,wrong
+p0727,con dao bắt đầu bằng chữ D,con dao bắt đầu bằng chữ D,explore_info,letter info
+p0728,máy khoan,máy khoan.,data_verifiedObjects_label,label
+p0729,"Đúng rồi, đây là máy khoan","Đúng rồi, đây là máy khoan",object_answer,right
+p0730,Chưa đúng. Đây là máy khoan,Chưa đúng. Đây là máy khoan,object_answer,wrong
+p0731,máy khoan bắt đầu bằng chữ M,máy khoan bắt đầu bằng chữ M,explore_info,letter info
+p0732,bình cứu hỏa,bình cứu hỏa.,data_verifiedObjects_label,label
+p0733,"Đúng rồi, đây là bình cứu hỏa","Đúng rồi, đây là bình cứu hỏa",object_answer,right
+p0734,Chưa đúng. Đây là bình cứu hỏa,Chưa đúng. Đây là bình cứu hỏa,object_answer,wrong
+p0735,bình cứu hỏa bắt đầu bằng chữ B,bình cứu hỏa bắt đầu bằng chữ B,explore_info,letter info
+p0736,cái thang,cái thang.,data_verifiedObjects_label,label
+p0737,"Đúng rồi, đây là cái thang","Đúng rồi, đây là cái thang",object_answer,right
+p0738,Chưa đúng. Đây là cái thang,Chưa đúng. Đây là cái thang,object_answer,wrong
+p0739,cái thang bắt đầu bằng chữ T,cái thang bắt đầu bằng chữ T,explore_info,letter info
+p0740,cái kìm,cái kìm.,data_verifiedObjects_label,label
+p0741,"Đúng rồi, đây là cái kìm","Đúng rồi, đây là cái kìm",object_answer,right
+p0742,Chưa đúng. Đây là cái kìm,Chưa đúng. Đây là cái kìm,object_answer,wrong
+p0743,cái kìm bắt đầu bằng chữ K,cái kìm bắt đầu bằng chữ K,explore_info,letter info
+p0744,cưa tay,cưa tay.,data_verifiedObjects_label,label
+p0745,"Đúng rồi, đây là cưa tay","Đúng rồi, đây là cưa tay",object_answer,right
+p0746,Chưa đúng. Đây là cưa tay,Chưa đúng. Đây là cưa tay,object_answer,wrong
+p0747,cưa tay bắt đầu bằng chữ C,cưa tay bắt đầu bằng chữ C,explore_info,letter info
+p0748,thước dây,thước dây.,data_verifiedObjects_label,label
+p0749,"Đúng rồi, đây là thước dây","Đúng rồi, đây là thước dây",object_answer,right
+p0750,Chưa đúng. Đây là thước dây,Chưa đúng. Đây là thước dây,object_answer,wrong
+p0751,thước dây bắt đầu bằng chữ T,thước dây bắt đầu bằng chữ T,explore_info,letter info
+p0752,cờ lê,cờ lê.,data_verifiedObjects_label,label
+p0753,"Đúng rồi, đây là cờ lê","Đúng rồi, đây là cờ lê",object_answer,right
+p0754,Chưa đúng. Đây là cờ lê,Chưa đúng. Đây là cờ lê,object_answer,wrong
+p0755,cờ lê bắt đầu bằng chữ C,cờ lê bắt đầu bằng chữ C,explore_info,letter info
+p0756,tất Giáng sinh,tất Giáng sinh.,data_verifiedObjects_label,label
+p0757,"Đúng rồi, đây là tất Giáng sinh","Đúng rồi, đây là tất Giáng sinh",object_answer,right
+p0758,Chưa đúng. Đây là tất Giáng sinh,Chưa đúng. Đây là tất Giáng sinh,object_answer,wrong
+p0759,tất Giáng sinh bắt đầu bằng chữ T,tất Giáng sinh bắt đầu bằng chữ T,explore_info,letter info
+p0760,cái chuông,cái chuông.,data_verifiedObjects_label,label
+p0761,"Đúng rồi, đây là cái chuông","Đúng rồi, đây là cái chuông",object_answer,right
+p0762,Chưa đúng. Đây là cái chuông,Chưa đúng. Đây là cái chuông,object_answer,wrong
+p0763,cái chuông bắt đầu bằng chữ C,cái chuông bắt đầu bằng chữ C,explore_info,letter info
+p0764,cái chiếu,cái chiếu.,data_verifiedObjects_label,label
+p0765,"Đúng rồi, đây là cái chiếu","Đúng rồi, đây là cái chiếu",object_answer,right
+p0766,Chưa đúng. Đây là cái chiếu,Chưa đúng. Đây là cái chiếu,object_answer,wrong
+p0767,cái chiếu bắt đầu bằng chữ C,cái chiếu bắt đầu bằng chữ C,explore_info,letter info
+p0768,khoai tây,khoai tây.,data_verifiedFoods_label,label
+p0769,"Đúng rồi, đây là khoai tây","Đúng rồi, đây là khoai tây",food_answer,right
+p0770,Chưa đúng. Đây là khoai tây,Chưa đúng. Đây là khoai tây,food_answer,wrong
+p0771,khoai tây bắt đầu bằng chữ K,khoai tây bắt đầu bằng chữ K,explore_info,letter info
+p0772,củ su hào,củ su hào.,data_verifiedFoods_label,label
+p0773,"Đúng rồi, đây là củ su hào","Đúng rồi, đây là củ su hào",food_answer,right
+p0774,Chưa đúng. Đây là củ su hào,Chưa đúng. Đây là củ su hào,food_answer,wrong
+p0775,củ su hào bắt đầu bằng chữ S,củ su hào bắt đầu bằng chữ S,explore_info,letter info
+p0776,khoai lang,khoai lang.,data_verifiedFoods_label,label
+p0777,"Đúng rồi, đây là khoai lang","Đúng rồi, đây là khoai lang",food_answer,right
+p0778,Chưa đúng. Đây là khoai lang,Chưa đúng. Đây là khoai lang,food_answer,wrong
+p0779,khoai lang bắt đầu bằng chữ K,khoai lang bắt đầu bằng chữ K,explore_info,letter info
+p0780,gừng,gừng.,data_verifiedFoods_label,label
+p0781,"Đúng rồi, đây là gừng","Đúng rồi, đây là gừng",food_answer,right
+p0782,Chưa đúng. Đây là gừng,Chưa đúng. Đây là gừng,food_answer,wrong
+p0783,gừng bắt đầu bằng chữ G,gừng bắt đầu bằng chữ G,explore_info,letter info
+p0784,tỏi,tỏi.,data_verifiedFoods_label,label
+p0785,"Đúng rồi, đây là tỏi","Đúng rồi, đây là tỏi",food_answer,right
+p0786,Chưa đúng. Đây là tỏi,Chưa đúng. Đây là tỏi,food_answer,wrong
+p0787,tỏi bắt đầu bằng chữ T,tỏi bắt đầu bằng chữ T,explore_info,letter info
+p0788,hành tây,hành tây.,data_verifiedFoods_label,label
+p0789,"Đúng rồi, đây là hành tây","Đúng rồi, đây là hành tây",food_answer,right
+p0790,Chưa đúng. Đây là hành tây,Chưa đúng. Đây là hành tây,food_answer,wrong
+p0791,hành tây bắt đầu bằng chữ H,hành tây bắt đầu bằng chữ H,explore_info,letter info
+p0792,bắp cải,bắp cải.,data_verifiedFoods_label,label
+p0793,"Đúng rồi, đây là bắp cải","Đúng rồi, đây là bắp cải",food_answer,right
+p0794,Chưa đúng. Đây là bắp cải,Chưa đúng. Đây là bắp cải,food_answer,wrong
+p0795,bắp cải bắt đầu bằng chữ B,bắp cải bắt đầu bằng chữ B,explore_info,letter info
+p0796,súp lơ,súp lơ.,data_verifiedFoods_label,label
+p0797,"Đúng rồi, đây là súp lơ","Đúng rồi, đây là súp lơ",food_answer,right
+p0798,Chưa đúng. Đây là súp lơ,Chưa đúng. Đây là súp lơ,food_answer,wrong
+p0799,súp lơ bắt đầu bằng chữ S,súp lơ bắt đầu bằng chữ S,explore_info,letter info
+p0800,súp lơ xanh,súp lơ xanh.,data_verifiedFoods_label,label
+p0801,"Đúng rồi, đây là súp lơ xanh","Đúng rồi, đây là súp lơ xanh",food_answer,right
+p0802,Chưa đúng. Đây là súp lơ xanh,Chưa đúng. Đây là súp lơ xanh,food_answer,wrong
+p0803,súp lơ xanh bắt đầu bằng chữ S,súp lơ xanh bắt đầu bằng chữ S,explore_info,letter info
+p0804,cải thảo,cải thảo.,data_verifiedFoods_label,label
+p0805,"Đúng rồi, đây là cải thảo","Đúng rồi, đây là cải thảo",food_answer,right
+p0806,Chưa đúng. Đây là cải thảo,Chưa đúng. Đây là cải thảo,food_answer,wrong
+p0807,cải thảo bắt đầu bằng chữ C,cải thảo bắt đầu bằng chữ C,explore_info,letter info
+p0808,Cà chua,Cà chua.,data_verifiedFoods_label,label
+p0809,"Đúng rồi, đây là Cà chua","Đúng rồi, đây là Cà chua",food_answer,right
+p0810,Chưa đúng. Đây là Cà chua,Chưa đúng. Đây là Cà chua,food_answer,wrong
+p0811,Cà chua bắt đầu bằng chữ C,Cà chua bắt đầu bằng chữ C,explore_info,letter info
+p0812,bí ngô,bí ngô.,data_verifiedFoods_label,label
+p0813,"Đúng rồi, đây là bí ngô","Đúng rồi, đây là bí ngô",food_answer,right
+p0814,Chưa đúng. Đây là bí ngô,Chưa đúng. Đây là bí ngô,food_answer,wrong
+p0815,bí ngô bắt đầu bằng chữ B,bí ngô bắt đầu bằng chữ B,explore_info,letter info
+p0816,quả hồng,quả hồng.,data_verifiedFoods_label,label
+p0817,"Đúng rồi, đây là quả hồng","Đúng rồi, đây là quả hồng",food_answer,right
+p0818,Chưa đúng. Đây là quả hồng,Chưa đúng. Đây là quả hồng,food_answer,wrong
+p0819,quả hồng bắt đầu bằng chữ H,quả hồng bắt đầu bằng chữ H,explore_info,letter info
+p0820,quả lựu,quả lựu.,data_verifiedFoods_label,label
+p0821,"Đúng rồi, đây là quả lựu","Đúng rồi, đây là quả lựu",food_answer,right
+p0822,Chưa đúng. Đây là quả lựu,Chưa đúng. Đây là quả lựu,food_answer,wrong
+p0823,quả lựu bắt đầu bằng chữ L,quả lựu bắt đầu bằng chữ L,explore_info,letter info
+p0824,quả cam,quả cam.,data_verifiedFoods_label,label
+p0825,"Đúng rồi, đây là quả cam","Đúng rồi, đây là quả cam",food_answer,right
+p0826,Chưa đúng. Đây là quả cam,Chưa đúng. Đây là quả cam,food_answer,wrong
+p0827,quả cam bắt đầu bằng chữ C,quả cam bắt đầu bằng chữ C,explore_info,letter info
+p0828,quả mận,quả mận.,data_verifiedFoods_label,label
+p0829,"Đúng rồi, đây là quả mận","Đúng rồi, đây là quả mận",food_answer,right
+p0830,Chưa đúng. Đây là quả mận,Chưa đúng. Đây là quả mận,food_answer,wrong
+p0831,quả mận bắt đầu bằng chữ M,quả mận bắt đầu bằng chữ M,explore_info,letter info
+p0832,táo xanh,táo xanh.,data_verifiedFoods_label,label
+p0833,"Đúng rồi, đây là táo xanh","Đúng rồi, đây là táo xanh",food_answer,right
+p0834,Chưa đúng. Đây là táo xanh,Chưa đúng. Đây là táo xanh,food_answer,wrong
+p0835,táo xanh bắt đầu bằng chữ T,táo xanh bắt đầu bằng chữ T,explore_info,letter info
+p0836,quả mâm xôi,quả mâm xôi.,data_verifiedFoods_label,label
+p0837,"Đúng rồi, đây là quả mâm xôi","Đúng rồi, đây là quả mâm xôi",food_answer,right
+p0838,Chưa đúng. Đây là quả mâm xôi,Chưa đúng. Đây là quả mâm xôi,food_answer,wrong
+p0839,quả mâm xôi bắt đầu bằng chữ M,quả mâm xôi bắt đầu bằng chữ M,explore_info,letter info
+p0840,Quả dâu tây,Quả dâu tây.,data_verifiedFoods_label,label
+p0841,"Đúng rồi, đây là Quả dâu tây","Đúng rồi, đây là Quả dâu tây",food_answer,right
+p0842,Chưa đúng. Đây là Quả dâu tây,Chưa đúng. Đây là Quả dâu tây,food_answer,wrong
+p0843,Quả dâu tây bắt đầu bằng chữ D,Quả dâu tây bắt đầu bằng chữ D,explore_info,letter info
+p0844,quả chanh,quả chanh.,data_verifiedFoods_label,label
+p0845,"Đúng rồi, đây là quả chanh","Đúng rồi, đây là quả chanh",food_answer,right
+p0846,Chưa đúng. Đây là quả chanh,Chưa đúng. Đây là quả chanh,food_answer,wrong
+p0847,quả chanh bắt đầu bằng chữ C,quả chanh bắt đầu bằng chữ C,explore_info,letter info
+p0848,Quả Na,Quả Na.,data_verifiedFoods_label,label
+p0849,"Đúng rồi, đây là Quả Na","Đúng rồi, đây là Quả Na",food_answer,right
+p0850,Chưa đúng. Đây là Quả Na,Chưa đúng. Đây là Quả Na,food_answer,wrong
+p0851,Quả Na bắt đầu bằng chữ N,Quả Na bắt đầu bằng chữ N,explore_info,letter info
+p0852,quả ổi,quả ổi.,data_verifiedFoods_label,label
+p0853,"Đúng rồi, đây là quả ổi","Đúng rồi, đây là quả ổi",food_answer,right
+p0854,Chưa đúng. Đây là quả ổi,Chưa đúng. Đây là quả ổi,food_answer,wrong
+p0855,quả ổi bắt đầu bằng chữ Ô,quả ổi bắt đầu bằng chữ Ô,explore_info,letter info
+p0856,quả dứa,quả dứa.,data_verifiedFoods_label,label
+p0857,"Đúng rồi, đây là quả dứa","Đúng rồi, đây là quả dứa",food_answer,right
+p0858,Chưa đúng. Đây là quả dứa,Chưa đúng. Đây là quả dứa,food_answer,wrong
+p0859,quả dứa bắt đầu bằng chữ D,quả dứa bắt đầu bằng chữ D,explore_info,letter info
+p0860,cà tím,cà tím.,data_verifiedFoods_label,label
+p0861,"Đúng rồi, đây là cà tím","Đúng rồi, đây là cà tím",food_answer,right
+p0862,Chưa đúng. Đây là cà tím,Chưa đúng. Đây là cà tím,food_answer,wrong
+p0863,cà tím bắt đầu bằng chữ C,cà tím bắt đầu bằng chữ C,explore_info,letter info
+p0864,cherry,cherry.,data_verifiedFoods_label,label
+p0865,"Đúng rồi, đây là cherry","Đúng rồi, đây là cherry",food_answer,right
+p0866,Chưa đúng. Đây là cherry,Chưa đúng. Đây là cherry,food_answer,wrong
+p0867,cherry bắt đầu bằng chữ C,cherry bắt đầu bằng chữ C,explore_info,letter info
+p0868,Xoài,Xoài.,data_verifiedFoods_label,label
+p0869,"Đúng rồi, đây là Xoài","Đúng rồi, đây là Xoài",food_answer,right
+p0870,Chưa đúng. Đây là Xoài,Chưa đúng. Đây là Xoài,food_answer,wrong
+p0871,Xoài bắt đầu bằng chữ X,Xoài bắt đầu bằng chữ X,explore_info,letter info
+p0872,Dưa hấu vàng,Dưa hấu vàng.,data_verifiedFoods_label,label
+p0873,"Đúng rồi, đây là Dưa hấu vàng","Đúng rồi, đây là Dưa hấu vàng",food_answer,right
+p0874,Chưa đúng. Đây là Dưa hấu vàng,Chưa đúng. Đây là Dưa hấu vàng,food_answer,wrong
+p0875,Dưa hấu vàng bắt đầu bằng chữ D,Dưa hấu vàng bắt đầu bằng chữ D,explore_info,letter info
+p0876,táo đỏ,táo đỏ.,data_verifiedFoods_label,label
+p0877,"Đúng rồi, đây là táo đỏ","Đúng rồi, đây là táo đỏ",food_answer,right
+p0878,Chưa đúng. Đây là táo đỏ,Chưa đúng. Đây là táo đỏ,food_answer,wrong
+p0879,táo đỏ bắt đầu bằng chữ T,táo đỏ bắt đầu bằng chữ T,explore_info,letter info
+p0880,thanh long,thanh long.,data_verifiedFoods_label,label
+p0881,"Đúng rồi, đây là thanh long","Đúng rồi, đây là thanh long",food_answer,right
+p0882,Chưa đúng. Đây là thanh long,Chưa đúng. Đây là thanh long,food_answer,wrong
+p0883,thanh long bắt đầu bằng chữ T,thanh long bắt đầu bằng chữ T,explore_info,letter info
+p0884,quả khế,quả khế.,data_verifiedFoods_label,label
+p0885,"Đúng rồi, đây là quả khế","Đúng rồi, đây là quả khế",food_answer,right
+p0886,Chưa đúng. Đây là quả khế,Chưa đúng. Đây là quả khế,food_answer,wrong
+p0887,quả khế bắt đầu bằng chữ K,quả khế bắt đầu bằng chữ K,explore_info,letter info
+p0888,chanh leo,chanh leo.,data_verifiedFoods_label,label
+p0889,"Đúng rồi, đây là chanh leo","Đúng rồi, đây là chanh leo",food_answer,right
+p0890,Chưa đúng. Đây là chanh leo,Chưa đúng. Đây là chanh leo,food_answer,wrong
+p0891,chanh leo bắt đầu bằng chữ C,chanh leo bắt đầu bằng chữ C,explore_info,letter info
+p0892,Hồng xiêm,Hồng xiêm.,data_verifiedFoods_label,label
+p0893,"Đúng rồi, đây là Hồng xiêm","Đúng rồi, đây là Hồng xiêm",food_answer,right
+p0894,Chưa đúng. Đây là Hồng xiêm,Chưa đúng. Đây là Hồng xiêm,food_answer,wrong
+p0895,Hồng xiêm bắt đầu bằng chữ H,Hồng xiêm bắt đầu bằng chữ H,explore_info,letter info
+p0896,dừa,dừa.,data_verifiedFoods_label,label
+p0897,"Đúng rồi, đây là dừa","Đúng rồi, đây là dừa",food_answer,right
+p0898,Chưa đúng. Đây là dừa,Chưa đúng. Đây là dừa,food_answer,wrong
+p0899,dừa bắt đầu bằng chữ D,dừa bắt đầu bằng chữ D,explore_info,letter info
+p0900,chuối,chuối.,data_verifiedFoods_label,label
+p0901,"Đúng rồi, đây là chuối","Đúng rồi, đây là chuối",food_answer,right
+p0902,Chưa đúng. Đây là chuối,Chưa đúng. Đây là chuối,food_answer,wrong
+p0903,chuối bắt đầu bằng chữ C,chuối bắt đầu bằng chữ C,explore_info,letter info
+p0904,quả vải,quả vải.,data_verifiedFoods_label,label
+p0905,"Đúng rồi, đây là quả vải","Đúng rồi, đây là quả vải",food_answer,right
+p0906,Chưa đúng. Đây là quả vải,Chưa đúng. Đây là quả vải,food_answer,wrong
+p0907,quả vải bắt đầu bằng chữ V,quả vải bắt đầu bằng chữ V,explore_info,letter info
+p0908,Nho,Nho.,data_verifiedFoods_label,label
+p0909,"Đúng rồi, đây là Nho","Đúng rồi, đây là Nho",food_answer,right
+p0910,Chưa đúng. Đây là Nho,Chưa đúng. Đây là Nho,food_answer,wrong
+p0911,Nho bắt đầu bằng chữ N,Nho bắt đầu bằng chữ N,explore_info,letter info
+p0912,bánh trôi,bánh trôi.,data_verifiedFoods_label,label
+p0913,"Đúng rồi, đây là bánh trôi","Đúng rồi, đây là bánh trôi",food_answer,right
+p0914,Chưa đúng. Đây là bánh trôi,Chưa đúng. Đây là bánh trôi,food_answer,wrong
+p0915,bánh trôi bắt đầu bằng chữ B,bánh trôi bắt đầu bằng chữ B,explore_info,letter info
+p0916,cái bánh mỳ,cái bánh mỳ.,data_verifiedFoods_label,label
+p0917,"Đúng rồi, đây là cái bánh mỳ","Đúng rồi, đây là cái bánh mỳ",food_answer,right
+p0918,Chưa đúng. Đây là cái bánh mỳ,Chưa đúng. Đây là cái bánh mỳ,food_answer,wrong
+p0919,cái bánh mỳ bắt đầu bằng chữ B,cái bánh mỳ bắt đầu bằng chữ B,explore_info,letter info
+p0920,bánh chung thu,bánh chung thu.,data_verifiedFoods_label,label
+p0921,"Đúng rồi, đây là bánh chung thu","Đúng rồi, đây là bánh chung thu",food_answer,right
+p0922,Chưa đúng. Đây là bánh chung thu,Chưa đúng. Đây là bánh chung thu,food_answer,wrong
+p0923,bánh chung thu bắt đầu bằng chữ B,bánh chung thu bắt đầu bằng chữ B,explore_info,letter info
+p0924,"Đúng rồi, đây là con ong","Đúng rồi, đây là con ong",animal_answer,right/wrong
+p0925,ong bắt đầu bằng chữ O,ong bắt đầu bằng chữ O,explore_info,letter info
+p0926,bươm bướm,bươm bướm.,data_verifiedAnimals_label,label
+p0927,"Đúng rồi, đây là con bươm bướm","Đúng rồi, đây là con bươm bướm",animal_answer,right/wrong
+p0928,bươm bướm bắt đầu bằng chữ B,bươm bướm bắt đầu bằng chữ B,explore_info,letter info
+p0929,châu chấu,châu chấu.,data_verifiedAnimals_label,label
+p0930,"Đúng rồi, đây là con châu chấu","Đúng rồi, đây là con châu chấu",animal_answer,right/wrong
+p0931,châu chấu bắt đầu bằng chữ C,châu chấu bắt đầu bằng chữ C,explore_info,letter info
+p0932,nhện,nhện.,data_verifiedAnimals_label,label
+p0933,"Đúng rồi, đây là con nhện","Đúng rồi, đây là con nhện",animal_answer,right/wrong
+p0934,nhện bắt đầu bằng chữ N,nhện bắt đầu bằng chữ N,explore_info,letter info
+p0935,bọ rùa,bọ rùa.,data_verifiedAnimals_label,label
+p0936,"Đúng rồi, đây là con bọ rùa","Đúng rồi, đây là con bọ rùa",animal_answer,right/wrong
+p0937,bọ rùa bắt đầu bằng chữ B,bọ rùa bắt đầu bằng chữ B,explore_info,letter info
+p0938,bọ ngựa,bọ ngựa.,data_verifiedAnimals_label,label
+p0939,"Đúng rồi, đây là con bọ ngựa","Đúng rồi, đây là con bọ ngựa",animal_answer,right/wrong
+p0940,bọ ngựa bắt đầu bằng chữ B,bọ ngựa bắt đầu bằng chữ B,explore_info,letter info
+p0941,báo,báo.,data_verifiedAnimals_label,label
+p0942,"Đúng rồi, đây là con báo","Đúng rồi, đây là con báo",animal_answer,right/wrong
+p0943,báo bắt đầu bằng chữ B,báo bắt đầu bằng chữ B,explore_info,letter info
+p0944,ngựa,ngựa.,data_verifiedAnimals_label,label
+p0945,"Đúng rồi, đây là con ngựa","Đúng rồi, đây là con ngựa",animal_answer,right/wrong
+p0946,ngựa bắt đầu bằng chữ N,ngựa bắt đầu bằng chữ N,explore_info,letter info
+p0947,"Đúng rồi, đây là con dê","Đúng rồi, đây là con dê",animal_answer,right/wrong
+p0948,dê bắt đầu bằng chữ D,dê bắt đầu bằng chữ D,explore_info,letter info
+p0949,hươu,hươu.,data_verifiedAnimals_label,label
+p0950,"Đúng rồi, đây là con hươu","Đúng rồi, đây là con hươu",animal_answer,right/wrong
+p0951,hươu bắt đầu bằng chữ H,hươu bắt đầu bằng chữ H,explore_info,letter info
+p0952,heo,heo.,data_verifiedAnimals_label,label
+p0953,"Đúng rồi, đây là con heo","Đúng rồi, đây là con heo",animal_answer,right/wrong
+p0954,heo bắt đầu bằng chữ H,heo bắt đầu bằng chữ H,explore_info,letter info
+p0955,hươu cao cổ,hươu cao cổ.,data_verifiedAnimals_label,label
+p0956,"Đúng rồi, đây là con hươu cao cổ","Đúng rồi, đây là con hươu cao cổ",animal_answer,right/wrong
+p0957,hươu cao cổ bắt đầu bằng chữ H,hươu cao cổ bắt đầu bằng chữ H,explore_info,letter info
+p0958,khỉ,khỉ.,data_verifiedAnimals_label,label
+p0959,"Đúng rồi, đây là con khỉ","Đúng rồi, đây là con khỉ",animal_answer,right/wrong
+p0960,khỉ bắt đầu bằng chữ K,khỉ bắt đầu bằng chữ K,explore_info,letter info
+p0961,tê giác,tê giác.,data_verifiedAnimals_label,label
+p0962,"Đúng rồi, đây là con tê giác","Đúng rồi, đây là con tê giác",animal_answer,right/wrong
+p0963,tê giác bắt đầu bằng chữ T,tê giác bắt đầu bằng chữ T,explore_info,letter info
+p0964,bồ nông,bồ nông.,data_verifiedAnimals_label,label
+p0965,"Đúng rồi, đây là con bồ nông","Đúng rồi, đây là con bồ nông",animal_answer,right/wrong
+p0966,bồ nông bắt đầu bằng chữ B,bồ nông bắt đầu bằng chữ B,explore_info,letter info
+p0967,chim công,chim công.,data_verifiedAnimals_label,label
+p0968,"Đúng rồi, đây là con chim công","Đúng rồi, đây là con chim công",animal_answer,right/wrong
+p0969,chim công bắt đầu bằng chữ C,chim công bắt đầu bằng chữ C,explore_info,letter info
+p0970,chim cánh cụt,chim cánh cụt.,data_verifiedAnimals_label,label
+p0971,"Đúng rồi, đây là con chim cánh cụt","Đúng rồi, đây là con chim cánh cụt",animal_answer,right/wrong
+p0972,chim cánh cụt bắt đầu bằng chữ C,chim cánh cụt bắt đầu bằng chữ C,explore_info,letter info
+p0973,vịt,vịt.,data_verifiedAnimals_label,label
+p0974,"Đúng rồi, đây là con vịt","Đúng rồi, đây là con vịt",animal_answer,right/wrong
+p0975,vịt bắt đầu bằng chữ V,vịt bắt đầu bằng chữ V,explore_info,letter info
+p0976,cú mèo,cú mèo.,data_verifiedAnimals_label,label
+p0977,"Đúng rồi, đây là con cú mèo","Đúng rồi, đây là con cú mèo",animal_answer,right/wrong
+p0978,cú mèo bắt đầu bằng chữ C,cú mèo bắt đầu bằng chữ C,explore_info,letter info
+p0979,đại bàng,đại bàng.,data_verifiedAnimals_label,label
+p0980,"Đúng rồi, đây là con đại bàng","Đúng rồi, đây là con đại bàng",animal_answer,right/wrong
+p0981,đại bàng bắt đầu bằng chữ Đ,đại bàng bắt đầu bằng chữ Đ,explore_info,letter info
+p0982,bồ câu,bồ câu.,data_verifiedAnimals_label,label
+p0983,"Đúng rồi, đây là con bồ câu","Đúng rồi, đây là con bồ câu",animal_answer,right/wrong
+p0984,bồ câu bắt đầu bằng chữ B,bồ câu bắt đầu bằng chữ B,explore_info,letter info
+p0985,gà trống,gà trống.,data_verifiedAnimals_label,label
+p0986,"Đúng rồi, đây là con gà trống","Đúng rồi, đây là con gà trống",animal_answer,right/wrong
+p0987,gà trống bắt đầu bằng chữ G,gà trống bắt đầu bằng chữ G,explore_info,letter info
+p0988,đà điểu,đà điểu.,data_verifiedAnimals_label,label
+p0989,"Đúng rồi, đây là con đà điểu","Đúng rồi, đây là con đà điểu",animal_answer,right/wrong
+p0990,đà điểu bắt đầu bằng chữ Đ,đà điểu bắt đầu bằng chữ Đ,explore_info,letter info
+p0991,bạch tuộc,bạch tuộc.,data_verifiedAnimals_label,label
+p0992,"Đúng rồi, đây là con bạch tuộc","Đúng rồi, đây là con bạch tuộc",animal_answer,right/wrong
+p0993,bạch tuộc bắt đầu bằng chữ B,bạch tuộc bắt đầu bằng chữ B,explore_info,letter info
+p0994,cua,cua.,data_verifiedAnimals_label,label
+p0995,"Đúng rồi, đây là con cua","Đúng rồi, đây là con cua",animal_answer,right/wrong
+p0996,cua bắt đầu bằng chữ C,cua bắt đầu bằng chữ C,explore_info,letter info
+p0997,tôm hùm,tôm hùm.,data_verifiedAnimals_label,label
+p0998,"Đúng rồi, đây là con tôm hùm","Đúng rồi, đây là con tôm hùm",animal_answer,right/wrong
+p0999,tôm hùm bắt đầu bằng chữ T,tôm hùm bắt đầu bằng chữ T,explore_info,letter info
+p1000,sao biển,sao biển.,data_verifiedAnimals_label,label
+p1001,"Đúng rồi, đây là con sao biển","Đúng rồi, đây là con sao biển",animal_answer,right/wrong
+p1002,sao biển bắt đầu bằng chữ S,sao biển bắt đầu bằng chữ S,explore_info,letter info
+p1003,Cá Hồng,Cá Hồng.,data_verifiedAnimals_label,label
+p1004,"Đúng rồi, đây là con Cá Hồng","Đúng rồi, đây là con Cá Hồng",animal_answer,right/wrong
+p1005,Cá Hồng bắt đầu bằng chữ C,Cá Hồng bắt đầu bằng chữ C,explore_info,letter info
+p1006,cá mú,cá mú.,data_verifiedAnimals_label,label
+p1007,"Đúng rồi, đây là con cá mú","Đúng rồi, đây là con cá mú",animal_answer,right/wrong
+p1008,cá mú bắt đầu bằng chữ C,cá mú bắt đầu bằng chữ C,explore_info,letter info
+p1009,cá vàng,cá vàng.,data_verifiedAnimals_label,label
+p1010,"Đúng rồi, đây là con cá vàng","Đúng rồi, đây là con cá vàng",animal_answer,right/wrong
+p1011,cá vàng bắt đầu bằng chữ C,cá vàng bắt đầu bằng chữ C,explore_info,letter info
+p1012,cá da trơn,cá da trơn.,data_verifiedAnimals_label,label
+p1013,"Đúng rồi, đây là con cá da trơn","Đúng rồi, đây là con cá da trơn",animal_answer,right/wrong
+p1014,cá da trơn bắt đầu bằng chữ C,cá da trơn bắt đầu bằng chữ C,explore_info,letter info
+p1015,"Đúng rồi, đây là con cá","Đúng rồi, đây là con cá",animal_answer,right/wrong
+p1016,"Đúng rồi, đây là con ếch","Đúng rồi, đây là con ếch",animal_answer,right/wrong
+p1017,gấu trúc,gấu trúc.,data_animals_label,label
+p1018,"Đúng rồi, đây là con gấu trúc","Đúng rồi, đây là con gấu trúc",animal_answer,right/wrong
+p1019,"Đúng rồi, đây là con mèo","Đúng rồi, đây là con mèo",animal_answer,right/wrong
+p1020,bướm,bướm.,data_animals_label,label
+p1021,"Đúng rồi, đây là con bướm","Đúng rồi, đây là con bướm",animal_answer,right/wrong
+p1022,sư tử,sư tử.,data_animals_label,label
+p1023,"Đúng rồi, đây là con sư tử","Đúng rồi, đây là con sư tử",animal_answer,right/wrong
+p1024,quả cầu,quả cầu.,data_verifiedExplore_label,label
+p1025,quả cầu bắt đầu bằng chữ Q,quả cầu bắt đầu bằng chữ Q,explore_info,letter info
+p1026,mặt trăng bắt đầu bằng chữ T,mặt trăng bắt đầu bằng chữ T,explore_info,letter info
+p1027,ngôi sao,ngôi sao.,data_verifiedExplore_label,label
+p1028,ngôi sao bắt đầu bằng chữ S,ngôi sao bắt đầu bằng chữ S,explore_info,letter info
+p1029,người tuyết,người tuyết.,data_verifiedExplore_label,label
+p1030,người tuyết bắt đầu bằng chữ N,người tuyết bắt đầu bằng chữ N,explore_info,letter info
+p1031,Đây là gì?,Đây là gì?,garden_prompt,object/food/animal/letter
+p1032,Đồ vật đã xác minh,Đồ vật đã xác minh.,garden_prompt,object/food/animal/letter
+p1033,Rau quả gì đây?,Rau quả gì đây?,garden_prompt,object/food/animal/letter
+p1034,Nhóm rau quả đã xác minh,Nhóm rau quả đã xác minh,garden_prompt,object/food/animal/letter
+p1035,Con gì đây?,Con gì đây?,garden_prompt,object/food/animal/letter
+p1036,Bắt đầu bằng chữ gì?,Bắt đầu bằng chữ gì?,garden_prompt,object/food/animal/letter
+p1037,Hình bắt đầu bằng chữ gì?,Hình bắt đầu bằng chữ gì?,garden_prompt,object/food/animal/letter
+p1038,Bé nhìn con vật thật to rồi chọn tên đúng. Pha 06 dùng danh sách ảnh thật đã rà tay.,Bé nhìn con vật thật to rồi chọn tên đúng. Pha 06 dùng danh sách ảnh thật đã rà tay.,garden_prompt,object/food/animal/letter
+p1039,Ảnh thật từ ISO đã rà tay: nhìn đồ vật lớn rồi chọn tên đúng.,Ảnh thật từ i sô đã rà tay: nhìn đồ vật lớn rồi chọn tên đúng.,garden_prompt,object/food/animal/letter
+p1040,"Rau quả từ ISO đã rà tay, tránh sai nhãn như bản cũ.","Rau quả từ i sô đã rà tay, tránh sai nhãn như bản cũ.",garden_prompt,object/food/animal/letter
+p1041,Hình áo bắt đầu bằng chữ gì?,Hình áo bắt đầu bằng chữ gì?,letter_task_prompt,
+p1042,"Đúng rồi, áo bắt đầu bằng chữ A","Đúng rồi, áo bắt đầu bằng chữ A",letter_task_answer,right
+p1043,Chưa đúng. áo bắt đầu bằng chữ A,Chưa đúng. áo bắt đầu bằng chữ A,letter_task_answer,wrong
+p1044,ăng-ten,ăng-ten.,abc_label,
+p1045,Hình ăng-ten bắt đầu bằng chữ gì?,Hình ăng-ten bắt đầu bằng chữ gì?,letter_task_prompt,
+p1046,"Đúng rồi, ăng-ten bắt đầu bằng chữ Ă","Đúng rồi, ăng-ten bắt đầu bằng chữ Ă",letter_task_answer,right
+p1047,Chưa đúng. ăng-ten bắt đầu bằng chữ Ă,Chưa đúng. ăng-ten bắt đầu bằng chữ Ă,letter_task_answer,wrong
+p1048,ấm nước,ấm nước.,abc_label,
+p1049,Hình ấm nước bắt đầu bằng chữ gì?,Hình ấm nước bắt đầu bằng chữ gì?,letter_task_prompt,
+p1050,"Đúng rồi, ấm nước bắt đầu bằng chữ Â","Đúng rồi, ấm nước bắt đầu bằng chữ Â",letter_task_answer,right
+p1051,Chưa đúng. ấm nước bắt đầu bằng chữ Â,Chưa đúng. ấm nước bắt đầu bằng chữ Â,letter_task_answer,wrong
+p1052,bóng bay,bóng bay.,abc_label,
+p1053,Hình bóng bay bắt đầu bằng chữ gì?,Hình bóng bay bắt đầu bằng chữ gì?,letter_task_prompt,
+p1054,"Đúng rồi, bóng bay bắt đầu bằng chữ B","Đúng rồi, bóng bay bắt đầu bằng chữ B",letter_task_answer,right
+p1055,Chưa đúng. bóng bay bắt đầu bằng chữ B,Chưa đúng. bóng bay bắt đầu bằng chữ B,letter_task_answer,wrong
+p1056,Hình cá bắt đầu bằng chữ gì?,Hình cá bắt đầu bằng chữ gì?,letter_task_prompt,
+p1057,"Đúng rồi, cá bắt đầu bằng chữ C","Đúng rồi, cá bắt đầu bằng chữ C",letter_task_answer,right
+p1058,Chưa đúng. cá bắt đầu bằng chữ C,Chưa đúng. cá bắt đầu bằng chữ C,letter_task_answer,wrong
+p1059,dâu tây,dâu tây.,abc_label,
+p1060,Hình dâu tây bắt đầu bằng chữ gì?,Hình dâu tây bắt đầu bằng chữ gì?,letter_task_prompt,
+p1061,"Đúng rồi, dâu tây bắt đầu bằng chữ D","Đúng rồi, dâu tây bắt đầu bằng chữ D",letter_task_answer,right
+p1062,Chưa đúng. dâu tây bắt đầu bằng chữ D,Chưa đúng. dâu tây bắt đầu bằng chữ D,letter_task_answer,wrong
+p1063,Hình đồng hồ bắt đầu bằng chữ gì?,Hình đồng hồ bắt đầu bằng chữ gì?,letter_task_prompt,
+p1064,"Đúng rồi, đồng hồ bắt đầu bằng chữ Đ","Đúng rồi, đồng hồ bắt đầu bằng chữ Đ",letter_task_answer,right
+p1065,Chưa đúng. đồng hồ bắt đầu bằng chữ Đ,Chưa đúng. đồng hồ bắt đầu bằng chữ Đ,letter_task_answer,wrong
+p1066,Hình em bé bắt đầu bằng chữ gì?,Hình em bé bắt đầu bằng chữ gì?,letter_task_prompt,
+p1067,"Đúng rồi, em bé bắt đầu bằng chữ E","Đúng rồi, em bé bắt đầu bằng chữ E",letter_task_answer,right
+p1068,Chưa đúng. em bé bắt đầu bằng chữ E,Chưa đúng. em bé bắt đầu bằng chữ E,letter_task_answer,wrong
+p1069,Hình ếch bắt đầu bằng chữ gì?,Hình ếch bắt đầu bằng chữ gì?,letter_task_prompt,
+p1070,"Đúng rồi, ếch bắt đầu bằng chữ Ê","Đúng rồi, ếch bắt đầu bằng chữ Ê",letter_task_answer,right
+p1071,Chưa đúng. ếch bắt đầu bằng chữ Ê,Chưa đúng. ếch bắt đầu bằng chữ Ê,letter_task_answer,wrong
+p1072,Hình gấu trúc bắt đầu bằng chữ gì?,Hình gấu trúc bắt đầu bằng chữ gì?,letter_task_prompt,
+p1073,"Đúng rồi, gấu trúc bắt đầu bằng chữ G","Đúng rồi, gấu trúc bắt đầu bằng chữ G",letter_task_answer,right
+p1074,Chưa đúng. gấu trúc bắt đầu bằng chữ G,Chưa đúng. gấu trúc bắt đầu bằng chữ G,letter_task_answer,wrong
+p1075,hoa hồng,hoa hồng.,abc_label,
+p1076,Hình hoa hồng bắt đầu bằng chữ gì?,Hình hoa hồng bắt đầu bằng chữ gì?,letter_task_prompt,
+p1077,"Đúng rồi, hoa hồng bắt đầu bằng chữ H","Đúng rồi, hoa hồng bắt đầu bằng chữ H",letter_task_answer,right
+p1078,Chưa đúng. hoa hồng bắt đầu bằng chữ H,Chưa đúng. hoa hồng bắt đầu bằng chữ H,letter_task_answer,wrong
+p1079,máy in,máy in.,abc_label,
+p1080,Hình máy in bắt đầu bằng chữ gì?,Hình máy in bắt đầu bằng chữ gì?,letter_task_prompt,
+p1081,"Đúng rồi, máy in bắt đầu bằng chữ I","Đúng rồi, máy in bắt đầu bằng chữ I",letter_task_answer,right
+p1082,Chưa đúng. máy in bắt đầu bằng chữ I,Chưa đúng. máy in bắt đầu bằng chữ I,letter_task_answer,wrong
+p1083,kính bơi,kính bơi.,abc_label,
+p1084,Hình kính bơi bắt đầu bằng chữ gì?,Hình kính bơi bắt đầu bằng chữ gì?,letter_task_prompt,
+p1085,"Đúng rồi, kính bơi bắt đầu bằng chữ K","Đúng rồi, kính bơi bắt đầu bằng chữ K",letter_task_answer,right
+p1086,Chưa đúng. kính bơi bắt đầu bằng chữ K,Chưa đúng. kính bơi bắt đầu bằng chữ K,letter_task_answer,wrong
+p1087,lọ hoa,lọ hoa.,abc_label,
+p1088,Hình lọ hoa bắt đầu bằng chữ gì?,Hình lọ hoa bắt đầu bằng chữ gì?,letter_task_prompt,
+p1089,"Đúng rồi, lọ hoa bắt đầu bằng chữ L","Đúng rồi, lọ hoa bắt đầu bằng chữ L",letter_task_answer,right
+p1090,Chưa đúng. lọ hoa bắt đầu bằng chữ L,Chưa đúng. lọ hoa bắt đầu bằng chữ L,letter_task_answer,wrong
+p1091,Hình mèo bắt đầu bằng chữ gì?,Hình mèo bắt đầu bằng chữ gì?,letter_task_prompt,
+p1092,"Đúng rồi, mèo bắt đầu bằng chữ M","Đúng rồi, mèo bắt đầu bằng chữ M",letter_task_answer,right
+p1093,Chưa đúng. mèo bắt đầu bằng chữ M,Chưa đúng. mèo bắt đầu bằng chữ M,letter_task_answer,wrong
+p1094,nải chuối,nải chuối.,abc_label,
+p1095,Hình nải chuối bắt đầu bằng chữ gì?,Hình nải chuối bắt đầu bằng chữ gì?,letter_task_prompt,
+p1096,"Đúng rồi, nải chuối bắt đầu bằng chữ N","Đúng rồi, nải chuối bắt đầu bằng chữ N",letter_task_answer,right
+p1097,Chưa đúng. nải chuối bắt đầu bằng chữ N,Chưa đúng. nải chuối bắt đầu bằng chữ N,letter_task_answer,wrong
+p1098,Hình ong bắt đầu bằng chữ gì?,Hình ong bắt đầu bằng chữ gì?,letter_task_prompt,
+p1099,"Đúng rồi, ong bắt đầu bằng chữ O","Đúng rồi, ong bắt đầu bằng chữ O",letter_task_answer,right
+p1100,Chưa đúng. ong bắt đầu bằng chữ O,Chưa đúng. ong bắt đầu bằng chữ O,letter_task_answer,wrong
+p1101,Hình ô tô bắt đầu bằng chữ gì?,Hình ô tô bắt đầu bằng chữ gì?,letter_task_prompt,
+p1102,"Đúng rồi, ô tô bắt đầu bằng chữ Ô","Đúng rồi, ô tô bắt đầu bằng chữ Ô",letter_task_answer,right
+p1103,Chưa đúng. ô tô bắt đầu bằng chữ Ô,Chưa đúng. ô tô bắt đầu bằng chữ Ô,letter_task_answer,wrong
+p1104,Hình ớt bắt đầu bằng chữ gì?,Hình ớt bắt đầu bằng chữ gì?,letter_task_prompt,
+p1105,"Đúng rồi, ớt bắt đầu bằng chữ Ơ","Đúng rồi, ớt bắt đầu bằng chữ Ơ",letter_task_answer,right
+p1106,Chưa đúng. ớt bắt đầu bằng chữ Ơ,Chưa đúng. ớt bắt đầu bằng chữ Ơ,letter_task_answer,wrong
+p1107,Hình đàn piano bắt đầu bằng chữ gì?,Hình đàn piano bắt đầu bằng chữ gì?,letter_task_prompt,
+p1108,"Đúng rồi, đàn piano bắt đầu bằng chữ P","Đúng rồi, đàn piano bắt đầu bằng chữ P",letter_task_answer,right
+p1109,Chưa đúng. đàn piano bắt đầu bằng chữ P,Chưa đúng. đàn piano bắt đầu bằng chữ P,letter_task_answer,wrong
+p1110,quýt,quýt.,abc_label,
+p1111,Hình quýt bắt đầu bằng chữ gì?,Hình quýt bắt đầu bằng chữ gì?,letter_task_prompt,
+p1112,"Đúng rồi, quýt bắt đầu bằng chữ Q","Đúng rồi, quýt bắt đầu bằng chữ Q",letter_task_answer,right
+p1113,Chưa đúng. quýt bắt đầu bằng chữ Q,Chưa đúng. quýt bắt đầu bằng chữ Q,letter_task_answer,wrong
+p1114,rau cải,rau cải.,abc_label,
+p1115,Hình rau cải bắt đầu bằng chữ gì?,Hình rau cải bắt đầu bằng chữ gì?,letter_task_prompt,
+p1116,"Đúng rồi, rau cải bắt đầu bằng chữ R","Đúng rồi, rau cải bắt đầu bằng chữ R",letter_task_answer,right
+p1117,Chưa đúng. rau cải bắt đầu bằng chữ R,Chưa đúng. rau cải bắt đầu bằng chữ R,letter_task_answer,wrong
+p1118,Hình sao biển bắt đầu bằng chữ gì?,Hình sao biển bắt đầu bằng chữ gì?,letter_task_prompt,
+p1119,"Đúng rồi, sao biển bắt đầu bằng chữ S","Đúng rồi, sao biển bắt đầu bằng chữ S",letter_task_answer,right
+p1120,Chưa đúng. sao biển bắt đầu bằng chữ S,Chưa đúng. sao biển bắt đầu bằng chữ S,letter_task_answer,wrong
+p1121,Hình tôm hùm bắt đầu bằng chữ gì?,Hình tôm hùm bắt đầu bằng chữ gì?,letter_task_prompt,
+p1122,"Đúng rồi, tôm hùm bắt đầu bằng chữ T","Đúng rồi, tôm hùm bắt đầu bằng chữ T",letter_task_answer,right
+p1123,Chưa đúng. tôm hùm bắt đầu bằng chữ T,Chưa đúng. tôm hùm bắt đầu bằng chữ T,letter_task_answer,wrong
+p1124,uống nước,uống nước.,abc_label,
+p1125,Hình uống nước bắt đầu bằng chữ gì?,Hình uống nước bắt đầu bằng chữ gì?,letter_task_prompt,
+p1126,"Đúng rồi, uống nước bắt đầu bằng chữ U","Đúng rồi, uống nước bắt đầu bằng chữ U",letter_task_answer,right
+p1127,Chưa đúng. uống nước bắt đầu bằng chữ U,Chưa đúng. uống nước bắt đầu bằng chữ U,letter_task_answer,wrong
+p1128,chim ưng,chim ưng.,abc_label,
+p1129,Hình chim ưng bắt đầu bằng chữ gì?,Hình chim ưng bắt đầu bằng chữ gì?,letter_task_prompt,
+p1130,"Đúng rồi, chim ưng bắt đầu bằng chữ Ư","Đúng rồi, chim ưng bắt đầu bằng chữ Ư",letter_task_answer,right
+p1131,Chưa đúng. chim ưng bắt đầu bằng chữ Ư,Chưa đúng. chim ưng bắt đầu bằng chữ Ư,letter_task_answer,wrong
+p1132,vở,vở.,abc_label,
+p1133,Hình vở bắt đầu bằng chữ gì?,Hình vở bắt đầu bằng chữ gì?,letter_task_prompt,
+p1134,"Đúng rồi, vở bắt đầu bằng chữ V","Đúng rồi, vở bắt đầu bằng chữ V",letter_task_answer,right
+p1135,Chưa đúng. vở bắt đầu bằng chữ V,Chưa đúng. vở bắt đầu bằng chữ V,letter_task_answer,wrong
+p1136,xe đạp,xe đạp.,abc_label,
+p1137,Hình xe đạp bắt đầu bằng chữ gì?,Hình xe đạp bắt đầu bằng chữ gì?,letter_task_prompt,
+p1138,"Đúng rồi, xe đạp bắt đầu bằng chữ X","Đúng rồi, xe đạp bắt đầu bằng chữ X",letter_task_answer,right
+p1139,Chưa đúng. xe đạp bắt đầu bằng chữ X,Chưa đúng. xe đạp bắt đầu bằng chữ X,letter_task_answer,wrong
+p1140,yếm,yếm.,abc_label,
+p1141,Hình yếm bắt đầu bằng chữ gì?,Hình yếm bắt đầu bằng chữ gì?,letter_task_prompt,
+p1142,"Đúng rồi, yếm bắt đầu bằng chữ Y","Đúng rồi, yếm bắt đầu bằng chữ Y",letter_task_answer,right
+p1143,Chưa đúng. yếm bắt đầu bằng chữ Y,Chưa đúng. yếm bắt đầu bằng chữ Y,letter_task_answer,wrong
+p1144,Bé đếm xem có bao nhiêu hình?,Bé đếm xem có bao nhiêu hình?,number_prompt,
+p1145,Có bao nhiêu?,Có bao nhiêu?,number_ui,
+p1146,"Đúng rồi, có 1 hình","Đúng rồi, có 1 hình",number_answer,right
+p1147,Chưa đúng. Có 1 hình,Chưa đúng. Có 1 hình,number_answer,wrong
+p1148,"Đúng rồi, có 2 hình","Đúng rồi, có 2 hình",number_answer,right
+p1149,Chưa đúng. Có 2 hình,Chưa đúng. Có 2 hình,number_answer,wrong
+p1150,"Đúng rồi, có 3 hình","Đúng rồi, có 3 hình",number_answer,right
+p1151,Chưa đúng. Có 3 hình,Chưa đúng. Có 3 hình,number_answer,wrong
+p1152,"Đúng rồi, có 4 hình","Đúng rồi, có 4 hình",number_answer,right
+p1153,Chưa đúng. Có 4 hình,Chưa đúng. Có 4 hình,number_answer,wrong
+p1154,"Đúng rồi, có 5 hình","Đúng rồi, có 5 hình",number_answer,right
+p1155,Chưa đúng. Có 5 hình,Chưa đúng. Có 5 hình,number_answer,wrong
+p1156,"Đúng rồi, có 6 hình","Đúng rồi, có 6 hình",number_answer,right
+p1157,Chưa đúng. Có 6 hình,Chưa đúng. Có 6 hình,number_answer,wrong
+p1158,"Đúng rồi, có 7 hình","Đúng rồi, có 7 hình",number_answer,right
+p1159,Chưa đúng. Có 7 hình,Chưa đúng. Có 7 hình,number_answer,wrong
+p1160,"Đúng rồi, có 8 hình","Đúng rồi, có 8 hình",number_answer,right
+p1161,Chưa đúng. Có 8 hình,Chưa đúng. Có 8 hình,number_answer,wrong
+p1162,"Đúng rồi, có 9 hình","Đúng rồi, có 9 hình",number_answer,right
+p1163,Chưa đúng. Có 9 hình,Chưa đúng. Có 9 hình,number_answer,wrong
+p1164,Bé hãy chọn hình to hơn,Bé hãy chọn hình to hơn,compare_prompt,
+p1165,"Đúng rồi, hình to hơn ở bên trái","Đúng rồi, hình to hơn ở bên trái",compare_answer,right
+p1166,Chưa đúng. Hình to hơn ở bên trái,Chưa đúng. Hình to hơn ở bên trái,compare_answer,wrong
+p1167,"Đúng rồi, hình to hơn ở bên phải","Đúng rồi, hình to hơn ở bên phải",compare_answer,right
+p1168,Chưa đúng. Hình to hơn ở bên phải,Chưa đúng. Hình to hơn ở bên phải,compare_answer,wrong
+p1169,Bé hãy chọn hình nhỏ hơn,Bé hãy chọn hình nhỏ hơn,compare_prompt,
+p1170,"Đúng rồi, hình nhỏ hơn ở bên trái","Đúng rồi, hình nhỏ hơn ở bên trái",compare_answer,right
+p1171,Chưa đúng. Hình nhỏ hơn ở bên trái,Chưa đúng. Hình nhỏ hơn ở bên trái,compare_answer,wrong
+p1172,"Đúng rồi, hình nhỏ hơn ở bên phải","Đúng rồi, hình nhỏ hơn ở bên phải",compare_answer,right
+p1173,Chưa đúng. Hình nhỏ hơn ở bên phải,Chưa đúng. Hình nhỏ hơn ở bên phải,compare_answer,wrong
+p1174,Kết quả bằng mấy?,Kết quả bằng mấy?,arith_prompt,
+p1175,Bé hãy tính 0 cộng 0 bằng mấy?,Bé hãy tính 0 cộng 0 bằng mấy?,arith_question,plus
+p1176,"Đúng rồi, 0 cộng 0 bằng 0","Đúng rồi, 0 cộng 0 bằng 0",arith_answer,plus
+p1177,Bé hãy tính 0 cộng 1 bằng mấy?,Bé hãy tính 0 cộng 1 bằng mấy?,arith_question,plus
+p1178,"Đúng rồi, 0 cộng 1 bằng 1","Đúng rồi, 0 cộng 1 bằng 1",arith_answer,plus
+p1179,Bé hãy tính 0 cộng 2 bằng mấy?,Bé hãy tính 0 cộng 2 bằng mấy?,arith_question,plus
+p1180,"Đúng rồi, 0 cộng 2 bằng 2","Đúng rồi, 0 cộng 2 bằng 2",arith_answer,plus
+p1181,Bé hãy tính 0 cộng 3 bằng mấy?,Bé hãy tính 0 cộng 3 bằng mấy?,arith_question,plus
+p1182,"Đúng rồi, 0 cộng 3 bằng 3","Đúng rồi, 0 cộng 3 bằng 3",arith_answer,plus
+p1183,Bé hãy tính 0 cộng 4 bằng mấy?,Bé hãy tính 0 cộng 4 bằng mấy?,arith_question,plus
+p1184,"Đúng rồi, 0 cộng 4 bằng 4","Đúng rồi, 0 cộng 4 bằng 4",arith_answer,plus
+p1185,Bé hãy tính 0 cộng 5 bằng mấy?,Bé hãy tính 0 cộng 5 bằng mấy?,arith_question,plus
+p1186,"Đúng rồi, 0 cộng 5 bằng 5","Đúng rồi, 0 cộng 5 bằng 5",arith_answer,plus
+p1187,Bé hãy tính 1 cộng 0 bằng mấy?,Bé hãy tính 1 cộng 0 bằng mấy?,arith_question,plus
+p1188,"Đúng rồi, 1 cộng 0 bằng 1","Đúng rồi, 1 cộng 0 bằng 1",arith_answer,plus
+p1189,Bé hãy tính 1 cộng 1 bằng mấy?,Bé hãy tính 1 cộng 1 bằng mấy?,arith_question,plus
+p1190,"Đúng rồi, 1 cộng 1 bằng 2","Đúng rồi, 1 cộng 1 bằng 2",arith_answer,plus
+p1191,Bé hãy tính 1 cộng 2 bằng mấy?,Bé hãy tính 1 cộng 2 bằng mấy?,arith_question,plus
+p1192,"Đúng rồi, 1 cộng 2 bằng 3","Đúng rồi, 1 cộng 2 bằng 3",arith_answer,plus
+p1193,Bé hãy tính 1 cộng 3 bằng mấy?,Bé hãy tính 1 cộng 3 bằng mấy?,arith_question,plus
+p1194,"Đúng rồi, 1 cộng 3 bằng 4","Đúng rồi, 1 cộng 3 bằng 4",arith_answer,plus
+p1195,Bé hãy tính 1 cộng 4 bằng mấy?,Bé hãy tính 1 cộng 4 bằng mấy?,arith_question,plus
+p1196,"Đúng rồi, 1 cộng 4 bằng 5","Đúng rồi, 1 cộng 4 bằng 5",arith_answer,plus
+p1197,Bé hãy tính 1 cộng 5 bằng mấy?,Bé hãy tính 1 cộng 5 bằng mấy?,arith_question,plus
+p1198,"Đúng rồi, 1 cộng 5 bằng 6","Đúng rồi, 1 cộng 5 bằng 6",arith_answer,plus
+p1199,Bé hãy tính 2 cộng 0 bằng mấy?,Bé hãy tính 2 cộng 0 bằng mấy?,arith_question,plus
+p1200,"Đúng rồi, 2 cộng 0 bằng 2","Đúng rồi, 2 cộng 0 bằng 2",arith_answer,plus
+p1201,Bé hãy tính 2 cộng 1 bằng mấy?,Bé hãy tính 2 cộng 1 bằng mấy?,arith_question,plus
+p1202,"Đúng rồi, 2 cộng 1 bằng 3","Đúng rồi, 2 cộng 1 bằng 3",arith_answer,plus
+p1203,Bé hãy tính 2 cộng 2 bằng mấy?,Bé hãy tính 2 cộng 2 bằng mấy?,arith_question,plus
+p1204,"Đúng rồi, 2 cộng 2 bằng 4","Đúng rồi, 2 cộng 2 bằng 4",arith_answer,plus
+p1205,Bé hãy tính 2 cộng 3 bằng mấy?,Bé hãy tính 2 cộng 3 bằng mấy?,arith_question,plus
+p1206,"Đúng rồi, 2 cộng 3 bằng 5","Đúng rồi, 2 cộng 3 bằng 5",arith_answer,plus
+p1207,Bé hãy tính 2 cộng 4 bằng mấy?,Bé hãy tính 2 cộng 4 bằng mấy?,arith_question,plus
+p1208,"Đúng rồi, 2 cộng 4 bằng 6","Đúng rồi, 2 cộng 4 bằng 6",arith_answer,plus
+p1209,Bé hãy tính 2 cộng 5 bằng mấy?,Bé hãy tính 2 cộng 5 bằng mấy?,arith_question,plus
+p1210,"Đúng rồi, 2 cộng 5 bằng 7","Đúng rồi, 2 cộng 5 bằng 7",arith_answer,plus
+p1211,Bé hãy tính 3 cộng 0 bằng mấy?,Bé hãy tính 3 cộng 0 bằng mấy?,arith_question,plus
+p1212,"Đúng rồi, 3 cộng 0 bằng 3","Đúng rồi, 3 cộng 0 bằng 3",arith_answer,plus
+p1213,Bé hãy tính 3 cộng 1 bằng mấy?,Bé hãy tính 3 cộng 1 bằng mấy?,arith_question,plus
+p1214,"Đúng rồi, 3 cộng 1 bằng 4","Đúng rồi, 3 cộng 1 bằng 4",arith_answer,plus
+p1215,Bé hãy tính 3 cộng 2 bằng mấy?,Bé hãy tính 3 cộng 2 bằng mấy?,arith_question,plus
+p1216,"Đúng rồi, 3 cộng 2 bằng 5","Đúng rồi, 3 cộng 2 bằng 5",arith_answer,plus
+p1217,Bé hãy tính 3 cộng 3 bằng mấy?,Bé hãy tính 3 cộng 3 bằng mấy?,arith_question,plus
+p1218,"Đúng rồi, 3 cộng 3 bằng 6","Đúng rồi, 3 cộng 3 bằng 6",arith_answer,plus
+p1219,Bé hãy tính 3 cộng 4 bằng mấy?,Bé hãy tính 3 cộng 4 bằng mấy?,arith_question,plus
+p1220,"Đúng rồi, 3 cộng 4 bằng 7","Đúng rồi, 3 cộng 4 bằng 7",arith_answer,plus
+p1221,Bé hãy tính 3 cộng 5 bằng mấy?,Bé hãy tính 3 cộng 5 bằng mấy?,arith_question,plus
+p1222,"Đúng rồi, 3 cộng 5 bằng 8","Đúng rồi, 3 cộng 5 bằng 8",arith_answer,plus
+p1223,Bé hãy tính 4 cộng 0 bằng mấy?,Bé hãy tính 4 cộng 0 bằng mấy?,arith_question,plus
+p1224,"Đúng rồi, 4 cộng 0 bằng 4","Đúng rồi, 4 cộng 0 bằng 4",arith_answer,plus
+p1225,Bé hãy tính 4 cộng 1 bằng mấy?,Bé hãy tính 4 cộng 1 bằng mấy?,arith_question,plus
+p1226,"Đúng rồi, 4 cộng 1 bằng 5","Đúng rồi, 4 cộng 1 bằng 5",arith_answer,plus
+p1227,Bé hãy tính 4 cộng 2 bằng mấy?,Bé hãy tính 4 cộng 2 bằng mấy?,arith_question,plus
+p1228,"Đúng rồi, 4 cộng 2 bằng 6","Đúng rồi, 4 cộng 2 bằng 6",arith_answer,plus
+p1229,Bé hãy tính 4 cộng 3 bằng mấy?,Bé hãy tính 4 cộng 3 bằng mấy?,arith_question,plus
+p1230,"Đúng rồi, 4 cộng 3 bằng 7","Đúng rồi, 4 cộng 3 bằng 7",arith_answer,plus
+p1231,Bé hãy tính 4 cộng 4 bằng mấy?,Bé hãy tính 4 cộng 4 bằng mấy?,arith_question,plus
+p1232,"Đúng rồi, 4 cộng 4 bằng 8","Đúng rồi, 4 cộng 4 bằng 8",arith_answer,plus
+p1233,Bé hãy tính 4 cộng 5 bằng mấy?,Bé hãy tính 4 cộng 5 bằng mấy?,arith_question,plus
+p1234,"Đúng rồi, 4 cộng 5 bằng 9","Đúng rồi, 4 cộng 5 bằng 9",arith_answer,plus
+p1235,Bé hãy tính 5 cộng 0 bằng mấy?,Bé hãy tính 5 cộng 0 bằng mấy?,arith_question,plus
+p1236,"Đúng rồi, 5 cộng 0 bằng 5","Đúng rồi, 5 cộng 0 bằng 5",arith_answer,plus
+p1237,Bé hãy tính 5 cộng 1 bằng mấy?,Bé hãy tính 5 cộng 1 bằng mấy?,arith_question,plus
+p1238,"Đúng rồi, 5 cộng 1 bằng 6","Đúng rồi, 5 cộng 1 bằng 6",arith_answer,plus
+p1239,Bé hãy tính 5 cộng 2 bằng mấy?,Bé hãy tính 5 cộng 2 bằng mấy?,arith_question,plus
+p1240,"Đúng rồi, 5 cộng 2 bằng 7","Đúng rồi, 5 cộng 2 bằng 7",arith_answer,plus
+p1241,Bé hãy tính 5 cộng 3 bằng mấy?,Bé hãy tính 5 cộng 3 bằng mấy?,arith_question,plus
+p1242,"Đúng rồi, 5 cộng 3 bằng 8","Đúng rồi, 5 cộng 3 bằng 8",arith_answer,plus
+p1243,Bé hãy tính 5 cộng 4 bằng mấy?,Bé hãy tính 5 cộng 4 bằng mấy?,arith_question,plus
+p1244,"Đúng rồi, 5 cộng 4 bằng 9","Đúng rồi, 5 cộng 4 bằng 9",arith_answer,plus
+p1245,Bé hãy tính 5 cộng 5 bằng mấy?,Bé hãy tính 5 cộng 5 bằng mấy?,arith_question,plus
+p1246,"Đúng rồi, 5 cộng 5 bằng 10","Đúng rồi, 5 cộng 5 bằng 10",arith_answer,plus
+p1247,Bé hãy tính 1 trừ 0 bằng mấy?,Bé hãy tính 1 trừ 0 bằng mấy?,arith_question,minus
+p1248,"Đúng rồi, 1 trừ 0 bằng 1","Đúng rồi, 1 trừ 0 bằng 1",arith_answer,minus
+p1249,Bé hãy tính 1 trừ 1 bằng mấy?,Bé hãy tính 1 trừ 1 bằng mấy?,arith_question,minus
+p1250,"Đúng rồi, 1 trừ 1 bằng 0","Đúng rồi, 1 trừ 1 bằng 0",arith_answer,minus
+p1251,Bé hãy tính 2 trừ 0 bằng mấy?,Bé hãy tính 2 trừ 0 bằng mấy?,arith_question,minus
+p1252,"Đúng rồi, 2 trừ 0 bằng 2","Đúng rồi, 2 trừ 0 bằng 2",arith_answer,minus
+p1253,Bé hãy tính 2 trừ 1 bằng mấy?,Bé hãy tính 2 trừ 1 bằng mấy?,arith_question,minus
+p1254,"Đúng rồi, 2 trừ 1 bằng 1","Đúng rồi, 2 trừ 1 bằng 1",arith_answer,minus
+p1255,Bé hãy tính 2 trừ 2 bằng mấy?,Bé hãy tính 2 trừ 2 bằng mấy?,arith_question,minus
+p1256,"Đúng rồi, 2 trừ 2 bằng 0","Đúng rồi, 2 trừ 2 bằng 0",arith_answer,minus
+p1257,Bé hãy tính 3 trừ 0 bằng mấy?,Bé hãy tính 3 trừ 0 bằng mấy?,arith_question,minus
+p1258,"Đúng rồi, 3 trừ 0 bằng 3","Đúng rồi, 3 trừ 0 bằng 3",arith_answer,minus
+p1259,Bé hãy tính 3 trừ 1 bằng mấy?,Bé hãy tính 3 trừ 1 bằng mấy?,arith_question,minus
+p1260,"Đúng rồi, 3 trừ 1 bằng 2","Đúng rồi, 3 trừ 1 bằng 2",arith_answer,minus
+p1261,Bé hãy tính 3 trừ 2 bằng mấy?,Bé hãy tính 3 trừ 2 bằng mấy?,arith_question,minus
+p1262,"Đúng rồi, 3 trừ 2 bằng 1","Đúng rồi, 3 trừ 2 bằng 1",arith_answer,minus
+p1263,Bé hãy tính 3 trừ 3 bằng mấy?,Bé hãy tính 3 trừ 3 bằng mấy?,arith_question,minus
+p1264,"Đúng rồi, 3 trừ 3 bằng 0","Đúng rồi, 3 trừ 3 bằng 0",arith_answer,minus
+p1265,Bé hãy tính 4 trừ 0 bằng mấy?,Bé hãy tính 4 trừ 0 bằng mấy?,arith_question,minus
+p1266,"Đúng rồi, 4 trừ 0 bằng 4","Đúng rồi, 4 trừ 0 bằng 4",arith_answer,minus
+p1267,Bé hãy tính 4 trừ 1 bằng mấy?,Bé hãy tính 4 trừ 1 bằng mấy?,arith_question,minus
+p1268,"Đúng rồi, 4 trừ 1 bằng 3","Đúng rồi, 4 trừ 1 bằng 3",arith_answer,minus
+p1269,Bé hãy tính 4 trừ 2 bằng mấy?,Bé hãy tính 4 trừ 2 bằng mấy?,arith_question,minus
+p1270,"Đúng rồi, 4 trừ 2 bằng 2","Đúng rồi, 4 trừ 2 bằng 2",arith_answer,minus
+p1271,Bé hãy tính 4 trừ 3 bằng mấy?,Bé hãy tính 4 trừ 3 bằng mấy?,arith_question,minus
+p1272,"Đúng rồi, 4 trừ 3 bằng 1","Đúng rồi, 4 trừ 3 bằng 1",arith_answer,minus
+p1273,Bé hãy tính 4 trừ 4 bằng mấy?,Bé hãy tính 4 trừ 4 bằng mấy?,arith_question,minus
+p1274,"Đúng rồi, 4 trừ 4 bằng 0","Đúng rồi, 4 trừ 4 bằng 0",arith_answer,minus
+p1275,Bé hãy tính 5 trừ 0 bằng mấy?,Bé hãy tính 5 trừ 0 bằng mấy?,arith_question,minus
+p1276,"Đúng rồi, 5 trừ 0 bằng 5","Đúng rồi, 5 trừ 0 bằng 5",arith_answer,minus
+p1277,Bé hãy tính 5 trừ 1 bằng mấy?,Bé hãy tính 5 trừ 1 bằng mấy?,arith_question,minus
+p1278,"Đúng rồi, 5 trừ 1 bằng 4","Đúng rồi, 5 trừ 1 bằng 4",arith_answer,minus
+p1279,Bé hãy tính 5 trừ 2 bằng mấy?,Bé hãy tính 5 trừ 2 bằng mấy?,arith_question,minus
+p1280,"Đúng rồi, 5 trừ 2 bằng 3","Đúng rồi, 5 trừ 2 bằng 3",arith_answer,minus
+p1281,Bé hãy tính 5 trừ 3 bằng mấy?,Bé hãy tính 5 trừ 3 bằng mấy?,arith_question,minus
+p1282,"Đúng rồi, 5 trừ 3 bằng 2","Đúng rồi, 5 trừ 3 bằng 2",arith_answer,minus
+p1283,Bé hãy tính 5 trừ 4 bằng mấy?,Bé hãy tính 5 trừ 4 bằng mấy?,arith_question,minus
+p1284,"Đúng rồi, 5 trừ 4 bằng 1","Đúng rồi, 5 trừ 4 bằng 1",arith_answer,minus
+p1285,Bé hãy tính 5 trừ 5 bằng mấy?,Bé hãy tính 5 trừ 5 bằng mấy?,arith_question,minus
+p1286,"Đúng rồi, 5 trừ 5 bằng 0","Đúng rồi, 5 trừ 5 bằng 0",arith_answer,minus
+p1287,Bé hãy tính 6 trừ 0 bằng mấy?,Bé hãy tính 6 trừ 0 bằng mấy?,arith_question,minus
+p1288,"Đúng rồi, 6 trừ 0 bằng 6","Đúng rồi, 6 trừ 0 bằng 6",arith_answer,minus
+p1289,Bé hãy tính 6 trừ 1 bằng mấy?,Bé hãy tính 6 trừ 1 bằng mấy?,arith_question,minus
+p1290,"Đúng rồi, 6 trừ 1 bằng 5","Đúng rồi, 6 trừ 1 bằng 5",arith_answer,minus
+p1291,Bé hãy tính 6 trừ 2 bằng mấy?,Bé hãy tính 6 trừ 2 bằng mấy?,arith_question,minus
+p1292,"Đúng rồi, 6 trừ 2 bằng 4","Đúng rồi, 6 trừ 2 bằng 4",arith_answer,minus
+p1293,Bé hãy tính 6 trừ 3 bằng mấy?,Bé hãy tính 6 trừ 3 bằng mấy?,arith_question,minus
+p1294,"Đúng rồi, 6 trừ 3 bằng 3","Đúng rồi, 6 trừ 3 bằng 3",arith_answer,minus
+p1295,Bé hãy tính 6 trừ 4 bằng mấy?,Bé hãy tính 6 trừ 4 bằng mấy?,arith_question,minus
+p1296,"Đúng rồi, 6 trừ 4 bằng 2","Đúng rồi, 6 trừ 4 bằng 2",arith_answer,minus
+p1297,Bé hãy tính 6 trừ 5 bằng mấy?,Bé hãy tính 6 trừ 5 bằng mấy?,arith_question,minus
+p1298,"Đúng rồi, 6 trừ 5 bằng 1","Đúng rồi, 6 trừ 5 bằng 1",arith_answer,minus
+p1299,Bé hãy tính 6 trừ 6 bằng mấy?,Bé hãy tính 6 trừ 6 bằng mấy?,arith_question,minus
+p1300,"Đúng rồi, 6 trừ 6 bằng 0","Đúng rồi, 6 trừ 6 bằng 0",arith_answer,minus
+p1301,Bé hãy tính 7 trừ 0 bằng mấy?,Bé hãy tính 7 trừ 0 bằng mấy?,arith_question,minus
+p1302,"Đúng rồi, 7 trừ 0 bằng 7","Đúng rồi, 7 trừ 0 bằng 7",arith_answer,minus
+p1303,Bé hãy tính 7 trừ 1 bằng mấy?,Bé hãy tính 7 trừ 1 bằng mấy?,arith_question,minus
+p1304,"Đúng rồi, 7 trừ 1 bằng 6","Đúng rồi, 7 trừ 1 bằng 6",arith_answer,minus
+p1305,Bé hãy tính 7 trừ 2 bằng mấy?,Bé hãy tính 7 trừ 2 bằng mấy?,arith_question,minus
+p1306,"Đúng rồi, 7 trừ 2 bằng 5","Đúng rồi, 7 trừ 2 bằng 5",arith_answer,minus
+p1307,Bé hãy tính 7 trừ 3 bằng mấy?,Bé hãy tính 7 trừ 3 bằng mấy?,arith_question,minus
+p1308,"Đúng rồi, 7 trừ 3 bằng 4","Đúng rồi, 7 trừ 3 bằng 4",arith_answer,minus
+p1309,Bé hãy tính 7 trừ 4 bằng mấy?,Bé hãy tính 7 trừ 4 bằng mấy?,arith_question,minus
+p1310,"Đúng rồi, 7 trừ 4 bằng 3","Đúng rồi, 7 trừ 4 bằng 3",arith_answer,minus
+p1311,Bé hãy tính 7 trừ 5 bằng mấy?,Bé hãy tính 7 trừ 5 bằng mấy?,arith_question,minus
+p1312,"Đúng rồi, 7 trừ 5 bằng 2","Đúng rồi, 7 trừ 5 bằng 2",arith_answer,minus
+p1313,Bé hãy tính 7 trừ 6 bằng mấy?,Bé hãy tính 7 trừ 6 bằng mấy?,arith_question,minus
+p1314,"Đúng rồi, 7 trừ 6 bằng 1","Đúng rồi, 7 trừ 6 bằng 1",arith_answer,minus
+p1315,Bé hãy tính 7 trừ 7 bằng mấy?,Bé hãy tính 7 trừ 7 bằng mấy?,arith_question,minus
+p1316,"Đúng rồi, 7 trừ 7 bằng 0","Đúng rồi, 7 trừ 7 bằng 0",arith_answer,minus
+p1317,Bé hãy tính 8 trừ 0 bằng mấy?,Bé hãy tính 8 trừ 0 bằng mấy?,arith_question,minus
+p1318,"Đúng rồi, 8 trừ 0 bằng 8","Đúng rồi, 8 trừ 0 bằng 8",arith_answer,minus
+p1319,Bé hãy tính 8 trừ 1 bằng mấy?,Bé hãy tính 8 trừ 1 bằng mấy?,arith_question,minus
+p1320,"Đúng rồi, 8 trừ 1 bằng 7","Đúng rồi, 8 trừ 1 bằng 7",arith_answer,minus
+p1321,Bé hãy tính 8 trừ 2 bằng mấy?,Bé hãy tính 8 trừ 2 bằng mấy?,arith_question,minus
+p1322,"Đúng rồi, 8 trừ 2 bằng 6","Đúng rồi, 8 trừ 2 bằng 6",arith_answer,minus
+p1323,Bé hãy tính 8 trừ 3 bằng mấy?,Bé hãy tính 8 trừ 3 bằng mấy?,arith_question,minus
+p1324,"Đúng rồi, 8 trừ 3 bằng 5","Đúng rồi, 8 trừ 3 bằng 5",arith_answer,minus
+p1325,Bé hãy tính 8 trừ 4 bằng mấy?,Bé hãy tính 8 trừ 4 bằng mấy?,arith_question,minus
+p1326,"Đúng rồi, 8 trừ 4 bằng 4","Đúng rồi, 8 trừ 4 bằng 4",arith_answer,minus
+p1327,Bé hãy tính 8 trừ 5 bằng mấy?,Bé hãy tính 8 trừ 5 bằng mấy?,arith_question,minus
+p1328,"Đúng rồi, 8 trừ 5 bằng 3","Đúng rồi, 8 trừ 5 bằng 3",arith_answer,minus
+p1329,Bé hãy tính 8 trừ 6 bằng mấy?,Bé hãy tính 8 trừ 6 bằng mấy?,arith_question,minus
+p1330,"Đúng rồi, 8 trừ 6 bằng 2","Đúng rồi, 8 trừ 6 bằng 2",arith_answer,minus
+p1331,Bé hãy tính 8 trừ 7 bằng mấy?,Bé hãy tính 8 trừ 7 bằng mấy?,arith_question,minus
+p1332,"Đúng rồi, 8 trừ 7 bằng 1","Đúng rồi, 8 trừ 7 bằng 1",arith_answer,minus
+p1333,Bé hãy tính 8 trừ 8 bằng mấy?,Bé hãy tính 8 trừ 8 bằng mấy?,arith_question,minus
+p1334,"Đúng rồi, 8 trừ 8 bằng 0","Đúng rồi, 8 trừ 8 bằng 0",arith_answer,minus
+p1335,Bé hãy tính 9 trừ 0 bằng mấy?,Bé hãy tính 9 trừ 0 bằng mấy?,arith_question,minus
+p1336,"Đúng rồi, 9 trừ 0 bằng 9","Đúng rồi, 9 trừ 0 bằng 9",arith_answer,minus
+p1337,Bé hãy tính 9 trừ 1 bằng mấy?,Bé hãy tính 9 trừ 1 bằng mấy?,arith_question,minus
+p1338,"Đúng rồi, 9 trừ 1 bằng 8","Đúng rồi, 9 trừ 1 bằng 8",arith_answer,minus
+p1339,Bé hãy tính 9 trừ 2 bằng mấy?,Bé hãy tính 9 trừ 2 bằng mấy?,arith_question,minus
+p1340,"Đúng rồi, 9 trừ 2 bằng 7","Đúng rồi, 9 trừ 2 bằng 7",arith_answer,minus
+p1341,Bé hãy tính 9 trừ 3 bằng mấy?,Bé hãy tính 9 trừ 3 bằng mấy?,arith_question,minus
+p1342,"Đúng rồi, 9 trừ 3 bằng 6","Đúng rồi, 9 trừ 3 bằng 6",arith_answer,minus
+p1343,Bé hãy tính 9 trừ 4 bằng mấy?,Bé hãy tính 9 trừ 4 bằng mấy?,arith_question,minus
+p1344,"Đúng rồi, 9 trừ 4 bằng 5","Đúng rồi, 9 trừ 4 bằng 5",arith_answer,minus
+p1345,Bé hãy tính 9 trừ 5 bằng mấy?,Bé hãy tính 9 trừ 5 bằng mấy?,arith_question,minus
+p1346,"Đúng rồi, 9 trừ 5 bằng 4","Đúng rồi, 9 trừ 5 bằng 4",arith_answer,minus
+p1347,Bé hãy tính 9 trừ 6 bằng mấy?,Bé hãy tính 9 trừ 6 bằng mấy?,arith_question,minus
+p1348,"Đúng rồi, 9 trừ 6 bằng 3","Đúng rồi, 9 trừ 6 bằng 3",arith_answer,minus
+p1349,Bé hãy tính 9 trừ 7 bằng mấy?,Bé hãy tính 9 trừ 7 bằng mấy?,arith_question,minus
+p1350,"Đúng rồi, 9 trừ 7 bằng 2","Đúng rồi, 9 trừ 7 bằng 2",arith_answer,minus
+p1351,Bé hãy tính 9 trừ 8 bằng mấy?,Bé hãy tính 9 trừ 8 bằng mấy?,arith_question,minus
+p1352,"Đúng rồi, 9 trừ 8 bằng 1","Đúng rồi, 9 trừ 8 bằng 1",arith_answer,minus
+p1353,Bé hãy tính 9 trừ 9 bằng mấy?,Bé hãy tính 9 trừ 9 bằng mấy?,arith_question,minus
+p1354,"Đúng rồi, 9 trừ 9 bằng 0","Đúng rồi, 9 trừ 9 bằng 0",arith_answer,minus
+p1355,Bé hãy tính 10 trừ 0 bằng mấy?,Bé hãy tính 10 trừ 0 bằng mấy?,arith_question,minus
+p1356,"Đúng rồi, 10 trừ 0 bằng 10","Đúng rồi, 10 trừ 0 bằng 10",arith_answer,minus
+p1357,Bé hãy tính 10 trừ 1 bằng mấy?,Bé hãy tính 10 trừ 1 bằng mấy?,arith_question,minus
+p1358,"Đúng rồi, 10 trừ 1 bằng 9","Đúng rồi, 10 trừ 1 bằng 9",arith_answer,minus
+p1359,Bé hãy tính 10 trừ 2 bằng mấy?,Bé hãy tính 10 trừ 2 bằng mấy?,arith_question,minus
+p1360,"Đúng rồi, 10 trừ 2 bằng 8","Đúng rồi, 10 trừ 2 bằng 8",arith_answer,minus
+p1361,Bé hãy tính 10 trừ 3 bằng mấy?,Bé hãy tính 10 trừ 3 bằng mấy?,arith_question,minus
+p1362,"Đúng rồi, 10 trừ 3 bằng 7","Đúng rồi, 10 trừ 3 bằng 7",arith_answer,minus
+p1363,Bé hãy tính 10 trừ 4 bằng mấy?,Bé hãy tính 10 trừ 4 bằng mấy?,arith_question,minus
+p1364,"Đúng rồi, 10 trừ 4 bằng 6","Đúng rồi, 10 trừ 4 bằng 6",arith_answer,minus
+p1365,Bé hãy tính 10 trừ 5 bằng mấy?,Bé hãy tính 10 trừ 5 bằng mấy?,arith_question,minus
+p1366,"Đúng rồi, 10 trừ 5 bằng 5","Đúng rồi, 10 trừ 5 bằng 5",arith_answer,minus
+p1367,Bé hãy tính 10 trừ 6 bằng mấy?,Bé hãy tính 10 trừ 6 bằng mấy?,arith_question,minus
+p1368,"Đúng rồi, 10 trừ 6 bằng 4","Đúng rồi, 10 trừ 6 bằng 4",arith_answer,minus
+p1369,Bé hãy tính 10 trừ 7 bằng mấy?,Bé hãy tính 10 trừ 7 bằng mấy?,arith_question,minus
+p1370,"Đúng rồi, 10 trừ 7 bằng 3","Đúng rồi, 10 trừ 7 bằng 3",arith_answer,minus
+p1371,Bé hãy tính 10 trừ 8 bằng mấy?,Bé hãy tính 10 trừ 8 bằng mấy?,arith_question,minus
+p1372,"Đúng rồi, 10 trừ 8 bằng 2","Đúng rồi, 10 trừ 8 bằng 2",arith_answer,minus
+p1373,Bé hãy tính 10 trừ 9 bằng mấy?,Bé hãy tính 10 trừ 9 bằng mấy?,arith_question,minus
+p1374,"Đúng rồi, 10 trừ 9 bằng 1","Đúng rồi, 10 trừ 9 bằng 1",arith_answer,minus
+p1375,Bé hãy tính 10 trừ 10 bằng mấy?,Bé hãy tính 10 trừ 10 bằng mấy?,arith_question,minus
+p1376,"Đúng rồi, 10 trừ 10 bằng 0","Đúng rồi, 10 trừ 10 bằng 0",arith_answer,minus
+p1377,Xem mẫu,Xem mẫu.,write_static,
+p1378,Viết lại,Viết lại.,write_static,
+p1379,Cầm tay chỉ việc,Cầm tay chỉ việc.,write_static,
+p1380,Chế độ: Xem mẫu,Chế độ: Xem mẫu.,write_static,
+p1381,Chế độ: Viết lại,Chế độ: Viết lại.,write_static,
+p1382,Chế độ: Cầm tay chỉ việc,Chế độ: Cầm tay chỉ việc,write_static,
+p1383,Bé tô theo nét chữ mờ nhé,Bé tô theo nét chữ mờ nhé,write_static,
+p1384,Bé viết lại trên dòng kẻ nhé,Bé viết lại trên dòng kẻ nhé,write_static,
+p1385,"Xóa nét, bé viết lại nhé","Xóa nét, bé viết lại nhé",write_static,
+p1386,Bé hãy tô hoặc viết thêm trước nhé,Bé hãy tô hoặc viết thêm trước nhé,write_static,
+p1387,"Cầm tay chỉ việc: bé bắt đầu ở chân bên trái, đi theo chữ rồi kết thúc ở chân bên phải.","Cầm tay chỉ việc: bé bắt đầu ở chân bên trái, đi theo chữ rồi kết thúc ở chân bên phải.",write_static,
+p1388,"Cầm tay chỉ việc: đặt nét đầu tiên ở chân bên trái, đi theo nét chữ, rồi kết thúc ở chân bên phải.","Cầm tay chỉ việc: đặt nét đầu tiên ở chân bên trái, đi theo nét chữ, rồi kết thúc ở chân bên phải.",write_static,
+p1389,Xóa nét,Xóa nét.,write_static,
+p1390,Hoa/thường,Hoa/thường.,write_static,
+p1391,Hoàn thành,Hoàn thành.,write_static,
+p1392,Chữ khác,Chữ khác.,write_static,
+p1393,Bé hãy tập viết chữ A,Bé hãy tập viết chữ A,write_prompt,
+p1394,"Đúng rồi, bé đã hoàn thành chữ A","Đúng rồi, bé đã hoàn thành chữ A",write_answer,
+p1395,Xem mẫu chữ A,Xem mẫu chữ A.,write_mode,
+p1396,Bé hãy tập viết chữ Ă,Bé hãy tập viết chữ Ă,write_prompt,
+p1397,"Đúng rồi, bé đã hoàn thành chữ Ă","Đúng rồi, bé đã hoàn thành chữ Ă",write_answer,
+p1398,Xem mẫu chữ Ă,Xem mẫu chữ Ă.,write_mode,
+p1399,Bé hãy tập viết chữ Â,Bé hãy tập viết chữ Â,write_prompt,
+p1400,"Đúng rồi, bé đã hoàn thành chữ Â","Đúng rồi, bé đã hoàn thành chữ Â",write_answer,
+p1401,Xem mẫu chữ Â,Xem mẫu chữ Â.,write_mode,
+p1402,Bé hãy tập viết chữ B,Bé hãy tập viết chữ B,write_prompt,
+p1403,"Đúng rồi, bé đã hoàn thành chữ B","Đúng rồi, bé đã hoàn thành chữ B",write_answer,
+p1404,Xem mẫu chữ B,Xem mẫu chữ B.,write_mode,
+p1405,Bé hãy tập viết chữ C,Bé hãy tập viết chữ C,write_prompt,
+p1406,"Đúng rồi, bé đã hoàn thành chữ C","Đúng rồi, bé đã hoàn thành chữ C",write_answer,
+p1407,Xem mẫu chữ C,Xem mẫu chữ C.,write_mode,
+p1408,Bé hãy tập viết chữ D,Bé hãy tập viết chữ D,write_prompt,
+p1409,"Đúng rồi, bé đã hoàn thành chữ D","Đúng rồi, bé đã hoàn thành chữ D",write_answer,
+p1410,Xem mẫu chữ D,Xem mẫu chữ D.,write_mode,
+p1411,Bé hãy tập viết chữ Đ,Bé hãy tập viết chữ Đ,write_prompt,
+p1412,"Đúng rồi, bé đã hoàn thành chữ Đ","Đúng rồi, bé đã hoàn thành chữ Đ",write_answer,
+p1413,Xem mẫu chữ Đ,Xem mẫu chữ Đ.,write_mode,
+p1414,Bé hãy tập viết chữ E,Bé hãy tập viết chữ E,write_prompt,
+p1415,"Đúng rồi, bé đã hoàn thành chữ E","Đúng rồi, bé đã hoàn thành chữ E",write_answer,
+p1416,Xem mẫu chữ E,Xem mẫu chữ E.,write_mode,
+p1417,Bé hãy tập viết chữ Ê,Bé hãy tập viết chữ Ê,write_prompt,
+p1418,"Đúng rồi, bé đã hoàn thành chữ Ê","Đúng rồi, bé đã hoàn thành chữ Ê",write_answer,
+p1419,Xem mẫu chữ Ê,Xem mẫu chữ Ê.,write_mode,
+p1420,Bé hãy tập viết chữ G,Bé hãy tập viết chữ G,write_prompt,
+p1421,"Đúng rồi, bé đã hoàn thành chữ G","Đúng rồi, bé đã hoàn thành chữ G",write_answer,
+p1422,Xem mẫu chữ G,Xem mẫu chữ G.,write_mode,
+p1423,Bé hãy tập viết chữ H,Bé hãy tập viết chữ H,write_prompt,
+p1424,"Đúng rồi, bé đã hoàn thành chữ H","Đúng rồi, bé đã hoàn thành chữ H",write_answer,
+p1425,Xem mẫu chữ H,Xem mẫu chữ H.,write_mode,
+p1426,Bé hãy tập viết chữ I,Bé hãy tập viết chữ I,write_prompt,
+p1427,"Đúng rồi, bé đã hoàn thành chữ I","Đúng rồi, bé đã hoàn thành chữ I",write_answer,
+p1428,Xem mẫu chữ I,Xem mẫu chữ I.,write_mode,
+p1429,Bé hãy tập viết chữ K,Bé hãy tập viết chữ K,write_prompt,
+p1430,"Đúng rồi, bé đã hoàn thành chữ K","Đúng rồi, bé đã hoàn thành chữ K",write_answer,
+p1431,Xem mẫu chữ K,Xem mẫu chữ K.,write_mode,
+p1432,Bé hãy tập viết chữ L,Bé hãy tập viết chữ L,write_prompt,
+p1433,"Đúng rồi, bé đã hoàn thành chữ L","Đúng rồi, bé đã hoàn thành chữ L",write_answer,
+p1434,Xem mẫu chữ L,Xem mẫu chữ L.,write_mode,
+p1435,Bé hãy tập viết chữ M,Bé hãy tập viết chữ M,write_prompt,
+p1436,"Đúng rồi, bé đã hoàn thành chữ M","Đúng rồi, bé đã hoàn thành chữ M",write_answer,
+p1437,Xem mẫu chữ M,Xem mẫu chữ M.,write_mode,
+p1438,Bé hãy tập viết chữ N,Bé hãy tập viết chữ N,write_prompt,
+p1439,"Đúng rồi, bé đã hoàn thành chữ N","Đúng rồi, bé đã hoàn thành chữ N",write_answer,
+p1440,Xem mẫu chữ N,Xem mẫu chữ N.,write_mode,
+p1441,Bé hãy tập viết chữ O,Bé hãy tập viết chữ O,write_prompt,
+p1442,"Đúng rồi, bé đã hoàn thành chữ O","Đúng rồi, bé đã hoàn thành chữ O",write_answer,
+p1443,Xem mẫu chữ O,Xem mẫu chữ O.,write_mode,
+p1444,Bé hãy tập viết chữ Ô,Bé hãy tập viết chữ Ô,write_prompt,
+p1445,"Đúng rồi, bé đã hoàn thành chữ Ô","Đúng rồi, bé đã hoàn thành chữ Ô",write_answer,
+p1446,Xem mẫu chữ Ô,Xem mẫu chữ Ô.,write_mode,
+p1447,Bé hãy tập viết chữ Ơ,Bé hãy tập viết chữ Ơ,write_prompt,
+p1448,"Đúng rồi, bé đã hoàn thành chữ Ơ","Đúng rồi, bé đã hoàn thành chữ Ơ",write_answer,
+p1449,Xem mẫu chữ Ơ,Xem mẫu chữ Ơ.,write_mode,
+p1450,Bé hãy tập viết chữ P,Bé hãy tập viết chữ P,write_prompt,
+p1451,"Đúng rồi, bé đã hoàn thành chữ P","Đúng rồi, bé đã hoàn thành chữ P",write_answer,
+p1452,Xem mẫu chữ P,Xem mẫu chữ P.,write_mode,
+p1453,Bé hãy tập viết chữ Q,Bé hãy tập viết chữ Q,write_prompt,
+p1454,"Đúng rồi, bé đã hoàn thành chữ Q","Đúng rồi, bé đã hoàn thành chữ Q",write_answer,
+p1455,Xem mẫu chữ Q,Xem mẫu chữ Q.,write_mode,
+p1456,Bé hãy tập viết chữ R,Bé hãy tập viết chữ R,write_prompt,
+p1457,"Đúng rồi, bé đã hoàn thành chữ R","Đúng rồi, bé đã hoàn thành chữ R",write_answer,
+p1458,Xem mẫu chữ R,Xem mẫu chữ R.,write_mode,
+p1459,Bé hãy tập viết chữ S,Bé hãy tập viết chữ S,write_prompt,
+p1460,"Đúng rồi, bé đã hoàn thành chữ S","Đúng rồi, bé đã hoàn thành chữ S",write_answer,
+p1461,Xem mẫu chữ S,Xem mẫu chữ S.,write_mode,
+p1462,Bé hãy tập viết chữ T,Bé hãy tập viết chữ T,write_prompt,
+p1463,"Đúng rồi, bé đã hoàn thành chữ T","Đúng rồi, bé đã hoàn thành chữ T",write_answer,
+p1464,Xem mẫu chữ T,Xem mẫu chữ T.,write_mode,
+p1465,Bé hãy tập viết chữ U,Bé hãy tập viết chữ U,write_prompt,
+p1466,"Đúng rồi, bé đã hoàn thành chữ U","Đúng rồi, bé đã hoàn thành chữ U",write_answer,
+p1467,Xem mẫu chữ U,Xem mẫu chữ U.,write_mode,
+p1468,Bé hãy tập viết chữ Ư,Bé hãy tập viết chữ Ư,write_prompt,
+p1469,"Đúng rồi, bé đã hoàn thành chữ Ư","Đúng rồi, bé đã hoàn thành chữ Ư",write_answer,
+p1470,Xem mẫu chữ Ư,Xem mẫu chữ Ư.,write_mode,
+p1471,Bé hãy tập viết chữ V,Bé hãy tập viết chữ V,write_prompt,
+p1472,"Đúng rồi, bé đã hoàn thành chữ V","Đúng rồi, bé đã hoàn thành chữ V",write_answer,
+p1473,Xem mẫu chữ V,Xem mẫu chữ V.,write_mode,
+p1474,Bé hãy tập viết chữ X,Bé hãy tập viết chữ X,write_prompt,
+p1475,"Đúng rồi, bé đã hoàn thành chữ X","Đúng rồi, bé đã hoàn thành chữ X",write_answer,
+p1476,Xem mẫu chữ X,Xem mẫu chữ X.,write_mode,
+p1477,Bé hãy tập viết chữ Y,Bé hãy tập viết chữ Y,write_prompt,
+p1478,"Đúng rồi, bé đã hoàn thành chữ Y","Đúng rồi, bé đã hoàn thành chữ Y",write_answer,
+p1479,Xem mẫu chữ Y,Xem mẫu chữ Y.,write_mode,
+p1480,Chạm nút để nghe lại. Chỉ dùng dữ liệu đã xác minh hoặc hình do app tự tạo.,Chạm nút để nghe lại. Chỉ dùng dữ liệu đã xác minh hoặc hình do app tự tạo.,explore_static,
+p1481,Nghe tên,Nghe tên.,explore_static,
+p1482,Thông tin,Thông tin.,explore_static,
+p1483,Hình khác,Hình khác.,explore_static,
+p1484,Chế độ hướng dẫn chi tiết đang bật.,"Chế độ hướng dẫn chi tiết đang bật. Cô sẽ đọc chậm, rõ, và chỉ từng bước cho bé.",screenreader_guide,v5 accessibility
+p1485,Con đang ở màn hình chữ cái.,"Con đang ở màn hình chữ cái. Con chạm vào một ô chữ để nghe chữ, nghe từ gợi nhớ, và nghe hướng dẫn tiếp theo.",screenreader_guide,v5 accessibility
+p1486,Con đang ở vườn học.,"Con đang ở vườn học. Bên trái là danh sách khu học. Ở giữa là nội dung bài học. Bên phải là điểm vườn, sao, chuỗi đúng, và nhật ký.",screenreader_guide,v5 accessibility
+p1487,Cách chọn đáp án.,Con nghe câu hỏi trước. Sau đó nhìn các thẻ đáp án trên màn hình. Con chạm vào thẻ mà con nghĩ là đúng.,screenreader_guide,v5 accessibility
+p1488,Cách nghe lại.,"Nếu chưa nghe rõ, con bấm nút Nghe lại để nghe câu hướng dẫn một lần nữa.",screenreader_guide,v5 accessibility
+p1489,Cách quay về bản đồ.,Bấm nút Bản đồ để quay về danh sách các khu trong vườn học.,screenreader_guide,v5 accessibility
+p1490,Cách về chữ cái.,Bấm nút Về chữ cái để trở lại màn hình học chữ cái.,screenreader_guide,v5 accessibility
+p1491,Cách dùng giọng AI local.,"Khi bật Giọng ây ai cục bộ, máy sẽ dùng giọng đọc trong máy. Khi bỏ tích, app dùng gờ en a, chấm, pê pê ét em nếu có.",screenreader_guide,v5 accessibility
+p1492,Thông báo khi đúng.,"Nếu con chọn đúng, app sẽ đọc Đúng rồi, và cộng điểm cho con.",screenreader_guide,v5 accessibility
+p1493,Thông báo khi sai.,"Nếu con chọn chưa đúng, app sẽ đọc đáp án đúng và mời con thử lại.",screenreader_guide,v5 accessibility
+p1494,Hướng dẫn cho người cần nghe thay nhìn.,"Con có thể học bằng tai. Hãy nghe tên khu, nghe câu hỏi, rồi chạm theo lời hướng dẫn. Mỗi nút quan trọng đều có câu đọc riêng.",screenreader_guide,v5 accessibility
+p1495,Hướng dẫn khu Nhận dạng hình,"Con đang ở khu Nhận dạng hình. Tam giác, vuông, chữ nhật, tròn, bầu dục. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,shape
+p1496,Mở khu Nhận dạng hình,"Mở khu Nhận dạng hình. Tam giác, vuông, chữ nhật, tròn, bầu dục.",screenreader_zone_open,shape
+p1497,Hướng dẫn khu Màu sắc,"Con đang ở khu Màu sắc. Nhìn hình rồi chọn màu đúng. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,color
+p1498,Mở khu Màu sắc,Mở khu Màu sắc. Nhìn hình rồi chọn màu đúng.,screenreader_zone_open,color
+p1499,"Hướng dẫn khu To, nhỏ","Con đang ở khu To, nhỏ. Nâng cấp: lớn hơn, nhỏ hơn, bằng nhau. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,size
+p1500,"Mở khu To, nhỏ","Mở khu To, nhỏ. Nâng cấp: lớn hơn, nhỏ hơn, bằng nhau.",screenreader_zone_open,size
+p1501,Hướng dẫn khu Ghép mẫu,"Con đang ở khu Ghép mẫu. Cầm tay chỉ việc: nhìn mẫu rồi chạm vào hình giống y như mẫu. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,match
+p1502,Mở khu Ghép mẫu,Mở khu Ghép mẫu. Cầm tay chỉ việc: nhìn mẫu rồi chạm vào hình giống y như mẫu.,screenreader_zone_open,match
+p1503,Hướng dẫn khu Nghe chọn hình,"Con đang ở khu Nghe chọn hình. Nghe lời đọc rồi chọn hình đúng. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,listen
+p1504,Mở khu Nghe chọn hình,Mở khu Nghe chọn hình. Nghe lời đọc rồi chọn hình đúng.,screenreader_zone_open,listen
+p1505,Hướng dẫn khu Xem giờ,"Con đang ở khu Xem giờ. Nhìn đồng hồ kim rồi chọn đúng giờ. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,clock
+p1506,Mở khu Xem giờ,Mở khu Xem giờ. Nhìn đồng hồ kim rồi chọn đúng giờ.,screenreader_zone_open,clock
+p1507,Hướng dẫn khu Con gì,"Con đang ở khu Con gì. Nhìn con vật lớn rồi chọn tên đúng. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,animal
+p1508,Mở khu Con gì,Mở khu Con gì. Nhìn con vật lớn rồi chọn tên đúng.,screenreader_zone_open,animal
+p1509,Hướng dẫn khu Đồ vật,"Con đang ở khu Đồ vật. Ảnh thật đã rà tay, chọn tên đúng. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,object
+p1510,Mở khu Đồ vật,"Mở khu Đồ vật. Ảnh thật đã rà tay, chọn tên đúng.",screenreader_zone_open,object
+p1511,Hướng dẫn khu Rau quả,"Con đang ở khu Rau quả. Rau quả đã rà tay, không trộn nhãn. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,food
+p1512,Mở khu Rau quả,"Mở khu Rau quả. Rau quả đã rà tay, không trộn nhãn.",screenreader_zone_open,food
+p1513,Hướng dẫn khu Tập viết,"Con đang ở khu Tập viết. Cầm tay chỉ việc: bắt đầu ở chân bên trái, đi theo chữ rồi dừng ở chân bên phải. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,write
+p1514,Mở khu Tập viết,"Mở khu Tập viết. Cầm tay chỉ việc: bắt đầu ở chân bên trái, đi theo chữ rồi dừng ở chân bên phải.",screenreader_zone_open,write
+p1515,Hướng dẫn khu Chữ đầu an toàn,"Con đang ở khu Chữ đầu an toàn. Chỉ dùng bộ chữ đã khóa dữ liệu 1-1. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,letters
+p1516,Mở khu Chữ đầu an toàn,Mở khu Chữ đầu an toàn. Chỉ dùng bộ chữ đã khóa dữ liệu 1-1.,screenreader_zone_open,letters
+p1517,Hướng dẫn khu Số đếm,"Con đang ở khu Số đếm. Đếm hình rồi chọn số đúng. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,numbers
+p1518,Mở khu Số đếm,Mở khu Số đếm. Đếm hình rồi chọn số đúng.,screenreader_zone_open,numbers
+p1519,Hướng dẫn khu So sánh,"Con đang ở khu So sánh. So sánh to, nhỏ bằng hình tạo chuẩn. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,compare
+p1520,Mở khu So sánh,"Mở khu So sánh. So sánh to, nhỏ bằng hình tạo chuẩn.",screenreader_zone_open,compare
+p1521,Hướng dẫn khu Cộng trừ,"Con đang ở khu Cộng trừ. Phép cộng trừ cơ bản ngẫu nhiên. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,arith
+p1522,Mở khu Cộng trừ,Mở khu Cộng trừ. Phép cộng trừ cơ bản ngẫu nhiên.,screenreader_zone_open,arith
+p1523,Hướng dẫn khu Khám phá,"Con đang ở khu Khám phá. Chạm xem hình và nghe đáp án đúng. Con nghe câu hỏi, rồi chạm vào đáp án đúng. Nếu chưa chắc, bấm Nghe lại.",screenreader_zone_guide,explore
+p1524,Mở khu Khám phá,Mở khu Khám phá. Chạm xem hình và nghe đáp án đúng.,screenreader_zone_open,explore
+p1525,Cầm tay chỉ việc nhận dạng hình,"Ở bài Nhận dạng hình, con nhìn hình lớn ở giữa màn hình. Con nghe câu hỏi Đây là hình gì, rồi chọn đúng tên hình bên dưới.",screenreader_guide,v5 accessibility
+p1526,Cầm tay chỉ việc màu sắc,"Ở bài Màu sắc, con nhìn màu của hình. Sau đó chọn đúng tên màu. Ví dụ đỏ, vàng, xanh lá, xanh dương.",screenreader_guide,v5 accessibility
+p1527,Cầm tay chỉ việc to nhỏ,"Ở bài To nhỏ, con so sánh hình bên trái và hình bên phải. Con chọn lớn hơn, nhỏ hơn, hoặc bằng nhau.",screenreader_guide,v5 accessibility
+p1528,Cầm tay chỉ việc ghép mẫu,"Ở bài Ghép mẫu, con nhìn hình mẫu trước. Sau đó chạm vào hình giống y như mẫu.",screenreader_guide,v5 accessibility
+p1529,Cầm tay chỉ việc nghe chọn hình,"Ở bài Nghe chọn hình, con nghe tên hình trước. Sau đó tìm và chạm vào đúng hình được đọc.",screenreader_guide,v5 accessibility
+p1530,Cầm tay chỉ việc xem giờ,"Ở bài Xem giờ, con nhìn đồng hồ kim. Kim ngắn chỉ giờ, kim dài chỉ phút. Con chọn đáp án giờ đúng.",screenreader_guide,v5 accessibility
+p1531,Cầm tay chỉ việc con gì,"Ở bài Con gì, con nhìn con vật lớn. Sau đó chọn đúng tên con vật.",screenreader_guide,v5 accessibility
+p1532,Cầm tay chỉ việc đồ vật,"Ở bài Đồ vật, con nhìn ảnh đồ vật thật. Sau đó chọn đúng tên đồ vật.",screenreader_guide,v5 accessibility
+p1533,Cầm tay chỉ việc rau quả,"Ở bài Rau quả, con nhìn ảnh rau quả. Sau đó chọn đúng tên rau hoặc quả.",screenreader_guide,v5 accessibility
+p1534,Cầm tay chỉ việc tập viết,"Ở bài Tập viết, con bắt đầu từ điểm đầu nét. Con đi theo nét chữ, chậm và đều, rồi thả tay khi đến điểm cuối.",screenreader_guide,v5 accessibility
+p1535,Cầm tay chỉ việc chữ đầu,"Ở bài Chữ đầu, con nghe tên đồ vật hoặc con vật. Sau đó chọn chữ cái đầu tiên của tên đó.",screenreader_guide,v5 accessibility
+p1536,Cầm tay chỉ việc số đếm,"Ở bài Số đếm, con đếm số hình trên màn hình. Sau đó chọn đúng con số.",screenreader_guide,v5 accessibility
+p1537,Cầm tay chỉ việc so sánh,"Ở bài So sánh, con nhìn hai nhóm hình. Con nghe yêu cầu rồi chọn đáp án so sánh đúng.",screenreader_guide,v5 accessibility
+p1538,Cầm tay chỉ việc cộng trừ,"Ở bài Cộng trừ, con nghe phép tính. Con đếm trong đầu hoặc đếm bằng hình, rồi chọn kết quả đúng.",screenreader_guide,v5 accessibility
+p1539,Cầm tay chỉ việc khám phá,"Ở bài Khám phá, con chạm vào hình để nghe tên và thông tin ngắn. Bấm Hình khác để xem hình mới.",screenreader_guide,v5 accessibility
