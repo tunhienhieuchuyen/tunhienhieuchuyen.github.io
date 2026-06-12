@@ -3,7 +3,7 @@
    App file: /chucai/hoccungducphuc.html
    Scope: /chucai/  -- separate from Bảng Nhân PWA at root.
 */
-const CHUCAI_CACHE = "chucai-separate-icon-20260612-01";
+const CHUCAI_CACHE = "chucai-voicebank-v5-20260612-01";
 
 const CORE_ASSETS = [
   "./",
@@ -52,6 +52,23 @@ self.addEventListener("fetch", (event) => {
         caches.open(CHUCAI_CACHE).then(cache => cache.put("./hoccungducphuc.html", copy));
         return res;
       }).catch(() => caches.match("./hoccungducphuc.html"))
+    );
+    return;
+  }
+
+
+
+  // Voicebank V5: cache-first on demand. Do not pre-cache 1539 WAV files during install.
+  if (url.pathname.includes("/chucai/voicebank_chucai/")) {
+    event.respondWith(
+      caches.match(req).then(cached => {
+        if (cached) return cached;
+        return fetch(req).then(res => {
+          const copy = res.clone();
+          caches.open(CHUCAI_CACHE).then(cache => cache.put(req, copy));
+          return res;
+        });
+      })
     );
     return;
   }
