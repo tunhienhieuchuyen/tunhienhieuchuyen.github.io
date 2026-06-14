@@ -5088,6 +5088,161 @@ window.ChatEngine = {
         this.saveAndSync();
         this.render();
     },
+    getSafeTelegramUploadName(fileName, mime = '') {
+        const raw = String(fileName || 'upload_file').trim() || 'upload_file';
+        const mimeMap = {
+            'image/jpeg': 'jpg',
+            'image/png': 'png',
+            'image/webp': 'webp',
+            'image/gif': 'gif',
+            'image/heic': 'heic',
+            'image/heif': 'heif',
+            'application/pdf': 'pdf',
+            'text/plain': 'txt',
+            'text/html': 'html'
+        };
+        let ext = '';
+        const dot = raw.lastIndexOf('.');
+        if (dot > 0 && dot < raw.length - 1) ext = raw.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!ext && mimeMap[String(mime || '').toLowerCase()]) ext = mimeMap[String(mime || '').toLowerCase()];
+
+        let base = dot > 0 ? raw.slice(0, dot) : raw;
+        base = base.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        base = base.replace(/[^a-zA-Z0-9._-]+/g, '_').replace(/_{2,}/g, '_').replace(/^[._-]+|[._-]+$/g, '');
+        if (!base) base = 'upload_file';
+        if (base.length > 60) base = base.slice(0, 60).replace(/[._-]+$/g, '');
+        return ext ? `${base}.${ext}` : base;
+    },
+
+    buildUploadDebug(meta = {}) {
+        const xhr = meta.xhr || {};
+        const data = meta.telegramData || {};
+        const responseText = String(meta.responseText || xhr.responseText || '');
+        return {
+            fileName: meta.fileName || '',
+            safeFileName: meta.safeFileName || '',
+            fileSize: Number(meta.fileSize || 0),
+            mime: meta.mime || '',
+            ext: meta.ext || '',
+            endpoint: meta.endpoint || '',
+            field: meta.field || '',
+            strategy: meta.strategy || '',
+            httpStatus: meta.httpStatus ?? xhr.status ?? 0,
+            telegramOk: data.ok === true,
+            telegramErrorCode: data.error_code ?? null,
+            telegramDescription: data.description || '',
+            xhrEvent: meta.xhrEvent || '',
+            xhrReadyState: xhr.readyState ?? null,
+            xhrStatus: xhr.status ?? meta.httpStatus ?? 0,
+            responseTextShort: responseText.slice(0, 1200),
+            navigatorOnLine: navigator.onLine,
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+        };
+    },
+
+    recordUploadError(debugObj, fileRef = null) {
+        this.lastUploadError = debugObj || {};
+        if (fileRef) this.lastFailedUploadFile = fileRef;
+        try {
+            localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify(this.lastUploadError));
+        } catch(e) {
+            try {
+                localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify({
+                    fileName: this.lastUploadError.fileName || '',
+                    safeFileName: this.lastUploadError.safeFileName || '',
+                    endpoint: this.lastUploadError.endpoint || '',
+                    httpStatus: this.lastUploadError.httpStatus || 0,
+                    telegramErrorCode: this.lastUploadError.telegramErrorCode || null,
+                    telegramDescription: this.lastUploadError.telegramDescription || '',
+                    xhrEvent: this.lastUploadError.xhrEvent || '',
+                    timestamp: this.lastUploadError.timestamp || new Date().toISOString()
+                }));
+            } catch(err) {}
+        }
+        return this.lastUploadError;
+    },
+
+    uploadDebugToText(debugObj = null) {
+        const d = debugObj || this.lastUploadError || {};
+        return [
+            'LỖI UPLOAD FAMILY CHAT',
+            `fileName: ${d.fileName || ''}`,
+            `safeFileName: ${d.safeFileName || ''}`,
+            `fileSize: ${d.fileSize || 0}`,
+            `mime: ${d.mime || ''}`,
+            `ext: ${d.ext || ''}`,
+            `endpoint: ${d.endpoint || ''}`,
+            `field: ${d.field || ''}`,
+            `strategy: ${d.strategy || ''}`,
+            `httpStatus: ${d.httpStatus ?? ''}`,
+            `telegramOk: ${d.telegramOk}`,
+            `telegramErrorCode: ${d.telegramErrorCode ?? ''}`,
+            `telegramDescription: ${d.telegramDescription || ''}`,
+            `xhrEvent: ${d.xhrEvent || ''}`,
+            `xhrReadyState: ${d.xhrReadyState ?? ''}`,
+            `xhrStatus: ${d.xhrStatus ?? ''}`,
+            `navigatorOnLine: ${d.navigatorOnLine}`,
+            `timestamp: ${d.timestamp || ''}`,
+            `userAgent: ${d.userAgent || ''}`,
+            '',
+            `responseTextShort: ${d.responseTextShort || ''}`
+        ].join('\n');
+    },
+
+    showUploadErrorDetail() {
+        let d = this.lastUploadError;
+        if (!d) {
+            try { d = JSON.parse(localStorage.getItem('lifeos_family_last_upload_error') || 'null'); } catch(e) {}
+        }
+        if (!d) {
+            window.showToast?.('Chưa có chi tiết lỗi upload', 'ph-warning-circle');
+            return;
+        }
+        this.lastUploadError = d;
+
+        let modal = document.getElementById('family-upload-error-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'family-upload-error-modal';
+            modal.className = 'fixed inset-0 z-[99999999] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-3';
+            modal.innerHTML = `
+              <div class="bg-white w-full sm:max-w-2xl max-h-[85vh] rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+                <div class="p-4 border-b border-slate-200 flex items-center justify-between gap-3">
+                  <div class="font-black text-rose-700 flex items-center gap-2"><i class="ph-bold ph-warning-circle"></i> Chi tiết lỗi upload</div>
+                  <button type="button" onclick="document.getElementById('family-upload-error-modal')?.remove()" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center active:scale-95"><i class="ph-bold ph-x pointer-events-none"></i></button>
+                </div>
+                <pre id="family-upload-error-text" class="p-4 text-xs leading-relaxed whitespace-pre-wrap break-words overflow-y-auto bg-slate-50 text-slate-800 flex-1"></pre>
+                <div class="p-3 border-t border-slate-200 grid grid-cols-2 gap-2">
+                  <button type="button" onclick="window.ChatEngine.copyLastUploadError()" class="px-3 py-2 rounded-xl bg-primary text-white text-xs font-black active:scale-95">Sao chép lỗi</button>
+                  <button type="button" onclick="window.ChatEngine.retryLastFailedUpload()" class="px-3 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-black active:scale-95">Thử gửi lại</button>
+                </div>
+              </div>`;
+            document.body.appendChild(modal);
+        }
+        const pre = document.getElementById('family-upload-error-text');
+        if (pre) pre.textContent = this.uploadDebugToText(d);
+    },
+
+    async copyLastUploadError() {
+        const text = this.uploadDebugToText(this.lastUploadError);
+        try {
+            await navigator.clipboard.writeText(text);
+            window.showToast?.('Đã sao chép lỗi upload', 'ph-check-circle');
+        } catch(e) {
+            window.showToast?.('Không sao chép được lỗi, hãy chụp màn hình.', 'ph-warning-circle');
+        }
+    },
+
+    async retryLastFailedUpload() {
+        if (!this.lastFailedUploadFile) {
+            this.setUploadStatus('Vui lòng chọn lại file để gửi lại', 'error', false);
+            return false;
+        }
+        this.setUploadStatus(`Đang thử gửi lại: ${this.lastFailedUploadFile.name || 'file lỗi'}`, 'info', false);
+        return this.sendFile(this.lastFailedUploadFile, 1, 1, { retryManual: true });
+    },
+
     async sendMultipleFiles(files) {
         const arr = Array.from(files || []).filter(Boolean);
         if (!arr.length) return;
@@ -5103,12 +5258,12 @@ window.ChatEngine = {
                     okCount++;
                     if (result.note) this.setUploadStatus(result.note, 'done', true);
                 } else {
-                    const detail = result?.error || `Không rõ lý do: ${arr[i]?.name || (i + 1)}`;
+                    const detail = result?.error || `Gửi lỗi: ${arr[i]?.name || (i + 1)} — không rõ lý do. Bấm Chi tiết lỗi.`;
                     failDetails.push(detail);
                     this.setUploadStatus(detail, 'error', false);
                 }
             } catch(e) {
-                const detail = `Gửi lỗi: ${arr[i]?.name || (i + 1)} — ${e.message || e}`;
+                const detail = `Gửi lỗi: ${arr[i]?.name || (i + 1)} — ${e.message || e}. Bấm Chi tiết lỗi.`;
                 failDetails.push(detail);
                 console.warn('[ChatEngine direct file queue]', arr[i]?.name, e);
                 this.setUploadStatus(detail, 'error', false);
@@ -5116,10 +5271,11 @@ window.ChatEngine = {
         }
 
         if (failDetails.length > 0) {
-            const summary = `Hoàn tất: ${okCount} file thành công, ${failDetails.length} file lỗi: ${failDetails.join(' | ')}`;
+            const names = failDetails.map(x => String(x || '')).join(' | ');
+            const summary = `${failDetails.length} file lỗi: ${names}. Bấm Chi tiết lỗi để xem nguyên nhân.`;
             console.warn('[ChatEngine file batch summary]', { okCount, failDetails });
             this.setUploadStatus(summary, 'error', false);
-            window.playSpeechTTS?.('Có file gửi lỗi. Vui lòng xem thông báo chi tiết.');
+            window.playSpeechTTS?.('Có file gửi lỗi. Vui lòng xem chi tiết lỗi.');
             return { ok: false, okCount, failCount: failDetails.length, errors: failDetails };
         }
 
@@ -5128,51 +5284,71 @@ window.ChatEngine = {
         window.playSpeechTTS?.('Đã gửi xong toàn bộ file.');
         return { ok: true, okCount, failCount: 0, errors: [] };
     },
-    async sendFile(file, currentIndex = 1, totalFiles = 1) {
+    async sendFile(file, currentIndex = 1, totalFiles = 1, options = {}) {
         if(!file) return { ok: false, error: 'Không có file để gửi' };
 
-        // PHA 63C: Direct Document First. Ảnh cũng gửi bằng file gốc qua sendDocument.
+        // PHA 63E: mobile upload forensic + safe retry. Giữ file gốc, không nén/resize/biến đổi.
         const MAX_SIZE = 50 * 1024 * 1024;
         const fileName = file.name || 'Tập tin';
         const fileSize = Number(file.size || 0);
         const mime = String(file.type || '').toLowerCase();
-        const ext = (fileName.split('.').pop() || '').toLowerCase();
+        const ext = (fileName.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         const isImageFile = mime.startsWith('image/') || ['jpg','jpeg','png','gif','webp','heic','heif','bmp'].includes(ext);
+        const safeFileName = this.getSafeTelegramUploadName(fileName, mime);
+
+        if (!this.token || !this.chatId) {
+            const debug = this.recordUploadError(this.buildUploadDebug({
+                fileName, safeFileName, fileSize, mime, ext, endpoint: 'sendDocument', field: 'document',
+                strategy: isImageFile ? 'image_as_document' : 'direct_file',
+                xhrEvent: 'missing_token_or_chatId'
+            }), file);
+            const msg = `Gửi lỗi: ${fileName} — thiếu token/chatId. Bấm Chi tiết lỗi.`;
+            this.setUploadStatus(msg, 'error', false);
+            return { ok: false, fileName, endpoint: 'sendDocument', error: msg, debug };
+        }
 
         if (fileSize > MAX_SIZE) {
+            const debug = this.recordUploadError(this.buildUploadDebug({
+                fileName, safeFileName, fileSize, mime, ext, endpoint: 'sendDocument', field: 'document',
+                strategy: isImageFile ? 'image_as_document' : 'direct_file',
+                xhrEvent: 'client_file_over_50MB'
+            }), file);
             const msg = `Gửi thất bại: ${fileName} — sendDocument: file vượt quá 50MB`;
-            console.warn('[ChatEngine direct file blocked]', { fileName, fileSize, mime, endpoint: 'sendDocument', reason: 'over_50MB' });
+            console.warn('[ChatEngine direct file blocked]', { fileName, safeFileName, fileSize, mime, endpoint: 'sendDocument', reason: 'over_50MB' });
             this.setUploadStatus(msg, 'error', false);
             window.playSpeechTTS?.('Một file quá lớn đã bị bỏ qua do vượt giới hạn tải lên.');
-            return { ok: false, fileName, endpoint: 'sendDocument', error: msg };
+            return { ok: false, fileName, endpoint: 'sendDocument', error: msg, debug };
         }
 
         let endpoint = 'sendDocument';
         let fileField = 'document';
         let msgType = 'file';
 
-        // Ảnh luôn đi sendDocument để tránh giới hạn riêng của endpoint ảnh.
-        // APK/MIME rỗng/lạ cũng đi document. Video/audio giữ luồng cũ nếu đang ổn.
+        // Ảnh luôn đi sendDocument. APK/MIME rỗng/lạ cũng đi document. Video/audio giữ luồng cũ nếu đang ổn.
         if (!isImageFile && ext !== 'apk') {
             if(mime.startsWith('video/')) { endpoint = 'sendVideo'; fileField = 'video'; msgType = 'video'; }
             else if(mime.startsWith('audio/')) { endpoint = 'sendAudio'; fileField = 'audio'; msgType = 'audio'; }
         }
 
-        const formData = new FormData();
-        formData.append('chat_id', this.chatId);
-        formData.append(fileField, file, fileName);
+        const strategy = isImageFile ? 'image_as_document' : (msgType === 'video' ? 'video_endpoint' : (msgType === 'audio' ? 'audio_endpoint' : 'direct_file'));
+        const shouldRetryHttp = (status, data) => {
+            const code = Number(data?.error_code || 0);
+            const desc = String(data?.description || '').toLowerCase();
+            if (status >= 500) return true;
+            if (code >= 500) return true;
+            if (desc.includes('timeout') || desc.includes('temporarily') || desc.includes('too many requests')) return true;
+            return false;
+        };
 
-        console.info('[ChatEngine direct file send start]', {
-            fileName,
-            size: fileSize,
-            mime: file.type || '',
-            endpoint,
-            field: fileField,
-            strategy: isImageFile ? 'image_as_document' : 'direct_file'
-        });
-        this.setUploadStatus(`Đang gửi ${currentIndex}/${totalFiles}: ${fileName} — 0%`, 'info', false);
+        const doUploadOnce = (attempt = 0) => new Promise((resolve) => {
+            const formData = new FormData();
+            formData.append('chat_id', this.chatId);
+            formData.append(fileField, file, safeFileName);
 
-        return new Promise((resolve) => {
+            console.info('[ChatEngine direct file send start]', {
+                fileName, safeFileName, size: fileSize, mime: file.type || '', endpoint, field: fileField, strategy, attempt
+            });
+
             const xhr = new XMLHttpRequest();
             xhr.open('POST', `https://api.telegram.org/bot${this.token}/${endpoint}`, true);
             xhr.timeout = 120000;
@@ -5186,38 +5362,34 @@ window.ChatEngine = {
                 }
             };
 
+            const fail = (reason, data = {}, parseErr = null) => {
+                const debug = this.recordUploadError(this.buildUploadDebug({
+                    fileName, safeFileName, fileSize, mime, ext, endpoint, field: fileField, strategy,
+                    httpStatus: xhr.status || 0,
+                    telegramData: data || {},
+                    xhrEvent: reason,
+                    xhr,
+                    responseText: xhr.responseText || ''
+                }), file);
+
+                const errCode = data?.error_code !== undefined ? data.error_code : '';
+                const desc = data?.description || (parseErr ? 'lỗi phân tích phản hồi Telegram' : (reason === 'network_error' ? 'lỗi mạng khi gửi file' : (reason === 'timeout' ? 'quá thời gian gửi file' : 'không có mô tả lỗi')));
+                const msg = `Gửi lỗi: ${fileName} — ${endpoint} HTTP ${xhr.status || 0}${errCode !== '' ? ' | Telegram ' + errCode : ''}: ${desc}. Bấm Chi tiết lỗi.`;
+                console.warn('[ChatEngine upload fail forensic]', { debug, response: data, parseErr });
+                resolve({ ok: false, retryable: reason === 'network_error' || reason === 'timeout' || shouldRetryHttp(xhr.status || 0, data), fileName, endpoint, error: msg, debug });
+            };
+
             xhr.onload = () => {
                 let data = {};
                 try { data = JSON.parse(xhr.responseText || '{}'); }
-                catch(parseErr) {
-                    const msg = `Gửi lỗi: ${fileName} — ${endpoint} HTTP ${xhr.status || 0}: lỗi phân tích phản hồi Telegram`;
-                    console.warn('[ChatEngine Telegram response parse]', {
-                        fileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, responseText: xhr.responseText, parseErr
-                    });
-                    this.setUploadStatus(msg, 'error', false);
-                    resolve({ ok: false, fileName, endpoint, error: msg });
-                    return;
-                }
+                catch(parseErr) { fail('parse_error', {}, parseErr); return; }
 
                 console.info('[ChatEngine Telegram response]', {
-                    fileName,
-                    size: fileSize,
-                    mime: file.type || '',
-                    endpoint,
-                    status: xhr.status,
-                    response: data
+                    fileName, safeFileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, response: data
                 });
 
                 if (xhr.status < 200 || xhr.status >= 300 || data.ok !== true) {
-                    const errCode = data.error_code !== undefined ? data.error_code : '';
-                    const desc = data.description || 'Không có mô tả lỗi';
-                    const msg = `Gửi lỗi: ${fileName} — ${endpoint} HTTP ${xhr.status || 0}${errCode !== '' ? ' | Telegram ' + errCode : ''}: ${desc}`;
-                    console.warn('[ChatEngine Telegram API fail]', {
-                        fileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, error_code: data.error_code, description: data.description, response: data
-                    });
-                    this.setUploadStatus(msg, 'error', false);
-                    window.playSpeechTTS?.('Gửi file bị lỗi. Telegram đã trả lỗi.');
-                    resolve({ ok: false, fileName, endpoint, error: msg, response: data });
+                    fail('telegram_or_http_error', data, null);
                     return;
                 }
 
@@ -5245,6 +5417,7 @@ window.ChatEngine = {
                         telegram_msg_id: telegramMsgId,
                         chat_id: this.chatId,
                         sent_via_endpoint: endpoint,
+                        safe_upload_name: safeFileName,
                         topic_id: this.currentTopic !== 'all' ? this.currentTopic : null
                     };
                     window.chatHistory.push(msg);
@@ -5254,47 +5427,49 @@ window.ChatEngine = {
                     this.cancelReply();
                     this.saveAndSync();
                     this.render();
-
-                    const note = isImageFile
-                        ? `Ảnh đã gửi bằng file gốc qua sendDocument: ${fileName}`
-                        : `Đã gửi: ${fileName}`;
-                    this.setUploadStatus(note, 'done', true);
-                    window.playSpeechTTS?.('Đã gửi file');
-                    resolve({ ok: true, fileName, endpoint, note });
+                    const note = isImageFile ? `Ảnh đã gửi bằng file gốc: ${fileName}` : `Đã gửi: ${fileName}`;
+                    resolve({ ok: true, fileName, endpoint, note, attempt });
                 } catch(err) {
-                    const msg = `Gửi lỗi: ${fileName} — ${endpoint} Telegram trả ok nhưng thiếu file_id`;
-                    console.warn('[ChatEngine Telegram ok but invalid payload]', {
-                        fileName, size: fileSize, mime: file.type || '', endpoint, status: xhr.status, response: data, err
-                    });
-                    this.setUploadStatus(msg, 'error', false);
-                    resolve({ ok: false, fileName, endpoint, error: msg, response: data });
+                    fail('telegram_ok_missing_file_id', data, err);
                 }
             };
 
-            xhr.onerror = () => {
-                const msg = `Gửi lỗi: ${fileName} — ${endpoint}: lỗi mạng khi gửi file`;
-                console.warn('[ChatEngine direct file network error]', { fileName, size: fileSize, mime: file.type || '', endpoint });
-                this.setUploadStatus(msg, 'error', false);
-                window.playSpeechTTS?.('Lỗi mạng khi gửi file');
-                resolve({ ok: false, fileName, endpoint, error: msg });
-            };
-
-            xhr.ontimeout = () => {
-                const msg = `Gửi lỗi: ${fileName} — ${endpoint}: quá thời gian gửi file`;
-                console.warn('[ChatEngine direct file timeout]', { fileName, size: fileSize, mime: file.type || '', endpoint, timeout: xhr.timeout });
-                this.setUploadStatus(msg, 'error', false);
-                window.playSpeechTTS?.('Quá thời gian gửi file');
-                resolve({ ok: false, fileName, endpoint, error: msg });
-            };
+            xhr.onerror = () => fail('network_error');
+            xhr.ontimeout = () => fail('timeout');
 
             try { xhr.send(formData); }
             catch(e) {
-                const msg = `Gửi lỗi: ${fileName} — ${endpoint}: ${e.message || e}`;
-                console.warn('[ChatEngine XHR send]', { fileName, size: fileSize, mime: file.type || '', endpoint, error: e });
-                this.setUploadStatus(msg, 'error', false);
-                resolve({ ok: false, fileName, endpoint, error: msg });
+                const debug = this.recordUploadError(this.buildUploadDebug({
+                    fileName, safeFileName, fileSize, mime, ext, endpoint, field: fileField, strategy,
+                    xhrEvent: 'xhr_send_exception',
+                    responseText: String(e?.message || e || '')
+                }), file);
+                const msg = `Gửi lỗi: ${fileName} — ${endpoint}: ${e.message || e}. Bấm Chi tiết lỗi.`;
+                console.warn('[ChatEngine XHR send exception]', { debug, error: e });
+                resolve({ ok: false, retryable: false, fileName, endpoint, error: msg, debug });
             }
         });
+
+        this.lastFailedUploadFile = file;
+        this.setUploadStatus(`Đang gửi ${currentIndex}/${totalFiles}: ${fileName} — 0%`, 'info', false);
+        let result = await doUploadOnce(0);
+
+        if (!result.ok && result.retryable && !options.retryManual) {
+            this.setUploadStatus(`Lỗi mạng, đang thử lại 1/1: ${fileName}`, 'error', false);
+            await new Promise(r => setTimeout(r, 1800));
+            result = await doUploadOnce(1);
+        }
+
+        if (result.ok) {
+            this.lastFailedUploadFile = null;
+            this.setUploadStatus(result.note || `Đã gửi: ${fileName}`, 'done', true);
+            window.playSpeechTTS?.('Đã gửi file');
+            return result;
+        }
+
+        this.setUploadStatus(result.error || `Gửi lỗi: ${fileName}. Bấm Chi tiết lỗi.`, 'error', false);
+        window.playSpeechTTS?.('Gửi file bị lỗi. Bấm chi tiết lỗi để xem nguyên nhân.');
+        return result;
     },
     saveAndSync() {
         const safeHistory = (window.chatHistory || []).map(m => {
@@ -6089,7 +6264,6 @@ window.ChatEngine = {
         form.parentNode.insertBefore(bar, form);
         return bar;
     },
-
     setUploadStatus(text, state = 'info', autoHide = false) {
         const bar = this.ensureUploadStatus();
         if (!bar) {
@@ -6099,8 +6273,18 @@ window.ChatEngine = {
         const tone = state === 'error'
             ? 'bg-rose-50 text-rose-700 border-rose-200'
             : (state === 'done' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-sky-50 text-sky-700 border-sky-200');
-        bar.className = `mx-3 mb-2 px-3 py-2 rounded-2xl border text-xs font-bold shadow-sm flex items-center justify-between gap-2 ${tone}`;
-        bar.innerHTML = `<span class="truncate">${window.escapeHTML(String(text || ''))}</span><button type="button" onclick="this.closest('#chat-upload-status')?.classList.add('hidden')" class="w-7 h-7 rounded-full bg-white/70 border border-white/80 flex items-center justify-center active:scale-95"><i class="ph-bold ph-x text-xs pointer-events-none"></i></button>`;
+        const textCls = state === 'error'
+            ? 'min-w-0 flex-1 whitespace-normal break-words leading-snug max-h-40 overflow-y-auto pr-1'
+            : 'min-w-0 flex-1 truncate';
+        const safeText = window.escapeHTML(String(text || ''));
+        const errorActions = state === 'error'
+            ? `<div class="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                <button type="button" onclick="window.ChatEngine.showUploadErrorDetail()" class="px-2.5 py-1.5 rounded-xl bg-white/80 border border-rose-200 text-rose-700 font-black text-[10px] active:scale-95">Chi tiết lỗi</button>
+                <button type="button" onclick="window.ChatEngine.retryLastFailedUpload()" class="px-2.5 py-1.5 rounded-xl bg-white/80 border border-rose-200 text-rose-700 font-black text-[10px] active:scale-95">Thử gửi lại</button>
+              </div>`
+            : '';
+        bar.className = `mx-3 mb-2 px-3 py-2 rounded-2xl border text-xs font-bold shadow-sm flex items-start justify-between gap-2 ${tone}`;
+        bar.innerHTML = `<span class="${textCls}">${safeText}</span>${errorActions}<button type="button" onclick="this.closest('#chat-upload-status')?.classList.add('hidden')" class="w-7 h-7 rounded-full bg-white/70 border border-white/80 flex items-center justify-center active:scale-95 shrink-0"><i class="ph-bold ph-x text-xs pointer-events-none"></i></button>`;
         if (this._uploadStatusTimer) clearTimeout(this._uploadStatusTimer);
         if (autoHide) {
             this._uploadStatusTimer = setTimeout(() => { bar.classList.add('hidden'); }, 2800);
@@ -12348,5 +12532,3976 @@ window.MediaHub = {
 
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => window.MediaHub.init(), 1500); });
 </script>
+
+
+<style id="lifeos-pha64f-landscape-mini-pc-final-style">
+/* PHA 64F FINAL — Dedicated Mini-PC landscape root from clean Pha63E.
+   Key fix: never hide the new list target; old main is hidden, so no nested source grid can cover/blank lists. */
+body.lifeos-landscape-mini-pc {
+  --l64f-head: 46px;
+  --l64f-dock: 40px;
+  --l64f-gap: 6px;
+  --l64f-root-top: calc(var(--l64f-head) + var(--l64f-dock) + var(--l64f-gap));
+  --l64f-root-h: calc(100dvh - var(--l64f-root-top));
+  width: 100vw !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  background: linear-gradient(180deg,#fffdf2 0%,#fff7d6 100%) !important;
+}
+
+body.lifeos-landscape-mini-pc header.lifeos-header-final {
+  position: fixed !important;
+  top: 0 !important; left: 0 !important; right: 0 !important;
+  height: var(--l64f-head) !important;
+  min-height: var(--l64f-head) !important;
+  max-height: var(--l64f-head) !important;
+  padding: max(4px, env(safe-area-inset-top)) 10px 4px !important;
+  z-index: 9000 !important;
+  border-bottom: 1px solid rgba(226,232,240,.9) !important;
+  overflow: visible !important;
+}
+body.lifeos-landscape-mini-pc .lifeos-header-brand { gap: 7px !important; min-width: 0 !important; }
+body.lifeos-landscape-mini-pc .lifeos-header-brand > div:first-child { width: 34px !important; height: 34px !important; border-radius: 12px !important; }
+body.lifeos-landscape-mini-pc #bot-icon { font-size: 18px !important; }
+body.lifeos-landscape-mini-pc .lifeos-brand-text h1 { font-size: 15px !important; line-height: 1 !important; white-space: nowrap !important; }
+body.lifeos-landscape-mini-pc #sentinel-badge,
+body.lifeos-landscape-mini-pc .lifeos-brand-text .flex { display: none !important; }
+body.lifeos-landscape-mini-pc .lifeos-header-actions {
+  gap: 5px !important;
+  max-width: 74vw !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+body.lifeos-landscape-mini-pc .lifeos-header-actions a,
+body.lifeos-landscape-mini-pc .lifeos-header-actions button,
+body.lifeos-landscape-mini-pc #profile-btn,
+body.lifeos-landscape-mini-pc #theme-toggle {
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 8px !important;
+  border-radius: 11px !important;
+  font-size: 10.5px !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc #theme-toggle { width: 32px !important; min-width: 32px !important; padding: 0 !important; }
+body.lifeos-landscape-mini-pc #profile-menu {
+  position: fixed !important;
+  top: calc(var(--l64f-head) + 4px) !important;
+  right: 10px !important;
+  z-index: 99999999 !important;
+  max-height: calc(100dvh - var(--l64f-head) - 14px) !important;
+  overflow-y: auto !important;
+}
+
+body.lifeos-landscape-mini-pc #desktop-workspace-dock {
+  display: flex !important;
+  position: fixed !important;
+  top: var(--l64f-head) !important;
+  left: 8px !important;
+  right: 8px !important;
+  width: auto !important;
+  height: var(--l64f-dock) !important;
+  min-height: var(--l64f-dock) !important;
+  max-height: var(--l64f-dock) !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  z-index: 8500 !important;
+  gap: 5px !important;
+  border-radius: 999px !important;
+  background: rgba(255,253,242,.96) !important;
+  border: 1px solid rgba(244,216,122,.9) !important;
+  box-shadow: 0 8px 24px rgba(120,83,20,.12) !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+body.lifeos-landscape-mini-pc #desktop-workspace-dock button[data-desktop-view="overview"] { display: none !important; }
+body.lifeos-landscape-mini-pc #desktop-workspace-dock button {
+  flex: 1 0 auto !important;
+  min-width: 92px !important;
+  height: 30px !important;
+  padding: 0 9px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  color: var(--c-mut) !important;
+  background: transparent !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc #desktop-workspace-dock button.is-active,
+body.lifeos-landscape-mini-pc #desktop-workspace-dock button.l64f-active {
+  background: var(--c-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 14px rgba(16,185,129,.22) !important;
+}
+
+/* This is the decisive separation: old main cannot cover or constrain the mini-PC root. */
+body.lifeos-landscape-mini-pc > main,
+body.lifeos-landscape-mini-pc #bottom-nav,
+body.lifeos-landscape-mini-pc #mobile-input {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos-landscape-root {
+  display: block !important;
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: var(--l64f-root-top) !important;
+  width: 100vw !important;
+  height: var(--l64f-root-h) !important;
+  min-height: var(--l64f-root-h) !important;
+  max-height: var(--l64f-root-h) !important;
+  padding: 6px 8px 8px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  z-index: 1200 !important;
+  background: transparent !important;
+}
+body:not(.lifeos-landscape-mini-pc) #lifeos-landscape-root { display: none !important; }
+
+body.lifeos-landscape-mini-pc .l64f-panel {
+  display: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc .l64f-panel.is-active { display: block !important; }
+
+body.lifeos-landscape-mini-pc .l64f-card {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(226,232,240,.9) !important;
+  background: rgba(255,255,255,.88) !important;
+  box-shadow: 0 12px 30px rgba(15,23,42,.07) !important;
+}
+
+/* MUSIC */
+body.lifeos-landscape-mini-pc #l64f-music-card {
+  display: grid !important;
+  grid-template-rows: 34px minmax(0,1fr) !important;
+  gap: 6px !important;
+  padding: 6px !important;
+}
+body.lifeos-landscape-mini-pc #l64f-music-title { height: 34px !important; overflow: visible !important; }
+body.lifeos-landscape-mini-pc #l64f-music-title .music-titlebar { height: 34px !important; min-height: 34px !important; max-height: 34px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; width: 100% !important; overflow: visible !important; }
+body.lifeos-landscape-mini-pc #l64f-music-title h2 { font-size: 13px !important; line-height: 1 !important; }
+body.lifeos-landscape-mini-pc #l64f-music-title .music-header-actions { gap: 5px !important; max-width: 58vw !important; overflow-x: auto !important; flex-wrap: nowrap !important; }
+body.lifeos-landscape-mini-pc #l64f-music-title .music-header-actions > *,
+body.lifeos-landscape-mini-pc #music-admin-btn,
+body.lifeos-landscape-mini-pc #music-sleep-timer { height: 28px !important; min-height: 28px !important; padding: 0 7px !important; border-radius: 10px !important; font-size: 10px !important; }
+
+body.lifeos-landscape-mini-pc #l64f-music-work {
+  display: grid !important;
+  grid-template-columns: minmax(285px,42%) minmax(0,58%) !important;
+  gap: 7px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #l64f-music-left {
+  display: grid !important;
+  grid-template-columns: minmax(110px,34%) minmax(0,66%) !important;
+  grid-template-rows: 34px 34px minmax(0,1fr) !important;
+  gap: 6px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 6px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(226,232,240,.88) !important;
+  background: rgba(248,250,252,.80) !important;
+}
+body.lifeos-landscape-mini-pc #l64f-music-search { grid-column: 1 / -1 !important; grid-row: 1 !important; }
+body.lifeos-landscape-mini-pc #music-search { width: 100% !important; height: 34px !important; min-height: 34px !important; border-radius: 12px !important; padding: 0 10px !important; font-size: 11px !important; }
+body.lifeos-landscape-mini-pc #media-subtabs { grid-column: 1 / -1 !important; grid-row: 2 !important; height: 34px !important; min-height: 34px !important; padding: 0 !important; margin: 0 !important; gap: 5px !important; display: flex !important; overflow-x: auto !important; }
+body.lifeos-landscape-mini-pc #media-subtabs button { height: 32px !important; min-height: 32px !important; padding: 0 8px !important; border-radius: 12px !important; font-size: 10.5px !important; flex: 1 0 auto !important; }
+
+/* MP3 uses full left list width. Radio/TV use group sidebar + list. */
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #media-group-sidebar,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #media-group-mobile-bar { display: none !important; }
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #l64f-music-list { grid-column: 1 / -1 !important; grid-row: 3 !important; }
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #media-group-sidebar,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #media-group-sidebar { display: flex !important; }
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #l64f-music-list,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-music-list { grid-column: 2 !important; grid-row: 3 !important; }
+
+body.lifeos-landscape-mini-pc #media-group-sidebar { grid-column: 1 !important; grid-row: 3 !important; display: flex !important; flex-direction: column !important; gap: 4px !important; height: 100% !important; min-height: 0 !important; overflow-y: auto !important; padding: 4px !important; border-radius: 13px !important; border: 1px solid rgba(226,232,240,.85) !important; background: rgba(255,255,255,.82) !important; }
+body.lifeos-landscape-mini-pc #media-group-sidebar button { min-height: 28px !important; padding: 5px 6px !important; border-radius: 10px !important; font-size: 10px !important; line-height: 1.05 !important; text-align: left !important; }
+body.lifeos-landscape-mini-pc #media-group-mobile-bar { display: none !important; }
+
+body.lifeos-landscape-mini-pc #l64f-music-list {
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  border-radius: 13px !important;
+  border: 1px solid rgba(226,232,240,.75) !important;
+}
+body.lifeos-landscape-mini-pc #music-list-container { height: 100% !important; min-height: 0 !important; max-height: 100% !important; padding: 6px !important; overflow-y: auto !important; overflow-x: hidden !important; background: rgba(255,255,255,.78) !important; }
+body.lifeos-landscape-mini-pc #mp3-list-container,
+body.lifeos-landscape-mini-pc #radio-list-container,
+body.lifeos-landscape-mini-pc #tv-list-container { min-height: 100% !important; }
+body.lifeos-landscape-mini-pc #tv-list-container { grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 6px !important; align-content: start !important; }
+
+body.lifeos-landscape-mini-pc #mp3-list-container .song-row,
+body.lifeos-landscape-mini-pc #radio-list-container .media-item {
+  min-height: 44px !important;
+  padding: 7px 9px !important;
+  margin-bottom: 6px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.95) !important;
+  border: 1px solid rgba(226,232,240,.9) !important;
+}
+body.lifeos-landscape-mini-pc #mp3-list-container .song-title,
+body.lifeos-landscape-mini-pc #radio-list-container .song-title,
+body.lifeos-landscape-mini-pc #tv-list-container .media-item span {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  -webkit-line-clamp: unset !important;
+  max-height: none !important;
+  line-height: 1.15 !important;
+}
+body.lifeos-landscape-mini-pc #tv-list-container .media-item { min-height: 76px !important; padding: 7px !important; overflow: visible !important; }
+
+body.lifeos-landscape-mini-pc #l64f-music-right {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 7px !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: 7px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(226,232,240,.9) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,247,214,.76)) !important;
+}
+body.lifeos-landscape-mini-pc #l64f-media-preview { flex: 1 1 auto !important; min-height: 120px !important; display: flex !important; align-items: center !important; justify-content: center !important; text-align: center !important; border-radius: 14px !important; border: 1px dashed rgba(99,102,241,.34) !important; background: rgba(255,255,255,.78) !important; color: var(--c-mut) !important; padding: 12px !important; font-size: 12px !important; font-weight: 900 !important; }
+body.lifeos-landscape-mini-pc #l64f-music-right.l64f-has-player #l64f-media-preview { display: none !important; }
+body.lifeos-landscape-mini-pc #tv-video-element { width: 100% !important; aspect-ratio: 16/9 !important; max-height: min(42dvh,210px) !important; min-height: 120px !important; object-fit: contain !important; }
+
+body.lifeos-landscape-mini-pc #l64f-data-status,
+body.lifeos-landscape-mini-pc #l64f-mp3-empty-hint {
+  padding: 12px 10px !important;
+  border-radius: 14px !important;
+  border: 1px dashed rgba(99,102,241,.35) !important;
+  background: rgba(255,255,255,.84) !important;
+  color: var(--c-mut) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1.35 !important;
+  text-align: center !important;
+}
+body.lifeos-landscape-mini-pc #l64f-data-status button,
+body.lifeos-landscape-mini-pc #l64f-mp3-empty-hint button { margin-top: 8px !important; padding: 7px 12px !important; border-radius: 12px !important; background: var(--c-primary) !important; color: #fff !important; font-size: 11px !important; font-weight: 950 !important; }
+
+/* CHAT */
+body.lifeos-landscape-mini-pc #l64f-chat-card { display: grid !important; grid-template-columns: minmax(150px,30%) minmax(0,70%) !important; gap: 7px !important; padding: 6px !important; }
+body.lifeos-landscape-mini-pc #l64f-chat-left,
+body.lifeos-landscape-mini-pc #l64f-chat-right { min-height: 0 !important; overflow: hidden !important; border-radius: 16px !important; }
+body.lifeos-landscape-mini-pc #l64f-chat-left { display: flex !important; flex-direction: column !important; gap: 6px !important; }
+body.lifeos-landscape-mini-pc #chat-folder-tabs { flex: 1 1 auto !important; min-height: 0 !important; flex-direction: column !important; flex-wrap: nowrap !important; overflow-y: auto !important; overflow-x: hidden !important; border: 1px solid rgba(226,232,240,.9) !important; border-radius: 16px !important; background: rgba(255,255,255,.84) !important; padding: 6px !important; gap: 5px !important; }
+body.lifeos-landscape-mini-pc #l64f-chat-right { display: grid !important; grid-template-rows: auto minmax(0,1fr) auto auto auto auto !important; gap: 5px !important; }
+body.lifeos-landscape-mini-pc #chat-messages { min-height: 0 !important; height: 100% !important; overflow-y: auto !important; border: 1px solid rgba(226,232,240,.9) !important; border-radius: 16px !important; background: rgba(248,250,252,.88) !important; padding: 8px 10px !important; }
+body.lifeos-landscape-mini-pc #chat-form { height: 52px !important; min-height: 52px !important; max-height: 52px !important; border-radius: 16px !important; padding: 5px !important; }
+
+/* TASK */
+body.lifeos-landscape-mini-pc #l64f-tasks-card { display: grid !important; grid-template-columns: minmax(230px,38%) minmax(0,62%) !important; gap: 8px !important; padding: 6px !important; }
+body.lifeos-landscape-mini-pc #l64f-task-left,
+body.lifeos-landscape-mini-pc #l64f-task-right { min-height: 0 !important; overflow-y: auto !important; border-radius: 18px !important; border: 1px solid rgba(226,232,240,.9) !important; background: rgba(255,255,255,.82) !important; padding: 8px !important; }
+body.lifeos-landscape-mini-pc #form-pc { display: flex !important; flex-direction: column !important; gap: 7px !important; }
+body.lifeos-landscape-mini-pc #form-pc .relative,
+body.lifeos-landscape-mini-pc #form-pc input,
+body.lifeos-landscape-mini-pc #form-pc button { width: 100% !important; height: 36px !important; min-height: 36px !important; font-size: 12px !important; }
+
+body.lifeos-landscape-mini-pc #l64f-focus-card,
+body.lifeos-landscape-mini-pc #l64f-vault-card { padding: 8px !important; overflow-y: auto !important; }
+
+body.lifeos-landscape-mini-pc #mini-player { display: none !important; }
+body.lifeos-landscape-mini-pc #chat-msg-menu,
+body.lifeos-landscape-mini-pc #chat-lightbox,
+body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !important; z-index: 99999999 !important; }
+
+@media (max-height:430px) {
+  body.lifeos-landscape-mini-pc { --l64f-head: 44px; --l64f-dock: 38px; --l64f-gap: 4px; }
+  body.lifeos-landscape-mini-pc #desktop-workspace-dock button { min-width: 82px !important; font-size: 10px !important; }
+  body.lifeos-landscape-mini-pc #l64f-music-work { grid-template-columns: minmax(255px,42%) minmax(0,58%) !important; }
+}
+</style>
+
+
+<script id="lifeos-pha64f-landscape-mini-pc-final-js">
+(function(){
+  const moved = new Set();
+  const VIEW_BY_MODE = { tasks:'tasks', focus:'focus', vault:'vault', music:'music', chat:'chat', overview:'tasks' };
+
+  function isMini(){
+    const w = window.innerWidth, h = window.innerHeight;
+    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+    return w > h && h <= 620 && (coarse || mobileUA || w <= 1280);
+  }
+  function setImp(el,p,v){ if(el) el.style.setProperty(p,v,'important'); }
+  function norm(v){ return String(v || '').trim(); }
+  function low(v){ return norm(v).toLowerCase(); }
+
+  function move(el,target){
+    if(!el || !target || el === target || el.contains(target) || target.contains(el)) return;
+    if(!el.__l64fAnchor){
+      el.__l64fAnchor = document.createComment('l64f-anchor:' + (el.id || el.tagName));
+      el.parentNode && el.parentNode.insertBefore(el.__l64fAnchor, el);
+    }
+    target.appendChild(el);
+    moved.add(el);
+  }
+
+  function restoreAll(){
+    Array.from(moved).reverse().forEach(el => {
+      const a = el.__l64fAnchor;
+      if(a && a.parentNode){ a.parentNode.insertBefore(el, a.nextSibling); a.remove(); }
+      delete el.__l64fAnchor;
+      moved.delete(el);
+    });
+    const root = document.getElementById('lifeos-landscape-root');
+    if(root) root.remove();
+  }
+
+  function ensureRoot(){
+    let root = document.getElementById('lifeos-landscape-root');
+    if(root) return root;
+    root = document.createElement('div');
+    root.id = 'lifeos-landscape-root';
+    root.innerHTML = `
+      <section id="l64f-panel-tasks" class="l64f-panel"><div id="l64f-tasks-card" class="l64f-card"><div id="l64f-task-left"></div><div id="l64f-task-right"></div></div></section>
+      <section id="l64f-panel-focus" class="l64f-panel"><div id="l64f-focus-card" class="l64f-card"></div></section>
+      <section id="l64f-panel-vault" class="l64f-panel"><div id="l64f-vault-card" class="l64f-card"></div></section>
+      <section id="l64f-panel-music" class="l64f-panel"><div id="l64f-music-card" class="l64f-card"><div id="l64f-music-title"></div><div id="l64f-music-work"><div id="l64f-music-left"><div id="l64f-music-search"></div><div id="l64f-music-list"></div></div><div id="l64f-music-right"><div id="l64f-media-preview"><div><div style="font-size:24px;line-height:1;margin-bottom:6px">🖥️</div><div>Chọn kênh/bài hát để phát</div><div style="font-size:10px;margin-top:4px;opacity:.72">Mini-PC root riêng: danh sách thật không bị khung cũ che</div></div></div></div></div></div></section>
+      <section id="l64f-panel-chat" class="l64f-panel"><div id="l64f-chat-card" class="l64f-card"><div id="l64f-chat-left"></div><div id="l64f-chat-right"></div></div></section>`;
+    document.body.appendChild(root);
+    return root;
+  }
+
+  function computeHeights(){
+    if(!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+    const vv = window.visualViewport;
+    const h = Math.max(260, Math.round(vv ? vv.height : window.innerHeight));
+    const header = document.querySelector('header.lifeos-header-final');
+    const dock = document.getElementById('desktop-workspace-dock');
+    const headerH = header ? Math.max(42, Math.round(header.getBoundingClientRect().height)) : 46;
+    const dockH = dock ? Math.max(36, Math.round(dock.getBoundingClientRect().height)) : 40;
+    const gap = h <= 430 ? 4 : 6;
+    const top = headerH + dockH + gap;
+    const rootH = Math.max(250, h - top);
+    document.body.style.setProperty('--l64f-head', headerH + 'px');
+    document.body.style.setProperty('--l64f-dock', dockH + 'px');
+    document.body.style.setProperty('--l64f-gap', gap + 'px');
+    document.body.style.setProperty('--l64f-root-top', top + 'px');
+    document.body.style.setProperty('--l64f-root-h', rootH + 'px');
+    const root = document.getElementById('lifeos-landscape-root');
+    setImp(root,'top',top + 'px');
+    setImp(root,'height',rootH + 'px');
+    setImp(root,'min-height',rootH + 'px');
+    setImp(root,'max-height',rootH + 'px');
+  }
+
+  function getMode(){
+    const active = document.querySelector('.view-section.active');
+    return ({'view-tasks':'tasks','view-focus':'focus','view-vault':'vault','view-music':'music','view-chat':'chat'})[active?.id || 'view-tasks'] || 'tasks';
+  }
+  function setDockActive(mode){
+    document.querySelectorAll('#desktop-workspace-dock [data-desktop-view]').forEach(btn => {
+      const on = VIEW_BY_MODE[btn.dataset.desktopView] === mode;
+      btn.classList.toggle('is-active', on);
+      btn.classList.toggle('l64f-active', on);
+    });
+  }
+  function showPanel(mode){
+    document.querySelectorAll('#lifeos-landscape-root .l64f-panel').forEach(p => p.classList.remove('is-active'));
+    document.getElementById('l64f-panel-' + mode)?.classList.add('is-active');
+    document.body.dataset.lifeosLandscapeRootMode = mode;
+    setDockActive(mode);
+  }
+
+  function mapTasks(){
+    const formPanel = document.querySelector('#view-tasks #form-pc')?.closest('div.hidden, div');
+    const listPanel = document.querySelector('#view-tasks #todo-list')?.closest('div.flex-grow, div');
+    const allChildren = Array.from(document.getElementById('view-tasks')?.children || []);
+    const summary = allChildren.find(el => el !== formPanel && el !== listPanel && el.matches && el.matches('.flex.flex-col, .flex'));
+    move(formPanel, document.getElementById('l64f-task-left'));
+    if(summary) move(summary, document.getElementById('l64f-task-left'));
+    move(listPanel, document.getElementById('l64f-task-right'));
+  }
+  function mapFocus(){ move(document.getElementById('view-focus')?.firstElementChild, document.getElementById('l64f-focus-card')); }
+  function mapVault(){ move(document.getElementById('view-vault')?.firstElementChild, document.getElementById('l64f-vault-card')); }
+
+  function mapMusic(){
+    const card = document.getElementById('view-music')?.firstElementChild;
+    const title = card?.querySelector('.music-titlebar');
+    const searchBox = document.getElementById('music-search')?.parentElement;
+    const tabs = document.getElementById('media-subtabs');
+    const sidebar = document.getElementById('media-group-sidebar');
+    const mobileBar = document.getElementById('media-group-mobile-bar');
+    const listContainer = document.getElementById('music-list-container');
+    const listCol = listContainer?.parentElement;
+    const tv = document.getElementById('tv-player-container');
+    const playerCol = tv?.parentElement;
+
+    move(title, document.getElementById('l64f-music-title'));
+    move(searchBox, document.getElementById('l64f-music-search'));
+    move(tabs, document.getElementById('l64f-music-left'));
+    move(sidebar, document.getElementById('l64f-music-left'));
+    move(mobileBar, document.getElementById('l64f-music-left'));
+    move(listCol, document.getElementById('l64f-music-list'));
+    move(playerCol, document.getElementById('l64f-music-right'));
+    updateMediaTabState();
+    updateMusicPreview();
+  }
+
+  function mapChat(){
+    const card = document.getElementById('view-chat')?.firstElementChild;
+    const header = Array.from(card?.children || []).find(el => el.classList && el.classList.contains('bg-gradient-to-r'));
+    const folders = document.getElementById('chat-folder-tabs');
+    const pinned = document.getElementById('chat-pinned-banner');
+    const messages = document.getElementById('chat-messages');
+    const menu = document.getElementById('chat-msg-menu');
+    const lightbox = document.getElementById('chat-lightbox');
+    const edit = document.getElementById('chat-edit-banner');
+    const reply = document.getElementById('chat-reply-banner');
+    const emoji = document.getElementById('chat-emoji-container');
+    const rec = document.getElementById('chat-recording-banner');
+    const form = document.getElementById('chat-form');
+    move(header, document.getElementById('l64f-chat-left'));
+    move(folders, document.getElementById('l64f-chat-left'));
+    const right = document.getElementById('l64f-chat-right');
+    move(pinned, right); move(messages, right); move(edit, right); move(reply, right); move(emoji, right); move(rec, right); move(form, right);
+    move(menu, document.body); move(lightbox, document.body);
+  }
+
+  function updateMusicPreview(){
+    const right = document.getElementById('l64f-music-right');
+    if(!right) return;
+    const tv = document.getElementById('tv-player-container');
+    const radio = document.getElementById('radio-player-container');
+    const tvShown = tv && getComputedStyle(tv).display !== 'none';
+    const radioShown = radio && getComputedStyle(radio).display !== 'none';
+    right.classList.toggle('l64f-has-player', !!(tvShown || radioShown));
+  }
+
+  function updateMediaTabState(){
+    const tab = (window.MediaHub && window.MediaHub.currentTab) || 'music';
+    document.body.dataset.l64fMediaTab = tab;
+    const mp3 = document.getElementById('mp3-list-container');
+    const radio = document.getElementById('radio-list-container');
+    const tv = document.getElementById('tv-list-container');
+    if(!mp3 || !radio || !tv) return;
+    if(tab === 'tv'){
+      mp3.style.setProperty('display','none','important');
+      radio.style.setProperty('display','none','important');
+      tv.style.setProperty('display','grid','important');
+    } else if(tab === 'radio'){
+      mp3.style.setProperty('display','none','important');
+      tv.style.setProperty('display','none','important');
+      radio.style.setProperty('display','block','important');
+    } else {
+      radio.style.setProperty('display','none','important');
+      tv.style.setProperty('display','none','important');
+      mp3.style.setProperty('display','block','important');
+    }
+  }
+
+  function groupMap(pack){
+    const m = new Map();
+    (Array.isArray(pack?.groups) ? pack.groups : []).forEach(g => {
+      const id = norm(g.id || g.group || g.key || g.slug || g.name);
+      if(id) m.set(id, g);
+    });
+    return m;
+  }
+  function inferType(ch, path, gm){
+    const raw = low(ch.type || ch.kind || ch.category || ch.mediaType || ch.group_type);
+    if(raw.includes('radio')) return 'radio';
+    if(raw.includes('tv') || raw.includes('tivi') || raw.includes('television')) return 'tv';
+    const g = norm(ch.group || ch.group_id || ch.groupId || ch.category_id || ch.categoryId);
+    const group = gm.get(g);
+    const mix = low([path, g, group?.type, group?.name, ch.group_name, ch.name, ch.title].join(' '));
+    if(mix.includes('radio') || mix.includes('phát thanh') || mix.includes('phat thanh')) return 'radio';
+    return 'tv';
+  }
+  function extractChannels(pack){
+    const gm = groupMap(pack);
+    const out = [], seen = new Set();
+    function push(obj, path){
+      if(!obj || typeof obj !== 'object' || Array.isArray(obj)) return;
+      const url = norm(obj.url || obj.link || obj.stream_url || obj.streamUrl || obj.src || obj.m3u8 || obj.hls || obj.playUrl);
+      if(!url) return;
+      const group = norm(obj.group || obj.group_id || obj.groupId || obj.category_id || obj.categoryId || obj.parent || path.split('/').slice(-1)[0] || 'all') || 'all';
+      const gr = gm.get(group);
+      const type = inferType(obj, path, gm);
+      const name = norm(obj.name || obj.title || obj.label || obj.channel || obj.station || obj.id || url);
+      const id = norm(obj.id || obj.key || obj.slug || name + '_' + url) || (type + '_' + out.length);
+      const key = type + '|' + url + '|' + name;
+      if(seen.has(key)) return;
+      seen.add(key);
+      out.push({...obj, id, name, url, type, group, group_name: norm(obj.group_name || obj.groupName || gr?.name || group)});
+    }
+    function walk(node, path){
+      if(!node) return;
+      if(Array.isArray(node)){ node.forEach((x,i)=>walk(x, path + '/' + i)); return; }
+      if(typeof node !== 'object') return;
+      push(node, path);
+      Object.keys(node).forEach(k => { if(k !== 'groups') walk(node[k], path + '/' + k); });
+    }
+    walk(pack, 'root');
+    return out;
+  }
+  function deriveGroups(pack, channels){
+    if(Array.isArray(pack?.groups) && pack.groups.length) return pack.groups;
+    const m = new Map();
+    channels.forEach(ch => { if(!m.has(ch.group)) m.set(ch.group, {id:ch.group, name:ch.group_name || ch.group, type:ch.type}); });
+    return Array.from(m.values());
+  }
+
+  async function deepLoadChannels(force){
+    const mh = window.MediaHub;
+    if(!mh) return false;
+    try{
+      const res = await fetch('smartbox_channels.json' + (force ? '?t=' + Date.now() : ''), {cache: force ? 'no-store' : 'default'});
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const pack = await res.json();
+      const channels = extractChannels(pack);
+      if(!channels.length) throw new Error('Không tìm thấy kênh có url');
+      mh.rawGroups = deriveGroups(pack, channels);
+      mh.allChannels = channels;
+      mh.tvData = channels.filter(c => c.type === 'tv');
+      mh.radioData = channels.filter(c => c.type === 'radio');
+      mh.renderGroupMenus?.();
+      mh.renderLists?.();
+      updateMediaTabState();
+      return true;
+    }catch(e){
+      showListStatus('Không nạp được danh sách: ' + (e.message || e), true);
+      return false;
+    }
+  }
+
+  function showListStatus(msg, retry){
+    const tab = (window.MediaHub && window.MediaHub.currentTab) || 'music';
+    const container = tab === 'tv' ? document.getElementById('tv-list-container') : document.getElementById('radio-list-container');
+    if(!container || tab === 'music') return;
+    let box = document.getElementById('l64f-data-status');
+    if(!box){ box = document.createElement('div'); box.id = 'l64f-data-status'; container.appendChild(box); }
+    box.textContent = msg || 'Đang nạp danh sách...';
+    if(retry){
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Tải lại danh sách';
+      btn.onclick = () => deepLoadChannels(true);
+      box.appendChild(document.createElement('br'));
+      box.appendChild(btn);
+    }
+  }
+
+  function makeMp3Hint(){
+    const c = document.getElementById('mp3-list-container');
+    if(!c || c.querySelector('.song-row') || c.querySelector('#l64f-mp3-empty-hint')) return;
+    const box = document.createElement('div');
+    box.id = 'l64f-mp3-empty-hint';
+    box.textContent = 'Đang tải MP3 hoặc chưa có cache nhạc.';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = 'Tải lại MP3';
+    btn.onclick = () => { try{ window.MusicApp?.refetch?.(); }catch(e){} setTimeout(refreshMedia, 700); };
+    box.appendChild(document.createElement('br'));
+    box.appendChild(btn);
+    c.appendChild(box);
+  }
+
+  function refreshMp3(){
+    try{
+      const app = window.MusicApp;
+      if(!app) return;
+      if(!app.isInitialized && typeof app.initAudioEngine === 'function') app.initAudioEngine();
+      if(typeof app.renderList === 'function') app.renderList();
+      const c = document.getElementById('mp3-list-container');
+      const rows = c?.querySelector('.song-row');
+      const len = Array.isArray(app.playlist) ? app.playlist.length : 0;
+      if(!rows && !len){
+        try{
+          const cached = localStorage.getItem('xs_songs_v4');
+          if(cached){ app.playlist = JSON.parse(cached); app.renderList?.(); }
+        }catch(e){}
+      }
+      if(!c?.querySelector('.song-row')) makeMp3Hint();
+    }catch(e){}
+  }
+
+  async function refreshMedia(){
+    if(!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+    updateMediaTabState();
+    const mh = window.MediaHub;
+    const tab = (mh && mh.currentTab) || 'music';
+    if(tab === 'music'){ refreshMp3(); return; }
+    const need = !mh?.allChannels?.length || (tab === 'tv' && !mh.tvData?.length) || (tab === 'radio' && !mh.radioData?.length);
+    if(need) await deepLoadChannels(false);
+    else { mh.renderGroupMenus?.(); mh.renderLists?.(); updateMediaTabState(); }
+    const list = tab === 'tv' ? document.getElementById('tv-list-container') : document.getElementById('radio-list-container');
+    if(list && !list.querySelector('.media-item')) showListStatus('Danh sách rỗng. Bấm tải lại danh sách.', true);
+  }
+
+  function mapAll(){
+    ensureRoot();
+    mapTasks(); mapFocus(); mapVault(); mapMusic(); mapChat();
+    updateMediaTabState();
+    updateMusicPreview();
+  }
+
+  function activate(mode){
+    mode = VIEW_BY_MODE[mode] || mode || getMode();
+    ensureRoot();
+    showPanel(mode);
+    if(mode === 'music' && window.MusicApp && !window.MusicApp.isInitialized){ try{ window.MusicApp.initAudioEngine(); }catch(e){} }
+    if(mode === 'chat'){ try{ window.ChatEngine?.init?.(); }catch(e){} try{ window.ChatEngine?.render?.(); }catch(e){} }
+    if(mode === 'focus'){ try{ window.switchTimerMode?.('dateclock'); }catch(e){} }
+    computeHeights();
+    setTimeout(refreshMedia, 80);
+  }
+
+  function apply(){
+    const on = isMini();
+    document.body.classList.toggle('lifeos-landscape-mini-pc', on);
+    document.documentElement.classList.toggle('lifeos-landscape-mini-pc', on);
+    if(on){
+      ensureRoot(); computeHeights(); mapAll(); activate(document.body.dataset.lifeosLandscapeRootMode || getMode());
+    } else {
+      restoreAll();
+      ['--l64f-head','--l64f-dock','--l64f-gap','--l64f-root-top','--l64f-root-h'].forEach(p => document.body.style.removeProperty(p));
+    }
+  }
+
+  const oldSet = window.setDesktopWorkspace;
+  window.setDesktopWorkspace = function(mode){
+    if(document.body.classList.contains('lifeos-landscape-mini-pc')){ activate(mode); return; }
+    return oldSet ? oldSet.apply(this, arguments) : undefined;
+  };
+  const oldSwitch = window.switchTab;
+  window.switchTab = function(id, btn){
+    if(document.body.classList.contains('lifeos-landscape-mini-pc')){
+      const mode = ({'view-tasks':'tasks','view-focus':'focus','view-vault':'vault','view-music':'music','view-chat':'chat'})[id] || 'tasks';
+      activate(mode); return;
+    }
+    const ret = oldSwitch ? oldSwitch.apply(this, arguments) : undefined;
+    requestAnimationFrame(()=>setTimeout(apply,50));
+    return ret;
+  };
+
+  function patchMedia(){
+    const mh = window.MediaHub;
+    if(mh && !mh.__l64fPatched){
+      mh.__l64fPatched = true;
+      const oldInit = mh.init;
+      if(typeof oldInit === 'function'){
+        mh.init = async function(force){ const ret = await oldInit.apply(this, arguments); await refreshMedia(); return ret; };
+      }
+      const oldSw = mh.switchTab;
+      if(typeof oldSw === 'function'){
+        mh.switchTab = function(){ const ret = oldSw.apply(this, arguments); setTimeout(refreshMedia, 80); return ret; };
+      }
+      const oldRender = mh.renderLists;
+      if(typeof oldRender === 'function'){
+        mh.renderLists = function(){ const ret = oldRender.apply(this, arguments); updateMediaTabState(); return ret; };
+      }
+    }
+  }
+
+  window.LifeOS64FReloadMedia = () => deepLoadChannels(true);
+
+  function bindDock(){
+    const dock = document.getElementById('desktop-workspace-dock');
+    if(!dock || dock.__l64fBound) return;
+    dock.__l64fBound = true;
+    dock.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-desktop-view]');
+      if(!btn || !document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+      e.preventDefault(); e.stopPropagation();
+      activate(btn.dataset.desktopView || 'tasks');
+    }, true);
+  }
+
+  function schedule(){
+    requestAnimationFrame(()=>{
+      bindDock(); patchMedia(); apply();
+      setTimeout(apply,80); setTimeout(refreshMedia,240); setTimeout(refreshMedia,1000); setTimeout(refreshMedia,2200);
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once:true});
+  else schedule();
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', schedule, {passive:true});
+})();
+</script>
+
+
+
+<style id="lifeos-pha64f1-mp3-right-player-style">
+/* PHA 64F.1: MP3 right-side player inside dedicated Mini-PC root. */
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #l64f-media-preview {
+  display: none !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #l64f-mp3-right-player {
+  display: flex !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #l64f-mp3-right-player,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-mp3-right-player {
+  display: none !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-right-player {
+  flex: 1 1 auto !important;
+  min-height: 180px !important;
+  width: 100% !important;
+  display: none;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 14px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(244, 216, 122, .88) !important;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 113, 24, .16), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,247,214,.82)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 16px 36px rgba(120,83,20,.10) !important;
+  color: #7c2d12 !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-now-top {
+  display: grid !important;
+  grid-template-columns: 64px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-cover {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(135deg, var(--c-primary), #fb923c) !important;
+  color: #fff !important;
+  box-shadow: 0 12px 24px rgba(249,115,22,.22) !important;
+  font-size: 30px !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-now-title {
+  font-size: clamp(14px, 2vw, 18px) !important;
+  font-weight: 1000 !important;
+  line-height: 1.2 !important;
+  color: #7c2d12 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-now-artist {
+  margin-top: 4px !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: rgba(124,45,18,.66) !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-now-status {
+  margin-top: 6px !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  color: var(--c-primary) !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-controls {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-controls button {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255,255,255,.92) !important;
+  border: 1px solid rgba(244,216,122,.9) !important;
+  color: #7c2d12 !important;
+  box-shadow: 0 8px 20px rgba(120,83,20,.08) !important;
+  transition: transform .12s ease, filter .12s ease !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-controls button:active {
+  transform: scale(.94) !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-controls #l64f-mp3-play {
+  width: 58px !important;
+  height: 58px !important;
+  min-width: 58px !important;
+  background: var(--c-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 30px rgba(249,115,22,.26) !important;
+  font-size: 26px !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-controls button.is-on {
+  background: rgba(249,115,22,.12) !important;
+  color: var(--c-primary) !important;
+  border-color: rgba(249,115,22,.35) !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-progress-wrap {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) 42px !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  color: rgba(124,45,18,.72) !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-progress-track {
+  height: 10px !important;
+  border-radius: 999px !important;
+  background: rgba(251,146,60,.18) !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  border: 1px solid rgba(244,216,122,.72) !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-progress-bar {
+  height: 100% !important;
+  width: 0% !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, var(--c-primary), #fb923c) !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-mp3-help {
+  text-align: center !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: rgba(124,45,18,.56) !important;
+}
+</style>
+
+
+<script id="lifeos-pha64f1-mp3-right-player-js">
+(function(){
+  function fmt(sec){
+    sec = Number(sec || 0);
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function cleanTitle(v){
+    try { return window.MusicApp?.cleanSongTitle?.(v) || String(v || '').replace(/\.mp3$/i,'').replace(/[_]+/g,' ').trim() || 'Bài hát'; }
+    catch(e) { return String(v || 'Bài hát'); }
+  }
+
+  function ensurePanel(){
+    const right = document.getElementById('l64f-music-right');
+    if (!right) return null;
+    let panel = document.getElementById('l64f-mp3-right-player');
+    if (panel) return panel;
+    panel = document.createElement('div');
+    panel.id = 'l64f-mp3-right-player';
+    panel.innerHTML = `
+      <div id="l64f-mp3-now-top">
+        <div id="l64f-mp3-cover"><i class="ph-fill ph-music-notes"></i></div>
+        <div>
+          <div id="l64f-mp3-now-title">Chọn một bài MP3 bên trái</div>
+          <div id="l64f-mp3-now-artist">Mini-PC Player</div>
+          <div id="l64f-mp3-now-status">Sẵn sàng phát nhạc</div>
+        </div>
+      </div>
+      <div id="l64f-mp3-controls">
+        <button id="l64f-mp3-shuffle" type="button" title="Trộn bài"><i class="ph-bold ph-shuffle"></i></button>
+        <button id="l64f-mp3-prev" type="button" title="Bài trước"><i class="ph-fill ph-skip-back"></i></button>
+        <button id="l64f-mp3-play" type="button" title="Phát/Tạm dừng"><i class="ph-fill ph-play"></i></button>
+        <button id="l64f-mp3-next" type="button" title="Bài tiếp theo"><i class="ph-fill ph-skip-forward"></i></button>
+        <button id="l64f-mp3-repeat" type="button" title="Lặp lại"><i class="ph-bold ph-repeat"></i></button>
+      </div>
+      <div id="l64f-mp3-progress-wrap">
+        <span id="l64f-mp3-current">0:00</span>
+        <div id="l64f-mp3-progress-track"><div id="l64f-mp3-progress-bar"></div></div>
+        <span id="l64f-mp3-duration">0:00</span>
+      </div>
+      <div id="l64f-mp3-help">Bấm bài trong danh sách bên trái hoặc dùng nút phát tại đây.</div>
+    `;
+    right.insertBefore(panel, right.firstChild);
+
+    panel.querySelector('#l64f-mp3-shuffle').onclick = function(){ try { window.MusicApp?.toggleShuffle?.(); } catch(e){} sync(); };
+    panel.querySelector('#l64f-mp3-prev').onclick = function(){ try { window.MusicApp?.playPrev?.(); } catch(e){} setTimeout(sync, 120); };
+    panel.querySelector('#l64f-mp3-next').onclick = function(){ try { window.MusicApp?.playNext?.(); } catch(e){} setTimeout(sync, 120); };
+    panel.querySelector('#l64f-mp3-repeat').onclick = function(){ try { window.MusicApp?.toggleRepeat?.(); } catch(e){} sync(); };
+    panel.querySelector('#l64f-mp3-play').onclick = function(){
+      try {
+        const app = window.MusicApp;
+        if (!app) return;
+        if ((!app.hasUserSelectedTrack || app.currentIndex < 0) && Array.isArray(app.playlist) && app.playlist.length) app.play(0);
+        else app.togglePlay();
+      } catch(e) {}
+      setTimeout(sync, 120);
+    };
+    panel.querySelector('#l64f-mp3-progress-track').onclick = function(e){
+      const a = document.getElementById('mstq-player');
+      if (!a || !a.duration) return;
+      const r = this.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      a.currentTime = pct * a.duration;
+      sync();
+    };
+
+    const a = document.getElementById('mstq-player');
+    if (a && !a.__l64f1SyncBound) {
+      a.__l64f1SyncBound = true;
+      ['timeupdate','play','pause','ended','loadedmetadata','durationchange'].forEach(ev => a.addEventListener(ev, sync, { passive:true }));
+    }
+    return panel;
+  }
+
+  function sync(){
+    if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+    const panel = ensurePanel();
+    if (!panel) return;
+
+    const app = window.MusicApp || {};
+    const a = document.getElementById('mstq-player');
+    const list = Array.isArray(app.playlist) ? app.playlist : [];
+    const idx = Number.isInteger(app.currentIndex) ? app.currentIndex : -1;
+    const current = idx >= 0 ? list[idx] : null;
+    const first = list[0] || null;
+    const song = current || first;
+
+    const titleEl = panel.querySelector('#l64f-mp3-now-title');
+    const artistEl = panel.querySelector('#l64f-mp3-now-artist');
+    const statusEl = panel.querySelector('#l64f-mp3-now-status');
+    const playBtn = panel.querySelector('#l64f-mp3-play');
+    const shuffleBtn = panel.querySelector('#l64f-mp3-shuffle');
+    const repeatBtn = panel.querySelector('#l64f-mp3-repeat');
+    const bar = panel.querySelector('#l64f-mp3-progress-bar');
+    const cur = panel.querySelector('#l64f-mp3-current');
+    const dur = panel.querySelector('#l64f-mp3-duration');
+
+    if (song) {
+      titleEl.textContent = current ? cleanTitle(song.title) : 'Sẵn sàng: ' + cleanTitle(song.title);
+      artistEl.textContent = cleanTitle(song.artist || 'Archive');
+    } else {
+      titleEl.textContent = 'Chọn một bài MP3 bên trái';
+      artistEl.textContent = 'Danh sách đang tải hoặc chưa có bài';
+    }
+
+    const playing = !!(a && !a.paused && !a.ended) || !!app.playing;
+    statusEl.textContent = current ? (playing ? 'Đang phát...' : 'Đã tạm dừng') : (song ? 'Bấm phát để nghe bài đầu tiên' : 'Sẵn sàng phát nhạc');
+    playBtn.innerHTML = playing ? '<i class="ph-fill ph-pause"></i>' : '<i class="ph-fill ph-play"></i>';
+
+    shuffleBtn.classList.toggle('is-on', !!app.shuffle);
+    repeatBtn.classList.toggle('is-on', app.repeat && app.repeat !== 'off');
+    repeatBtn.innerHTML = app.repeat === 'one' ? '<i class="ph-bold ph-repeat-once"></i>' : '<i class="ph-bold ph-repeat"></i>';
+
+    const duration = a && isFinite(a.duration) ? a.duration : (current?.duration || 0);
+    const currentTime = a && isFinite(a.currentTime) ? a.currentTime : 0;
+    const pct = duration > 0 ? Math.max(0, Math.min(100, (currentTime / duration) * 100)) : 0;
+    bar.style.width = pct.toFixed(1) + '%';
+    cur.textContent = fmt(currentTime);
+    dur.textContent = fmt(duration);
+  }
+
+  function patchMusicApp(){
+    const app = window.MusicApp;
+    if (!app || app.__l64f1RightPlayerPatched) return;
+    app.__l64f1RightPlayerPatched = true;
+
+    ['updateMiniPlayer','renderList','play','togglePlay','playNext','playPrev','toggleShuffle','toggleRepeat'].forEach(name => {
+      const old = app[name];
+      if (typeof old !== 'function') return;
+      app[name] = function(){
+        const ret = old.apply(this, arguments);
+        setTimeout(sync, 60);
+        setTimeout(sync, 250);
+        return ret;
+      };
+    });
+  }
+
+  function schedule(){
+    requestAnimationFrame(function(){
+      patchMusicApp();
+      ensurePanel();
+      sync();
+      setTimeout(sync, 150);
+      setTimeout(sync, 600);
+      setTimeout(sync, 1500);
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+
+  window.addEventListener('resize', schedule, { passive:true });
+  window.addEventListener('orientationchange', schedule, { passive:true });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule, { passive:true });
+})();
+</script>
+
+
+
+<style id="lifeos-pha64f2-radio-tv-player-clean-style">
+/* PHA 64F.2: Remove useless preview block in Radio/TV, keep the right column for real player only. */
+body.lifeos-landscape-mini-pc #l64f-media-preview {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-music-right {
+  justify-content: stretch !important;
+  align-items: stretch !important;
+  overflow-y: auto !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #l64f-mp3-right-player {
+  display: flex !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #l64f-mp3-right-player,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-mp3-right-player {
+  display: none !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-music-right > div:not(#l64f-mp3-right-player):not(#l64f-media-preview) {
+  width: 100% !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #radio-player-container,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #tv-player-container {
+  display: block !important;
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border-radius: 18px !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #tv-player-container {
+  padding: 6px !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #tv-video-element {
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: calc(var(--l64f-root-h) - 78px) !important;
+  min-height: 170px !important;
+  object-fit: contain !important;
+  border-radius: 14px !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #radio-player-container {
+  min-height: 150px !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #radio-player-container > div {
+  width: 100% !important;
+  min-height: 142px !important;
+  margin: 0 !important;
+  border-radius: 18px !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #l64f-music-right,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-music-right {
+  padding: 7px !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #l64f-music-right:empty::before,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-music-right:empty::before {
+  content: "Chọn kênh bên trái để phát";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--c-mut);
+}
+</style>
+
+
+<script id="lifeos-pha64f2-radio-tv-player-clean-js">
+(function(){
+  function currentTab(){
+    return (window.MediaHub && window.MediaHub.currentTab) || document.body.dataset.l64fMediaTab || 'music';
+  }
+
+  function cleanRightColumn(){
+    if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+    const tab = currentTab();
+    document.body.dataset.l64fMediaTab = tab;
+
+    const preview = document.getElementById('l64f-media-preview');
+    if (preview) {
+      preview.style.setProperty('display', 'none', 'important');
+      preview.style.setProperty('visibility', 'hidden', 'important');
+    }
+
+    const mp3Panel = document.getElementById('l64f-mp3-right-player');
+    if (mp3Panel) {
+      if (tab === 'music') mp3Panel.style.setProperty('display', 'flex', 'important');
+      else mp3Panel.style.setProperty('display', 'none', 'important');
+    }
+
+    const radio = document.getElementById('radio-player-container');
+    const tv = document.getElementById('tv-player-container');
+    if (radio) {
+      if (tab === 'radio') radio.style.setProperty('display', 'block', 'important');
+      else radio.style.setProperty('display', 'none', 'important');
+    }
+    if (tv) {
+      if (tab === 'tv') tv.style.setProperty('display', 'block', 'important');
+      else tv.style.setProperty('display', 'none', 'important');
+    }
+  }
+
+  function patchMediaHub(){
+    const mh = window.MediaHub;
+    if (!mh || mh.__lifeos64f2PlayerClean) return;
+    mh.__lifeos64f2PlayerClean = true;
+
+    const oldSwitch = mh.switchTab;
+    if (typeof oldSwitch === 'function') {
+      mh.switchTab = function(){
+        const ret = oldSwitch.apply(this, arguments);
+        schedule();
+        return ret;
+      };
+    }
+
+    const oldPlay = mh.playStream;
+    if (typeof oldPlay === 'function') {
+      mh.playStream = function(){
+        const ret = oldPlay.apply(this, arguments);
+        schedule();
+        return ret;
+      };
+    }
+  }
+
+  function schedule(){
+    requestAnimationFrame(function(){
+      patchMediaHub();
+      cleanRightColumn();
+      setTimeout(cleanRightColumn, 80);
+      setTimeout(cleanRightColumn, 260);
+      setTimeout(cleanRightColumn, 800);
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+
+  window.addEventListener('resize', schedule, { passive:true });
+  window.addEventListener('orientationchange', schedule, { passive:true });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule, { passive:true });
+})();
+</script>
+
+
+
+<style id="lifeos-pha64f3-family-chat-landscape-fix-style">
+/* PHA 64F.3: Family tab Mini-PC fix + upload forensic visibility.
+   Keeps Music 64F2 intact. Scope only landscape mini-PC. */
+body.lifeos-landscape-mini-pc #btnInstall {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Family tab must look like a PC split workspace, not zoomed mobile. */
+body.lifeos-landscape-mini-pc #l64f-chat-card {
+  grid-template-columns: minmax(210px, 27%) minmax(0, 73%) !important;
+  gap: 7px !important;
+  padding: 6px !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-chat-left {
+  display: grid !important;
+  grid-template-rows: 54px minmax(0, 1fr) !important;
+  gap: 6px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-chat-left > .bg-gradient-to-r {
+  height: 54px !important;
+  min-height: 54px !important;
+  max-height: 54px !important;
+  padding: 7px 8px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(226,232,240,.9) !important;
+  background: rgba(255,255,255,.88) !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-chat-left > .bg-gradient-to-r .w-11 {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 13px !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-chat-left h2 {
+  font-size: 13px !important;
+  line-height: 1.05 !important;
+  max-width: 128px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-status {
+  font-size: 9.5px !important;
+  line-height: 1.05 !important;
+  max-width: 132px !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-chat-left > .bg-gradient-to-r button {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 12px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-folder-tabs {
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 6px !important;
+  gap: 5px !important;
+  border-radius: 16px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-folder-tabs button,
+body.lifeos-landscape-mini-pc #chat-dynamic-folders button {
+  width: 100% !important;
+  min-height: 30px !important;
+  height: auto !important;
+  justify-content: flex-start !important;
+  padding: 6px 8px !important;
+  border-radius: 11px !important;
+  font-size: 10.5px !important;
+  line-height: 1.1 !important;
+  white-space: normal !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-dynamic-folders {
+  width: 100% !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+/* Right panel: messages fill the middle, input is always visible. */
+body.lifeos-landscape-mini-pc #l64f-chat-right {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto 48px !important;
+  gap: 4px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  background: rgba(248,250,252,.70) !important;
+  border-radius: 16px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-pinned-banner {
+  grid-row: 1 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  max-height: 42px !important;
+  padding: 6px 10px !important;
+  border-radius: 13px !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-messages {
+  grid-row: 2 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 8px 10px !important;
+  border-radius: 16px !important;
+  background: rgba(248,250,252,.88) !important;
+  border: 1px solid rgba(226,232,240,.9) !important;
+  scroll-padding-bottom: 64px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-edit-banner { grid-row: 3 !important; margin: 0 !important; max-height: 38px !important; overflow: hidden !important; }
+body.lifeos-landscape-mini-pc #chat-reply-banner { grid-row: 4 !important; margin: 0 !important; max-height: 38px !important; overflow: hidden !important; }
+body.lifeos-landscape-mini-pc #chat-recording-banner { grid-row: 5 !important; margin: 0 !important; max-height: 40px !important; overflow: hidden !important; }
+
+body.lifeos-landscape-mini-pc #chat-upload-status {
+  grid-row: 6 !important;
+  margin: 0 !important;
+  max-height: 76px !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  border-radius: 13px !important;
+  padding: 6px 8px !important;
+  font-size: 10.5px !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-upload-status span {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  max-height: none !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-form {
+  grid-row: 7 !important;
+  align-self: end !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.96) !important;
+  border: 1px solid rgba(226,232,240,.95) !important;
+  box-shadow: 0 -8px 22px rgba(15,23,42,.06) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-form button {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border-radius: 13px !important;
+  padding: 0 !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-private-toggle {
+  width: 34px !important;
+  min-width: 34px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-input {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  max-height: 38px !important;
+  padding: 8px 10px !important;
+  border-radius: 13px !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+
+/* Make messages/cards compact enough for full landscape overview. */
+body.lifeos-landscape-mini-pc #chat-messages .chat-file-card {
+  min-width: 210px !important;
+  max-width: min(330px, 48vw) !important;
+  padding: 8px !important;
+  border-radius: 14px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-messages [class*="max-w-"] {
+  max-width: min(520px, 76%) !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-messages .text-sm {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-messages .p-4 {
+  padding: 10px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-messages .rounded-2xl,
+body.lifeos-landscape-mini-pc #chat-messages .rounded-3xl {
+  border-radius: 16px !important;
+}
+
+/* Emoji/menu/viewer must be overlay, not part of the grid height. */
+body.lifeos-landscape-mini-pc #chat-emoji-container {
+  position: fixed !important;
+  right: 16px !important;
+  bottom: 62px !important;
+  z-index: 9999999 !important;
+  max-height: 45dvh !important;
+  overflow-y: auto !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-msg-menu,
+body.lifeos-landscape-mini-pc #chat-lightbox,
+body.lifeos-landscape-mini-pc #family-upload-error-modal {
+  position: fixed !important;
+  z-index: 99999999 !important;
+}
+
+/* Make upload detail modal readable on phone landscape. */
+body.lifeos-landscape-mini-pc #family-upload-error-modal > div {
+  max-height: 88dvh !important;
+  width: min(720px, 94vw) !important;
+}
+
+body.lifeos-landscape-mini-pc #family-upload-error-text {
+  max-height: 50dvh !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+
+@media (max-height:430px) {
+  body.lifeos-landscape-mini-pc #l64f-chat-card {
+    grid-template-columns: minmax(185px, 25%) minmax(0, 75%) !important;
+    gap: 5px !important;
+  }
+  body.lifeos-landscape-mini-pc #l64f-chat-left {
+    grid-template-rows: 48px minmax(0, 1fr) !important;
+  }
+  body.lifeos-landscape-mini-pc #l64f-chat-left > .bg-gradient-to-r {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+  }
+  body.lifeos-landscape-mini-pc #chat-form {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+  }
+  body.lifeos-landscape-mini-pc #chat-form button {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+  }
+  body.lifeos-landscape-mini-pc #chat-input {
+    min-height: 34px !important;
+    height: 34px !important;
+    max-height: 34px !important;
+  }
+}
+</style>
+
+
+<script id="lifeos-pha64f3-family-chat-landscape-fix-js">
+(function(){
+  function compactFamilyLayout(){
+    if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+    const right = document.getElementById('l64f-chat-right');
+    const form = document.getElementById('chat-form');
+    const messages = document.getElementById('chat-messages');
+    if (!right || !form || !messages) return;
+
+    right.style.setProperty('grid-template-rows', 'auto minmax(0, 1fr) auto auto auto auto 48px', 'important');
+    right.style.setProperty('overflow', 'hidden', 'important');
+
+    messages.style.setProperty('height', '100%', 'important');
+    messages.style.setProperty('min-height', '0', 'important');
+    messages.style.setProperty('overflow-y', 'auto', 'important');
+
+    form.style.setProperty('height', '48px', 'important');
+    form.style.setProperty('min-height', '48px', 'important');
+    form.style.setProperty('max-height', '48px', 'important');
+
+    const install = document.getElementById('btnInstall');
+    if (install) {
+      install.style.setProperty('display', 'none', 'important');
+      install.style.setProperty('visibility', 'hidden', 'important');
+      install.style.setProperty('pointer-events', 'none', 'important');
+    }
+
+    // Force upload errors to remain readable in landscape; never truncate the mobile filename/error.
+    const bar = document.getElementById('chat-upload-status');
+    if (bar) {
+      bar.style.setProperty('white-space', 'normal', 'important');
+      bar.style.setProperty('word-break', 'break-word', 'important');
+      bar.style.setProperty('overflow-wrap', 'anywhere', 'important');
+      bar.querySelectorAll('span').forEach(s => {
+        s.style.setProperty('white-space', 'normal', 'important');
+        s.style.setProperty('word-break', 'break-word', 'important');
+        s.style.setProperty('overflow-wrap', 'anywhere', 'important');
+        s.classList.remove('truncate');
+      });
+    }
+  }
+
+  function verifyUploadFlowMarkers(){
+    const ce = window.ChatEngine;
+    if (!ce || ce.__lifeos64f3Verified) return;
+    ce.__lifeos64f3Verified = true;
+    try {
+      console.info('[64F3 Family upload check]', {
+        hasSafeName: typeof ce.getSafeTelegramUploadName === 'function',
+        hasLastError: 'lastUploadError' in ce,
+        localStorageKey: 'lifeos_family_last_upload_error',
+        note: 'Ảnh đi sendDocument/document; lỗi upload hiển thị đầy đủ và có Chi tiết lỗi/Thử gửi lại.'
+      });
+    } catch(e) {}
+  }
+
+  function patchSetUploadStatus(){
+    const ce = window.ChatEngine;
+    if (!ce || ce.__lifeos64f3UploadStatusPatched || typeof ce.setUploadStatus !== 'function') return;
+    ce.__lifeos64f3UploadStatusPatched = true;
+    const old = ce.setUploadStatus;
+    ce.setUploadStatus = function(text, state, autoHide){
+      const ret = old.apply(this, arguments);
+      setTimeout(compactFamilyLayout, 20);
+      if (state === 'error') {
+        const bar = document.getElementById('chat-upload-status');
+        if (bar) {
+          bar.style.setProperty('white-space', 'normal', 'important');
+          bar.style.setProperty('word-break', 'break-word', 'important');
+          bar.style.setProperty('overflow-wrap', 'anywhere', 'important');
+          bar.querySelectorAll('span').forEach(s => {
+            s.classList.remove('truncate');
+            s.style.setProperty('white-space', 'normal', 'important');
+            s.style.setProperty('word-break', 'break-word', 'important');
+            s.style.setProperty('overflow-wrap', 'anywhere', 'important');
+          });
+        }
+      }
+      return ret;
+    };
+  }
+
+  function schedule(){
+    requestAnimationFrame(function(){
+      patchSetUploadStatus();
+      verifyUploadFlowMarkers();
+      compactFamilyLayout();
+      setTimeout(compactFamilyLayout, 80);
+      setTimeout(compactFamilyLayout, 260);
+      setTimeout(compactFamilyLayout, 900);
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+
+  window.addEventListener('resize', schedule, { passive:true });
+  window.addEventListener('orientationchange', schedule, { passive:true });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule, { passive:true });
+})();
+</script>
+
+
+
+<style id="lifeos-pha64f4-family-menu-event-fix-style">
+/* PHA 64F.4: family message menu must live outside hidden main and be clickable in Mini-PC. */
+body.lifeos-landscape-mini-pc #chat-msg-menu,
+body.lifeos-landscape-mini-pc #chat-lightbox,
+body.lifeos-landscape-mini-pc #family-upload-error-modal {
+  position: fixed !important;
+  z-index: 99999999 !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-msg-menu {
+  inset: 0 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 10px !important;
+  background: rgba(15, 23, 42, .42) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-msg-menu:not(.hidden) {
+  display: flex !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-msg-menu > div {
+  width: min(420px, 92vw) !important;
+  max-height: 86dvh !important;
+  overflow-y: auto !important;
+  border-radius: 24px !important;
+  padding: 14px !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-messages [data-chat-msg-id],
+body.lifeos-landscape-mini-pc #chat-messages .chat-file-card {
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: rgba(249, 115, 22, .18) !important;
+}
+
+body.lifeos-landscape-mini-pc #chat-messages [data-chat-msg-id]:active,
+body.lifeos-landscape-mini-pc #chat-messages .chat-file-card:active {
+  filter: brightness(.98) !important;
+}
+</style>
+
+
+<script id="lifeos-pha64f4-family-menu-event-fix-js">
+(function(){
+  function forceOverlayToBody(){
+    ['chat-msg-menu','chat-lightbox','family-upload-error-modal'].forEach(function(id){
+      const el = document.getElementById(id);
+      if (el && el.parentElement !== document.body) {
+        document.body.appendChild(el);
+      }
+    });
+  }
+
+  function getMsgIdFromTarget(target){
+    const el = target && target.closest ? target.closest('[data-chat-msg-id]') : null;
+    if (el && el.dataset.chatMsgId) return el.dataset.chatMsgId;
+
+    const card = target && target.closest ? target.closest('.chat-file-card') : null;
+    if (card) {
+      const attr = card.getAttribute('onclick') || '';
+      const m = attr.match(/openMsgMenu\(['"]([^'"]+)['"]\)/);
+      if (m) return m[1];
+      const bubble = card.closest('[data-chat-msg-id]');
+      if (bubble && bubble.dataset.chatMsgId) return bubble.dataset.chatMsgId;
+    }
+    return '';
+  }
+
+  function shouldIgnoreTap(target){
+    if (!target || !target.closest) return false;
+    // Do not steal taps from real action controls.
+    return !!target.closest('button,a,input,textarea,select,label,[contenteditable="true"]');
+  }
+
+  function openMenuById(id){
+    if (!id || !window.ChatEngine || typeof window.ChatEngine.openMsgMenu !== 'function') return false;
+    forceOverlayToBody();
+    try { window.vibrate?.(15); } catch(e) {}
+    try { window.ChatEngine.openMsgMenu(id); } catch(e) { console.warn('[64F4] openMsgMenu failed', e); return false; }
+    forceOverlayToBody();
+    const menu = document.getElementById('chat-msg-menu');
+    if (menu) {
+      menu.classList.remove('hidden');
+      menu.style.setProperty('display', 'flex', 'important');
+      menu.style.setProperty('z-index', '99999999', 'important');
+    }
+    return true;
+  }
+
+  function bindMessageEvents(){
+    const box = document.getElementById('chat-messages');
+    if (!box || box.__lifeos64f4MenuBound) return;
+    box.__lifeos64f4MenuBound = true;
+
+    let down = null;
+    let timer = null;
+
+    box.addEventListener('click', function(e){
+      if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+      if (shouldIgnoreTap(e.target)) return;
+      const id = getMsgIdFromTarget(e.target);
+      if (!id) return;
+      e.preventDefault();
+      e.stopPropagation();
+      openMenuById(id);
+    }, true);
+
+    box.addEventListener('contextmenu', function(e){
+      if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+      const id = getMsgIdFromTarget(e.target);
+      if (!id) return;
+      e.preventDefault();
+      e.stopPropagation();
+      openMenuById(id);
+    }, true);
+
+    box.addEventListener('pointerdown', function(e){
+      if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+      const id = getMsgIdFromTarget(e.target);
+      if (!id) return;
+      down = { id, x: e.clientX, y: e.clientY, target: e.target };
+      clearTimeout(timer);
+      timer = setTimeout(function(){
+        if (!down) return;
+        openMenuById(down.id);
+        down = null;
+      }, 520);
+    }, true);
+
+    box.addEventListener('pointermove', function(e){
+      if (!down) return;
+      if (Math.abs(e.clientX - down.x) > 12 || Math.abs(e.clientY - down.y) > 12) {
+        clearTimeout(timer);
+        down = null;
+      }
+    }, true);
+
+    ['pointerup','pointercancel','mouseleave'].forEach(function(ev){
+      box.addEventListener(ev, function(){
+        clearTimeout(timer);
+        down = null;
+      }, true);
+    });
+  }
+
+  function patchOpenClose(){
+    const ce = window.ChatEngine;
+    if (!ce || ce.__lifeos64f4MenuPatched) return;
+    ce.__lifeos64f4MenuPatched = true;
+
+    if (typeof ce.openMsgMenu === 'function') {
+      const oldOpen = ce.openMsgMenu;
+      ce.openMsgMenu = function(id){
+        forceOverlayToBody();
+        const ret = oldOpen.apply(this, arguments);
+        forceOverlayToBody();
+        const menu = document.getElementById('chat-msg-menu');
+        if (menu) {
+          menu.classList.remove('hidden');
+          menu.style.setProperty('display', 'flex', 'important');
+          menu.style.setProperty('z-index', '99999999', 'important');
+        }
+        return ret;
+      };
+    }
+
+    if (typeof ce.closeMsgMenu === 'function') {
+      const oldClose = ce.closeMsgMenu;
+      ce.closeMsgMenu = function(){
+        const ret = oldClose.apply(this, arguments);
+        const menu = document.getElementById('chat-msg-menu');
+        if (menu) {
+          menu.classList.add('hidden');
+          menu.style.setProperty('display', 'none', 'important');
+        }
+        return ret;
+      };
+    }
+
+    if (typeof ce.render === 'function') {
+      const oldRender = ce.render;
+      ce.render = function(){
+        const ret = oldRender.apply(this, arguments);
+        setTimeout(function(){
+          forceOverlayToBody();
+          bindMessageEvents();
+        }, 30);
+        return ret;
+      };
+    }
+  }
+
+  function schedule(){
+    requestAnimationFrame(function(){
+      forceOverlayToBody();
+      patchOpenClose();
+      bindMessageEvents();
+      setTimeout(forceOverlayToBody, 80);
+      setTimeout(bindMessageEvents, 120);
+      setTimeout(function(){
+        forceOverlayToBody();
+        bindMessageEvents();
+      }, 700);
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+
+  window.addEventListener('resize', schedule, { passive:true });
+  window.addEventListener('orientationchange', schedule, { passive:true });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule, { passive:true });
+})();
+</script>
+
+
+
+<style id="lifeos-pha64g-focus-dedicated-landscape-workspace-style">
+/* PHA 64G: Dedicated Focus Landscape Workspace.
+   Starts from stable F4. Scope: phone landscape mini-PC + Focus only.
+   Desktop PC, phone portrait, Music, Family, upload, HLS remain untouched. */
+body.lifeos-landscape-mini-pc #l64f-focus-card.lifeos64g-focus-on {
+  position: relative !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.lifeos-landscape-mini-pc #l64f-focus-card.lifeos64g-focus-on > .bg-white {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-focus-landscape-workspace {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 50 !important;
+  display: grid !important;
+  grid-template-rows: 34px 34px minmax(0, 1fr) !important;
+  gap: 7px !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+  padding: 8px 10px 10px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(244, 63, 94, .25) !important;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(244,63,94,.08), transparent 32%),
+    linear-gradient(135deg, rgba(255,255,255,.94), rgba(255,241,242,.78)) !important;
+  overflow: hidden !important;
+}
+
+body:not(.lifeos-landscape-mini-pc) #lifeos64g-focus-landscape-workspace {
+  display: none !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-focus-head {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-focus-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+  font-size: 12px !important;
+  font-weight: 1000 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  color: var(--c-primary) !important;
+  white-space: nowrap !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-focus-sound {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 13px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(244, 63, 94, .25) !important;
+  background: rgba(255,255,255,.72) !important;
+  color: var(--c-primary) !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-focus-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+  min-height: 0 !important;
+  border-radius: 999px !important;
+  padding: 3px !important;
+  background: rgba(255, 228, 230, .78) !important;
+  border: 1px solid rgba(244, 63, 94, .24) !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-focus-tab {
+  min-width: 0 !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 7px !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #be123c !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-focus-tab.is-active {
+  background: rgba(255,255,255,.9) !important;
+  color: var(--c-primary) !important;
+  box-shadow: 0 8px 18px rgba(244, 63, 94, .12) !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-focus-body {
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-pane {
+  display: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-pane.is-active {
+  display: block !important;
+}
+
+/* Ngày giờ: true full-horizontal 2-column layout */
+body.lifeos-landscape-mini-pc #lifeos64g-dateclock-pane.is-active {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.58fr) minmax(260px, 1fr) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-dateclock-left,
+body.lifeos-landscape-mini-pc #lifeos64g-dateclock-right {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-dateclock-left {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  border: 1px solid rgba(244, 63, 94, .28) !important;
+  border-radius: 22px !important;
+  background: rgba(255,255,255,.62) !important;
+  padding: 18px 20px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.88) !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-dateclock-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  color: var(--c-primary) !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  font-weight: 1000 !important;
+  letter-spacing: .15em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 9px !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-dateclock-time {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  color: #9f1239 !important;
+  font-size: clamp(3.05rem, 12.2vh, 5.4rem) !important;
+  line-height: .9 !important;
+  font-weight: 1000 !important;
+  letter-spacing: -.08em !important;
+  white-space: nowrap !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-dateclock-weekday {
+  color: var(--c-primary) !important;
+  font-size: clamp(1.05rem, 3.2vh, 1.5rem) !important;
+  line-height: 1.1 !important;
+  font-weight: 1000 !important;
+  margin-top: 9px !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-dateclock-note {
+  margin-top: auto !important;
+  padding-top: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  color: rgba(190,18,60,.72) !important;
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+  font-weight: 850 !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-dateclock-right {
+  display: grid !important;
+  grid-template-rows: minmax(0,1fr) minmax(0,1fr) !important;
+  gap: 12px !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-date-card {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  border: 1px solid rgba(244, 63, 94, .28) !important;
+  border-radius: 22px !important;
+  background: rgba(255,255,255,.54) !important;
+  padding: 15px 17px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.88) !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-date-card-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  color: #be123c !important;
+  font-size: 10.5px !important;
+  line-height: 1.15 !important;
+  font-weight: 1000 !important;
+  letter-spacing: .11em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 8px !important;
+  white-space: nowrap !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-date-short {
+  color: #9f1239 !important;
+  font-size: clamp(1.35rem, 4.4vh, 2rem) !important;
+  line-height: 1 !important;
+  font-weight: 1000 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-date-long {
+  color: rgba(159,18,57,.74) !important;
+  margin-top: 7px !important;
+  font-size: 11px !important;
+  line-height: 1.28 !important;
+  font-weight: 800 !important;
+  white-space: normal !important;
+}
+
+/* Weather placeholder/full mapping foundation for next step */
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active {
+  display: grid !important;
+  grid-template-rows: 40px minmax(0,1fr) !important;
+  gap: 10px !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-weather-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-weather-title {
+  font-size: 13px !important;
+  font-weight: 1000 !important;
+  color: #0f172a !important;
+  text-transform: uppercase !important;
+  letter-spacing: .08em !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-weather-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0,1.05fr) minmax(0,.95fr) !important;
+  gap: 12px !important;
+  min-height: 0 !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-weather-main,
+body.lifeos-landscape-mini-pc #lifeos64g-weather-stats {
+  min-height: 0 !important;
+  border: 1px solid rgba(56,189,248,.22) !important;
+  border-radius: 22px !important;
+  background: rgba(255,255,255,.58) !important;
+  padding: 16px !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-weather-stats {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  gap: 10px !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-stat {
+  min-width: 0 !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.62) !important;
+  padding: 10px !important;
+  border: 1px solid rgba(226,232,240,.7) !important;
+}
+
+body.lifeos-landscape-mini-pc .lifeos64g-generic-pane.is-active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px dashed rgba(244, 63, 94, .28) !important;
+  border-radius: 22px !important;
+  color: rgba(159,18,57,.68) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  padding: 16px !important;
+}
+
+@media (max-height: 430px) {
+  body.lifeos-landscape-mini-pc #lifeos64g-focus-landscape-workspace {
+    grid-template-rows: 30px 30px minmax(0,1fr) !important;
+    gap: 5px !important;
+    padding: 7px 9px 9px !important;
+  }
+  body.lifeos-landscape-mini-pc .lifeos64g-focus-tab {
+    height: 24px !important;
+    min-height: 24px !important;
+    font-size: 9px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-dateclock-pane.is-active {
+    grid-template-columns: minmax(0, 1.48fr) minmax(235px, .98fr) !important;
+    gap: 10px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-dateclock-left {
+    padding: 14px 16px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-dateclock-time {
+    font-size: clamp(2.55rem, 10.8vh, 4rem) !important;
+  }
+  body.lifeos-landscape-mini-pc .lifeos64g-date-card {
+    padding: 12px 14px !important;
+  }
+  body.lifeos-landscape-mini-pc .lifeos64g-date-short {
+    font-size: clamp(1.12rem, 3.7vh, 1.55rem) !important;
+  }
+}
+</style>
+
+
+<script id="lifeos-pha64g-focus-dedicated-landscape-workspace-js">
+(function(){
+  const ROOT_ID = 'lifeos64g-focus-landscape-workspace';
+  const MODES = ['dateclock','weather','news','countdown','stopwatch'];
+
+  function isPhoneLandscapeTarget(){
+    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+    return window.innerWidth > window.innerHeight && window.innerHeight <= 620 && (coarse || mobileUA);
+  }
+
+  function isLandscapeMiniFocus(){
+    const focusPanel = document.getElementById('l64f-panel-focus');
+    return !!(
+      document.body.classList.contains('lifeos-landscape-mini-pc') &&
+      isPhoneLandscapeTarget() &&
+      focusPanel &&
+      focusPanel.classList.contains('is-active')
+    );
+  }
+
+  function currentMode(){
+    const pairs = [
+      ['dateclock','mode-dateclock-ui'],
+      ['weather','mode-weather-ui'],
+      ['news','mode-news-ui'],
+      ['countdown','mode-countdown-ui'],
+      ['stopwatch','mode-stopwatch-ui']
+    ];
+    for (const [mode,id] of pairs) {
+      const el = document.getElementById(id);
+      if (el && !el.classList.contains('hidden')) return mode;
+    }
+    return 'dateclock';
+  }
+
+  function text(id, fallback){
+    const el = document.getElementById(id);
+    const v = el ? String(el.textContent || '').trim() : '';
+    return v || fallback || '--';
+  }
+
+  function ensureRoot(){
+    const card = document.getElementById('l64f-focus-card');
+    if (!card) return null;
+
+    let root = document.getElementById(ROOT_ID);
+    if (root) return root;
+
+    root = document.createElement('div');
+    root.id = ROOT_ID;
+    root.innerHTML = `
+      <div id="lifeos64g-focus-head">
+        <div id="lifeos64g-focus-title"><i class="ph-fill ph-hourglass-high"></i><span>Bộ đếm thời gian</span></div>
+        <button id="lifeos64g-focus-sound" type="button" title="Âm thanh"><i class="ph-bold ph-speaker-high"></i></button>
+      </div>
+      <div id="lifeos64g-focus-tabs">
+        <button class="lifeos64g-focus-tab" data-mode="dateclock">Ngày giờ</button>
+        <button class="lifeos64g-focus-tab" data-mode="weather">Thời tiết</button>
+        <button class="lifeos64g-focus-tab" data-mode="news">Nhịp Sống</button>
+        <button class="lifeos64g-focus-tab" data-mode="countdown">Đếm ngược</button>
+        <button class="lifeos64g-focus-tab" data-mode="stopwatch">Bấm giờ</button>
+      </div>
+      <div id="lifeos64g-focus-body">
+        <section id="lifeos64g-dateclock-pane" class="lifeos64g-pane">
+          <div id="lifeos64g-dateclock-left">
+            <div id="lifeos64g-dateclock-label"><i class="ph-bold ph-clock"></i><span>Theo giờ hệ thống thiết bị</span></div>
+            <div id="lifeos64g-dateclock-time">--:--:--</div>
+            <div id="lifeos64g-dateclock-weekday">--</div>
+            <div id="lifeos64g-dateclock-note"><i class="ph-bold ph-device-mobile"></i><span>Theo giờ hệ thống thiết bị</span></div>
+          </div>
+          <div id="lifeos64g-dateclock-right">
+            <div class="lifeos64g-date-card">
+              <div class="lifeos64g-date-card-label"><i class="ph-fill ph-sun"></i><span>Dương lịch</span></div>
+              <div id="lifeos64g-solar-short" class="lifeos64g-date-short">--/--/----</div>
+              <div id="lifeos64g-solar-long" class="lifeos64g-date-long">--</div>
+            </div>
+            <div class="lifeos64g-date-card">
+              <div class="lifeos64g-date-card-label"><i class="ph-fill ph-moon-stars"></i><span>Âm lịch</span></div>
+              <div id="lifeos64g-lunar-short" class="lifeos64g-date-short">--/--/----</div>
+              <div id="lifeos64g-lunar-long" class="lifeos64g-date-long">--</div>
+            </div>
+          </div>
+        </section>
+        <section id="lifeos64g-weather-pane" class="lifeos64g-pane">
+          <div id="lifeos64g-weather-head">
+            <div id="lifeos64g-weather-title"><i class="ph-fill ph-cloud-sun"></i> Thời tiết</div>
+            <div id="lifeos64g-weather-status">--</div>
+          </div>
+          <div id="lifeos64g-weather-grid">
+            <div id="lifeos64g-weather-main">
+              <div id="lifeos64g-weather-location">--</div>
+              <div id="lifeos64g-weather-desc">--</div>
+              <div id="lifeos64g-weather-temp" style="font-size:clamp(2.2rem,8vh,4rem);font-weight:1000;color:#0f172a;line-height:1;margin-top:8px">--°C</div>
+            </div>
+            <div id="lifeos64g-weather-stats">
+              <div class="lifeos64g-stat"><b>Cảm giác</b><div id="lifeos64g-weather-feels">--</div></div>
+              <div class="lifeos64g-stat"><b>Độ ẩm</b><div id="lifeos64g-weather-humidity">--</div></div>
+              <div class="lifeos64g-stat"><b>Gió</b><div id="lifeos64g-weather-wind">--</div></div>
+              <div class="lifeos64g-stat"><b>Lượng mưa</b><div id="lifeos64g-weather-rain">--</div></div>
+            </div>
+          </div>
+        </section>
+        <section id="lifeos64g-news-pane" class="lifeos64g-pane lifeos64g-generic-pane">Nhịp Sống sẽ được map riêng sau khi Ngày giờ đạt.</section>
+        <section id="lifeos64g-countdown-pane" class="lifeos64g-pane lifeos64g-generic-pane">Đếm ngược sẽ được map riêng sau khi Ngày giờ đạt.</section>
+        <section id="lifeos64g-stopwatch-pane" class="lifeos64g-pane lifeos64g-generic-pane">Bấm giờ sẽ được map riêng sau khi Ngày giờ đạt.</section>
+      </div>
+    `;
+    card.appendChild(root);
+
+    root.querySelector('#lifeos64g-focus-sound').onclick = function(){
+      try { window.toggleTimerSound?.(); } catch(e) {}
+    };
+
+    root.querySelectorAll('.lifeos64g-focus-tab').forEach(btn => {
+      btn.onclick = function(){
+        const mode = btn.dataset.mode || 'dateclock';
+        try { window.switchTimerMode?.(mode); } catch(e) {}
+        setMode(mode);
+        sync();
+      };
+    });
+
+    return root;
+  }
+
+  function set(id, value){
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function syncDateClock(){
+    set('lifeos64g-dateclock-time', text('dateclock-time','--:--:--'));
+    set('lifeos64g-dateclock-weekday', text('dateclock-weekday','--'));
+    set('lifeos64g-solar-short', text('dateclock-solar-short','--/--/----'));
+    set('lifeos64g-solar-long', text('dateclock-solar-long','--'));
+    set('lifeos64g-lunar-short', text('dateclock-lunar-short','--/--/----'));
+    set('lifeos64g-lunar-long', text('dateclock-lunar-long','--'));
+  }
+
+  function syncWeather(){
+    set('lifeos64g-weather-status', text('weather-status',''));
+    set('lifeos64g-weather-location', text('weather-location-name','--'));
+    set('lifeos64g-weather-desc', text('weather-desc','--'));
+    set('lifeos64g-weather-temp', text('weather-temp','--°C'));
+    set('lifeos64g-weather-feels', text('weather-feels','--'));
+    set('lifeos64g-weather-humidity', text('weather-humidity','--'));
+    set('lifeos64g-weather-wind', text('weather-wind','--'));
+    set('lifeos64g-weather-rain', text('weather-rain','--'));
+  }
+
+  function setMode(mode){
+    mode = MODES.includes(mode) ? mode : 'dateclock';
+    document.querySelectorAll('.lifeos64g-focus-tab').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.mode === mode);
+    });
+    document.querySelectorAll('.lifeos64g-pane').forEach(p => p.classList.remove('is-active'));
+    const pane = document.getElementById('lifeos64g-' + mode + '-pane');
+    if (pane) pane.classList.add('is-active');
+  }
+
+  function hideRoot(){
+    const card = document.getElementById('l64f-focus-card');
+    const root = document.getElementById(ROOT_ID);
+    if (card) card.classList.remove('lifeos64g-focus-on');
+    if (root) root.style.display = 'none';
+  }
+
+  function showRoot(){
+    const card = document.getElementById('l64f-focus-card');
+    const root = ensureRoot();
+    if (!card || !root) return;
+    card.classList.add('lifeos64g-focus-on');
+    root.style.display = 'grid';
+  }
+
+  function sync(){
+    if (!isLandscapeMiniFocus()) {
+      hideRoot();
+      return;
+    }
+    showRoot();
+    const mode = currentMode();
+    setMode(mode);
+    syncDateClock();
+    syncWeather();
+  }
+
+  function patchSwitches(){
+    if (window.__lifeos64gFocusWorkspacePatched) return;
+    window.__lifeos64gFocusWorkspacePatched = true;
+
+    const oldTimer = window.switchTimerMode;
+    if (typeof oldTimer === 'function') {
+      window.switchTimerMode = function(mode){
+        const ret = oldTimer.apply(this, arguments);
+        setTimeout(sync, 20);
+        setTimeout(sync, 120);
+        return ret;
+      };
+    }
+
+    const oldDesktop = window.setDesktopWorkspace;
+    if (typeof oldDesktop === 'function') {
+      window.setDesktopWorkspace = function(mode){
+        const ret = oldDesktop.apply(this, arguments);
+        setTimeout(sync, 20);
+        setTimeout(sync, 120);
+        return ret;
+      };
+    }
+
+    const oldSwitchTab = window.switchTab;
+    if (typeof oldSwitchTab === 'function') {
+      window.switchTab = function(){
+        const ret = oldSwitchTab.apply(this, arguments);
+        setTimeout(sync, 20);
+        setTimeout(sync, 120);
+        return ret;
+      };
+    }
+  }
+
+  function schedule(){
+    requestAnimationFrame(function(){
+      patchSwitches();
+      sync();
+      setTimeout(sync, 80);
+      setTimeout(sync, 240);
+      setTimeout(sync, 700);
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+
+  setInterval(sync, 1000);
+  window.addEventListener('resize', schedule, { passive:true });
+  window.addEventListener('orientationchange', schedule, { passive:true });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule, { passive:true });
+})();
+</script>
+
+
+
+<style id="lifeos-pha64h-focus-submodes-landscape-style">
+/* PHA 64H: Map Focus submodes in dedicated landscape workspace.
+   Does NOT modify passed DateClock layout. Scope: phone landscape mini-PC only. */
+body.lifeos-landscape-mini-pc #lifeos64g-focus-landscape-workspace.lifeos64h-upgraded {
+  --focus64h-gap: 12px;
+}
+body.lifeos-landscape-mini-pc .lifeos64h-mode-shell {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64h-card {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  border: 1px solid rgba(244,63,94,.22) !important;
+  border-radius: 20px !important;
+  background: rgba(255,255,255,.62) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86), 0 10px 24px rgba(15,23,42,.04) !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64h-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64h-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+  font-weight: 1000 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  color: var(--c-primary) !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64h-muted {
+  color: rgba(159,18,57,.70) !important;
+  font-size: 11px !important;
+  font-weight: 750 !important;
+  line-height: 1.35 !important;
+}
+
+/* WEATHER: removed in PHA 64N; consolidated by lifeos-pha64n-weather-landscape-consolidated-style. */
+/* NEWS / Nhịp Sống: summary + filter left, compact article grid right. */
+body.lifeos-landscape-mini-pc #lifeos64g-news-pane.is-active.lifeos64h-ready {
+  display: grid !important;
+  grid-template-columns: minmax(0, 34%) minmax(0, 66%) !important;
+  gap: var(--focus64h-gap) !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-news-left {
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0,1fr) !important;
+  gap: 10px !important;
+  padding: 13px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-news-filters {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  align-content: flex-start !important;
+  overflow-y: auto !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-news-filters button {
+  height: 30px !important;
+  padding: 0 9px !important;
+  border-radius: 11px !important;
+  font-size: 10px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-news-list {
+  padding: 10px !important;
+  columns: 2 220px !important;
+  column-gap: 10px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-news-list > * {
+  display: inline-block !important;
+  width: 100% !important;
+  break-inside: avoid !important;
+  margin: 0 0 10px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-news-list article {
+  padding: 10px !important;
+  border-radius: 15px !important;
+  font-size: 11px !important;
+  line-height: 1.28 !important;
+}
+
+/* COUNTDOWN: setup/form left, active timer right. */
+body.lifeos-landscape-mini-pc #lifeos64g-countdown-pane.is-active.lifeos64h-ready {
+  display: grid !important;
+  grid-template-columns: minmax(0, 40%) minmax(0, 60%) !important;
+  gap: var(--focus64h-gap) !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-cd-left,
+body.lifeos-landscape-mini-pc #lifeos64h-cd-right {
+  padding: 13px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-cd-inputs {
+  display: grid !important;
+  grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64h-cd-field label {
+  display: block !important;
+  font-size: 9px !important;
+  font-weight: 1000 !important;
+  letter-spacing: .08em !important;
+  color: rgba(190,18,60,.72) !important;
+  text-transform: uppercase !important;
+  margin-bottom: 5px !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64h-cd-field input {
+  width: 100% !important;
+  height: 42px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(244,63,94,.22) !important;
+  background: rgba(255,255,255,.72) !important;
+  text-align: center !important;
+  font-size: 18px !important;
+  font-weight: 1000 !important;
+  color: #9f1239 !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-cd-presets {
+  margin-top: 12px !important;
+  display: grid !important;
+  grid-template-columns: repeat(4,minmax(0,1fr)) !important;
+  gap: 7px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-cd-display {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: clamp(3rem, 11vh, 5.2rem) !important;
+  line-height: .9 !important;
+  font-weight: 1000 !important;
+  color: #9f1239 !important;
+  letter-spacing: -.08em !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-cd-actions,
+body.lifeos-landscape-mini-pc #lifeos64h-sw-actions {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) 92px !important;
+  gap: 8px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-cd-actions button,
+body.lifeos-landscape-mini-pc #lifeos64h-sw-actions button {
+  height: 42px !important;
+  border-radius: 15px !important;
+  font-size: 12px !important;
+}
+
+/* STOPWATCH: clock/actions left, lap/summary right. */
+body.lifeos-landscape-mini-pc #lifeos64g-stopwatch-pane.is-active.lifeos64h-ready {
+  display: grid !important;
+  grid-template-columns: minmax(0, 58%) minmax(0, 42%) !important;
+  gap: var(--focus64h-gap) !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-sw-left,
+body.lifeos-landscape-mini-pc #lifeos64h-sw-right {
+  padding: 13px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-sw-display {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: clamp(3rem, 11vh, 5.2rem) !important;
+  line-height: .9 !important;
+  font-weight: 1000 !important;
+  color: #065f46 !important;
+  letter-spacing: -.08em !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64h-sw-laps {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  margin-top: 10px !important;
+  padding: 10px !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.55) !important;
+  border: 1px dashed rgba(16,185,129,.28) !important;
+  overflow-y: auto !important;
+}
+
+@media (max-height: 430px) {
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64h-ready { grid-template-columns: minmax(0,40%) minmax(0,60%) !important; gap: 10px !important; }
+  body.lifeos-landscape-mini-pc #lifeos64h-weather-left,
+  body.lifeos-landscape-mini-pc #lifeos64h-cd-left,
+  body.lifeos-landscape-mini-pc #lifeos64h-cd-right,
+  body.lifeos-landscape-mini-pc #lifeos64h-sw-left,
+  body.lifeos-landscape-mini-pc #lifeos64h-sw-right { padding: 10px !important; }
+  body.lifeos-landscape-mini-pc #lifeos64h-weather-stats { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  body.lifeos-landscape-mini-pc #lifeos64h-weather-forecast { grid-template-columns: 1fr 1fr !important; gap: 8px !important; padding: 8px !important; }
+  body.lifeos-landscape-mini-pc #lifeos64h-cd-display,
+  body.lifeos-landscape-mini-pc #lifeos64h-sw-display { font-size: clamp(2.55rem, 10vh, 4rem) !important; }
+  body.lifeos-landscape-mini-pc #lifeos64h-news-list { columns: 2 190px !important; }
+  body.lifeos-landscape-mini-pc #lifeos64h-cd-presets { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+}
+</style>
+
+
+<script id="lifeos-pha64h-focus-submodes-landscape-js">
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function txt(id, fallback){ const el = byId(id); const v = el ? String(el.textContent || '').trim() : ''; return v || fallback || '--'; }
+  function html(id){ const el = byId(id); return el ? el.innerHTML : ''; }
+  function isFocusLandscape(){
+    return !!(document.body.classList.contains('lifeos-landscape-mini-pc') && byId('l64f-panel-focus')?.classList.contains('is-active'));
+  }
+  function currentMode(){
+    const map = [['weather','mode-weather-ui'],['news','mode-news-ui'],['countdown','mode-countdown-ui'],['stopwatch','mode-stopwatch-ui'],['dateclock','mode-dateclock-ui']];
+    for (const [m,id] of map){ const el = byId(id); if (el && !el.classList.contains('hidden')) return m; }
+    return 'dateclock';
+  }
+  function setText(id, val){ const el = byId(id); if(el) el.textContent = val; }
+
+  function ensureWeatherPane(){
+    const pane = byId('lifeos64g-weather-pane'); if(!pane || pane.dataset.lifeos64hReady) return;
+    pane.dataset.lifeos64hReady = '1';
+    pane.classList.add('lifeos64h-ready');
+    pane.innerHTML = `
+      <div id="lifeos64h-weather-left" class="lifeos64h-card">
+        <div class="lifeos64h-title"><i class="ph-fill ph-cloud-sun"></i><span>Thời tiết</span><span id="lifeos64h-weather-updated" class="lifeos64h-muted" style="margin-left:auto">--:--</span></div>
+        <div id="lifeos64h-weather-locs">
+          <button type="button" data-loc="hanoi">Hà Nội</button><button type="button" data-loc="noibai">Nội Bài</button><button type="button" data-loc="socson">Sóc Sơn</button><button type="button" id="lifeos64h-weather-refresh"><i class="ph-bold ph-arrows-clockwise"></i></button>
+        </div>
+        <div id="lifeos64h-weather-main">
+          <div id="lifeos64h-weather-place">--</div><div id="lifeos64h-weather-desc">--</div><div id="lifeos64h-weather-temp">--°</div>
+        </div>
+        <div id="lifeos64h-weather-ai" class="lifeos64h-muted">--</div>
+      </div>
+      <div id="lifeos64h-weather-right">
+        <div id="lifeos64h-weather-stats" class="lifeos64h-card">
+          <div class="lifeos64h-stat"><b>Cảm giác</b><div id="lifeos64h-weather-feels">--</div></div><div class="lifeos64h-stat"><b>Độ ẩm</b><div id="lifeos64h-weather-humidity">--</div></div><div class="lifeos64h-stat"><b>Gió</b><div id="lifeos64h-weather-wind">--</div></div><div class="lifeos64h-stat"><b>Lượng mưa</b><div id="lifeos64h-weather-rain">--</div></div>
+        </div>
+        <div id="lifeos64h-weather-forecast" class="lifeos64h-card">
+          <div class="lifeos64h-forecast-block"><div class="lifeos64h-title"><i class="ph-bold ph-clock"></i><span>24 giờ tới</span></div><div id="lifeos64h-weather-hourly" class="lifeos64h-forecast-list"></div></div>
+          <div class="lifeos64h-forecast-block"><div class="lifeos64h-title"><i class="ph-bold ph-calendar-dots"></i><span>5 ngày tới</span></div><div id="lifeos64h-weather-daily" class="lifeos64h-forecast-list"></div></div>
+        </div>
+      </div>`;
+    pane.querySelectorAll('[data-loc]').forEach(btn => btn.onclick = () => { try{ window.setWeatherLocation?.(btn.dataset.loc); }catch(e){} setTimeout(syncWeather, 200); });
+    byId('lifeos64h-weather-refresh').onclick = () => { try{ window.refreshWeather?.(); }catch(e){} setTimeout(syncWeather, 200); };
+  }
+  function syncWeather(){
+    ensureWeatherPane();
+    setText('lifeos64h-weather-updated', txt('weather-updated','--:--'));
+    setText('lifeos64h-weather-place', txt('weather-location-name','--'));
+    setText('lifeos64h-weather-desc', txt('weather-desc','--'));
+    setText('lifeos64h-weather-temp', txt('weather-temp','--°'));
+    setText('lifeos64h-weather-feels', txt('weather-feels','--'));
+    setText('lifeos64h-weather-humidity', txt('weather-humidity','--'));
+    setText('lifeos64h-weather-wind', txt('weather-wind','--'));
+    setText('lifeos64h-weather-rain', txt('weather-rain','--'));
+    setText('lifeos64h-weather-ai', txt('weather-ai-text', txt('weather-status','Chưa có tóm tắt thời tiết.')));
+    const hourly = byId('lifeos64h-weather-hourly'); if(hourly) hourly.innerHTML = html('weather-hourly-list') || '<div class="lifeos64h-muted">Chưa có dự báo giờ.</div>';
+    const daily = byId('lifeos64h-weather-daily'); if(daily) daily.innerHTML = html('weather-daily-list') || '<div class="lifeos64h-muted">Chưa có dự báo ngày.</div>';
+  }
+
+  function ensureNewsPane(){
+    const pane = byId('lifeos64g-news-pane'); if(!pane || pane.dataset.lifeos64hReady) return;
+    pane.dataset.lifeos64hReady = '1';
+    pane.classList.remove('lifeos64g-generic-pane');
+    pane.classList.add('lifeos64h-ready');
+    pane.innerHTML = `
+      <div id="lifeos64h-news-left" class="lifeos64h-card">
+        <div class="lifeos64h-title"><i class="ph-bold ph-newspaper"></i><span>Nhịp Sống</span></div>
+        <div class="lifeos64h-muted">Tin gần Nội Bài · Sóc Sơn · Hà Nội</div>
+        <div id="lifeos64h-news-updated" class="lifeos64h-muted">Chưa cập nhật</div>
+        <button id="lifeos64h-news-refresh" class="lifeos64h-btn" type="button"><i class="ph-bold ph-arrow-clockwise"></i> Làm mới</button>
+        <div id="lifeos64h-news-status" class="lifeos64h-muted"></div>
+        <div id="lifeos64h-news-filters" class="lifeos64h-scroll"></div>
+      </div>
+      <div id="lifeos64h-news-list" class="lifeos64h-card lifeos64h-scroll"></div>`;
+    byId('lifeos64h-news-refresh').onclick = () => { try{ window.NewsApp?.load?.(true); }catch(e){} setTimeout(syncNews, 400); };
+  }
+  function syncNews(){
+    ensureNewsPane();
+    setText('lifeos64h-news-updated', txt('news-updated','Chưa cập nhật'));
+    setText('lifeos64h-news-status', txt('news-status',''));
+    const filters = byId('lifeos64h-news-filters'); if(filters) filters.innerHTML = html('news-filter-tabs') || '<div class="lifeos64h-muted">Chưa có bộ lọc.</div>';
+    const list = byId('lifeos64h-news-list'); if(list) list.innerHTML = html('news-list') || '<div class="lifeos64h-muted">Chưa có tin mới. Bấm Làm mới.</div>';
+  }
+
+  function ensureCountdownPane(){
+    const pane = byId('lifeos64g-countdown-pane'); if(!pane || pane.dataset.lifeos64hReady) return;
+    pane.dataset.lifeos64hReady = '1';
+    pane.classList.remove('lifeos64g-generic-pane');
+    pane.classList.add('lifeos64h-ready');
+    pane.innerHTML = `
+      <div id="lifeos64h-cd-left" class="lifeos64h-card">
+        <div class="lifeos64h-title"><i class="ph-bold ph-hourglass-medium"></i><span>Thiết lập đếm ngược</span></div>
+        <div class="lifeos64h-muted">Nhập thời gian, vừa thấy form vừa thấy đồng hồ chính.</div>
+        <div id="lifeos64h-cd-inputs"><div class="lifeos64h-cd-field"><label>Giờ</label><input id="lifeos64h-in-hr" inputmode="numeric"></div><div class="lifeos64h-cd-field"><label>Phút</label><input id="lifeos64h-in-min" inputmode="numeric"></div><div class="lifeos64h-cd-field"><label>Giây</label><input id="lifeos64h-in-sec" inputmode="numeric"></div></div>
+        <div id="lifeos64h-cd-presets"><button class="lifeos64h-btn" data-min="5">5p</button><button class="lifeos64h-btn" data-min="10">10p</button><button class="lifeos64h-btn" data-min="25">25p</button><button class="lifeos64h-btn" data-min="45">45p</button></div>
+      </div>
+      <div id="lifeos64h-cd-right" class="lifeos64h-card"><div class="lifeos64h-title"><i class="ph-bold ph-timer"></i><span>Đồng hồ chính</span></div><div id="lifeos64h-cd-display">00:25:00</div><div id="lifeos64h-cd-actions"><button id="lifeos64h-cd-toggle" class="lifeos64h-btn" type="button"><i class="ph-fill ph-play"></i> Bắt đầu</button><button id="lifeos64h-cd-reset" class="lifeos64h-btn" type="button"><i class="ph-bold ph-arrow-counter-clockwise"></i></button></div></div>`;
+    ['hr','min','sec'].forEach(k => { const proxy = byId('lifeos64h-in-' + k); const original = byId(k === 'hr' ? 'in-hr' : (k === 'min' ? 'in-min' : 'in-sec')); if(proxy && original){ proxy.oninput = () => { original.value = proxy.value; }; }});
+    pane.querySelectorAll('[data-min]').forEach(btn => btn.onclick = () => { try{ window.applyTimerPreset?.(Number(btn.dataset.min)); }catch(e){} syncCountdown(); });
+    byId('lifeos64h-cd-toggle').onclick = () => { try{ window.toggleCountdown?.(); }catch(e){} setTimeout(syncCountdown, 80); };
+    byId('lifeos64h-cd-reset').onclick = () => { try{ window.resetCountdown?.(); }catch(e){} setTimeout(syncCountdown, 80); };
+  }
+  function syncCountdown(){
+    ensureCountdownPane();
+    const vals = { hr: byId('in-hr')?.value || '', min: byId('in-min')?.value || '', sec: byId('in-sec')?.value || '' };
+    if(byId('lifeos64h-in-hr') && document.activeElement !== byId('lifeos64h-in-hr')) byId('lifeos64h-in-hr').value = vals.hr;
+    if(byId('lifeos64h-in-min') && document.activeElement !== byId('lifeos64h-in-min')) byId('lifeos64h-in-min').value = vals.min;
+    if(byId('lifeos64h-in-sec') && document.activeElement !== byId('lifeos64h-in-sec')) byId('lifeos64h-in-sec').value = vals.sec;
+    const h = txt('cd-hr','').replace(':',''); const m = txt('cd-min','00'); const s = txt('cd-sec','00');
+    setText('lifeos64h-cd-display', (h ? h + ':' : '00:') + m + ':' + s);
+    const originalBtn = byId('cd-toggle-btn'); if(byId('lifeos64h-cd-toggle') && originalBtn) byId('lifeos64h-cd-toggle').innerHTML = originalBtn.innerHTML;
+  }
+
+  function ensureStopwatchPane(){
+    const pane = byId('lifeos64g-stopwatch-pane'); if(!pane || pane.dataset.lifeos64hReady) return;
+    pane.dataset.lifeos64hReady = '1';
+    pane.classList.remove('lifeos64g-generic-pane');
+    pane.classList.add('lifeos64h-ready');
+    pane.innerHTML = `
+      <div id="lifeos64h-sw-left" class="lifeos64h-card"><div class="lifeos64h-title"><i class="ph-bold ph-stopwatch"></i><span>Bấm giờ</span></div><div id="lifeos64h-sw-display">00:00.00</div><div id="lifeos64h-sw-actions"><button id="lifeos64h-sw-toggle" class="lifeos64h-btn" type="button"><i class="ph-fill ph-play"></i> Bắt đầu</button><button id="lifeos64h-sw-reset" class="lifeos64h-btn" type="button"><i class="ph-bold ph-arrow-counter-clockwise"></i></button></div></div>
+      <div id="lifeos64h-sw-right" class="lifeos64h-card"><div class="lifeos64h-title"><i class="ph-bold ph-list-numbers"></i><span>Vòng / Ghi chú</span></div><div id="lifeos64h-sw-laps" class="lifeos64h-muted">Chưa có danh sách Lap trong logic hiện tại. Đồng hồ chính vẫn hoạt động đầy đủ.</div></div>`;
+    byId('lifeos64h-sw-toggle').onclick = () => { try{ window.toggleStopwatch?.(); }catch(e){} setTimeout(syncStopwatch, 80); };
+    byId('lifeos64h-sw-reset').onclick = () => { try{ window.resetStopwatch?.(); }catch(e){} setTimeout(syncStopwatch, 80); };
+  }
+  function syncStopwatch(){
+    ensureStopwatchPane();
+    setText('lifeos64h-sw-display', txt('sw-min','00') + ':' + txt('sw-sec','00') + txt('sw-ms','.00'));
+    const originalBtn = byId('sw-toggle-btn'); if(byId('lifeos64h-sw-toggle') && originalBtn) byId('lifeos64h-sw-toggle').innerHTML = originalBtn.innerHTML;
+  }
+
+  function ensureAll(){ ensureWeatherPane(); ensureNewsPane(); ensureCountdownPane(); ensureStopwatchPane(); }
+  function sync(){
+    if(!isFocusLandscape()) return;
+    ensureAll();
+    const mode = currentMode();
+    if(mode === 'weather') { /* PHA64N: Weather DOM render is consolidated; do not interval-render. */ }
+    else if(mode === 'news') syncNews();
+    else if(mode === 'countdown') syncCountdown();
+    else if(mode === 'stopwatch') syncStopwatch();
+  }
+  function patchSwitches(){
+    if(window.__lifeos64hFocusSubmodesPatched) return;
+    window.__lifeos64hFocusSubmodesPatched = true;
+    const wrap = (name) => { const old = window[name]; if(typeof old === 'function'){ window[name] = function(){ const ret = old.apply(this, arguments); setTimeout(sync, 40); setTimeout(sync, 200); return ret; }; } };
+    wrap('switchTimerMode'); wrap('setDesktopWorkspace'); wrap('switchTab');
+  }
+  function schedule(){ requestAnimationFrame(() => { patchSwitches(); ensureAll(); sync(); setTimeout(sync, 100); setTimeout(sync, 400); }); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once:true}); else schedule();
+  setInterval(sync, 1000);
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', schedule, {passive:true});
+})();
+</script>
+
+
+<style id="lifeos-pha64i-weather-lifestyle-microfix-style">
+/* PHA 64I: microfix only for Focus landscape Weather + Nhịp Sống.
+   Base: 64H. Do not touch DateClock / Countdown / Stopwatch / PC / portrait / other tabs. */
+
+/* ---- WEATHER: removed in PHA 64N; consolidated by lifeos-pha64n-weather-landscape-consolidated-style. */
+/* ---- NHỊP SỐNG / NEWS: right column truly full, independent scroll, compact grid ---- */
+body.lifeos-landscape-mini-pc #lifeos64g-news-pane.is-active.lifeos64h-ready,
+body.lifeos-landscape-mini-pc #mode-news-ui:not(.hidden),
+body.lifeos-landscape-mini-pc #mode-lifestyle-ui:not(.hidden) {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-news-pane.is-active.lifeos64h-ready {
+  display: grid !important;
+  grid-template-columns: minmax(0, 28%) minmax(0, 72%) !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-left,
+body.lifeos-landscape-mini-pc #lifeos64h-news-list {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-left {
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) !important;
+  gap: 7px !important;
+  padding: 10px !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-left .lifeos64h-title {
+  font-size: 10px !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-updated,
+body.lifeos-landscape-mini-pc #lifeos64h-news-status,
+body.lifeos-landscape-mini-pc #lifeos64h-news-left .lifeos64h-muted {
+  font-size: 10px !important;
+  line-height: 1.25 !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-refresh {
+  height: 30px !important;
+  min-height: 30px !important;
+  border-radius: 11px !important;
+  font-size: 10px !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-filters {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  align-content: flex-start !important;
+  padding-right: 2px !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-filters button {
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 0 7px !important;
+  font-size: 9px !important;
+  border-radius: 9px !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-list {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-rows: min-content !important;
+  align-content: start !important;
+  gap: 8px !important;
+  columns: auto !important;
+  column-gap: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 9px !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-list > * {
+  display: block !important;
+  width: 100% !important;
+  break-inside: auto !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-list article,
+body.lifeos-landscape-mini-pc #lifeos64h-news-list .news-card,
+body.lifeos-landscape-mini-pc #lifeos64h-news-list > div {
+  padding: 8px !important;
+  border-radius: 12px !important;
+  font-size: 10px !important;
+  line-height: 1.24 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-list h3,
+body.lifeos-landscape-mini-pc #lifeos64h-news-list h4,
+body.lifeos-landscape-mini-pc #lifeos64h-news-list .font-bold,
+body.lifeos-landscape-mini-pc #lifeos64h-news-list .font-extrabold {
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64h-news-list p,
+body.lifeos-landscape-mini-pc #lifeos64h-news-list .text-sm,
+body.lifeos-landscape-mini-pc #lifeos64h-news-list .text-xs {
+  font-size: 9.5px !important;
+  line-height: 1.22 !important;
+}
+
+@media (max-height: 430px) {
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64h-ready {
+    grid-template-columns: minmax(0, 37%) minmax(0, 63%) !important;
+    gap: 8px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64h-weather-left,
+  body.lifeos-landscape-mini-pc #lifeos64h-weather-stats,
+  body.lifeos-landscape-mini-pc #lifeos64h-weather-forecast,
+  body.lifeos-landscape-mini-pc #lifeos64h-news-left,
+  body.lifeos-landscape-mini-pc #lifeos64h-news-list {
+    padding: 7px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64h-weather-right {
+    grid-template-rows: minmax(62px, 26%) minmax(0, 74%) !important;
+    gap: 7px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64h-weather-forecast {
+    gap: 7px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-news-pane.is-active.lifeos64h-ready {
+    grid-template-columns: minmax(0, 26%) minmax(0, 74%) !important;
+    gap: 8px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64h-news-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+}
+</style>
+
+
+
+
+<style id="lifeos-pha64n-weather-landscape-consolidated-style">
+/* PHA 64N: single consolidated Weather landscape CSS.
+   Scope: phone landscape mini-PC + #mode-weather-ui only. No PC/portrait/global changes. */
+body.lifeos-landscape-mini-pc #mode-weather-ui:not(.hidden),
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64h-ready.lifeos64n-weather-ready {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64h-ready.lifeos64n-weather-ready {
+  display: grid !important;
+  grid-template-columns: minmax(0, 39%) minmax(0, 61%) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+}
+
+/* Left column: fixed current card + scrollable details */
+body.lifeos-landscape-mini-pc #lifeos64n-weather-left {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: 28px minmax(112px, 46%) minmax(0, 1fr) !important;
+  gap: 7px !important;
+  padding: 8px !important;
+  border: 1px solid rgba(244,63,94,.22) !important;
+  border-radius: 20px !important;
+  background: rgba(255,255,255,.62) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86), 0 10px 24px rgba(15,23,42,.04) !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-topbar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-topbar .lifeos64n-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 9.5px !important;
+  line-height: 1 !important;
+  font-weight: 1000 !important;
+  letter-spacing: .1em !important;
+  color: var(--c-primary) !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  min-width: 0 !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-updated {
+  margin-left: auto !important;
+  font-size: 8.5px !important;
+  line-height: 1 !important;
+  color: rgba(159,18,57,.66) !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-current {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 8px !important;
+  align-items: center !important;
+  min-height: 0 !important;
+  padding: 10px !important;
+  border-radius: 17px !important;
+  border: 1px solid rgba(56,189,248,.24) !important;
+  background: linear-gradient(135deg, rgba(239,246,255,.86), rgba(255,255,255,.76)) !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-place {
+  font-size: clamp(1rem, 3.1vh, 1.28rem) !important;
+  line-height: 1.05 !important;
+  font-weight: 1000 !important;
+  color: #0f172a !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-desc {
+  margin-top: 2px !important;
+  font-size: 10.5px !important;
+  line-height: 1.15 !important;
+  font-weight: 900 !important;
+  color: #0284c7 !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-temp {
+  margin-top: 5px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: clamp(2.05rem, 8vh, 3.55rem) !important;
+  line-height: .9 !important;
+  font-weight: 1000 !important;
+  letter-spacing: -.07em !important;
+  color: #0f172a !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-icon {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 25px !important;
+  color: #0284c7 !important;
+  background: rgba(255,255,255,.72) !important;
+  border: 1px solid rgba(56,189,248,.24) !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-left-scroll {
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-right: 2px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-stats {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-stat {
+  min-width: 0 !important;
+  min-height: 38px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(226,232,240,.72) !important;
+  background: rgba(255,255,255,.68) !important;
+  padding: 6px !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-stat b {
+  display: block !important;
+  font-size: 7.5px !important;
+  line-height: 1.05 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+  color: rgba(71,85,105,.72) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-stat span {
+  display: block !important;
+  margin-top: 3px !important;
+  font-size: clamp(.82rem, 2.45vh, 1.08rem) !important;
+  line-height: 1 !important;
+  font-weight: 1000 !important;
+  color: #0f172a !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-ai {
+  margin-top: 7px !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 7px 8px !important;
+  border-radius: 13px !important;
+  border: 1px solid rgba(245,158,11,.22) !important;
+  background: rgba(255,251,235,.72) !important;
+  font-size: 9.5px !important;
+  line-height: 1.25 !important;
+  color: rgba(159,18,57,.76) !important;
+  font-weight: 760 !important;
+  overflow-wrap: anywhere !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-quick {
+  margin-top: 7px !important;
+  padding: 7px !important;
+  border-radius: 13px !important;
+  border: 1px solid rgba(56,189,248,.22) !important;
+  background: rgba(240,249,255,.62) !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-quick-title {
+  font-size: 8px !important;
+  font-weight: 1000 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  color: #0369a1 !important;
+  margin-bottom: 5px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-quick-list {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 5px !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-quick-chip {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  min-height: 24px !important;
+  padding: 4px 5px !important;
+  border-radius: 9px !important;
+  background: rgba(255,255,255,.72) !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+}
+
+/* Right column: stable forecast dashboard */
+body.lifeos-landscape-mini-pc #lifeos64n-weather-right {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) minmax(78px, 92px) !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  border: 1px solid rgba(244,63,94,.22) !important;
+  border-radius: 20px !important;
+  background: rgba(255,255,255,.62) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86), 0 10px 24px rgba(15,23,42,.04) !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-forecast-block {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-rows: 22px minmax(0, 1fr) !important;
+  gap: 6px !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-forecast-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  font-weight: 1000 !important;
+  letter-spacing: .1em !important;
+  color: var(--c-primary) !important;
+  text-transform: uppercase !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-hourly {
+  min-height: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-content: start !important;
+  gap: 5px 7px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 2px !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-hourly-card {
+  min-width: 0 !important;
+  min-height: 30px !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) 42px !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 5px 6px !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(244,63,94,.18) !important;
+  background: rgba(255,228,230,.62) !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-hourly-time,
+body.lifeos-landscape-mini-pc .lifeos64n-hourly-extra {
+  font-size: 9px !important;
+  line-height: 1 !important;
+  font-weight: 1000 !important;
+  color: #be123c !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-hourly-mid {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  font-size: 13px !important;
+  color: #0284c7 !important;
+  font-weight: 1000 !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-daily {
+  min-height: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 7px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding-bottom: 2px !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-daily-card {
+  flex: 0 0 clamp(76px, 18%, 98px) !important;
+  width: clamp(76px, 18%, 98px) !important;
+  min-width: 76px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  padding: 6px !important;
+  border-radius: 11px !important;
+  border: 1px solid rgba(244,63,94,.18) !important;
+  background: rgba(255,228,230,.62) !important;
+  overflow: hidden !important;
+  text-align: center !important;
+  color: #be123c !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-daily-date {
+  font-size: 8.5px !important;
+  font-weight: 1000 !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-daily-card i {
+  display: block !important;
+  margin: 3px 0 !important;
+  font-size: 14px !important;
+  color: #0284c7 !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-daily-temp {
+  font-size: 10px !important;
+  font-weight: 1000 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64n-daily-text {
+  margin-top: 3px !important;
+  font-size: 8px !important;
+  line-height: 1.1 !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (max-height: 430px) {
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64h-ready.lifeos64n-weather-ready {
+    grid-template-columns: minmax(0, 38%) minmax(0, 62%) !important;
+    gap: 8px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64n-weather-left {
+    grid-template-rows: 24px minmax(96px, 43%) minmax(0, 1fr) !important;
+    gap: 5px !important;
+    padding: 6px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64n-weather-current {
+    padding: 8px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64n-weather-temp {
+    font-size: clamp(1.85rem, 7vh, 3.15rem) !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64n-weather-right {
+    grid-template-rows: minmax(0,1fr) 76px !important;
+    gap: 6px !important;
+    padding: 6px !important;
+  }
+  body.lifeos-landscape-mini-pc .lifeos64n-hourly-card {
+    min-height: 27px !important;
+    padding: 4px 5px !important;
+  }
+  body.lifeos-landscape-mini-pc .lifeos64n-daily-card {
+    flex-basis: 72px !important;
+    width: 72px !important;
+    min-width: 72px !important;
+  }
+}
+</style>
+
+
+<script id="lifeos-pha64n-weather-landscape-controller-js">
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function isLandscape(){
+    const pane = byId('lifeos64g-weather-pane');
+    return !!(document.body.classList.contains('lifeos-landscape-mini-pc') && pane && pane.classList.contains('is-active'));
+  }
+  function txt(id, fb){ const el = byId(id); const v = el ? String(el.textContent || '').trim() : ''; return v || fb || '--'; }
+  function data(){ return window.weatherState && window.weatherState.lastData; }
+  function fmtNum(v, digits){
+    try { return window.weatherFmtNum ? window.weatherFmtNum(v, digits) : String(Math.round(Number(v)||0)); }
+    catch(e){ return String(Math.round(Number(v)||0)); }
+  }
+  function hourLabel(t){
+    const s = String(t || '');
+    const m = s.match(/T(\d{2})/); if(m) return m[1] + 'h';
+    const m2 = s.match(/^(\d{1,2})[:h]/); if(m2) return String(m2[1]).padStart(2,'0') + 'h';
+    return '--h';
+  }
+  function dayLabel(date){
+    const d = new Date(String(date || '') + 'T00:00:00');
+    if (isNaN(d.getTime())) return '--/--';
+    const days = ['CN','T2','T3','T4','T5','T6','T7'];
+    return days[d.getDay()] + ' ' + String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
+  }
+  function shortText(s){
+    s = String(s || '').trim();
+    if(!s) return '--';
+    return s.replace(/nhiều mây/i,'Mây').replace(/mưa dông/i,'Dông').replace(/có mưa/i,'Mưa').slice(0,16);
+  }
+  function icon(cls){ return String(cls || 'ph-cloud-sun').replace(/[^a-zA-Z0-9\-\s_]/g,''); }
+  function stable(obj){ try { return JSON.stringify(obj); } catch(e){ return String(obj); } }
+  function setText(id, value){ const el = byId(id); if(el && el.textContent !== String(value)) el.textContent = String(value); }
+
+  function ensurePane(){
+    const pane = byId('lifeos64g-weather-pane');
+    if(!pane) return null;
+    pane.classList.add('lifeos64h-ready','lifeos64n-weather-ready');
+    if(byId('lifeos64n-weather-left') && byId('lifeos64n-weather-right')) return pane;
+    pane.innerHTML = `
+      <div id="lifeos64n-weather-left">
+        <div id="lifeos64n-weather-topbar"><div class="lifeos64n-title"><i class="ph-fill ph-cloud-sun"></i><span>Thời tiết</span></div><span id="lifeos64n-weather-updated">--:--</span></div>
+        <div id="lifeos64n-weather-current"><div id="lifeos64n-weather-current-main"><div class="lifeos64n-current-head"><div class="lifeos64n-current-copy"><div id="lifeos64n-weather-place">--</div><div id="lifeos64n-weather-desc">--</div></div><div id="lifeos64n-weather-icon"><i class="ph-fill ph-cloud-sun"></i></div></div><div id="lifeos64n-weather-temp">--°</div></div><div id="lifeos64n-weather-current-side"><div id="lifeos64n-weather-quick"><div id="lifeos64n-weather-quick-title">24h nhanh</div><div id="lifeos64n-weather-quick-list"></div></div></div></div>
+        <div id="lifeos64n-weather-left-scroll">
+          <div id="lifeos64n-weather-stats">
+            <div class="lifeos64n-stat"><b>Cảm giác</b><span id="lifeos64n-weather-feels">--</span></div><div class="lifeos64n-stat"><b>Độ ẩm</b><span id="lifeos64n-weather-humidity">--</span></div><div class="lifeos64n-stat"><b>Gió</b><span id="lifeos64n-weather-wind">--</span></div><div class="lifeos64n-stat"><b>Lượng mưa</b><span id="lifeos64n-weather-rain">--</span></div>
+          </div>
+          <div id="lifeos64n-weather-ai">--</div>
+        </div>
+      </div>
+      <div id="lifeos64n-weather-right">
+        <div class="lifeos64n-forecast-block"><div class="lifeos64n-forecast-title"><i class="ph-bold ph-clock"></i><span>24 giờ tới</span></div><div id="lifeos64n-weather-hourly"></div></div>
+        <div class="lifeos64n-forecast-block"><div class="lifeos64n-forecast-title"><i class="ph-bold ph-calendar-dots"></i><span>5 ngày tới</span></div><div id="lifeos64n-weather-daily"></div></div>
+      </div>`;
+    return pane;
+  }
+
+  function currentKey(w){
+    return stable({
+      updated: txt('weather-updated',''), place: txt('weather-location-name',''), desc: txt('weather-desc',''), temp: txt('weather-temp',''),
+      feels: txt('weather-feels',''), humidity: txt('weather-humidity',''), wind: txt('weather-wind',''), rain: txt('weather-rain',''),
+      ai: txt('weather-ai-text', txt('weather-status','')),
+      firstHourly: (w && w.hourly || []).slice(0,4).map(x=>[x.time,x.temp])
+    });
+  }
+  function renderCurrent(w){
+    const pane = ensurePane(); if(!pane) return;
+    const key = currentKey(w);
+    if(pane.dataset.lifeos64nCurrentKey === key) return;
+    setText('lifeos64n-weather-updated', txt('weather-updated','--:--'));
+    setText('lifeos64n-weather-place', txt('weather-location-name','--'));
+    setText('lifeos64n-weather-desc', txt('weather-desc','--'));
+    setText('lifeos64n-weather-temp', txt('weather-temp','--°'));
+    setText('lifeos64n-weather-feels', txt('weather-feels','--'));
+    setText('lifeos64n-weather-humidity', txt('weather-humidity','--'));
+    setText('lifeos64n-weather-wind', txt('weather-wind','--'));
+    setText('lifeos64n-weather-rain', txt('weather-rain','--'));
+    setText('lifeos64n-weather-ai', txt('weather-ai-text', txt('weather-status','Chưa có tóm tắt thời tiết.')));
+    const iconEl = byId('lifeos64n-weather-icon');
+    if(iconEl && w && w.current && w.current.icon) iconEl.innerHTML = '<i class="ph-fill ' + icon(w.current.icon) + '"></i>';
+    pane.dataset.lifeos64nCurrentKey = key;
+  }
+  function renderHourly(w){
+    const box = byId('lifeos64n-weather-hourly');
+    const arr = (w && Array.isArray(w.hourly)) ? w.hourly.slice(0, 12) : [];
+    const key = stable(arr.map(x=>[x.time,x.temp,x.precipProb,x.wind,x.icon]));
+    if(!box || box.dataset.weatherRenderKey === key) return;
+    box.innerHTML = arr.map((x,i)=>{
+      const rain = Number(x.precipProb || 0);
+      const extra = rain > 0 ? `<span class="lifeos64n-hourly-extra"><i class="ph-bold ph-drop"></i>${fmtNum(rain,0)}%</span>` : `<span class="lifeos64n-hourly-extra">${x.wind ? fmtNum(x.wind,0)+'km/h' : ''}</span>`;
+      return `<div class="lifeos64n-hourly-card ${i===0?'is-current':''}"><div class="lifeos64n-hourly-time">${hourLabel(x.time)}</div><div class="lifeos64n-hourly-mid"><i class="ph-fill ${icon(x.icon || 'ph-cloud')}"></i><span>${fmtNum(x.temp,0)}°</span></div>${extra}</div>`;
+    }).join('') || '<div class="lifeos64h-muted">Chưa có dự báo giờ.</div>';
+    box.dataset.weatherRenderKey = key;
+  }
+  function renderDaily(w){
+    const box = byId('lifeos64n-weather-daily');
+    const arr = (w && Array.isArray(w.daily)) ? w.daily.slice(0, 5) : [];
+    const key = stable(arr.map(x=>[x.date,x.tempMax,x.tempMin,x.icon,x.text]));
+    if(!box || box.dataset.weatherRenderKey === key) return;
+    box.innerHTML = arr.map(x=>{
+      const temp = `${fmtNum(x.tempMax,0)}°/${fmtNum(x.tempMin,0)}°`;
+      return `<div class="lifeos64n-daily-card"><div class="lifeos64n-daily-date">${dayLabel(x.date)}</div><i class="ph-fill ${icon(x.icon || 'ph-cloud-sun')}"></i><div class="lifeos64n-daily-temp">${temp}</div><div class="lifeos64n-daily-text">${shortText(x.text)}</div></div>`;
+    }).join('') || '<div class="lifeos64h-muted">Chưa có dự báo ngày.</div>';
+    box.dataset.weatherRenderKey = key;
+  }
+  function renderQuick(w){
+    const list = byId('lifeos64n-weather-quick-list');
+    const source = (w && Array.isArray(w.hourly)) ? w.hourly : [];
+    const idxs = [0, Math.min(2,source.length-1), Math.min(4,source.length-1), Math.min(6,source.length-1)].filter((v,i,a)=>v>=0 && a.indexOf(v)===i);
+    const key = stable(idxs.map(i=>[source[i].time, source[i].temp]));
+    if(!list || list.dataset.weatherRenderKey === key) return;
+    list.innerHTML = idxs.map(i=>`<div class="lifeos64n-quick-chip"><b>${hourLabel(source[i].time)}</b><span>${fmtNum(source[i].temp,0)}°</span></div>`).join('') || '<div class="lifeos64h-muted">--</div>';
+    list.dataset.weatherRenderKey = key;
+  }
+  function sync(reason){
+    if(!isLandscape()) return;
+    const w = data();
+    ensurePane();
+    renderCurrent(w);
+    if(w){ renderHourly(w); renderDaily(w); renderQuick(w); }
+  }
+  function schedule(reason){
+    requestAnimationFrame(()=>sync(reason || 'raf'));
+    setTimeout(()=>sync(reason || 'late'), 160);
+    setTimeout(()=>sync(reason || 'late2'), 650);
+  }
+  function patchFn(name){
+    const old = window[name];
+    if(typeof old !== 'function') return;
+    const flag = '__lifeos64nWeatherLandscapePatch_' + name;
+    if(old[flag]) return;
+    const wrapped = function(){
+      const ret = old.apply(this, arguments);
+      schedule(name);
+      return ret;
+    };
+    wrapped[flag] = true;
+    window[name] = wrapped;
+  }
+  function boot(){
+    patchFn('refreshWeather'); patchFn('setWeatherLocation'); patchFn('fetchWeather'); patchFn('switchTimerMode');
+    schedule('boot');
+  }
+  window.LifeOSWeatherLandscapeController = { schedule, sync };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  window.addEventListener('load', boot, {once:true});
+  window.addEventListener('resize', ()=>schedule('resize'), {passive:true});
+  window.addEventListener('orientationchange', ()=>schedule('orientation'), {passive:true});
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>schedule('vv'), {passive:true});
+})();
+</script>
+
+
+
+<style id="lifeos-pha64p-weather-left-card-quick24h-balance-style">
+/* PHA 64P: Weather left card final balance.
+   Scope: phone landscape Weather only. Reuses the single 64N controller; no timer/controller added. */
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-left {
+  grid-template-rows: 28px minmax(122px, 52%) minmax(0, 1fr) !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-current {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(118px, 36%) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+  padding: 9px !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-current-main {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 4px !important;
+  align-content: center !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready .lifeos64n-current-head {
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 40px !important;
+  gap: 7px !important;
+  align-items: start !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready .lifeos64n-current-copy {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-icon {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  justify-self: end !important;
+  align-self: start !important;
+  border-radius: 14px !important;
+  font-size: 22px !important;
+  position: static !important;
+  z-index: auto !important;
+  transform: none !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-place {
+  font-size: clamp(.98rem, 3vh, 1.22rem) !important;
+  line-height: 1.04 !important;
+  white-space: normal !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-desc {
+  font-size: 10px !important;
+  line-height: 1.12 !important;
+  margin-top: 2px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-temp {
+  margin-top: 2px !important;
+  font-size: clamp(1.95rem, 7.4vh, 3.35rem) !important;
+  line-height: .9 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-current-side {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-quick {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 7px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(56,189,248,.26) !important;
+  background: linear-gradient(135deg, rgba(240,249,255,.82), rgba(255,255,255,.72)) !important;
+  display: grid !important;
+  grid-template-rows: 16px minmax(0, 1fr) !important;
+  gap: 5px !important;
+  overflow: hidden !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82) !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-quick-title {
+  margin: 0 !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  font-size: 8.5px !important;
+  line-height: 1 !important;
+  font-weight: 1000 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  color: #0369a1 !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-quick-list {
+  min-height: 0 !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: repeat(4, minmax(18px, 1fr)) !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready .lifeos64n-quick-chip {
+  min-width: 0 !important;
+  min-height: 18px !important;
+  height: 100% !important;
+  padding: 2px 6px !important;
+  border-radius: 9px !important;
+  background: rgba(255,255,255,.82) !important;
+  border: 1px solid rgba(56,189,248,.15) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 5px !important;
+  font-size: 8.8px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  color: #0f172a !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready .lifeos64n-quick-chip b,
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready .lifeos64n-quick-chip span {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-left-scroll {
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+@media (max-height: 430px) {
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-left {
+    grid-template-rows: 26px minmax(116px, 54%) minmax(0, 1fr) !important;
+    gap: 6px !important;
+    padding: 6px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-current {
+    grid-template-columns: minmax(0, 1fr) minmax(106px, 35%) !important;
+    gap: 7px !important;
+    padding: 7px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready .lifeos64n-current-head {
+    grid-template-columns: minmax(0,1fr) 34px !important;
+    gap: 5px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    font-size: 19px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-temp {
+    font-size: clamp(1.75rem, 6.8vh, 2.9rem) !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-quick {
+    padding: 5px !important;
+    grid-template-rows: 14px minmax(0,1fr) !important;
+    gap: 3px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-quick-title {
+    height: 14px !important;
+    min-height: 14px !important;
+    font-size: 7.5px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-quick-list {
+    grid-template-rows: repeat(4, minmax(15px, 1fr)) !important;
+    gap: 3px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready .lifeos64n-quick-chip {
+    min-height: 15px !important;
+    padding: 1px 4px !important;
+    font-size: 8px !important;
+  }
+}
+</style>
+
+
+<style id="lifeos-pha64q-weather-location-chips-header-style">
+/* PHA 64Q: Restore Weather location chips in compact header.
+   Scope only phone landscape Weather. Keeps 64N/64P no-flicker controller and current layout. */
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-topbar {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 7px !important;
+  min-height: 28px !important;
+  height: 28px !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-topbar .lifeos64n-title {
+  min-width: max-content !important;
+  white-space: nowrap !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64q-weather-location-chips {
+  min-width: 0 !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: 0 1px !important;
+  scrollbar-width: none !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64q-weather-location-chips::-webkit-scrollbar {
+  display: none !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64q-weather-chip {
+  flex: 0 0 auto !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(244,63,94,.24) !important;
+  background: rgba(255,255,255,.78) !important;
+  color: #be123c !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  font-weight: 1000 !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+body.lifeos-landscape-mini-pc .lifeos64q-weather-chip.is-active {
+  background: var(--c-primary) !important;
+  border-color: var(--c-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 14px rgba(244,63,94,.14) !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64q-weather-refresh {
+  width: 24px !important;
+  min-width: 24px !important;
+  padding: 0 !important;
+  border-radius: 9px !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64n-weather-updated {
+  min-width: max-content !important;
+  margin-left: 0 !important;
+  justify-self: end !important;
+  white-space: nowrap !important;
+  font-size: 8.5px !important;
+}
+@media (max-height: 430px) {
+  body.lifeos-landscape-mini-pc #lifeos64g-weather-pane.is-active.lifeos64n-weather-ready #lifeos64n-weather-topbar {
+    gap: 5px !important;
+    height: 26px !important;
+    min-height: 26px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64q-weather-location-chips {
+    height: 26px !important;
+    gap: 4px !important;
+  }
+  body.lifeos-landscape-mini-pc .lifeos64q-weather-chip {
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 6px !important;
+    font-size: 8px !important;
+  }
+  body.lifeos-landscape-mini-pc #lifeos64q-weather-refresh {
+    width: 22px !important;
+    min-width: 22px !important;
+  }
+}
+</style>
+<script id="lifeos-pha64q-weather-location-chips-header-js">
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function activeLocKey(){
+    const name = String((byId('weather-location-name') || {}).textContent || '').toLowerCase();
+    if(name.includes('nội') || name.includes('noi')) return 'noibai';
+    if(name.includes('sóc') || name.includes('soc')) return 'socson';
+    return 'hanoi';
+  }
+  function markActive(){
+    const cur = activeLocKey();
+    document.querySelectorAll('#lifeos64q-weather-location-chips [data-loc]').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.loc === cur);
+    });
+  }
+  function isWeatherLandscape(){
+    const pane = byId('lifeos64g-weather-pane');
+    return !!(document.body.classList.contains('lifeos-landscape-mini-pc') && pane && pane.classList.contains('is-active'));
+  }
+  function ensureChips(){
+    if(!isWeatherLandscape()) return;
+    const topbar = byId('lifeos64n-weather-topbar');
+    const updated = byId('lifeos64n-weather-updated');
+    if(!topbar || !updated) {
+      try { window.LifeOSWeatherLandscapeController?.schedule?.('64Q-chips-wait'); } catch(e) {}
+      return;
+    }
+    let chips = byId('lifeos64q-weather-location-chips');
+    if(!chips){
+      chips = document.createElement('div');
+      chips.id = 'lifeos64q-weather-location-chips';
+      chips.innerHTML = '<button type="button" class="lifeos64q-weather-chip" data-loc="hanoi">Hà Nội</button><button type="button" class="lifeos64q-weather-chip" data-loc="noibai">Nội Bài</button><button type="button" class="lifeos64q-weather-chip" data-loc="socson">Sóc Sơn</button><button type="button" class="lifeos64q-weather-chip" id="lifeos64q-weather-refresh" title="Tải lại"><i class="ph-bold ph-arrows-clockwise"></i></button>';
+      topbar.insertBefore(chips, updated);
+      chips.querySelectorAll('[data-loc]').forEach(btn => {
+        btn.onclick = function(){
+          try { window.setWeatherLocation?.(btn.dataset.loc); } catch(e) {}
+          setTimeout(markActive, 80);
+          setTimeout(function(){ try { window.LifeOSWeatherLandscapeController?.schedule?.('64Q-location'); } catch(e) {} }, 180);
+        };
+      });
+      const refresh = byId('lifeos64q-weather-refresh');
+      if(refresh) refresh.onclick = function(){
+        try { window.refreshWeather?.(); } catch(e) {}
+        setTimeout(function(){ try { window.LifeOSWeatherLandscapeController?.schedule?.('64Q-refresh'); } catch(e) {} }, 180);
+      };
+    } else if(chips.parentElement !== topbar) {
+      topbar.insertBefore(chips, updated);
+    } else if(chips.nextSibling !== updated) {
+      topbar.insertBefore(chips, updated);
+    }
+    markActive();
+  }
+  function schedule(){
+    requestAnimationFrame(ensureChips);
+    setTimeout(ensureChips, 120);
+    setTimeout(ensureChips, 420);
+  }
+  const oldSwitch = window.switchTimerMode;
+  if(typeof oldSwitch === 'function' && !window.__lifeos64qWeatherChipSwitchPatch){
+    window.__lifeos64qWeatherChipSwitchPatch = true;
+    window.switchTimerMode = function(){
+      const ret = oldSwitch.apply(this, arguments);
+      schedule();
+      return ret;
+    };
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once:true}); else schedule();
+  window.addEventListener('load', schedule, {once:true});
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', schedule, {passive:true});
+})();
+</script>
+
+
+
+<style id="lifeos-pha64r-weather-advice-summary-style">
+/* PHA 64R: Weather advice final fallback. Scope only weather advice nodes; no layout changes. */
+body.lifeos-landscape-mini-pc #mode-weather-ui #lifeos64n-weather-ai,
+body.lifeos-landscape-mini-pc #mode-weather-ui #lifeos64h-weather-ai {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+body.lifeos-landscape-mini-pc #mode-weather-ui #lifeos64n-weather-ai .lifeos64r-advice,
+body.lifeos-landscape-mini-pc #mode-weather-ui #lifeos64h-weather-ai .lifeos64r-advice,
+#weather-ai-text .lifeos64r-advice {
+  display: inline !important;
+}
+</style>
+
+
+<script id="lifeos-pha64r-weather-advice-summary-final-fix-js">
+(function(){
+  const LOADING_RE = /Đang\s+(làm mềm câu hiện tại và lời khuyên|phân tích|nạp Model AI)|loading|undefined|null/i;
+  const PATCH_FLAG = '__lifeos64rWeatherAdvicePatched';
+
+  function byId(id){ return document.getElementById(id); }
+  function rawText(id){ const el = byId(id); return el ? String(el.textContent || '').trim() : ''; }
+  function clean(s){ return String(s || '').replace(/\s+/g, ' ').trim(); }
+  function isBadText(s){ s = clean(s); return !s || s === '--' || LOADING_RE.test(s); }
+  function esc(s){
+    return String(s || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function valFromAny(ids, fb){
+    for (const id of ids) {
+      const v = clean(rawText(id));
+      if (v && v !== '--' && !LOADING_RE.test(v)) return v;
+    }
+    return fb || '--';
+  }
+  function numberFromText(v){
+    const m = String(v || '').replace(',', '.').match(/-?\d+(?:\.\d+)?/);
+    return m ? Number(m[0]) : NaN;
+  }
+  function fallbackText(){
+    const loc = valFromAny(['lifeos64n-weather-place','lifeos64h-weather-place','weather-location-name'], 'khu vực hiện tại');
+    const desc = valFromAny(['lifeos64n-weather-desc','lifeos64h-weather-desc','weather-desc'], 'theo dữ liệu hiện tại');
+    const temp = valFromAny(['lifeos64n-weather-temp','lifeos64h-weather-temp','weather-temp'], '--°C');
+    const feels = valFromAny(['lifeos64n-weather-feels','lifeos64h-weather-feels','weather-feels'], '');
+    const humidity = valFromAny(['lifeos64n-weather-humidity','lifeos64h-weather-humidity','weather-humidity'], '');
+    const wind = valFromAny(['lifeos64n-weather-wind','lifeos64h-weather-wind','weather-wind'], '');
+    const rain = valFromAny(['lifeos64n-weather-rain','lifeos64h-weather-rain','weather-rain'], '');
+    const t = numberFromText(temp);
+    const f = numberFromText(feels);
+    const h = numberFromText(humidity);
+    const r = numberFromText(rain);
+    const w = numberFromText(wind);
+
+    let current = `${loc} hiện ${desc.toLowerCase()}, nhiệt độ khoảng ${temp}`;
+    if (Number.isFinite(f) && Number.isFinite(t) && Math.abs(f - t) >= 1) current += `, cơ thể có thể cảm nhận khoảng ${feels}`;
+    if (Number.isFinite(h) && h >= 75) current += `; độ ẩm ${humidity} làm cảm giác dễ bí và oi hơn`;
+    else if (humidity && humidity !== '--') current += `; độ ẩm ${humidity}`;
+    current += '.';
+
+    let advice = 'Khi ra ngoài nên theo dõi mưa/gió, mang nước và chuẩn bị áo mưa hoặc mũ tùy thời điểm.';
+    if (Number.isFinite(r) && r > 0) advice = 'Đang có mưa hoặc mặt đường có thể ướt, nên đi chậm, mang áo mưa và tránh để thiết bị điện tử bị ẩm.';
+    else if (Number.isFinite(t) && (t >= 32 || (Number.isFinite(f) && f >= 35))) advice = 'Trời khá nóng, nên uống nước đều, tránh đứng lâu dưới nắng và ưu tiên nghỉ ở nơi thoáng mát.';
+    else if (Number.isFinite(w) && w >= 25) advice = 'Gió khá đáng chú ý, nên giữ chắc đồ nhẹ khi ra ngoài và chú ý khi đi xe máy.';
+    else if (Number.isFinite(h) && h >= 80) advice = 'Độ ẩm cao, nên giữ nhà cửa thông thoáng, mang áo mưa mỏng nếu phải đi xa và chú ý cảm giác oi bí.';
+
+    return `Hiện tại: ${current}\nLời khuyên: ${advice}`;
+  }
+  function keyFor(text){
+    return clean([
+      text,
+      rawText('lifeos64n-weather-place'), rawText('lifeos64n-weather-temp'), rawText('lifeos64n-weather-humidity'), rawText('lifeos64n-weather-rain'),
+      rawText('weather-location-name'), rawText('weather-temp'), rawText('weather-humidity'), rawText('weather-rain')
+    ].join('|'));
+  }
+  function renderInto(el, text){
+    if (!el) return false;
+    const key = keyFor(text);
+    if (el.dataset.lifeos64rAdviceKey === key && !isBadText(el.textContent)) return false;
+    const html = `<span class="lifeos64r-advice text-amber-900">${esc(text).replace(/\n/g, '<br/>')}</span>`;
+    el.innerHTML = html;
+    el.dataset.lifeos64rAdviceKey = key;
+    return true;
+  }
+  function fixNode(el, force){
+    if (!el) return false;
+    const t = clean(el.textContent);
+    if (!force && !isBadText(t)) return false;
+    return renderInto(el, fallbackText());
+  }
+  function fixAll(force){
+    const nodes = [byId('weather-ai-text'), byId('lifeos64h-weather-ai'), byId('lifeos64n-weather-ai')].filter(Boolean);
+    let changed = false;
+    nodes.forEach(el => { changed = fixNode(el, !!force) || changed; });
+    return changed;
+  }
+  function schedule(reason){
+    // Do not run intervals and do not re-render whole Weather; only fix the text node if it is stuck/loading.
+    setTimeout(() => fixAll(false), 80);
+    setTimeout(() => fixAll(false), 900);
+    setTimeout(() => fixAll(false), 2200);
+    setTimeout(() => fixAll(false), 3100);
+  }
+  function wrap(obj, name){
+    if (!obj || typeof obj[name] !== 'function') return;
+    const old = obj[name];
+    if (old[PATCH_FLAG]) return;
+    const wrapped = function(){
+      let ret;
+      try { ret = old.apply(this, arguments); }
+      finally { schedule(name); }
+      if (ret && typeof ret.then === 'function') ret.catch(()=>{}).finally(()=>schedule(name + ':done'));
+      return ret;
+    };
+    wrapped[PATCH_FLAG] = true;
+    obj[name] = wrapped;
+  }
+  function boot(){
+    if (window.WeatherAIEngine) {
+      wrap(window.WeatherAIEngine, 'generateAIText');
+      wrap(window.WeatherAIEngine, 'activateNanoUI');
+    }
+    wrap(window, 'renderWeather');
+    wrap(window, 'refreshWeather');
+    wrap(window, 'setWeatherLocation');
+    wrap(window, 'switchTimerMode');
+    if (window.LifeOSWeatherLandscapeController && typeof window.LifeOSWeatherLandscapeController.schedule === 'function') {
+      wrap(window.LifeOSWeatherLandscapeController, 'schedule');
+    }
+    schedule('boot');
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  window.addEventListener('load', () => schedule('load'), {once:true});
+  window.addEventListener('orientationchange', () => schedule('orientation'), {passive:true});
+  window.addEventListener('resize', () => schedule('resize'), {passive:true});
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', () => schedule('vv'), {passive:true});
+  window.LifeOSWeatherAdviceController = { schedule, fixAll, fallbackText };
+})();
+</script>
+
 </body>
 </html>
