@@ -12847,7 +12847,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
     const w = window.innerWidth, h = window.innerHeight;
     const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
-    return w > h && h <= 620 && (coarse || mobileUA || w <= 1280);
+    return w > h && h <= 620 && (coarse || mobileUA);
   }
   function setImp(el,p,v){ if(el) el.style.setProperty(p,v,'important'); }
   function norm(v){ return String(v || '').trim(); }
@@ -16500,6 +16500,791 @@ body.lifeos-landscape-mini-pc #mode-weather-ui #lifeos64h-weather-ai .lifeos64r-
   window.addEventListener('resize', () => schedule('resize'), {passive:true});
   if (window.visualViewport) window.visualViewport.addEventListener('resize', () => schedule('vv'), {passive:true});
   window.LifeOSWeatherAdviceController = { schedule, fixAll, fallbackText };
+})();
+</script>
+
+
+<!-- PHA 65A NOTE: HTML respects device auto-rotate. Android/TWA build must NOT set android:screenOrientation="portrait"; use unspecified or omit the attribute. -->
+<script id="lifeos-pha65a-orientation-upload-root-fix-js">
+(function(){
+  const PATCH_ID = 'lifeos-pha65a-orientation-upload-root-fix-js';
+  const DEFAULT_RELAY = '';
+
+  function isCoarseOrMobile(){
+    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+    return !!(coarse || mobileUA);
+  }
+  function isPhoneLandscape(){
+    return window.innerWidth > window.innerHeight && window.innerHeight <= 620 && isCoarseOrMobile();
+  }
+  function enforceOrientationClass(){
+    const on = isPhoneLandscape();
+    document.body.classList.toggle('lifeos-landscape-mini-pc', on);
+    document.documentElement.classList.toggle('lifeos-landscape-mini-pc', on);
+    if (!on) {
+      document.body.removeAttribute('data-lifeos-landscape-root-mode-stuck');
+    }
+  }
+
+  async function relaxManifestOrientation(){
+    try {
+      const link = document.getElementById('manifest-link') || document.querySelector('link[rel="manifest"]');
+      if (!link) return;
+      const originalHref = link.getAttribute('href') || '/manifest.json';
+      let manifest = null;
+      try {
+        const res = await fetch(originalHref, { cache: 'no-store' });
+        if (res.ok) manifest = await res.json();
+      } catch(e) {}
+      if (!manifest || typeof manifest !== 'object') {
+        manifest = {
+          name: document.title || 'LifeOS.Cloud',
+          short_name: 'LifeOS',
+          start_url: '.',
+          display: 'standalone'
+        };
+      }
+      manifest.orientation = 'any';
+      manifest.display = manifest.display || 'standalone';
+      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.dataset.lifeos65aOrientation = 'any';
+    } catch(e) {
+      console.warn('[LifeOS 65A manifest orientation relax]', e);
+    }
+  }
+
+  function getNetworkType(){
+    try { return navigator.connection && (navigator.connection.effectiveType || navigator.connection.type || ''); }
+    catch(e){ return ''; }
+  }
+  function endpointHost(url){
+    try { return new URL(url, location.href).host; } catch(e) { return ''; }
+  }
+  function relayUrl(){
+    try {
+      return String(window.LIFEOS_UPLOAD_RELAY_URL || localStorage.getItem('LIFEOS_UPLOAD_RELAY_URL') || DEFAULT_RELAY || '').trim();
+    } catch(e) { return String(window.LIFEOS_UPLOAD_RELAY_URL || DEFAULT_RELAY || '').trim(); }
+  }
+  window.LIFEOS_UPLOAD_RELAY_URL = relayUrl();
+  window.setLifeOSUploadRelayUrl = function(url){
+    const v = String(url || '').trim();
+    window.LIFEOS_UPLOAD_RELAY_URL = v;
+    try { localStorage.setItem('LIFEOS_UPLOAD_RELAY_URL', v); } catch(e) {}
+    window.ChatEngine?.setUploadStatus?.(v ? 'Đã cấu hình upload relay cho Family Chat' : 'Đã tắt upload relay; mobile sẽ dùng đường Telegram trực tiếp dễ bị chặn', v ? 'done' : 'error', true);
+    return v;
+  };
+
+  function enrichDebug(d, extra){
+    const out = Object.assign({}, d || {}, extra || {});
+    if (!out.networkType) out.networkType = getNetworkType();
+    if (out.navigatorOnLine === undefined) out.navigatorOnLine = navigator.onLine;
+    if (!out.userAgent) out.userAgent = navigator.userAgent;
+    if (!out.timestamp) out.timestamp = new Date().toISOString();
+    return out;
+  }
+
+  function installChatRelayPatch(){
+    const ce = window.ChatEngine;
+    if (!ce || ce.__lifeos65aUploadRelayPatch) return false;
+    ce.__lifeos65aUploadRelayPatch = true;
+
+    const oldSendFile = typeof ce.sendFile === 'function' ? ce.sendFile.bind(ce) : null;
+    const oldBuildUploadDebug = typeof ce.buildUploadDebug === 'function' ? ce.buildUploadDebug.bind(ce) : null;
+    const oldUploadDebugToText = typeof ce.uploadDebugToText === 'function' ? ce.uploadDebugToText.bind(ce) : null;
+
+    ce.getUploadRelayUrl = function(){ return relayUrl(); };
+    ce.getUploadTransport = function(){ return this.getUploadRelayUrl() ? 'relay' : 'direct_telegram'; };
+
+    ce.buildUploadDebug = function(meta = {}){
+      const base = oldBuildUploadDebug ? oldBuildUploadDebug(meta) : {};
+      const transport = meta.transport || this.__lifeos65aCurrentTransport || this.getUploadTransport?.() || 'direct_telegram';
+      const url = meta.relayUrl || (transport === 'relay' ? this.getUploadRelayUrl?.() : `https://api.telegram.org/bot${this.token || ''}/${meta.endpoint || ''}`);
+      return enrichDebug(base, {
+        transport,
+        endpointHost: meta.endpointHost || endpointHost(url),
+        formDataKeys: Array.isArray(meta.formDataKeys) ? meta.formDataKeys : (base.formDataKeys || []),
+        uploadMethod: meta.uploadMethod || base.uploadMethod || 'xhr',
+        timeoutMs: meta.timeoutMs || base.timeoutMs || 120000,
+        networkType: getNetworkType(),
+        errorName: meta.errorName || base.errorName || '',
+        errorMessage: meta.errorMessage || base.errorMessage || '',
+        relayStatus: meta.relayStatus ?? base.relayStatus ?? null,
+        relayOk: meta.relayOk ?? base.relayOk ?? null,
+        relayErrorType: meta.relayErrorType || base.relayErrorType || '',
+        relayDescription: meta.relayDescription || base.relayDescription || '',
+        telegramOk: meta.telegramOk ?? base.telegramOk,
+        telegramDescription: meta.telegramDescription || base.telegramDescription || '',
+        responseTextShort: String(meta.responseText || base.responseTextShort || '').slice(0, 1200)
+      });
+    };
+
+    ce.uploadDebugToText = function(debugObj = null){
+      const d = debugObj || this.lastUploadError || {};
+      const head = [
+        'LỖI UPLOAD FAMILY CHAT',
+        `transport: ${d.transport || ''}`,
+        `endpointHost: ${d.endpointHost || ''}`,
+        `fileName: ${d.fileName || ''}`,
+        `safeFileName: ${d.safeFileName || ''}`,
+        `fileSize: ${d.fileSize || 0}`,
+        `mime: ${d.mime || ''}`,
+        `ext: ${d.ext || ''}`,
+        `formDataKeys: ${(d.formDataKeys || []).join(',')}`,
+        `uploadMethod: ${d.uploadMethod || ''}`,
+        `timeoutMs: ${d.timeoutMs || ''}`,
+        `networkType: ${d.networkType || ''}`,
+        `navigatorOnLine: ${d.navigatorOnLine}`,
+        `errorName: ${d.errorName || ''}`,
+        `errorMessage: ${d.errorMessage || ''}`,
+        `httpStatus: ${d.httpStatus ?? ''}`,
+        `xhrStatus: ${d.xhrStatus ?? ''}`,
+        `xhrEvent: ${d.xhrEvent || ''}`,
+        `relayStatus: ${d.relayStatus ?? ''}`,
+        `relayOk: ${d.relayOk ?? ''}`,
+        `relayErrorType: ${d.relayErrorType || ''}`,
+        `telegramOk: ${d.telegramOk}`,
+        `telegramErrorCode: ${d.telegramErrorCode ?? ''}`,
+        `telegramDescription: ${d.telegramDescription || ''}`,
+        `timestamp: ${d.timestamp || ''}`,
+        `userAgent: ${d.userAgent || ''}`,
+        '',
+        `responseTextShort: ${d.responseTextShort || ''}`
+      ].join('\n');
+      return head || (oldUploadDebugToText ? oldUploadDebugToText(debugObj) : '');
+    };
+
+    ce.normalizeRelayTelegramResult = function(data, fileField){
+      const result = data?.result || data?.telegramResult || data?.telegram?.result || data?.message || {};
+      const doc = result?.[fileField] || result?.document || result?.video || result?.audio || data?.document || data?.file || {};
+      let photoObj = null;
+      if (Array.isArray(result?.photo) && result.photo.length) photoObj = result.photo[result.photo.length - 1];
+      const source = doc?.file_id ? doc : (photoObj?.file_id ? photoObj : data);
+      return {
+        messageId: data?.messageId || data?.message_id || result?.message_id || data?.telegram_msg_id || null,
+        fileId: data?.file_id || data?.fileId || source?.file_id || data?.file?.file_id || '',
+        fileUniqueId: data?.file_unique_id || source?.file_unique_id || '',
+        fileSize: data?.file_size || source?.file_size || 0,
+        mimeType: data?.mime_type || source?.mime_type || '',
+        fileUrl: data?.fileUrl || data?.file_url || data?.url || ''
+      };
+    };
+
+    ce.sendFileViaRelay = async function(file, currentIndex = 1, totalFiles = 1, options = {}){
+      const relay = this.getUploadRelayUrl();
+      const fileName = file?.name || 'Tập tin';
+      const fileSize = Number(file?.size || 0);
+      const mime = String(file?.type || '').toLowerCase();
+      const ext = (fileName.split('.').pop() || '').toLowerCase();
+      const safeFileName = this.getSafeTelegramUploadName ? this.getSafeTelegramUploadName(fileName, mime) : fileName;
+      const isImageFile = /^image\//.test(mime) || /\.(jpg|jpeg|png|webp|gif|bmp|heic|heif)$/i.test(fileName);
+      const endpoint = 'sendDocument';
+      const fileField = 'document';
+      const strategy = isImageFile ? 'image_as_document_relay' : 'file_as_document_relay';
+      const timeoutMs = Number(options.timeoutMs || 120000);
+      const formDataKeys = ['chat_id', fileField, 'original_file_name', 'safe_file_name', 'mime_type', 'file_size', 'strategy', 'endpoint', 'topic_id'];
+
+      if (!relay) {
+        const msg = 'Mobile upload trực tiếp Telegram có thể bị chặn; cần cấu hình LIFEOS_UPLOAD_RELAY_URL.';
+        this.setUploadStatus?.(msg, 'error', false);
+        const debug = this.recordUploadError?.(this.buildUploadDebug({
+          transport: 'direct_telegram', endpoint, field: fileField, fileName, safeFileName, fileSize, mime, ext, strategy,
+          formDataKeys, uploadMethod: 'xhr', timeoutMs, xhrEvent: 'relay_missing', errorName: 'RelayMissing', errorMessage: msg,
+          httpStatus: 0, responseText: msg
+        }), file);
+        return { ok:false, retryable:false, fileName, endpoint, error: msg + ' Bấm Chi tiết lỗi.', debug };
+      }
+
+      this.__lifeos65aCurrentTransport = 'relay';
+      this.lastFailedUploadFile = file;
+      this.setUploadStatus?.(`Đang gửi qua relay ${currentIndex}/${totalFiles}: ${fileName} — 0%`, 'info', false);
+
+      return await new Promise((resolve) => {
+        const fd = new FormData();
+        fd.append('chat_id', this.chatId || '');
+        fd.append(fileField, file, safeFileName);
+        fd.append('original_file_name', fileName);
+        fd.append('safe_file_name', safeFileName);
+        fd.append('mime_type', file?.type || '');
+        fd.append('file_size', String(fileSize));
+        fd.append('strategy', strategy);
+        fd.append('endpoint', endpoint);
+        fd.append('topic_id', this.currentTopic && this.currentTopic !== 'all' ? this.currentTopic : '');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', relay, true);
+        xhr.timeout = timeoutMs;
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.max(0, Math.min(100, Math.round((e.loaded / e.total) * 100)));
+            this.setUploadStatus?.(`Đang gửi qua relay ${currentIndex}/${totalFiles}: ${fileName} — ${pct}%`, 'info', false);
+          } else {
+            this.setUploadStatus?.(`Đang gửi qua relay ${currentIndex}/${totalFiles}: ${fileName}`, 'info', false);
+          }
+        };
+
+        const finishFail = (reason, data = {}, err = null) => {
+          const responseText = xhr.responseText || (err ? String(err.message || err) : '');
+          const desc = data?.telegramDescription || data?.description || data?.error || data?.message || (err ? (err.message || String(err)) : reason);
+          const debug = this.recordUploadError?.(this.buildUploadDebug({
+            transport: 'relay', relayUrl: relay, endpointHost: endpointHost(relay), endpoint, field: fileField,
+            fileName, safeFileName, fileSize, mime, ext, strategy, httpStatus: xhr.status || 0,
+            relayStatus: xhr.status || 0, relayOk: data?.ok === true, relayErrorType: data?.errorType || reason,
+            relayDescription: desc, telegramOk: data?.telegramOk, telegramDescription: data?.telegramDescription || data?.description || '',
+            formDataKeys, uploadMethod: 'xhr', timeoutMs, xhrEvent: reason, xhr, errorName: err?.name || reason,
+            errorMessage: err?.message || desc, responseText
+          }), file);
+          const msg = `Gửi lỗi qua relay: ${fileName} — HTTP ${xhr.status || 0}: ${desc}. Bấm Chi tiết lỗi.`;
+          console.warn('[LifeOS 65A relay upload fail]', { debug, data, err });
+          this.setUploadStatus?.(msg, 'error', false);
+          resolve({ ok:false, retryable:false, fileName, endpoint, error: msg, debug });
+        };
+
+        xhr.onload = () => {
+          let data = {};
+          try { data = JSON.parse(xhr.responseText || '{}'); }
+          catch(e) { finishFail('relay_parse_error', {}, e); return; }
+          if (xhr.status < 200 || xhr.status >= 300 || data.ok !== true) { finishFail('relay_http_or_json_error', data); return; }
+          try {
+            const norm = this.normalizeRelayTelegramResult(data, fileField);
+            if (!norm.fileId && !norm.fileUrl) throw new Error('Relay ok nhưng không trả file_id/fileUrl');
+            const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+            const msg = {
+              id: Date.now().toString() + '_' + Math.floor(Math.random() * 100000),
+              type: 'file',
+              file_id: norm.fileId || '',
+              file_unique_id: norm.fileUniqueId || '',
+              file_url: norm.fileUrl || '',
+              file_name: fileName,
+              file_size: norm.fileSize || fileSize,
+              mime_type: norm.mimeType || file?.type || (isImageFile ? 'image/*' : ''),
+              sender: this.getKey(),
+              timestamp: Date.now(),
+              sentAt: Date.now(),
+              reply_to: this.replyingTo,
+              isPrivate: isPriv,
+              telegram_msg_id: norm.messageId,
+              chat_id: this.chatId,
+              sent_via_endpoint: endpoint,
+              sent_via_transport: 'relay',
+              safe_upload_name: safeFileName,
+              topic_id: this.currentTopic !== 'all' ? this.currentTopic : null
+            };
+            window.chatHistory.push(msg);
+            this.triggerPushNotification?.(isImageFile ? '🖼️ [Ảnh gửi qua relay]' : '📎 [File gửi qua relay]');
+            this.cancelReply?.();
+            this.saveAndSync?.();
+            this.render?.();
+            this.lastFailedUploadFile = null;
+            const note = isImageFile ? `Ảnh đã gửi qua relay: ${fileName}` : `Đã gửi qua relay: ${fileName}`;
+            this.setUploadStatus?.(note, 'done', true);
+            resolve({ ok:true, fileName, endpoint, note, transport:'relay', response:data });
+          } catch(e) {
+            finishFail('relay_ok_missing_file_reference', data, e);
+          }
+        };
+        xhr.onerror = () => finishFail('relay_network_error');
+        xhr.ontimeout = () => finishFail('relay_timeout');
+        try { xhr.send(fd); }
+        catch(e) { finishFail('relay_xhr_send_exception', {}, e); }
+      });
+    };
+
+    ce.sendFile = async function(file, currentIndex = 1, totalFiles = 1, options = {}){
+      const relay = this.getUploadRelayUrl?.() || '';
+      if (relay) return await this.sendFileViaRelay(file, currentIndex, totalFiles, options);
+      this.__lifeos65aCurrentTransport = 'direct_telegram';
+      if (isCoarseOrMobile()) {
+        const warn = 'Mobile upload trực tiếp Telegram có thể bị chặn; cần relay để ổn định.';
+        console.warn('[LifeOS 65A upload transport]', warn, { fileName: file?.name, size: file?.size, transport:'direct_telegram' });
+      }
+      const result = oldSendFile ? await oldSendFile(file, currentIndex, totalFiles, options) : { ok:false, error:'ChatEngine.sendFile gốc không tồn tại' };
+      if (!result?.ok && this.lastUploadError) {
+        this.lastUploadError = enrichDebug(this.lastUploadError, {
+          transport: 'direct_telegram',
+          endpointHost: 'api.telegram.org',
+          uploadMethod: 'xhr',
+          timeoutMs: 120000,
+          networkType: getNetworkType(),
+          errorName: this.lastUploadError.errorName || (this.lastUploadError.xhrEvent || 'direct_telegram_upload_error'),
+          errorMessage: this.lastUploadError.errorMessage || (Number(this.lastUploadError.httpStatus || this.lastUploadError.xhrStatus || 0) === 0 ? 'Trình duyệt/mobile WebView không hoàn tất kết nối trực tiếp tới Telegram Bot API; cần relay.' : '')
+        });
+        try { localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify(this.lastUploadError)); } catch(e) {}
+        if (Number(this.lastUploadError.httpStatus || this.lastUploadError.xhrStatus || 0) === 0) {
+          this.setUploadStatus?.(`Gửi lỗi: ${file?.name || 'file'} — direct_telegram HTTP 0/network_error. Mobile cần cấu hình relay. Bấm Chi tiết lỗi.`, 'error', false);
+        }
+      }
+      return result;
+    };
+
+    console.info('[LifeOS 65A] Family upload transport patch installed', { relayConfigured: !!relayUrl() });
+    return true;
+  }
+
+  function schedule(){
+    requestAnimationFrame(() => {
+      enforceOrientationClass();
+      installChatRelayPatch();
+      setTimeout(enforceOrientationClass, 80);
+      setTimeout(installChatRelayPatch, 120);
+    });
+  }
+
+  relaxManifestOrientation();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+  window.addEventListener('load', schedule, { passive:true });
+  window.addEventListener('resize', schedule, { passive:true });
+  window.addEventListener('orientationchange', schedule, { passive:true });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule, { passive:true });
+})();
+</script>
+
+
+
+
+
+<style id="lifeos-pha65c-family-desktop-dragdrop-forensic-style">
+/* PHA 65C: robust Family drag-drop overlay. Pointer-events none so drop event is never swallowed. */
+#lifeos65c-family-drop-overlay {
+  position: fixed;
+  left: var(--lifeos65c-drop-left, 16px);
+  top: var(--lifeos65c-drop-top, 16px);
+  width: var(--lifeos65c-drop-width, calc(100vw - 32px));
+  height: var(--lifeos65c-drop-height, calc(100dvh - 32px));
+  z-index: 99999999;
+  display: none;
+  pointer-events: none;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed color-mix(in srgb, var(--c-primary, #f43f5e) 72%, transparent);
+  border-radius: 26px;
+  background: color-mix(in srgb, white 76%, var(--c-primary, #f43f5e) 13%);
+  box-shadow: inset 0 0 0 999px rgba(255,255,255,.36), 0 18px 52px rgba(15,23,42,.22);
+  backdrop-filter: blur(3px);
+}
+body.lifeos65c-family-drag-active #lifeos65c-family-drop-overlay {
+  display: flex;
+}
+#lifeos65c-family-drop-overlay .lifeos65c-drop-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(520px, calc(100vw - 48px));
+  padding: 16px 22px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(226,232,240,.9);
+  box-shadow: 0 18px 48px rgba(15,23,42,.18);
+  color: var(--c-primary, #f43f5e);
+  font-weight: 1000;
+  text-align: center;
+}
+#lifeos65c-family-drop-overlay .lifeos65c-drop-card i {
+  font-size: 30px;
+}
+body.lifeos65c-family-drag-active #view-chat,
+body.lifeos65c-family-drag-active #l64f-panel-chat,
+body.lifeos65c-family-drag-active #l64f-chat-card,
+body.lifeos65c-family-drag-active #chat-messages {
+  outline: 2px solid color-mix(in srgb, var(--c-primary, #f43f5e) 55%, transparent);
+  outline-offset: -3px;
+}
+</style>
+
+
+<script id="lifeos-pha65c-family-desktop-dragdrop-forensic-js">
+(function(){
+  const PATCH_ID = 'lifeos-pha65c-family-desktop-dragdrop-forensic-js';
+  let dragDepth = 0;
+
+  function isMobilePlatform(){
+    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+    return !!(coarse || mobileUA);
+  }
+
+  function platformName(){ return isMobilePlatform() ? 'mobile' : 'desktop'; }
+
+  function networkType(){
+    try { return navigator.connection && (navigator.connection.effectiveType || navigator.connection.type || ''); }
+    catch(e){ return ''; }
+  }
+
+  function hasFiles(e){
+    const dt = e && e.dataTransfer;
+    if (!dt) return false;
+    const types = Array.from(dt.types || []);
+    return types.includes('Files') || types.includes('application/x-moz-file') || (dt.files && dt.files.length > 0);
+  }
+
+  function fileArray(fileList){
+    return Array.from(fileList || []).filter(f => f && typeof f.name === 'string');
+  }
+
+  function activeFamilyZones(){
+    const ids = ['l64f-panel-chat','l64f-chat-card','l64f-chat-right','view-chat','chat-messages','chat-form'];
+    return ids.map(id => document.getElementById(id)).filter(Boolean);
+  }
+
+  function isVisible(el){
+    if (!el) return false;
+    const style = getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden') return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 4 && r.height > 4;
+  }
+
+  function isFamilyActive(){
+    const landscapePanel = document.getElementById('l64f-panel-chat');
+    if (landscapePanel && landscapePanel.classList.contains('is-active') && isVisible(landscapePanel)) return true;
+
+    const view = document.getElementById('view-chat');
+    if (view && !view.classList.contains('hidden') && isVisible(view)) {
+      const bodyMode = document.body.dataset.desktopWorkspace || document.body.dataset.lifeosLandscapeRootMode || '';
+      if (!bodyMode || bodyMode === 'chat') return true;
+      if (view.querySelector('#chat-messages') && isVisible(document.getElementById('chat-messages'))) return true;
+    }
+
+    return String(document.body.dataset.desktopWorkspace || '') === 'chat' || String(document.body.dataset.lifeosLandscapeRootMode || '') === 'chat';
+  }
+
+  function eventInsideFamily(e){
+    const target = e && e.target;
+    if (!target) return false;
+    return activeFamilyZones().some(z => z === target || z.contains(target));
+  }
+
+  function primaryDropRect(){
+    const preferred = [
+      document.getElementById('l64f-panel-chat'),
+      document.getElementById('l64f-chat-card'),
+      document.getElementById('view-chat'),
+      document.getElementById('chat-messages')
+    ].filter(isVisible);
+    const el = preferred[0] || document.body;
+    const r = el.getBoundingClientRect();
+    const margin = 6;
+    return {
+      left: Math.max(6, r.left + margin),
+      top: Math.max(6, r.top + margin),
+      width: Math.max(180, Math.min(window.innerWidth - 12, r.width - margin * 2)),
+      height: Math.max(120, Math.min(window.innerHeight - 12, r.height - margin * 2))
+    };
+  }
+
+  function ensureOverlay(){
+    let overlay = document.getElementById('lifeos65c-family-drop-overlay');
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.id = 'lifeos65c-family-drop-overlay';
+    overlay.innerHTML = '<div class="lifeos65c-drop-card"><i class="ph-bold ph-upload-simple"></i><span>Thả file để gửi vào Gia đình</span></div>';
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  function positionOverlay(){
+    const overlay = ensureOverlay();
+    const r = primaryDropRect();
+    overlay.style.setProperty('--lifeos65c-drop-left', r.left + 'px');
+    overlay.style.setProperty('--lifeos65c-drop-top', r.top + 'px');
+    overlay.style.setProperty('--lifeos65c-drop-width', r.width + 'px');
+    overlay.style.setProperty('--lifeos65c-drop-height', r.height + 'px');
+  }
+
+  function showOverlay(){
+    positionOverlay();
+    document.body.classList.add('lifeos65c-family-drag-active');
+  }
+
+  function hideOverlay(){
+    dragDepth = 0;
+    document.body.classList.remove('lifeos65c-family-drag-active');
+  }
+
+  function blockBrowser(e){
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+  }
+
+  function shouldCapture(e){
+    if (!hasFiles(e)) return false;
+    return isFamilyActive() || eventInsideFamily(e);
+  }
+
+  function logFiles(stage, files, extra = {}){
+    const ce = window.ChatEngine;
+    const transport = ce?.getUploadTransport?.() || 'direct_telegram';
+    const payload = {
+      inputSource: 'drag_drop',
+      stage,
+      platform: platformName(),
+      transport,
+      fileCount: files.length,
+      files: files.map(f => ({ fileName: f.name, fileSize: f.size, mime: f.type || '' })),
+      timestamp: new Date().toISOString(),
+      networkType: networkType(),
+      navigatorOnLine: navigator.onLine,
+      userAgent: navigator.userAgent,
+      ...extra
+    };
+    console.info('[LifeOS 65C Family drag-drop forensic]', payload);
+    return payload;
+  }
+
+  async function sendDroppedFiles(files){
+    const ce = window.ChatEngine;
+    if (!ce) {
+      window.showToast?.('Family Chat chưa sẵn sàng nhận file kéo-thả', 'ph-warning-circle');
+      console.warn('[LifeOS 65C drag_drop error]', { errorName:'ChatEngineMissing', inputSource:'drag_drop', fileCount: files.length });
+      return;
+    }
+
+    if (typeof ce.handleFamilyFiles !== 'function') {
+      ce.handleFamilyFiles = async function(fileList, options = {}){
+        this.__lifeos65cCurrentInputSource = String(options.inputSource || 'file_input');
+        return await this.sendMultipleFiles(fileList, options);
+      };
+    }
+
+    ce.__lifeos65cCurrentInputSource = 'drag_drop';
+    ce.__lifeos65bCurrentInputSource = 'drag_drop';
+    ce.setUploadStatus?.(`Đã nhận ${files.length} file kéo-thả, đang gửi...`, 'info', false);
+    logFiles('drop_accept', files);
+
+    try {
+      const result = await ce.handleFamilyFiles(files, { inputSource: 'drag_drop' });
+      console.info('[LifeOS 65C drag_drop result]', {
+        inputSource: 'drag_drop',
+        platform: platformName(),
+        transport: ce.getUploadTransport?.() || 'direct_telegram',
+        result,
+        timestamp: new Date().toISOString()
+      });
+      return result;
+    } catch(err) {
+      const debug = {
+        inputSource: 'drag_drop',
+        platform: platformName(),
+        transport: ce.getUploadTransport?.() || 'direct_telegram',
+        errorName: err?.name || 'DragDropUploadError',
+        errorMessage: err?.message || String(err || ''),
+        timestamp: new Date().toISOString(),
+        fileCount: files.length
+      };
+      console.warn('[LifeOS 65C drag_drop upload exception]', debug);
+      ce.setUploadStatus?.(`Kéo-thả lỗi: ${debug.errorMessage || 'không rõ lỗi'}`, 'error', false);
+      return { ok:false, error: debug.errorMessage, debug };
+    } finally {
+      setTimeout(() => {
+        if (ce.__lifeos65cCurrentInputSource === 'drag_drop') ce.__lifeos65cCurrentInputSource = 'file_input';
+        if (ce.__lifeos65bCurrentInputSource === 'drag_drop') ce.__lifeos65bCurrentInputSource = 'file_input';
+      }, 800);
+    }
+  }
+
+  function installEventFlow(){
+    if (window.__lifeos65cFamilyDragDropEventsBound) return;
+    window.__lifeos65cFamilyDragDropEventsBound = true;
+    ensureOverlay();
+
+    document.addEventListener('dragenter', (e) => {
+      if (!shouldCapture(e)) return;
+      blockBrowser(e);
+      dragDepth++;
+      showOverlay();
+      logFiles('dragenter', [], { dragDepth });
+    }, true);
+
+    document.addEventListener('dragover', (e) => {
+      if (!shouldCapture(e)) return;
+      blockBrowser(e);
+      showOverlay();
+    }, true);
+
+    document.addEventListener('dragleave', (e) => {
+      if (!hasFiles(e) || !document.body.classList.contains('lifeos65c-family-drag-active')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      dragDepth = Math.max(0, dragDepth - 1);
+      const related = e.relatedTarget;
+      const leftKnownZones = related ? !activeFamilyZones().some(z => z.contains(related) || z === related) : false;
+      if (dragDepth <= 0 || leftKnownZones) hideOverlay();
+    }, true);
+
+    document.addEventListener('drop', async (e) => {
+      if (!shouldCapture(e)) return;
+      blockBrowser(e);
+      const files = fileArray(e.dataTransfer?.files || []);
+      hideOverlay();
+
+      if (!files.length) {
+        window.ChatEngine?.setUploadStatus?.('Không thấy file hợp lệ trong thao tác kéo-thả', 'error', false);
+        console.warn('[LifeOS 65C drag_drop empty]', { inputSource:'drag_drop', timestamp:new Date().toISOString() });
+        return;
+      }
+
+      await sendDroppedFiles(files);
+    }, true);
+
+    window.addEventListener('dragend', hideOverlay, true);
+    window.addEventListener('blur', hideOverlay, true);
+    window.addEventListener('resize', () => { if (document.body.classList.contains('lifeos65c-family-drag-active')) positionOverlay(); }, { passive:true });
+
+    console.info('[LifeOS 65C] Document-level Family drag/drop event flow installed');
+  }
+
+  function installPipelinePatch(){
+    const ce = window.ChatEngine;
+    if (!ce || ce.__lifeos65cPipelinePatch) return false;
+
+    ce.__lifeos65cPipelinePatch = true;
+
+    const oldBuildUploadDebug = typeof ce.buildUploadDebug === 'function' ? ce.buildUploadDebug.bind(ce) : null;
+    const oldUploadDebugToText = typeof ce.uploadDebugToText === 'function' ? ce.uploadDebugToText.bind(ce) : null;
+    const oldSendFile = typeof ce.sendFile === 'function' ? ce.sendFile.bind(ce) : null;
+    const oldSendMultipleFiles = typeof ce.sendMultipleFiles === 'function' ? ce.sendMultipleFiles.bind(ce) : null;
+    const oldHandleFiles = typeof ce.handleFiles === 'function' ? ce.handleFiles.bind(ce) : null;
+    const oldHandleFile = typeof ce.handleFile === 'function' ? ce.handleFile.bind(ce) : null;
+    const oldClipboard = typeof ce.handleClipboardPaste === 'function' ? ce.handleClipboardPaste.bind(ce) : null;
+
+    ce.getInputSource = function(options = {}){
+      return String(options.inputSource || this.__lifeos65cCurrentInputSource || this.__lifeos65bCurrentInputSource || 'file_input');
+    };
+
+    ce.handleFamilyFiles = async function(files, options = {}){
+      const source = this.getInputSource(options);
+      this.__lifeos65cCurrentInputSource = source;
+      this.__lifeos65bCurrentInputSource = source;
+      return await this.sendMultipleFiles(files, { inputSource: source });
+    };
+
+    ce.handleFiles = function(files){
+      this.__lifeos65cCurrentInputSource = 'file_input';
+      this.__lifeos65bCurrentInputSource = 'file_input';
+      if (typeof oldHandleFiles === 'function') return oldHandleFiles(files);
+      return this.handleFamilyFiles(files, { inputSource:'file_input' });
+    };
+
+    ce.handleFile = function(file){
+      this.__lifeos65cCurrentInputSource = 'file_input';
+      this.__lifeos65bCurrentInputSource = 'file_input';
+      if (typeof oldHandleFile === 'function') return oldHandleFile(file);
+      return this.handleFamilyFiles([file], { inputSource:'file_input' });
+    };
+
+    ce.buildUploadDebug = function(meta = {}){
+      const base = oldBuildUploadDebug ? oldBuildUploadDebug(meta) : {};
+      const inputSource = meta.inputSource || this.__lifeos65cCurrentInputSource || this.__lifeos65bCurrentInputSource || base.inputSource || 'file_input';
+      return Object.assign({}, base, {
+        inputSource,
+        platform: meta.platform || base.platform || platformName(),
+        transport: meta.transport || base.transport || this.__lifeos65aCurrentTransport || this.getUploadTransport?.() || 'direct_telegram',
+        networkType: meta.networkType || base.networkType || networkType(),
+        navigatorOnLine: navigator.onLine,
+        errorName: meta.errorName || base.errorName || '',
+        errorMessage: meta.errorMessage || base.errorMessage || '',
+        timestamp: meta.timestamp || base.timestamp || new Date().toISOString(),
+        userAgent: navigator.userAgent
+      });
+    };
+
+    ce.uploadDebugToText = function(debugObj = null){
+      const d = debugObj || this.lastUploadError || {};
+      const base = oldUploadDebugToText ? oldUploadDebugToText(debugObj) : '';
+      if (base.includes('inputSource:')) return base;
+      const prefix = [
+        `inputSource: ${d.inputSource || this.__lifeos65cCurrentInputSource || ''}`,
+        `platform: ${d.platform || platformName()}`,
+        `transport: ${d.transport || this.getUploadTransport?.() || ''}`,
+        `networkType: ${d.networkType || networkType()}`
+      ].join('\n');
+      return prefix + '\n' + base;
+    };
+
+    ce.sendMultipleFiles = async function(files, options = {}){
+      const source = this.getInputSource(options);
+      this.__lifeos65cCurrentInputSource = source;
+      this.__lifeos65bCurrentInputSource = source;
+      const arr = fileArray(files);
+      console.info('[LifeOS 65C sendMultipleFiles forensic]', {
+        inputSource: source,
+        fileCount: arr.length,
+        platform: platformName(),
+        transport: this.getUploadTransport?.() || 'direct_telegram',
+        files: arr.map(f => ({ fileName:f.name, fileSize:f.size, mime:f.type || '' })),
+        timestamp: new Date().toISOString()
+      });
+      if (!arr.length) return { ok:false, okCount:0, failCount:0, errors:['Không có file'] };
+      return oldSendMultipleFiles ? await oldSendMultipleFiles(arr) : { ok:false, error:'sendMultipleFiles gốc không tồn tại' };
+    };
+
+    ce.sendFile = async function(file, currentIndex = 1, totalFiles = 1, options = {}){
+      const source = this.getInputSource(options);
+      this.__lifeos65cCurrentInputSource = source;
+      this.__lifeos65bCurrentInputSource = source;
+      const transport = this.getUploadTransport?.() || 'direct_telegram';
+      console.info('[LifeOS 65C sendFile start]', {
+        inputSource: source,
+        platform: platformName(),
+        transport,
+        fileName: file?.name || '',
+        fileSize: file?.size || 0,
+        mime: file?.type || '',
+        currentIndex,
+        totalFiles,
+        timestamp: new Date().toISOString()
+      });
+      const result = oldSendFile
+        ? await oldSendFile(file, currentIndex, totalFiles, Object.assign({}, options, { inputSource: source, platform: platformName() }))
+        : { ok:false, error:'sendFile gốc không tồn tại' };
+      console.info('[LifeOS 65C sendFile result]', {
+        inputSource: source,
+        platform: platformName(),
+        transport: result?.transport || transport,
+        fileName: file?.name || '',
+        fileSize: file?.size || 0,
+        mime: file?.type || '',
+        result: result?.ok ? 'ok' : 'fail',
+        errorName: this.lastUploadError?.errorName || '',
+        errorMessage: this.lastUploadError?.errorMessage || result?.error || '',
+        timestamp: new Date().toISOString()
+      });
+      return result;
+    };
+
+    ce.handleClipboardPaste = async function(e){
+      this.__lifeos65cCurrentInputSource = 'clipboard';
+      this.__lifeos65bCurrentInputSource = 'clipboard';
+      try { return await oldClipboard?.(e); }
+      finally {
+        setTimeout(() => {
+          if (this.__lifeos65cCurrentInputSource === 'clipboard') this.__lifeos65cCurrentInputSource = 'file_input';
+          if (this.__lifeos65bCurrentInputSource === 'clipboard') this.__lifeos65bCurrentInputSource = 'file_input';
+        }, 700);
+      }
+    };
+
+    console.info('[LifeOS 65C] Family FileList pipeline forensic patch installed');
+    return true;
+  }
+
+  let attempts = 0;
+  function schedule(){
+    attempts++;
+    installEventFlow();
+    const ok = installPipelinePatch();
+    if (!ok && attempts < 80) setTimeout(schedule, 180);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+  window.addEventListener('load', schedule, { passive:true });
+  window.addEventListener('resize', () => setTimeout(schedule, 80), { passive:true });
+  window.addEventListener('orientationchange', () => setTimeout(schedule, 80), { passive:true });
 })();
 </script>
 
