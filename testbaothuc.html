@@ -3,411 +3,520 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>LifeOS Alarm Overnight Test Harness 66D FIX1</title>
+<title>LifeOS Alarm Test 66G — Fast Overnight V19 Anchor</title>
 <style>
-:root{--brand:#f43f5e;--ok:#16a34a;--warn:#f59e0b;--bad:#dc2626;--blue:#2563eb;--line:#e2e8f0;--text:#0f172a}
+:root{
+  --brand:#f43f5e;--brand2:#0ea5e9;--ok:#16a34a;--warn:#f59e0b;--bad:#dc2626;
+  --ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--card:rgba(255,255,255,.94);
+  --bg1:#fff1f2;--bg2:#f8fafc;--bg3:#e0f2fe;
+}
 *{box-sizing:border-box}
-body{margin:0;min-height:100dvh;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(135deg,#fff1f2,#f8fafc 42%,#e0f2fe);color:var(--text)}
-header{position:sticky;top:0;z-index:10;padding:14px 16px;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(226,232,240,.9)}
-h1{margin:0;font-size:clamp(18px,3vw,28px);font-weight:950;color:#9f1239}
-header p{margin:5px 0 0;color:#475569;font-size:13px;font-weight:750;line-height:1.35}
-main{width:min(1280px,100%);margin:0 auto;padding:14px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
-.card{grid-column:span 6;background:rgba(255,255,255,.92);border:1px solid rgba(226,232,240,.95);border-radius:18px;box-shadow:0 18px 48px rgba(15,23,42,.08);overflow:hidden}
+html,body{margin:0;min-height:100dvh}
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2) 44%,var(--bg3));
+  color:var(--ink);overflow-x:hidden;
+}
+header{
+  position:sticky;top:0;z-index:20;padding:12px 14px;background:rgba(255,255,255,.9);
+  backdrop-filter:blur(14px);border-bottom:1px solid rgba(226,232,240,.95);
+}
+h1{margin:0;font-size:clamp(18px,3vw,28px);font-weight:1000;color:#9f1239;letter-spacing:-.02em}
+header p{margin:5px 0 0;color:#475569;font-size:13px;font-weight:800;line-height:1.35}
+main{width:min(1280px,100%);margin:0 auto;padding:12px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
+section{border-radius:20px;overflow:hidden}
+.quick{
+  grid-column:span 12;background:linear-gradient(135deg,#fff,#ecfeff);
+  border:2px solid rgba(14,165,233,.35);box-shadow:0 22px 60px rgba(15,23,42,.10)
+}
+.quick h2,.card h2{
+  margin:0;padding:13px 14px;border-bottom:1px solid var(--line);
+  background:linear-gradient(135deg,#e0f2fe,#fff1f2);font-size:16px;font-weight:1000;color:#075985;
+}
+.card{grid-column:span 6;background:var(--card);border:1px solid rgba(226,232,240,.95);box-shadow:0 18px 48px rgba(15,23,42,.08)}
 .card.wide{grid-column:span 12}
-.card h2{margin:0;padding:13px 14px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#fff,#fff1f2);font-size:15px;font-weight:950;color:#9f1239;display:flex;align-items:center;gap:8px}
-.body{padding:14px;display:grid;gap:10px}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-label{font-size:12px;font-weight:900;color:#475569}
-input,textarea{width:100%;border:1px solid #cbd5e1;border-radius:12px;padding:10px 12px;font:inherit;font-size:13px;background:#fff;outline:none}
-textarea{min-height:66px;resize:vertical}
-button{border:0;border-radius:13px;padding:10px 12px;font-weight:950;font-size:13px;color:white;background:#334155;cursor:pointer;box-shadow:0 8px 20px rgba(15,23,42,.12)}
-button:active{transform:translateY(1px)}
-button.primary{background:var(--brand)} button.ok{background:var(--ok)} button.warn{background:var(--warn)} button.bad{background:var(--bad)} button.blue{background:var(--blue)}
-button.ghost{background:#f1f5f9;color:#0f172a;box-shadow:none;border:1px solid #e2e8f0}
-.status{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.pill{border:1px solid #e2e8f0;background:#f8fafc;border-radius:14px;padding:10px;min-width:0}
-.pill b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:4px}
-.pill span{font-weight:900;font-size:13px;word-break:break-word}
-.logbox{height:360px;overflow:auto;background:#020617;color:#dbeafe;border-radius:16px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.48;white-space:pre-wrap}
-.notice{padding:10px 12px;border-radius:14px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:12px;font-weight:800;line-height:1.38}
+.body,.quick-body{padding:12px;display:grid;gap:10px}
+.quick-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+.notice{padding:10px 12px;border-radius:15px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:12px;font-weight:850;line-height:1.45}
+.pass-note{background:#dcfce7;border-color:#86efac;color:#166534}
 .danger-note{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{
+  border:0;border-radius:14px;padding:11px 13px;font-weight:1000;font-size:13px;color:white;
+  background:#334155;cursor:pointer;box-shadow:0 9px 20px rgba(15,23,42,.14);touch-action:manipulation
+}
+button:active{transform:translateY(1px)}
+button.primary{background:var(--brand)}button.ok{background:var(--ok)}button.warn{background:var(--warn)}button.bad{background:var(--bad)}button.blue{background:#2563eb}
+button.ghost{background:#f1f5f9;color:#0f172a;box-shadow:none;border:1px solid #e2e8f0}
+button.running{outline:3px solid rgba(245,158,11,.45);filter:saturate(1.15)}
+input,textarea,select{
+  width:100%;border:1px solid #cbd5e1;border-radius:13px;padding:10px 12px;
+  font:inherit;font-size:13px;background:#fff;outline:none
+}
+textarea{min-height:66px;resize:vertical}
+label{font-size:12px;font-weight:950;color:#475569}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-audio{width:100%}
-.small{font-size:12px;color:#64748b;font-weight:750;line-height:1.4}
-.timer-big{font-size:clamp(30px,7vw,70px);font-weight:1000;letter-spacing:-.06em;color:#9f1239;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1}
-@media(max-width:900px){main{grid-template-columns:1fr;padding:10px;gap:10px}.card,.card.wide{grid-column:span 1}.status,.grid2{grid-template-columns:1fr}header{padding:12px}}
-
-/* PHA 66D - LDPlayer/GitHub simple test upgrade */
-.quick-panel{grid-column:span 12;background:linear-gradient(135deg,#fff,#ecfeff);border:2px solid rgba(14,165,233,.35);border-radius:20px;box-shadow:0 22px 60px rgba(15,23,42,.10);overflow:hidden}
-.quick-panel h2{margin:0;padding:14px 16px;background:linear-gradient(135deg,#e0f2fe,#fff1f2);border-bottom:1px solid #bae6fd;color:#075985;font-size:17px;font-weight:1000}
-.quick-grid{padding:14px;display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
-.quick-steps{display:grid;gap:10px}
-.quick-step{border:1px solid #bae6fd;background:#f0f9ff;border-radius:15px;padding:11px}
-.quick-step b{display:block;color:#075985;margin-bottom:4px}
-.quick-result{border:1px solid #cbd5e1;background:#0f172a;color:#e2e8f0;border-radius:16px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;min-height:170px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pill{border:1px solid #e2e8f0;background:#f8fafc;border-radius:15px;padding:10px;min-width:0}
+.pill b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:4px}
+.pill span{font-weight:950;font-size:13px;word-break:break-word}
 .badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:950;margin:2px;border:1px solid #cbd5e1;background:#f8fafc;color:#334155}
-.badge.ok{background:#dcfce7;border-color:#86efac;color:#166534}
-.badge.warn{background:#fef3c7;border-color:#fcd34d;color:#92400e}
-.badge.bad{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
-.compact-test main{gap:10px}
-.compact-test .advanced-card{display:none}
-.compact-test.show-advanced .advanced-card{display:block}
-.compact-test .logbox{height:300px}
-@media(max-width:900px){.quick-grid{grid-template-columns:1fr}.quick-panel{grid-column:span 1}}
-
-
-/* PHA 66D FIX1 - quick buttons real binding */
-button.quick-running{outline:3px solid rgba(245,158,11,.45);filter:saturate(1.1)}
-.quick-result.ok{border-color:#22c55e}
-.quick-result.warn{border-color:#f59e0b}
-.quick-result.bad{border-color:#ef4444}
-
+.badge.ok{background:#dcfce7;border-color:#86efac;color:#166534}.badge.warn{background:#fef3c7;border-color:#fcd34d;color:#92400e}.badge.bad{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+.summary{
+  border:1px solid #cbd5e1;background:#020617;color:#e2e8f0;border-radius:16px;padding:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;min-height:310px;max-height:62dvh;overflow:auto
+}
+.logbox{
+  height:340px;overflow:auto;background:#020617;color:#dbeafe;border-radius:16px;padding:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.48;white-space:pre-wrap
+}
+.timer{font-size:clamp(38px,9vw,86px);font-weight:1000;letter-spacing:-.07em;color:#9f1239;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:.95}
+audio{width:100%}.small{font-size:12px;color:#64748b;font-weight:800;line-height:1.45}
+.compact .advanced{display:none}.compact.show-advanced .advanced{display:block}
+@media(max-width:900px){
+  main{grid-template-columns:1fr;padding:10px}.quick,.card,.card.wide{grid-column:span 1}
+  .quick-grid,.grid2,.grid3{grid-template-columns:1fr}header{padding:11px}
+  button{width:100%}.row button{width:auto;flex:1 1 auto}
+}
 </style>
 </head>
-<body class="compact-test">
+<body class="compact">
 <header>
-  <h1>LifeOS Alarm Overnight Test Harness 66D FIX1</h1>
-  <p>Bản 66D FIX1: đã gắn lại nút Test nhanh A/B/C cho GitHub Pages / LDPlayer. Tool kiểm thử độc lập cho audio unlock, beep vật lý, TTS preload, worker timer drift, silence audio, WakeLock/visibility và native bridge. Đây là test harness, không phải bảo đảm HTML/PWA báo thức xuyên đêm 100%.</p>
+  <h1>LifeOS Alarm Test 66G — Fast Overnight V19 Anchor</h1>
+  <p>Tool độc lập để giả lập báo thức xuyên đêm nhanh: 15 giây = 1 đêm, 60 giây = 1 ngày, 5 phút = 5 ngày/5 đêm. Không sửa LifeOS chính, không thay thế Android AlarmManager production.</p>
 </header>
 
 <main>
-
-  <section class="quick-panel">
-    <h2>0. Test nhanh LDPlayer / GitHub Pages</h2>
+<section class="quick">
+  <h2>0. Fast Overnight Simulation — V19 Anchor</h2>
+  <div class="quick-body">
     <div class="quick-grid">
-      <div class="quick-steps">
-        <div class="notice">Bản này ưu tiên test trực tiếp trên GitHub Pages / LDPlayer. Đặt file này làm <b>index.html</b> cùng cấp với <b>silence_30min.mp3</b>. Không cần Cloudflare riêng nếu GitHub Pages đã chạy HTTPS.</div>
-        <div class="quick-step"><b>URL silence tự nhận cùng thư mục</b><span id="sameOriginSilenceUrl">--</span></div>
+      <div class="body">
+        <div class="notice pass-note">
+          Cách test chuẩn: bấm <b>A. Mở trạm gác V19</b>, sau đó bấm B0/B1/B2 rồi ra Home hoặc để LDPlayer ngủ.
+          PASS nhanh khi timer fire trong hidden/Home, chuông vật lý nổ và TTS nói.
+        </div>
+        <div class="grid2">
+          <div>
+            <label>Audio Anchor Mode</label>
+            <select id="anchorMode">
+              <option value="both" selected>Both: Local silence + V19 online MP3</option>
+              <option value="v19">V19 online MP3 anchor nghe rõ</option>
+              <option value="silence">Local silence_30min.mp3 cùng thư mục</option>
+            </select>
+          </div>
+          <div>
+            <label>Local silence URL</label>
+            <input id="silenceUrl" value="" placeholder="Tự nhận ./silence_30min.mp3">
+          </div>
+        </div>
+        <div>
+          <label>V19 online MP3 anchor</label>
+          <input id="v19AnchorUrl" value="https://dn721807.ca.archive.org/0/items/giai-toa-moi-thu/Nh%E1%BB%8Bp_%C4%90i%E1%BB%87u_H%E1%BA%A1nh_Ph%C3%BAc_200545_v1.mp3">
+        </div>
+        <div>
+          <label>Câu TTS GTX</label>
+          <textarea id="ttsText">Đã đến giờ báo thức LifeOS. Hãy kiểm tra nhiệm vụ của bạn.</textarea>
+        </div>
         <div class="row">
-          <button class="primary" id="btnQuickPrepare">A. Chuẩn bị test: unlock + load silence + nạp TTS</button>
-          <button class="ok" id="btnQuick60">B. Test 60 giây rồi tắt màn</button>
-          <button class="warn" id="btnQuick300">C. Test 5 phút rồi tắt màn</button>
+          <button class="primary" id="btnStation">A. Mở trạm gác V19</button>
+          <button class="ok" id="btn15">B0. 15 giây = 1 đêm</button>
+          <button class="ok" id="btn60">B1. 60 giây = 1 ngày</button>
+          <button class="warn" id="btn300">B2. 5 phút = 5 ngày/5 đêm</button>
           <button class="blue" id="btnCopySummary">Copy Summary cho ChatGPT</button>
-          <button class="ghost" id="btnToggleAdvanced">Hiện/ẩn phần nâng cao</button>
+          <button class="ghost" id="btnAdvanced">Hiện/ẩn nâng cao</button>
         </div>
         <div id="envBadges"></div>
+        <div class="grid3">
+          <div class="pill"><b>Countdown</b><span class="timer" id="timerCountdown">--</span></div>
+          <div class="pill"><b>Simulated</b><span id="simulatedLabel">--</span></div>
+          <div class="pill"><b>PASS</b><span id="passState">chưa test</span></div>
+        </div>
       </div>
       <div>
-        <div class="quick-result" id="quickSummary">Chưa có kết quả. Bấm A để chuẩn bị, sau đó bấm B hoặc C và tắt màn hình LDPlayer/điện thoại.</div>
+        <div class="summary" id="quickSummary">Chưa có kết quả.</div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="card advanced-card"><h2>1. Audio Unlock Station</h2><div class="body">
-    <div class="notice danger-note">Không tự phát âm thanh. Phải bấm nút để tạo user gesture/audio unlock. HTML/PWA không được coi là báo thức xuyên đêm chính.</div>
-    <div class="row"><button class="primary" id="btnUnlock">1. Mở quyền âm thanh</button><button class="ghost" id="btnProbeAudio">Probe audio state</button></div>
-    <div class="status"><div class="pill"><b>AudioContext</b><span id="audioState">not_created</span></div><div class="pill"><b>User gesture unlock</b><span id="unlockState">false</span></div></div>
-  </div></section>
+<section class="card advanced"><h2>1. Audio / Anchor Players</h2><div class="body">
+  <div class="grid2">
+    <div><label>Local silence</label><audio id="silenceAudio" controls preload="none" loop></audio></div>
+    <div><label>V19 online anchor</label><audio id="anchorAudio" controls preload="none" loop></audio></div>
+  </div>
+  <div><label>TTS GTX Audio</label><audio id="ttsAudio" controls preload="none"></audio></div>
+  <div class="row">
+    <button class="ghost" id="btnUnlock">Unlock audio</button>
+    <button class="ghost" id="btnBeepOnce">Beep test</button>
+    <button class="ghost" id="btnPlayTTS">Play TTS now</button>
+    <button class="bad" id="btnStopAll">Stop all</button>
+  </div>
+</div></section>
 
-  <section class="card advanced-card"><h2>2. Physical Beep Test</h2><div class="body">
-    <div class="row"><button class="ok" id="btnBeepOnce">Test beep ngắn</button><button class="warn" id="btnStartBeep">Start alarm beep</button><button class="bad" id="btnStopBeep">Dừng beep</button></div>
-    <div class="small">Beep dùng WebAudio oscillator square wave, không phụ thuộc file MP3.</div>
-  </div></section>
+<section class="card advanced"><h2>2. Runtime State</h2><div class="body">
+  <div class="grid2">
+    <div class="pill"><b>AudioContext</b><span id="audioState">not_created</span></div>
+    <div class="pill"><b>Visibility</b><span id="visibilityState">--</span></div>
+    <div class="pill"><b>TTS mode</b><span id="ttsMode">none</span></div>
+    <div class="pill"><b>Native bridge</b><span id="nativeState">false</span></div>
+  </div>
+</div></section>
 
-  <section class="card advanced-card"><h2>3. Silent / Background Audio Test</h2><div class="body">
-    <div class="notice">silence_30min.mp3 chỉ là test audio session/fallback khi app đang mở. Không dùng để hứa xuyên đêm.</div>
-    <label>Silence MP3 URL</label><input id="silenceUrl" value="" placeholder="Tự nhận: ./silence_30min.mp3 cùng thư mục index.html">
-    <audio id="silenceAudio" controls preload="none" loop></audio>
-    <div class="row"><button class="blue" id="btnLoadSilence">Load silence</button><button class="ok" id="btnPlaySilence">Play loop</button><button class="bad" id="btnStopSilence">Stop</button></div>
-    <div class="small">Host gợi ý: HTTPS, CORS đúng, Content-Type audio/mpeg, Cache-Control ổn định.</div>
-  </div></section>
-
-  <section class="card advanced-card"><h2>4. TTS Preload Test</h2><div class="body">
-    <div class="notice">Google TTS public URL chỉ dùng test, không phải nguồn production ổn định.</div>
-    <label>Câu TTS</label><textarea id="ttsText">Đã đến giờ báo thức LifeOS. Hãy kiểm tra nhiệm vụ của bạn.</textarea>
-    <audio id="ttsAudio" controls preload="none"></audio>
-    <div class="row"><button class="blue" id="btnPreloadTTS">Nạp TTS</button><button class="ok" id="btnPlayTTS">Phát thử TTS</button><button class="warn" id="btnTTSTimer">Phát TTS sau 15 giây</button></div>
-    <div class="status"><div class="pill"><b>TTS readyState</b><span id="ttsReady">0</span></div><div class="pill"><b>TTS URL mode</b><span>public_google_translate_test</span></div></div>
-  </div></section>
-
-  <section class="card wide advanced-card"><h2>5. Worker Timer + Drift Test</h2><div class="body">
-    <div class="notice">Preset 60s/5 phút dùng để tắt màn hình thử ngắn. Worker timer vẫn không phải alarm xuyên đêm. Native APK AlarmManager mới là hướng chính.</div>
-    <div class="timer-big" id="timerCountdown">--</div>
-    <div class="row"><button class="ok" data-timer="15">15 giây</button><button class="ok" data-timer="60">60 giây</button><button class="warn" data-timer="300">5 phút</button><input id="customSeconds" type="number" min="1" value="120" style="width:120px"><button class="blue" id="btnCustomTimer">Custom seconds</button><button class="bad" id="btnStopTimer">Stop timer</button></div>
-    <div class="grid2"><div class="pill"><b>expectedFireAt</b><span id="expectedFireAt">--</span></div><div class="pill"><b>actual / drift</b><span id="actualFireAt">--</span></div></div>
-  </div></section>
-
-  <section class="card advanced-card"><h2>6. Native Bridge Probe</h2><div class="body">
-    <div class="status"><div class="pill"><b>nativeAlarmAvailable</b><span id="nativeAvailable">unknown</span></div><div class="pill"><b>Bridge object</b><span id="bridgeObject">window.AndroidBridge</span></div></div>
-    <div class="row"><button class="blue" id="btnProbeBridge">Probe bridge</button><button class="ok" id="btnNativeNow">testAlarmNow nếu có</button><button class="warn" id="btnNativeSchedule">Schedule native 1 phút nếu có</button><button class="bad" id="btnNativeCancel">Cancel native test nếu có</button></div>
-    <div id="bridgeMethods" class="small"></div><div class="notice" id="bridgeNotice">Nếu không có bridge: chỉ test HTML foreground/screen-off ngắn.</div>
-  </div></section>
-
-  <section class="card advanced-card"><h2>7. Visibility / Wake / Session Log</h2><div class="body">
-    <div class="row"><button class="blue" id="btnWakeLock">Request WakeLock</button><button class="ghost" id="btnReleaseWake">Release WakeLock</button></div>
-    <div class="status"><div class="pill"><b>visibilityState</b><span id="visibilityState">--</span></div><div class="pill"><b>WakeLock</b><span id="wakeState">none</span></div><div class="pill"><b>MediaSession</b><span id="mediaSessionState">--</span></div><div class="pill"><b>Platform</b><span id="platformState">--</span></div></div>
-  </div></section>
-
-  <section class="card wide"><h2>8. Export Log</h2><div class="body">
-    <div class="row"><button class="blue" id="btnCopyLog">Copy log</button><button class="ok" id="btnDownloadTxt">Download TXT</button><button class="ok" id="btnDownloadJson">Download JSON</button><button class="bad" id="btnClearLog">Clear log</button></div>
-    <div class="logbox" id="logBox"></div>
-  </div></section>
+<section class="card wide"><h2>3. Export Log</h2><div class="body">
+  <div class="row">
+    <button class="blue" id="btnCopyLog">Copy log</button>
+    <button class="ok" id="btnDownloadJson">Download JSON</button>
+    <button class="ok" id="btnDownloadTxt">Download TXT</button>
+    <button class="bad" id="btnClearLog">Clear log</button>
+  </div>
+  <div class="logbox" id="logBox"></div>
+</div></section>
 </main>
 
 <script>
 (function(){
-  const logs = [];
-  let audioCtx = null, unlocked = false, alarmOsc = null, alarmGain = null, timerWorker = null, expectedFireAt = 0, wakeLock = null;
-  const $ = id => document.getElementById(id);
-  const nowIso = () => new Date().toISOString();
-  let nativeTestTaskId = 'lifeos_test_alarm_' + Date.now();
+'use strict';
+const $ = id => document.getElementById(id);
+const logs = [];
+let audioCtx = null, unlocked = false, wakeLock = null, timerWorker = null;
+let alarmOsc = null, alarmGain = null, beepStarted = false, ttsStarted = false;
+let ttsModeLast = 'none', currentTest = null, lastHiddenAt = null, lastVisibleAt = null, hiddenTransitions = 0;
+let lastFire = null, lastStart = null;
 
-  function safeJson(obj){ try { return JSON.stringify(obj, null, 2); } catch(e){ return String(obj); } }
-  function log(event, data = {}){
-    const item = { ts: nowIso(), event, visibilityState: document.visibilityState, audioState: audioCtx ? audioCtx.state : 'not_created', userAgent: navigator.userAgent, platform: navigator.platform || '', language: navigator.language || '', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || '', ...data };
-    logs.push(item);
-    const box = $('logBox');
-    box.textContent += (box.textContent ? '\n\n' : '') + `[${item.ts}] ${event}\n${safeJson(data)}`;
-    box.scrollTop = box.scrollHeight;
-    refreshStatus();
-    console.log('[LifeOS Alarm Harness]', item);
-  }
-  function refreshStatus(){
-    $('audioState').textContent = audioCtx ? audioCtx.state : 'not_created';
-    $('unlockState').textContent = String(unlocked);
-    $('visibilityState').textContent = document.visibilityState;
-    $('ttsReady').textContent = String($('ttsAudio').readyState);
-    $('wakeState').textContent = wakeLock ? 'active' : 'none';
-    $('mediaSessionState').textContent = 'mediaSession' in navigator ? 'available' : 'unavailable';
-    $('platformState').textContent = `${navigator.platform || ''} | ${Intl.DateTimeFormat().resolvedOptions().timeZone || ''}`;
-  }
-  async function ensureAudio(){
-    if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); log('audio_context_created', { state: audioCtx.state, sampleRate: audioCtx.sampleRate }); }
-    if (audioCtx.state === 'suspended') { await audioCtx.resume(); log('audio_context_resume_called', { state: audioCtx.state }); }
-    return audioCtx;
-  }
-  async function beepOnce(freq = 880, ms = 160, type = 'square', volume = 0.12){
-    const ctx = await ensureAudio();
-    const osc = ctx.createOscillator(), gain = ctx.createGain();
-    osc.type = type; osc.frequency.value = freq; gain.gain.value = volume;
-    osc.connect(gain); gain.connect(ctx.destination); osc.start();
-    setTimeout(() => { try { osc.stop(); osc.disconnect(); gain.disconnect(); } catch(e){} }, ms);
-    log('physical_beep_once', { freq, ms, type, audioCtxState: ctx.state });
-  }
-  async function unlockAudio(){ try { await ensureAudio(); await beepOnce(1040, 120); unlocked = true; log('audio_unlock_success', { audioCtxState: audioCtx.state, userGesture: true }); } catch(e) { log('audio_unlock_fail', { name: e.name, message: e.message }); } }
-  async function startAlarmBeep(){
-    try {
-      await ensureAudio(); stopAlarmBeep();
-      alarmOsc = audioCtx.createOscillator(); alarmGain = audioCtx.createGain();
-      alarmOsc.type = 'square'; alarmOsc.frequency.value = 880; alarmGain.gain.value = 0.001;
-      alarmOsc.connect(alarmGain); alarmGain.connect(audioCtx.destination);
-      const t = audioCtx.currentTime; alarmGain.gain.setValueAtTime(0.001, t); alarmGain.gain.exponentialRampToValueAtTime(0.18, t + 0.05);
-      alarmOsc.start(); let flip = false;
-      alarmOsc.__interval = setInterval(() => { if (!alarmOsc) return; alarmOsc.frequency.value = flip ? 880 : 1320; flip = !flip; }, 240);
-      log('alarm_beep_start', { frequencyPattern: '880/1320 square', audioCtxState: audioCtx.state });
-    } catch(e) { log('alarm_beep_start_fail', { name:e.name, message:e.message }); }
-  }
-  function stopAlarmBeep(){
-    if (alarmOsc) {
-      try { clearInterval(alarmOsc.__interval); } catch(e){} try { alarmOsc.stop(); } catch(e){} try { alarmOsc.disconnect(); } catch(e){} try { alarmGain && alarmGain.disconnect(); } catch(e){}
-      alarmOsc = null; alarmGain = null; log('alarm_beep_stop');
-    }
-  }
-  function setupAudioEvents(audio, name){
-    ['loadstart','loadedmetadata','canplay','canplaythrough','playing','pause','stalled','suspend','error','waiting','ended','abort','emptied'].forEach(evt => audio.addEventListener(evt, () => {
-      const err = audio.error ? { code: audio.error.code, message: audio.error.message || '' } : null;
-      log(`${name}_${evt}`, { src: audio.currentSrc || audio.src || '', readyState: audio.readyState, networkState: audio.networkState, error: err });
-    }));
-  }
-  setupAudioEvents($('silenceAudio'), 'silence_audio'); setupAudioEvents($('ttsAudio'), 'tts_audio');
-  function loadSilence(){ const url = $('silenceUrl').value.trim(); const a = $('silenceAudio'); a.src = url; a.load(); log('silence_load_requested', { url }); }
-  async function playSilence(){ try { await ensureAudio(); await $('silenceAudio').play(); log('silence_play_loop_requested', { src: $('silenceAudio').src }); } catch(e) { log('silence_play_fail', { name:e.name, message:e.message }); } }
-  function stopSilence(){ const a = $('silenceAudio'); a.pause(); a.currentTime = 0; log('silence_stop'); }
-  function ttsUrl(text){ return 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=vi&q=' + encodeURIComponent(text); }
-  function preloadTTS(){ const text = $('ttsText').value.trim() || 'Đã đến giờ báo thức LifeOS.'; const a = $('ttsAudio'); a.src = ttsUrl(text); a.load(); log('tts_preload_requested', { text, srcMode:'google_translate_public_test' }); }
-  async function playTTS(){ try { await ensureAudio(); if (!$('ttsAudio').src) preloadTTS(); await $('ttsAudio').play(); log('tts_play_requested', { readyState: $('ttsAudio').readyState }); } catch(e) { log('tts_play_fail', { name:e.name, message:e.message, readyState: $('ttsAudio').readyState, errorCode: $('ttsAudio').error && $('ttsAudio').error.code }); } }
-  function workerSource(){ return "let timer=null;self.onmessage=function(e){const d=e.data||{};if(d.cmd==='start'){clearInterval(timer);const expected=d.expectedFireAt;timer=setInterval(function(){const now=Date.now();self.postMessage({type:'tick',now,remainingMs:expected-now,expectedFireAt:expected});if(now>=expected){clearInterval(timer);self.postMessage({type:'fire',now:Date.now(),expectedFireAt:expected});}},250);}else if(d.cmd==='stop'){clearInterval(timer);self.postMessage({type:'stopped',now:Date.now()});}};"; }
-  function stopTimer(){ if (timerWorker) { try { timerWorker.postMessage({cmd:'stop'}); timerWorker.terminate(); } catch(e){} timerWorker = null; } $('timerCountdown').textContent = '--'; log('worker_timer_stop'); }
-  function startTimer(seconds){
-    stopTimer(); seconds = Math.max(1, Number(seconds || 1)); expectedFireAt = Date.now() + seconds * 1000;
-    $('expectedFireAt').textContent = new Date(expectedFireAt).toLocaleString(); $('actualFireAt').textContent = '--';
-    const blob = new Blob([workerSource()], { type:'application/javascript' }); const url = URL.createObjectURL(blob); timerWorker = new Worker(url); URL.revokeObjectURL(url);
-    timerWorker.onmessage = async e => {
-      const data = e.data || {};
-      if (data.type === 'tick') $('timerCountdown').textContent = `${Math.max(0, Math.ceil(data.remainingMs / 1000))}s`;
-      else if (data.type === 'fire') {
-        const actual = data.now || Date.now(), driftMs = actual - data.expectedFireAt;
-        $('actualFireAt').textContent = `${new Date(actual).toLocaleString()} | drift ${driftMs}ms`;
-        log('worker_timer_fire', { expectedFireAt: new Date(data.expectedFireAt).toISOString(), actualFireAt: new Date(actual).toISOString(), driftMs });
-        await startAlarmBeep(); setTimeout(stopAlarmBeep, 12000);
-        if ($('ttsAudio').src && $('ttsAudio').readyState >= 2) await playTTS();
-      } else if (data.type === 'stopped') log('worker_timer_worker_stopped', data);
-    };
-    timerWorker.postMessage({cmd:'start', expectedFireAt});
-    log('worker_timer_start', { seconds, expectedFireAt: new Date(expectedFireAt).toISOString(), instruction:'Có thể tắt màn hình để test drift/audio, nhưng HTML không bảo đảm xuyên đêm.' });
-  }
-  function probeBridge(){
-    const bridge = window.AndroidBridge;
-    const methods = ['setAlarm','cancelAlarm','updateAlarm','listScheduledAlarms','testAlarmNow','requestExactAlarmPermission','requestNotificationPermission'];
-    const result = {}; methods.forEach(m => result[m] = !!(bridge && typeof bridge[m] === 'function'));
-    $('nativeAvailable').textContent = String(!!bridge); $('bridgeMethods').textContent = methods.map(m => `${m}: ${result[m]}`).join(' | ');
-    $('bridgeNotice').textContent = bridge ? 'Có native bridge. Có thể test hàm nếu shell APK hỗ trợ.' : 'Không có native bridge. Chỉ test HTML foreground/screen-off ngắn.';
-    log('native_bridge_probe', { nativeAlarmAvailable: !!bridge, methods: result }); return { bridge, result };
-  }
-  function callBridge(method, payload){
-    const bridge = window.AndroidBridge;
-    if (!bridge || typeof bridge[method] !== 'function') { log('native_bridge_call_missing', { method, payload }); return; }
-    try { const ret = bridge[method](JSON.stringify(payload || {})); log('native_bridge_call', { method, payload, returnValue: ret }); }
-    catch(e){ log('native_bridge_call_fail', { method, payload, name:e.name, message:e.message }); }
-  }
-  async function requestWakeLock(){ try { if (!('wakeLock' in navigator)) { log('wakelock_unavailable'); return; } wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { log('wakelock_released_event'); wakeLock = null; refreshStatus(); }); log('wakelock_success'); } catch(e) { log('wakelock_fail', { name:e.name, message:e.message }); } refreshStatus(); }
-  function releaseWakeLock(){ if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; log('wakelock_release_requested'); } refreshStatus(); }
-  function download(filename, mime, content){ const blob = new Blob([content], { type:mime }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 300); }
-  function exportTxt(){ return logs.map(x => `[${x.ts}] ${x.event}\n${safeJson(x)}`).join('\n\n'); }
-  document.addEventListener('visibilitychange', () => log('visibilitychange', { visibilityState: document.visibilityState }));
-  window.addEventListener('focus', () => log('window_focus')); window.addEventListener('blur', () => log('window_blur'));
-  window.addEventListener('online', () => log('network_online')); window.addEventListener('offline', () => log('network_offline'));
-  $('btnUnlock').onclick = unlockAudio; $('btnProbeAudio').onclick = () => log('audio_probe', { state: audioCtx ? audioCtx.state : 'not_created', unlocked });
-  $('btnBeepOnce').onclick = () => beepOnce(); $('btnStartBeep').onclick = startAlarmBeep; $('btnStopBeep').onclick = stopAlarmBeep;
-  $('btnLoadSilence').onclick = loadSilence; $('btnPlaySilence').onclick = playSilence; $('btnStopSilence').onclick = stopSilence;
-  $('btnPreloadTTS').onclick = preloadTTS; $('btnPlayTTS').onclick = playTTS; $('btnTTSTimer').onclick = () => { preloadTTS(); startTimer(15); };
-  document.querySelectorAll('[data-timer]').forEach(btn => btn.onclick = () => startTimer(btn.dataset.timer));
-  $('btnCustomTimer').onclick = () => startTimer($('customSeconds').value); $('btnStopTimer').onclick = stopTimer;
-  $('btnProbeBridge').onclick = probeBridge; $('btnNativeNow').onclick = () => callBridge('testAlarmNow', { taskId:nativeTestTaskId, title:'LifeOS native alarm test now', createdAt:Date.now() });
-  $('btnNativeSchedule').onclick = () => callBridge('setAlarm', { taskId:nativeTestTaskId, title:'LifeOS native alarm test 1 phút', dueAt:Date.now()+60000, profileId:'test', alarmEnabled:true, sound:'default', vibration:true, createdAt:Date.now(), updatedAt:Date.now() });
-  $('btnNativeCancel').onclick = () => callBridge('cancelAlarm', { taskId:nativeTestTaskId });
-  $('btnWakeLock').onclick = requestWakeLock; $('btnReleaseWake').onclick = releaseWakeLock;
-  $('btnCopyLog').onclick = async () => { try { await navigator.clipboard.writeText(exportTxt()); log('export_copy_log_success'); } catch(e){ log('export_copy_log_fail', { name:e.name, message:e.message }); } };
-  $('btnDownloadTxt').onclick = () => { log('export_download_txt'); download('lifeos_alarm_test_log.txt','text/plain;charset=utf-8',exportTxt()); };
-  $('btnDownloadJson').onclick = () => { log('export_download_json'); download('lifeos_alarm_test_log.json','application/json;charset=utf-8',JSON.stringify(logs,null,2)); };
-  $('btnClearLog').onclick = () => { logs.length = 0; $('logBox').textContent = ''; log('log_cleared'); };
-  window.lifeosOnNativeAlarmFired = payloadJson => log('native_callback_fired', { payloadJson });
-  window.lifeosOnNativeAlarmScheduled = payloadJson => log('native_callback_scheduled', { payloadJson });
-  window.lifeosOnNativeAlarmCancelled = payloadJson => log('native_callback_cancelled', { payloadJson });
-  window.lifeosOnNativeAlarmPermissionChanged = payloadJson => log('native_callback_permission_changed', { payloadJson });
+const SIM = {
+  15:{realSeconds:15,simulatedLabel:'1 đêm giả lập'},
+  60:{realSeconds:60,simulatedLabel:'1 ngày giả lập'},
+  300:{realSeconds:300,simulatedLabel:'5 ngày / 5 đêm giả lập'}
+};
+const nowIso = () => new Date().toISOString();
 
-  // ===== PHA 66D FIX1: quick buttons real binding =====
-  function getSameOriginSilenceUrl(){
-    try { return new URL('silence_30min.mp3', location.href).href; }
-    catch(e){ return 'silence_30min.mp3'; }
+function safeJson(o){try{return JSON.stringify(o,null,2)}catch(e){return String(o)}}
+function log(event,data={}){
+  const item = {
+    ts:nowIso(),event,visibilityState:document.visibilityState,audioState:audioCtx?audioCtx.state:'not_created',
+    userAgent:navigator.userAgent,platform:navigator.platform||'',language:navigator.language||'',
+    timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'',...data
+  };
+  logs.push(item);
+  const box=$('logBox');
+  if(box){box.textContent+=(box.textContent?'\n\n':'')+`[${item.ts}] ${event}\n${safeJson(data)}`;box.scrollTop=box.scrollHeight}
+  refreshStatus(); refreshSummary();
+  console.log('[LifeOS66G]',item);
+}
+function refreshStatus(){
+  if($('audioState')) $('audioState').textContent=audioCtx?audioCtx.state:'not_created';
+  if($('visibilityState')) $('visibilityState').textContent=document.visibilityState;
+  if($('ttsMode')) $('ttsMode').textContent=ttsModeLast;
+  if($('nativeState')) $('nativeState').textContent=String(!!window.AndroidBridge);
+  if($('simulatedLabel')) $('simulatedLabel').textContent=currentTest?currentTest.simulatedLabel:'--';
+  if($('passState')) $('passState').textContent=buildPass().overallFastOvernightPass?'PASS':'chưa đạt/chưa test';
+}
+async function ensureAudio(){
+  if(!audioCtx){
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    log('audio_context_created',{state:audioCtx.state,sampleRate:audioCtx.sampleRate});
   }
-  function getLastEvent(name){
-    for (let i = logs.length - 1; i >= 0; i--) if (logs[i].event === name) return logs[i];
-    return null;
+  if(audioCtx.state==='suspended'){
+    await audioCtx.resume();
+    log('audio_context_resume_called',{state:audioCtx.state});
   }
-  function hasEvent(name){ return !!logs.find(x => x.event === name); }
-  function renderEnvBadges(){
-    const isHttps = location.protocol === 'https:';
-    const isFile = location.protocol === 'file:';
-    const isGithub = /github\.io/i.test(location.hostname);
-    const bridge = !!window.AndroidBridge;
-    const silenceUrl = getSameOriginSilenceUrl();
-    const badges = [
-      `<span class="badge ${isHttps?'ok':(isFile?'warn':'bad')}">protocol: ${location.protocol}</span>`,
-      `<span class="badge ${isGithub?'ok':'warn'}">host: ${location.hostname || 'local/file'}</span>`,
-      `<span class="badge ${bridge?'ok':'warn'}">nativeBridge: ${bridge}</span>`,
-      `<span class="badge ${'wakeLock' in navigator?'ok':'warn'}">wakeLock: ${'wakeLock' in navigator}</span>`,
-      `<span class="badge ${'mediaSession' in navigator?'ok':'warn'}">mediaSession: ${'mediaSession' in navigator}</span>`
-    ];
-    if ($('envBadges')) $('envBadges').innerHTML = badges.join('');
-    if ($('sameOriginSilenceUrl')) $('sameOriginSilenceUrl').textContent = silenceUrl;
-    if ($('silenceUrl') && !$('silenceUrl').value.trim()) $('silenceUrl').value = silenceUrl;
+  return audioCtx;
+}
+async function beepOnce(freq=1040,ms=150,vol=.18){
+  const ctx=await ensureAudio();
+  const osc=ctx.createOscillator(), gain=ctx.createGain();
+  osc.type='square'; osc.frequency.value=freq; gain.gain.value=vol;
+  osc.connect(gain); gain.connect(ctx.destination); osc.start();
+  setTimeout(()=>{try{osc.stop();osc.disconnect();gain.disconnect()}catch(e){}},ms);
+  log('physical_beep_once',{freq,ms,volume:vol,audioCtxState:ctx.state});
+}
+async function unlockAudio(){
+  await ensureAudio();
+  await beepOnce(1040,120,.16);
+  unlocked=true;
+  log('audio_unlock_success',{audioCtxState:audioCtx.state,userGesture:true});
+}
+function startAlarmBeep(){
+  try{
+    stopAlarmBeep(false);
+    const ctx=audioCtx;
+    alarmOsc=ctx.createOscillator(); alarmGain=ctx.createGain();
+    alarmOsc.type='square'; alarmOsc.frequency.value=880; alarmGain.gain.value=.001;
+    alarmOsc.connect(alarmGain); alarmGain.connect(ctx.destination);
+    const t=ctx.currentTime;
+    alarmGain.gain.setValueAtTime(.001,t);
+    alarmGain.gain.exponentialRampToValueAtTime(.22,t+.06);
+    alarmOsc.start();
+    let i=0, freqs=[880,1320,1760,1320];
+    alarmOsc.__interval=setInterval(()=>{if(alarmOsc){alarmOsc.frequency.value=freqs[i++%freqs.length]}},180);
+    beepStarted=true;
+    log('alarm_beep_start',{frequencyPattern:'880/1320/1760 square',volume:'.22',audioCtxState:ctx.state,atHidden:document.visibilityState==='hidden'});
+  }catch(e){log('alarm_beep_start_fail',{name:e.name,message:e.message})}
+}
+function stopAlarmBeep(shouldLog=true){
+  if(alarmOsc){
+    try{clearInterval(alarmOsc.__interval)}catch(e){}
+    try{alarmOsc.stop()}catch(e){}
+    try{alarmOsc.disconnect()}catch(e){}
+    try{alarmGain&&alarmGain.disconnect()}catch(e){}
+    alarmOsc=null;alarmGain=null;
+    if(shouldLog) log('alarm_beep_stop');
   }
-  function buildSummaryText(){
-    const fire = getLastEvent('worker_timer_fire');
-    const start = getLastEvent('worker_timer_start');
-    const unlock = hasEvent('audio_unlock_success');
-    const silenceOk = hasEvent('silence_audio_canplaythrough') || hasEvent('silence_audio_playing');
-    const silenceFail = getLastEvent('silence_play_fail') || getLastEvent('silence_audio_error');
-    const ttsOk = hasEvent('tts_audio_canplaythrough') || hasEvent('tts_audio_playing');
-    const ttsFail = getLastEvent('tts_play_fail') || getLastEvent('tts_audio_error');
-    const bridgeProbe = getLastEvent('native_bridge_probe');
-    const wakeOk = hasEvent('wakelock_success');
-    const summary = {
-      testName: 'LifeOS Alarm Overnight Test Harness 66D FIX1 Quick Summary',
-      pageUrl: location.href,
-      protocol: location.protocol,
-      host: location.hostname,
-      platform: navigator.platform || '',
-      userAgent: navigator.userAgent,
-      language: navigator.language || '',
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
-      visibilityState: document.visibilityState,
-      audioState: audioCtx ? audioCtx.state : 'not_created',
-      audioUnlock: unlock,
-      silenceUrl: $('silenceUrl') ? $('silenceUrl').value.trim() : '',
-      silenceLoadedOrPlaying: silenceOk,
-      silenceFail: silenceFail ? { event:silenceFail.event, name:silenceFail.name, message:silenceFail.message, error:silenceFail.error } : null,
-      ttsLoadedOrPlaying: ttsOk,
-      ttsFail: ttsFail ? { event:ttsFail.event, name:ttsFail.name, message:ttsFail.message, error:ttsFail.error } : null,
-      wakeLockSuccess: wakeOk,
-      nativeAlarmAvailable: !!window.AndroidBridge,
-      nativeBridgeProbe: bridgeProbe ? bridgeProbe.methods : null,
-      lastTimerStart: start ? { seconds:start.seconds, expectedFireAt:start.expectedFireAt } : null,
-      lastTimerFire: fire ? { expectedFireAt: fire.expectedFireAt, actualFireAt: fire.actualFireAt, driftMs: fire.driftMs } : null,
-      importantEventsTail: logs.slice(-22).map(x => ({ ts:x.ts, event:x.event, visibilityState:x.visibilityState, audioState:x.audioState, driftMs:x.driftMs || undefined }))
-    };
-    return JSON.stringify(summary, null, 2);
-  }
-  function refreshQuickSummary(status){
-    if (!$('quickSummary')) return;
-    $('quickSummary').textContent = buildSummaryText();
-    $('quickSummary').classList.remove('ok','warn','bad');
-    if (status) $('quickSummary').classList.add(status);
-  }
-  async function quickPrepare(){
-    try {
-      renderEnvBadges();
-      log('quick_prepare_start', { note:'unlock + load same-origin silence + preload TTS', silenceUrl:getSameOriginSilenceUrl() });
-      if ($('btnQuickPrepare')) $('btnQuickPrepare').classList.add('quick-running');
-      await unlockAudio();
-      if ($('silenceUrl') && !$('silenceUrl').value.trim()) $('silenceUrl').value = getSameOriginSilenceUrl();
-      loadSilence();
-      setTimeout(() => { playSilence().catch(()=>{}); }, 900);
-      preloadTTS();
-      setTimeout(() => { refreshQuickSummary('ok'); if ($('btnQuickPrepare')) $('btnQuickPrepare').classList.remove('quick-running'); }, 2200);
-    } catch(e) {
-      log('quick_prepare_fail', { name:e.name, message:e.message });
-      refreshQuickSummary('bad');
-      if ($('btnQuickPrepare')) $('btnQuickPrepare').classList.remove('quick-running');
-    }
-  }
-  function quickStartTimer(seconds){
-    renderEnvBadges();
-    log('quick_timer_start_requested', { seconds, instruction:'Sau khi bấm hãy để LDPlayer ngủ hoặc bấm Home/ẩn app để test.' });
-    startTimer(seconds);
-    refreshQuickSummary('warn');
-  }
-  async function copyQuickSummary(){
-    const s = buildSummaryText();
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(s);
-        log('quick_summary_copied');
-      } else {
-        throw new Error('navigator.clipboard unavailable');
-      }
-    } catch(e) {
-      log('quick_summary_copy_fail', { name:e.name, message:e.message });
-      try { window.prompt('Copy summary thủ công:', s); } catch(_){}
-    }
-    refreshQuickSummary('ok');
-  }
-  function bindQuickButtons(){
-    renderEnvBadges();
-    if ($('btnQuickPrepare')) $('btnQuickPrepare').onclick = quickPrepare;
-    if ($('btnQuick60')) $('btnQuick60').onclick = () => quickStartTimer(60);
-    if ($('btnQuick300')) $('btnQuick300').onclick = () => quickStartTimer(300);
-    if ($('btnCopySummary')) $('btnCopySummary').onclick = copyQuickSummary;
-    if ($('btnToggleAdvanced')) $('btnToggleAdvanced').onclick = () => {
-      document.body.classList.toggle('show-advanced');
-      log('advanced_toggle', { show: document.body.classList.contains('show-advanced') });
-      refreshQuickSummary();
-    };
-    setInterval(() => { try { refreshQuickSummary(); } catch(e){} }, 2500);
-    log('quick_buttons_bound_fix1', {
-      hasA: !!$('btnQuickPrepare'),
-      hasB: !!$('btnQuick60'),
-      hasC: !!$('btnQuick300'),
-      hasCopy: !!$('btnCopySummary'),
-      silenceAutoUrl: getSameOriginSilenceUrl()
+}
+function setupAudioEvents(audio,name){
+  ['loadstart','loadedmetadata','loadeddata','canplay','canplaythrough','playing','pause','stalled','suspend','error','waiting','ended','abort','emptied'].forEach(evt=>{
+    audio.addEventListener(evt,()=>{
+      const err=audio.error?{code:audio.error.code,message:audio.error.message||''}:null;
+      log(`${name}_${evt}`,{src:audio.currentSrc||audio.src||'',readyState:audio.readyState,networkState:audio.networkState,error:err});
     });
-  }
+  });
+}
+setupAudioEvents($('silenceAudio'),'silence_audio');
+setupAudioEvents($('anchorAudio'),'v19_anchor_audio');
+setupAudioEvents($('ttsAudio'),'tts_audio');
 
-  if ('mediaSession' in navigator) { try { navigator.mediaSession.metadata = new MediaMetadata({ title:'LifeOS Alarm Test Harness', artist:'LifeOS', album:'Alarm Diagnostics' }); log('mediasession_metadata_set'); } catch(e) { log('mediasession_metadata_fail', { name:e.name, message:e.message }); } }
-  bindQuickButtons();
-  refreshStatus(); probeBridge();
-  log('harness_loaded', { note:'Test harness độc lập. Không chứng minh HTML/PWA báo thức xuyên đêm 100%. Native APK AlarmManager là hướng production.', userAgent:navigator.userAgent, platform:navigator.platform || '', timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone || '', mediaSessionAvailable:'mediaSession' in navigator, wakeLockAvailable:'wakeLock' in navigator });
+function sameOriginSilence(){try{return new URL('silence_30min.mp3',location.href).href}catch(e){return 'silence_30min.mp3'}}
+function ttsUrl(text){return 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=gtx&q='+encodeURIComponent(text)}
+
+function preloadTTS(){
+  const text=$('ttsText').value.trim()||'Đã đến giờ báo thức LifeOS.';
+  const a=$('ttsAudio');
+  a.src=ttsUrl(text); a.preload='auto'; a.load();
+  ttsModeLast='google_gtx_audio';
+  log('tts_preload_requested',{text,srcMode:'google_translate_gtx_v19_style',url:a.src});
+}
+function getVietnameseVoice(){
+  try{
+    const voices=speechSynthesis.getVoices();
+    return voices.find(v=>/vi/i.test(v.lang||''))||voices.find(v=>/Vietnam/i.test(v.name||''))||voices[0]||null;
+  }catch(e){return null}
+}
+function speakFallback(text){
+  return new Promise((resolve,reject)=>{
+    try{
+      if(!('speechSynthesis' in window)) throw new Error('speechSynthesis unavailable');
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(text||'Đã đến giờ báo thức LifeOS.');
+      const voice=getVietnameseVoice();
+      if(voice) u.voice=voice;
+      u.lang=voice&&voice.lang?voice.lang:'vi-VN'; u.rate=.92; u.pitch=1; u.volume=1;
+      u.onstart=()=>{ttsModeLast='speechSynthesis';ttsStarted=true;log('tts_speechsynthesis_start',{voice:voice?{name:voice.name,lang:voice.lang}:null,text:u.text,atHidden:document.visibilityState==='hidden'})};
+      u.onend=()=>{log('tts_speechsynthesis_end');resolve(true)};
+      u.onerror=e=>{log('tts_speechsynthesis_error',{error:e.error||'',message:e.message||''});reject(e)};
+      speechSynthesis.speak(u);
+      setTimeout(()=>resolve(true),12000);
+    }catch(e){log('tts_speechsynthesis_fail',{name:e.name,message:e.message});reject(e)}
+  });
+}
+async function playTTS(){
+  const text=$('ttsText').value.trim()||'Đã đến giờ báo thức LifeOS.';
+  try{
+    await ensureAudio();
+    if(!$('ttsAudio').src) preloadTTS();
+    const a=$('ttsAudio'); a.currentTime=0; a.volume=1.0;
+    await a.play();
+    ttsModeLast='google_gtx_audio'; ttsStarted=true;
+    log('tts_play_requested',{readyState:a.readyState,mode:ttsModeLast,atHidden:document.visibilityState==='hidden'});
+  }catch(e){
+    log('tts_play_fail',{name:e.name,message:e.message,readyState:$('ttsAudio').readyState,errorCode:$('ttsAudio').error&&$('ttsAudio').error.code,fallback:'speechSynthesis'});
+    try{await speakFallback(text)}catch(e2){log('tts_all_modes_fail',{first:{name:e.name,message:e.message},second:{name:e2.name,message:e2.message}})}
+  }
+}
+$('ttsAudio').addEventListener('playing',()=>{ttsStarted=true;});
+$('ttsAudio').addEventListener('error',()=>{setTimeout(()=>speakFallback($('ttsText').value.trim()).catch(()=>{}),250)});
+
+async function loadAndPlayAudio(audio,url,name){
+  audio.src=url; audio.preload='auto'; audio.load();
+  log(`${name}_load_requested`,{url});
+  await new Promise(r=>setTimeout(r,500));
+  try{audio.volume=name==='v19_anchor'?0.35:0.01; await audio.play(); log(`${name}_play_requested`,{src:audio.src,volume:audio.volume}); return true}
+  catch(e){log(`${name}_play_fail`,{name:e.name,message:e.message,src:audio.src}); return false}
+}
+async function openStation(){
+  $('btnStation').classList.add('running');
+  try{
+    log('v19_station_open_start',{anchorMode:$('anchorMode').value});
+    await unlockAudio();
+    await requestWakeLockSoft();
+    setMediaSession();
+    const mode=$('anchorMode').value;
+    if(!$('silenceUrl').value.trim()) $('silenceUrl').value=sameOriginSilence();
+    if(mode==='silence'||mode==='both') await loadAndPlayAudio($('silenceAudio'),$('silenceUrl').value.trim(),'silence');
+    if(mode==='v19'||mode==='both') await loadAndPlayAudio($('anchorAudio'),$('v19AnchorUrl').value.trim(),'v19_anchor');
+    preloadTTS();
+    await beepOnce(1320,140,.18);
+    log('v19_station_open_success',{anchorMode:mode});
+  }catch(e){log('v19_station_open_fail',{name:e.name,message:e.message})}
+  $('btnStation').classList.remove('running');
+}
+function setMediaSession(){
+  if('mediaSession' in navigator){
+    try{
+      navigator.mediaSession.metadata=new MediaMetadata({title:'LifeOS Fast Overnight Test 66G',artist:'LifeOS',album:'V19 Anchor'});
+      navigator.mediaSession.playbackState='playing';
+      log('mediasession_metadata_set_66g');
+    }catch(e){log('mediasession_metadata_fail',{name:e.name,message:e.message})}
+  }else log('mediasession_unavailable');
+}
+async function requestWakeLockSoft(){
+  try{
+    if(!('wakeLock' in navigator)){log('wakelock_unavailable');return}
+    wakeLock=await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release',()=>{log('wakelock_released_event');wakeLock=null});
+    log('wakelock_success');
+  }catch(e){log('wakelock_fail',{name:e.name,message:e.message})}
+}
+
+function workerSource(){
+  return `let timer=null;self.onmessage=e=>{const d=e.data||{};if(d.cmd==='start'){clearInterval(timer);const expected=d.expectedFireAt;timer=setInterval(()=>{const now=Date.now();self.postMessage({type:'tick',now,remainingMs:expected-now,expectedFireAt:expected});if(now>=expected){clearInterval(timer);self.postMessage({type:'fire',now:Date.now(),expectedFireAt:expected});}},250)}else if(d.cmd==='stop'){clearInterval(timer);self.postMessage({type:'stopped',now:Date.now()})}};`;
+}
+function stopTimer(){
+  if(timerWorker){try{timerWorker.postMessage({cmd:'stop'});timerWorker.terminate()}catch(e){} timerWorker=null}
+  $('timerCountdown').textContent='--';
+  log('worker_timer_stop');
+}
+function startFastTest(seconds){
+  const cfg=SIM[seconds]||{realSeconds:seconds,simulatedLabel:`${seconds} giây tùy chỉnh`};
+  currentTest={...cfg,testMode:'fast_overnight_simulation',startedAt:nowIso()};
+  beepStarted=false; ttsStarted=false; lastFire=null;
+  stopTimer();
+  const expectedFireAt=Date.now()+seconds*1000;
+  lastStart={realSeconds:seconds,simulatedLabel:cfg.simulatedLabel,testMode:'fast_overnight_simulation',expectedFireAt:new Date(expectedFireAt).toISOString()};
+  log('fast_overnight_timer_start',{...lastStart,instruction:'Bấm xong ra Home / để LDPlayer ngủ. Đây là mô phỏng nhanh, không chờ thật qua đêm.'});
+  const blob=new Blob([workerSource()],{type:'application/javascript'}), url=URL.createObjectURL(blob);
+  timerWorker=new Worker(url); URL.revokeObjectURL(url);
+  timerWorker.onmessage=async e=>{
+    const d=e.data||{};
+    if(d.type==='tick') $('timerCountdown').textContent=`${Math.max(0,Math.ceil(d.remainingMs/1000))}s`;
+    if(d.type==='fire'){
+      const actual=d.now||Date.now(), drift=actual-d.expectedFireAt;
+      lastFire={expectedFireAt:new Date(d.expectedFireAt).toISOString(),actualFireAt:new Date(actual).toISOString(),driftMs:drift,fireVisibilityState:document.visibilityState,wasHiddenAtFire:document.visibilityState==='hidden'};
+      log('worker_timer_fire',{...lastFire,simulatedLabel:cfg.simulatedLabel,realSeconds:seconds});
+      startAlarmBeep();
+      setTimeout(()=>stopAlarmBeep(true),12000);
+      await playTTS();
+    }
+  };
+  timerWorker.postMessage({cmd:'start',expectedFireAt});
+  refreshSummary();
+}
+
+function getLastEvent(name){for(let i=logs.length-1;i>=0;i--)if(logs[i].event===name)return logs[i];return null}
+function hasEvent(name){return logs.some(x=>x.event===name)}
+function countEvents(name){return logs.filter(x=>x.event===name).length}
+function activeAnchor(){
+  return {
+    localSilenceLoadedOrPlaying:hasEvent('silence_audio_canplaythrough')||hasEvent('silence_audio_playing')||hasEvent('silence_play_requested'),
+    v19OnlineAnchorLoadedOrPlaying:hasEvent('v19_anchor_audio_canplaythrough')||hasEvent('v19_anchor_audio_playing')||hasEvent('v19_anchor_play_requested')
+  };
+}
+function buildPass(){
+  const a=activeAnchor();
+  const fire=lastFire||getLastEvent('worker_timer_fire')||{};
+  const hiddenBefore=hiddenTransitions>0;
+  const beep=beepStarted||hasEvent('alarm_beep_start');
+  const tts=ttsStarted||hasEvent('tts_audio_playing')||hasEvent('tts_play_requested')||hasEvent('tts_speechsynthesis_start');
+  const driftOk=typeof fire.driftMs==='number' ? Math.abs(fire.driftMs)<=3000 : false;
+  const reasons=[], fails=[];
+  if(unlocked) reasons.push('audio unlock OK'); else fails.push('audio unlock chưa OK');
+  if(a.localSilenceLoadedOrPlaying||a.v19OnlineAnchorLoadedOrPlaying) reasons.push('anchor audio active'); else fails.push('chưa có anchor audio active');
+  if(fire.actualFireAt||fire.ts) reasons.push('timer fired'); else fails.push('timer chưa fire');
+  if(driftOk) reasons.push('drift <= 3000ms'); else fails.push('drift chưa đạt hoặc chưa có');
+  if(hiddenBefore||fire.wasHiddenAtFire||fire.visibilityState==='hidden') reasons.push('đã có hidden/Home trước hoặc tại lúc fire'); else fails.push('chưa chứng minh hidden/Home');
+  if(beep) reasons.push('beep started'); else fails.push('beep chưa started');
+  if(tts) reasons.push('TTS started/playing'); else fails.push('TTS chưa started/playing');
+  return {overallFastOvernightPass:unlocked&&(a.localSilenceLoadedOrPlaying||a.v19OnlineAnchorLoadedOrPlaying)&&(fire.actualFireAt||fire.ts)&&driftOk&&(hiddenBefore||fire.wasHiddenAtFire||fire.visibilityState==='hidden')&&beep&&tts,passReasons:reasons,failReasons:fails};
+}
+function buildSummary(){
+  const a=activeAnchor(), p=buildPass(), fire=lastFire||getLastEvent('worker_timer_fire'), start=lastStart||getLastEvent('fast_overnight_timer_start');
+  return {
+    testName:'LifeOS Alarm Test 66G Fast Overnight V19 Anchor',
+    pageUrl:location.href,protocol:location.protocol,host:location.hostname,platform:navigator.platform||'',userAgent:navigator.userAgent,
+    language:navigator.language||'',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'',
+    testMode:currentTest?currentTest.testMode:'fast_overnight_simulation',
+    realSeconds:currentTest?currentTest.realSeconds:null,
+    simulatedLabel:currentTest?currentTest.simulatedLabel:null,
+    audioAnchorMode:$('anchorMode').value,
+    ...a,
+    audioUnlock:unlocked,audioState:audioCtx?audioCtx.state:'not_created',
+    ttsLoadedOrPlaying:ttsStarted||hasEvent('tts_audio_canplaythrough')||hasEvent('tts_audio_playing')||hasEvent('tts_speechsynthesis_start'),
+    ttsModeLast,nativeAlarmAvailable:!!window.AndroidBridge,
+    lastTimerStart:start,lastTimerFire:fire,
+    driftMs:fire&&typeof fire.driftMs==='number'?fire.driftMs:null,
+    fireVisibilityState:fire?fire.fireVisibilityState||fire.visibilityState:null,
+    wasHiddenAtFire:fire?!!(fire.wasHiddenAtFire||fire.visibilityState==='hidden'):false,
+    hiddenTransitionsCount:hiddenTransitions,lastHiddenAt,lastVisibleAt,
+    beepStarted:beepStarted||hasEvent('alarm_beep_start'),
+    beepStartedAtHidden:!!(getLastEvent('alarm_beep_start')&&(getLastEvent('alarm_beep_start').atHidden||getLastEvent('alarm_beep_start').visibilityState==='hidden')),
+    ttsStarted:ttsStarted||hasEvent('tts_audio_playing')||hasEvent('tts_play_requested')||hasEvent('tts_speechsynthesis_start'),
+    ttsStartedAtHidden:!!((getLastEvent('tts_audio_playing')&&getLastEvent('tts_audio_playing').visibilityState==='hidden')||(getLastEvent('tts_play_requested')&&(getLastEvent('tts_play_requested').atHidden||getLastEvent('tts_play_requested').visibilityState==='hidden'))||(getLastEvent('tts_speechsynthesis_start')&&(getLastEvent('tts_speechsynthesis_start').atHidden||getLastEvent('tts_speechsynthesis_start').visibilityState==='hidden'))),
+    ...p,
+    importantEventsTail:logs.slice(-32).map(x=>({ts:x.ts,event:x.event,visibilityState:x.visibilityState,audioState:x.audioState,driftMs:x.driftMs,atHidden:x.atHidden,simulatedLabel:x.simulatedLabel}))
+  };
+}
+function refreshSummary(){
+  const el=$('quickSummary'); if(el) el.textContent=safeJson(buildSummary());
+  refreshStatus();
+}
+async function copyText(s){
+  try{await navigator.clipboard.writeText(s);log('copy_success')}catch(e){log('copy_fail',{name:e.name,message:e.message});try{prompt('Copy thủ công:',s)}catch(_){}}}
+function exportTxt(){return logs.map(x=>`[${x.ts}] ${x.event}\n${safeJson(x)}`).join('\n\n')}
+function download(name,mime,content){
+  const blob=new Blob([content],{type:mime}), url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},300)
+}
+function renderEnvBadges(){
+  if(!$('silenceUrl').value.trim()) $('silenceUrl').value=sameOriginSilence();
+  const badges=[
+    ['protocol: '+location.protocol, location.protocol==='https:'?'ok':(location.protocol==='file:'?'warn':'bad')],
+    ['host: '+(location.hostname||'local/file'), /github\.io/i.test(location.hostname)?'ok':'warn'],
+    ['nativeBridge: '+!!window.AndroidBridge, window.AndroidBridge?'ok':'warn'],
+    ['mediaSession: '+('mediaSession' in navigator), 'mediaSession' in navigator?'ok':'warn'],
+    ['V19 GTX TTS', 'ok']
+  ];
+  $('envBadges').innerHTML=badges.map(b=>`<span class="badge ${b[1]}">${b[0]}</span>`).join('');
+}
+function probeBridge(){
+  const methods=['setAlarm','cancelAlarm','updateAlarm','listScheduledAlarms','testAlarmNow','requestExactAlarmPermission','requestNotificationPermission'];
+  const bridge=window.AndroidBridge, result={}; methods.forEach(m=>result[m]=!!(bridge&&typeof bridge[m]==='function'));
+  log('native_bridge_probe',{nativeAlarmAvailable:!!bridge,methods:result});
+}
+function stopAll(){
+  stopAlarmBeep(true); stopTimer();
+  [$('silenceAudio'),$('anchorAudio'),$('ttsAudio')].forEach(a=>{try{a.pause();a.currentTime=0}catch(e){}});
+  try{speechSynthesis.cancel()}catch(e){}
+  log('stop_all');
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){hiddenTransitions++;lastHiddenAt=nowIso()}
+  if(document.visibilityState==='visible'){lastVisibleAt=nowIso()}
+  log('visibilitychange',{visibilityState:document.visibilityState,hiddenTransitions,lastHiddenAt,lastVisibleAt});
+});
+window.addEventListener('focus',()=>log('window_focus'));
+window.addEventListener('blur',()=>log('window_blur'));
+window.addEventListener('online',()=>log('network_online'));
+window.addEventListener('offline',()=>log('network_offline'));
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged=()=>log('speech_voices_changed',{count:speechSynthesis.getVoices().length});
+
+$('btnStation').onclick=openStation;
+$('btn15').onclick=()=>startFastTest(15);
+$('btn60').onclick=()=>startFastTest(60);
+$('btn300').onclick=()=>startFastTest(300);
+$('btnCopySummary').onclick=()=>copyText(safeJson(buildSummary()));
+$('btnAdvanced').onclick=()=>{document.body.classList.toggle('show-advanced');log('advanced_toggle',{show:document.body.classList.contains('show-advanced')})};
+$('btnUnlock').onclick=unlockAudio;
+$('btnBeepOnce').onclick=()=>beepOnce(1320,160,.18);
+$('btnPlayTTS').onclick=playTTS;
+$('btnStopAll').onclick=stopAll;
+$('btnCopyLog').onclick=()=>copyText(exportTxt());
+$('btnDownloadJson').onclick=()=>download('lifeos_alarm_test_66G_log.json','application/json;charset=utf-8',safeJson(logs));
+$('btnDownloadTxt').onclick=()=>download('lifeos_alarm_test_66G_log.txt','text/plain;charset=utf-8',exportTxt());
+$('btnClearLog').onclick=()=>{logs.length=0;$('logBox').textContent='';log('log_cleared')};
+
+renderEnvBadges(); setMediaSession(); probeBridge(); refreshSummary();
+log('harness_loaded_66g',{note:'Fast overnight simulation. 15s=1 night, 60s=1 day, 300s=5 days/5 nights. Not production replacement for Android AlarmManager.',mediaSessionAvailable:'mediaSession' in navigator,wakeLockAvailable:'wakeLock' in navigator});
 })();
 </script>
 </body>
