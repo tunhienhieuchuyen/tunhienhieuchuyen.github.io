@@ -17288,5 +17288,448 @@ body.lifeos65c-family-drag-active #chat-messages {
 })();
 </script>
 
+
+
+<style id="lifeos-pha66b-task-alarm-native-bridge-style">
+/* PHA 66B: Native Alarm Bridge architecture lock status.
+   This is a small status surface only; it does not change Task/Weather/Family layout logic. */
+#lifeos-native-alarm-bridge-status {
+  display: none;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(245, 158, 11, .35);
+  background: rgba(255, 251, 235, .92);
+  color: #92400e;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 800;
+}
+#lifeos-native-alarm-bridge-status.lifeos-native-ready {
+  border-color: rgba(16, 185, 129, .35);
+  background: rgba(236, 253, 245, .92);
+  color: #047857;
+}
+#lifeos-native-alarm-bridge-status .lifeos-bridge-mini {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+#lifeos-native-alarm-bridge-status i {
+  margin-top: 1px;
+  font-size: 16px;
+  flex: 0 0 auto;
+}
+#lifeos-native-alarm-bridge-status b {
+  font-weight: 1000;
+}
+body[data-desktop-workspace="tasks"] #lifeos-native-alarm-bridge-status,
+body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-native-alarm-bridge-status {
+  display: block;
+}
+</style>
+
+
+<script id="lifeos-pha66b-task-alarm-native-bridge-stub-js">
+(function(){
+  'use strict';
+  if (window.__lifeosPha66bTaskAlarmNativeBridgeStub) return;
+  window.__lifeosPha66bTaskAlarmNativeBridgeStub = true;
+
+  const PATCH_ID = 'lifeos-pha66b-task-alarm-native-bridge-stub-js';
+  const SCHEMA_VERSION = 'lifeos_alarm_bridge_v1';
+  const LOG_KEY = 'lifeos_native_alarm_bridge_last_log';
+  const ARCH_KEY = 'lifeos_alarm_architecture_lock_v66b';
+
+  window.LifeOSAlarmArchitecture = Object.assign({}, window.LifeOSAlarmArchitecture || {}, {
+    phase: '66B',
+    htmlRole: 'ui_task_editor_sync_data',
+    nativeRole: 'android_alarmmanager_exact_alarm',
+    foregroundFallback: 'html_active_only',
+    nativeRequiredForOvernight: true,
+    silence30minRole: 'fallback_audio_unlock_only_not_primary_alarm',
+    cloudflareRole: 'support_sync_push_relay_not_offline_alarm',
+    bridgeApi: [
+      'window.AndroidBridge.setAlarm(payloadJson)',
+      'window.AndroidBridge.cancelAlarm(taskId)',
+      'window.AndroidBridge.updateAlarm(payloadJson)',
+      'window.AndroidBridge.listScheduledAlarms()',
+      'window.AndroidBridge.testAlarmNow(taskId)',
+      'window.AndroidBridge.requestExactAlarmPermission()',
+      'window.AndroidBridge.requestNotificationPermission()'
+    ],
+    androidBuildNote: 'APK/TWA/WebView must not use android:screenOrientation="portrait"; use unspecified/no declaration. Native alarm should use AlarmManager.setExactAndAllowWhileIdle + high-importance notification channel.'
+  });
+  try { localStorage.setItem(ARCH_KEY, JSON.stringify(window.LifeOSAlarmArchitecture)); } catch(e) {}
+
+  function nowIso(){ return new Date().toISOString(); }
+  function safeJsonParse(v){ try { return typeof v === 'string' ? JSON.parse(v) : (v || {}); } catch(e) { return { raw: String(v || '') }; } }
+  function profileId(){
+    return String(window.viewingUser || window.currentUser || localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || 'live');
+  }
+  function bridge(){
+    return window.AndroidBridge || window.LifeOSAndroidBridge || window.NativeBridge || null;
+  }
+  function hasMethod(name){
+    const b = bridge();
+    return !!(b && typeof b[name] === 'function');
+  }
+  function nativeAvailable(){
+    return !!bridge() && ['setAlarm','cancelAlarm','updateAlarm','listScheduledAlarms','testAlarmNow','requestExactAlarmPermission','requestNotificationPermission'].some(hasMethod);
+  }
+  function toMs(value){
+    if (value === null || value === undefined || value === '') return null;
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    const n = Number(value);
+    if (Number.isFinite(n) && n > 1000000000) return n;
+    const t = Date.parse(String(value));
+    return Number.isFinite(t) ? t : null;
+  }
+  function dueAtFromTask(t){
+    if (!t) return null;
+    let ms = toMs(t.dueAt ?? t.alarmTime ?? t.dueTime);
+    if (ms) return ms;
+    const date = String(t.dueDate || t.date || '').trim();
+    const time = String(t.timeStr || '').trim();
+    if (date && time) {
+      const parts = date.split('-');
+      const hm = time.split(':');
+      if (parts.length === 3 && hm.length >= 2) {
+        const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), Number(hm[0]), Number(hm[1]), 0, 0);
+        if (Number.isFinite(d.getTime())) return d.getTime();
+      }
+    }
+    return null;
+  }
+  function repeatRuleFromTask(t){
+    if (!t) return null;
+    if (t.repeatRule) return t.repeatRule;
+    if (t.isDaily) return 'FREQ=DAILY';
+    return null;
+  }
+  function compactTask(t){
+    return {
+      id: String(t?.id || ''),
+      text: String(t?.text || t?.title || ''),
+      completed: !!t?.completed,
+      alarmEnabled: t?.alarmEnabled !== false,
+      alarmTime: t?.alarmTime ?? null,
+      dueAt: t?.dueAt ?? null,
+      dueTime: t?.dueTime ?? null,
+      dueDate: t?.dueDate || t?.date || null,
+      timeStr: t?.timeStr || null,
+      isDaily: !!t?.isDaily,
+      repeatRule: repeatRuleFromTask(t),
+      alerted: !!t?.alerted,
+      createdAt: t?.createdAt || null,
+      updatedAt: t?.updatedAt || Date.now()
+    };
+  }
+
+  const Controller = {
+    phase: '66B',
+    schemaVersion: SCHEMA_VERSION,
+    fallback: 'html_active_only',
+    get nativeAlarmAvailable(){ return nativeAvailable(); },
+
+    isNativeBridgeAvailable(){
+      return nativeAvailable();
+    },
+
+    normalizeTaskAlarmPayload(task, meta = {}){
+      const t = task || {};
+      const dueAt = dueAtFromTask(t);
+      const title = String(t.title || t.text || 'LifeOS alarm').trim() || 'LifeOS alarm';
+      return {
+        schemaVersion: SCHEMA_VERSION,
+        source: 'LifeOS.HTML',
+        phase: '66B',
+        action: meta.action || 'setAlarm',
+        taskId: String(t.id || meta.taskId || ''),
+        title,
+        dueAt,
+        dueAtIso: dueAt ? new Date(dueAt).toISOString() : null,
+        profileId: String(meta.profileId || profileId()),
+        alarmEnabled: t.alarmEnabled !== false,
+        repeatRule: repeatRuleFromTask(t),
+        sound: meta.sound || t.sound || 'default_alarm',
+        vibration: meta.vibration ?? t.vibration ?? true,
+        completed: !!t.completed,
+        alerted: !!t.alerted,
+        createdAt: t.createdAt || Date.now(),
+        updatedAt: t.updatedAt || Date.now(),
+        fallback: this.fallback,
+        nativeAlarmAvailable: nativeAvailable(),
+        task: compactTask(t)
+      };
+    },
+
+    shouldSchedule(task){
+      const dueAt = dueAtFromTask(task);
+      return !!(task && String(task.id || '') && task.alarmEnabled !== false && !task.completed && dueAt && dueAt > Date.now());
+    },
+
+    log(entry = {}){
+      const payload = Object.assign({
+        phase: '66B',
+        timestamp: nowIso(),
+        nativeAlarmAvailable: nativeAvailable(),
+        fallback: nativeAvailable() ? null : this.fallback
+      }, entry || {});
+      try { localStorage.setItem(LOG_KEY, JSON.stringify(payload)); } catch(e) {}
+      console.info('[LifeOS 66B NativeAlarmBridge]', payload);
+      return payload;
+    },
+
+    callBridge(method, payload = {}){
+      const b = bridge();
+      const json = JSON.stringify(payload);
+      if (!b || typeof b[method] !== 'function') {
+        return this.log({ ok:false, method, payload, note:'native bridge missing; using html_active_only fallback' });
+      }
+      try {
+        const result = b[method](json);
+        return this.log({ ok:true, method, payload, bridgeResult: result ?? null });
+      } catch(err) {
+        return this.log({ ok:false, method, payload, errorName: err?.name || 'BridgeCallError', errorMessage: err?.message || String(err || '') });
+      }
+    },
+
+    setAlarm(taskOrPayload, meta = {}){
+      const payload = taskOrPayload && taskOrPayload.schemaVersion ? taskOrPayload : this.normalizeTaskAlarmPayload(taskOrPayload, Object.assign({}, meta, { action:'setAlarm' }));
+      if (!payload.taskId || !payload.dueAt) return this.log({ ok:false, method:'setAlarm', payload, note:'missing taskId/dueAt' });
+      return this.callBridge('setAlarm', payload);
+    },
+
+    updateAlarm(taskOrPayload, meta = {}){
+      const payload = taskOrPayload && taskOrPayload.schemaVersion ? taskOrPayload : this.normalizeTaskAlarmPayload(taskOrPayload, Object.assign({}, meta, { action:'updateAlarm' }));
+      if (!payload.taskId || !payload.dueAt) return this.log({ ok:false, method:'updateAlarm', payload, note:'missing taskId/dueAt' });
+      return this.callBridge(hasMethod('updateAlarm') ? 'updateAlarm' : 'setAlarm', payload);
+    },
+
+    cancelAlarm(taskOrId, meta = {}){
+      const id = typeof taskOrId === 'object' ? String(taskOrId?.id || taskOrId?.taskId || '') : String(taskOrId || '');
+      const payload = {
+        schemaVersion: SCHEMA_VERSION,
+        source: 'LifeOS.HTML',
+        phase: '66B',
+        action: 'cancelAlarm',
+        taskId: id,
+        profileId: String(meta.profileId || profileId()),
+        updatedAt: Date.now(),
+        fallback: this.fallback,
+        nativeAlarmAvailable: nativeAvailable()
+      };
+      if (!id) return this.log({ ok:false, method:'cancelAlarm', payload, note:'missing taskId' });
+      return this.callBridge('cancelAlarm', payload);
+    },
+
+    syncTask(task, reason = 'syncTask'){
+      if (!task || !String(task.id || '')) return this.log({ ok:false, reason, note:'missing task' });
+      if (this.shouldSchedule(task)) return this.setAlarm(task, { reason });
+      return this.cancelAlarm(task, { reason });
+    },
+
+    reconcileAll(reason = 'reconcileAll'){
+      const list = Array.isArray(window.todos) ? window.todos : [];
+      const summary = { scheduled:0, cancelled:0, skipped:0, total:list.length };
+      list.forEach(t => {
+        if (!t || !String(t.id || '')) { summary.skipped++; return; }
+        if (this.shouldSchedule(t)) { summary.scheduled++; this.setAlarm(t, { reason }); }
+        else { summary.cancelled++; this.cancelAlarm(t, { reason }); }
+      });
+      return this.log({ ok:true, method:'reconcileAll', reason, summary });
+    },
+
+    listScheduledAlarms(){
+      return this.callBridge('listScheduledAlarms', { schemaVersion: SCHEMA_VERSION, phase:'66B', action:'listScheduledAlarms', profileId: profileId(), timestamp: nowIso() });
+    },
+
+    testAlarmNow(taskId){
+      const t = (window.todos || []).find(x => String(x.id) === String(taskId)) || null;
+      const payload = this.normalizeTaskAlarmPayload(t || { id: taskId || 'TEST_ALARM', text:'LifeOS test alarm', alarmTime: Date.now() + 5000 }, { action:'testAlarmNow' });
+      payload.test = true;
+      return this.callBridge('testAlarmNow', payload);
+    },
+
+    requestExactAlarmPermission(){
+      return this.callBridge('requestExactAlarmPermission', { schemaVersion: SCHEMA_VERSION, phase:'66B', action:'requestExactAlarmPermission', timestamp: nowIso() });
+    },
+
+    requestNotificationPermission(){
+      return this.callBridge('requestNotificationPermission', { schemaVersion: SCHEMA_VERSION, phase:'66B', action:'requestNotificationPermission', timestamp: nowIso() });
+    }
+  };
+
+  window.LifeOSNativeAlarm = Controller;
+
+  function statusText(){
+    if (Controller.isNativeBridgeAvailable()) {
+      return {
+        cls:'lifeos-native-ready',
+        icon:'ph-bold ph-shield-check',
+        html:'<b>Native Alarm Bridge:</b> đã phát hiện APK bridge. Tạo/sửa/xóa nhiệm vụ có giờ sẽ gửi payload sang Android AlarmManager.'
+      };
+    }
+    return {
+      cls:'',
+      icon:'ph-bold ph-warning-circle',
+      html:'<b>Báo thức xuyên đêm:</b> cần APK Native Bridge. Bản HTML hiện tại chỉ là <b>fallback khi app đang mở</b>; không hứa báo thức qua đêm bằng JS timer.'
+    };
+  }
+
+  function ensureStatus(){
+    const view = document.getElementById('view-tasks');
+    if (!view) return null;
+    let box = document.getElementById('lifeos-native-alarm-bridge-status');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'lifeos-native-alarm-bridge-status';
+      const target = view.querySelector('#todo-form, form, .task-input-container') || view.firstElementChild || view;
+      if (target && target.parentNode) target.parentNode.insertBefore(box, target.nextSibling);
+      else view.insertBefore(box, view.firstChild);
+    }
+    const s = statusText();
+    box.className = s.cls;
+    box.innerHTML = '<div class="lifeos-bridge-mini"><i class="' + s.icon + '"></i><div>' + s.html + '<div class="mt-1 text-[10px] opacity-75">nativeAlarmAvailable: ' + Controller.isNativeBridgeAvailable() + ' · fallback: ' + (Controller.isNativeBridgeAvailable() ? 'native_alarmmanager' : 'html_active_only') + '</div></div></div>';
+    return box;
+  }
+
+  function debounce(fn, ms){
+    let id = null;
+    return function(){
+      clearTimeout(id);
+      const args = arguments, self = this;
+      id = setTimeout(function(){ fn.apply(self, args); }, ms);
+    };
+  }
+  const reconcileSoon = debounce(function(reason){ Controller.reconcileAll(reason || 'debounced'); ensureStatus(); }, 300);
+
+  function hookGlobals(){
+    if (window.__lifeosPha66bAlarmHooksInstalled) return;
+    window.__lifeosPha66bAlarmHooksInstalled = true;
+
+    const oldSaveLocalTodos = window.saveLocalTodos;
+    if (typeof oldSaveLocalTodos === 'function') {
+      window.saveLocalTodos = function(){
+        const ret = oldSaveLocalTodos.apply(this, arguments);
+        reconcileSoon('saveLocalTodos');
+        return ret;
+      };
+    }
+
+    const oldToggleAlarm = window.toggleAlarm;
+    if (typeof oldToggleAlarm === 'function') {
+      window.toggleAlarm = function(e, id){
+        const ret = oldToggleAlarm.apply(this, arguments);
+        const t = (window.todos || []).find(x => String(x.id) === String(id));
+        setTimeout(() => { if (t) Controller.syncTask(t, 'toggleAlarm'); ensureStatus(); }, 80);
+        return ret;
+      };
+    }
+
+    const oldToggleTask = window.toggleTask;
+    if (typeof oldToggleTask === 'function') {
+      window.toggleTask = function(id){
+        const ret = oldToggleTask.apply(this, arguments);
+        const t = (window.todos || []).find(x => String(x.id) === String(id));
+        setTimeout(() => { if (t) Controller.syncTask(t, 'toggleTask'); }, 80);
+        return ret;
+      };
+    }
+
+    const oldSaveEditTask = window.saveEditTask;
+    if (typeof oldSaveEditTask === 'function') {
+      window.saveEditTask = function(id){
+        const ret = oldSaveEditTask.apply(this, arguments);
+        const t = (window.todos || []).find(x => String(x.id) === String(id));
+        setTimeout(() => { if (t) Controller.syncTask(t, 'saveEditTask'); ensureStatus(); }, 100);
+        return ret;
+      };
+    }
+
+    const oldExecDeleteTask = window.execDeleteTask;
+    if (typeof oldExecDeleteTask === 'function') {
+      window.execDeleteTask = function(id){
+        Controller.cancelAlarm(String(id), { reason:'execDeleteTask' });
+        return oldExecDeleteTask.apply(this, arguments);
+      };
+    }
+
+    const oldCleanupTasks = window.cleanupTasks;
+    if (typeof oldCleanupTasks === 'function') {
+      window.cleanupTasks = function(){
+        const before = (window.todos || []).filter(t => t && t.completed && t.id).map(t => String(t.id));
+        before.forEach(id => Controller.cancelAlarm(id, { reason:'cleanupTasks' }));
+        return oldCleanupTasks.apply(this, arguments);
+      };
+    }
+
+    const oldStopGlobalAlarm = window.stopGlobalAlarm;
+    if (typeof oldStopGlobalAlarm === 'function') {
+      window.stopGlobalAlarm = function(actionType){
+        const ids = Array.isArray(window.activeAlarmTaskIds) ? window.activeAlarmTaskIds.slice() : [];
+        const ret = oldStopGlobalAlarm.apply(this, arguments);
+        setTimeout(() => {
+          ids.forEach(id => {
+            const t = (window.todos || []).find(x => String(x.id) === String(id));
+            if (t) Controller.syncTask(t, 'stopGlobalAlarm:' + actionType);
+            else Controller.cancelAlarm(id, { reason:'stopGlobalAlarm:' + actionType });
+          });
+        }, 120);
+        return ret;
+      };
+    }
+
+    window.addEventListener('storage', function(e){
+      if (e.key && /todo|task|lifeos/i.test(e.key)) reconcileSoon('storage:' + e.key);
+    });
+
+    console.info('[LifeOS 66B] Task alarm native bridge hooks installed', {
+      nativeAlarmAvailable: Controller.isNativeBridgeAvailable(),
+      fallback: Controller.isNativeBridgeAvailable() ? null : 'html_active_only',
+      note: 'HTML timers remain foreground fallback only. Overnight alarm requires APK native AlarmManager bridge.'
+    });
+  }
+
+  window.lifeosOnNativeAlarmFired = function(payloadJson){
+    const payload = safeJsonParse(payloadJson);
+    Controller.log({ ok:true, callback:'lifeosOnNativeAlarmFired', payload });
+    try {
+      const id = String(payload.taskId || '');
+      const t = (window.todos || []).find(x => String(x.id) === id);
+      if (t) {
+        t.nativeAlarmFiredAt = Date.now();
+        if (typeof window.renderTasksOnly === 'function') window.renderTasksOnly();
+      }
+    } catch(e) {}
+  };
+  window.lifeosOnNativeAlarmScheduled = function(payloadJson){
+    const payload = safeJsonParse(payloadJson);
+    Controller.log({ ok:true, callback:'lifeosOnNativeAlarmScheduled', payload });
+  };
+  window.lifeosOnNativeAlarmCancelled = function(payloadJson){
+    const payload = safeJsonParse(payloadJson);
+    Controller.log({ ok:true, callback:'lifeosOnNativeAlarmCancelled', payload });
+  };
+  window.lifeosOnNativeAlarmPermissionChanged = function(payloadJson){
+    const payload = safeJsonParse(payloadJson);
+    Controller.log({ ok:true, callback:'lifeosOnNativeAlarmPermissionChanged', payload });
+    ensureStatus();
+  };
+
+  function boot(){
+    hookGlobals();
+    ensureStatus();
+    setTimeout(() => reconcileSoon('boot'), 500);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true });
+  else boot();
+  window.addEventListener('load', boot, { passive:true });
+  window.addEventListener('focus', function(){ ensureStatus(); reconcileSoon('focus'); }, { passive:true });
+})();
+</script>
+
 </body>
 </html>
