@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LifeOS Alarm Overnight Test Harness 66D</title>
+<style>
+:root{--brand:#f43f5e;--ok:#16a34a;--warn:#f59e0b;--bad:#dc2626;--blue:#2563eb;--line:#e2e8f0;--text:#0f172a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(135deg,#fff1f2,#f8fafc 42%,#e0f2fe);color:var(--text)}
+header{position:sticky;top:0;z-index:10;padding:14px 16px;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(226,232,240,.9)}
+h1{margin:0;font-size:clamp(18px,3vw,28px);font-weight:950;color:#9f1239}
+header p{margin:5px 0 0;color:#475569;font-size:13px;font-weight:750;line-height:1.35}
+main{width:min(1280px,100%);margin:0 auto;padding:14px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.card{grid-column:span 6;background:rgba(255,255,255,.92);border:1px solid rgba(226,232,240,.95);border-radius:18px;box-shadow:0 18px 48px rgba(15,23,42,.08);overflow:hidden}
+.card.wide{grid-column:span 12}
+.card h2{margin:0;padding:13px 14px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#fff,#fff1f2);font-size:15px;font-weight:950;color:#9f1239;display:flex;align-items:center;gap:8px}
+.body{padding:14px;display:grid;gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+label{font-size:12px;font-weight:900;color:#475569}
+input,textarea{width:100%;border:1px solid #cbd5e1;border-radius:12px;padding:10px 12px;font:inherit;font-size:13px;background:#fff;outline:none}
+textarea{min-height:66px;resize:vertical}
+button{border:0;border-radius:13px;padding:10px 12px;font-weight:950;font-size:13px;color:white;background:#334155;cursor:pointer;box-shadow:0 8px 20px rgba(15,23,42,.12)}
+button:active{transform:translateY(1px)}
+button.primary{background:var(--brand)} button.ok{background:var(--ok)} button.warn{background:var(--warn)} button.bad{background:var(--bad)} button.blue{background:var(--blue)}
+button.ghost{background:#f1f5f9;color:#0f172a;box-shadow:none;border:1px solid #e2e8f0}
+.status{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pill{border:1px solid #e2e8f0;background:#f8fafc;border-radius:14px;padding:10px;min-width:0}
+.pill b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:4px}
+.pill span{font-weight:900;font-size:13px;word-break:break-word}
+.logbox{height:360px;overflow:auto;background:#020617;color:#dbeafe;border-radius:16px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.48;white-space:pre-wrap}
+.notice{padding:10px 12px;border-radius:14px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:12px;font-weight:800;line-height:1.38}
+.danger-note{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+audio{width:100%}
+.small{font-size:12px;color:#64748b;font-weight:750;line-height:1.4}
+.timer-big{font-size:clamp(30px,7vw,70px);font-weight:1000;letter-spacing:-.06em;color:#9f1239;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:10px;gap:10px}.card,.card.wide{grid-column:span 1}.status,.grid2{grid-template-columns:1fr}header{padding:12px}}
+
+/* PHA 66D - LDPlayer/GitHub simple test upgrade */
+.quick-panel{grid-column:span 12;background:linear-gradient(135deg,#fff,#ecfeff);border:2px solid rgba(14,165,233,.35);border-radius:20px;box-shadow:0 22px 60px rgba(15,23,42,.10);overflow:hidden}
+.quick-panel h2{margin:0;padding:14px 16px;background:linear-gradient(135deg,#e0f2fe,#fff1f2);border-bottom:1px solid #bae6fd;color:#075985;font-size:17px;font-weight:1000}
+.quick-grid{padding:14px;display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+.quick-steps{display:grid;gap:10px}
+.quick-step{border:1px solid #bae6fd;background:#f0f9ff;border-radius:15px;padding:11px}
+.quick-step b{display:block;color:#075985;margin-bottom:4px}
+.quick-result{border:1px solid #cbd5e1;background:#0f172a;color:#e2e8f0;border-radius:16px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;min-height:170px}
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:950;margin:2px;border:1px solid #cbd5e1;background:#f8fafc;color:#334155}
+.badge.ok{background:#dcfce7;border-color:#86efac;color:#166534}
+.badge.warn{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+.badge.bad{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+.compact-test main{gap:10px}
+.compact-test .advanced-card{display:none}
+.compact-test.show-advanced .advanced-card{display:block}
+.compact-test .logbox{height:300px}
+@media(max-width:900px){.quick-grid{grid-template-columns:1fr}.quick-panel{grid-column:span 1}}
+
+</style>
+</head>
+<body class="compact-test">
+<header>
+  <h1>LifeOS Alarm Overnight Test Harness 66D</h1>
+  <p>Bản 66D đơn giản hóa cho GitHub Pages / LDPlayer. Tool kiểm thử độc lập cho audio unlock, beep vật lý, TTS preload, worker timer drift, silence audio, WakeLock/visibility và native bridge. Đây là test harness, không phải bảo đảm HTML/PWA báo thức xuyên đêm 100%.</p>
+</header>
+
+<main>
+
+  <section class="quick-panel">
+    <h2>0. Test nhanh LDPlayer / GitHub Pages</h2>
+    <div class="quick-grid">
+      <div class="quick-steps">
+        <div class="notice">Bản này ưu tiên test trực tiếp trên GitHub Pages / LDPlayer. Đặt file này làm <b>index.html</b> cùng cấp với <b>silence_30min.mp3</b>. Không cần Cloudflare riêng nếu GitHub Pages đã chạy HTTPS.</div>
+        <div class="quick-step"><b>URL silence tự nhận cùng thư mục</b><span id="sameOriginSilenceUrl">--</span></div>
+        <div class="row">
+          <button class="primary" id="btnQuickPrepare">A. Chuẩn bị test: unlock + load silence + nạp TTS</button>
+          <button class="ok" id="btnQuick60">B. Test 60 giây rồi tắt màn</button>
+          <button class="warn" id="btnQuick300">C. Test 5 phút rồi tắt màn</button>
+          <button class="blue" id="btnCopySummary">Copy Summary cho ChatGPT</button>
+          <button class="ghost" id="btnToggleAdvanced">Hiện/ẩn phần nâng cao</button>
+        </div>
+        <div id="envBadges"></div>
+      </div>
+      <div>
+        <div class="quick-result" id="quickSummary">Chưa có kết quả. Bấm A để chuẩn bị, sau đó bấm B hoặc C và tắt màn hình LDPlayer/điện thoại.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card advanced-card"><h2>1. Audio Unlock Station</h2><div class="body">
+    <div class="notice danger-note">Không tự phát âm thanh. Phải bấm nút để tạo user gesture/audio unlock. HTML/PWA không được coi là báo thức xuyên đêm chính.</div>
+    <div class="row"><button class="primary" id="btnUnlock">1. Mở quyền âm thanh</button><button class="ghost" id="btnProbeAudio">Probe audio state</button></div>
+    <div class="status"><div class="pill"><b>AudioContext</b><span id="audioState">not_created</span></div><div class="pill"><b>User gesture unlock</b><span id="unlockState">false</span></div></div>
+  </div></section>
+
+  <section class="card advanced-card"><h2>2. Physical Beep Test</h2><div class="body">
+    <div class="row"><button class="ok" id="btnBeepOnce">Test beep ngắn</button><button class="warn" id="btnStartBeep">Start alarm beep</button><button class="bad" id="btnStopBeep">Dừng beep</button></div>
+    <div class="small">Beep dùng WebAudio oscillator square wave, không phụ thuộc file MP3.</div>
+  </div></section>
+
+  <section class="card advanced-card"><h2>3. Silent / Background Audio Test</h2><div class="body">
+    <div class="notice">silence_30min.mp3 chỉ là test audio session/fallback khi app đang mở. Không dùng để hứa xuyên đêm.</div>
+    <label>Silence MP3 URL</label><input id="silenceUrl" value="" placeholder="Tự nhận: ./silence_30min.mp3 cùng thư mục index.html">
+    <audio id="silenceAudio" controls preload="none" loop></audio>
+    <div class="row"><button class="blue" id="btnLoadSilence">Load silence</button><button class="ok" id="btnPlaySilence">Play loop</button><button class="bad" id="btnStopSilence">Stop</button></div>
+    <div class="small">Host gợi ý: HTTPS, CORS đúng, Content-Type audio/mpeg, Cache-Control ổn định.</div>
+  </div></section>
+
+  <section class="card advanced-card"><h2>4. TTS Preload Test</h2><div class="body">
+    <div class="notice">Google TTS public URL chỉ dùng test, không phải nguồn production ổn định.</div>
+    <label>Câu TTS</label><textarea id="ttsText">Đã đến giờ báo thức LifeOS. Hãy kiểm tra nhiệm vụ của bạn.</textarea>
+    <audio id="ttsAudio" controls preload="none"></audio>
+    <div class="row"><button class="blue" id="btnPreloadTTS">Nạp TTS</button><button class="ok" id="btnPlayTTS">Phát thử TTS</button><button class="warn" id="btnTTSTimer">Phát TTS sau 15 giây</button></div>
+    <div class="status"><div class="pill"><b>TTS readyState</b><span id="ttsReady">0</span></div><div class="pill"><b>TTS URL mode</b><span>public_google_translate_test</span></div></div>
+  </div></section>
+
+  <section class="card wide advanced-card"><h2>5. Worker Timer + Drift Test</h2><div class="body">
+    <div class="notice">Preset 60s/5 phút dùng để tắt màn hình thử ngắn. Worker timer vẫn không phải alarm xuyên đêm. Native APK AlarmManager mới là hướng chính.</div>
+    <div class="timer-big" id="timerCountdown">--</div>
+    <div class="row"><button class="ok" data-timer="15">15 giây</button><button class="ok" data-timer="60">60 giây</button><button class="warn" data-timer="300">5 phút</button><input id="customSeconds" type="number" min="1" value="120" style="width:120px"><button class="blue" id="btnCustomTimer">Custom seconds</button><button class="bad" id="btnStopTimer">Stop timer</button></div>
+    <div class="grid2"><div class="pill"><b>expectedFireAt</b><span id="expectedFireAt">--</span></div><div class="pill"><b>actual / drift</b><span id="actualFireAt">--</span></div></div>
+  </div></section>
+
+  <section class="card advanced-card"><h2>6. Native Bridge Probe</h2><div class="body">
+    <div class="status"><div class="pill"><b>nativeAlarmAvailable</b><span id="nativeAvailable">unknown</span></div><div class="pill"><b>Bridge object</b><span id="bridgeObject">window.AndroidBridge</span></div></div>
+    <div class="row"><button class="blue" id="btnProbeBridge">Probe bridge</button><button class="ok" id="btnNativeNow">testAlarmNow nếu có</button><button class="warn" id="btnNativeSchedule">Schedule native 1 phút nếu có</button><button class="bad" id="btnNativeCancel">Cancel native test nếu có</button></div>
+    <div id="bridgeMethods" class="small"></div><div class="notice" id="bridgeNotice">Nếu không có bridge: chỉ test HTML foreground/screen-off ngắn.</div>
+  </div></section>
+
+  <section class="card advanced-card"><h2>7. Visibility / Wake / Session Log</h2><div class="body">
+    <div class="row"><button class="blue" id="btnWakeLock">Request WakeLock</button><button class="ghost" id="btnReleaseWake">Release WakeLock</button></div>
+    <div class="status"><div class="pill"><b>visibilityState</b><span id="visibilityState">--</span></div><div class="pill"><b>WakeLock</b><span id="wakeState">none</span></div><div class="pill"><b>MediaSession</b><span id="mediaSessionState">--</span></div><div class="pill"><b>Platform</b><span id="platformState">--</span></div></div>
+  </div></section>
+
+  <section class="card wide"><h2>8. Export Log</h2><div class="body">
+    <div class="row"><button class="blue" id="btnCopyLog">Copy log</button><button class="ok" id="btnDownloadTxt">Download TXT</button><button class="ok" id="btnDownloadJson">Download JSON</button><button class="bad" id="btnClearLog">Clear log</button></div>
+    <div class="logbox" id="logBox"></div>
+  </div></section>
+</main>
+
+<script>
+(function(){
+  const logs = [];
+  let audioCtx = null, unlocked = false, alarmOsc = null, alarmGain = null, timerWorker = null, expectedFireAt = 0, wakeLock = null;
+  const $ = id => document.getElementById(id);
+  const nowIso = () => new Date().toISOString();
+  let nativeTestTaskId = 'lifeos_test_alarm_' + Date.now();
+
+  function safeJson(obj){ try { return JSON.stringify(obj, null, 2); } catch(e){ return String(obj); } }
+  function log(event, data = {}){
+    const item = { ts: nowIso(), event, visibilityState: document.visibilityState, audioState: audioCtx ? audioCtx.state : 'not_created', userAgent: navigator.userAgent, platform: navigator.platform || '', language: navigator.language || '', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || '', ...data };
+    logs.push(item);
+    const box = $('logBox');
+    box.textContent += (box.textContent ? '\n\n' : '') + `[${item.ts}] ${event}\n${safeJson(data)}`;
+    box.scrollTop = box.scrollHeight;
+    refreshStatus();
+    console.log('[LifeOS Alarm Harness]', item);
+  }
+  function refreshStatus(){
+    $('audioState').textContent = audioCtx ? audioCtx.state : 'not_created';
+    $('unlockState').textContent = String(unlocked);
+    $('visibilityState').textContent = document.visibilityState;
+    $('ttsReady').textContent = String($('ttsAudio').readyState);
+    $('wakeState').textContent = wakeLock ? 'active' : 'none';
+    $('mediaSessionState').textContent = 'mediaSession' in navigator ? 'available' : 'unavailable';
+    $('platformState').textContent = `${navigator.platform || ''} | ${Intl.DateTimeFormat().resolvedOptions().timeZone || ''}`;
+  }
+  async function ensureAudio(){
+    if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); log('audio_context_created', { state: audioCtx.state, sampleRate: audioCtx.sampleRate }); }
+    if (audioCtx.state === 'suspended') { await audioCtx.resume(); log('audio_context_resume_called', { state: audioCtx.state }); }
+    return audioCtx;
+  }
+  async function beepOnce(freq = 880, ms = 160, type = 'square', volume = 0.12){
+    const ctx = await ensureAudio();
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = type; osc.frequency.value = freq; gain.gain.value = volume;
+    osc.connect(gain); gain.connect(ctx.destination); osc.start();
+    setTimeout(() => { try { osc.stop(); osc.disconnect(); gain.disconnect(); } catch(e){} }, ms);
+    log('physical_beep_once', { freq, ms, type, audioCtxState: ctx.state });
+  }
+  async function unlockAudio(){ try { await ensureAudio(); await beepOnce(1040, 120); unlocked = true; log('audio_unlock_success', { audioCtxState: audioCtx.state, userGesture: true }); } catch(e) { log('audio_unlock_fail', { name: e.name, message: e.message }); } }
+  async function startAlarmBeep(){
+    try {
+      await ensureAudio(); stopAlarmBeep();
+      alarmOsc = audioCtx.createOscillator(); alarmGain = audioCtx.createGain();
+      alarmOsc.type = 'square'; alarmOsc.frequency.value = 880; alarmGain.gain.value = 0.001;
+      alarmOsc.connect(alarmGain); alarmGain.connect(audioCtx.destination);
+      const t = audioCtx.currentTime; alarmGain.gain.setValueAtTime(0.001, t); alarmGain.gain.exponentialRampToValueAtTime(0.18, t + 0.05);
+      alarmOsc.start(); let flip = false;
+      alarmOsc.__interval = setInterval(() => { if (!alarmOsc) return; alarmOsc.frequency.value = flip ? 880 : 1320; flip = !flip; }, 240);
+      log('alarm_beep_start', { frequencyPattern: '880/1320 square', audioCtxState: audioCtx.state });
+    } catch(e) { log('alarm_beep_start_fail', { name:e.name, message:e.message }); }
+  }
+  function stopAlarmBeep(){
+    if (alarmOsc) {
+      try { clearInterval(alarmOsc.__interval); } catch(e){} try { alarmOsc.stop(); } catch(e){} try { alarmOsc.disconnect(); } catch(e){} try { alarmGain && alarmGain.disconnect(); } catch(e){}
+      alarmOsc = null; alarmGain = null; log('alarm_beep_stop');
+    }
+  }
+  function setupAudioEvents(audio, name){
+    ['loadstart','loadedmetadata','canplay','canplaythrough','playing','pause','stalled','suspend','error','waiting','ended','abort','emptied'].forEach(evt => audio.addEventListener(evt, () => {
+      const err = audio.error ? { code: audio.error.code, message: audio.error.message || '' } : null;
+      log(`${name}_${evt}`, { src: audio.currentSrc || audio.src || '', readyState: audio.readyState, networkState: audio.networkState, error: err });
+    }));
+  }
+  setupAudioEvents($('silenceAudio'), 'silence_audio'); setupAudioEvents($('ttsAudio'), 'tts_audio');
+  function loadSilence(){ const url = $('silenceUrl').value.trim(); const a = $('silenceAudio'); a.src = url; a.load(); log('silence_load_requested', { url }); }
+  async function playSilence(){ try { await ensureAudio(); await $('silenceAudio').play(); log('silence_play_loop_requested', { src: $('silenceAudio').src }); } catch(e) { log('silence_play_fail', { name:e.name, message:e.message }); } }
+  function stopSilence(){ const a = $('silenceAudio'); a.pause(); a.currentTime = 0; log('silence_stop'); }
+  function ttsUrl(text){ return 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=vi&q=' + encodeURIComponent(text); }
+  function preloadTTS(){ const text = $('ttsText').value.trim() || 'Đã đến giờ báo thức LifeOS.'; const a = $('ttsAudio'); a.src = ttsUrl(text); a.load(); log('tts_preload_requested', { text, srcMode:'google_translate_public_test' }); }
+  async function playTTS(){ try { await ensureAudio(); if (!$('ttsAudio').src) preloadTTS(); await $('ttsAudio').play(); log('tts_play_requested', { readyState: $('ttsAudio').readyState }); } catch(e) { log('tts_play_fail', { name:e.name, message:e.message, readyState: $('ttsAudio').readyState, errorCode: $('ttsAudio').error && $('ttsAudio').error.code }); } }
+  function workerSource(){ return "let timer=null;self.onmessage=function(e){const d=e.data||{};if(d.cmd==='start'){clearInterval(timer);const expected=d.expectedFireAt;timer=setInterval(function(){const now=Date.now();self.postMessage({type:'tick',now,remainingMs:expected-now,expectedFireAt:expected});if(now>=expected){clearInterval(timer);self.postMessage({type:'fire',now:Date.now(),expectedFireAt:expected});}},250);}else if(d.cmd==='stop'){clearInterval(timer);self.postMessage({type:'stopped',now:Date.now()});}};"; }
+  function stopTimer(){ if (timerWorker) { try { timerWorker.postMessage({cmd:'stop'}); timerWorker.terminate(); } catch(e){} timerWorker = null; } $('timerCountdown').textContent = '--'; log('worker_timer_stop'); }
+  function startTimer(seconds){
+    stopTimer(); seconds = Math.max(1, Number(seconds || 1)); expectedFireAt = Date.now() + seconds * 1000;
+    $('expectedFireAt').textContent = new Date(expectedFireAt).toLocaleString(); $('actualFireAt').textContent = '--';
+    const blob = new Blob([workerSource()], { type:'application/javascript' }); const url = URL.createObjectURL(blob); timerWorker = new Worker(url); URL.revokeObjectURL(url);
+    timerWorker.onmessage = async e => {
+      const data = e.data || {};
+      if (data.type === 'tick') $('timerCountdown').textContent = `${Math.max(0, Math.ceil(data.remainingMs / 1000))}s`;
+      else if (data.type === 'fire') {
+        const actual = data.now || Date.now(), driftMs = actual - data.expectedFireAt;
+        $('actualFireAt').textContent = `${new Date(actual).toLocaleString()} | drift ${driftMs}ms`;
+        log('worker_timer_fire', { expectedFireAt: new Date(data.expectedFireAt).toISOString(), actualFireAt: new Date(actual).toISOString(), driftMs });
+        await startAlarmBeep(); setTimeout(stopAlarmBeep, 12000);
+        if ($('ttsAudio').src && $('ttsAudio').readyState >= 2) await playTTS();
+      } else if (data.type === 'stopped') log('worker_timer_worker_stopped', data);
+    };
+    timerWorker.postMessage({cmd:'start', expectedFireAt});
+    log('worker_timer_start', { seconds, expectedFireAt: new Date(expectedFireAt).toISOString(), instruction:'Có thể tắt màn hình để test drift/audio, nhưng HTML không bảo đảm xuyên đêm.' });
+  }
+  function probeBridge(){
+    const bridge = window.AndroidBridge;
+    const methods = ['setAlarm','cancelAlarm','updateAlarm','listScheduledAlarms','testAlarmNow','requestExactAlarmPermission','requestNotificationPermission'];
+    const result = {}; methods.forEach(m => result[m] = !!(bridge && typeof bridge[m] === 'function'));
+    $('nativeAvailable').textContent = String(!!bridge); $('bridgeMethods').textContent = methods.map(m => `${m}: ${result[m]}`).join(' | ');
+    $('bridgeNotice').textContent = bridge ? 'Có native bridge. Có thể test hàm nếu shell APK hỗ trợ.' : 'Không có native bridge. Chỉ test HTML foreground/screen-off ngắn.';
+    log('native_bridge_probe', { nativeAlarmAvailable: !!bridge, methods: result }); return { bridge, result };
+  }
+  function callBridge(method, payload){
+    const bridge = window.AndroidBridge;
+    if (!bridge || typeof bridge[method] !== 'function') { log('native_bridge_call_missing', { method, payload }); return; }
+    try { const ret = bridge[method](JSON.stringify(payload || {})); log('native_bridge_call', { method, payload, returnValue: ret }); }
+    catch(e){ log('native_bridge_call_fail', { method, payload, name:e.name, message:e.message }); }
+  }
+  async function requestWakeLock(){ try { if (!('wakeLock' in navigator)) { log('wakelock_unavailable'); return; } wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { log('wakelock_released_event'); wakeLock = null; refreshStatus(); }); log('wakelock_success'); } catch(e) { log('wakelock_fail', { name:e.name, message:e.message }); } refreshStatus(); }
+  function releaseWakeLock(){ if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; log('wakelock_release_requested'); } refreshStatus(); }
+  function download(filename, mime, content){ const blob = new Blob([content], { type:mime }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 300); }
+  function exportTxt(){ return logs.map(x => `[${x.ts}] ${x.event}\n${safeJson(x)}`).join('\n\n'); }
+  document.addEventListener('visibilitychange', () => log('visibilitychange', { visibilityState: document.visibilityState }));
+  window.addEventListener('focus', () => log('window_focus')); window.addEventListener('blur', () => log('window_blur'));
+  window.addEventListener('online', () => log('network_online')); window.addEventListener('offline', () => log('network_offline'));
+  $('btnUnlock').onclick = unlockAudio; $('btnProbeAudio').onclick = () => log('audio_probe', { state: audioCtx ? audioCtx.state : 'not_created', unlocked });
+  $('btnBeepOnce').onclick = () => beepOnce(); $('btnStartBeep').onclick = startAlarmBeep; $('btnStopBeep').onclick = stopAlarmBeep;
+  $('btnLoadSilence').onclick = loadSilence; $('btnPlaySilence').onclick = playSilence; $('btnStopSilence').onclick = stopSilence;
+  $('btnPreloadTTS').onclick = preloadTTS; $('btnPlayTTS').onclick = playTTS; $('btnTTSTimer').onclick = () => { preloadTTS(); startTimer(15); };
+  document.querySelectorAll('[data-timer]').forEach(btn => btn.onclick = () => startTimer(btn.dataset.timer));
+  $('btnCustomTimer').onclick = () => startTimer($('customSeconds').value); $('btnStopTimer').onclick = stopTimer;
+  $('btnProbeBridge').onclick = probeBridge; $('btnNativeNow').onclick = () => callBridge('testAlarmNow', { taskId:nativeTestTaskId, title:'LifeOS native alarm test now', createdAt:Date.now() });
+  $('btnNativeSchedule').onclick = () => callBridge('setAlarm', { taskId:nativeTestTaskId, title:'LifeOS native alarm test 1 phút', dueAt:Date.now()+60000, profileId:'test', alarmEnabled:true, sound:'default', vibration:true, createdAt:Date.now(), updatedAt:Date.now() });
+  $('btnNativeCancel').onclick = () => callBridge('cancelAlarm', { taskId:nativeTestTaskId });
+  $('btnWakeLock').onclick = requestWakeLock; $('btnReleaseWake').onclick = releaseWakeLock;
+  $('btnCopyLog').onclick = async () => { try { await navigator.clipboard.writeText(exportTxt()); log('export_copy_log_success'); } catch(e){ log('export_copy_log_fail', { name:e.name, message:e.message }); } };
+  $('btnDownloadTxt').onclick = () => { log('export_download_txt'); download('lifeos_alarm_test_log.txt','text/plain;charset=utf-8',exportTxt()); };
+  $('btnDownloadJson').onclick = () => { log('export_download_json'); download('lifeos_alarm_test_log.json','application/json;charset=utf-8',JSON.stringify(logs,null,2)); };
+  $('btnClearLog').onclick = () => { logs.length = 0; $('logBox').textContent = ''; log('log_cleared'); };
+  window.lifeosOnNativeAlarmFired = payloadJson => log('native_callback_fired', { payloadJson });
+  window.lifeosOnNativeAlarmScheduled = payloadJson => log('native_callback_scheduled', { payloadJson });
+  window.lifeosOnNativeAlarmCancelled = payloadJson => log('native_callback_cancelled', { payloadJson });
+  window.lifeosOnNativeAlarmPermissionChanged = payloadJson => log('native_callback_permission_changed', { payloadJson });
+  if ('mediaSession' in navigator) { try { navigator.mediaSession.metadata = new MediaMetadata({ title:'LifeOS Alarm Test Harness', artist:'LifeOS', album:'Alarm Diagnostics' }); log('mediasession_metadata_set'); } catch(e) { log('mediasession_metadata_fail', { name:e.name, message:e.message }); } }
+  refreshStatus(); probeBridge();
+  log('harness_loaded', { note:'Test harness độc lập. Không chứng minh HTML/PWA báo thức xuyên đêm 100%. Native APK AlarmManager là hướng production.', userAgent:navigator.userAgent, platform:navigator.platform || '', timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone || '', mediaSessionAvailable:'mediaSession' in navigator, wakeLockAvailable:'wakeLock' in navigator });
+})();
+</script>
+</body>
+</html>
