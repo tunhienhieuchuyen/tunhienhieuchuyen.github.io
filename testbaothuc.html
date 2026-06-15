@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>LifeOS Alarm Overnight Test Harness 66D</title>
+<title>LifeOS Alarm Overnight Test Harness 66D FIX1</title>
 <style>
 :root{--brand:#f43f5e;--ok:#16a34a;--warn:#f59e0b;--bad:#dc2626;--blue:#2563eb;--line:#e2e8f0;--text:#0f172a}
 *{box-sizing:border-box}
@@ -55,12 +55,19 @@ audio{width:100%}
 .compact-test .logbox{height:300px}
 @media(max-width:900px){.quick-grid{grid-template-columns:1fr}.quick-panel{grid-column:span 1}}
 
+
+/* PHA 66D FIX1 - quick buttons real binding */
+button.quick-running{outline:3px solid rgba(245,158,11,.45);filter:saturate(1.1)}
+.quick-result.ok{border-color:#22c55e}
+.quick-result.warn{border-color:#f59e0b}
+.quick-result.bad{border-color:#ef4444}
+
 </style>
 </head>
 <body class="compact-test">
 <header>
-  <h1>LifeOS Alarm Overnight Test Harness 66D</h1>
-  <p>Bản 66D đơn giản hóa cho GitHub Pages / LDPlayer. Tool kiểm thử độc lập cho audio unlock, beep vật lý, TTS preload, worker timer drift, silence audio, WakeLock/visibility và native bridge. Đây là test harness, không phải bảo đảm HTML/PWA báo thức xuyên đêm 100%.</p>
+  <h1>LifeOS Alarm Overnight Test Harness 66D FIX1</h1>
+  <p>Bản 66D FIX1: đã gắn lại nút Test nhanh A/B/C cho GitHub Pages / LDPlayer. Tool kiểm thử độc lập cho audio unlock, beep vật lý, TTS preload, worker timer drift, silence audio, WakeLock/visibility và native bridge. Đây là test harness, không phải bảo đảm HTML/PWA báo thức xuyên đêm 100%.</p>
 </header>
 
 <main>
@@ -268,7 +275,137 @@ audio{width:100%}
   window.lifeosOnNativeAlarmScheduled = payloadJson => log('native_callback_scheduled', { payloadJson });
   window.lifeosOnNativeAlarmCancelled = payloadJson => log('native_callback_cancelled', { payloadJson });
   window.lifeosOnNativeAlarmPermissionChanged = payloadJson => log('native_callback_permission_changed', { payloadJson });
+
+  // ===== PHA 66D FIX1: quick buttons real binding =====
+  function getSameOriginSilenceUrl(){
+    try { return new URL('silence_30min.mp3', location.href).href; }
+    catch(e){ return 'silence_30min.mp3'; }
+  }
+  function getLastEvent(name){
+    for (let i = logs.length - 1; i >= 0; i--) if (logs[i].event === name) return logs[i];
+    return null;
+  }
+  function hasEvent(name){ return !!logs.find(x => x.event === name); }
+  function renderEnvBadges(){
+    const isHttps = location.protocol === 'https:';
+    const isFile = location.protocol === 'file:';
+    const isGithub = /github\.io/i.test(location.hostname);
+    const bridge = !!window.AndroidBridge;
+    const silenceUrl = getSameOriginSilenceUrl();
+    const badges = [
+      `<span class="badge ${isHttps?'ok':(isFile?'warn':'bad')}">protocol: ${location.protocol}</span>`,
+      `<span class="badge ${isGithub?'ok':'warn'}">host: ${location.hostname || 'local/file'}</span>`,
+      `<span class="badge ${bridge?'ok':'warn'}">nativeBridge: ${bridge}</span>`,
+      `<span class="badge ${'wakeLock' in navigator?'ok':'warn'}">wakeLock: ${'wakeLock' in navigator}</span>`,
+      `<span class="badge ${'mediaSession' in navigator?'ok':'warn'}">mediaSession: ${'mediaSession' in navigator}</span>`
+    ];
+    if ($('envBadges')) $('envBadges').innerHTML = badges.join('');
+    if ($('sameOriginSilenceUrl')) $('sameOriginSilenceUrl').textContent = silenceUrl;
+    if ($('silenceUrl') && !$('silenceUrl').value.trim()) $('silenceUrl').value = silenceUrl;
+  }
+  function buildSummaryText(){
+    const fire = getLastEvent('worker_timer_fire');
+    const start = getLastEvent('worker_timer_start');
+    const unlock = hasEvent('audio_unlock_success');
+    const silenceOk = hasEvent('silence_audio_canplaythrough') || hasEvent('silence_audio_playing');
+    const silenceFail = getLastEvent('silence_play_fail') || getLastEvent('silence_audio_error');
+    const ttsOk = hasEvent('tts_audio_canplaythrough') || hasEvent('tts_audio_playing');
+    const ttsFail = getLastEvent('tts_play_fail') || getLastEvent('tts_audio_error');
+    const bridgeProbe = getLastEvent('native_bridge_probe');
+    const wakeOk = hasEvent('wakelock_success');
+    const summary = {
+      testName: 'LifeOS Alarm Overnight Test Harness 66D FIX1 Quick Summary',
+      pageUrl: location.href,
+      protocol: location.protocol,
+      host: location.hostname,
+      platform: navigator.platform || '',
+      userAgent: navigator.userAgent,
+      language: navigator.language || '',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      visibilityState: document.visibilityState,
+      audioState: audioCtx ? audioCtx.state : 'not_created',
+      audioUnlock: unlock,
+      silenceUrl: $('silenceUrl') ? $('silenceUrl').value.trim() : '',
+      silenceLoadedOrPlaying: silenceOk,
+      silenceFail: silenceFail ? { event:silenceFail.event, name:silenceFail.name, message:silenceFail.message, error:silenceFail.error } : null,
+      ttsLoadedOrPlaying: ttsOk,
+      ttsFail: ttsFail ? { event:ttsFail.event, name:ttsFail.name, message:ttsFail.message, error:ttsFail.error } : null,
+      wakeLockSuccess: wakeOk,
+      nativeAlarmAvailable: !!window.AndroidBridge,
+      nativeBridgeProbe: bridgeProbe ? bridgeProbe.methods : null,
+      lastTimerStart: start ? { seconds:start.seconds, expectedFireAt:start.expectedFireAt } : null,
+      lastTimerFire: fire ? { expectedFireAt: fire.expectedFireAt, actualFireAt: fire.actualFireAt, driftMs: fire.driftMs } : null,
+      importantEventsTail: logs.slice(-22).map(x => ({ ts:x.ts, event:x.event, visibilityState:x.visibilityState, audioState:x.audioState, driftMs:x.driftMs || undefined }))
+    };
+    return JSON.stringify(summary, null, 2);
+  }
+  function refreshQuickSummary(status){
+    if (!$('quickSummary')) return;
+    $('quickSummary').textContent = buildSummaryText();
+    $('quickSummary').classList.remove('ok','warn','bad');
+    if (status) $('quickSummary').classList.add(status);
+  }
+  async function quickPrepare(){
+    try {
+      renderEnvBadges();
+      log('quick_prepare_start', { note:'unlock + load same-origin silence + preload TTS', silenceUrl:getSameOriginSilenceUrl() });
+      if ($('btnQuickPrepare')) $('btnQuickPrepare').classList.add('quick-running');
+      await unlockAudio();
+      if ($('silenceUrl') && !$('silenceUrl').value.trim()) $('silenceUrl').value = getSameOriginSilenceUrl();
+      loadSilence();
+      setTimeout(() => { playSilence().catch(()=>{}); }, 900);
+      preloadTTS();
+      setTimeout(() => { refreshQuickSummary('ok'); if ($('btnQuickPrepare')) $('btnQuickPrepare').classList.remove('quick-running'); }, 2200);
+    } catch(e) {
+      log('quick_prepare_fail', { name:e.name, message:e.message });
+      refreshQuickSummary('bad');
+      if ($('btnQuickPrepare')) $('btnQuickPrepare').classList.remove('quick-running');
+    }
+  }
+  function quickStartTimer(seconds){
+    renderEnvBadges();
+    log('quick_timer_start_requested', { seconds, instruction:'Sau khi bấm hãy để LDPlayer ngủ hoặc bấm Home/ẩn app để test.' });
+    startTimer(seconds);
+    refreshQuickSummary('warn');
+  }
+  async function copyQuickSummary(){
+    const s = buildSummaryText();
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(s);
+        log('quick_summary_copied');
+      } else {
+        throw new Error('navigator.clipboard unavailable');
+      }
+    } catch(e) {
+      log('quick_summary_copy_fail', { name:e.name, message:e.message });
+      try { window.prompt('Copy summary thủ công:', s); } catch(_){}
+    }
+    refreshQuickSummary('ok');
+  }
+  function bindQuickButtons(){
+    renderEnvBadges();
+    if ($('btnQuickPrepare')) $('btnQuickPrepare').onclick = quickPrepare;
+    if ($('btnQuick60')) $('btnQuick60').onclick = () => quickStartTimer(60);
+    if ($('btnQuick300')) $('btnQuick300').onclick = () => quickStartTimer(300);
+    if ($('btnCopySummary')) $('btnCopySummary').onclick = copyQuickSummary;
+    if ($('btnToggleAdvanced')) $('btnToggleAdvanced').onclick = () => {
+      document.body.classList.toggle('show-advanced');
+      log('advanced_toggle', { show: document.body.classList.contains('show-advanced') });
+      refreshQuickSummary();
+    };
+    setInterval(() => { try { refreshQuickSummary(); } catch(e){} }, 2500);
+    log('quick_buttons_bound_fix1', {
+      hasA: !!$('btnQuickPrepare'),
+      hasB: !!$('btnQuick60'),
+      hasC: !!$('btnQuick300'),
+      hasCopy: !!$('btnCopySummary'),
+      silenceAutoUrl: getSameOriginSilenceUrl()
+    });
+  }
+
   if ('mediaSession' in navigator) { try { navigator.mediaSession.metadata = new MediaMetadata({ title:'LifeOS Alarm Test Harness', artist:'LifeOS', album:'Alarm Diagnostics' }); log('mediasession_metadata_set'); } catch(e) { log('mediasession_metadata_fail', { name:e.name, message:e.message }); } }
+  bindQuickButtons();
   refreshStatus(); probeBridge();
   log('harness_loaded', { note:'Test harness độc lập. Không chứng minh HTML/PWA báo thức xuyên đêm 100%. Native APK AlarmManager là hướng production.', userAgent:navigator.userAgent, platform:navigator.platform || '', timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone || '', mediaSessionAvailable:'mediaSession' in navigator, wakeLockAvailable:'wakeLock' in navigator });
 })();
