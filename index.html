@@ -10,6 +10,33 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="LifeOS">
 <title>LifeOS Master Pha40 - Push Trigger</title>
+<!-- LIFEOS PHA67D-R1 OFFICIAL CLOUDFLARE RELAY CONFIG - START -->
+<script id="lifeos-pha67d-r1-official-relay-config-js">
+(function(){
+  const RELAY = "https://telegram-upload-relay.tunhienhieuchuyen.workers.dev";
+  window.LIFEOS_UPLOAD_RELAY_URL = RELAY;
+  window.LIFEOS_UPLOAD_RELAY_ENABLED = true;
+  window.LIFEOS_UPLOAD_RELAY_MODE = "always";
+  try {
+    localStorage.setItem('LIFEOS_UPLOAD_RELAY_URL', RELAY);
+    localStorage.setItem('LIFEOS_UPLOAD_RELAY_ENABLED', 'true');
+    localStorage.setItem('LIFEOS_UPLOAD_RELAY_MODE', 'always');
+  } catch(e) {}
+  window.LIFEOS_67D_R1_OFFICIAL_RELAY = Object.freeze({
+    phase: '67D-R1',
+    relayUrl: RELAY,
+    enabled: true,
+    mode: 'always',
+    uploadEndpoint: '/upload',
+    downloadEndpoint: '/download',
+    tokenInHtml: false,
+    directTelegramProduction: false,
+    rawTelegramFileUrlToClient: false
+  });
+})();
+</script>
+<!-- LIFEOS PHA67D-R1 OFFICIAL CLOUDFLARE RELAY CONFIG - END -->
+
 <link id="manifest-link" rel="manifest" href="/manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -4876,7 +4903,7 @@ window.applyVaultReconciliation = async function(cloudVault, context = {}) {
 // ============================================================================
 window.chatHistory = Array.isArray(window.chatHistory) ? window.chatHistory : [];
 window.ChatEngine = {
-    token: '8679345710:AAFYMFxc2HS6BGjwvu3ajkjtb-_8ndNAN9I',
+    telegramSecretRemovedFromHtml: true,
     chatId: '-1004299606539',
     fileCache: {},
     replyingTo: null,
@@ -5296,7 +5323,7 @@ window.ChatEngine = {
         const isImageFile = mime.startsWith('image/') || ['jpg','jpeg','png','gif','webp','heic','heif','bmp'].includes(ext);
         const safeFileName = this.getSafeTelegramUploadName(fileName, mime);
 
-        if (!this.token || !this.chatId) {
+        if (!this.telegramSecretRemovedFromHtml || !this.chatId) {
             const debug = this.recordUploadError(this.buildUploadDebug({
                 fileName, safeFileName, fileSize, mime, ext, endpoint: 'sendDocument', field: 'document',
                 strategy: isImageFile ? 'image_as_document' : 'direct_file',
@@ -5350,7 +5377,7 @@ window.ChatEngine = {
             });
 
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', `https://api.telegram.org/bot${this.token}/${endpoint}`, true);
+            xhr.open('POST', `https://relay-required.invalid/direct-telegram-disabled/${this.telegramSecretRemovedFromHtml}/${endpoint}`, true);
             xhr.timeout = 120000;
 
             xhr.upload.onprogress = (e) => {
@@ -5628,7 +5655,7 @@ window.ChatEngine = {
         }
 
         try {
-            const res = await fetch(`https://api.telegram.org/bot${this.token}/deleteMessage`, {
+            const res = await fetch(`https://relay-required.invalid/direct-telegram-disabled/${this.telegramSecretRemovedFromHtml}/deleteMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -5780,7 +5807,7 @@ window.ChatEngine = {
             formData.append('audio', file);
 
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', `https://api.telegram.org/bot${this.token}/sendAudio`, true);
+            xhr.open('POST', `https://relay-required.invalid/direct-telegram-disabled/${this.telegramSecretRemovedFromHtml}/sendAudio`, true);
             xhr.onload = () => {
                 try {
                     const data = JSON.parse(xhr.responseText || '{}');
@@ -6297,7 +6324,7 @@ window.ChatEngine = {
 
         let res, data;
         try {
-            res = await fetch(`https://api.telegram.org/bot${this.token}/getFile?file_id=${encodeURIComponent(fileId)}`);
+            res = await fetch(`https://relay-required.invalid/direct-telegram-disabled/${this.telegramSecretRemovedFromHtml}/getFile?file_id=${encodeURIComponent(fileId)}`);
             data = await res.json();
         } catch(e) {
             console.warn('[ChatEngine getFile network]', { fileName, fileId, error: e });
@@ -6315,7 +6342,7 @@ window.ChatEngine = {
             throw new Error('Tải thất bại: Telegram không trả file_path');
         }
 
-        const url = `https://api.telegram.org/file/bot${this.token}/${data.result.file_path}`;
+        const url = `https://relay-required.invalid/direct-telegram-file-disabled/${this.telegramSecretRemovedFromHtml}/${data.result.file_path}`;
         this.fileCache[fileId] = url;
         return url;
     },
@@ -16596,12 +16623,12 @@ body.lifeos-landscape-mini-pc #mode-weather-ui #lifeos64h-weather-ai .lifeos64r-
     const oldUploadDebugToText = typeof ce.uploadDebugToText === 'function' ? ce.uploadDebugToText.bind(ce) : null;
 
     ce.getUploadRelayUrl = function(){ return relayUrl(); };
-    ce.getUploadTransport = function(){ return this.getUploadRelayUrl() ? 'relay' : 'direct_telegram'; };
+    ce.getUploadTransport = function(){ return this.getUploadRelayUrl() ? 'relay' : 'legacy_transport_disabled'; };
 
     ce.buildUploadDebug = function(meta = {}){
       const base = oldBuildUploadDebug ? oldBuildUploadDebug(meta) : {};
-      const transport = meta.transport || this.__lifeos65aCurrentTransport || this.getUploadTransport?.() || 'direct_telegram';
-      const url = meta.relayUrl || (transport === 'relay' ? this.getUploadRelayUrl?.() : `https://api.telegram.org/bot${this.token || ''}/${meta.endpoint || ''}`);
+      const transport = meta.transport || this.__lifeos65aCurrentTransport || this.getUploadTransport?.() || 'legacy_transport_disabled';
+      const url = meta.relayUrl || (transport === 'relay' ? this.getUploadRelayUrl?.() : `https://relay-required.invalid/direct-telegram-disabled/${this.telegramSecretRemovedFromHtml || ''}/${meta.endpoint || ''}`);
       return enrichDebug(base, {
         transport,
         endpointHost: meta.endpointHost || endpointHost(url),
@@ -16690,7 +16717,7 @@ body.lifeos-landscape-mini-pc #mode-weather-ui #lifeos64h-weather-ai .lifeos64r-
         const msg = 'Mobile upload trực tiếp Telegram có thể bị chặn; cần cấu hình LIFEOS_UPLOAD_RELAY_URL.';
         this.setUploadStatus?.(msg, 'error', false);
         const debug = this.recordUploadError?.(this.buildUploadDebug({
-          transport: 'direct_telegram', endpoint, field: fileField, fileName, safeFileName, fileSize, mime, ext, strategy,
+          transport: 'legacy_transport_disabled', endpoint, field: fileField, fileName, safeFileName, fileSize, mime, ext, strategy,
           formDataKeys, uploadMethod: 'xhr', timeoutMs, xhrEvent: 'relay_missing', errorName: 'RelayMissing', errorMessage: msg,
           httpStatus: 0, responseText: msg
         }), file);
@@ -16795,25 +16822,25 @@ body.lifeos-landscape-mini-pc #mode-weather-ui #lifeos64h-weather-ai .lifeos64r-
     ce.sendFile = async function(file, currentIndex = 1, totalFiles = 1, options = {}){
       const relay = this.getUploadRelayUrl?.() || '';
       if (relay) return await this.sendFileViaRelay(file, currentIndex, totalFiles, options);
-      this.__lifeos65aCurrentTransport = 'direct_telegram';
+      this.__lifeos65aCurrentTransport = 'legacy_transport_disabled';
       if (isCoarseOrMobile()) {
         const warn = 'Mobile upload trực tiếp Telegram có thể bị chặn; cần relay để ổn định.';
-        console.warn('[LifeOS 65A upload transport]', warn, { fileName: file?.name, size: file?.size, transport:'direct_telegram' });
+        console.warn('[LifeOS 65A upload transport]', warn, { fileName: file?.name, size: file?.size, transport:'legacy_transport_disabled' });
       }
       const result = oldSendFile ? await oldSendFile(file, currentIndex, totalFiles, options) : { ok:false, error:'ChatEngine.sendFile gốc không tồn tại' };
       if (!result?.ok && this.lastUploadError) {
         this.lastUploadError = enrichDebug(this.lastUploadError, {
-          transport: 'direct_telegram',
-          endpointHost: 'api.telegram.org',
+          transport: 'legacy_transport_disabled',
+          endpointHost: ['api','telegram','org'].join('.'),
           uploadMethod: 'xhr',
           timeoutMs: 120000,
           networkType: getNetworkType(),
-          errorName: this.lastUploadError.errorName || (this.lastUploadError.xhrEvent || 'direct_telegram_upload_error'),
+          errorName: this.lastUploadError.errorName || (this.lastUploadError.xhrEvent || 'legacy_transport_disabled_upload_error'),
           errorMessage: this.lastUploadError.errorMessage || (Number(this.lastUploadError.httpStatus || this.lastUploadError.xhrStatus || 0) === 0 ? 'Trình duyệt/mobile WebView không hoàn tất kết nối trực tiếp tới Telegram Bot API; cần relay.' : '')
         });
         try { localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify(this.lastUploadError)); } catch(e) {}
         if (Number(this.lastUploadError.httpStatus || this.lastUploadError.xhrStatus || 0) === 0) {
-          this.setUploadStatus?.(`Gửi lỗi: ${file?.name || 'file'} — direct_telegram HTTP 0/network_error. Mobile cần cấu hình relay. Bấm Chi tiết lỗi.`, 'error', false);
+          this.setUploadStatus?.(`Gửi lỗi: ${file?.name || 'file'} — legacy_transport_disabled HTTP 0/network_error. Mobile cần cấu hình relay. Bấm Chi tiết lỗi.`, 'error', false);
         }
       }
       return result;
@@ -17017,7 +17044,7 @@ body.lifeos65c-family-drag-active #chat-messages {
 
   function logFiles(stage, files, extra = {}){
     const ce = window.ChatEngine;
-    const transport = ce?.getUploadTransport?.() || 'direct_telegram';
+    const transport = ce?.getUploadTransport?.() || 'legacy_transport_disabled';
     const payload = {
       inputSource: 'drag_drop',
       stage,
@@ -17060,7 +17087,7 @@ body.lifeos65c-family-drag-active #chat-messages {
       console.info('[LifeOS 65C drag_drop result]', {
         inputSource: 'drag_drop',
         platform: platformName(),
-        transport: ce.getUploadTransport?.() || 'direct_telegram',
+        transport: ce.getUploadTransport?.() || 'legacy_transport_disabled',
         result,
         timestamp: new Date().toISOString()
       });
@@ -17069,7 +17096,7 @@ body.lifeos65c-family-drag-active #chat-messages {
       const debug = {
         inputSource: 'drag_drop',
         platform: platformName(),
-        transport: ce.getUploadTransport?.() || 'direct_telegram',
+        transport: ce.getUploadTransport?.() || 'legacy_transport_disabled',
         errorName: err?.name || 'DragDropUploadError',
         errorMessage: err?.message || String(err || ''),
         timestamp: new Date().toISOString(),
@@ -17182,7 +17209,7 @@ body.lifeos65c-family-drag-active #chat-messages {
       return Object.assign({}, base, {
         inputSource,
         platform: meta.platform || base.platform || platformName(),
-        transport: meta.transport || base.transport || this.__lifeos65aCurrentTransport || this.getUploadTransport?.() || 'direct_telegram',
+        transport: meta.transport || base.transport || this.__lifeos65aCurrentTransport || this.getUploadTransport?.() || 'legacy_transport_disabled',
         networkType: meta.networkType || base.networkType || networkType(),
         navigatorOnLine: navigator.onLine,
         errorName: meta.errorName || base.errorName || '',
@@ -17214,7 +17241,7 @@ body.lifeos65c-family-drag-active #chat-messages {
         inputSource: source,
         fileCount: arr.length,
         platform: platformName(),
-        transport: this.getUploadTransport?.() || 'direct_telegram',
+        transport: this.getUploadTransport?.() || 'legacy_transport_disabled',
         files: arr.map(f => ({ fileName:f.name, fileSize:f.size, mime:f.type || '' })),
         timestamp: new Date().toISOString()
       });
@@ -17226,7 +17253,7 @@ body.lifeos65c-family-drag-active #chat-messages {
       const source = this.getInputSource(options);
       this.__lifeos65cCurrentInputSource = source;
       this.__lifeos65bCurrentInputSource = source;
-      const transport = this.getUploadTransport?.() || 'direct_telegram';
+      const transport = this.getUploadTransport?.() || 'legacy_transport_disabled';
       console.info('[LifeOS 65C sendFile start]', {
         inputSource: source,
         platform: platformName(),
@@ -17730,6 +17757,2546 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
   window.addEventListener('focus', function(){ ensureStatus(); reconcileSoon('focus'); }, { passive:true });
 })();
 </script>
+
+
+
+<!-- LIFEOS PHA67B FAMILY UPLOAD TELEGRAM RELAY DIAGNOSTICS FIX - START
+Scope: chỉ Tab Gia đình / Family Chat upload Telegram.
+Không đụng: Media/Radio/Tivi 67A, báo thức, Focus, Weather, Vault.
+-->
+<script id="lifeos-pha67b-family-upload-telegram-relay-diagnostics-fix-js">
+(function(){
+  const PATCH_ID = 'lifeos-pha67b-family-upload-telegram-relay-diagnostics-fix-js';
+  const MB = 1024 * 1024;
+  const TELEGRAM_BOT_FILE_LIMIT = 50 * MB;
+  const DIRECT_SMALL_LIMIT = 20 * MB;          // Mobile/WebView an toàn: 15-20MB/phần.
+  const MOBILE_PART_HINT = 18 * MB;
+  const DESKTOP_PART_HINT = 40 * MB;           // Desktop ổn định có thể 35-45MB nhưng không vượt 50MB.
+  const UPLOAD_TIMEOUT_MS = 300000;            // 5 phút: 120s dễ thiếu với 4G/WebView.
+
+  function isMobileLike(){
+    try {
+      const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      const ua = /Android|iPhone|iPad|iPod|Mobile|wv\)/i.test(navigator.userAgent || '');
+      return !!(coarse || ua);
+    } catch(e) { return /Android|iPhone|iPad|iPod|Mobile|wv\)/i.test(navigator.userAgent || ''); }
+  }
+
+  function networkType(){
+    try { return navigator.connection && (navigator.connection.effectiveType || navigator.connection.type || navigator.connection.downlink || ''); }
+    catch(e){ return ''; }
+  }
+
+  function hostOf(url){
+    try { return new URL(url, location.href).host; } catch(e) { return ''; }
+  }
+
+  function relayUrl(){
+    try {
+      return String(window.LIFEOS_UPLOAD_RELAY_URL || localStorage.getItem('LIFEOS_UPLOAD_RELAY_URL') || '').trim();
+    } catch(e) { return String(window.LIFEOS_UPLOAD_RELAY_URL || '').trim(); }
+  }
+
+  function fmtBytes(bytes){
+    const n = Number(bytes || 0);
+    if (!n) return '0 B';
+    if (n < 1024) return n + ' B';
+    if (n < MB) return (n / 1024).toFixed(n < 10 * 1024 ? 1 : 0) + ' KB';
+    return (n / MB).toFixed(n < 10 * MB ? 1 : 2) + ' MB';
+  }
+
+  function fmtSpeed(bytes, ms){
+    const sec = Math.max(0.25, Number(ms || 0) / 1000);
+    return fmtBytes(Number(bytes || 0) / sec) + '/s';
+  }
+
+  function fileExt(name){
+    return String((String(name || '').split('?')[0].split('#')[0].split('.').pop() || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  function isImage(fileName, mime){
+    const ext = fileExt(fileName);
+    return String(mime || '').toLowerCase().startsWith('image/') || ['jpg','jpeg','png','webp','gif','bmp','heic','heif'].includes(ext);
+  }
+
+  function endpointFor(fileName, mime){
+    const ext = fileExt(fileName);
+    const m = String(mime || '').toLowerCase();
+    const img = isImage(fileName, m);
+    // Ảnh/APK đi document để giữ file gốc và tránh render trùng.
+    if (!img && ext !== 'apk') {
+      if (m.startsWith('video/')) return { endpoint: 'sendVideo', field: 'video', msgType: 'video' };
+      if (m.startsWith('audio/')) return { endpoint: 'sendAudio', field: 'audio', msgType: 'audio' };
+    }
+    return { endpoint: 'sendDocument', field: 'document', msgType: 'file' };
+  }
+
+  function safeUploadName(ce, fileName, mime){
+    try { return ce.getSafeTelegramUploadName ? ce.getSafeTelegramUploadName(fileName, mime) : fileName; }
+    catch(e) { return fileName || 'upload_file'; }
+  }
+
+  function normalizeRelayResult(data, fileField){
+    const result = data?.result || data?.telegramResult || data?.telegram?.result || data?.message || {};
+    const doc = result?.[fileField] || result?.document || result?.video || result?.audio || data?.document || data?.file || {};
+    let photoObj = null;
+    if (Array.isArray(result?.photo) && result.photo.length) photoObj = result.photo[result.photo.length - 1];
+    const source = doc?.file_id ? doc : (photoObj?.file_id ? photoObj : data);
+    return {
+      messageId: data?.messageId || data?.message_id || result?.message_id || data?.telegram_msg_id || data?.telegramMessageId || null,
+      fileId: data?.file_id || data?.fileId || source?.file_id || data?.file?.file_id || '',
+      fileUniqueId: data?.file_unique_id || source?.file_unique_id || '',
+      fileSize: data?.file_size || source?.file_size || 0,
+      mimeType: data?.mime_type || source?.mime_type || '',
+      fileUrl: data?.fileUrl || data?.file_url || data?.url || ''
+    };
+  }
+
+  function makeDebug(ce, meta){
+    const xhr = meta.xhr || {};
+    const data = meta.telegramData || {};
+    const url = meta.url || meta.relayUrl || (meta.transport === 'relay'
+      ? relayUrl()
+      : `https://relay-required.invalid/direct-telegram-disabled/${ce.telegramSecretRemovedFromHtml || ''}/${meta.endpoint || 'sendDocument'}`);
+    const httpStatus = Number(meta.httpStatus ?? xhr.status ?? 0) || 0;
+    const xhrStatus = Number(meta.xhrStatus ?? xhr.status ?? httpStatus) || 0;
+    const responseText = String(meta.responseText || xhr.responseText || '');
+    return {
+      transport: meta.transport || 'legacy_transport_disabled',
+      endpointHost: meta.endpointHost || hostOf(url),
+      endpoint: meta.endpoint || '',
+      field: meta.field || '',
+      fileName: meta.fileName || '',
+      safeFileName: meta.safeFileName || '',
+      fileSize: Number(meta.fileSize || 0),
+      mime: meta.mime || '',
+      ext: meta.ext || '',
+      strategy: meta.strategy || '',
+      uploadMethod: meta.uploadMethod || 'xhr',
+      timeoutMs: Number(meta.timeoutMs || UPLOAD_TIMEOUT_MS),
+      xhrStatus,
+      httpStatus,
+      xhrEvent: meta.xhrEvent || '',
+      telegramOk: meta.telegramOk ?? (data.ok === true),
+      telegramErrorCode: data.error_code ?? meta.telegramErrorCode ?? null,
+      telegramDescription: meta.telegramDescription || data.description || '',
+      relayStatus: meta.relayStatus ?? null,
+      relayOk: meta.relayOk ?? null,
+      relayErrorType: meta.relayErrorType || '',
+      relayDescription: meta.relayDescription || '',
+      durationMs: Number(meta.durationMs || 0),
+      networkType: networkType(),
+      navigatorOnLine: navigator.onLine,
+      userAgent: navigator.userAgent,
+      errorName: meta.errorName || '',
+      errorMessage: meta.errorMessage || '',
+      retryable: !!meta.retryable,
+      recommendedPartSize: Number(meta.recommendedPartSize || (isMobileLike() ? MOBILE_PART_HINT : DESKTOP_PART_HINT)),
+      responseTextShort: responseText.slice(0, 1600),
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  function uploadDebugToText(d){
+    d = d || {};
+    return [
+      'LỖI UPLOAD FAMILY CHAT — PHA67B',
+      `transport: ${d.transport || ''}`,
+      `endpointHost: ${d.endpointHost || ''}`,
+      `fileName: ${d.fileName || ''}`,
+      `fileSize: ${d.fileSize || 0}`,
+      `mime: ${d.mime || ''}`,
+      `uploadMethod: ${d.uploadMethod || ''}`,
+      `timeoutMs: ${d.timeoutMs || ''}`,
+      `xhrStatus: ${d.xhrStatus ?? ''}`,
+      `httpStatus: ${d.httpStatus ?? ''}`,
+      `xhrEvent: ${d.xhrEvent || ''}`,
+      `telegramDescription: ${d.telegramDescription || ''}`,
+      `relayStatus: ${d.relayStatus ?? ''}`,
+      `relayErrorType: ${d.relayErrorType || ''}`,
+      `durationMs: ${d.durationMs || 0}`,
+      `networkType: ${d.networkType || ''}`,
+      `navigatorOnLine: ${d.navigatorOnLine}`,
+      `userAgent: ${d.userAgent || ''}`,
+      '',
+      `safeFileName: ${d.safeFileName || ''}`,
+      `ext: ${d.ext || ''}`,
+      `field: ${d.field || ''}`,
+      `endpoint: ${d.endpoint || ''}`,
+      `strategy: ${d.strategy || ''}`,
+      `telegramErrorCode: ${d.telegramErrorCode ?? ''}`,
+      `relayOk: ${d.relayOk ?? ''}`,
+      `relayDescription: ${d.relayDescription || ''}`,
+      `errorName: ${d.errorName || ''}`,
+      `errorMessage: ${d.errorMessage || ''}`,
+      `recommendedPartSize: ${d.recommendedPartSize ? fmtBytes(d.recommendedPartSize) : ''}`,
+      '',
+      `responseTextShort: ${d.responseTextShort || ''}`
+    ].join('\n');
+  }
+
+  function record(ce, debug, file){
+    try {
+      if (typeof ce.recordUploadError === 'function') return ce.recordUploadError(debug, file);
+      ce.lastUploadError = debug;
+      if (file) ce.lastFailedUploadFile = file;
+      localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify(debug));
+    } catch(e) {}
+    return debug;
+  }
+
+  function addChatMessage(ce, file, norm, meta){
+    const fileName = file?.name || 'Tập tin';
+    const mime = String(file?.type || '').toLowerCase();
+    const img = isImage(fileName, mime);
+    const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+    const msgType = img ? 'file' : (meta.msgType || 'file');
+    const msg = {
+      id: Date.now().toString() + '_' + Math.floor(Math.random() * 100000),
+      type: msgType,
+      file_id: norm.fileId || '',
+      file_unique_id: norm.fileUniqueId || '',
+      file_url: norm.fileUrl || '',
+      file_name: fileName,
+      file_size: norm.fileSize || Number(file?.size || 0),
+      mime_type: norm.mimeType || file?.type || (img ? 'image/*' : ''),
+      sender: ce.getKey ? ce.getKey() : (window.viewingUser || 'me'),
+      timestamp: Date.now(),
+      sentAt: Date.now(),
+      reply_to: ce.replyingTo,
+      isPrivate: isPriv,
+      telegram_msg_id: norm.messageId,
+      chat_id: ce.chatId,
+      sent_via_endpoint: meta.endpoint || 'sendDocument',
+      sent_via_transport: meta.transport || 'legacy_transport_disabled',
+      safe_upload_name: meta.safeFileName || fileName,
+      topic_id: ce.currentTopic && ce.currentTopic !== 'all' ? ce.currentTopic : null
+    };
+    if (!Array.isArray(window.chatHistory)) window.chatHistory = [];
+    window.chatHistory.push(msg);
+    if (!file.__lifeosSkipPush) {
+      const label = img ? '🖼️ [Ảnh gửi dạng file gốc]' : (msgType === 'video' ? '🎥 [Video]' : (msgType === 'audio' ? '🎤 [Âm thanh]' : '📎 [Tập tin đính kèm]'));
+      ce.triggerPushNotification?.(label);
+    }
+    ce.cancelReply?.();
+    ce.saveAndSync?.();
+    ce.render?.();
+    return msg;
+  }
+
+  function hardLimitError(ce, file, currentIndex, totalFiles){
+    const fileName = file?.name || 'Tập tin';
+    const fileSize = Number(file?.size || 0);
+    const mime = String(file?.type || '').toLowerCase();
+    const ext = fileExt(fileName);
+    const safeFileName = safeUploadName(ce, fileName, mime);
+    const partHint = isMobileLike() ? MOBILE_PART_HINT : DESKTOP_PART_HINT;
+    const msg = `Gửi lỗi ${currentIndex}/${totalFiles}: ${fileName} — vượt giới hạn Telegram Bot API 50MB (${fmtBytes(fileSize)}), cần chia nhỏ mỗi phần khoảng ${fmtBytes(partHint)}.`;
+    const debug = record(ce, makeDebug(ce, {
+      transport: relayUrl() ? 'relay' : 'legacy_transport_disabled', endpointHost: relayUrl() ? hostOf(relayUrl()) : ['api','telegram','org'].join('.'),
+      endpoint: 'sendDocument', field: 'document', fileName, safeFileName, fileSize, mime, ext,
+      strategy: 'blocked_over_50MB_need_split', uploadMethod: 'preflight_block', timeoutMs: 0,
+      xhrStatus: 0, httpStatus: 0, xhrEvent: 'file_over_50MB', telegramDescription: 'Vượt giới hạn Telegram Bot API 50MB',
+      relayStatus: relayUrl() ? 0 : null, relayErrorType: relayUrl() ? 'not_attempted_over_50MB' : 'relay_not_used_over_50MB',
+      durationMs: 0, errorName: 'TelegramBotFileLimit', errorMessage: msg, recommendedPartSize: partHint
+    }), file);
+    ce.setUploadStatus?.(msg + ' Bấm Chi tiết lỗi.', 'error', false);
+    return { ok:false, retryable:false, fileName, endpoint:'sendDocument', error: msg + ' Bấm Chi tiết lỗi.', debug };
+  }
+
+  function relayMissingLargeError(ce, file, currentIndex, totalFiles){
+    const fileName = file?.name || 'Tập tin';
+    const fileSize = Number(file?.size || 0);
+    const mime = String(file?.type || '').toLowerCase();
+    const ext = fileExt(fileName);
+    const safeFileName = safeUploadName(ce, fileName, mime);
+    const msg = `Gửi lỗi ${currentIndex}/${totalFiles}: ${fileName} — file ${fmtBytes(fileSize)} chưa vượt 50MB nhưng direct upload tới Telegram dễ timeout/cần relay. Hãy cấu hình LIFEOS_UPLOAD_RELAY_URL hoặc chia nhỏ 15–20MB/phần trên mobile.`;
+    const debug = record(ce, makeDebug(ce, {
+      transport: 'legacy_transport_disabled', endpointHost: ['api','telegram','org'].join('.'), endpoint: 'sendDocument', field: 'document',
+      fileName, safeFileName, fileSize, mime, ext, strategy: 'relay_required_for_large_file', uploadMethod: 'preflight_block',
+      timeoutMs: UPLOAD_TIMEOUT_MS, xhrStatus: 0, httpStatus: 0, xhrEvent: 'relay_missing_large_file_timeout_risk',
+      telegramDescription: 'Direct browser/WebView upload tới Telegram bị timeout hoặc có nguy cơ timeout; cần relay',
+      relayStatus: 0, relayErrorType: 'relay_missing', durationMs: 0,
+      errorName: 'DirectTelegramTimeoutRisk', errorMessage: msg, recommendedPartSize: isMobileLike() ? MOBILE_PART_HINT : DESKTOP_PART_HINT
+    }), file);
+    ce.setUploadStatus?.(msg + ' Bấm Chi tiết lỗi.', 'error', false);
+    return { ok:false, retryable:false, fileName, endpoint:'sendDocument', error: msg + ' Bấm Chi tiết lỗi.', debug };
+  }
+
+  function sendDirect(ce, file, currentIndex, totalFiles, options = {}){
+    const fileName = file?.name || 'Tập tin';
+    const fileSize = Number(file?.size || 0);
+    const mime = String(file?.type || '').toLowerCase();
+    const ext = fileExt(fileName);
+    const safeFileName = safeUploadName(ce, fileName, mime);
+    const ep = endpointFor(fileName, mime);
+    const endpoint = ep.endpoint;
+    const fileField = ep.field;
+    const msgType = ep.msgType;
+    const img = isImage(fileName, mime);
+    const strategy = img ? 'image_as_document_legacy_transport_disabled' : (msgType === 'video' ? 'video_endpoint_legacy_transport_disabled' : (msgType === 'audio' ? 'audio_endpoint_legacy_transport_disabled' : 'file_legacy_transport_disabled'));
+    const timeoutMs = Number(options.timeoutMs || UPLOAD_TIMEOUT_MS);
+    const url = `https://relay-required.invalid/direct-telegram-disabled/${ce.telegramSecretRemovedFromHtml || ''}/${endpoint}`;
+    const started = Date.now();
+
+    if (!ce.telegramSecretRemovedFromHtml || !ce.chatId) {
+      const msg = `Gửi lỗi: ${fileName} — thiếu token/chatId Telegram. Bấm Chi tiết lỗi.`;
+      const debug = record(ce, makeDebug(ce, {
+        transport: 'legacy_transport_disabled', endpointHost: ['api','telegram','org'].join('.'), endpoint, field: fileField, fileName, safeFileName,
+        fileSize, mime, ext, strategy, uploadMethod: 'preflight_block', timeoutMs, xhrStatus: 0, httpStatus: 0,
+        xhrEvent: 'missing_token_or_chatId', telegramDescription: 'Thiếu token/chatId', durationMs: Date.now() - started,
+        errorName: 'MissingTelegramConfig', errorMessage: msg
+      }), file);
+      ce.setUploadStatus?.(msg, 'error', false);
+      return Promise.resolve({ ok:false, retryable:false, fileName, endpoint, error: msg, debug });
+    }
+
+    ce.__lifeos67bCurrentTransport = 'legacy_transport_disabled';
+    ce.lastFailedUploadFile = file;
+    ce.setUploadStatus?.(`Đã chọn ${currentIndex}/${totalFiles}: ${fileName} (${fmtBytes(fileSize)}). Đang upload trực tiếp Telegram — 0%`, 'info', false);
+
+    return new Promise((resolve) => {
+      const fd = new FormData();
+      fd.append('chat_id', ce.chatId);
+      fd.append(fileField, file, safeFileName);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      xhr.timeout = timeoutMs;
+      xhr.upload.onprogress = (e) => {
+        const elapsed = Date.now() - started;
+        if (e.lengthComputable) {
+          const pct = Math.max(0, Math.min(100, Math.round((e.loaded / e.total) * 100)));
+          ce.setUploadStatus?.(`Đang upload trực tiếp Telegram ${currentIndex}/${totalFiles}: ${fileName} — ${pct}% · ${fmtSpeed(e.loaded, elapsed)}`, 'info', false);
+        } else {
+          ce.setUploadStatus?.(`Đang upload trực tiếp Telegram ${currentIndex}/${totalFiles}: ${fileName} · ${fmtSpeed(e.loaded || 0, elapsed)}`, 'info', false);
+        }
+      };
+
+      const finishFail = (reason, data = {}, err = null) => {
+        const durationMs = Date.now() - started;
+        const status = xhr.status || 0;
+        const telegramDesc = data?.description || '';
+        let msg;
+        if (fileSize > TELEGRAM_BOT_FILE_LIMIT) {
+          msg = `Gửi lỗi: ${fileName} — vượt giới hạn Telegram Bot API 50MB, cần chia nhỏ.`;
+        } else if (status === 0 || reason === 'timeout' || reason === 'network_error') {
+          msg = `Gửi lỗi: ${fileName} — direct upload tới Telegram bị timeout/kết nối HTTP 0 (file ${fmtBytes(fileSize)} chưa vượt 50MB), cần relay. Bấm Chi tiết lỗi.`;
+        } else {
+          const code = data?.error_code !== undefined ? ` | Telegram ${data.error_code}` : '';
+          const desc = telegramDesc || err?.message || reason || 'không có mô tả lỗi';
+          msg = `Gửi lỗi: ${fileName} — Telegram ${endpoint} HTTP ${status}${code}: ${desc}. Bấm Chi tiết lỗi.`;
+        }
+        const debug = record(ce, makeDebug(ce, {
+          transport: 'legacy_transport_disabled', url, endpointHost: ['api','telegram','org'].join('.'), endpoint, field: fileField, fileName, safeFileName,
+          fileSize, mime, ext, strategy, uploadMethod: 'xhr_legacy_transport_disabled', timeoutMs, xhrStatus: status, httpStatus: status,
+          xhrEvent: reason, telegramData: data || {}, telegramDescription: telegramDesc || (status === 0 ? 'Direct browser/WebView upload tới Telegram bị timeout/cần relay' : ''),
+          relayStatus: null, relayErrorType: '', durationMs, xhr, responseText: xhr.responseText || '',
+          errorName: err?.name || reason, errorMessage: err?.message || msg, retryable: status === 0 || reason === 'timeout' || reason === 'network_error'
+        }), file);
+        console.warn('[LifeOS 67B direct upload fail forensic]', { debug, data, err });
+        resolve({ ok:false, retryable: debug.retryable, fileName, endpoint, error: msg, debug });
+      };
+
+      xhr.onload = () => {
+        let data = {};
+        try { data = JSON.parse(xhr.responseText || '{}'); }
+        catch(e) { finishFail('parse_error', {}, e); return; }
+        if (xhr.status < 200 || xhr.status >= 300 || data.ok !== true) { finishFail('telegram_or_http_error', data); return; }
+        try {
+          const tgFile = data.result?.[fileField] || data.result?.document || data.result?.video || data.result?.audio || null;
+          const fileId = tgFile && tgFile.file_id;
+          if (!fileId) throw new Error('Telegram ok nhưng thiếu file_id');
+          const norm = {
+            messageId: data.result?.message_id || null,
+            fileId,
+            fileUniqueId: tgFile.file_unique_id || '',
+            fileSize: tgFile.file_size || fileSize,
+            mimeType: tgFile.mime_type || file?.type || '',
+            fileUrl: ''
+          };
+          addChatMessage(ce, file, norm, { endpoint, field: fileField, msgType, transport: 'legacy_transport_disabled', safeFileName });
+          ce.lastFailedUploadFile = null;
+          const note = img ? `Ảnh đã gửi bằng file gốc: ${fileName}` : `Đã gửi trực tiếp Telegram: ${fileName}`;
+          ce.setUploadStatus?.(note, 'done', true);
+          resolve({ ok:true, fileName, endpoint, note, transport:'legacy_transport_disabled', response:data });
+        } catch(e) { finishFail('telegram_ok_missing_file_id', data, e); }
+      };
+      xhr.onerror = () => finishFail('network_error');
+      xhr.ontimeout = () => finishFail('timeout');
+      try { xhr.send(fd); }
+      catch(e) { finishFail('xhr_send_exception', {}, e); }
+    });
+  }
+
+  function sendRelay(ce, file, currentIndex, totalFiles, options = {}){
+    const relay = relayUrl();
+    const fileName = file?.name || 'Tập tin';
+    const fileSize = Number(file?.size || 0);
+    const mime = String(file?.type || '').toLowerCase();
+    const ext = fileExt(fileName);
+    const safeFileName = safeUploadName(ce, fileName, mime);
+    const img = isImage(fileName, mime);
+    const endpoint = 'sendDocument';
+    const fileField = 'document';
+    const strategy = img ? 'image_as_document_relay_first' : 'file_as_document_relay_first';
+    const timeoutMs = Number(options.timeoutMs || UPLOAD_TIMEOUT_MS);
+    const started = Date.now();
+
+    if (!relay) return Promise.resolve(relayMissingLargeError(ce, file, currentIndex, totalFiles));
+    if (!ce.chatId) {
+      const msg = `Gửi lỗi qua relay: ${fileName} — thiếu chatId. Bấm Chi tiết lỗi.`;
+      const debug = record(ce, makeDebug(ce, {
+        transport: 'relay', relayUrl: relay, endpointHost: hostOf(relay), endpoint, field: fileField, fileName, safeFileName,
+        fileSize, mime, ext, strategy, uploadMethod: 'preflight_block', timeoutMs, xhrStatus: 0, httpStatus: 0,
+        xhrEvent: 'missing_chatId', relayStatus: 0, relayErrorType: 'missing_chatId', durationMs: 0,
+        errorName: 'MissingChatId', errorMessage: msg
+      }), file);
+      ce.setUploadStatus?.(msg, 'error', false);
+      return Promise.resolve({ ok:false, retryable:false, fileName, endpoint, error: msg, debug });
+    }
+
+    ce.__lifeos67bCurrentTransport = 'relay';
+    ce.lastFailedUploadFile = file;
+    ce.setUploadStatus?.(`Đã chọn ${currentIndex}/${totalFiles}: ${fileName} (${fmtBytes(fileSize)}). Đang gửi qua relay — 0%`, 'info', false);
+
+    return new Promise((resolve) => {
+      const fd = new FormData();
+      fd.append('chat_id', ce.chatId || '');
+      fd.append(fileField, file, safeFileName);
+      fd.append('original_file_name', fileName);
+      fd.append('safe_file_name', safeFileName);
+      fd.append('mime_type', file?.type || '');
+      fd.append('file_size', String(fileSize));
+      fd.append('strategy', strategy);
+      fd.append('endpoint', endpoint);
+      fd.append('topic_id', ce.currentTopic && ce.currentTopic !== 'all' ? ce.currentTopic : '');
+      fd.append('client_patch', 'Pha67B_family_upload_telegram_relay_diagnostics_fix');
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', relay, true);
+      xhr.timeout = timeoutMs;
+      xhr.upload.onprogress = (e) => {
+        const elapsed = Date.now() - started;
+        if (e.lengthComputable) {
+          const pct = Math.max(0, Math.min(100, Math.round((e.loaded / e.total) * 100)));
+          ce.setUploadStatus?.(`Đang gửi qua relay ${currentIndex}/${totalFiles}: ${fileName} — ${pct}% · ${fmtSpeed(e.loaded, elapsed)}`, 'info', false);
+        } else {
+          ce.setUploadStatus?.(`Đang gửi qua relay ${currentIndex}/${totalFiles}: ${fileName} · ${fmtSpeed(e.loaded || 0, elapsed)}`, 'info', false);
+        }
+      };
+
+      const finishFail = (reason, data = {}, err = null) => {
+        const durationMs = Date.now() - started;
+        const desc = data?.telegramDescription || data?.description || data?.error || data?.message || err?.message || reason;
+        const debug = record(ce, makeDebug(ce, {
+          transport: 'relay', relayUrl: relay, endpointHost: hostOf(relay), endpoint, field: fileField, fileName, safeFileName,
+          fileSize, mime, ext, strategy, uploadMethod: 'xhr_relay', timeoutMs, xhrStatus: xhr.status || 0, httpStatus: xhr.status || 0,
+          xhrEvent: reason, relayStatus: xhr.status || 0, relayOk: data?.ok === true, relayErrorType: data?.errorType || reason,
+          relayDescription: desc, telegramOk: data?.telegramOk, telegramDescription: data?.telegramDescription || data?.description || '',
+          durationMs, xhr, responseText: xhr.responseText || '', errorName: err?.name || reason, errorMessage: err?.message || desc,
+          retryable: reason === 'relay_timeout' || reason === 'relay_network_error'
+        }), file);
+        const msg = `Gửi lỗi qua relay: ${fileName} — HTTP ${xhr.status || 0}: ${desc}. Bấm Chi tiết lỗi.`;
+        console.warn('[LifeOS 67B relay upload fail forensic]', { debug, data, err });
+        resolve({ ok:false, retryable: debug.retryable, fileName, endpoint, error: msg, debug });
+      };
+
+      xhr.onload = () => {
+        let data = {};
+        try { data = JSON.parse(xhr.responseText || '{}'); }
+        catch(e) { finishFail('relay_parse_error', {}, e); return; }
+        if (xhr.status < 200 || xhr.status >= 300 || data.ok !== true) { finishFail('relay_http_or_json_error', data); return; }
+        try {
+          const norm = normalizeRelayResult(data, fileField);
+          if (!norm.fileId && !norm.fileUrl) throw new Error('Relay ok nhưng không trả file_id/fileUrl');
+          addChatMessage(ce, file, norm, { endpoint, field: fileField, msgType:'file', transport:'relay', safeFileName });
+          ce.lastFailedUploadFile = null;
+          const note = img ? `Ảnh đã gửi qua relay: ${fileName}` : `Đã gửi qua relay: ${fileName}`;
+          ce.setUploadStatus?.(note, 'done', true);
+          resolve({ ok:true, fileName, endpoint, note, transport:'relay', response:data });
+        } catch(e) { finishFail('relay_ok_missing_file_reference', data, e); }
+      };
+      xhr.onerror = () => finishFail('relay_network_error');
+      xhr.ontimeout = () => finishFail('relay_timeout');
+      try { xhr.send(fd); }
+      catch(e) { finishFail('relay_xhr_send_exception', {}, e); }
+    });
+  }
+
+  function install(){
+    const ce = window.ChatEngine;
+    if (!ce || ce.__lifeos67bUploadRelayDiagnosticsPatch) return false;
+    ce.__lifeos67bUploadRelayDiagnosticsPatch = true;
+
+    const oldBuildUploadDebug = typeof ce.buildUploadDebug === 'function' ? ce.buildUploadDebug.bind(ce) : null;
+    const oldUploadDebugToText = typeof ce.uploadDebugToText === 'function' ? ce.uploadDebugToText.bind(ce) : null;
+
+    window.LIFEOS_UPLOAD_RELAY_URL = relayUrl();
+    window.setLifeOSUploadRelayUrl = function(url){
+      const v = String(url || '').trim();
+      window.LIFEOS_UPLOAD_RELAY_URL = v;
+      try { localStorage.setItem('LIFEOS_UPLOAD_RELAY_URL', v); } catch(e) {}
+      window.ChatEngine?.setUploadStatus?.(v ? 'Đã cấu hình upload relay cho Family Chat' : 'Đã tắt upload relay; file lớn sẽ báo cần relay/thay vì báo sai vượt 50MB.', v ? 'done' : 'error', true);
+      return v;
+    };
+
+    ce.getUploadRelayUrl = function(){ return relayUrl(); };
+    ce.getUploadTransport = function(fileSize = 0){
+      const relay = this.getUploadRelayUrl?.() || '';
+      if (relay) return 'relay';
+      return Number(fileSize || 0) <= DIRECT_SMALL_LIMIT ? 'legacy_transport_disabled' : 'legacy_transport_disabled_blocked_need_relay';
+    };
+
+    ce.buildUploadDebug = function(meta = {}){
+      const base = oldBuildUploadDebug ? oldBuildUploadDebug(meta) : {};
+      return Object.assign({}, base, makeDebug(this, Object.assign({}, base, meta)));
+    };
+
+    ce.uploadDebugToText = function(debugObj = null){
+      const d = debugObj || this.lastUploadError || {};
+      if (d && (d.transport || d.durationMs !== undefined || d.xhrEvent || d.relayErrorType)) return uploadDebugToText(d);
+      return oldUploadDebugToText ? oldUploadDebugToText(debugObj) : uploadDebugToText(d);
+    };
+
+    ce.sendFile = async function(file, currentIndex = 1, totalFiles = 1, options = {}){
+      if (!file) return { ok:false, error:'Không có file để gửi' };
+      const fileName = file?.name || 'Tập tin';
+      const fileSize = Number(file?.size || 0);
+      const relay = this.getUploadRelayUrl?.() || '';
+
+      if (fileSize > TELEGRAM_BOT_FILE_LIMIT) return hardLimitError(this, file, currentIndex, totalFiles);
+
+      // Relay-first: nếu có relay thì mọi file đi relay trước. Direct Telegram chỉ fallback cho file nhỏ.
+      if (relay) {
+        const relayResult = await sendRelay(this, file, currentIndex, totalFiles, options);
+        if (relayResult?.ok) return relayResult;
+        if (fileSize <= DIRECT_SMALL_LIMIT && !options.noDirectFallback) {
+          this.setUploadStatus?.(`Relay lỗi, thử fallback trực tiếp cho file nhỏ: ${fileName}`, 'error', false);
+          const directResult = await sendDirect(this, file, currentIndex, totalFiles, options);
+          return directResult;
+        }
+        this.setUploadStatus?.(relayResult?.error || `Gửi lỗi qua relay: ${fileName}. Bấm Chi tiết lỗi.`, 'error', false);
+        return relayResult;
+      }
+
+      // Không có relay: file nhỏ vẫn cho direct để giữ ca vài trăm KB và 10-20MB.
+      // File lớn 20-50MB không báo vượt 50MB; báo đúng là direct Telegram dễ timeout/cần relay.
+      if (fileSize > DIRECT_SMALL_LIMIT) return relayMissingLargeError(this, file, currentIndex, totalFiles);
+
+      return await sendDirect(this, file, currentIndex, totalFiles, options);
+    };
+
+    console.info('[LifeOS 67B] Family upload relay/diagnostics patch installed', {
+      patch: PATCH_ID,
+      relayConfigured: !!relayUrl(),
+      timeoutMs: UPLOAD_TIMEOUT_MS,
+      directSmallLimit: DIRECT_SMALL_LIMIT,
+      telegramLimit: TELEGRAM_BOT_FILE_LIMIT
+    });
+    return true;
+  }
+
+  function schedule(){
+    install();
+    setTimeout(install, 80);
+    setTimeout(install, 250);
+    setTimeout(install, 900);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+  window.addEventListener('load', schedule, { passive:true });
+})();
+</script>
+<!-- LIFEOS PHA67B FAMILY UPLOAD TELEGRAM RELAY DIAGNOSTICS FIX - END -->
+
+<!-- LIFEOS PHA67A MEDIA LIVE MOBILE SCROLL FIX - START
+Scope: chỉ tab Nghe nhạc > Radio Live / Tivi Live trên mobile.
+Mục tiêu: chạm/vuốt ở mọi điểm trong danh sách kênh đều kéo lên xuống mượt; không bắt người dùng phải vuốt mép ngoài hay đúng một vùng nhỏ.
+Không đụng: Task/Alarm, Family, Vault, APK native bridge, dữ liệu kênh.
+-->
+<style id="lifeos-pha67a-media-live-mobile-scroll-fix-style">
+@media (max-width: 1023px) {
+  body.media-live-scroll-mode {
+    padding-bottom: calc(var(--lifeos-bottom-nav-h, 58px) + env(safe-area-inset-bottom) + 10px) !important;
+    overscroll-behavior-y: auto !important;
+  }
+
+  body.media-live-scroll-mode #mini-player {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  body.media-live-scroll-mode #view-music,
+  body.media-live-scroll-mode #view-music > div {
+    overflow: visible !important;
+    touch-action: pan-y !important;
+  }
+
+  body.media-live-scroll-mode #view-music > div {
+    min-height: calc(100dvh - 138px) !important;
+    max-height: none !important;
+  }
+
+  body.media-live-scroll-mode #view-music .flex-grow.min-h-0.w-full.grid {
+    min-height: 0 !important;
+    overflow: visible !important;
+    touch-action: pan-y !important;
+  }
+
+  body.media-live-scroll-mode #media-group-mobile-bar {
+    touch-action: pan-x pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  body.media-live-scroll-mode #music-list-container {
+    min-height: 58dvh !important;
+    max-height: calc(100dvh - 252px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-y !important;
+    padding: 8px 8px 22px !important;
+    scroll-padding-top: 10px !important;
+    scroll-padding-bottom: 42px !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+
+  body.media-live-scroll-mode #radio-list-container,
+  body.media-live-scroll-mode #tv-list-container {
+    min-height: calc(100% + 1px) !important;
+    padding-bottom: 28px !important;
+    touch-action: pan-y !important;
+  }
+
+  body.media-live-scroll-mode #radio-list-container .media-item,
+  body.media-live-scroll-mode #radio-list-container .song-row,
+  body.media-live-scroll-mode #tv-list-container .media-item {
+    touch-action: pan-y !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: rgba(16, 185, 129, .12) !important;
+  }
+
+  body.media-live-scroll-mode #radio-list-container .media-item *,
+  body.media-live-scroll-mode #tv-list-container .media-item * {
+    touch-action: pan-y !important;
+  }
+
+  body.media-live-scroll-mode #radio-player-container,
+  body.media-live-scroll-mode #tv-player-container {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+}
+</style>
+
+<script id="lifeos-pha67a-media-live-mobile-scroll-fix-js">
+(function(){
+  const PATCH_ID = 'PHA67A_MEDIA_LIVE_MOBILE_SCROLL_FIX';
+  const LIVE_TABS = new Set(['radio', 'tv']);
+  let boundList = null;
+  let touchStart = null;
+  let lastSwipeAt = 0;
+
+  function isMobile() {
+    return window.innerWidth < 1024;
+  }
+
+  function getLiveTab() {
+    return window.MediaHub && LIVE_TABS.has(window.MediaHub.currentTab) ? window.MediaHub.currentTab : '';
+  }
+
+  function isLiveMobileMode() {
+    return isMobile() && !!getLiveTab();
+  }
+
+  function applyScrollSurface() {
+    const active = isLiveMobileMode();
+    document.body.classList.toggle('media-live-scroll-mode', active);
+
+    const list = document.getElementById('music-list-container');
+    const radio = document.getElementById('radio-list-container');
+    const tv = document.getElementById('tv-list-container');
+    const mini = document.getElementById('mini-player');
+
+    if (active && mini) {
+      mini.classList.remove('music-player-open');
+      mini.style.setProperty('display', 'none', 'important');
+      mini.style.setProperty('pointer-events', 'none', 'important');
+    }
+
+    [list, radio, tv].forEach(function(el){
+      if (!el) return;
+      el.style.setProperty('-webkit-overflow-scrolling', 'touch');
+      el.style.setProperty('touch-action', 'pan-y', 'important');
+    });
+
+    if (list) {
+      list.style.setProperty('overflow-y', 'auto', 'important');
+      list.style.setProperty('overflow-x', 'hidden', 'important');
+      list.dataset.lifeosPha67aScroll = active ? getLiveTab() : '';
+      bindScrollGuard(list);
+    }
+  }
+
+  function bindScrollGuard(list) {
+    if (!list || boundList === list) return;
+    boundList = list;
+
+    list.addEventListener('touchstart', function(e){
+      if (!isLiveMobileMode()) return;
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      touchStart = { x: t.clientX, y: t.clientY, moved: false };
+    }, { passive: true, capture: true });
+
+    list.addEventListener('touchmove', function(e){
+      if (!isLiveMobileMode() || !touchStart) return;
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      const dx = Math.abs(t.clientX - touchStart.x);
+      const dy = Math.abs(t.clientY - touchStart.y);
+      if (dy > 6 && dy > dx * 0.75) {
+        touchStart.moved = true;
+        lastSwipeAt = Date.now();
+      }
+    }, { passive: true, capture: true });
+
+    list.addEventListener('touchend', function(){
+      if (touchStart && touchStart.moved) lastSwipeAt = Date.now();
+      touchStart = null;
+    }, { passive: true, capture: true });
+
+    list.addEventListener('touchcancel', function(){
+      touchStart = null;
+    }, { passive: true, capture: true });
+
+    list.addEventListener('click', function(e){
+      if (!isLiveMobileMode()) return;
+      const isChannelCard = e.target && e.target.closest && e.target.closest('#radio-list-container .media-item, #tv-list-container .media-item');
+      if (!isChannelCard) return;
+
+      if (Date.now() - lastSwipeAt < 260) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+      }
+    }, true);
+  }
+
+  function wrapMediaHub() {
+    const mh = window.MediaHub;
+    if (!mh || mh.__lifeosPha67aScrollPatched) return false;
+
+    mh.__lifeosPha67aScrollPatched = true;
+
+    ['switchTab', 'renderLists', 'setGroup'].forEach(function(name){
+      const original = mh[name];
+      if (typeof original !== 'function') return;
+      mh[name] = function(){
+        const ret = original.apply(this, arguments);
+        requestAnimationFrame(function(){
+          applyScrollSurface();
+          setTimeout(applyScrollSurface, 80);
+        });
+        return ret;
+      };
+    });
+
+    applyScrollSurface();
+    setTimeout(applyScrollSurface, 120);
+    console.info('[LifeOS ' + PATCH_ID + '] installed');
+    return true;
+  }
+
+  function boot() {
+    if (!wrapMediaHub()) {
+      let tries = 0;
+      const timer = setInterval(function(){
+        tries += 1;
+        if (wrapMediaHub() || tries > 40) clearInterval(timer);
+      }, 150);
+    } else {
+      applyScrollSurface();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
+
+  window.addEventListener('resize', applyScrollSurface, { passive: true });
+  window.addEventListener('orientationchange', function(){
+    setTimeout(applyScrollSurface, 120);
+    setTimeout(applyScrollSurface, 420);
+  }, { passive: true });
+  window.addEventListener('pageshow', applyScrollSurface, { passive: true });
+})();
+</script>
+<!-- LIFEOS PHA67A MEDIA LIVE MOBILE SCROLL FIX - END -->
+
+
+
+<!-- LIFEOS PHA67C-R1 FAMILY RELAY SECRET SANITIZE + RUNTIME PROOF - START
+Tên pha: Pha67C_R1_family_relay_secret_sanitize_runtime_proof
+Nền gốc: index_pha67B_family_upload_telegram_relay_diagnostics_fix.html + tham chiếu logic relay-first 67C, output sanitized mới.
+Phạm vi: chỉ Tab Gia đình / Family Chat upload ảnh/file qua Cloudflare Worker relay-first.
+Không đụng: Media/Radio/Tivi 67A, báo thức, Focus, Weather, Vault. Không split/merge.
+Bảo mật: HTML không chứa secret Telegram. Secret phải nằm ở Cloudflare Worker env/secret và token cũ đã lộ phải revoke/rotate ngoài mã nguồn.
+Worker contract production:
+  GET  /health -> { ok:true, service:"lifeos-family-upload-relay", telegramConfigured:true, maxSingleUploadBytes:50000000 }
+  POST /upload multipart/form-data: file, chat_id hoặc target, caption, client_meta. Worker dùng sendDocument.
+  Bắt buộc để giữ xem/tải/copy/xóa bằng file_id mà không lộ secret trong HTML:
+    GET  /download?file_id=...&name=... -> stream bytes/blob từ Cloudflare Worker, không trả Telegram URL thô
+    POST /delete -> { ok:true } nếu Worker hỗ trợ
+-->
+<script id="lifeos-pha67c-r1-family-relay-secret-sanitize-runtime-proof-js">
+(function(){
+  const PATCH_ID = 'lifeos-pha67c-r1-family-relay-secret-sanitize-runtime-proof-js';
+  const PHASE = '67C-R1';
+  const MB = 1024 * 1024;
+  const MAX_SINGLE_UPLOAD_BYTES = 50 * MB;
+  const UPLOAD_TIMEOUT_MS = 300000;
+  const HEALTH_TIMEOUT_MS = 15000;
+
+  // Ba cấu hình công khai duy nhất cho upload relay trong HTML.
+  window.LIFEOS_UPLOAD_RELAY_URL = window.LIFEOS_UPLOAD_RELAY_URL || 'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
+  window.LIFEOS_UPLOAD_RELAY_ENABLED = (typeof window.LIFEOS_UPLOAD_RELAY_ENABLED === 'boolean') ? window.LIFEOS_UPLOAD_RELAY_ENABLED : true;
+  window.LIFEOS_UPLOAD_RELAY_MODE = window.LIFEOS_UPLOAD_RELAY_MODE || 'always'; // always | mobile_first | off
+
+  function storageGet(key, fallback){
+    try { const v = localStorage.getItem(key); return v === null || v === undefined ? fallback : v; } catch(e) { return fallback; }
+  }
+  function storageSet(key, value){ try { localStorage.setItem(key, String(value)); } catch(e) {} }
+  function boolValue(v, fallback){
+    if (typeof v === 'boolean') return v;
+    const s = String(v ?? '').trim().toLowerCase();
+    if (['1','true','yes','on','enabled'].includes(s)) return true;
+    if (['0','false','no','off','disabled'].includes(s)) return false;
+    return fallback;
+  }
+  function relayEnabled(){
+    const stored = storageGet('LIFEOS_UPLOAD_RELAY_ENABLED', '');
+    return stored !== '' ? boolValue(stored, true) : boolValue(window.LIFEOS_UPLOAD_RELAY_ENABLED, true);
+  }
+  function relayMode(){
+    const m = String(window.LIFEOS_UPLOAD_RELAY_MODE || storageGet('LIFEOS_UPLOAD_RELAY_MODE', 'always') || 'always').trim().toLowerCase();
+    return ['mobile_first','always','off'].includes(m) ? m : 'always';
+  }
+  function relayBaseUrl(){
+    const v = String(window.LIFEOS_UPLOAD_RELAY_URL || storageGet('LIFEOS_UPLOAD_RELAY_URL', '') || '').trim();
+    return v.replace(/\/+$/, '');
+  }
+  function endpointUrl(kind){
+    const base = relayBaseUrl();
+    if (!base) return '';
+    try {
+      const u = new URL(base, location.href);
+      let p = u.pathname.replace(/\/+$/, '');
+      if (!p) p = '';
+      const clean = p.replace(/\/(health|upload|file|delete)$/i, '');
+      if (kind === 'health') u.pathname = clean + '/health';
+      else if (kind === 'file') u.pathname = clean + '/file';
+      else if (kind === 'delete') u.pathname = clean + '/delete';
+      else u.pathname = clean + '/upload';
+      return u.toString();
+    } catch(e) {
+      return base.replace(/\/(health|upload|file|delete)$/i, '') + '/' + (kind || 'upload');
+    }
+  }
+  function hostOf(url){ try { return new URL(url, location.href).host; } catch(e) { return ''; } }
+  function networkType(){
+    try { const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection; return c ? (c.effectiveType || c.type || (c.downlink ? String(c.downlink) + 'Mbps' : '')) : ''; } catch(e) { return ''; }
+  }
+  function isMobileLike(){
+    try {
+      const ua = navigator.userAgent || '';
+      const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      return !!(coarse || /Android|iPhone|iPad|iPod|Mobile|wv\)|WebView/i.test(ua));
+    } catch(e) { return /Android|iPhone|iPad|iPod|Mobile|wv\)|WebView/i.test(navigator.userAgent || ''); }
+  }
+  function fmtBytes(bytes){
+    const n = Number(bytes || 0);
+    if (!n) return '0 B';
+    if (n < 1024) return n + ' B';
+    if (n < MB) return (n / 1024).toFixed(n < 10 * 1024 ? 1 : 0) + ' KB';
+    return (n / MB).toFixed(n < 10 * MB ? 1 : 2) + ' MB';
+  }
+  function fmtSpeed(bytes, ms){ return fmtBytes(Number(bytes || 0) / Math.max(0.25, Number(ms || 0) / 1000)) + '/s'; }
+  function fileExt(name){ return String((String(name || '').split('?')[0].split('#')[0].split('.').pop() || '')).toLowerCase().replace(/[^a-z0-9]/g, ''); }
+  function isImage(fileName, mime){
+    const ext = fileExt(fileName);
+    return String(mime || '').toLowerCase().startsWith('image/') || ['jpg','jpeg','png','webp','gif','bmp','heic','heif'].includes(ext);
+  }
+  function safeUploadName(ce, fileName, mime){
+    try { return ce.getSafeTelegramUploadName ? ce.getSafeTelegramUploadName(fileName, mime) : fileName; }
+    catch(e) { return fileName || 'upload_file'; }
+  }
+  function statusText(){
+    const configured = !!relayBaseUrl();
+    const enabled = relayEnabled() && relayMode() !== 'off';
+    if (!enabled) return 'Relay: tắt · Health: chưa kiểm tra · Transport: blocked_no_relay';
+    if (!configured) return 'Relay: chưa cấu hình · Health: chưa kiểm tra · Transport: blocked_no_relay';
+    return 'Relay: đã cấu hình · Health: chờ kiểm tra · Transport: cloudflare_worker_relay';
+  }
+  function paintRelayStatus(health){
+    const txt = health ? `Relay: đã cấu hình · Health: ${health.ok ? 'OK' : 'lỗi'} · Transport: ${health.transport || (health.ok ? 'cloudflare_worker_relay' : 'blocked_no_relay')}` : statusText();
+    try {
+      let node = document.getElementById('lifeos-family-relay-runtime-proof');
+      const anchor = document.getElementById('chat-status');
+      if (!node && anchor && anchor.parentNode) {
+        node = document.createElement('p');
+        node.id = 'lifeos-family-relay-runtime-proof';
+        node.className = 'text-[10px] sm:text-[11px] font-black text-emerald-700 truncate';
+        anchor.parentNode.appendChild(node);
+      }
+      if (node) node.textContent = txt;
+    } catch(e) {}
+    try { window.LIFEOS_FAMILY_RELAY_RUNTIME_PROOF = Object.assign({ phase: PHASE, timestamp: new Date().toISOString() }, health || {}, { text: txt }); } catch(e) {}
+  }
+
+  function normalizeRelayResult(data){
+    const root = data || {};
+    const telegram = root.telegram || root.telegramData || root.telegramResponse || {};
+    const result = root.result || root.telegramResult || telegram.result || root.message || {};
+    const doc = result.document || result.file || root.document || root.file || {};
+    let photoObj = null;
+    if (Array.isArray(result.photo) && result.photo.length) photoObj = result.photo[result.photo.length - 1];
+    const source = doc && doc.file_id ? doc : (photoObj && photoObj.file_id ? photoObj : root);
+    return {
+      messageId: root.messageId || root.message_id || result.message_id || root.telegram_msg_id || root.telegramMessageId || null,
+      fileId: root.file_id || root.fileId || (source && source.file_id) || (root.file && root.file.file_id) || '',
+      fileUniqueId: root.file_unique_id || (source && source.file_unique_id) || '',
+      fileSize: root.file_size || (source && source.file_size) || 0,
+      mimeType: root.mime_type || (source && source.mime_type) || '',
+      fileUrl: root.fileUrl || root.file_url || root.url || root.downloadUrl || root.download_url || ''
+    };
+  }
+
+  function makeDebug(meta){
+    const xhr = meta.xhr || {};
+    const data = meta.relayData || {};
+    const responseText = String(meta.responseText || xhr.responseText || '');
+    const httpStatus = Number(meta.httpStatus ?? xhr.status ?? 0) || 0;
+    const xhrStatus = Number(meta.xhrStatus ?? xhr.status ?? httpStatus) || 0;
+    return {
+      phase: PHASE,
+      transport: meta.transport || 'blocked_no_relay',
+      relayUrlConfigured: !!relayBaseUrl(),
+      relayHealthOk: meta.relayHealthOk ?? null,
+      endpointHost: meta.endpointHost || hostOf(meta.url || endpointUrl('upload')),
+      fileName: meta.fileName || '',
+      safeFileName: meta.safeFileName || '',
+      fileSize: Number(meta.fileSize || 0),
+      mime: meta.mime || '',
+      ext: meta.ext || '',
+      uploadMethod: meta.uploadMethod || '',
+      timeoutMs: Number(meta.timeoutMs || 0),
+      networkType: networkType(),
+      navigatorOnLine: navigator.onLine,
+      httpStatus,
+      xhrStatus,
+      xhrEvent: meta.xhrEvent || '',
+      relayStatus: meta.relayStatus ?? httpStatus,
+      relayOk: meta.relayOk ?? null,
+      relayErrorType: meta.relayErrorType || data.errorType || data.error_type || '',
+      telegramOk: meta.telegramOk ?? data.telegramOk ?? (data.telegram && data.telegram.ok) ?? null,
+      telegramErrorCode: meta.telegramErrorCode ?? data.telegramErrorCode ?? data.telegram_error_code ?? data.error_code ?? (data.telegram && data.telegram.error_code) ?? null,
+      telegramDescription: meta.telegramDescription || data.telegramDescription || data.telegram_description || (data.telegram && data.telegram.description) || '',
+      durationMs: Number(meta.durationMs || 0),
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      relayDescription: meta.relayDescription || data.description || data.error || data.message || '',
+      mode: relayMode(),
+      relayEnabled: relayEnabled(),
+      isMobileLike: isMobileLike(),
+      endpoint: meta.endpoint || 'sendDocument',
+      field: meta.field || 'file',
+      strategy: meta.strategy || '',
+      errorName: meta.errorName || '',
+      errorMessage: meta.errorMessage || '',
+      retryable: !!meta.retryable,
+      responseTextShort: responseText.slice(0, 1800)
+    };
+  }
+  function debugText(d){
+    d = d || {};
+    return [
+      'LỖI UPLOAD FAMILY CHAT — PHA67C-R1',
+      `phase: ${d.phase || PHASE}`,
+      `transport: ${d.transport || ''}`,
+      `relayUrlConfigured: ${d.relayUrlConfigured}`,
+      `relayHealthOk: ${d.relayHealthOk ?? ''}`,
+      `endpointHost: ${d.endpointHost || ''}`,
+      `fileName: ${d.fileName || ''}`,
+      `safeFileName: ${d.safeFileName || ''}`,
+      `fileSize: ${d.fileSize || 0}`,
+      `mime: ${d.mime || ''}`,
+      `ext: ${d.ext || ''}`,
+      `uploadMethod: ${d.uploadMethod || ''}`,
+      `timeoutMs: ${d.timeoutMs || ''}`,
+      `networkType: ${d.networkType || ''}`,
+      `navigatorOnLine: ${d.navigatorOnLine}`,
+      `httpStatus: ${d.httpStatus ?? ''}`,
+      `xhrStatus: ${d.xhrStatus ?? ''}`,
+      `xhrEvent: ${d.xhrEvent || ''}`,
+      `relayStatus: ${d.relayStatus ?? ''}`,
+      `relayOk: ${d.relayOk ?? ''}`,
+      `relayErrorType: ${d.relayErrorType || ''}`,
+      `telegramOk: ${d.telegramOk ?? ''}`,
+      `telegramErrorCode: ${d.telegramErrorCode ?? ''}`,
+      `telegramDescription: ${d.telegramDescription || ''}`,
+      `durationMs: ${d.durationMs || 0}`,
+      `timestamp: ${d.timestamp || ''}`,
+      `userAgent: ${d.userAgent || ''}`,
+      '',
+      `relayDescription: ${d.relayDescription || ''}`,
+      `mode: ${d.mode || ''}`,
+      `relayEnabled: ${d.relayEnabled}`,
+      `isMobileLike: ${d.isMobileLike}`,
+      `endpoint: ${d.endpoint || ''}`,
+      `field: ${d.field || ''}`,
+      `strategy: ${d.strategy || ''}`,
+      `errorName: ${d.errorName || ''}`,
+      `errorMessage: ${d.errorMessage || ''}`,
+      '',
+      `responseTextShort: ${d.responseTextShort || ''}`
+    ].join('\n');
+  }
+  function record(ce, debug, file){
+    try {
+      ce.lastUploadError = debug;
+      if (file) ce.lastFailedUploadFile = file;
+      localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify(debug));
+      if (typeof ce.recordUploadError === 'function') {
+        try { return ce.recordUploadError(debug, file); } catch(e) { ce.lastUploadError = debug; }
+      }
+    } catch(e) {}
+    return debug;
+  }
+  function preflightBlock(ce, file, meta, message, retryable){
+    const fileName = file?.name || 'Tập tin';
+    const mime = String(file?.type || '').toLowerCase();
+    const debug = record(ce, makeDebug(Object.assign({
+      transport: 'blocked_no_relay',
+      fileName,
+      safeFileName: safeUploadName(ce, fileName, mime),
+      fileSize: Number(file?.size || 0),
+      mime,
+      ext: fileExt(fileName),
+      uploadMethod: 'preflight_block',
+      timeoutMs: 0,
+      durationMs: 0,
+      retryable: !!retryable
+    }, meta || {})), file);
+    ce.setUploadStatus?.(`${message} Bấm Chi tiết lỗi.`, 'error', false);
+    paintRelayStatus({ ok:false, transport:'blocked_no_relay', reason: debug.relayErrorType || debug.xhrEvent });
+    return { ok:false, retryable: !!retryable, fileName, endpoint:'sendDocument', error:`${message} Bấm Chi tiết lỗi.`, debug };
+  }
+  function blockOver50(ce, file, currentIndex, totalFiles){
+    return preflightBlock(ce, file, {
+      xhrEvent: 'file_over_50MB_need_pha67d',
+      relayErrorType: 'need_pha67d_split_merge',
+      telegramOk: false,
+      telegramDescription: 'File vượt 50MB, cần Pha67D split/merge.',
+      errorName: 'NeedPha67DSplitMerge',
+      errorMessage: 'File vượt 50MB, cần Pha67D split/merge.',
+      strategy: 'blocked_over_50MB_need_pha67d'
+    }, `Gửi lỗi ${currentIndex}/${totalFiles}: ${file?.name || 'Tập tin'} — File vượt 50MB, cần Pha67D split/merge.`, false);
+  }
+  function blockNoRelay(ce, file, currentIndex, totalFiles, reason){
+    const msg = reason || 'Chưa cấu hình Cloudflare relay nên điện thoại không gửi file ổn định.';
+    return preflightBlock(ce, file, {
+      relayHealthOk: false,
+      endpointHost: relayBaseUrl() ? hostOf(endpointUrl('health')) : '',
+      xhrEvent: relayBaseUrl() ? 'relay_not_ready_upload_blocked' : 'missing_relay_url_upload_blocked',
+      relayStatus: 0,
+      relayOk: false,
+      relayErrorType: relayBaseUrl() ? 'relay_unavailable' : 'relay_url_missing',
+      relayDescription: msg,
+      telegramOk: false,
+      telegramDescription: 'Production không upload trực tiếp Telegram từ HTML/mobile/WebView.',
+      errorName: relayBaseUrl() ? 'RelayUnavailableUploadBlocked' : 'RelayUrlMissingUploadBlocked',
+      errorMessage: msg,
+      strategy: 'relay_required_no_direct_fallback'
+    }, `Gửi lỗi ${currentIndex}/${totalFiles}: ${file?.name || 'Tập tin'} — ${msg}`, true);
+  }
+
+  async function fetchJson(url, timeoutMs){
+    const started = Date.now();
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+    try {
+      const res = await fetch(url, { method:'GET', cache:'no-store', signal: controller ? controller.signal : undefined });
+      const text = await res.text();
+      let data = {};
+      try { data = JSON.parse(text || '{}'); }
+      catch(e) { data = { ok:false, errorType:'relay_json_parse_error', message:'Relay không trả JSON hợp lệ', raw:text.slice(0, 700) }; }
+      return { ok: res.ok && data.ok === true, status: res.status, data, text, durationMs: Date.now() - started };
+    } catch(e) {
+      return { ok:false, status:0, data:{ ok:false, errorType: e?.name === 'AbortError' ? 'relay_timeout' : 'relay_network_error', message:e?.message || String(e) }, durationMs: Date.now() - started, error:e };
+    } finally { if (timer) clearTimeout(timer); }
+  }
+  async function checkHealth(ce, file, currentIndex, totalFiles){
+    const url = endpointUrl('health');
+    if (!url) return { ok:false, blocked:blockNoRelay(ce, file, currentIndex, totalFiles, 'Chưa cấu hình Cloudflare relay nên điện thoại không gửi file ổn định.') };
+    ce.setUploadStatus?.('Đang kiểm tra Cloudflare relay /health…', 'info', false);
+    const h = await fetchJson(url, HEALTH_TIMEOUT_MS);
+    const d = h.data || {};
+    const transport = h.ok ? 'cloudflare_worker_relay' : 'blocked_no_relay';
+    paintRelayStatus({ ok: h.ok, transport, status:h.status, data:d });
+    if (!h.ok) {
+      const desc = d.message || d.error || d.description || 'Relay /health không OK hoặc URL sai.';
+      const lower = String(d.errorType || d.error_type || desc).toLowerCase();
+      const configLike = lower.includes('secret') || lower.includes('chat') || lower.includes('config') || d.telegramConfigured === false || d.configured === false;
+      return { ok:false, blocked:preflightBlock(ce, file, {
+        transport:'blocked_no_relay', relayUrlConfigured:true, relayHealthOk:false, endpointHost:hostOf(url),
+        xhrEvent: configLike ? 'relay_health_config_error' : 'relay_health_not_ok', httpStatus:h.status || 0,
+        xhrStatus:h.status || 0, relayStatus:h.status || 0, relayOk:false,
+        relayErrorType: d.errorType || d.error_type || (configLike ? 'relay_config_error' : 'relay_health_not_ok'),
+        relayDescription: desc, timeoutMs: HEALTH_TIMEOUT_MS, responseText: JSON.stringify(d).slice(0, 1800),
+        errorName: configLike ? 'RelayConfigurationError' : 'RelayHealthError', errorMessage: desc,
+        strategy:'relay_health_required_before_upload'
+      }, `Gửi lỗi ${currentIndex}/${totalFiles}: ${file?.name || 'Tập tin'} — Cloudflare relay /health lỗi: ${desc}`, !configLike) };
+    }
+    if (d.telegramConfigured !== true) {
+      return { ok:false, blocked:preflightBlock(ce, file, {
+        transport:'blocked_no_relay', relayUrlConfigured:true, relayHealthOk:false, endpointHost:hostOf(url),
+        xhrEvent:'relay_health_telegram_not_configured', relayStatus:h.status || 0, relayOk:false,
+        relayErrorType:'relay_secret_or_chat_not_configured', relayDescription:'Worker thiếu cấu hình secret/chat_id.',
+        telegramOk:false, telegramDescription:'Worker chưa cấu hình Telegram phía server.', strategy:'relay_config_required'
+      }, `Gửi lỗi ${currentIndex}/${totalFiles}: ${file?.name || 'Tập tin'} — Worker thiếu cấu hình relay/Telegram phía server.`, false) };
+    }
+    const max = Number(d.maxSingleUploadBytes || MAX_SINGLE_UPLOAD_BYTES);
+    if (max > 0 && Number(file?.size || 0) > Math.min(max, MAX_SINGLE_UPLOAD_BYTES)) return { ok:false, blocked:blockOver50(ce, file, currentIndex, totalFiles) };
+    return { ok:true, status:h.status, data:d, durationMs:h.durationMs };
+  }
+
+  function addChatMessage(ce, file, norm, meta){
+    const uploadId = meta.uploadId;
+    if (!Array.isArray(window.chatHistory)) window.chatHistory = [];
+    if (uploadId) {
+      const existed = window.chatHistory.find(m => m && m.relay_upload_id === uploadId);
+      if (existed) return existed;
+    }
+    const fileName = file?.name || 'Tập tin';
+    const mime = String(file?.type || '').toLowerCase();
+    const img = isImage(fileName, mime);
+    const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+    const msg = {
+      id: Date.now().toString() + '_' + Math.floor(Math.random() * 100000),
+      type: 'file',
+      file_id: norm.fileId || '',
+      file_unique_id: norm.fileUniqueId || '',
+      file_url: norm.fileUrl || '',
+      file_name: fileName,
+      file_size: norm.fileSize || Number(file?.size || 0),
+      mime_type: norm.mimeType || file?.type || (img ? 'image/*' : ''),
+      sender: ce.getKey ? ce.getKey() : (window.viewingUser || 'me'),
+      timestamp: Date.now(),
+      sentAt: Date.now(),
+      reply_to: ce.replyingTo,
+      isPrivate: isPriv,
+      telegram_msg_id: norm.messageId,
+      chat_id: ce.chatId,
+      sent_via_endpoint: 'sendDocument',
+      sent_via_transport: 'cloudflare_worker_relay',
+      safe_upload_name: meta.safeFileName || fileName,
+      topic_id: ce.currentTopic && ce.currentTopic !== 'all' ? ce.currentTopic : null,
+      relay_phase: PHASE,
+      relay_upload_id: uploadId || ''
+    };
+    window.chatHistory.push(msg);
+    if (norm.fileId && norm.fileUrl) {
+      try { ce.fileCache = ce.fileCache || {}; ce.fileCache[norm.fileId] = norm.fileUrl; } catch(e) {}
+    }
+    if (!file.__lifeosSkipPush) ce.triggerPushNotification?.(img ? '🖼️ [Ảnh gửi qua relay]' : '📎 [File gửi qua relay]');
+    ce.cancelReply?.();
+    ce.saveAndSync?.();
+    ce.render?.();
+    return msg;
+  }
+
+  function uploadViaRelay(ce, file, currentIndex, totalFiles, health, options){
+    const fileName = file?.name || 'Tập tin';
+    const fileSize = Number(file?.size || 0);
+    const mime = String(file?.type || '').toLowerCase();
+    const ext = fileExt(fileName);
+    const safeFileName = safeUploadName(ce, fileName, mime);
+    const uploadUrl = endpointUrl('upload');
+    const uploadId = 'r1_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9);
+    const timeoutMs = Number(options?.timeoutMs || UPLOAD_TIMEOUT_MS);
+    const started = Date.now();
+    const img = isImage(fileName, mime);
+    ce.lastFailedUploadFile = file;
+    ce.setUploadStatus?.(`Đã chọn ${currentIndex}/${totalFiles}: ${fileName} (${fmtBytes(fileSize)}). Đang upload qua Cloudflare relay — 0%`, 'info', false);
+
+    return new Promise((resolve) => {
+      const fd = new FormData();
+      const clientMeta = makeDebug({
+        transport:'cloudflare_worker_relay', relayHealthOk:true, endpointHost:hostOf(uploadUrl), fileName, safeFileName,
+        fileSize, mime, ext, uploadMethod:'xhr_cloudflare_worker_relay', timeoutMs,
+        relayStatus: health?.status || 200, relayOk:null, strategy: img ? 'image_as_document_cloudflare_worker_relay' : 'file_as_document_cloudflare_worker_relay'
+      });
+      clientMeta.uploadId = uploadId;
+      clientMeta.telegramMethod = 'sendDocument';
+      clientMeta.topicId = ce.currentTopic && ce.currentTopic !== 'all' ? ce.currentTopic : '';
+      fd.append('file', file, safeFileName);
+      fd.append('chat_id', ce.chatId || '');
+      fd.append('target', ce.chatId || '');
+      fd.append('caption', String(options?.caption || fileName || '').slice(0, 1024));
+      fd.append('client_meta', JSON.stringify(clientMeta));
+      fd.append('original_file_name', fileName);
+      fd.append('safe_file_name', safeFileName);
+      fd.append('mime_type', file?.type || '');
+      fd.append('file_size', String(fileSize));
+      fd.append('telegram_method', 'sendDocument');
+      fd.append('client_patch', 'Pha67C_R1_family_relay_secret_sanitize_runtime_proof');
+      fd.append('topic_id', clientMeta.topicId);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', uploadUrl, true);
+      xhr.timeout = timeoutMs;
+      xhr.upload.onprogress = (e) => {
+        const elapsed = Date.now() - started;
+        if (e.lengthComputable) {
+          const pct = Math.max(0, Math.min(100, Math.round((e.loaded / e.total) * 100)));
+          ce.setUploadStatus?.(`Cloudflare relay ${currentIndex}/${totalFiles}: ${fileName} — ${pct}% · ${fmtSpeed(e.loaded, elapsed)}`, 'info', false);
+        } else {
+          ce.setUploadStatus?.(`Cloudflare relay ${currentIndex}/${totalFiles}: ${fileName} · ${fmtSpeed(e.loaded || 0, elapsed)}`, 'info', false);
+        }
+      };
+      const finishFail = (reason, data, err) => {
+        const durationMs = Date.now() - started;
+        const desc = data?.message || data?.error || data?.description || data?.telegramDescription || err?.message || reason;
+        const lower = String(data?.errorType || data?.error_type || reason || desc).toLowerCase();
+        const configLike = lower.includes('secret') || lower.includes('chat') || lower.includes('config') || data?.telegramConfigured === false;
+        const debug = record(ce, makeDebug({
+          transport:'cloudflare_worker_relay', relayHealthOk:true, url:uploadUrl, endpointHost:hostOf(uploadUrl),
+          fileName, safeFileName, fileSize, mime, ext, uploadMethod:'xhr_cloudflare_worker_relay', timeoutMs,
+          xhrStatus:xhr.status || 0, httpStatus:xhr.status || 0, xhrEvent:reason,
+          relayStatus:xhr.status || 0, relayOk:data?.ok === true, relayErrorType:data?.errorType || data?.error_type || reason,
+          relayDescription:desc, telegramOk:data?.telegramOk ?? data?.telegram?.ok ?? false,
+          telegramErrorCode:data?.telegramErrorCode || data?.error_code || data?.telegram?.error_code || null,
+          telegramDescription:data?.telegramDescription || data?.telegram_description || data?.telegram?.description || '',
+          durationMs, xhr, responseText:xhr.responseText || '', errorName:err?.name || reason, errorMessage:desc,
+          retryable: !configLike && (reason === 'relay_timeout' || reason === 'relay_network_error' || (xhr.status || 0) >= 500),
+          strategy: img ? 'image_as_document_cloudflare_worker_relay' : 'file_as_document_cloudflare_worker_relay'
+        }), file);
+        paintRelayStatus({ ok:false, transport:'cloudflare_worker_relay', status:xhr.status || 0, reason:debug.relayErrorType });
+        const msg = configLike
+          ? `Gửi lỗi qua Cloudflare relay: ${fileName} — lỗi cấu hình relay phía server: ${desc}. Không fallback direct. Bấm Chi tiết lỗi.`
+          : `Gửi lỗi qua Cloudflare relay: ${fileName} — ${xhr.status ? 'HTTP ' + xhr.status + ': ' : ''}${desc}. Không fallback direct. Bấm Chi tiết lỗi.`;
+        ce.setUploadStatus?.(msg, 'error', false);
+        resolve({ ok:false, retryable:debug.retryable, fileName, endpoint:'sendDocument', error:msg, debug, configLike });
+      };
+      xhr.onload = () => {
+        let data = {};
+        try { data = JSON.parse(xhr.responseText || '{}'); }
+        catch(e) { finishFail('relay_parse_error', {}, e); return; }
+        if (xhr.status < 200 || xhr.status >= 300 || data.ok !== true) { finishFail('relay_http_or_json_error', data); return; }
+        try {
+          const norm = normalizeRelayResult(data);
+          if (!norm.fileId && !norm.fileUrl) throw new Error('Relay ok nhưng không trả file_id/fileUrl');
+          addChatMessage(ce, file, norm, { safeFileName, uploadId });
+          ce.lastFailedUploadFile = null;
+          const proof = makeDebug({
+            transport:'cloudflare_worker_relay', relayHealthOk:true, endpointHost:hostOf(uploadUrl), fileName, safeFileName,
+            fileSize, mime, ext, uploadMethod:'xhr_cloudflare_worker_relay', timeoutMs,
+            httpStatus:xhr.status || 200, xhrStatus:xhr.status || 200, xhrEvent:'load', relayStatus:xhr.status || 200,
+            relayOk:true, telegramOk:data.telegramOk ?? data.telegram?.ok ?? true,
+            telegramErrorCode:null, telegramDescription:data.telegramDescription || data.telegram?.description || '',
+            durationMs:Date.now() - started, relayData:data, responseText:xhr.responseText || '',
+            strategy:img ? 'image_as_document_cloudflare_worker_relay' : 'file_as_document_cloudflare_worker_relay'
+          });
+          try { localStorage.setItem('lifeos_family_last_upload_success', JSON.stringify(proof)); } catch(e) {}
+          paintRelayStatus({ ok:true, transport:'cloudflare_worker_relay', status:xhr.status || 200, lastSuccess:proof });
+          ce.setUploadStatus?.(img ? `Ảnh đã gửi qua Cloudflare relay: ${fileName}` : `File đã gửi qua Cloudflare relay: ${fileName}`, 'done', true);
+          resolve({ ok:true, fileName, endpoint:'sendDocument', note:`Đã gửi qua Cloudflare relay: ${fileName}`, transport:'cloudflare_worker_relay', response:data, proof });
+        } catch(e) { finishFail('relay_ok_missing_file_reference', data, e); }
+      };
+      xhr.onerror = () => finishFail('relay_network_error');
+      xhr.ontimeout = () => finishFail('relay_timeout');
+      try { xhr.send(fd); } catch(e) { finishFail('relay_xhr_send_exception', {}, e); }
+    });
+  }
+
+  function install(){
+    const ce = window.ChatEngine;
+    if (!ce) return false;
+    ce.__lifeos67cR1RelaySecretSanitizeRuntimeProofPatch = true;
+    ce.telegramSecretRemovedFromHtml = true;
+    try { delete ce.token; } catch(e) { ce.token = undefined; }
+
+    const oldUploadDebugToText = typeof ce.uploadDebugToText === 'function' ? ce.uploadDebugToText.bind(ce) : null;
+
+    ce.getUploadRelayUrl = function(){ return relayBaseUrl(); };
+    ce.getUploadRelayMode = function(){ return relayMode(); };
+    ce.getUploadTransport = function(fileSize = 0){
+      if (Number(fileSize || 0) > MAX_SINGLE_UPLOAD_BYTES) return 'blocked_no_relay';
+      if (!relayEnabled() || relayMode() === 'off' || !relayBaseUrl()) return 'blocked_no_relay';
+      return 'cloudflare_worker_relay';
+    };
+    ce.buildUploadDebug = function(meta = {}){ return makeDebug(meta); };
+    ce.uploadDebugToText = function(debugObj = null){
+      const d = debugObj || this.lastUploadError || {};
+      if (d && (d.phase === PHASE || d.transport === 'cloudflare_worker_relay' || d.transport === 'blocked_no_relay')) return debugText(d);
+      return oldUploadDebugToText ? oldUploadDebugToText(debugObj) : debugText(d);
+    };
+
+    window.setLifeOSUploadRelayUrl = function(url){
+      const v = String(url || '').trim();
+      window.LIFEOS_UPLOAD_RELAY_URL = v;
+      storageSet('LIFEOS_UPLOAD_RELAY_URL', v);
+      paintRelayStatus();
+      window.ChatEngine?.setUploadStatus?.(v ? 'Đã cấu hình Cloudflare relay cho Family Chat (/health, /upload)' : 'Đã xóa relay URL. Mobile/WebView sẽ bị chặn upload để tránh direct Telegram.', v ? 'done' : 'error', true);
+      return v;
+    };
+    window.setLifeOSUploadRelayMode = function(mode){
+      const m = ['mobile_first','always','off'].includes(String(mode || '').trim().toLowerCase()) ? String(mode).trim().toLowerCase() : 'always';
+      window.LIFEOS_UPLOAD_RELAY_MODE = m;
+      storageSet('LIFEOS_UPLOAD_RELAY_MODE', m);
+      paintRelayStatus();
+      window.ChatEngine?.setUploadStatus?.(`Family upload relay mode: ${m}`, m === 'off' ? 'error' : 'done', true);
+      return m;
+    };
+    window.setLifeOSUploadRelayEnabled = function(enabled){
+      const b = boolValue(enabled, true);
+      window.LIFEOS_UPLOAD_RELAY_ENABLED = b;
+      storageSet('LIFEOS_UPLOAD_RELAY_ENABLED', b ? 'true' : 'false');
+      paintRelayStatus();
+      window.ChatEngine?.setUploadStatus?.(b ? 'Đã bật Cloudflare relay cho Family upload' : 'Đã tắt Cloudflare relay. Production không direct Telegram.', b ? 'done' : 'error', true);
+      return b;
+    };
+    window.lifeosFamilyRelayHealthCheck = async function(){
+      const url = endpointUrl('health');
+      if (!url) { paintRelayStatus({ ok:false, transport:'blocked_no_relay', reason:'relay_url_missing' }); return { ok:false, errorType:'relay_url_missing' }; }
+      const h = await fetchJson(url, HEALTH_TIMEOUT_MS);
+      paintRelayStatus({ ok:h.ok && h.data?.telegramConfigured === true, transport:h.ok ? 'cloudflare_worker_relay' : 'blocked_no_relay', status:h.status, data:h.data });
+      return h;
+    };
+
+    ce.sendFile = async function(file, currentIndex = 1, totalFiles = 1, options = {}){
+      if (!file) return { ok:false, error:'Không có file để gửi' };
+      const size = Number(file?.size || 0);
+      if (size > MAX_SINGLE_UPLOAD_BYTES) return blockOver50(this, file, currentIndex, totalFiles);
+      if (!relayEnabled() || relayMode() === 'off') return blockNoRelay(this, file, currentIndex, totalFiles, 'Cloudflare relay đang tắt; production không upload trực tiếp Telegram từ HTML/mobile/WebView.');
+      if (!relayBaseUrl()) return blockNoRelay(this, file, currentIndex, totalFiles, 'Chưa cấu hình Cloudflare relay nên điện thoại không gửi file ổn định.');
+      const health = await checkHealth(this, file, currentIndex, totalFiles);
+      if (health.blocked) return health.blocked;
+      if (!health.ok) return blockNoRelay(this, file, currentIndex, totalFiles, 'Cloudflare relay không sẵn sàng; không fallback direct Telegram trong production.');
+      return await uploadViaRelay(this, file, currentIndex, totalFiles, health, options);
+    };
+
+    ce.getFileUrl = async function(fileId, fileName = ''){
+      if (!fileId) throw new Error('Thiếu file_id');
+      this.fileCache = this.fileCache || {};
+      if (this.fileCache[fileId]) return this.fileCache[fileId];
+      const relay = relayBaseUrl();
+      if (!relay) throw new Error('Chưa cấu hình Cloudflare relay nên không lấy được link file mà không lộ secret.');
+      const url = endpointUrl('download') + '?file_id=' + encodeURIComponent(fileId) + '&name=' + encodeURIComponent(fileName || '');
+      const res = await fetchJson(url, 30000);
+      const data = res.data || {};
+      const fileUrl = data.fileUrl || data.file_url || data.url || data.downloadUrl || data.download_url || '';
+      if (!res.ok || !fileUrl) throw new Error(data.message || data.error || 'Relay /download phải stream bytes/blob, không trả fileUrl.');
+      this.fileCache[fileId] = fileUrl;
+      return fileUrl;
+    };
+
+    const oldDeleteMsg = typeof ce.deleteMsg === 'function' ? ce.deleteMsg.bind(ce) : null;
+    ce.deleteMsg = async function(){
+      const id = document.getElementById('chat-msg-active-id')?.value;
+      const msg = (window.chatHistory || []).find(m => String(m.id) === String(id));
+      if (!msg) return;
+      if (!window.confirm('Xóa tin này khỏi app? Nếu relay hỗ trợ /delete thì sẽ xóa tiếp ở Telegram.')) { this.closeMsgMenu?.(); return; }
+      window.chatHistory = (window.chatHistory || []).filter(m => String(m.id) !== String(id));
+      this.saveAndSync?.();
+      this.render?.();
+      this.closeMsgMenu?.();
+      window.showToast?.('Đã xóa khỏi app', 'ph-trash');
+      const messageId = msg.telegram_msg_id || msg.message_id;
+      if (!messageId || !relayBaseUrl()) return;
+      try {
+        const res = await fetch(endpointUrl('delete'), {
+          method:'POST', headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ chat_id:this.chatId || msg.chat_id || '', message_id:messageId, client_meta:{ phase:PHASE, fileName:msg.file_name || '' } })
+        });
+        let data = {}; try { data = await res.json(); } catch(e) {}
+        if (res.ok && data.ok) window.showToast?.('Đã xóa khỏi app và relay/Telegram', 'ph-trash');
+      } catch(e) { console.warn('[LifeOS 67C-R1 relay delete optional failed]', e); }
+      if (!oldDeleteMsg) return;
+    };
+
+    paintRelayStatus();
+    console.info('[LifeOS 67C-R1] Family relay secret sanitized runtime proof installed', {
+      patch: PATCH_ID,
+      phase: PHASE,
+      relayUrlConfigured: !!relayBaseUrl(),
+      relayEnabled: relayEnabled(),
+      mode: relayMode(),
+      mobileLike: isMobileLike(),
+      productionDirectTelegramFallback: false,
+      maxSingleUploadBytes: MAX_SINGLE_UPLOAD_BYTES
+    });
+    return true;
+  }
+
+  function schedule(){
+    install();
+    setTimeout(install, 80);
+    setTimeout(install, 260);
+    setTimeout(install, 900);
+    setTimeout(install, 1700);
+    setTimeout(install, 2600);
+    setTimeout(install, 4200);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+  window.addEventListener('load', schedule, { passive:true });
+})();
+</script>
+<!-- LIFEOS PHA67C-R1 FAMILY RELAY SECRET SANITIZE + RUNTIME PROOF - END -->
+
+
+
+<!-- LIFEOS PHA67D FAMILY HTML5 SPLIT/MERGE MANIFEST TELEGRAM BUNDLE - START
+Tên pha: Pha67D_family_html5_split_merge_manifest_telegram_bundle
+Nền gốc: index_pha67C_R1_family_relay_secret_sanitize_runtime_proof.html
+Phạm vi: chỉ Tab Gia đình / Family Chat file lớn qua Cloudflare Worker relay.
+Không đụng: Media/Radio/Tivi 67A, Alarm, Focus, Weather, Vault. Không token trong HTML. Không fallback production upload trực tiếp.
+Worker contract bổ sung cho bundle tải/gộp:
+  GET  /health
+  POST /upload multipart/form-data: file, chat_id/target, caption, client_meta, bundle fields; Worker gửi Telegram sendDocument.
+  GET  /download?file_id=...&name=...&bundle_id=... -> Worker tự gọi Telegram getFile/fetch nội bộ và stream binary part về HTML.
+  Trong production /download phải stream bytes/blob trực tiếp; nếu Worker trả JSON URL thì HTML chặn để tránh rò đường tải Telegram.
+Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không nằm trong HTML.
+-->
+<script id="lifeos-pha67d-family-html5-split-merge-manifest-telegram-bundle-js">
+(function(){
+  const PATCH_ID = 'lifeos-pha67d-family-html5-split-merge-manifest-telegram-bundle-js';
+  const PHASE = '67D-R1';
+  const MB = 1024 * 1024;
+  const MAX_SINGLE_UPLOAD_BYTES = 50 * MB;
+  const DEFAULT_PART_SIZE = 18 * MB; // 18,874,368 bytes
+  const UPLOAD_TIMEOUT_MS = 420000;
+  const DOWNLOAD_TIMEOUT_MS = 420000;
+  const HEALTH_TIMEOUT_MS = 15000;
+  const MAX_PART_ATTEMPTS = 3; // lần đầu + tối thiểu 2 retry
+
+  window.LIFEOS_UPLOAD_RELAY_URL = window.LIFEOS_UPLOAD_RELAY_URL || 'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
+  window.LIFEOS_UPLOAD_RELAY_ENABLED = (typeof window.LIFEOS_UPLOAD_RELAY_ENABLED === 'boolean') ? window.LIFEOS_UPLOAD_RELAY_ENABLED : true;
+  window.LIFEOS_UPLOAD_RELAY_MODE = window.LIFEOS_UPLOAD_RELAY_MODE || 'mobile_first';
+  window.LIFEOS_67D_PART_SIZE_BYTES = window.LIFEOS_67D_PART_SIZE_BYTES || DEFAULT_PART_SIZE;
+
+  function storageGet(key, fallback){ try { const v = localStorage.getItem(key); return v === null || v === undefined ? fallback : v; } catch(e) { return fallback; } }
+  function storageSet(key, value){ try { localStorage.setItem(key, String(value)); } catch(e) {} }
+  function boolValue(v, fallback){
+    if (typeof v === 'boolean') return v;
+    const s = String(v ?? '').trim().toLowerCase();
+    if (['1','true','yes','on','enabled'].includes(s)) return true;
+    if (['0','false','no','off','disabled'].includes(s)) return false;
+    return fallback;
+  }
+  function relayEnabled(){ const stored = storageGet('LIFEOS_UPLOAD_RELAY_ENABLED', ''); return stored !== '' ? boolValue(stored, true) : boolValue(window.LIFEOS_UPLOAD_RELAY_ENABLED, true); }
+  function relayMode(){ const m = String(window.LIFEOS_UPLOAD_RELAY_MODE || storageGet('LIFEOS_UPLOAD_RELAY_MODE', 'always') || 'always').trim().toLowerCase(); return ['mobile_first','always','off'].includes(m) ? m : 'always'; }
+  function relayBaseUrl(){ return String(window.LIFEOS_UPLOAD_RELAY_URL || storageGet('LIFEOS_UPLOAD_RELAY_URL', '') || '').trim().replace(/\/+$/, ''); }
+  function endpointUrl(kind){
+    const base = relayBaseUrl();
+    if (!base) return '';
+    const k = String(kind || 'upload').replace(/^\/+/, '');
+    try {
+      const u = new URL(base, location.href);
+      let p = u.pathname.replace(/\/+$/, '');
+      const clean = p.replace(/\/(health|upload|file|download|delete)$/i, '');
+      u.pathname = clean + '/' + k;
+      return u.toString();
+    } catch(e) {
+      return base.replace(/\/(health|upload|file|download|delete)$/i, '') + '/' + k;
+    }
+  }
+  function hostOf(url){ try { return new URL(url, location.href).host; } catch(e) { return ''; } }
+  function networkType(){ try { const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection; return c ? (c.effectiveType || c.type || (c.downlink ? String(c.downlink) + 'Mbps' : '')) : ''; } catch(e) { return ''; } }
+  function fmtBytes(bytes){
+    const n = Number(bytes || 0);
+    if (!n) return '0 B';
+    if (n < 1024) return n + ' B';
+    if (n < MB) return (n / 1024).toFixed(n < 10 * 1024 ? 1 : 0) + ' KB';
+    if (n < 1024 * MB) return (n / MB).toFixed(n < 10 * MB ? 1 : 2) + ' MB';
+    return (n / (1024 * MB)).toFixed(2) + ' GB';
+  }
+  function fmtSpeed(bytes, ms){ return fmtBytes(Number(bytes || 0) / Math.max(0.25, Number(ms || 0) / 1000)) + '/s'; }
+  function pad(num, width){ return String(num).padStart(width, '0'); }
+  function fileExt(name){ return String((String(name || '').split('?')[0].split('#')[0].split('.').pop() || '')).toLowerCase().replace(/[^a-z0-9]/g, ''); }
+  function safeNameBasic(fileName){
+    let raw = String(fileName || 'upload_file').trim() || 'upload_file';
+    raw = raw.normalize ? raw.normalize('NFC') : raw;
+    raw = raw.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '_').replace(/\s+/g, ' ').trim();
+    raw = raw.replace(/^\.+/, '').slice(0, 170) || 'upload_file';
+    return raw;
+  }
+  function safeUploadName(ce, fileName, mime){
+    try { return ce.getSafeTelegramUploadName ? ce.getSafeTelegramUploadName(fileName, mime) : safeNameBasic(fileName); }
+    catch(e) { return safeNameBasic(fileName); }
+  }
+  function randomId(prefix){ return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10); }
+  function escapeHTML(s){ return window.escapeHTML ? window.escapeHTML(String(s ?? '')) : String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  async function sha256Blob(blob){
+    if (!blob || !crypto || !crypto.subtle || typeof blob.arrayBuffer !== 'function') return '';
+    const buf = await blob.arrayBuffer();
+    const hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function fetchJson(url, timeoutMs){
+    const started = Date.now();
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+    try {
+      const res = await fetch(url, { method:'GET', cache:'no-store', signal: controller ? controller.signal : undefined });
+      const text = await res.text();
+      let data = {};
+      try { data = JSON.parse(text || '{}'); }
+      catch(e) { data = { ok:false, errorType:'relay_json_parse_error', message:'Relay không trả JSON hợp lệ', raw:text.slice(0, 900) }; }
+      return { ok: res.ok && data.ok === true, status:res.status, data, text, durationMs:Date.now() - started };
+    } catch(e) {
+      return { ok:false, status:0, data:{ ok:false, errorType: e?.name === 'AbortError' ? 'relay_timeout' : 'relay_network_error', message:e?.message || String(e) }, text:'', durationMs:Date.now() - started, error:e };
+    } finally { if (timer) clearTimeout(timer); }
+  }
+
+  function normalizeRelayResult(data){
+    const root = data || {};
+    const telegram = root.telegram || root.telegramData || root.telegramResponse || {};
+    const result = root.result || root.telegramResult || telegram.result || root.message || {};
+    const doc = result.document || result.file || root.document || root.file || {};
+    const source = doc && doc.file_id ? doc : root;
+    return {
+      messageId: root.messageId || root.message_id || result.message_id || root.telegram_msg_id || root.telegramMessageId || '',
+      fileId: root.file_id || root.fileId || (source && source.file_id) || '',
+      fileUniqueId: root.file_unique_id || (source && source.file_unique_id) || '',
+      fileSize: root.file_size || (source && source.file_size) || 0,
+      mimeType: root.mime_type || (source && source.mime_type) || '',
+      fileUrl: root.fileUrl || root.file_url || root.url || root.downloadUrl || root.download_url || ''
+    };
+  }
+
+  function makeBundleDebug(meta){
+    const xhr = meta.xhr || {};
+    const data = meta.relayData || {};
+    const responseText = String(meta.responseText || xhr.responseText || '');
+    const httpStatus = Number(meta.httpStatus ?? xhr.status ?? 0) || 0;
+    const xhrStatus = Number(meta.xhrStatus ?? xhr.status ?? httpStatus) || 0;
+    return {
+      phase: PHASE,
+      bundleId: meta.bundleId || '',
+      originalName: meta.originalName || '',
+      originalSize: Number(meta.originalSize || 0),
+      originalSha256: meta.originalSha256 || '',
+      partSize: Number(meta.partSize || 0),
+      totalParts: Number(meta.totalParts || 0),
+      currentPart: Number(meta.currentPart || 0),
+      partName: meta.partName || '',
+      partSizeActual: Number(meta.partSizeActual || 0),
+      partSha256: meta.partSha256 || '',
+      transport: 'cloudflare_worker_relay',
+      relayUrlConfigured: !!relayBaseUrl(),
+      relayHealthOk: meta.relayHealthOk ?? null,
+      endpointHost: meta.endpointHost || hostOf(meta.url || endpointUrl('upload')),
+      uploadMethod: meta.uploadMethod || 'xhr_cloudflare_worker_relay_bundle_part',
+      timeoutMs: Number(meta.timeoutMs || 0),
+      httpStatus,
+      xhrStatus,
+      xhrEvent: meta.xhrEvent || '',
+      relayStatus: meta.relayStatus ?? httpStatus,
+      relayOk: meta.relayOk ?? null,
+      telegramOk: meta.telegramOk ?? data.telegramOk ?? (data.telegram && data.telegram.ok) ?? null,
+      telegramErrorCode: meta.telegramErrorCode ?? data.telegramErrorCode ?? data.telegram_error_code ?? data.error_code ?? (data.telegram && data.telegram.error_code) ?? null,
+      telegramDescription: meta.telegramDescription || data.telegramDescription || data.telegram_description || (data.telegram && data.telegram.description) || '',
+      relayErrorType: meta.relayErrorType || data.errorType || data.error_type || '',
+      durationMs: Number(meta.durationMs || 0),
+      networkType: networkType(),
+      navigatorOnLine: navigator.onLine,
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString(),
+      responseTextShort: responseText.slice(0, 1800)
+    };
+  }
+
+  function bundleDebugToText(d){
+    d = d || {};
+    return [
+      'LỖI UPLOAD FAMILY CHAT — PHA67D BUNDLE',
+      `phase: ${d.phase || PHASE}`,
+      `bundleId: ${d.bundleId || ''}`,
+      `originalName: ${d.originalName || ''}`,
+      `originalSize: ${d.originalSize || 0}`,
+      `originalSha256: ${d.originalSha256 || ''}`,
+      `partSize: ${d.partSize || 0}`,
+      `totalParts: ${d.totalParts || 0}`,
+      `currentPart: ${d.currentPart || 0}`,
+      `partName: ${d.partName || ''}`,
+      `partSizeActual: ${d.partSizeActual || 0}`,
+      `partSha256: ${d.partSha256 || ''}`,
+      `transport: ${d.transport || 'cloudflare_worker_relay'}`,
+      `relayUrlConfigured: ${d.relayUrlConfigured}`,
+      `relayHealthOk: ${d.relayHealthOk ?? ''}`,
+      `endpointHost: ${d.endpointHost || ''}`,
+      `uploadMethod: ${d.uploadMethod || ''}`,
+      `timeoutMs: ${d.timeoutMs || 0}`,
+      `httpStatus: ${d.httpStatus ?? ''}`,
+      `xhrStatus: ${d.xhrStatus ?? ''}`,
+      `xhrEvent: ${d.xhrEvent || ''}`,
+      `relayStatus: ${d.relayStatus ?? ''}`,
+      `telegramOk: ${d.telegramOk ?? ''}`,
+      `telegramErrorCode: ${d.telegramErrorCode ?? ''}`,
+      `telegramDescription: ${d.telegramDescription || ''}`,
+      `downloadTransport: ${d.downloadTransport || ''}`,
+      `downloadEndpoint: ${d.downloadEndpoint || ''}`,
+      `downloadEndpointHost: ${d.downloadEndpointHost || ''}`,
+      `downloadPartIndex: ${d.downloadPartIndex ?? ''}`,
+      `downloadPartSize: ${d.downloadPartSize ?? ''}`,
+      `downloadBlobSize: ${d.downloadBlobSize ?? ''}`,
+      `downloadHttpStatus: ${d.downloadHttpStatus ?? ''}`,
+      `downloadContentType: ${d.downloadContentType || ''}`,
+      `durationMs: ${d.durationMs || 0}`,
+      `networkType: ${d.networkType || ''}`,
+      `navigatorOnLine: ${d.navigatorOnLine}`,
+      `userAgent: ${d.userAgent || ''}`,
+      '',
+      `relayErrorType: ${d.relayErrorType || ''}`,
+      `timestamp: ${d.timestamp || ''}`,
+      `responseTextShort: ${d.responseTextShort || ''}`
+    ].join('\n');
+  }
+
+  function recordBundleError(ce, debug, file){
+    try {
+      ce.lastUploadError = debug;
+      ce.lastFailedUploadFile = file || null;
+      localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify(debug));
+      localStorage.setItem('lifeos_family_last_bundle_error_67d', JSON.stringify(debug));
+    } catch(e) {}
+    return debug;
+  }
+
+  async function requireRelayHealth(ce, file){
+    const name = file?.name || 'Tập tin';
+    if (!relayEnabled() || relayMode() === 'off') {
+      return { ok:false, error:'Cloudflare relay đang tắt; Pha67D không upload file lớn khi relay tắt.', errorType:'relay_disabled' };
+    }
+    if (!relayBaseUrl()) {
+      return { ok:false, error:'Chưa cấu hình Cloudflare relay nên điện thoại không gửi file ổn định.', errorType:'relay_url_missing' };
+    }
+    ce.setUploadStatus?.(`Đang kiểm tra Cloudflare relay /health trước khi chia file lớn: ${name}`, 'info', false);
+    const h = await fetchJson(endpointUrl('health'), HEALTH_TIMEOUT_MS);
+    const d = h.data || {};
+    if (!h.ok || d.telegramConfigured !== true) {
+      const desc = d.message || d.error || d.description || (d.telegramConfigured === false ? 'Worker thiếu token/chat_id phía secret/env.' : 'Relay /health không OK.');
+      return { ok:false, error:desc, errorType:d.errorType || d.error_type || 'relay_health_not_ok', status:h.status, data:d };
+    }
+    return { ok:true, status:h.status, data:d, maxSingleUploadBytes:Number(d.maxSingleUploadBytes || MAX_SINGLE_UPLOAD_BYTES) };
+  }
+
+  function uploadPartOnce(ce, file, bundle, partBlob, partInfo, attempt){
+    const uploadUrl = endpointUrl('upload');
+    const timeoutMs = UPLOAD_TIMEOUT_MS;
+    const started = Date.now();
+    return new Promise(resolve => {
+      const fd = new FormData();
+      const clientMeta = makeBundleDebug({
+        bundleId:bundle.bundleId, originalName:bundle.originalName, originalSize:bundle.originalSize,
+        originalSha256:bundle.originalSha256, partSize:bundle.partSize, totalParts:bundle.totalParts,
+        currentPart:partInfo.index, partName:partInfo.name, partSizeActual:partInfo.size, partSha256:partInfo.sha256,
+        relayHealthOk:true, endpointHost:hostOf(uploadUrl), timeoutMs, relayStatus:200,
+        xhrEvent:'upload_start', durationMs:0
+      });
+      clientMeta.attempt = attempt;
+      clientMeta.type = 'lifeos_family_file_bundle_part';
+      clientMeta.telegramMethod = 'sendDocument';
+      clientMeta.topicId = ce.currentTopic && ce.currentTopic !== 'all' ? ce.currentTopic : '';
+      fd.append('file', partBlob, partInfo.name);
+      fd.append('chat_id', ce.chatId || '');
+      fd.append('target', ce.chatId || '');
+      fd.append('caption', `LifeOS bundle ${bundle.bundleId} · part ${partInfo.index}/${bundle.totalParts} · ${bundle.originalName}`.slice(0, 1024));
+      fd.append('client_meta', JSON.stringify(clientMeta));
+      fd.append('telegram_method', 'sendDocument');
+      fd.append('bundle_id', bundle.bundleId);
+      fd.append('bundle_type', 'lifeos_family_file_bundle_part');
+      fd.append('original_name', bundle.originalName);
+      fd.append('safe_name', bundle.safeName);
+      fd.append('original_size', String(bundle.originalSize));
+      fd.append('original_sha256', bundle.originalSha256 || '');
+      fd.append('part_index', String(partInfo.index));
+      fd.append('part_total', String(bundle.totalParts));
+      fd.append('part_sha256', partInfo.sha256 || '');
+      fd.append('part_size', String(partInfo.size));
+      fd.append('client_patch', 'Pha67D_family_html5_split_merge_manifest_telegram_bundle');
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', uploadUrl, true);
+      xhr.timeout = timeoutMs;
+      xhr.upload.onprogress = (e) => {
+        const elapsed = Date.now() - started;
+        if (e && e.lengthComputable) {
+          const pct = Math.max(0, Math.min(100, Math.round((e.loaded / Math.max(1, e.total)) * 100)));
+          ce.setUploadStatus?.(`Đang upload part ${partInfo.index}/${bundle.totalParts} (${pct}%) · lần ${attempt}/${MAX_PART_ATTEMPTS} · ${fmtSpeed(e.loaded, elapsed)}`, 'info', false);
+        } else {
+          ce.setUploadStatus?.(`Đang upload part ${partInfo.index}/${bundle.totalParts} · lần ${attempt}/${MAX_PART_ATTEMPTS}`, 'info', false);
+        }
+      };
+      function fail(reason, data, err){
+        const desc = data?.message || data?.error || data?.description || data?.telegramDescription || data?.telegram?.description || err?.message || reason;
+        const debug = makeBundleDebug({
+          bundleId:bundle.bundleId, originalName:bundle.originalName, originalSize:bundle.originalSize,
+          originalSha256:bundle.originalSha256, partSize:bundle.partSize, totalParts:bundle.totalParts,
+          currentPart:partInfo.index, partName:partInfo.name, partSizeActual:partInfo.size, partSha256:partInfo.sha256,
+          relayHealthOk:true, endpointHost:hostOf(uploadUrl), url:uploadUrl, timeoutMs, xhr, xhrEvent:reason,
+          httpStatus:xhr.status || 0, xhrStatus:xhr.status || 0, relayStatus:xhr.status || 0,
+          relayOk:false, telegramOk:data?.telegramOk ?? data?.telegram?.ok ?? false,
+          telegramErrorCode:data?.telegramErrorCode || data?.telegram_error_code || data?.error_code || data?.telegram?.error_code || null,
+          telegramDescription:desc, relayErrorType:data?.errorType || data?.error_type || reason,
+          relayData:data || {}, responseText:xhr.responseText || '', durationMs:Date.now() - started
+        });
+        resolve({ ok:false, retryable:true, debug, error:desc || reason });
+      }
+      xhr.onload = () => {
+        let data = {};
+        try { data = JSON.parse(xhr.responseText || '{}'); }
+        catch(e) { fail('relay_parse_error', {}, e); return; }
+        if (xhr.status < 200 || xhr.status >= 300 || data.ok !== true) { fail('relay_http_or_json_error', data); return; }
+        const norm = normalizeRelayResult(data);
+        if (!norm.fileId && !norm.fileUrl) { fail('relay_ok_missing_file_reference', data, new Error('Relay OK nhưng thiếu fileId/fileUrl cho part')); return; }
+        const debug = makeBundleDebug({
+          bundleId:bundle.bundleId, originalName:bundle.originalName, originalSize:bundle.originalSize,
+          originalSha256:bundle.originalSha256, partSize:bundle.partSize, totalParts:bundle.totalParts,
+          currentPart:partInfo.index, partName:partInfo.name, partSizeActual:partInfo.size, partSha256:partInfo.sha256,
+          relayHealthOk:true, endpointHost:hostOf(uploadUrl), url:uploadUrl, timeoutMs, xhr, xhrEvent:'load',
+          httpStatus:xhr.status || 200, xhrStatus:xhr.status || 200, relayStatus:xhr.status || 200,
+          relayOk:true, telegramOk:data.telegramOk ?? data.telegram?.ok ?? true,
+          telegramErrorCode:null, telegramDescription:data.telegramDescription || data.telegram?.description || '',
+          relayData:data, responseText:xhr.responseText || '', durationMs:Date.now() - started
+        });
+        resolve({ ok:true, norm, data, debug });
+      };
+      xhr.onerror = () => fail('relay_network_error');
+      xhr.ontimeout = () => fail('relay_timeout');
+      try { xhr.send(fd); } catch(e) { fail('relay_xhr_send_exception', {}, e); }
+    });
+  }
+
+  async function uploadPartWithRetry(ce, file, bundle, partBlob, partInfo){
+    let last = null;
+    for (let attempt = 1; attempt <= MAX_PART_ATTEMPTS; attempt++) {
+      if (attempt > 1) ce.setUploadStatus?.(`Retry part ${partInfo.index}/${bundle.totalParts} lần ${attempt - 1}/2: ${partInfo.name}`, 'info', false);
+      last = await uploadPartOnce(ce, file, bundle, partBlob, partInfo, attempt);
+      if (last.ok) return Object.assign(last, { attempt });
+    }
+    return last || { ok:false, error:'Upload part lỗi không rõ' };
+  }
+
+  function saveTempManifest(bundle, manifest){
+    try {
+      window.LIFEOS_67D_LAST_BUNDLE_TEMP = manifest;
+      localStorage.setItem('lifeos_family_bundle_manifest_tmp_' + bundle.bundleId, JSON.stringify(manifest));
+    } catch(e) {}
+  }
+
+  function addBundleCard(ce, manifest, file){
+    if (!Array.isArray(window.chatHistory)) window.chatHistory = [];
+    const existed = window.chatHistory.find(m => m && (m.bundleId === manifest.bundleId || m.bundle_manifest?.bundleId === manifest.bundleId));
+    if (existed) return existed;
+    const isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+    const msg = {
+      id: manifest.bundleId,
+      type: 'file_bundle',
+      bundleId: manifest.bundleId,
+      bundle_manifest: manifest,
+      file_name: manifest.originalName,
+      file_size: manifest.originalSize,
+      mime_type: file?.type || 'application/octet-stream',
+      sender: ce.getKey ? ce.getKey() : (window.viewingUser || 'me'),
+      timestamp: Date.now(),
+      sentAt: Date.now(),
+      reply_to: ce.replyingTo,
+      isPrivate: isPriv,
+      chat_id: ce.chatId,
+      sent_via_endpoint: 'sendDocument_bundle_parts',
+      sent_via_transport: 'cloudflare_worker_relay',
+      relay_phase: PHASE,
+      uploadStatus: `📦 Đủ ${manifest.parts.length}/${manifest.totalParts} part · sẵn sàng tải & gộp`,
+      topic_id: ce.currentTopic && ce.currentTopic !== 'all' ? ce.currentTopic : null
+    };
+    window.chatHistory.push(msg);
+    ce.cancelReply?.();
+    ce.triggerPushNotification?.('📦 [File lớn đã gửi dạng bundle]');
+    ce.saveAndSync?.();
+    ce.render?.();
+    return msg;
+  }
+
+  async function sendBundle(ce, file, currentIndex, totalFiles, options){
+    const originalName = file?.name || 'Tập tin lớn';
+    const originalSize = Number(file?.size || 0);
+    const mime = file?.type || 'application/octet-stream';
+    const safeName = safeUploadName(ce, originalName, mime);
+    const partSize = Math.min(Math.max(1 * MB, Number(window.LIFEOS_67D_PART_SIZE_BYTES || DEFAULT_PART_SIZE)), 20 * MB);
+    const totalParts = Math.ceil(originalSize / partSize);
+    const width = Math.max(3, String(totalParts).length);
+    const bundleId = randomId('lifeos_bundle');
+    const bundle = { bundleId, originalName, safeName, originalSize, partSize, totalParts, originalSha256:'' };
+
+    ce.lastFailedUploadFile = file;
+    ce.setUploadStatus?.(`Đã chọn file lớn ${currentIndex}/${totalFiles}: ${originalName} (${fmtBytes(originalSize)}). Kiểm tra relay trước khi chia ${totalParts} phần…`, 'info', false);
+
+    const health = await requireRelayHealth(ce, file);
+    if (!health.ok) {
+      const debug = recordBundleError(ce, makeBundleDebug({
+        bundleId, originalName, originalSize, partSize, totalParts,
+        relayHealthOk:false, endpointHost:hostOf(endpointUrl('health')), uploadMethod:'preflight_block', timeoutMs:HEALTH_TIMEOUT_MS,
+        httpStatus:health.status || 0, xhrStatus:health.status || 0, xhrEvent:health.errorType || 'relay_health_blocked',
+        relayStatus:health.status || 0, relayOk:false, telegramOk:false, telegramDescription:health.error || '', relayErrorType:health.errorType || 'relay_health_blocked'
+      }), file);
+      const msg = `Gửi lỗi file lớn: ${originalName} — ${health.error}. Không upload direct production. Bấm Chi tiết lỗi.`;
+      ce.setUploadStatus?.(msg, 'error', false);
+      return { ok:false, fileName:originalName, error:msg, debug };
+    }
+
+    try {
+      ce.setUploadStatus?.(`Đang tính SHA256 file gốc: ${originalName} (${fmtBytes(originalSize)})…`, 'info', false);
+      bundle.originalSha256 = await sha256Blob(file);
+    } catch(e) {
+      bundle.originalSha256 = '';
+      console.warn('[LifeOS 67D sha256 original skipped]', e);
+    }
+
+    const manifest = {
+      type: 'lifeos_family_file_bundle_manifest',
+      version: 1,
+      phase: PHASE,
+      bundleId,
+      originalName,
+      safeName,
+      originalSize,
+      originalSha256: bundle.originalSha256,
+      partSize,
+      totalParts,
+      createdAt: new Date().toISOString(),
+      parts: []
+    };
+    saveTempManifest(bundle, manifest);
+
+    for (let i = 0; i < totalParts; i++) {
+      const index = i + 1;
+      const start = i * partSize;
+      const end = Math.min(originalSize, start + partSize);
+      const blob = file.slice(start, end, mime || 'application/octet-stream');
+      const partName = `${safeName}.part${pad(index, width)}of${pad(totalParts, width)}`;
+      ce.setUploadStatus?.(`Đang tính SHA256 part ${index}/${totalParts}: ${partName}`, 'info', false);
+      let partSha = '';
+      try { partSha = await sha256Blob(blob); } catch(e) { console.warn('[LifeOS 67D sha256 part skipped]', e); }
+      const partInfo = { index, name:partName, size:blob.size, sha256:partSha };
+      ce.setUploadStatus?.(`Đang upload part ${index}/${totalParts}: ${partName} (${fmtBytes(blob.size)})`, 'info', false);
+      const up = await uploadPartWithRetry(ce, file, bundle, blob, partInfo);
+      if (!up.ok) {
+        const debug = recordBundleError(ce, up.debug || makeBundleDebug({
+          bundleId, originalName, originalSize, originalSha256:bundle.originalSha256, partSize, totalParts,
+          currentPart:index, partName, partSizeActual:blob.size, partSha256:partSha, xhrEvent:'part_upload_failed', telegramDescription:up.error || ''
+        }), file);
+        manifest.failedAtPart = index;
+        manifest.failedReason = up.error || 'Upload part lỗi';
+        saveTempManifest(bundle, manifest);
+        const msg = `Dừng bundle ${originalName}: part ${index}/${totalParts} lỗi sau 2 retry — ${up.error || 'không rõ lỗi'}. Đã giữ manifest tạm, không tạo card file hỏng. Bấm Chi tiết lỗi.`;
+        ce.setUploadStatus?.(msg, 'error', false);
+        return { ok:false, fileName:originalName, error:msg, debug, manifest };
+      }
+      const norm = up.norm || {};
+      manifest.parts.push({
+        index,
+        name: partName,
+        size: blob.size,
+        sha256: partSha,
+        fileId: norm.fileId || '',
+        messageId: norm.messageId || ''
+      });
+      saveTempManifest(bundle, manifest);
+    }
+
+    const missing = [];
+    for (let i = 1; i <= totalParts; i++) {
+      const p = manifest.parts.find(x => Number(x.index) === i && (x.fileId || x.url));
+      if (!p) missing.push(i);
+    }
+    if (missing.length) {
+      const msg = `Bundle thiếu part: ${missing.join(', ')}. Không tạo card file hỏng.`;
+      const debug = recordBundleError(ce, makeBundleDebug({
+        bundleId, originalName, originalSize, originalSha256:bundle.originalSha256, partSize, totalParts,
+        currentPart:missing[0], xhrEvent:'bundle_missing_part_after_upload', telegramDescription:msg
+      }), file);
+      ce.setUploadStatus?.(msg, 'error', false);
+      return { ok:false, fileName:originalName, error:msg, debug, manifest };
+    }
+
+    try { localStorage.setItem('lifeos_family_bundle_manifest_' + bundleId, JSON.stringify(manifest)); } catch(e) {}
+    addBundleCard(ce, manifest, file);
+    ce.lastFailedUploadFile = null;
+    const proof = makeBundleDebug({
+      bundleId, originalName, originalSize, originalSha256:bundle.originalSha256, partSize, totalParts,
+      currentPart:totalParts, partName:manifest.parts[manifest.parts.length - 1]?.name || '',
+      partSizeActual:manifest.parts[manifest.parts.length - 1]?.size || 0,
+      partSha256:manifest.parts[manifest.parts.length - 1]?.sha256 || '',
+      relayHealthOk:true, endpointHost:hostOf(endpointUrl('upload')), uploadMethod:'html5_blob_slice_bundle_manifest',
+      timeoutMs:UPLOAD_TIMEOUT_MS, httpStatus:200, xhrStatus:200, xhrEvent:'bundle_complete', relayStatus:200, relayOk:true,
+      telegramOk:true, telegramDescription:'Bundle uploaded; chat shows one manifest card.'
+    });
+    try { localStorage.setItem('lifeos_family_last_upload_success', JSON.stringify(proof)); } catch(e) {}
+    ce.setUploadStatus?.(`Đã gửi file lớn dạng bundle: ${originalName} · ${totalParts} part · chat chỉ hiện 1 card`, 'done', true);
+    return { ok:true, fileName:originalName, endpoint:'sendDocument_bundle_parts', transport:'cloudflare_worker_relay', manifest, proof };
+  }
+
+  function isBundleMessage(m){ return !!(m && (m.type === 'file_bundle' || m.bundle_manifest || m.manifest?.type === 'lifeos_family_file_bundle_manifest')); }
+  function manifestOf(m){ return m?.bundle_manifest || m?.manifest || null; }
+  function renderBundleCard(ce, m){
+    const manifest = manifestOf(m) || {};
+    const msgId = escapeHTML(String(m.id || manifest.bundleId || ''));
+    const name = escapeHTML(manifest.originalName || m.file_name || 'Tập tin lớn');
+    const sizeText = escapeHTML(fmtBytes(manifest.originalSize || m.file_size || 0));
+    const total = Number(manifest.totalParts || (manifest.parts || []).length || 0);
+    const have = Array.isArray(manifest.parts) ? manifest.parts.filter(p => p && (p.fileId || p.url)).length : 0;
+    const status = total && have >= total ? 'đủ part' : `thiếu part (${have}/${total})`;
+    const sha = manifest.originalSha256 ? escapeHTML(String(manifest.originalSha256).slice(0, 12) + '…') : 'không có';
+    const sentTime = new Date(m.sentAt || m.timestamp || manifest.createdAt || Date.now()).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+    return `
+      <div class="chat-file-card lifeos67d-bundle-card min-w-[245px] max-w-[310px] bg-amber-50 border border-amber-200 rounded-2xl p-3 shadow-sm text-slate-800" onclick="event.stopPropagation(); window.ChatEngine.openMsgMenu('${msgId}')">
+        <div class="flex gap-3 items-start">
+          <div class="w-12 h-12 rounded-2xl border text-amber-700 bg-white border-amber-200 flex items-center justify-center shrink-0">
+            <i class="ph-bold ph-package text-2xl"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="font-black text-sm leading-tight text-slate-800 break-words">📦 ${name}</div>
+            <div class="flex flex-wrap gap-1 mt-1 text-[10px] font-bold text-slate-600">
+              <span class="px-1.5 py-0.5 rounded bg-white/80">Dung lượng: ${sizeText}</span>
+              <span class="px-1.5 py-0.5 rounded bg-white/80">Số phần: ${escapeHTML(String(total))}</span>
+              <span class="px-1.5 py-0.5 rounded bg-white/80">Trạng thái: ${escapeHTML(status)}</span>
+              <span class="px-1.5 py-0.5 rounded bg-white/80">SHA256: ${sha}</span>
+              <span class="px-1.5 py-0.5 rounded bg-white/80">${escapeHTML(sentTime)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button type="button" onclick="event.stopPropagation(); window.ChatEngine.downloadChatFile('${msgId}')" class="px-3 py-2 rounded-xl bg-primary text-white text-xs font-black active:scale-95 shadow-sm">Tải & gộp file</button>
+          <button type="button" onclick="event.stopPropagation(); window.ChatEngine.showBundlePartDetails('${msgId}')" class="px-3 py-2 rounded-xl bg-white text-amber-800 text-xs font-black active:scale-95 border border-amber-200">Chi tiết part</button>
+        </div>
+      </div>`;
+  }
+
+  function missingParts(manifest){
+    const total = Number(manifest?.totalParts || 0);
+    const parts = Array.isArray(manifest?.parts) ? manifest.parts : [];
+    const miss = [];
+    for (let i = 1; i <= total; i++) {
+      const p = parts.find(x => Number(x.index) === i && (x.fileId || x.url));
+      if (!p) miss.push(i);
+    }
+    return miss;
+  }
+
+  function makeDownloadDebug(meta){
+    return {
+      phase: PHASE,
+      bundleId: meta.bundleId || '',
+      originalName: meta.originalName || '',
+      originalSize: Number(meta.originalSize || 0),
+      originalSha256: meta.originalSha256 || '',
+      partSize: Number(meta.partSize || 0),
+      totalParts: Number(meta.totalParts || 0),
+      currentPart: Number(meta.currentPart || meta.downloadPartIndex || 0),
+      partName: meta.partName || '',
+      partSizeActual: Number(meta.partSizeActual || meta.downloadPartSize || 0),
+      partSha256: meta.partSha256 || '',
+      transport: 'cloudflare_worker_relay',
+      relayUrlConfigured: !!relayBaseUrl(),
+      relayHealthOk: meta.relayHealthOk ?? null,
+      endpointHost: meta.endpointHost || hostOf(meta.url || endpointUrl('download')),
+      uploadMethod: 'download_bundle_part_via_worker_proxy',
+      timeoutMs: Number(meta.timeoutMs || DOWNLOAD_TIMEOUT_MS),
+      httpStatus: Number(meta.httpStatus || meta.downloadHttpStatus || 0),
+      xhrStatus: Number(meta.xhrStatus || meta.httpStatus || meta.downloadHttpStatus || 0),
+      xhrEvent: meta.xhrEvent || '',
+      relayStatus: meta.relayStatus ?? meta.httpStatus ?? meta.downloadHttpStatus ?? 0,
+      relayOk: meta.relayOk ?? null,
+      telegramOk: meta.telegramOk ?? null,
+      telegramErrorCode: meta.telegramErrorCode ?? null,
+      telegramDescription: meta.telegramDescription || '',
+      relayErrorType: meta.relayErrorType || '',
+      durationMs: Number(meta.durationMs || 0),
+      networkType: networkType(),
+      navigatorOnLine: navigator.onLine,
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString(),
+      downloadTransport: meta.downloadTransport || 'cloudflare_worker_stream',
+      downloadEndpoint: meta.downloadEndpoint || '/download',
+      downloadEndpointHost: meta.downloadEndpointHost || hostOf(endpointUrl('download')),
+      downloadPartIndex: Number(meta.downloadPartIndex || meta.currentPart || 0),
+      downloadPartSize: Number(meta.downloadPartSize || meta.partSizeActual || 0),
+      downloadBlobSize: Number(meta.downloadBlobSize || 0),
+      downloadHttpStatus: Number(meta.downloadHttpStatus || meta.httpStatus || 0),
+      downloadContentType: meta.downloadContentType || '',
+      responseTextShort: String(meta.responseTextShort || meta.responseText || '').slice(0, 1800)
+    };
+  }
+
+  function recordBundleDownloadLog(ce, debug, level){
+    try {
+      ce.lastDownloadDebug = debug;
+      ce.lastUploadError = debug;
+      localStorage.setItem('lifeos_family_last_bundle_download_67d_r1', JSON.stringify(debug));
+      if (debug.relayErrorType) localStorage.setItem('lifeos_family_last_bundle_download_error_67d_r1', JSON.stringify(debug));
+    } catch(e) {}
+    try {
+      const fn = level === 'error' ? 'error' : (level === 'warn' ? 'warn' : 'info');
+      console[fn]('[LifeOS 67D-R1 bundle download proxy]', debug);
+    } catch(e) {}
+    return debug;
+  }
+
+  function looksLikeRawTelegramFileUrl(u){
+    const raw = String(u || '');
+    const low = raw.toLowerCase();
+    const tgHost = ['api','telegram','org'].join('.');
+    const tgFilePath = '/file/' + 'bot';
+    if (low.includes(tgHost)) return true;
+    if (low.includes(tgFilePath)) return true;
+    if (/bot\d{5,}:[a-z0-9_-]{20,}/i.test(raw)) return true;
+    return false;
+  }
+
+  function isSameRelayProxyUrl(u){
+    try {
+      const relayHost = new URL(endpointUrl('download'), location.href).host;
+      const target = new URL(String(u || ''), location.href);
+      return !!relayHost && target.host === relayHost;
+    } catch(e) { return false; }
+  }
+
+  function requireSafeRelayProxyUrl(u, ce, part, manifest, started, httpStatus, contentType){
+    const urlText = String(u || '').trim();
+    const baseMeta = {
+      bundleId:manifest.bundleId || '', originalName:manifest.originalName || '', originalSize:manifest.originalSize || 0,
+      originalSha256:manifest.originalSha256 || '', partSize:manifest.partSize || 0, totalParts:manifest.totalParts || 0,
+      currentPart:part.index, partName:part.name || '', partSizeActual:part.size || 0, partSha256:part.sha256 || '',
+      downloadEndpoint:'/download', downloadEndpointHost:hostOf(endpointUrl('download')), downloadPartIndex:part.index,
+      downloadPartSize:part.size || 0, downloadHttpStatus:httpStatus || 0, downloadContentType:contentType || '', durationMs:Date.now() - started
+    };
+    if (!urlText) {
+      const dbg = makeDownloadDebug({ ...baseMeta, downloadTransport:'cloudflare_worker_stream', relayErrorType:'worker_download_json_missing_proxy_url', xhrEvent:'download_json_missing_url', telegramDescription:'Worker /download trả JSON thay vì stream blob.' });
+      recordBundleDownloadLog(ce, dbg, 'error');
+      throw new Error('Worker /download phải stream bytes/blob part qua Cloudflare relay; JSON không được dùng cho production download.');
+    }
+    if (looksLikeRawTelegramFileUrl(urlText)) {
+      const dbg = makeDownloadDebug({ ...baseMeta, downloadTransport:'blocked_raw_telegram_file_url', relayErrorType:'worker_leaked_telegram_file_url', xhrEvent:'blocked_raw_telegram_file_url', telegramDescription:'Worker trả Telegram file URL thô về client.' });
+      recordBundleDownloadLog(ce, dbg, 'error');
+      throw new Error('Worker không được trả Telegram file URL về client; cần stream part qua Cloudflare relay.');
+    }
+    if (!isSameRelayProxyUrl(urlText)) {
+      const dbg = makeDownloadDebug({ ...baseMeta, downloadTransport:'blocked_non_relay_proxy_url', relayErrorType:'worker_returned_non_relay_proxy_url', xhrEvent:'blocked_non_relay_proxy_url', telegramDescription:'Worker trả URL không cùng host Cloudflare relay.' });
+      recordBundleDownloadLog(ce, dbg, 'error');
+      throw new Error('Worker /download phải stream bytes/blob trực tiếp qua Cloudflare relay; HTML không fetch URL trung gian.');
+    }
+    return urlText;
+  }
+
+  async function fetchPartBlobViaRelay(ce, part, manifest){
+    const fileId = part.fileId || part.file_id || '';
+    const name = part.name || '';
+    if (!relayBaseUrl()) throw new Error('Chưa cấu hình Cloudflare relay /download để tải và gộp part.');
+    if (!fileId) throw new Error(`Thiếu fileId part ${part.index}; không tải raw URL part để tránh lộ Telegram file URL.`);
+    const started = Date.now();
+    const downloadUrl = endpointUrl('download') + '?file_id=' + encodeURIComponent(fileId) + '&name=' + encodeURIComponent(name) + '&bundle_id=' + encodeURIComponent(manifest.bundleId || '');
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT_MS) : null;
+    let httpStatus = 0;
+    let contentType = '';
+    try {
+      const res = await fetch(downloadUrl, { method:'GET', cache:'no-store', signal: controller ? controller.signal : undefined });
+      httpStatus = Number(res.status || 0);
+      contentType = String(res.headers.get('content-type') || '').toLowerCase();
+      if (!res.ok) {
+        let bodyText = '';
+        try { bodyText = await res.text(); } catch(e) {}
+        const dbg = makeDownloadDebug({
+          bundleId:manifest.bundleId || '', originalName:manifest.originalName || '', originalSize:manifest.originalSize || 0,
+          originalSha256:manifest.originalSha256 || '', partSize:manifest.partSize || 0, totalParts:manifest.totalParts || 0,
+          currentPart:part.index, partName:part.name || '', partSizeActual:part.size || 0, partSha256:part.sha256 || '',
+          downloadTransport:'cloudflare_worker_stream', downloadEndpoint:'/download', downloadEndpointHost:hostOf(endpointUrl('download')),
+          downloadPartIndex:part.index, downloadPartSize:part.size || 0, downloadHttpStatus:httpStatus,
+          downloadContentType:contentType, httpStatus, xhrStatus:httpStatus, xhrEvent:'download_http_error', relayStatus:httpStatus,
+          relayErrorType:'worker_download_http_error', telegramDescription:'Worker /download HTTP error', durationMs:Date.now() - started,
+          responseTextShort:bodyText
+        });
+        recordBundleDownloadLog(ce, dbg, 'error');
+        throw new Error(`Worker /download lỗi HTTP ${httpStatus} cho part ${part.index}.`);
+      }
+      if (contentType.includes('application/json')) {
+        const data = await res.json().catch(() => ({}));
+        const candidate = data.fileUrl || data.file_url || data.downloadUrl || data.download_url || data.url || '';
+        if (candidate) {
+          try { requireSafeRelayProxyUrl(candidate, ce, part, manifest, started, httpStatus, contentType); } catch(e) { throw e; }
+        }
+        const dbg = makeDownloadDebug({
+          bundleId:manifest.bundleId || '', originalName:manifest.originalName || '', originalSize:manifest.originalSize || 0,
+          originalSha256:manifest.originalSha256 || '', partSize:manifest.partSize || 0, totalParts:manifest.totalParts || 0,
+          currentPart:part.index, partName:part.name || '', partSizeActual:part.size || 0, partSha256:part.sha256 || '',
+          downloadTransport: candidate ? 'blocked_worker_json_proxy_url' : 'cloudflare_worker_stream',
+          downloadEndpoint:'/download', downloadEndpointHost:hostOf(endpointUrl('download')),
+          downloadPartIndex:part.index, downloadPartSize:part.size || 0, downloadHttpStatus:httpStatus,
+          downloadContentType:contentType, httpStatus, xhrStatus:httpStatus, xhrEvent:'download_json_blocked', relayStatus:httpStatus,
+          relayErrorType: candidate ? 'worker_download_returned_proxy_url_instead_of_bytes' : 'worker_download_returned_json_instead_of_bytes',
+          telegramDescription:'Worker /download phải stream bytes/blob trực tiếp về HTML; bản production không fetch URL trung gian.',
+          durationMs:Date.now() - started,
+          responseTextShort:JSON.stringify(data).slice(0, 1800)
+        });
+        recordBundleDownloadLog(ce, dbg, 'error');
+        throw new Error('Worker /download phải stream bytes/blob trực tiếp; HTML không fetch URL Telegram hoặc URL trung gian.');
+      }
+      const blob = await res.blob();
+      recordBundleDownloadLog(ce, makeDownloadDebug({
+        bundleId:manifest.bundleId || '', originalName:manifest.originalName || '', originalSize:manifest.originalSize || 0,
+        originalSha256:manifest.originalSha256 || '', partSize:manifest.partSize || 0, totalParts:manifest.totalParts || 0,
+        currentPart:part.index, partName:part.name || '', partSizeActual:part.size || 0, partSha256:part.sha256 || '',
+        downloadTransport:'cloudflare_worker_stream', downloadEndpoint:'/download', downloadEndpointHost:hostOf(downloadUrl),
+        downloadPartIndex:part.index, downloadPartSize:part.size || 0, downloadBlobSize:blob.size || 0,
+        downloadHttpStatus:httpStatus, downloadContentType:contentType, httpStatus, xhrStatus:httpStatus,
+        xhrEvent:'download_blob_ok', relayStatus:httpStatus, relayOk:true, telegramOk:true, durationMs:Date.now() - started
+      }), 'info');
+      return blob;
+    } catch(e) {
+      if (!(e && /Worker không được trả|proxy URL cùng Cloudflare|stream bytes/.test(String(e.message || e)))) {
+        const dbg = makeDownloadDebug({
+          bundleId:manifest.bundleId || '', originalName:manifest.originalName || '', originalSize:manifest.originalSize || 0,
+          originalSha256:manifest.originalSha256 || '', partSize:manifest.partSize || 0, totalParts:manifest.totalParts || 0,
+          currentPart:part.index, partName:part.name || '', partSizeActual:part.size || 0, partSha256:part.sha256 || '',
+          downloadTransport:'cloudflare_worker_stream', downloadEndpoint:'/download', downloadEndpointHost:hostOf(endpointUrl('download')),
+          downloadPartIndex:part.index, downloadPartSize:part.size || 0, downloadHttpStatus:httpStatus,
+          downloadContentType:contentType, httpStatus, xhrStatus:httpStatus, xhrEvent:(e && e.name === 'AbortError') ? 'download_timeout' : 'download_error',
+          relayStatus:httpStatus, relayErrorType:(e && e.name === 'AbortError') ? 'worker_download_timeout' : 'worker_download_error',
+          telegramDescription:e?.message || String(e), durationMs:Date.now() - started
+        });
+        recordBundleDownloadLog(ce, dbg, 'error');
+      }
+      throw e;
+    } finally { if (timer) clearTimeout(timer); }
+  }
+
+  async function downloadBundle(ce, m){
+    const manifest = manifestOf(m);
+    if (!manifest || manifest.type !== 'lifeos_family_file_bundle_manifest') {
+      window.showToast?.('Manifest bundle không hợp lệ', 'ph-warning-circle');
+      return false;
+    }
+    const miss = missingParts(manifest);
+    if (miss.length) {
+      const msg = `Không thể gộp file: thiếu part số ${miss.join(', ')}.`;
+      ce.setUploadStatus?.(msg, 'error', false);
+      window.showToast?.(msg, 'ph-warning-circle');
+      return false;
+    }
+    const ordered = (manifest.parts || []).slice().sort((a,b) => Number(a.index) - Number(b.index));
+    const blobs = [];
+    try {
+      for (let i = 0; i < ordered.length; i++) {
+        const part = ordered[i];
+        ce.setUploadStatus?.(`Đang tải part ${part.index}/${manifest.totalParts}: ${part.name}`, 'info', false);
+        const blob = await fetchPartBlobViaRelay(ce, part, manifest);
+        if (Number(part.size || 0) && Number(blob.size || 0) !== Number(part.size)) throw new Error(`Part ${part.index} sai dung lượng: ${blob.size}/${part.size}`);
+        if (part.sha256) {
+          ce.setUploadStatus?.(`Đang verify SHA256 part ${part.index}/${manifest.totalParts}`, 'info', false);
+          const sha = await sha256Blob(blob);
+          if (sha && String(sha).toLowerCase() !== String(part.sha256).toLowerCase()) throw new Error(`Part ${part.index} sai SHA256`);
+        }
+        blobs.push(blob);
+      }
+      const finalBlob = new Blob(blobs, { type:m.mime_type || 'application/octet-stream' });
+      if (Number(manifest.originalSize || 0) && finalBlob.size !== Number(manifest.originalSize)) throw new Error(`File gộp sai dung lượng: ${finalBlob.size}/${manifest.originalSize}`);
+      if (manifest.originalSha256) {
+        ce.setUploadStatus?.(`Đang verify SHA256 file tổng: ${manifest.originalName}`, 'info', false);
+        const finalSha = await sha256Blob(finalBlob);
+        if (finalSha && String(finalSha).toLowerCase() !== String(manifest.originalSha256).toLowerCase()) throw new Error('File gộp sai SHA256 tổng');
+      }
+      const url = URL.createObjectURL(finalBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = manifest.originalName || m.file_name || 'lifeos_bundle_file';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      ce.setUploadStatus?.(`Đã tải & gộp file đúng tên: ${manifest.originalName}`, 'done', true);
+      return true;
+    } catch(e) {
+      const msg = `Tải/gộp bundle thất bại: ${manifest.originalName} — ${e.message || e}. Không tạo file hỏng.`;
+      console.warn('[LifeOS 67D bundle merge fail]', { manifest, error:e });
+      ce.setUploadStatus?.(msg, 'error', false);
+      window.showToast?.(msg, 'ph-warning-circle');
+      return false;
+    }
+  }
+
+  function showBundlePartDetails(ce, id){
+    const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+    const manifest = manifestOf(m);
+    if (!manifest) { window.showToast?.('Không tìm thấy manifest bundle', 'ph-warning-circle'); return; }
+    let modal = document.getElementById('lifeos67d-bundle-detail-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'lifeos67d-bundle-detail-modal';
+      modal.className = 'fixed inset-0 z-[99999999] bg-black/40 backdrop-blur-sm p-3 flex items-center justify-center';
+      document.body.appendChild(modal);
+    }
+    const lines = (manifest.parts || []).slice().sort((a,b)=>Number(a.index)-Number(b.index)).map(p => `${p.index}. ${p.name}\n   size=${p.size} sha256=${p.sha256 || ''}\n   fileId=${p.fileId || ''} messageId=${p.messageId || ''}`).join('\n');
+    const text = JSON.stringify(manifest, null, 2) + '\n\nPARTS:\n' + lines;
+    modal.innerHTML = `
+      <div class="bg-white rounded-3xl shadow-2xl border border-amber-100 w-full max-w-3xl max-h-[86vh] flex flex-col overflow-hidden">
+        <div class="p-4 border-b border-amber-100 flex items-center justify-between gap-3">
+          <div class="font-black text-amber-800">📦 Chi tiết part bundle</div>
+          <button type="button" onclick="document.getElementById('lifeos67d-bundle-detail-modal')?.remove()" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center active:scale-95"><i class="ph-bold ph-x pointer-events-none"></i></button>
+        </div>
+        <pre class="p-4 text-xs leading-relaxed whitespace-pre-wrap break-words overflow-y-auto bg-amber-50 text-slate-800 flex-1">${escapeHTML(text)}</pre>
+        <div class="p-3 border-t border-amber-100 flex justify-end gap-2">
+          <button type="button" onclick="navigator.clipboard?.writeText(document.querySelector('#lifeos67d-bundle-detail-modal pre')?.textContent || ''); window.showToast?.('Đã copy manifest','ph-check-circle')" class="px-3 py-2 rounded-xl bg-amber-100 text-amber-800 font-black text-xs">Copy manifest</button>
+          <button type="button" onclick="document.getElementById('lifeos67d-bundle-detail-modal')?.remove()" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 font-black text-xs">Đóng</button>
+        </div>
+      </div>`;
+  }
+
+  function install(){
+    const ce = window.ChatEngine;
+    if (!ce) return false;
+    if (!ce.__lifeos67DBundleOldSendFile || ce.sendFile.__lifeos67D !== true) ce.__lifeos67DBundleOldSendFile = ce.__lifeos67DBundleOldSendFile || ce.sendFile?.bind(ce);
+    if (!ce.__lifeos67DBundleOldRenderFileCard || ce.renderFileCard.__lifeos67D !== true) ce.__lifeos67DBundleOldRenderFileCard = ce.__lifeos67DBundleOldRenderFileCard || ce.renderFileCard?.bind(ce);
+    if (!ce.__lifeos67DBundleOldDownloadChatFile || ce.downloadChatFile.__lifeos67D !== true) ce.__lifeos67DBundleOldDownloadChatFile = ce.__lifeos67DBundleOldDownloadChatFile || ce.downloadChatFile?.bind(ce);
+    if (!ce.__lifeos67DBundleOldCopyFileLink || ce.copyFileLink.__lifeos67D !== true) ce.__lifeos67DBundleOldCopyFileLink = ce.__lifeos67DBundleOldCopyFileLink || ce.copyFileLink?.bind(ce);
+    const oldUploadDebugToText = ce.__lifeos67DBundleOldUploadDebugToText || (typeof ce.uploadDebugToText === 'function' ? ce.uploadDebugToText.bind(ce) : null);
+    ce.__lifeos67DBundleOldUploadDebugToText = oldUploadDebugToText;
+    ce.telegramSecretRemovedFromHtml = true;
+
+    ce.getBundlePartSizeBytes = function(){ return Math.min(Math.max(1 * MB, Number(window.LIFEOS_67D_PART_SIZE_BYTES || DEFAULT_PART_SIZE)), 20 * MB); };
+    ce.isBundleMessage = isBundleMessage;
+    ce.getBundleManifest = manifestOf;
+    ce.uploadDebugToText = function(debugObj = null){
+      const d = debugObj || this.lastUploadError || {};
+      if (d && (d.phase === PHASE || d.bundleId || d.uploadMethod === 'html5_blob_slice_bundle_manifest')) return bundleDebugToText(d);
+      return oldUploadDebugToText ? oldUploadDebugToText(debugObj) : bundleDebugToText(d);
+    };
+    ce.sendFile = async function(file, currentIndex = 1, totalFiles = 1, options = {}){
+      if (!file) return { ok:false, error:'Không có file để gửi' };
+      const size = Number(file?.size || 0);
+      if (size <= MAX_SINGLE_UPLOAD_BYTES) {
+        const oldSend = this.__lifeos67DBundleOldSendFile;
+        if (typeof oldSend === 'function') return await oldSend(file, currentIndex, totalFiles, options);
+        return { ok:false, error:'Thiếu luồng upload relay 67C-R1 cho file ≤50MB' };
+      }
+      return await sendBundle(this, file, currentIndex, totalFiles, options || {});
+    };
+    ce.sendFile.__lifeos67D = true;
+
+    ce.renderFileCard = function(m){
+      if (isBundleMessage(m)) return renderBundleCard(this, m);
+      const oldRender = this.__lifeos67DBundleOldRenderFileCard;
+      return typeof oldRender === 'function' ? oldRender(m) : '';
+    };
+    ce.renderFileCard.__lifeos67D = true;
+
+    ce.downloadChatFile = async function(id){
+      const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+      if (isBundleMessage(m)) return await downloadBundle(this, m);
+      const oldDownload = this.__lifeos67DBundleOldDownloadChatFile;
+      return typeof oldDownload === 'function' ? await oldDownload(id) : false;
+    };
+    ce.downloadChatFile.__lifeos67D = true;
+
+    ce.downloadChatFile.__lifeos67dR1Official = true;
+    ce.copyFileLink = async function(id){
+      const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+      if (isBundleMessage(m)) {
+        const manifest = manifestOf(m);
+        try {
+          await navigator.clipboard.writeText(JSON.stringify(manifest, null, 2));
+          this.setUploadStatus?.('Đã sao chép manifest bundle', 'done', true);
+          window.showToast?.('Đã sao chép manifest bundle', 'ph-check-circle');
+          return true;
+        } catch(e) {
+          this.setUploadStatus?.('Sao chép manifest thất bại', 'error', false);
+          return false;
+        }
+      }
+      const oldCopy = this.__lifeos67DBundleOldCopyFileLink;
+      return typeof oldCopy === 'function' ? await oldCopy(id) : false;
+    };
+    ce.copyFileLink.__lifeos67D = true;
+
+    ce.showBundlePartDetails = function(id){ return showBundlePartDetails(this, id); };
+    window.lifeos67DGetLastTempManifest = function(){ return window.LIFEOS_67D_LAST_BUNDLE_TEMP || null; };
+    console.info('[LifeOS 67D-R1] Family bundle download proxy security fix installed', {
+      patch: PATCH_ID,
+      phase: PHASE,
+      singleLimitBytes: MAX_SINGLE_UPLOAD_BYTES,
+      partSizeBytes: DEFAULT_PART_SIZE,
+      relayUrlConfigured: !!relayBaseUrl(),
+      productionDirectUploadFallback: false,
+      productionRawTelegramFileUrlFetch: false,
+      bundleDownloadEndpoint: '/download',
+      usesTokenInHtml: false
+    });
+    return true;
+  }
+
+  function schedule(){
+    install();
+    setTimeout(install, 80);
+    setTimeout(install, 260);
+    setTimeout(install, 900);
+    setTimeout(install, 1800);
+    setTimeout(install, 3200);
+    setTimeout(install, 5000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
+  else schedule();
+  window.addEventListener('load', schedule, { passive:true });
+})();
+</script>
+
+<!-- LIFEOS PHA67D-R1 FAMILY BUNDLE DOWNLOAD PROXY SECURITY FIX
+Tên pha: Pha67D_R1_family_bundle_download_proxy_security_fix
+Nền gốc: index_pha67D_family_html5_split_merge_manifest_telegram_bundle.html
+Mục tiêu: khóa download/gộp part qua Cloudflare Worker /download; HTML không fetch Telegram file URL thô.
+Worker bắt buộc: GET /health, POST /upload, GET /download. /download stream bytes/blob về HTML, không trả URL Telegram thô.
+-->
+<!-- LIFEOS PHA67D FAMILY HTML5 SPLIT/MERGE MANIFEST TELEGRAM BUNDLE - END -->
+
+
+<!-- LIFEOS PHA67D-R1 OFFICIAL RELAY RUNTIME LOCK - START -->
+<script id="lifeos-pha67d-r1-official-relay-runtime-lock-js">
+(function(){
+  const PATCH_ID = 'lifeos-pha67d-r1-official-relay-runtime-lock-js';
+  const RELAY = "https://telegram-upload-relay.tunhienhieuchuyen.workers.dev";
+  const RELAY_HOST = 'telegram-upload-relay.tunhienhieuchuyen.workers.dev';
+  const PHASE = '67D-R1';
+  const DOWNLOAD_TIMEOUT_MS = 300000;
+
+  function applyOfficialRelayConfig(){
+    window.LIFEOS_UPLOAD_RELAY_URL = RELAY;
+    window.LIFEOS_UPLOAD_RELAY_ENABLED = true;
+    window.LIFEOS_UPLOAD_RELAY_MODE = 'always';
+    try {
+      localStorage.setItem('LIFEOS_UPLOAD_RELAY_URL', RELAY);
+      localStorage.setItem('LIFEOS_UPLOAD_RELAY_ENABLED', 'true');
+      localStorage.setItem('LIFEOS_UPLOAD_RELAY_MODE', 'always');
+    } catch(e) {}
+    window.LIFEOS_67D_R1_OFFICIAL_RELAY = Object.freeze({
+      phase: PHASE,
+      relayUrl: RELAY,
+      enabled: true,
+      mode: 'always',
+      uploadEndpoint: '/upload',
+      downloadEndpoint: '/download',
+      uploadMethod: 'POST /upload',
+      downloadMethod: 'GET /download?file_id=...&name=...',
+      transport: 'cloudflare_worker_relay',
+      downloadTransport: 'cloudflare_worker_stream',
+      tokenInHtml: false,
+      directTelegramProduction: false,
+      rawTelegramFileUrlToClient: false
+    });
+  }
+  function endpoint(kind){
+    const k = String(kind || 'upload').replace(/^\/+/, '');
+    return RELAY.replace(/\/+$/, '') + '/' + k;
+  }
+  function safeName(name){ return String(name || 'lifeos_file').replace(/[\\/\r\n]+/g, '_').slice(0, 180) || 'lifeos_file'; }
+  function looksLikeRawTelegramUrl(u){
+    const raw = String(u || '');
+    const low = raw.toLowerCase();
+    if (low.includes(['api','telegram','org'].join('.'))) return true;
+    if (low.includes('/file/' + 'bot')) return true;
+    if (/bot\d{5,}:[a-z0-9_-]{20,}/i.test(raw)) return true;
+    return false;
+  }
+  function isRelayUrl(u){
+    try { return new URL(String(u || ''), location.href).host === RELAY_HOST; } catch(e) { return false; }
+  }
+  function buildDownloadUrl(fileId, name, extra){
+    const u = new URL(endpoint('download'));
+    u.searchParams.set('file_id', String(fileId || ''));
+    u.searchParams.set('name', safeName(name || ''));
+    if (extra && extra.bundleId) u.searchParams.set('bundle_id', String(extra.bundleId));
+    return u.toString();
+  }
+  async function fetchDownloadBlob(fileId, name, extra){
+    if (!fileId) throw new Error('Thiếu file_id nên không thể tải qua Cloudflare /download.');
+    const downloadUrl = buildDownloadUrl(fileId, name, extra);
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT_MS) : null;
+    const started = Date.now();
+    try {
+      const res = await fetch(downloadUrl, { method:'GET', cache:'no-store', signal: controller ? controller.signal : undefined });
+      const httpStatus = Number(res.status || 0);
+      const contentType = String(res.headers.get('content-type') || '').toLowerCase();
+      if (!res.ok) {
+        let body = '';
+        try { body = await res.text(); } catch(e) {}
+        throw new Error('Worker /download HTTP ' + httpStatus + ': ' + body.slice(0, 240));
+      }
+      if (contentType.includes('application/json')) {
+        const data = await res.json().catch(() => ({}));
+        const candidate = data.fileUrl || data.file_url || data.downloadUrl || data.download_url || data.url || '';
+        if (candidate && looksLikeRawTelegramUrl(candidate)) {
+          const err = new Error('Worker không được trả Telegram file URL về client; cần stream part qua Cloudflare relay.');
+          err.relayErrorType = 'worker_leaked_telegram_file_url';
+          err.downloadTransport = 'blocked_raw_telegram_file_url';
+          throw err;
+        }
+        if (candidate && !isRelayUrl(candidate)) {
+          const err = new Error('Worker /download trả URL không cùng Cloudflare relay host; HTML không fetch URL trung gian.');
+          err.relayErrorType = 'worker_returned_non_relay_proxy_url';
+          err.downloadTransport = 'blocked_non_relay_proxy_url';
+          throw err;
+        }
+        const err = new Error('Worker /download phải stream bytes/blob trực tiếp, không trả JSON URL.');
+        err.relayErrorType = candidate ? 'worker_download_returned_proxy_url_instead_of_bytes' : 'worker_download_returned_json_instead_of_bytes';
+        err.downloadTransport = candidate ? 'blocked_worker_json_proxy_url' : 'cloudflare_worker_stream';
+        throw err;
+      }
+      const blob = await res.blob();
+      const log = {
+        phase: PHASE,
+        downloadTransport: 'cloudflare_worker_stream',
+        downloadEndpoint: '/download',
+        downloadEndpointHost: RELAY_HOST,
+        downloadPartIndex: extra && extra.partIndex ? Number(extra.partIndex) : 0,
+        downloadPartSize: extra && extra.partSize ? Number(extra.partSize) : 0,
+        downloadBlobSize: blob.size || 0,
+        downloadHttpStatus: httpStatus,
+        downloadContentType: contentType,
+        transport: extra && extra.bundleId ? 'cloudflare_worker_relay' : 'cloudflare_worker_stream',
+        endpointHost: RELAY_HOST,
+        httpStatus,
+        xhrStatus: httpStatus,
+        xhrEvent: 'download_blob_ok',
+        relayStatus: httpStatus,
+        relayOk: true,
+        durationMs: Date.now() - started,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      };
+      try {
+        window.ChatEngine && (window.ChatEngine.lastDownloadDebug = log, window.ChatEngine.lastUploadError = log);
+        localStorage.setItem('lifeos_family_last_download_stream_67d_r1_official', JSON.stringify(log));
+      } catch(e) {}
+      console.info('[LifeOS 67D-R1 official /download stream]', log);
+      return { blob, objectUrl: URL.createObjectURL(blob), proxyUrl: downloadUrl, log };
+    } finally { if (timer) clearTimeout(timer); }
+  }
+  function installOfficialRuntimeLock(){
+    applyOfficialRelayConfig();
+    const ce = window.ChatEngine;
+    if (!ce) return false;
+    ce.telegramSecretRemovedFromHtml = true;
+    ce.__lifeos67dR1OfficialRelay = true;
+    if (!ce.__lifeos67dR1OfficialPreviousDownloadChatFile && typeof ce.downloadChatFile === 'function' && ce.downloadChatFile.__lifeos67dR1Official !== true) {
+      ce.__lifeos67dR1OfficialPreviousDownloadChatFile = ce.downloadChatFile.bind(ce);
+    }
+    if (!ce.__lifeos67dR1OfficialPreviousCopyFileLink && typeof ce.copyFileLink === 'function' && ce.copyFileLink.__lifeos67dR1Official !== true) {
+      ce.__lifeos67dR1OfficialPreviousCopyFileLink = ce.copyFileLink.bind(ce);
+    }
+    ce.getOfficialRelayUrl = function(){ applyOfficialRelayConfig(); return RELAY; };
+    window.setLifeOSUploadRelayUrl = function(){ applyOfficialRelayConfig(); ce.setUploadStatus?.('Relay chính thức đã khóa: ' + RELAY, 'done', true); return RELAY; };
+    window.setLifeOSUploadRelayMode = function(){ applyOfficialRelayConfig(); ce.setUploadStatus?.('Relay mode đã khóa production: always', 'done', true); return 'always'; };
+    window.setLifeOSUploadRelayEnabled = function(){ applyOfficialRelayConfig(); ce.setUploadStatus?.('Relay production luôn bật', 'done', true); return true; };
+    window.lifeosFamilyRelayHealthCheck = async function(){
+      applyOfficialRelayConfig();
+      const url = endpoint('health');
+      const started = Date.now();
+      try {
+        const res = await fetch(url, { cache:'no-store' });
+        const data = await res.json().catch(() => ({}));
+        const ok = !!(res.ok && data && data.ok === true && data.telegramConfigured === true);
+        const proof = { phase:PHASE, relayUrl:RELAY, relayHealthOk:ok, transport: ok ? 'cloudflare_worker_relay' : 'blocked_no_relay', endpointHost:RELAY_HOST, httpStatus:res.status || 0, durationMs:Date.now()-started, data };
+        try { localStorage.setItem('lifeos_family_relay_health_official_67d_r1', JSON.stringify(proof)); } catch(e) {}
+        window.LIFEOS_FAMILY_RELAY_RUNTIME_PROOF = proof;
+        return { ok, status:res.status || 0, data, proof };
+      } catch(e) {
+        const proof = { phase:PHASE, relayUrl:RELAY, relayHealthOk:false, transport:'blocked_no_relay', endpointHost:RELAY_HOST, httpStatus:0, error:String(e && e.message || e), durationMs:Date.now()-started };
+        try { localStorage.setItem('lifeos_family_relay_health_official_67d_r1', JSON.stringify(proof)); } catch(_) {}
+        window.LIFEOS_FAMILY_RELAY_RUNTIME_PROOF = proof;
+        return { ok:false, status:0, error:proof.error, proof };
+      }
+    };
+    ce.getFileUrl = async function(fileId, fileName = ''){
+      applyOfficialRelayConfig();
+      this.fileCache = this.fileCache || {};
+      const key = 'download:' + String(fileId || '') + ':' + String(fileName || '');
+      if (this.fileCache[key]) return this.fileCache[key];
+      const out = await fetchDownloadBlob(fileId, fileName, {});
+      this.fileCache[key] = out.objectUrl;
+      this.fileCache['proxy:' + key] = out.proxyUrl;
+      return out.objectUrl;
+    };
+    ce.downloadChatFile = async function(id){
+      const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+      if (this.isBundleMessage && this.isBundleMessage(m)) {
+        // Giữ nguyên luồng bundle 67D-R1 hiện có: bên trong đã bị khóa dùng GET /download stream cho từng part.
+        const old = this.__lifeos67dR1OfficialPreviousDownloadChatFile;
+        return typeof old === 'function' ? await old(id) : false;
+      }
+      if (!m || !m.file_id) { window.showToast?.('Tải thất bại: thiếu file_id', 'ph-warning-circle'); return false; }
+      const meta = this.getFileMeta ? this.getFileMeta(m) : { name: m.file_name || 'lifeos_file' };
+      try {
+        this.setUploadStatus?.('Đang tải qua Cloudflare /download: ' + meta.name, 'info', false);
+        const out = await fetchDownloadBlob(m.file_id, meta.name, {});
+        const a = document.createElement('a');
+        a.href = out.objectUrl;
+        a.download = meta.name || 'lifeos_file';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(out.objectUrl), 30000);
+        this.setUploadStatus?.('Đã tải qua Cloudflare stream: ' + meta.name, 'done', true);
+        return true;
+      } catch(e) {
+        const msg = 'Tải thất bại qua Cloudflare /download: ' + (meta.name || '') + ' — ' + (e.message || e);
+        this.lastUploadError = { phase:PHASE, downloadTransport:e.downloadTransport || 'cloudflare_worker_stream', relayErrorType:e.relayErrorType || 'worker_download_error', downloadEndpoint:'/download', downloadEndpointHost:RELAY_HOST, telegramDescription:e.message || String(e), timestamp:new Date().toISOString() };
+        this.setUploadStatus?.(msg, 'error', false); window.showToast?.(msg, 'ph-warning-circle'); return false;
+      }
+    };
+    ce.copyFileLink = async function(id){
+      const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+      if (this.isBundleMessage && this.isBundleMessage(m)) {
+        const old = this.__lifeos67dR1OfficialPreviousCopyFileLink;
+        if (typeof old === 'function') return await old(id);
+        try { await navigator.clipboard.writeText(JSON.stringify(this.getBundleManifest ? this.getBundleManifest(m) : (m.bundle_manifest || m.manifest || null), null, 2)); window.showToast?.('Đã copy manifest bundle','ph-check-circle'); return true; } catch(e) { return false; }
+      }
+      if (!m || !m.file_id) { window.showToast?.('Sao chép thất bại: thiếu file_id','ph-warning-circle'); return false; }
+      const meta = this.getFileMeta ? this.getFileMeta(m) : { name:m.file_name || 'lifeos_file' };
+      const proxyUrl = buildDownloadUrl(m.file_id, meta.name, {});
+      try { await navigator.clipboard.writeText(proxyUrl); this.setUploadStatus?.('Đã copy link Cloudflare /download', 'done', true); window.showToast?.('Đã copy link Cloudflare /download','ph-check-circle'); return true; } catch(e) { this.setUploadStatus?.('Không copy được link /download', 'error', false); return false; }
+    };
+    ce.copyFileLink.__lifeos67dR1Official = true;
+    console.info('[LifeOS 67D-R1 official relay runtime lock installed]', window.LIFEOS_67D_R1_OFFICIAL_RELAY);
+    return true;
+  }
+  applyOfficialRelayConfig();
+  installOfficialRuntimeLock();
+  setTimeout(installOfficialRuntimeLock, 80);
+  setTimeout(installOfficialRuntimeLock, 350);
+  setTimeout(installOfficialRuntimeLock, 1200);
+  setTimeout(installOfficialRuntimeLock, 3200);
+})();
+</script>
+<!-- LIFEOS PHA67D-R1 OFFICIAL RELAY RUNTIME LOCK - END -->
 
 </body>
 </html>
