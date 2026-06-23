@@ -19861,6 +19861,7 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
 #mode-weather-ui .lifeos67h-r7-tag-rain { color: rgb(3,105,161); background: rgba(224,242,254,.92); border-color: rgba(125,211,252,.82); }
 #mode-weather-ui .lifeos67h-r7-tag-soft { color: rgb(71,85,105); background: rgba(241,245,249,.92); border-color: rgba(226,232,240,.92); }
 #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline {
+  box-sizing: border-box;
   width: 100%;
   max-width: 100%;
   display: flex;
@@ -20103,6 +20104,211 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
 })();
 </script>
 <!-- LIFEOS PHA67H_R7 WEATHER 24H SMART TIMELINE OVERVIEW FIX - END -->
+
+
+<!-- LIFEOS PHA67H_R7_1 WEATHER 24H SCROLL LABEL POLISH NO BREAK FIX - START -->
+<style id="lifeos-pha67h-r7-1-weather-24h-scroll-label-polish-no-break-fix-style">
+/* Pha67H_R7_1: scoped Weather polish only. Keeps PC horizontal scrollbar, short labels, no app-wide layout changes. */
+#mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(14, 165, 233, .75) rgba(226, 232, 240, .92);
+  scrollbar-gutter: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+}
+#mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline.hide-scrollbar::-webkit-scrollbar,
+#mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline.custom-scroll-area::-webkit-scrollbar,
+#mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline::-webkit-scrollbar {
+  display: block !important;
+  height: 8px !important;
+}
+#mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, .92);
+  border-radius: 999px;
+}
+#mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(56,189,248,.82), rgba(14,165,233,.92));
+  border-radius: 999px;
+  border: 2px solid rgba(226,232,240,.92);
+}
+#mode-weather-ui .lifeos67h-r7-hour-label,
+#mode-weather-ui .lifeos67h-r7-hour-label.lifeos67h-r7-1-short-label {
+  font-size: 8px;
+  letter-spacing: -.015em;
+  line-height: 1;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mode-weather-ui .lifeos67h-r7-tag,
+#mode-weather-ui .lifeos67h-r7-tag.lifeos67h-r7-1-short-tag {
+  font-size: 8.5px;
+  line-height: 1.05;
+  padding: 3px 6px;
+  max-width: 100%;
+}
+#mode-weather-ui .lifeos67h-r7-phase-card {
+  overflow: hidden;
+}
+#mode-weather-ui .lifeos67h-r7-weather-shell {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+#mode-weather-ui .lifeos67h-r7-quick,
+#mode-weather-ui .lifeos67h-r7-phases,
+#mode-weather-ui .lifeos67h-r7-microgrid {
+  max-width: 100%;
+  min-width: 0;
+}
+@media (hover:hover) and (pointer:fine) {
+  #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline {
+    padding-bottom: 14px;
+  }
+  #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline.hide-scrollbar::-webkit-scrollbar,
+  #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline.custom-scroll-area::-webkit-scrollbar,
+  #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline::-webkit-scrollbar {
+    height: 10px !important;
+  }
+}
+@media (max-width: 720px) {
+  #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline {
+    padding-bottom: 8px;
+    scrollbar-gutter: auto;
+  }
+  #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline.hide-scrollbar::-webkit-scrollbar,
+  #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline.custom-scroll-area::-webkit-scrollbar,
+  #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline::-webkit-scrollbar {
+    height: 5px !important;
+  }
+  #mode-weather-ui .lifeos67h-r7-hour-card {
+    flex-basis: 68px;
+    min-width: 68px;
+    max-width: 68px;
+  }
+  #mode-weather-ui .lifeos67h-r7-hour-label,
+  #mode-weather-ui .lifeos67h-r7-hour-label.lifeos67h-r7-1-short-label {
+    font-size: 7.8px;
+  }
+  #mode-weather-ui .lifeos67h-r7-tag,
+  #mode-weather-ui .lifeos67h-r7-tag.lifeos67h-r7-1-short-tag {
+    font-size: 8px;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  #mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline {
+    padding-bottom: 7px;
+  }
+  #mode-weather-ui .lifeos67h-r7-hour-card {
+    flex-basis: 62px;
+    min-width: 62px;
+    max-width: 62px;
+    min-height: 92px;
+  }
+  #mode-weather-ui .lifeos67h-r7-hour-label,
+  #mode-weather-ui .lifeos67h-r7-hour-label.lifeos67h-r7-1-short-label {
+    font-size: 7.4px;
+    margin-top: 4px;
+  }
+  #mode-weather-ui .lifeos67h-r7-rain-bar { margin-top: 4px; }
+}
+</style>
+<script id="lifeos-pha67h-r7-1-weather-24h-scroll-label-polish-no-break-fix-js">
+(function(){
+  'use strict';
+  const PHASE = 'Pha67H_R7_1_weather_24h_scroll_label_polish_no_break_fix';
+  if(window.__lifeos67hR71WeatherScrollLabelPolishInstalled) return;
+  window.__lifeos67hR71WeatherScrollLabelPolishInstalled = true;
+  const shortText = (txt) => {
+    const raw = String(txt || '').trim();
+    const noEmoji = raw.replace(/^[✅⚠️🔥🌧️🌦️☔️\s]+/u, '').trim();
+    const map = {
+      'Hạn chế ra ngoài': 'Hạn chế',
+      'Nên hạn chế ra ngoài': 'Hạn chế',
+      'Dễ chịu hơn': 'Dễ chịu',
+      'Có khả năng mưa': 'Có mưa',
+      'Có thể mưa': 'Mưa nhẹ',
+      'Có mưa đáng chú ý': 'Có mưa',
+      'Có thể mưa rải rác': 'Mưa nhẹ',
+      'Ít biến động lớn': 'Ổn định',
+      'Có lúc rất nóng': 'Rất nóng'
+    };
+    const mapped = map[noEmoji] || noEmoji || raw;
+    const emoji = (raw.match(/^[✅⚠️🔥🌧️🌦️☔️]/u) || [''])[0];
+    return emoji ? (emoji + ' ' + mapped) : mapped;
+  };
+  const polish = () => {
+    const root = document.getElementById('mode-weather-ui');
+    if(!root) return;
+    const hourly = document.getElementById('weather-hourly-list');
+    if(hourly && hourly.classList.contains('lifeos67h-r7-timeline')) {
+      hourly.classList.remove('hide-scrollbar');
+      hourly.classList.add('lifeos67h-r7-1-scroll-visible');
+      hourly.setAttribute('aria-label', 'Dải dự báo 24 giờ tới, có thể kéo ngang');
+    }
+    root.querySelectorAll('.lifeos67h-r7-hour-label').forEach(el => {
+      const next = shortText(el.textContent);
+      if(next && next !== el.textContent.trim()) el.textContent = next;
+      el.classList.add('lifeos67h-r7-1-short-label');
+    });
+    root.querySelectorAll('.lifeos67h-r7-tag').forEach(el => {
+      const next = shortText(el.textContent);
+      if(next && next !== el.textContent.trim()) el.textContent = next;
+      el.classList.add('lifeos67h-r7-1-short-tag');
+    });
+    const title = root.querySelector('.lifeos67h-r7-title span');
+    if(title) {
+      title.textContent = title.textContent
+        .replace('Có lúc rất nóng', 'Rất nóng')
+        .replace('Có mưa đáng chú ý', 'Có mưa')
+        .replace('Có thể mưa rải rác', 'Mưa nhẹ')
+        .replace('Ít biến động lớn', 'Ổn định');
+    }
+    if(hourly && hourly.scrollWidth > hourly.clientWidth + 4 && hourly.scrollLeft < 1) {
+      // Keep the experience discoverable without jumping away from the current first hour.
+      hourly.scrollLeft = 0;
+    }
+  };
+  const install = () => {
+    if(typeof window.renderWeather === 'function' && !window.renderWeather.__lifeos67hR71WeatherPolish) {
+      const old = window.renderWeather.bind(window);
+      window.renderWeather = function(data, opts){
+        const ret = old(data, opts || {});
+        try { polish(); requestAnimationFrame(polish); setTimeout(polish, 120); } catch(e) {}
+        return ret;
+      };
+      window.renderWeather.__lifeos67hR71WeatherPolish = true;
+      if(old.__lifeos67hR7WeatherSmartTimeline || window.__lifeos67hR7WeatherSmartTimelineInstalled) window.renderWeather.__lifeos67hR7WeatherSmartTimeline = true;
+    }
+    try { polish(); } catch(e) {}
+    window.LifeOS_Pha67H_R7_1_Weather24hScrollLabelPolishNoBreakFix = {
+      phase: PHASE,
+      base: 'index_pha67H_R7_weather_24h_smart_timeline_overview_fix.html',
+      scopedToWeather: true,
+      keepsPcScrollbar: true,
+      shortLabels: true,
+      doesNotPatchProfile: true,
+      doesNotPatchNavigation: true,
+      doesNotPatchFamily: true,
+      doesNotPatchRadioTv: true,
+      doesNotPatchQueue: true
+    };
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, {once:true}); else install();
+  setTimeout(install, 300); setTimeout(install, 1200); setTimeout(polish, 2500);
+})();
+</script>
+<!-- LIFEOS PHA67H_R7_1 WEATHER 24H SCROLL LABEL POLISH NO BREAK FIX - END -->
 
 </body>
 </html>
