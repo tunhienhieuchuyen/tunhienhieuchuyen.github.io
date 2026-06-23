@@ -19360,5 +19360,749 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
 <!-- LIFEOS PHA67H_R5_2 FAMILY MOBILE LANDSCAPE DENSE PANORAMA FIX - END -->
 
 
+
+<!-- LIFEOS PHA67H_R6 FAMILY MOBILE SMALL IMAGE SEQUENTIAL QUEUE FIX - START -->
+<style id="lifeos-pha67h-r6-family-mobile-small-image-sequential-queue-fix-style">
+  #view-chat #chat-messages .lifeos67h-r6-queue-card,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-queue-card {
+    width: fit-content;
+    max-width: 168px;
+    min-width: 118px;
+    border-radius: 18px;
+    border: 1px solid rgba(20,184,166,.24);
+    background: rgba(240,253,250,.86);
+    padding: 7px;
+    box-shadow: 0 8px 18px rgba(15,118,110,.10);
+    color: #0f172a;
+  }
+  #view-chat #chat-messages .lifeos67h-r6-preview,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-preview {
+    width: 132px;
+    height: 96px;
+    max-width: 132px;
+    max-height: 96px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(226,232,240,.9);
+    border: 1px solid rgba(148,163,184,.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #view-chat #chat-messages .lifeos67h-r6-preview img,
+  #view-chat #chat-messages .lifeos67h-r6-preview video,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-preview img,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-preview video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block;
+  }
+  #view-chat #chat-messages .lifeos67h-r6-file-icon,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-file-icon {
+    width: 132px;
+    height: 72px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.8);
+    border: 1px dashed rgba(45,212,191,.55);
+    color: #0f766e;
+    font-size: 26px;
+  }
+  #view-chat #chat-messages .lifeos67h-r6-meta,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-meta {
+    margin-top: 5px;
+    max-width: 132px;
+    font-size: 10px;
+    line-height: 1.18;
+    font-weight: 800;
+    color: #0f766e;
+    overflow-wrap: anywhere;
+  }
+  #view-chat #chat-messages .lifeos67h-r6-status,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-status {
+    margin-top: 3px;
+    max-width: 132px;
+    font-size: 9px;
+    line-height: 1.15;
+    font-weight: 900;
+    color: #475569;
+    overflow-wrap: anywhere;
+  }
+  #view-chat #chat-messages .lifeos67h-r6-status[data-status="uploading"],
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-status[data-status="uploading"] { color:#2563eb; }
+  #view-chat #chat-messages .lifeos67h-r6-status[data-status="success"],
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-status[data-status="success"] { color:#059669; }
+  #view-chat #chat-messages .lifeos67h-r6-status[data-status="failed"],
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-status[data-status="failed"] { color:#e11d48; }
+  #view-chat #chat-messages .lifeos67h-r6-actions,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 6px;
+  }
+  #view-chat #chat-messages .lifeos67h-r6-actions button,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-actions button {
+    min-height: 28px;
+    border-radius: 10px;
+    padding: 4px 5px;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 900;
+    border: 1px solid rgba(148,163,184,.28);
+    background: rgba(255,255,255,.88);
+    color: #0f766e;
+  }
+  #view-chat #chat-messages .lifeos67h-r6-actions button:disabled,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-actions button:disabled {
+    opacity: .52;
+    pointer-events: none;
+  }
+  #view-chat #chat-messages .lifeos67h-r6-retry,
+  body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-retry {
+    background: rgba(255,241,242,.95) !important;
+    color: #be123c !important;
+    border-color: rgba(251,113,133,.45) !important;
+  }
+  @media (max-width: 640px) and (orientation: portrait) {
+    #view-chat #chat-messages .lifeos67h-r6-queue-card { max-width: 150px; padding:6px; }
+    #view-chat #chat-messages .lifeos67h-r6-preview { width:118px; height:86px; }
+    #view-chat #chat-messages .lifeos67h-r6-file-icon { width:118px; height:66px; }
+    #view-chat #chat-messages .lifeos67h-r6-meta,
+    #view-chat #chat-messages .lifeos67h-r6-status { max-width:118px; font-size:9px; }
+  }
+  @media (max-height: 520px) and (orientation: landscape) {
+    body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-queue-card { max-width: 112px; min-width: 96px; padding:5px; border-radius:14px; }
+    body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-preview { width:82px; height:54px; max-width:82px; max-height:54px; border-radius:10px; }
+    body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-file-icon { width:82px; height:48px; font-size:19px; border-radius:10px; }
+    body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-meta,
+    body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-status { max-width:82px; font-size:7.2px; line-height:1.08; margin-top:2px; }
+    body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-actions { gap:2px; margin-top:3px; }
+    body.lifeos-landscape-mini-pc #chat-messages .lifeos67h-r6-actions button { min-height:20px; border-radius:7px; padding:2px 3px; font-size:6.8px; }
+  }
+</style>
+<script id="lifeos-pha67h-r6-family-mobile-small-image-sequential-queue-fix-js">
+(function(){
+  'use strict';
+  const PHASE = 'Pha67H_R6_family_mobile_small_image_sequential_queue_fix';
+  const PATCH_ID = 'lifeos-pha67h-r6-family-mobile-small-image-sequential-queue-fix-js';
+  const RELAY_URL = 'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
+  const MAX_SINGLE = 50 * 1024 * 1024;
+  const TIMEOUTS = [120000, 240000, 420000];
+  const BACKOFFS = [2000, 5000, 10000];
+  const GAP_MS = 500;
+  const IMG_RE = /\.(jpe?g|png|webp|gif|bmp|heic|heif|avif)$/i;
+  const VID_RE = /\.(mp4|webm|mov|m4v|avi|mkv|3gp)$/i;
+  function ce(){ return window.ChatEngine || null; }
+  function esc(s){ return (window.escapeHTML ? window.escapeHTML(String(s ?? '')) : String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))); }
+  function makeId(prefix){ return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10); }
+  function relayBase(){ return String(window.LIFEOS_UPLOAD_RELAY_URL || RELAY_URL).replace(/\/+$/,''); }
+  function fileKind(file){ const mime=String(file && file.type || '').toLowerCase(); const name=String(file && file.name || '').toLowerCase(); if(mime.startsWith('image/') || IMG_RE.test(name)) return 'image'; if(mime.startsWith('video/') || VID_RE.test(name)) return 'video'; return 'file'; }
+  function labelOf(k){ return k === 'image' ? 'Ảnh' : (k === 'video' ? 'Video' : 'File'); }
+  function fmtSize(n){ n=Number(n||0); const engine=ce(); if(engine && typeof engine.formatFileSize==='function'){ try{return engine.formatFileSize(n);}catch(_){}} if(!n)return '0 B'; if(n<1024)return n+' B'; if(n<1048576)return (n/1024).toFixed(n<10240?1:0)+' KB'; return (n/1048576).toFixed(n<10485760?1:0)+' MB'; }
+  function safeName(engine,file){ try { return engine?.getSafeTelegramUploadName ? engine.getSafeTelegramUploadName(file.name || 'upload.bin', file.type || '') : (file.name || 'upload.bin'); } catch(_){ return String(file?.name || 'upload.bin').replace(/[\\/:*?"<>|]+/g,'_').slice(0,120) || 'upload.bin'; } }
+  function profileKey(engine){ try { return engine?.getKey?.() || window.viewingUser || window.currentUser || 'tham'; } catch(_){ return window.viewingUser || window.currentUser || 'tham'; } }
+  function currentTopic(engine){ try { return engine?.currentTopic && engine.currentTopic !== 'all' ? engine.currentTopic : null; } catch(_){ return null; } }
+  function log(event, payload){ try { console.info('[FamilyQueue R6] ' + event, payload || {}); } catch(_){} }
+  function isFamilyVisible(){ const v=document.getElementById('view-chat'); return !v || !v.classList.contains('hidden'); }
+  function extractIds(data){
+    const roots=[data, data&&data.result, data&&data.telegram, data&&data.telegram&&data.telegram.result, data&&data.data, data&&data.payload].filter(Boolean);
+    let fileId=data&&(data.fileId||data.file_id||data.telegramFileId||data.telegram_file_id||data.downloadFileId);
+    let messageId=data&&(data.messageId||data.message_id||data.telegramMessageId||data.telegram_message_id);
+    for(const r of roots){
+      if(!messageId && (r.message_id || r.id)) messageId = r.message_id || r.id;
+      const docs=[r.document,r.video,r.photo,r.file,r.attachment,r.result&&r.result.document,r.result&&r.result.video].filter(Boolean);
+      for(const doc of docs){ if(!fileId && (doc.file_id || doc.fileId || doc.id)) fileId = doc.file_id || doc.fileId || doc.id; if(!messageId && (doc.message_id || doc.messageId)) messageId = doc.message_id || doc.messageId; }
+    }
+    return { fileId:fileId?String(fileId):'', messageId:messageId?String(messageId):'' };
+  }
+  function xhrUpload(file, meta, timeoutMs, progress){
+    return new Promise(resolve => {
+      const started=Date.now(); const xhr=new XMLHttpRequest(); const fd=new FormData(); const name=meta.safeFileName || file.name || 'upload.bin';
+      fd.append('file', file, name); fd.append('file_name', name); fd.append('filename', name); fd.append('mime', file.type || 'application/octet-stream'); fd.append('size', String(file.size || 0)); fd.append('target','family'); fd.append('caption', name); fd.append('upload_id', meta.uploadId || makeId('r6_upload'));
+      fd.append('client_meta', JSON.stringify(Object.assign({phase:PHASE, endpoint:'/upload', field:'file', uploadField:'file', uploadMethod:'xhr_cloudflare_worker_relay_queue', timeoutMs, timestamp:new Date().toISOString(), navigatorOnLine:navigator.onLine, userAgent:navigator.userAgent}, meta || {})));
+      xhr.open('POST', relayBase() + '/upload', true); xhr.timeout = timeoutMs;
+      xhr.upload.onprogress = function(e){ if(progress) progress(e); };
+      xhr.onload = function(){ let data={}; let parseError=''; try{ data=xhr.responseText?JSON.parse(xhr.responseText):{}; }catch(e){ parseError=e.message||String(e); } resolve({ok:xhr.status>=200&&xhr.status<300&&(data.ok!==false), status:xhr.status||0, data, responseText:xhr.responseText||'', parseError, event:'load', durationMs:Date.now()-started}); };
+      xhr.onerror = function(){ resolve({ok:false,status:xhr.status||0,data:{},responseText:xhr.responseText||'',event:'network_error',durationMs:Date.now()-started}); };
+      xhr.ontimeout = function(){ resolve({ok:false,status:xhr.status||0,data:{},responseText:xhr.responseText||'',event:'timeout',durationMs:Date.now()-started}); };
+      xhr.onabort = function(){ resolve({ok:false,status:xhr.status||0,data:{},responseText:xhr.responseText||'',event:'abort',durationMs:Date.now()-started}); };
+      try { xhr.send(fd); } catch(e){ resolve({ok:false,status:0,data:{},responseText:'',event:'send_exception',error:e.message||String(e),durationMs:Date.now()-started}); }
+    });
+  }
+  function history(){ if(!Array.isArray(window.chatHistory)) window.chatHistory=[]; return window.chatHistory; }
+  function findMsg(id){ return history().find(m => String(m.id) === String(id)); }
+  function setMsgStatus(id, status, label, extra){ const m=findMsg(id); if(!m) return null; Object.assign(m, extra || {}); m.__familyQueueStatus=status; m.__familyQueueStatusLabel=label; m.uploadStatus=label; m.updatedAt=Date.now(); return m; }
+  function makePendingMessage(engine, file, item){
+    const kind=item.kind, label=labelOf(kind), name=file.name || 'upload.bin', mime=file.type || 'application/octet-stream';
+    return {
+      id:item.id, type:'family_upload_pending', kind: kind === 'image' ? 'image_document' : (kind === 'video' ? 'video_document' : 'file'),
+      file_name:name, fileName:name, name:name, mime_type:mime, mime:mime, file_size:Number(file.size||0), size:Number(file.size||0), blobSize:Number(file.size||0),
+      localObjectUrl:item.previewUrl || '', localUrl:item.previewUrl || '', previewUrl:item.previewUrl || '',
+      sender:profileKey(engine), timestamp:Date.now(), topic_id:currentTopic(engine),
+      __familyQueueItem:true, __familyQueueId:item.id, __familyQueueBatchId:item.batchId, __familyQueueIndex:item.index, __familyQueueTotal:item.total,
+      __familyQueueStatus:'queued', __familyQueueStatusLabel:`${label} · ${fmtSize(file.size)} · Chờ tải ${item.index}/${item.total}`,
+      uploadStatus:`${label} · ${fmtSize(file.size)} · Chờ tải ${item.index}/${item.total}`
+    };
+  }
+  function statusText(item, status, attempt, error){ const label=labelOf(item.kind); const size=fmtSize(item.file && item.file.size); const pos=`${item.index}/${item.total}`; if(status==='queued')return `${label} · ${size} · Chờ tải ${pos}`; if(status==='uploading')return `${label} · ${size} · Đang tải ${pos} · lần ${attempt || item.attempt || 1}/3`; if(status==='retry')return `${label} · ${size} · Lỗi mạng, thử lại ${pos}`; if(status==='success')return `${label} · ${size} · Thành công ${pos}`; if(status==='failed')return `${label} · ${size} · Lỗi mạng, bấm thử lại`; return `${label} · ${size} · ${pos}`; }
+  function renderSoon(engine){
+    const q=window.FamilyUploadQueue; if(!q) return;
+    const now=Date.now();
+    if(q._renderTimer) return;
+    const delay=Math.max(0, 320 - (now - (q._lastRenderAt || 0)));
+    q._renderTimer=setTimeout(()=>{ q._renderTimer=null; q._lastRenderAt=Date.now(); try{ engine?.saveAndSync?.(); engine?.render?.(); }catch(e){} }, delay);
+  }
+  function updateStatus(item, status, label, extra){ item.status=status; item.messageStatus=label; const engine=ce(); setMsgStatus(item.id, status, label, extra); renderSoon(engine); }
+  function queueCardHtml(m, mediaMode){
+    const id=esc(m.id||''); const name=esc(m.file_name||m.name||'upload.bin'); const mime=String(m.mime_type||m.mime||''); const kind = mediaMode || (mime.startsWith('image/') ? 'image' : (mime.startsWith('video/') ? 'video' : 'file'));
+    const label=kind==='image'?'Ảnh':(kind==='video'?'Video':'File'); const size=fmtSize(m.file_size||m.size||m.blobSize||0); const status=String(m.__familyQueueStatus||'queued'); const statusLabel=esc(m.__familyQueueStatusLabel||m.uploadStatus||(`${label} · ${size}`)); const src=esc(m.localObjectUrl||m.localUrl||m.previewUrl||'');
+    const media = kind==='image' ? `<button type="button" class="lifeos67h-r6-preview" onclick="event.stopPropagation();${status==='failed'?'':'window.ChatEngine.openLightbox && window.ChatEngine.openLightbox(\''+id+'\')'}" title="Xem ảnh"><img src="${src}" alt="${name}" data-msg-id="${id}" /></button>` : (kind==='video' ? `<div class="lifeos67h-r6-preview"><video src="${src}" muted playsinline preload="metadata" onclick="event.stopPropagation()"></video></div>` : `<div class="lifeos67h-r6-file-icon"><i class="ph-bold ph-file-arrow-up"></i></div>`);
+    const canUse = status === 'success';
+    const retry = status === 'failed' ? `<button type="button" class="lifeos67h-r6-retry" onclick="event.preventDefault();event.stopPropagation();window.FamilyUploadQueue && window.FamilyUploadQueue.retryItem('${id}')">Thử lại</button>` : '';
+    const third = retry || `<button type="button" ${canUse?'':'disabled'} onclick="event.preventDefault();event.stopPropagation();window.ChatEngine.copyFileLink && window.ChatEngine.copyFileLink('${id}')">Copy</button>`;
+    return `<div class="lifeos67h-r6-queue-card" data-family-r6-queue-id="${id}" data-family-r6-status="${esc(status)}">${media}<div class="lifeos67h-r6-meta">${esc(label)} · ${esc(size)}</div><div class="lifeos67h-r6-status" data-status="${esc(status)}">${statusLabel}</div><div class="lifeos67h-r6-actions"><button type="button" ${kind==='image' && src ? '' : 'disabled'} onclick="event.preventDefault();event.stopPropagation();window.ChatEngine.openLightbox && window.ChatEngine.openLightbox('${id}')">Xem</button><button type="button" ${canUse?'':'disabled'} onclick="event.preventDefault();event.stopPropagation();window.ChatEngine.downloadChatFile && window.ChatEngine.downloadChatFile('${id}')">Tải</button>${third}</div></div>`;
+  }
+  async function uploadWithRetry(item){
+    const engine=ce(); const file=item.file; const name=safeName(engine,file); let lastErr=null;
+    for(let attempt=1; attempt<=3; attempt++){
+      item.attempt=attempt;
+      updateStatus(item,'uploading',statusText(item,'uploading',attempt));
+      if(engine?.setUploadStatus) engine.setUploadStatus(`Đang tải ${item.index}/${item.total}: ${file.name || name} · lần ${attempt}/3`, 'info', false);
+      log('Start item', {batchId:item.batchId,index:item.index,total:item.total,fileName:file.name||name,size:file.size||0,attempt,status:'uploading',successCount:window.FamilyUploadQueue.successCount,failCount:window.FamilyUploadQueue.failCount});
+      let lastProgressAt=0;
+      try{
+        if(Number(file.size||0) > MAX_SINGLE && engine?.__lifeosR6OldSendFile){
+          const before=history().map(m=>String(m.id));
+          const result=await engine.__lifeosR6OldSendFile(file,item.index,item.total,{inputSource:'r6_large_fallback'});
+          const after=history(); const added=after.filter(m=>!before.includes(String(m.id)));
+          const ids = result && result.message ? {fileId:result.message.file_id||result.message.fileId||'', messageId:result.message.message_id||result.message.telegram_msg_id||''} : (added[0] ? {fileId:added[0].file_id||added[0].fileId||'', messageId:added[0].message_id||added[0].telegram_msg_id||''} : {});
+          if(added.length) window.chatHistory = history().filter(m => !added.some(a => String(a.id) === String(m.id)));
+          if(!result || !result.ok || !ids.fileId) throw new Error(result?.error || 'large_fallback_failed');
+          return ids;
+        }
+        const meta={batchId:item.batchId,queueId:item.id,index:item.index,total:item.total,fileName:file.name||name,safeFileName:name,fileSize:file.size||0,mime:file.type||'',kind:item.kind,attempt,maxAttempts:3,uploadId:item.uploadId};
+        const res=await xhrUpload(file, meta, TIMEOUTS[attempt-1] || 420000, function(e){
+          const now=Date.now(); if(now-lastProgressAt<420) return; lastProgressAt=now;
+          if(e && e.lengthComputable){ const pct=Math.max(1,Math.min(99,Math.round(e.loaded/e.total*100))); updateStatus(item,'uploading',`${labelOf(item.kind)} · ${fmtSize(file.size)} · Đang tải ${item.index}/${item.total} · ${pct}%`); if(engine?.setUploadStatus) engine.setUploadStatus(`Đang tải ${item.index}/${item.total}: ${file.name || name} — ${pct}%`, 'info', false); }
+        });
+        const ids=extractIds(res.data || {});
+        if(!res.ok || !ids.fileId){ const msg=(res.data && (res.data.description||res.data.error||res.data.message)) || res.event || ('http_'+res.status); const err=new Error(msg); err.response=res; throw err; }
+        return ids;
+      }catch(e){
+        lastErr=e; item.error=String(e && e.message || e || 'upload_failed');
+        try { engine.lastFailedUploadFile = file; engine.lastUploadError = {phase:PHASE,batchId:item.batchId,index:item.index,total:item.total,fileName:file.name||name,safeFileName:name,fileSize:file.size||0,mime:file.type||'',attempt,status:'retry_or_failed',errorMessage:item.error,xhrEvent:e?.response?.event||'',httpStatus:e?.response?.status||0,xhrStatus:e?.response?.status||0,timestamp:new Date().toISOString(),navigatorOnLine:navigator.onLine,userAgent:navigator.userAgent}; localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify(engine.lastUploadError)); } catch(_) {}
+        if(attempt<3){
+          updateStatus(item,'retry',statusText(item,'retry',attempt,item.error));
+          log('Retry item', {batchId:item.batchId,index:item.index,total:item.total,fileName:file.name||name,size:file.size||0,attempt,status:'retry',successCount:window.FamilyUploadQueue.successCount,failCount:window.FamilyUploadQueue.failCount});
+          if(engine?.setUploadStatus) engine.setUploadStatus(`Lỗi mạng ${item.index}/${item.total}: ${file.name || name}. Thử lại sau ${Math.round((BACKOFFS[attempt-1]||2000)/1000)}s`, 'error', false);
+          await new Promise(r=>setTimeout(r, BACKOFFS[attempt-1] || 2000));
+        }
+      }
+    }
+    throw lastErr || new Error('upload_failed');
+  }
+  const Queue = window.FamilyUploadQueue && window.FamilyUploadQueue.__phase === PHASE ? window.FamilyUploadQueue : {
+    __phase: PHASE, running:false, items:[], currentIndex:0, total:0, successCount:0, failCount:0,
+    enqueue(files, source){
+      const engine=ce(); const arr=Array.from(files||[]).filter(Boolean); if(!arr.length) return {ok:true,okCount:0,failCount:0};
+      const batchId=makeId('r6_batch'); const startTotal=arr.length; this.total += startTotal;
+      const newItems=arr.map((file,idx)=>{ const kind=fileKind(file); let previewUrl=''; try{ if(kind==='image'||kind==='video') previewUrl=URL.createObjectURL(file); }catch(_){} return {id:makeId('r6_item'),batchId,index:idx+1,total:startTotal,file,kind,previewUrl,source:source||'file_input',status:'queued',attempt:0,uploadId:makeId('r6_upload')}; });
+      window.chatHistory = history();
+      newItems.forEach(item=>{ this.items.push(item); window.chatHistory.push(makePendingMessage(engine,item.file,item)); });
+      log('Enqueue batch', {batchId,total:startTotal,fileName:newItems[0]?.file?.name||'',size:newItems.reduce((s,x)=>s+Number(x.file.size||0),0),status:'queued',successCount:this.successCount,failCount:this.failCount});
+      try{ engine?.saveAndSync?.(); engine?.render?.(); }catch(e){}
+      if(engine?.setUploadStatus) engine.setUploadStatus(`Đã xếp hàng ${startTotal} file. Bắt đầu gửi tuần tự 1-by-1.`, 'info', false);
+      this.process();
+      return {ok:true,batchId,total:startTotal,queued:startTotal};
+    },
+    async process(){
+      if(this.running) return; this.running=true;
+      const engine=ce();
+      try{
+        let item;
+        while((item=this.items.find(x=>x.status==='queued' || x.status==='retry_queued'))){
+          this.currentIndex=item.index;
+          try{
+            const ids=await uploadWithRetry(item);
+            item.status='success'; this.successCount++;
+            const msg=findMsg(item.id);
+            if(msg){ Object.assign(msg,{type:item.kind==='video'?'video':'file',kind:item.kind==='image'?'image_document':(item.kind==='video'?'video_document':'file'),file_id:ids.fileId,fileId:ids.fileId,telegramFileId:ids.fileId,telegram_msg_id:ids.messageId||'',message_id:ids.messageId||'',__familyQueueStatus:'success',__familyQueueStatusLabel:statusText(item,'success'),uploadStatus:statusText(item,'success'),updatedAt:Date.now()}); }
+            log('Success item', {batchId:item.batchId,index:item.index,total:item.total,fileName:item.file.name||'',size:item.file.size||0,attempt:item.attempt,status:'success',successCount:this.successCount,failCount:this.failCount});
+            if(engine?.setUploadStatus) engine.setUploadStatus(`Đã gửi ${item.index}/${item.total}: ${item.file.name || 'file'}`, 'done', true);
+            try{ engine?.saveAndSync?.(); engine?.render?.(); }catch(e){}
+          }catch(e){
+            item.status='failed'; item.error=String(e && e.message || e || 'upload_failed'); this.failCount++;
+            updateStatus(item,'failed',statusText(item,'failed',3,item.error),{__familyQueueError:item.error});
+            log('Failed item', {batchId:item.batchId,index:item.index,total:item.total,fileName:item.file.name||'',size:item.file.size||0,attempt:item.attempt||3,status:'failed',successCount:this.successCount,failCount:this.failCount});
+            if(engine?.setUploadStatus) engine.setUploadStatus(`Lỗi ${item.index}/${item.total}: ${item.file.name || 'file'} — bấm Thử lại trên card.`, 'error', false);
+          }
+          await new Promise(r=>setTimeout(r,GAP_MS));
+        }
+      } finally {
+        this.running=false;
+        const pending=this.items.filter(x=>x.status==='queued'||x.status==='retry_queued').length;
+        if(!pending){ log('Batch done', {batchId:'all',index:this.currentIndex,total:this.total,fileName:'',size:0,attempt:0,status:'done',successCount:this.successCount,failCount:this.failCount}); if(engine?.setUploadStatus) engine.setUploadStatus(`Queue hoàn tất: ${this.successCount} thành công, ${this.failCount} lỗi`, this.failCount?'error':'done', !this.failCount); }
+      }
+    },
+    retryItem(id){
+      const engine=ce(); const item=this.items.find(x=>String(x.id)===String(id));
+      if(!item || !item.file){ if(engine?.setUploadStatus) engine.setUploadStatus('Không còn dữ liệu file gốc để thử lại. Hãy chọn lại file.', 'error', false); return false; }
+      if(item.status !== 'failed'){ if(engine?.setUploadStatus) engine.setUploadStatus('File này chưa ở trạng thái lỗi.', 'info', true); return false; }
+      item.status='queued'; item.attempt=0; item.error=''; this.failCount=Math.max(0,this.failCount-1);
+      updateStatus(item,'queued',statusText(item,'queued'));
+      log('Retry item', {batchId:item.batchId,index:item.index,total:item.total,fileName:item.file.name||'',size:item.file.size||0,attempt:0,status:'manual_retry',successCount:this.successCount,failCount:this.failCount});
+      this.process(); return true;
+    },
+    state(){ return {running:this.running,items:this.items.map(x=>({id:x.id,batchId:x.batchId,index:x.index,total:x.total,fileName:x.file?.name||'',size:x.file?.size||0,status:x.status,attempt:x.attempt,kind:x.kind})),currentIndex:this.currentIndex,total:this.total,successCount:this.successCount,failCount:this.failCount}; }
+  };
+  window.FamilyUploadQueue = Queue;
+  function install(){
+    const engine=ce(); if(!engine) return false;
+    if(!engine.__lifeosR6OldSendFile && engine.sendFile && engine.sendFile.__lifeos67hR6Queue !== true) engine.__lifeosR6OldSendFile=engine.sendFile.bind(engine);
+    if(!engine.__lifeosR6OldRenderFileCard && engine.renderFileCard && engine.renderFileCard.__lifeos67hR6Queue !== true) engine.__lifeosR6OldRenderFileCard=engine.renderFileCard.bind(engine);
+    if(!engine.__lifeosR6OldRenderImagePreview && engine.renderImagePreview && engine.renderImagePreview.__lifeos67hR6Queue !== true) engine.__lifeosR6OldRenderImagePreview=engine.renderImagePreview.bind(engine);
+    engine.renderFileCard=function(m){ if(m && m.__familyQueueItem) return queueCardHtml(m, String(m.mime_type||m.mime||'').toLowerCase().startsWith('video/') || String(m.kind||'').includes('video') ? 'video' : 'file'); return this.__lifeosR6OldRenderFileCard ? this.__lifeosR6OldRenderFileCard(m) : `<div>${esc(m?.file_name||m?.name||'File')}</div>`; };
+    engine.renderFileCard.__lifeos67hR6Queue=true;
+    engine.renderImagePreview=function(m, elId){ if(m && m.__familyQueueItem) return queueCardHtml(m, 'image'); return this.__lifeosR6OldRenderImagePreview ? this.__lifeosR6OldRenderImagePreview(m, elId) : `<div>${esc(m?.file_name||m?.name||'Ảnh')}</div>`; };
+    engine.renderImagePreview.__lifeos67hR6Queue=true;
+    engine.uploadRouter=function(files, source){ return window.FamilyUploadQueue.enqueue(files, source || 'upload_router'); };
+    engine.uploadRouter.__lifeos67gR1Router=true; engine.uploadRouter.__lifeos67hR6Queue=true;
+    engine.sendMultipleFiles=function(files){ return window.FamilyUploadQueue.enqueue(files, 'file_input'); };
+    engine.sendMultipleFiles.__lifeos67gR1Router=true; engine.sendMultipleFiles.__lifeos67hR6Queue=true;
+    engine.handleFiles=function(files){ return window.FamilyUploadQueue.enqueue(files, 'handle_files'); };
+    engine.handleFiles.__lifeos67gR1Router=true; engine.handleFiles.__lifeos67hR6Queue=true;
+    engine.handleFile=function(file){ return file ? window.FamilyUploadQueue.enqueue([file], 'handle_file') : false; };
+    engine.handleFile.__lifeos67gR1Router=true; engine.handleFile.__lifeos67hR6Queue=true;
+    engine.sendFile=function(file,currentIndex,totalFiles,options){ return file ? window.FamilyUploadQueue.enqueue([file], (options&&options.inputSource)||'send_file') : {ok:false,error:'no_file'}; };
+    engine.sendFile.__lifeos67gR1Router=true; engine.sendFile.__lifeos67hR6Queue=true;
+    engine.retryLastFailedUpload=function(){ const failed=window.FamilyUploadQueue.items.slice().reverse().find(x=>x.status==='failed'); if(failed) return window.FamilyUploadQueue.retryItem(failed.id); if(this.lastFailedUploadFile) return window.FamilyUploadQueue.enqueue([this.lastFailedUploadFile], 'retry_last_failed_upload'); window.showToast?.('Không có file lỗi để gửi lại','ph-info'); return false; };
+    engine.retryLastFailedUpload.__lifeos67hR6Queue=true;
+    const input=document.getElementById('chat-file-input');
+    if(input && !input.__lifeos67hR6Bound){ input.__lifeos67hR6Bound=true; input.onchange=function(e){ const files=e.target&&e.target.files; if(files&&files.length){ e.preventDefault&&e.preventDefault(); e.stopImmediatePropagation&&e.stopImmediatePropagation(); window.FamilyUploadQueue.enqueue(files,'file_input_r6'); e.target.value=''; } }; }
+    return true;
+  }
+  if(!document.__lifeos67hR6UploadCaptureBound){
+    document.__lifeos67hR6UploadCaptureBound=true;
+    document.addEventListener('change', function(e){ const t=e.target; if(t && t.id==='chat-file-input' && t.files && t.files.length){ const engine=ce(); if(!engine || !engine.uploadRouter?.__lifeos67hR6Queue) return; e.preventDefault(); e.stopImmediatePropagation(); const files=Array.from(t.files); t.value=''; window.FamilyUploadQueue.enqueue(files,'file_input_capture_r6'); } }, true);
+    document.addEventListener('drop', function(e){ if(!isFamilyVisible()) return; const files=e.dataTransfer&&e.dataTransfer.files; if(!files||!files.length) return; const inside=e.target&&e.target.closest&&e.target.closest('#view-chat,#chat-messages,#chat-input-area,#chat-form'); if(!inside) return; const engine=ce(); if(!engine || !engine.uploadRouter?.__lifeos67hR6Queue) return; e.preventDefault(); e.stopImmediatePropagation(); window.FamilyUploadQueue.enqueue(Array.from(files),'drag_drop_capture_r6'); }, true);
+    document.addEventListener('paste', function(e){ if(!isFamilyVisible()) return; const inside=e.target&&e.target.closest&&e.target.closest('#view-chat,#chat-messages,#chat-input,#chat-input-area,#chat-form'); if(!inside) return; const files=[]; const items=e.clipboardData&&e.clipboardData.items; if(items){ for(const it of items){ if(it.kind==='file'){ const f=it.getAsFile&&it.getAsFile(); if(f) files.push(f); } } } if(!files.length) return; const engine=ce(); if(!engine || !engine.uploadRouter?.__lifeos67hR6Queue) return; e.preventDefault(); e.stopImmediatePropagation(); window.FamilyUploadQueue.enqueue(files,'paste_capture_r6'); }, true);
+  }
+  window.LifeOS_Pha67H_R6_FamilyMobileSmallImageSequentialQueueFix = {phase:PHASE, patchId:PATCH_ID, base:'index_pha67H_R5_2_family_mobile_landscape_dense_panorama_fix.html', singleQueue:true, mobileConcurrency:1, pendingCardsBeforeUpload:true, retryTimeoutsMs:TIMEOUTS.slice(), retryBackoffsMs:BACKOFFS.slice(), doesNotPatchNavigation:true, doesNotPatchProfile:true, doesNotPatchSelection:true, doesNotPatchThumbnail:true, doesNotPatchViewer:true, doesNotPatchRadioTv:true};
+  function schedule(){ install(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', schedule, {once:true}); else schedule();
+  setTimeout(schedule,300); setTimeout(schedule,900); setTimeout(schedule,1800); setTimeout(schedule,3600);
+  window.addEventListener('focus', schedule, true);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') schedule(); }, true);
+})();
+</script>
+<!-- LIFEOS PHA67H_R6 FAMILY MOBILE SMALL IMAGE SEQUENTIAL QUEUE FIX - END -->
+
+
+<!-- LIFEOS PHA67H_R7 WEATHER 24H SMART TIMELINE OVERVIEW FIX - START -->
+<style id="lifeos-pha67h-r7-weather-24h-smart-timeline-overview-fix-style">
+/* Pha67H_R7: scoped only to Weather UI. Does not touch Family/Profile/Navigation/Radio/Tivi. */
+#mode-weather-ui .lifeos67h-r7-weather-shell,
+#mode-weather-ui .lifeos67h-r7-weather-shell * {
+  box-sizing: border-box;
+}
+#mode-weather-ui .lifeos67h-r7-weather-shell {
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+  margin: 0 0 10px 0;
+  border: 1px solid rgba(125, 211, 252, .55);
+  background: linear-gradient(135deg, rgba(240, 249, 255, .92), rgba(238, 242, 255, .76));
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+}
+#mode-weather-ui .lifeos67h-r7-quick {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+  max-width: 100%;
+}
+#mode-weather-ui .lifeos67h-r7-quick-main,
+#mode-weather-ui .lifeos67h-r7-quick-side {
+  min-width: 0;
+  border: 1px solid rgba(226,232,240,.9);
+  background: rgba(255,255,255,.78);
+  border-radius: 16px;
+  padding: 9px 10px;
+}
+#mode-weather-ui .lifeos67h-r7-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgb(15, 23, 42);
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 900;
+  letter-spacing: -.01em;
+  margin-bottom: 5px;
+}
+#mode-weather-ui .lifeos67h-r7-title i { color: rgb(14, 165, 233); font-size: 16px; }
+#mode-weather-ui .lifeos67h-r7-text {
+  color: rgb(51, 65, 85);
+  font-size: 11px;
+  line-height: 1.42;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+#mode-weather-ui .lifeos67h-r7-text strong { color: rgb(15, 23, 42); font-weight: 950; }
+#mode-weather-ui .lifeos67h-r7-microgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 6px;
+}
+#mode-weather-ui .lifeos67h-r7-metric {
+  min-width: 0;
+  border-radius: 13px;
+  background: rgba(248,250,252,.9);
+  border: 1px solid rgba(226,232,240,.9);
+  padding: 7px 8px;
+}
+#mode-weather-ui .lifeos67h-r7-metric-label {
+  font-size: 9px;
+  line-height: 1.15;
+  color: rgb(100,116,139);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mode-weather-ui .lifeos67h-r7-metric-value {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.2;
+  color: rgb(15,23,42);
+  font-weight: 950;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mode-weather-ui .lifeos67h-r7-phases {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 8px;
+  max-width: 100%;
+}
+#mode-weather-ui .lifeos67h-r7-phase-card {
+  min-width: 0;
+  border: 1px solid rgba(226,232,240,.92);
+  background: rgba(255,255,255,.78);
+  border-radius: 15px;
+  padding: 8px 9px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.75) inset;
+}
+#mode-weather-ui .lifeos67h-r7-phase-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+}
+#mode-weather-ui .lifeos67h-r7-phase-name {
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.2;
+  color: rgb(15,23,42);
+  font-weight: 950;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mode-weather-ui .lifeos67h-r7-phase-time {
+  flex-shrink: 0;
+  font-size: 9px;
+  line-height: 1;
+  color: rgb(100,116,139);
+  font-weight: 900;
+  background: rgba(241,245,249,.9);
+  border-radius: 999px;
+  padding: 3px 6px;
+}
+#mode-weather-ui .lifeos67h-r7-phase-meta {
+  margin-top: 5px;
+  font-size: 10px;
+  line-height: 1.25;
+  color: rgb(71,85,105);
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mode-weather-ui .lifeos67h-r7-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  margin-top: 5px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  line-height: 1.1;
+  font-weight: 950;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid transparent;
+}
+#mode-weather-ui .lifeos67h-r7-tag-ok { color: rgb(22,101,52); background: rgba(220,252,231,.88); border-color: rgba(134,239,172,.75); }
+#mode-weather-ui .lifeos67h-r7-tag-warm { color: rgb(146,64,14); background: rgba(254,243,199,.92); border-color: rgba(252,211,77,.76); }
+#mode-weather-ui .lifeos67h-r7-tag-hot { color: rgb(185,28,28); background: rgba(254,226,226,.92); border-color: rgba(252,165,165,.8); }
+#mode-weather-ui .lifeos67h-r7-tag-rain { color: rgb(3,105,161); background: rgba(224,242,254,.92); border-color: rgba(125,211,252,.82); }
+#mode-weather-ui .lifeos67h-r7-tag-soft { color: rgb(71,85,105); background: rgba(241,245,249,.92); border-color: rgba(226,232,240,.92); }
+#mode-weather-ui #weather-hourly-list.lifeos67h-r7-timeline {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 8px 2px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+#mode-weather-ui .lifeos67h-r7-hour-card {
+  flex: 0 0 76px;
+  min-width: 76px;
+  max-width: 76px;
+  scroll-snap-align: start;
+  border-radius: 16px;
+  border: 1px solid rgba(226,232,240,.95);
+  background: rgba(248,250,252,.94);
+  padding: 8px 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 112px;
+  box-shadow: 0 1px 2px rgba(15,23,42,.035);
+}
+#mode-weather-ui .lifeos67h-r7-hour-card.r7-now { border-color: rgba(99,102,241,.62); box-shadow: 0 0 0 2px rgba(99,102,241,.16); background: rgba(238,242,255,.94); }
+#mode-weather-ui .lifeos67h-r7-hour-card.r7-hot { border-color: rgba(251,146,60,.58); background: rgba(255,247,237,.96); }
+#mode-weather-ui .lifeos67h-r7-hour-card.r7-avoid { border-color: rgba(248,113,113,.62); background: rgba(254,242,242,.96); }
+#mode-weather-ui .lifeos67h-r7-hour-card.r7-rain { border-color: rgba(56,189,248,.68); background: rgba(240,249,255,.96); }
+#mode-weather-ui .lifeos67h-r7-hour-card.r7-peak-temp { box-shadow: 0 0 0 2px rgba(251,146,60,.22); }
+#mode-weather-ui .lifeos67h-r7-hour-card.r7-peak-rain { box-shadow: 0 0 0 2px rgba(56,189,248,.22); }
+#mode-weather-ui .lifeos67h-r7-hour-time { font-size: 10px; line-height: 1.15; font-weight: 950; color: rgb(71,85,105); margin-bottom: 4px; white-space: nowrap; }
+#mode-weather-ui .lifeos67h-r7-hour-card.r7-now .lifeos67h-r7-hour-time { color: rgb(79,70,229); }
+#mode-weather-ui .lifeos67h-r7-hour-icon { font-size: 24px; color: rgb(14,165,233); line-height: 1; margin: 2px 0 3px; filter: drop-shadow(0 1px 1px rgba(15,23,42,.08)); }
+#mode-weather-ui .lifeos67h-r7-hour-temp { font-size: 14px; line-height: 1.1; font-weight: 950; color: rgb(15,23,42); }
+#mode-weather-ui .lifeos67h-r7-hour-rain { display:flex; align-items:center; justify-content:center; gap:2px; min-height:15px; margin-top:4px; font-size:10px; line-height:1; font-weight:900; color: rgb(2,132,199); }
+#mode-weather-ui .lifeos67h-r7-rain-bar { width: 100%; height: 4px; border-radius: 999px; overflow: hidden; background: rgba(226,232,240,.92); margin-top: 5px; }
+#mode-weather-ui .lifeos67h-r7-rain-bar > span { display:block; height:100%; border-radius:999px; background: linear-gradient(90deg, rgba(56,189,248,.8), rgba(14,165,233,1)); min-width: 0; }
+#mode-weather-ui .lifeos67h-r7-hour-label { margin-top: 5px; max-width: 100%; font-size: 8.5px; line-height: 1.05; font-weight: 950; color: rgb(100,116,139); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 720px) {
+  #mode-weather-ui .lifeos67h-r7-weather-shell { padding: 8px; border-radius: 18px; }
+  #mode-weather-ui .lifeos67h-r7-quick { grid-template-columns: 1fr; gap: 7px; }
+  #mode-weather-ui .lifeos67h-r7-quick-main,
+  #mode-weather-ui .lifeos67h-r7-quick-side { padding: 8px 9px; border-radius: 15px; }
+  #mode-weather-ui .lifeos67h-r7-microgrid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  #mode-weather-ui .lifeos67h-r7-phases { display:flex; overflow-x:auto; overflow-y:hidden; gap:7px; padding-bottom:5px; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; }
+  #mode-weather-ui .lifeos67h-r7-phase-card { flex:0 0 158px; max-width:158px; scroll-snap-align:start; }
+  #mode-weather-ui .lifeos67h-r7-hour-card { flex-basis: 70px; min-width:70px; max-width:70px; min-height:106px; padding:7px 6px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  #mode-weather-ui .lifeos67h-r7-weather-shell { padding: 7px; margin-bottom: 8px; }
+  #mode-weather-ui .lifeos67h-r7-quick { grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); gap:6px; }
+  #mode-weather-ui .lifeos67h-r7-title { font-size: 11px; margin-bottom:3px; }
+  #mode-weather-ui .lifeos67h-r7-text { font-size: 10px; line-height:1.28; }
+  #mode-weather-ui .lifeos67h-r7-metric { padding:5px 7px; }
+  #mode-weather-ui .lifeos67h-r7-phases { display:flex; overflow-x:auto; padding-bottom:4px; gap:6px; margin-top:6px; }
+  #mode-weather-ui .lifeos67h-r7-phase-card { flex:0 0 136px; max-width:136px; padding:7px; border-radius:13px; }
+  #mode-weather-ui .lifeos67h-r7-phase-name { font-size:10px; }
+  #mode-weather-ui .lifeos67h-r7-phase-meta { font-size:9px; }
+  #mode-weather-ui .lifeos67h-r7-hour-card { flex-basis: 64px; min-width:64px; max-width:64px; min-height:96px; padding:6px 5px; border-radius:14px; }
+  #mode-weather-ui .lifeos67h-r7-hour-icon { font-size:21px; }
+  #mode-weather-ui .lifeos67h-r7-hour-temp { font-size:13px; }
+}
+</style>
+<script id="lifeos-pha67h-r7-weather-24h-smart-timeline-overview-fix-js">
+(function(){
+  'use strict';
+  const PHASE = 'Pha67H_R7_weather_24h_smart_timeline_overview_fix';
+  if(window.__lifeos67hR7WeatherSmartTimelineInstalled) return;
+  window.__lifeos67hR7WeatherSmartTimelineInstalled = true;
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+  const fmt = (v, d=0) => { const n = num(v); return n == null ? '--' : n.toFixed(d).replace(/\.0$/,''); };
+  const hourNum = value => {
+    const raw = String(value || '');
+    const m = raw.match(/T(\d{1,2})/);
+    if(m) return Math.max(0, Math.min(23, parseInt(m[1],10)));
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? 0 : d.getHours();
+  };
+  const labelHour = (value, nowLabel) => {
+    const raw = String(value || '');
+    const m = raw.match(/T(\d{2}:\d{2})/);
+    const label = m ? m[1] : String(hourNum(value)).padStart(2,'0') + ':00';
+    return nowLabel ? 'Bây giờ' : label;
+  };
+  const tempLabelClass = (tag) => tag === 'avoid' ? 'lifeos67h-r7-tag-hot' : (tag === 'hot' ? 'lifeos67h-r7-tag-warm' : (tag === 'rain' ? 'lifeos67h-r7-tag-rain' : 'lifeos67h-r7-tag-ok'));
+  const hourAdvice = x => {
+    const t = num(x.temp);
+    const r = num(x.precipProb) || 0;
+    const h = hourNum(x.time);
+    if(r >= 50) return {key:'rain', text:'🌧️ Có khả năng mưa'};
+    if(t != null && t >= 36) return {key:'avoid', text:'🔥 Hạn chế ra ngoài'};
+    if(t != null && t >= 32) return {key:'hot', text:'⚠️ Nóng oi'};
+    if(r >= 20) return {key:'rain', text:'🌦️ Có thể mưa'};
+    if((h >= 22 || h <= 5) && (t == null || t <= 30)) return {key:'ok', text:'✅ Dễ chịu hơn'};
+    return {key:'ok', text:'✅ Dễ chịu'};
+  };
+  const phaseNameByStart = h => {
+    if(h >= 17 && h <= 23) return 'Chiều tối';
+    if(h >= 0 && h <= 5) return 'Đêm';
+    if(h >= 6 && h <= 11) return 'Sáng';
+    return 'Trưa/chiều mai';
+  };
+  const rangeLabel = arr => {
+    if(!arr.length) return '--';
+    const first = hourNum(arr[0].time), last = hourNum(arr[arr.length-1].time);
+    return String(first).padStart(2,'0') + 'h–' + String(last).padStart(2,'0') + 'h';
+  };
+  const analyze = data => {
+    const hourly = Array.isArray(data && data.hourly) ? data.hourly.slice(0,24).filter(Boolean) : [];
+    const temps = hourly.map(x => num(x.temp)).filter(v => v != null);
+    const rains = hourly.map(x => num(x.precipProb)).filter(v => v != null);
+    const maxTemp = temps.length ? Math.max(...temps) : null;
+    const minTemp = temps.length ? Math.min(...temps) : null;
+    const maxRain = rains.length ? Math.max(...rains) : null;
+    const hottestIndex = maxTemp == null ? -1 : hourly.findIndex(x => num(x.temp) === maxTemp);
+    const rainiestIndex = maxRain == null ? -1 : hourly.findIndex(x => num(x.precipProb) === maxRain);
+    const hottest = hottestIndex >= 0 ? hourly[hottestIndex] : null;
+    const rainiest = rainiestIndex >= 0 ? hourly[rainiestIndex] : null;
+    const dominant = (() => {
+      if(maxRain != null && maxRain >= 50) return {key:'rain', text:'Có mưa đáng chú ý'};
+      if(maxTemp != null && maxTemp >= 36) return {key:'avoid', text:'Có lúc rất nóng'};
+      if(maxTemp != null && maxTemp >= 32) return {key:'hot', text:'Nóng oi'};
+      if(maxRain != null && maxRain >= 20) return {key:'rain', text:'Có thể mưa rải rác'};
+      return {key:'ok', text:'Ít biến động lớn'};
+    })();
+    const advice = (() => {
+      if(maxRain != null && maxRain >= 50) return 'Nên mang ô/áo mưa, tránh chủ quan khi di chuyển.';
+      if(maxTemp != null && maxTemp >= 36) return 'Hạn chế đứng lâu ngoài nắng, uống nước đều, đội mũ.';
+      if(maxTemp != null && maxTemp >= 32) return 'Ra ngoài nên mặc thoáng, uống nước và nghỉ xen kẽ.';
+      if(maxRain != null && maxRain >= 20) return 'Có thể chuẩn bị áo mưa mỏng nếu đi xa.';
+      return 'Sinh hoạt bình thường, vẫn nên theo dõi trước khi ra ngoài.';
+    })();
+    const chunks = [];
+    for(let i=0;i<4;i++) chunks.push(hourly.slice(i*6, i*6+6));
+    return {hourly, temps, rains, maxTemp, minTemp, maxRain, hottestIndex, rainiestIndex, hottest, rainiest, dominant, advice, chunks};
+  };
+  const stageCard = arr => {
+    if(!arr.length) return '';
+    const tvals = arr.map(x=>num(x.temp)).filter(v=>v!=null);
+    const rvals = arr.map(x=>num(x.precipProb)).filter(v=>v!=null);
+    const tMin = tvals.length ? Math.min(...tvals) : null;
+    const tMax = tvals.length ? Math.max(...tvals) : null;
+    const rMax = rvals.length ? Math.max(...rvals) : null;
+    const startH = hourNum(arr[0].time);
+    const labelProbe = {temp:tMax, precipProb:rMax, time:arr[0].time};
+    const tag = hourAdvice(labelProbe);
+    const tempText = tMin == null ? 'Nhiệt độ --' : (fmt(tMin) + '–' + fmt(tMax) + '°C');
+    const rainText = rMax == null ? 'Mưa: thiếu dữ liệu' : ('Mưa cao nhất ' + fmt(rMax) + '%');
+    return `<div class="lifeos67h-r7-phase-card">
+      <div class="lifeos67h-r7-phase-head"><div class="lifeos67h-r7-phase-name">${esc(phaseNameByStart(startH))}</div><div class="lifeos67h-r7-phase-time">${esc(rangeLabel(arr))}</div></div>
+      <div class="lifeos67h-r7-phase-meta">${esc(tempText)} · ${esc(rainText)}</div>
+      <div class="lifeos67h-r7-tag ${tempLabelClass(tag.key)}">${esc(tag.text)}</div>
+    </div>`;
+  };
+  const hourCard = (x, i, stats) => {
+    const t = num(x.temp);
+    const r = Math.max(0, Math.min(100, num(x.precipProb) || 0));
+    const tag = hourAdvice(x);
+    const classes = ['lifeos67h-r7-hour-card'];
+    if(i === 0) classes.push('r7-now', 'hourly-current');
+    if(tag.key === 'hot') classes.push('r7-hot');
+    if(tag.key === 'avoid') classes.push('r7-avoid');
+    if(tag.key === 'rain') classes.push('r7-rain');
+    if(i === stats.hottestIndex) classes.push('r7-peak-temp');
+    if(i === stats.rainiestIndex && stats.maxRain != null && stats.maxRain >= 20) classes.push('r7-peak-rain');
+    const label = i === stats.hottestIndex ? 'Nóng nhất' : (i === stats.rainiestIndex && stats.maxRain >= 20 ? 'Mưa cao' : tag.text.replace(/^[^\s]+\s*/, ''));
+    return `<div class="${classes.join(' ')}" title="${esc(labelHour(x.time, i===0))}: ${fmt(t)}°C, mưa ${fmt(r)}%">
+      <div class="lifeos67h-r7-hour-time">${esc(labelHour(x.time, i===0))}</div>
+      <i class="ph-fill ${esc(x.icon || 'ph-cloud-sun')} lifeos67h-r7-hour-icon"></i>
+      <div class="lifeos67h-r7-hour-temp">${fmt(t)}°</div>
+      <div class="lifeos67h-r7-hour-rain"><i class="ph-bold ph-drop"></i>${fmt(r)}%</div>
+      <div class="lifeos67h-r7-rain-bar"><span style="width:${r}%"></span></div>
+      <div class="lifeos67h-r7-hour-label">${esc(label)}</div>
+    </div>`;
+  };
+  const ensureShell = () => {
+    const hourlyList = document.getElementById('weather-hourly-list');
+    if(!hourlyList) return null;
+    let shell = document.getElementById('lifeos67h-r7-weather-shell');
+    if(!shell){
+      shell = document.createElement('div');
+      shell.id = 'lifeos67h-r7-weather-shell';
+      shell.className = 'lifeos67h-r7-weather-shell';
+      shell.innerHTML = '<div class="lifeos67h-r7-quick"><div class="lifeos67h-r7-quick-main" id="lifeos67h-r7-quick-main"></div><div class="lifeos67h-r7-quick-side"><div class="lifeos67h-r7-microgrid" id="lifeos67h-r7-microgrid"></div></div></div><div class="lifeos67h-r7-phases" id="lifeos67h-r7-phases"></div>';
+      const ai = document.getElementById('weather-ai-summary');
+      if(ai && ai.parentNode) ai.parentNode.insertBefore(shell, ai);
+      else hourlyList.parentNode.insertBefore(shell, hourlyList);
+    }
+    return shell;
+  };
+  const renderSmartWeather = data => {
+    const stats = analyze(data);
+    const shell = ensureShell();
+    const hourlyList = document.getElementById('weather-hourly-list');
+    if(!shell || !hourlyList || !stats.hourly.length) return;
+    const hotText = stats.hottest ? `${labelHour(stats.hottest.time)} · ${fmt(stats.maxTemp)}°C` : 'Thiếu dữ liệu';
+    const rainText = stats.maxRain == null ? 'Thiếu dữ liệu' : (stats.rainiest ? `${labelHour(stats.rainiest.time)} · ${fmt(stats.maxRain)}%` : `${fmt(stats.maxRain)}%`);
+    const rangeText = (stats.minTemp == null || stats.maxTemp == null) ? 'Thiếu dữ liệu' : `${fmt(stats.minTemp)}–${fmt(stats.maxTemp)}°C`;
+    const rainSummary = stats.maxRain == null ? 'chưa có dữ liệu mưa theo giờ rõ ràng' : (stats.maxRain >= 50 ? `mưa đáng chú ý, cao nhất ${fmt(stats.maxRain)}%` : stats.maxRain >= 20 ? `có thể mưa nhẹ/rải rác, cao nhất ${fmt(stats.maxRain)}%` : `ít mưa rõ rệt, cao nhất ${fmt(stats.maxRain)}%`);
+    const main = document.getElementById('lifeos67h-r7-quick-main');
+    if(main) main.innerHTML = `<div class="lifeos67h-r7-title"><i class="ph-fill ph-compass-tool"></i><span>24 giờ tới: ${esc(stats.dominant.text)}</span></div><div class="lifeos67h-r7-text">Nhiệt độ dao động <strong>${esc(rangeText)}</strong>; ${esc(rainSummary)}. <strong>Khuyến nghị:</strong> ${esc(stats.advice)}</div>`;
+    const grid = document.getElementById('lifeos67h-r7-microgrid');
+    if(grid) grid.innerHTML = `
+      <div class="lifeos67h-r7-metric"><div class="lifeos67h-r7-metric-label">Giờ nóng nhất</div><div class="lifeos67h-r7-metric-value">${esc(hotText)}</div></div>
+      <div class="lifeos67h-r7-metric"><div class="lifeos67h-r7-metric-label">Mưa cao nhất</div><div class="lifeos67h-r7-metric-value">${esc(rainText)}</div></div>
+      <div class="lifeos67h-r7-metric"><div class="lifeos67h-r7-metric-label">Toàn cảnh</div><div class="lifeos67h-r7-metric-value">${esc(stats.dominant.text)}</div></div>
+      <div class="lifeos67h-r7-metric"><div class="lifeos67h-r7-metric-label">Số giờ</div><div class="lifeos67h-r7-metric-value">${stats.hourly.length}/24 giờ</div></div>`;
+    const phases = document.getElementById('lifeos67h-r7-phases');
+    if(phases) phases.innerHTML = stats.chunks.map(stageCard).join('');
+    hourlyList.classList.add('lifeos67h-r7-timeline');
+    hourlyList.innerHTML = stats.hourly.map((x,i)=>hourCard(x,i,stats)).join('');
+    setTimeout(() => {
+      const currentCard = hourlyList.querySelector('.hourly-current');
+      if(currentCard && hourlyList) hourlyList.scrollTo({left: Math.max(0, currentCard.offsetLeft - 10), behavior:'smooth'});
+    }, 80);
+  };
+  const install = () => {
+    if(typeof window.renderWeather !== 'function') return false;
+    if(window.renderWeather.__lifeos67hR7WeatherSmartTimeline) return true;
+    const old = window.renderWeather.bind(window);
+    window.__lifeos67hR7OldRenderWeather = old;
+    window.renderWeather = function(data, opts){
+      const ret = old(data, opts || {});
+      try{ renderSmartWeather(data); }catch(e){ console.warn('[Weather R7] smart timeline render skipped', e); }
+      return ret;
+    };
+    window.renderWeather.__lifeos67hR7WeatherSmartTimeline = true;
+    if(window.weatherState && window.weatherState.lastData){
+      try{ renderSmartWeather(window.weatherState.lastData); }catch(e){}
+    }
+    window.LifeOS_Pha67H_R7_Weather24hSmartTimelineOverviewFix = {phase:PHASE, base:'index_pha67H_R6_family_mobile_small_image_sequential_queue_fix.html', scopedToWeather:true, noNewApi:true, doesNotPatchProfile:true, doesNotPatchNavigation:true, doesNotPatchFamily:true, doesNotPatchRadioTv:true};
+    return true;
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, {once:true}); else install();
+  setTimeout(install, 300); setTimeout(install, 1000); setTimeout(install, 2500);
+})();
+</script>
+<!-- LIFEOS PHA67H_R7 WEATHER 24H SMART TIMELINE OVERVIEW FIX - END -->
+
 </body>
 </html>
