@@ -16601,7 +16601,6 @@ body.lifeos65c-family-drag-active #chat-messages {
   outline-offset: -3px;
 }
 </style>
-
 <style id="lifeos-pha66b-task-alarm-native-bridge-style">
 /* PHA 66B: Native Alarm Bridge architecture lock status.
    This is a small status surface only; it does not change Task/Weather/Family layout logic. */
@@ -17040,9 +17039,6 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
   window.addEventListener('focus', function(){ ensureStatus(); reconcileSoon('focus'); }, { passive:true });
 })();
 </script>
-
-
-
 <!-- LIFEOS PHA67A MEDIA LIVE MOBILE SCROLL FIX - START
 Scope: chỉ tab Nghe nhạc > Radio Live / Tivi Live trên mobile.
 Mục tiêu: chạm/vuốt ở mọi điểm trong danh sách kênh đều kéo lên xuống mượt; không bắt người dùng phải vuốt mép ngoài hay đúng một vùng nhỏ.
@@ -17271,9 +17267,6 @@ Không đụng: Task/Alarm, Family, Vault, APK native bridge, dữ liệu kênh.
 })();
 </script>
 <!-- LIFEOS PHA67A MEDIA LIVE MOBILE SCROLL FIX - END -->
-
-
-
 <!-- LIFEOS PHA67D FAMILY HTML5 SPLIT/MERGE MANIFEST TELEGRAM BUNDLE - START
 Tên pha: Pha67D_family_html5_split_merge_manifest_telegram_bundle
 Nền gốc: index_pha67C_R1_family_relay_secret_sanitize_runtime_proof.html
@@ -17286,13 +17279,7 @@ Worker contract bổ sung cho bundle tải/gộp:
   Nếu /download trả JSON thì chỉ được trả proxy URL cùng Cloudflare relay host; tuyệt đối không trả URL Telegram file thô về client.
 Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không nằm trong HTML.
 -->
-
-
 <!-- LIFEOS PHA67D FAMILY HTML5 SPLIT/MERGE MANIFEST TELEGRAM BUNDLE - END -->
-
-
-
-
 <style id="lifeos-pha67d-r3-family-bulk-select-download-queue-zip-fix-css">
   #lifeos67d-r3-select-toolbar {
     margin: 0.35rem 0.75rem 0.5rem;
@@ -17355,9 +17342,6 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
     #lifeos67d-r3-select-toolbar button { flex: 1 1 auto; }
   }
 </style>
-
-
-
 <style id="lifeos-pha67d-r5-family-profile-safe-runtime-recovery-fix-css">
   .lifeos-r5-selectable-card { position: relative !important; overflow: visible !important; }
   .lifeos-r5-select-btn {
@@ -17391,8 +17375,6 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
     #lifeos67d-r5-toolbar button { flex:1 1 auto; padding-left:6px; padding-right:6px; }
   }
 </style>
-
-
 <script id="lifeos-pha67g-r2-family-relay-upload-timeout-router-stability-fix-js">
 (function(){
   'use strict';
@@ -18236,272 +18218,677 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
 })();
 </script>
 <!-- LIFEOS PHA67G-R6 FAMILY GALLERY PATCH CONFLICT RUNTIME ORDER FIX END -->
-
-
-<!-- LIFEOS PHA67G-R7 ALARM PROFILE TIME GATE NO REPLAY FIX START -->
-<script id="lifeos-pha67g-r7-alarm-profile-time-gate-no-replay-fix-js">
+<!-- LIFEOS PHA67G-R11 PROFILE SAFE GALLERY + ALARM TWO ISSUE FIX START -->
+<script id="lifeos-pha67g-r11-profile-safe-gallery-alarm-two-issue-fix-js">
 (function(){
   'use strict';
-  if (window.__lifeos67gR7AlarmGateInstalled) return;
-  window.__lifeos67gR7AlarmGateInstalled = true;
+  if (window.__LIFEOS_67G_R11_TWO_ISSUE_FIX__) return;
+  window.__LIFEOS_67G_R11_TWO_ISSUE_FIX__ = true;
 
-  const PHASE = '67G-R7';
-  const GRACE_MS = 60000;
-  const PROFILE_ENTER_MUTE_MS = 8000;
-  const LS_ALERTED = 'lifeos_67g_r7_alarm_alerted_keys';
-  const LS_ARMED = 'lifeos_67g_r7_alarm_armed_keys';
-  const LS_SILENCED = 'lifeos_67g_r7_alarm_silenced_past_keys';
-  const LS_LOGS = 'lifeos_67g_r7_alarm_gate_logs';
+  var PHASE = '67G-R11';
+  var LOG_KEY = 'lifeos_67g_r11_alarm_guard_logs';
+  var SILENCED_KEY = 'lifeos_67g_r11_alarm_silenced_keys';
+  var ARMED_KEY = 'lifeos_67g_r11_alarm_armed_keys';
+  var PROFILE_KEY = 'lifeos_67g_r11_last_profile';
+  var DEBUG = function(){ try { return window.LIFEOS_ALARM_DEBUG === true || localStorage.getItem('lifeos_alarm_debug') === '1'; } catch(e){ return false; } };
 
-  const nativeTrigger = typeof window.triggerGlobalAlarm === 'function' ? window.triggerGlobalAlarm : null;
-  const nativeCheck = typeof window.checkAlarms === 'function' ? window.checkAlarms : null;
-  const nativeLogin = typeof window.loginAsProfile === 'function' ? window.loginAsProfile : null;
-  const nativeLoadUserData = typeof window.loadUserData === 'function' ? window.loadUserData : null;
-  const nativeSelectProfile = typeof window.selectProfileFromMenu === 'function' ? window.selectProfileFromMenu : null;
-
-  function readMap(key){
-    try { const v = JSON.parse(localStorage.getItem(key) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
-    catch(e){ return {}; }
+  function now(){ return Date.now(); }
+  function safeStr(v){ return (v == null ? '' : String(v)).trim(); }
+  function getProfile(){
+    var p = window.viewingUser || window.currentUser || window.currentProfileId || window.activeProfileId;
+    if (!p) {
+      try { p = localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || ''; } catch(e) {}
+    }
+    p = safeStr(p);
+    if (!p || p === 'N/A' || p === 'undefined' || p === 'null') return '';
+    return p;
   }
-  function writeMap(key, obj){
+  function arrFromStore(key){
+    try { var a = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(a) ? a : []; } catch(e){ return []; }
+  }
+  function setStoreArr(key, a){
+    try { localStorage.setItem(key, JSON.stringify(Array.from(new Set(a)).slice(-1000))); } catch(e) {}
+  }
+  function hasKey(keyStore, k){ return arrFromStore(keyStore).indexOf(k) >= 0; }
+  function addKey(keyStore, k){ var a = arrFromStore(keyStore); if(a.indexOf(k)<0) { a.push(k); setStoreArr(keyStore, a); } }
+  function removeKey(keyStore, k){ var a = arrFromStore(keyStore).filter(function(x){ return x !== k; }); setStoreArr(keyStore, a); }
+
+  function log(type, msg, data){
+    var row = Object.assign({ phase: PHASE, ts: new Date().toISOString(), type: type, message: msg }, data || {});
     try {
-      const entries = Object.entries(obj || {}).sort((a,b)=> Number(b[1]||0)-Number(a[1]||0)).slice(0, 1000);
-      localStorage.setItem(key, JSON.stringify(Object.fromEntries(entries)));
+      var logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+      if (!Array.isArray(logs)) logs = [];
+      logs.push(row); logs = logs.slice(-300);
+      localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+      window.LIFEOS_67G_R11_LAST_ALARM_LOG = row;
     } catch(e) {}
+    var text = '[AlarmGuard] ' + msg;
+    if (type === 'block' || type === 'skip' || type === 'missed') console.warn(text, row);
+    else if (DEBUG()) console.debug(text, row);
   }
-  const state = window.LifeOSAlarmGate67GR7 = window.LifeOSAlarmGate67GR7 || {};
-  state.phase = PHASE;
-  state.installedAt = new Date().toISOString();
-  state.profile = '';
-  state.profileEnteredAt = Date.now();
-  state.alerted = readMap(LS_ALERTED);
-  state.armed = readMap(LS_ARMED);
-  state.silenced = readMap(LS_SILENCED);
-  state.logs = [];
-  state.loggedOnce = state.loggedOnce || {};
-  state.allowTrigger = state.allowTrigger || {};
 
-  function nowIso(){ return new Date().toISOString(); }
-  function activeProfile(){
-    return String(window.viewingUser || window.currentUser || (window.FirebaseSync && window.FirebaseSync._k) || localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || '').trim();
+  function getTaskId(t, idx){ return safeStr(t && (t.id || t.taskId || t.uid || t.key)) || ('idx_' + idx); }
+  function getTaskText(t){ return safeStr(t && (t.text || t.title || t.name || t.content)) || 'nhiệm vụ'; }
+  function getTaskProfile(t){
+    return safeStr(t && (t.profileId || t.profile || t.ownerProfile || t.ownerProfileId || t.userId || t.assigneeProfile || t.viewingUser));
   }
-  function profileConsistent(){
-    const p = activeProfile();
-    const fb = String((window.FirebaseSync && window.FirebaseSync._k) || '').trim();
-    if (!p) return { ok:false, profile:p, reason:'missing_active_profile' };
-    if (fb && fb !== p) return { ok:false, profile:p, fbProfile:fb, reason:'firebase_profile_mismatch' };
-    return { ok:true, profile:p, fbProfile:fb, reason:'' };
-  }
-  function normTime(v){
-    if (v == null || v === '') return 0;
-    if (typeof v === 'number' && isFinite(v)) return v < 100000000000 ? v*1000 : v;
-    if (v instanceof Date) return v.getTime();
-    if (typeof v === 'string') {
-      const raw = v.trim();
-      if (/^\d+$/.test(raw)) { const n = Number(raw); return n < 100000000000 ? n*1000 : n; }
-      const t = Date.parse(raw); return Number.isFinite(t) ? t : 0;
-    }
-    return 0;
-  }
-  function taskTime(t){
+  function getAlarmMs(t){
     if (!t) return 0;
-    const fields = ['alarmTime','dueAt','datetime','dateTime','timestamp','remindAt','scheduledAt','dueTime'];
-    for (const f of fields) { const ms = normTime(t[f]); if (ms) return ms; }
+    var ms = Number(t.alarmTime || t.dueAt || t.dueTime || t.reminderAt || 0);
+    if (ms && isFinite(ms)) return ms;
+    if (t.alarmAt) { var d = new Date(t.alarmAt).getTime(); if (isFinite(d)) return d; }
     if (t.dueDate && t.timeStr) {
-      const m = String(t.timeStr).match(/(\d{1,2})\D(\d{1,2})/);
-      const d = String(t.dueDate).split('-');
-      if (m && d.length === 3) return new Date(Number(d[0]), Number(d[1])-1, Number(d[2]), Number(m[1]), Number(m[2]), 0, 0).getTime();
+      var m = String(t.timeStr).match(/(\d{1,2})\D(\d{1,2})/);
+      var p = String(t.dueDate).split('-');
+      if (m && p.length === 3) {
+        var dd = new Date(Number(p[0]), Number(p[1])-1, Number(p[2]), Number(m[1]), Number(m[2]), 0, 0).getTime();
+        if (isFinite(dd)) return dd;
+      }
     }
     return 0;
   }
-  function taskId(t, idx){ return String((t && (t.id ?? t.taskId ?? t.uuid)) || ('idx_' + idx)); }
-  function taskText(t){ return String((t && (t.text || t.title || t.name || t.content)) || 'nhiệm vụ cần làm').replace(/\s+/g,' ').trim(); }
-  function taskVersion(t, ms){ return String((t && (t.alarmVersion ?? t.version ?? t.updatedAt ?? t.modifiedAt ?? t.alarmUpdatedAt ?? t.createdAt)) || ms || 'v0'); }
-  function keyFor(profile, t, idx, ms){ return [profile, taskId(t, idx), ms || taskTime(t), taskVersion(t, ms || taskTime(t))].join('|'); }
-  function sameProfileTask(t, profile){
-    const tp = String((t && (t.profile || t.profileId || t.owner || t.user || t.sender)) || '').trim();
-    return !tp || !profile || tp === profile;
+  function getVersion(t){ return safeStr(t && (t.alarmVersion || t.alarm_version || t.alarmRev || t.alarmUpdatedAt || t.updatedAt)); }
+  function setVersion(t, prefix){
+    if (!t) return '';
+    var v = (prefix || 'av') + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    t.alarmVersion = v;
+    t.alarmUpdatedAt = Date.now();
+    return v;
   }
-  function isTaskDone(t){ return !!(t && (t.completed || t.done || t.isDone)); }
-  function isAlarmEnabled(t){ return !(t && t.alarmEnabled === false); }
-  function saveTodos(){
+  function alarmKey(profile, t, idx){
+    var ms = getAlarmMs(t); var v = getVersion(t); var id = getTaskId(t, idx);
+    return [profile, id, ms || 'no_due', v || 'no_version'].join('|');
+  }
+  function isCompleted(t){ return !!(t && (t.completed || t.done || t.status === 'done' || t.status === 'completed')); }
+  function isAlerted(t){ return !!(t && (t.alerted || t.isAlerted || t.alarmAlerted)); }
+  function setAlerted(t){ if(t){ t.alerted = true; t.isAlerted = true; t.alarmAlerted = true; } }
+  function isAlarmEnabled(t){ return !(t && (t.alarmEnabled === false || t.alarm === false || t.reminderEnabled === false)); }
+  function saveRender(){
     try { if (typeof window.saveLocalTodos === 'function') window.saveLocalTodos(); } catch(e) {}
     try { if (typeof window.renderTasksOnly === 'function') window.renderTasksOnly(); } catch(e) {}
-    try { if (window.FirebaseSync && typeof window.FirebaseSync.pushAll === 'function') window.FirebaseSync.pushAll({ reason:'alarm_gate_67g_r7' }); } catch(e) {}
-  }
-  function log(reason, task, extra){
-    const profile = activeProfile();
-    const id = task ? taskId(task, 0) : '';
-    const k = reason + '|' + profile + '|' + id + '|' + (extra && extra.key || '');
-    if (state.loggedOnce[k] && Date.now() - state.loggedOnce[k] < 15000) return;
-    state.loggedOnce[k] = Date.now();
-    const item = Object.assign({ phase: PHASE, ts: nowIso(), reason, profile, taskId: id, taskText: task ? taskText(task) : '' }, extra || {});
-    state.logs.push(item); state.logs = state.logs.slice(-120);
-    try { localStorage.setItem(LS_LOGS, JSON.stringify(state.logs.slice(-60))); } catch(e) {}
-    if (/fire|block|mismatch|silence|outdated|profile/i.test(reason)) {
-      try { console.info('[AlarmGate 67G-R7] ' + reason + (id ? ' - alarm ID: ' + id : ''), item); } catch(e) {}
-    } else if (window.LIFEOS_ALARM_DEBUG === true || localStorage.getItem('lifeos_alarm_debug') === '1') {
-      try { console.debug('[AlarmGate 67G-R7] ' + reason, item); } catch(e) {}
-    }
-  }
-  function markMap(map, key){ map[key] = Date.now(); }
-  function persistMaps(){ writeMap(LS_ALERTED, state.alerted); writeMap(LS_ARMED, state.armed); writeMap(LS_SILENCED, state.silenced); }
-  function setTaskAlerted(t, ms, reason){
-    try { t.alerted = true; t.isAlerted = true; t.lastAlertedAt = Date.now(); t.lastAlarmGateReason = reason || PHASE; } catch(e) {}
-  }
-  function normalizeDaily(t, now, today){
-    if (!t || !t.isDaily) return false;
-    let changed = false;
-    if (t.dueDate && t.dueDate < today) { t.completed = false; t.alerted = false; t.isAlerted = false; t.dueDate = today; changed = true; }
-    const ms = taskTime(t);
-    if (ms && ms < now - GRACE_MS) {
-      const old = new Date(ms); const n = new Date(now);
-      n.setHours(old.getHours(), old.getMinutes(), 0, 0);
-      if (n.getTime() <= now) n.setDate(n.getDate()+1);
-      t.alarmTime = n.getTime(); t.alerted = false; t.isAlerted = false; changed = true;
-      log('daily_overdue_shift_next', t, { oldMs: ms, newMs: t.alarmTime });
-    }
-    return changed;
-  }
-  function silencePastAlarms(reason){
-    const pc = profileConsistent();
-    if (!pc.ok) { log('profile_mismatch_silence_skip', null, pc); return false; }
-    const todos = Array.isArray(window.todos) ? window.todos : [];
-    const now = Date.now();
-    let changed = false, count = 0;
-    todos.forEach((t, idx)=>{
-      if (!t || isTaskDone(t) || !isAlarmEnabled(t) || !sameProfileTask(t, pc.profile)) return;
-      const ms = taskTime(t); if (!ms) return;
-      const k = keyFor(pc.profile, t, idx, ms);
-      if (ms <= now && !state.alerted[k]) {
-        setTaskAlerted(t, ms, reason || 'silence_past_on_profile_enter');
-        markMap(state.alerted, k); markMap(state.silenced, k); changed = true; count += 1;
-        log('Silence Past Alarm - Ignore alarm ID: ' + taskId(t, idx), t, { key:k, dueMs:ms, overdueMs: now-ms, reason: reason || 'profile_enter' });
-      }
-    });
-    if (changed) { persistMaps(); saveTodos(); }
-    return count;
-  }
-  function onProfileEntered(reason){
-    const p = activeProfile();
-    state.profile = p;
-    state.profileEnteredAt = Date.now();
-    state.allowTrigger = {};
-    try { window.notifiedTasks = new Set(); } catch(e) {}
-    setTimeout(()=>silencePastAlarms(reason || 'profile_enter'), 80);
-    setTimeout(()=>silencePastAlarms(reason || 'profile_enter_late'), 900);
+    try { if (window.FirebaseSync && typeof window.FirebaseSync.pushAll === 'function') window.FirebaseSync.pushAll(); } catch(e) {}
   }
 
-  function evaluateTask(t, idx, now, today){
-    const pc = profileConsistent();
-    if (!pc.ok) return { ok:false, reason: pc.reason, profile: pc.profile, fbProfile: pc.fbProfile };
-    if (!t) return { ok:false, reason:'missing_task', profile:pc.profile };
-    if (!sameProfileTask(t, pc.profile)) return { ok:false, reason:'Profile mismatch - Ignore alarm ID: ' + taskId(t, idx), profile:pc.profile };
-    if (isTaskDone(t)) return { ok:false, reason:'completed' , profile:pc.profile};
-    if (!isAlarmEnabled(t)) return { ok:false, reason:'alarm_disabled', profile:pc.profile };
-    const ms = taskTime(t);
-    if (!ms) return { ok:false, reason:'missing_alarm_time', profile:pc.profile };
-    const k = keyFor(pc.profile, t, idx, ms);
-    const diff = ms - now;
-    if (normalizeDaily(t, now, today)) return { ok:false, reason:'daily_shifted', key:k, profile:pc.profile, changed:true };
-    if (state.alerted[k] || state.silenced[k] || t.isAlerted === true || (t.alerted === true && diff <= 0)) return { ok:false, reason:'already_alerted', key:k, profile:pc.profile };
-    if (diff > 0) { markMap(state.armed, k); return { ok:false, reason:'armed_future', key:k, diff, profile:pc.profile, armed:true }; }
-    if (diff < -GRACE_MS) return { ok:false, reason:'past_over_grace', key:k, diff, profile:pc.profile, silence:true };
-    if (!state.armed[k]) return { ok:false, reason:'not_armed_before_due', key:k, diff, profile:pc.profile, silence:true };
-    if (Date.now() - state.profileEnteredAt < PROFILE_ENTER_MUTE_MS) return { ok:false, reason:'profile_enter_mute_window', key:k, diff, profile:pc.profile, silence:true };
-    return { ok:true, reason:'fire_allowed', key:k, diff, profile:pc.profile, ms };
+  function stopAllAlarmAudio(reason){
+    try { window.isAlarmRinging = false; } catch(e) {}
+    try { clearInterval(window.beepInterval); window.beepInterval = null; } catch(e) {}
+    try { var ov = document.getElementById('alarm-overlay'); if (ov) { ov.classList.add('hidden'); ov.style.display = 'none'; } } catch(e) {}
+    ['mstq-alarm','tts-audio','lifeos-alarm-audio','alarm-audio'].forEach(function(id){
+      try { var a = document.getElementById(id); if (a) { a.pause(); a.currentTime = 0; a.muted = true; } } catch(e) {}
+    });
+    try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch(e) {}
+    try { if (window.synth && typeof window.synth.cancel === 'function') window.synth.cancel(); } catch(e) {}
+    try { window.activeAlarmTaskIds = []; } catch(e) {}
+    try { window.preloadedTTS = new Set(); } catch(e) {}
+    try { window.notifiedTasks = new Set(); } catch(e) {}
+    log('info', 'Hard stop alarm audio/runtime', { reason: reason || 'unknown' });
+  }
+
+  function requestNativeCancel(profile){
+    var b = window.NativeAlarmBridge || window.AndroidAlarmBridge || window.LifeOSNativeBridge || window.Android;
+    var called = false;
+    if (!b) { log('info', 'Native cancel requested', { profile: profile, bridge: false }); return; }
+    ['cancelAllAlarmsForProfile','cancelProfileAlarms','cancelAllAlarms','cancelPendingAlarms'].forEach(function(name){
+      try { if (typeof b[name] === 'function') { b[name](profile || ''); called = true; } } catch(e) {}
+    });
+    log('info', 'Native cancel requested', { profile: profile, bridge: true, called: called });
+  }
+
+  // Do NOT wrap/replace profile login/header functions. Poll profile state only.
+  var state = {
+    profile: getProfile(),
+    muteUntil: Date.now() + 8000,
+    allowTriggerUntil: 0,
+    allowIds: [],
+    installing: true
+  };
+  try { localStorage.setItem(PROFILE_KEY, state.profile || ''); } catch(e) {}
+  setTimeout(function(){ state.installing = false; }, 12000);
+  stopAllAlarmAudio('install_guard');
+  requestNativeCancel(state.profile);
+  setInterval(function(){
+    var p = getProfile();
+    if (p && p !== state.profile) {
+      var old = state.profile; state.profile = p; state.muteUntil = Date.now() + 10000;
+      try { localStorage.setItem(PROFILE_KEY, p); } catch(e) {}
+      stopAllAlarmAudio('profile_changed');
+      requestNativeCancel(p);
+      log('info', 'Profile changed - alarm runtime cleared', { oldProfile: old, newProfile: p });
+    }
+  }, 500);
+
+  // Normalize newly parsed tasks only; old tasks missing profile remain blocked until edited/recreated.
+  if (typeof window.parseTaskNLP === 'function' && !window.__lifeos67gR11ParseTaskWrapped) {
+    window.__lifeos67gR11ParseTaskWrapped = true;
+    var oldParse = window.parseTaskNLP;
+    window.parseTaskNLP = function(raw){
+      var t = oldParse.apply(this, arguments) || {};
+      var p = getProfile();
+      if (p && !t.profileId) t.profileId = p;
+      if (t.alarmTime || t.dueAt || t.alarmAt) setVersion(t, 'new');
+      t.createdAt = t.createdAt || new Date().toISOString();
+      return t;
+    };
+  }
+
+  // Save wrapper only arms future exact keys and does not touch profile/header.
+  if (typeof window.saveLocalTodos === 'function' && !window.__lifeos67gR11SaveTodosWrapped) {
+    window.__lifeos67gR11SaveTodosWrapped = true;
+    var oldSaveTodos = window.saveLocalTodos;
+    window.saveLocalTodos = function(){
+      var p = getProfile(); var todos = Array.isArray(window.todos) ? window.todos : [];
+      todos.forEach(function(t, idx){
+        if (!t) return;
+        var tp = getTaskProfile(t);
+        var ms = getAlarmMs(t);
+        if (p && tp === p && ms && ms > Date.now() + 15000 && isAlarmEnabled(t) && !isCompleted(t)) {
+          if (!getVersion(t)) setVersion(t, 'migrated_future');
+          addKey(ARMED_KEY, alarmKey(p, t, idx));
+        }
+      });
+      return oldSaveTodos.apply(this, arguments);
+    };
+  }
+
+  if (typeof window.saveEditTask === 'function' && !window.__lifeos67gR11SaveEditWrapped) {
+    window.__lifeos67gR11SaveEditWrapped = true;
+    var oldSaveEdit = window.saveEditTask;
+    window.saveEditTask = function(id){
+      var before = null;
+      try { before = (window.todos || []).find(function(x){ return String(x.id) === String(id); }); before = before ? { alarm: getAlarmMs(before), version: getVersion(before), profile: getTaskProfile(before) } : null; } catch(e) {}
+      var r = oldSaveEdit.apply(this, arguments);
+      try {
+        var t = (window.todos || []).find(function(x){ return String(x.id) === String(id); });
+        if (t) {
+          var afterMs = getAlarmMs(t); var p = getProfile();
+          if (!t.profileId && p) t.profileId = p;
+          if (afterMs && (!before || before.alarm !== afterMs)) {
+            var oldKey = before ? [before.profile || p, id, before.alarm || 'no_due', before.version || 'no_version'].join('|') : '';
+            if (oldKey) addKey(SILENCED_KEY, oldKey);
+            setVersion(t, 'edit');
+            var newKey = alarmKey(p, t, 0); addKey(ARMED_KEY, newKey); removeKey(SILENCED_KEY, newKey);
+            log('info', 'Alarm version incremented on edit', { taskId: id, oldAlarm: before && before.alarm, newAlarm: afterMs, alarmVersion: t.alarmVersion });
+            requestNativeCancel(p);
+            saveRender();
+          }
+        }
+      } catch(e) { log('warn', 'saveEdit alarm version wrapper failed', { error: String(e && e.message || e) }); }
+      return r;
+    };
+  }
+
+  function maybeRolloverDaily(t, nowMs, today){
+    if (!t || !t.isDaily || !t.dueDate || t.dueDate >= today) return false;
+    var oldMs = getAlarmMs(t);
+    t.completed = false; t.alerted = false; t.isAlerted = false; t.alarmAlerted = false; t.dueDate = today;
+    if (oldMs) {
+      var old = new Date(oldMs), n = new Date();
+      n.setHours(old.getHours(), old.getMinutes(), 0, 0);
+      if (n.getTime() <= nowMs + 5000) n.setDate(n.getDate() + 1);
+      t.alarmTime = n.getTime();
+      setVersion(t, 'daily');
+    }
+    return true;
   }
 
   window.checkAlarms = function(){
-    const todos = Array.isArray(window.todos) ? window.todos : [];
+    var todos = Array.isArray(window.todos) ? window.todos : [];
     if (!todos.length) return;
-    const pc = profileConsistent();
-    if (!pc.ok) { log('Profile mismatch - Ignore alarm scan', null, pc); return; }
-    const now = Date.now();
-    const today = typeof window.getIsoDate === 'function' ? window.getIsoDate() : new Date(now).toISOString().slice(0,10);
-    const fireIds = [], fireTexts = [];
-    let changed = false;
-    todos.forEach((t, idx)=>{
-      const ev = evaluateTask(t, idx, now, today);
-      if (ev.changed) { changed = true; return; }
-      if (ev.armed) { persistMaps(); return; }
-      if (ev.silence) {
-        const ms = taskTime(t); const k = ev.key || keyFor(pc.profile, t, idx, ms);
-        setTaskAlerted(t, ms, ev.reason); markMap(state.alerted, k); markMap(state.silenced, k); changed = true;
-        log(ev.reason + ' - Ignore alarm ID: ' + taskId(t, idx), t, Object.assign({}, ev, { dueMs:ms, overdueMs: now-ms }));
+    var profile = getProfile();
+    if (!profile) { log('block', 'Profile mismatch - Ignore alarm ID', { reason: 'no_active_profile' }); return; }
+    var nowMs = Date.now();
+    var today = (typeof window.getIsoDate === 'function') ? window.getIsoDate() : new Date().toISOString().slice(0,10);
+    var fireIds = [], fireTexts = [], needsSync = false;
+
+    todos.forEach(function(t, idx){
+      if (!t) return;
+      if (maybeRolloverDaily(t, nowMs, today)) needsSync = true;
+      var id = getTaskId(t, idx);
+      var tp = getTaskProfile(t);
+      if (!tp) { log('block', 'Block missing profile', { taskId: id, text: getTaskText(t) }); return; }
+      if (tp !== profile) { log('block', 'Profile mismatch - Ignore alarm ID', { taskId: id, taskProfile: tp, activeProfile: profile }); return; }
+      if (!isAlarmEnabled(t) || isCompleted(t)) return;
+      var ms = getAlarmMs(t); if (!ms) return;
+      var version = getVersion(t);
+      if (!version) {
+        if (ms > nowMs + 60000) { setVersion(t, 'future'); version = getVersion(t); needsSync = true; }
+        else { log('skip', 'Version outdated - Skip', { taskId: id, dueAt: ms, reason: 'missing_alarmVersion' }); setAlerted(t); needsSync = true; return; }
+      }
+      var key = alarmKey(profile, t, idx);
+      var diff = ms - nowMs;
+      if (diff > 15000) { addKey(ARMED_KEY, key); return; }
+      if (diff < -60000) {
+        setAlerted(t); addKey(SILENCED_KEY, key); needsSync = true;
+        log('missed', 'Expired alarm - Mark missed no sound', { taskId: id, dueAt: ms, diffMs: diff, key: key });
         return;
       }
-      if (ev.ok) {
-        const id = taskId(t, idx); const ms = taskTime(t); const k = ev.key || keyFor(pc.profile, t, idx, ms);
-        setTaskAlerted(t, ms, 'fired'); markMap(state.alerted, k); markMap(state.allowTrigger, k); changed = true;
-        fireIds.push(id); fireTexts.push(taskText(t));
-        log('Fire allowed - alarm ID: ' + id, t, ev);
-      } else if (/mismatch|outdated|profile/.test(ev.reason || '')) {
-        log(ev.reason, t, ev);
+      if (hasKey(SILENCED_KEY, key) || isAlerted(t)) { log('skip', 'Version outdated - Skip', { taskId: id, reason: 'already_alerted_or_silenced', key: key }); return; }
+      if (!hasKey(ARMED_KEY, key)) {
+        setAlerted(t); addKey(SILENCED_KEY, key); needsSync = true;
+        log('missed', 'Expired alarm - Mark missed no sound', { taskId: id, dueAt: ms, diffMs: diff, reason: 'not_armed_before_due', key: key });
+        return;
       }
+      if (nowMs < state.muteUntil) { log('skip', 'Profile mismatch - Ignore alarm ID', { taskId: id, reason: 'profile_entry_mute', muteMs: state.muteUntil - nowMs }); return; }
+      setAlerted(t); addKey(SILENCED_KEY, key); needsSync = true;
+      fireIds.push(id); fireTexts.push(getTaskText(t));
+      log('info', 'Fire allowed', { taskId: id, activeProfile: profile, dueAt: ms, alarmVersion: version, key: key });
     });
-    persistMaps();
-    if (changed) saveTodos();
-    if (fireIds.length && nativeTrigger) nativeTrigger.call(window, fireIds, fireTexts.join(' + '));
-  };
-  window.checkAlarms.__lifeos67gR7 = true;
 
-  window.triggerGlobalAlarm = function(taskIds, taskText){
-    const ids = Array.isArray(taskIds) ? taskIds.map(String) : (taskIds == null ? [] : [String(taskIds)]);
-    if (!ids.length || ids.some(id => /^__lifeos_test|countdown/i.test(id))) {
-      return nativeTrigger ? nativeTrigger.apply(this, arguments) : undefined;
+    if (needsSync) saveRender();
+    if (fireIds.length) {
+      state.allowTriggerUntil = Date.now() + 2500;
+      state.allowIds = fireIds.slice();
+      try { if (!window.notifiedTasks || !(window.notifiedTasks instanceof Set)) window.notifiedTasks = new Set(); fireIds.forEach(function(id){ window.notifiedTasks.add(String(id)); }); } catch(e) {}
+      if (typeof window.triggerGlobalAlarm === 'function') window.triggerGlobalAlarm(fireIds, fireTexts.join(' + '));
     }
-    const pc = profileConsistent();
-    if (!pc.ok) { log('Profile mismatch - Block direct trigger', null, Object.assign({}, pc, { taskIds: ids })); return false; }
-    const todos = Array.isArray(window.todos) ? window.todos : [];
-    const now = Date.now(); const today = typeof window.getIsoDate === 'function' ? window.getIsoDate() : new Date(now).toISOString().slice(0,10);
-    const allowed = [];
-    for (const id of ids) {
-      const idx = todos.findIndex(t => taskId(t, 0) === id || String(t && t.id) === id);
-      const t = idx >= 0 ? todos[idx] : null;
-      const ms = taskTime(t); const k = t ? keyFor(pc.profile, t, idx, ms) : '';
-      if (state.allowTrigger[k] && Date.now() - state.allowTrigger[k] < 10000) { allowed.push(id); continue; }
-      const ev = evaluateTask(t, idx, now, today);
-      if (ev.ok) { setTaskAlerted(t, ms, 'direct_trigger_gate'); markMap(state.alerted, k); allowed.push(id); }
-      else { log('Blocked direct trigger - ' + (ev.reason || 'not_allowed'), t, Object.assign({}, ev, { taskIds:ids })); }
-    }
-    if (!allowed.length) return false;
-    persistMaps(); saveTodos();
-    return nativeTrigger ? nativeTrigger.call(window, allowed, taskText) : undefined;
   };
-  window.triggerGlobalAlarm.__lifeos67gR7 = true;
 
-  if (nativeLogin) {
-    window.loginAsProfile = function(k, opts){
-      const ret = nativeLogin.apply(this, arguments);
-      onProfileEntered('loginAsProfile:' + k);
-      return ret;
-    };
-  }
-  if (nativeLoadUserData) {
-    window.loadUserData = function(){
-      const ret = nativeLoadUserData.apply(this, arguments);
-      onProfileEntered('loadUserData');
-      return ret;
-    };
-  }
-  if (nativeSelectProfile) {
-    window.selectProfileFromMenu = function(k){
-      const ret = nativeSelectProfile.apply(this, arguments);
-      state.pendingProfile = k;
-      return ret;
+  if (typeof window.triggerGlobalAlarm === 'function' && !window.__lifeos67gR11TriggerWrapped) {
+    window.__lifeos67gR11TriggerWrapped = true;
+    var oldTrigger = window.triggerGlobalAlarm;
+    window.triggerGlobalAlarm = function(taskIds, taskText){
+      var ids = Array.isArray(taskIds) ? taskIds.map(String) : (taskIds == null ? [] : [String(taskIds)]);
+      var text = safeStr(taskText);
+      var isTest = !ids.length && /thử|test|hệ thống báo động thử nghiệm/i.test(text);
+      if (!isTest) {
+        var allowed = Date.now() <= state.allowTriggerUntil && ids.length && ids.every(function(id){ return state.allowIds.indexOf(String(id)) >= 0; });
+        if (!allowed) {
+          log('block', 'Version outdated - Skip', { reason: 'blocked_direct_or_old_runtime_trigger', taskIds: ids, text: text.slice(0,120) });
+          return false;
+        }
+      }
+      return oldTrigger.apply(this, arguments);
     };
   }
 
-  window.lifeos67gR7SilencePastAlarms = silencePastAlarms;
-  window.lifeos67gR7AlarmGateStatus = function(){ return { phase:PHASE, profile:activeProfile(), profileEnteredAt:state.profileEnteredAt, alertCount:Object.keys(state.alerted).length, armCount:Object.keys(state.armed).length, logs:state.logs.slice(-20) }; };
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>onProfileEntered('dom_ready'), { once:true });
-  else onProfileEntered('install');
-  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') setTimeout(()=>window.checkAlarms(), 250); });
+  window.LifeOSAlarmGuard = window.LifeOSAlarmGuard || {};
+  window.LifeOSAlarmGuard.phase = PHASE;
+  window.LifeOSAlarmGuard.getProfile = getProfile;
+  window.LifeOSAlarmGuard.status = function(){
+    return { phase: PHASE, activeProfile: getProfile(), muteUntil: state.muteUntil, silencedCount: arrFromStore(SILENCED_KEY).length, armedCount: arrFromStore(ARMED_KEY).length, logs: arrFromStore(LOG_KEY).slice(-20) };
+  };
+  window.lifeos67gR11AlarmGuardStatus = window.LifeOSAlarmGuard.status;
+  log('info', 'Installed profile-safe alarm guard without profile/header wrapping', { activeProfile: getProfile() });
 })();
 </script>
-<!-- LIFEOS PHA67G-R7 ALARM PROFILE TIME GATE NO REPLAY FIX END -->
+<!-- LIFEOS PHA67G-R11 PROFILE SAFE GALLERY + ALARM TWO ISSUE FIX END -->
+<script id="lifeos-pha67g-r12-profile-safe-persistent-gallery-cache-alarm-proof-fix-js">
+(function(){
+  'use strict';
+  if (window.__LIFEOS_67G_R12_PERSISTENT_GALLERY_CACHE__) return;
+  window.__LIFEOS_67G_R12_PERSISTENT_GALLERY_CACHE__ = true;
 
-</body>
+  var PHASE = '67G-R12';
+  var RELAY_URL = String(window.LIFEOS_UPLOAD_RELAY_URL || 'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev').replace(/\/+$/, '');
+  var IMG_EXT_RE = /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif)$/i;
+  var DB_NAME = 'lifeos_family_image_cache_v1';
+  var DB_VERSION = 1;
+  var STORE = 'images';
+  var MAX_ITEMS = 160;
+  var FETCH_TIMEOUT_MS = 120000;
+  var mem = window.__LifeOS67GR12ImageMemoryCache || new Map();
+  var pending = window.__LifeOS67GR12ImagePendingCache || new Map();
+  var meta = window.__LifeOS67GR12ImageMetaCache || new Map();
+  window.__LifeOS67GR12ImageMemoryCache = mem;
+  window.__LifeOS67GR12ImagePendingCache = pending;
+  window.__LifeOS67GR12ImageMetaCache = meta;
+
+  function debugOn(){ try { return window.LIFEOS_GALLERY_DEBUG === true || localStorage.getItem('lifeos_gallery_debug') === '1'; } catch(e){ return false; } }
+  function log(event, data){
+    var row = Object.assign({phase:PHASE, event:event, ts:new Date().toISOString()}, data || {});
+    try {
+      window.LIFEOS_67G_R12_GALLERY_LAST_PROOF = row;
+      localStorage.setItem('lifeos_67g_r12_gallery_last_proof', JSON.stringify(row));
+      var arr = JSON.parse(localStorage.getItem('lifeos_67g_r12_gallery_logs') || '[]');
+      if (!Array.isArray(arr)) arr = [];
+      arr.push(row); localStorage.setItem('lifeos_67g_r12_gallery_logs', JSON.stringify(arr.slice(-250)));
+    } catch(_e) {}
+    if (debugOn()) console.info('[LifeOS 67G-R12 GalleryCache]', row);
+    return row;
+  }
+  function esc(v){
+    if (window.escapeHTML) return window.escapeHTML(String(v == null ? '' : v));
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); });
+  }
+  function pick(obj, paths){
+    for (var i=0;i<paths.length;i++){
+      var cur = obj, parts = paths[i].split('.');
+      for (var j=0;j<parts.length;j++) { if (cur == null) { cur = undefined; break; } cur = cur[parts[j]]; }
+      if (cur !== undefined && cur !== null && String(cur) !== '') return cur;
+    }
+    return '';
+  }
+  function makeId(raw){
+    return String(pick(raw, ['id','messageId','message_id','telegramMessageId','telegram_message_id','result.message_id','message.message_id']) || ('msg_'+Date.now()+'_'+Math.random().toString(36).slice(2)));
+  }
+  function normalizeFamilyMessage(raw){
+    var m = raw || {};
+    var fileId = String(pick(m, [
+      'file_id','fileId','telegramFileId','telegram_file_id','downloadFileId','download_file_id',
+      'attachment.file_id','attachment.fileId','attachment.telegramFileId','attachment.downloadFileId',
+      'document.file_id','document.fileId','message.document.file_id','message.document.fileId',
+      'result.file_id','result.fileId','result.document.file_id','result.document.fileId',
+      'data.file_id','data.fileId','file.file_id','file.fileId','payload.file_id','payload.fileId'
+    ]) || '');
+    var fileName = String(pick(m, [
+      'file_name','fileName','safeFileName','safe_name','name','originalName',
+      'attachment.file_name','attachment.fileName','attachment.safeFileName','attachment.name',
+      'document.file_name','document.fileName','message.document.file_name','message.document.fileName',
+      'result.file_name','result.fileName','result.document.file_name','result.document.fileName',
+      'data.file_name','data.fileName','file.name','file.file_name','payload.file_name','payload.fileName'
+    ]) || 'image');
+    var mime = String(pick(m, [
+      'mime','mime_type','mimeType','contentType','type_mime',
+      'attachment.mime','attachment.mime_type','attachment.mimeType','attachment.contentType',
+      'document.mime_type','document.mime','document.mimeType','message.document.mime_type','message.document.mime',
+      'result.mime','result.mime_type','result.document.mime_type','data.mime','data.mime_type','file.mime','file.mime_type','payload.mime','payload.mime_type'
+    ]) || '');
+    var sizeRaw = pick(m, ['file_size','fileSize','size','attachment.size','attachment.file_size','document.file_size','message.document.file_size','result.size','result.file_size','data.size','file.size','payload.size']);
+    var localObjectUrl = String(pick(m, ['localObjectUrl','localUrl','objectUrl','blobUrl','previewUrl','preview_url','thumbnailUrl','thumbUrl','attachment.localObjectUrl','attachment.localUrl']) || '');
+    var type = String(m.type || (mime.indexOf('image/') === 0 || IMG_EXT_RE.test(fileName) ? 'file' : ''));
+    var kind = String(pick(m, ['kind','attachment.kind','document.kind','payload.kind']) || '');
+    var isImage = type === 'image' || type === 'photo' || mime.indexOf('image/') === 0 || IMG_EXT_RE.test(fileName) || kind === 'image_document';
+    return { raw:m, id:makeId(m), type:type, kind:isImage && type === 'file' ? 'image_document' : kind, fileId:fileId, fileName:fileName, safeFileName:String(pick(m,['safeFileName','safe_name','attachment.safeFileName']) || fileName || 'image'), mime:mime, size:Number(sizeRaw || 0) || 0, isImage:isImage, localObjectUrl:localObjectUrl };
+  }
+  function normalizeInPlace(m){
+    var n = normalizeFamilyMessage(m);
+    if (m && n.isImage) {
+      if (!m.id) m.id = n.id;
+      if (n.fileId) { if (!m.file_id) m.file_id = n.fileId; if (!m.fileId) m.fileId = n.fileId; }
+      if (n.fileName) { if (!m.file_name) m.file_name = n.fileName; if (!m.fileName) m.fileName = n.fileName; }
+      if (n.mime) { if (!m.mime_type) m.mime_type = n.mime; if (!m.mime) m.mime = n.mime; }
+      if (n.size && !m.file_size) m.file_size = n.size;
+      if (!m.kind && n.kind) m.kind = n.kind;
+    }
+    return n;
+  }
+  function currentMessages(){
+    var arr = Array.isArray(window.chatHistory) ? window.chatHistory : [];
+    for (var i=0;i<arr.length;i++) normalizeInPlace(arr[i]);
+    return arr;
+  }
+  function relayDownloadUrl(fileId, name){
+    var url = new URL(RELAY_URL + '/download');
+    url.searchParams.set('file_id', fileId);
+    url.searchParams.set('name', name || 'image');
+    return url.toString();
+  }
+
+  var dbPromise = null;
+  function openDB(){
+    if (!('indexedDB' in window)) return Promise.resolve(null);
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise(function(resolve){
+      var req;
+      try { req = indexedDB.open(DB_NAME, DB_VERSION); } catch(e) { resolve(null); return; }
+      req.onupgradeneeded = function(){
+        var db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath:'fileId' });
+      };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ resolve(null); };
+      req.onblocked = function(){ resolve(null); };
+    });
+    return dbPromise;
+  }
+  async function idbGet(fileId){
+    var db = await openDB(); if (!db || !fileId) return null;
+    return new Promise(function(resolve){
+      try {
+        var tx = db.transaction(STORE, 'readonly');
+        var req = tx.objectStore(STORE).get(fileId);
+        req.onsuccess = function(){ resolve(req.result || null); };
+        req.onerror = function(){ resolve(null); };
+      } catch(e) { resolve(null); }
+    });
+  }
+  async function idbPut(fileId, blob, n){
+    var db = await openDB(); if (!db || !fileId || !blob || !blob.size) return false;
+    return new Promise(function(resolve){
+      try {
+        var tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put({ fileId:fileId, blob:blob, fileName:n.fileName || n.safeFileName || 'image', mime:n.mime || blob.type || '', size:blob.size, updatedAt:Date.now(), phase:PHASE });
+        tx.oncomplete = function(){ resolve(true); pruneDB().catch(function(){}); };
+        tx.onerror = function(){ resolve(false); };
+      } catch(e) { resolve(false); }
+    });
+  }
+  async function pruneDB(){
+    var db = await openDB(); if (!db) return;
+    try {
+      var tx = db.transaction(STORE, 'readwrite'), store = tx.objectStore(STORE), req = store.getAll();
+      req.onsuccess = function(){
+        var rows = Array.isArray(req.result) ? req.result : [];
+        if (rows.length <= MAX_ITEMS) return;
+        rows.sort(function(a,b){ return (a.updatedAt || 0) - (b.updatedAt || 0); });
+        rows.slice(0, rows.length - MAX_ITEMS).forEach(function(r){ try { store.delete(r.fileId); } catch(e){} });
+      };
+    } catch(e) {}
+  }
+  function remember(fileId, url, info){
+    if (!fileId || !url) return;
+    mem.set(fileId, url);
+    meta.set(fileId, Object.assign({createdAt:Date.now()}, info || {}));
+    if (mem.size > MAX_ITEMS) {
+      var first = mem.keys().next().value;
+      if (first) { mem.delete(first); meta.delete(first); }
+    }
+  }
+  async function persistLocalObjectUrl(n){
+    if (!n.localObjectUrl || !/^blob:/i.test(n.localObjectUrl) || !n.fileId) return;
+    if (meta.get(n.fileId) && meta.get(n.fileId).persistAttempted) return;
+    meta.set(n.fileId, Object.assign({}, meta.get(n.fileId) || {}, {persistAttempted:true}));
+    try {
+      var res = await fetch(n.localObjectUrl);
+      var blob = await res.blob();
+      if (blob && blob.size) await idbPut(n.fileId, blob, n);
+    } catch(e) {}
+  }
+  async function fetchBlob(fileId, name){
+    var started = performance.now ? performance.now() : Date.now();
+    var ctrl = null, timer = null;
+    var opts = { method:'GET', cache:'force-cache' };
+    if ('AbortController' in window) {
+      ctrl = new AbortController(); opts.signal = ctrl.signal;
+      timer = setTimeout(function(){ try { ctrl.abort(); } catch(e){} }, FETCH_TIMEOUT_MS);
+    }
+    try {
+      var res = await fetch(relayDownloadUrl(fileId, name), opts);
+      var contentType = res.headers && res.headers.get ? (res.headers.get('content-type') || '') : '';
+      if (!res.ok) {
+        var txt = await res.text().catch(function(){ return ''; });
+        var err = new Error('download_failed ' + res.status + ' ' + txt.slice(0,160));
+        err.httpStatus = res.status; err.contentType = contentType; throw err;
+      }
+      var blob = await res.blob();
+      blob.__lifeosHttpStatus = res.status;
+      blob.__lifeosContentType = contentType;
+      blob.__lifeosDurationMs = Math.round((performance.now ? performance.now() : Date.now()) - started);
+      if (!blob || blob.size <= 0) { var e = new Error('blob_empty'); e.httpStatus = res.status; e.contentType = contentType; throw e; }
+      return blob;
+    } finally { if (timer) clearTimeout(timer); }
+  }
+
+  var FamilyImageResolver = {
+    phase: PHASE,
+    normalize: normalizeFamilyMessage,
+    normalizeInPlace: normalizeInPlace,
+    isImageMessage: function(m){ return normalizeFamilyMessage(m).isImage; },
+    getFileId: function(m){ return normalizeFamilyMessage(m).fileId; },
+    getFileName: function(m){ var n = normalizeFamilyMessage(m); return n.safeFileName || n.fileName || 'image'; },
+    getMeta: function(fileId){ return meta.get(fileId) || null; },
+    async getObjectUrl(message, opts){
+      opts = opts || {};
+      var n = normalizeFamilyMessage(message);
+      if (!n.isImage) { var e1 = new Error('not_image_message'); e1.code = 'not_image_message'; throw e1; }
+      if (n.localObjectUrl && /^blob:|^data:/i.test(n.localObjectUrl)) {
+        if (n.fileId) { remember(n.fileId, n.localObjectUrl, {mode:'local_object_url', blobSize:n.size || 0}); persistLocalObjectUrl(n); }
+        return { url:n.localObjectUrl, mode:'local_object_url', cacheHit:true, normalized:n, blobSize:n.size || 0 };
+      }
+      if (!n.fileId) { var e2 = new Error('missing_file_id'); e2.code = 'missing_file_id'; throw e2; }
+      if (mem.has(n.fileId)) return { url:mem.get(n.fileId), mode: opts.prefetch ? 'prefetch_cache' : 'memory_cache', cacheHit:true, normalized:n, meta:meta.get(n.fileId) || null };
+      if (pending.has(n.fileId)) return pending.get(n.fileId);
+      var p = (async function(){
+        var rec = await idbGet(n.fileId);
+        if (rec && rec.blob && rec.blob.size) {
+          var idbUrl = URL.createObjectURL(rec.blob);
+          remember(n.fileId, idbUrl, { mode:'persistent_cache', blobSize:rec.blob.size, mime:rec.mime || rec.blob.type || '', persistedAt:rec.updatedAt || 0 });
+          log('cache_hit_persistent', { fileIdPrefix:n.fileId.slice(0,8), fileName:n.fileName, blobSize:rec.blob.size, resolverMode:'persistent_cache' });
+          return { url:idbUrl, mode:'persistent_cache', cacheHit:true, normalized:n, blob:rec.blob, blobSize:rec.blob.size };
+        }
+        var blob = await fetchBlob(n.fileId, n.safeFileName || n.fileName || 'image');
+        var url = URL.createObjectURL(blob);
+        remember(n.fileId, url, { mode:'relay_download_blob', blobSize:blob.size, durationMs:blob.__lifeosDurationMs || 0, mime:blob.__lifeosContentType || blob.type || '' });
+        idbPut(n.fileId, blob, n).catch(function(){});
+        return { url:url, mode:'relay_download_blob', cacheHit:false, normalized:n, blob:blob, blobSize:blob.size };
+      })();
+      pending.set(n.fileId, p);
+      try { return await p; } finally { pending.delete(n.fileId); }
+    },
+    prefetch: function(message){
+      var n = normalizeFamilyMessage(message);
+      if (!n.isImage || !n.fileId || mem.has(n.fileId) || pending.has(n.fileId)) return Promise.resolve(false);
+      return this.getObjectUrl(message, {prefetch:true}).then(function(g){ log('prefetch_ok', {fileIdPrefix:n.fileId.slice(0,8), fileName:n.fileName, resolverMode:g.mode, cacheHit:g.cacheHit, blobSize:g.blobSize || (g.blob && g.blob.size) || ''}); return true; }).catch(function(e){ log('prefetch_failed', {fileIdPrefix:n.fileId.slice(0,8), fileName:n.fileName, error:String(e && (e.code || e.message) || e)}); return false; });
+    }
+  };
+  window.FamilyImageResolver = FamilyImageResolver;
+  window.LifeOSFamilyImageResolver = FamilyImageResolver;
+
+  function ensureViewerImg(){
+    var lb = document.getElementById('chat-lightbox');
+    var img = document.getElementById('lightbox-img') || document.getElementById('chat-lightbox-img');
+    if (!img && lb) {
+      var holder = lb.querySelector('.flex-1, .items-center, .justify-center') || lb;
+      img = document.createElement('img'); img.id = 'lightbox-img'; img.alt = 'Ảnh xem lớn'; holder.appendChild(img);
+    }
+    if (img) {
+      img.id = 'lightbox-img';
+      img.style.display = 'block'; img.style.visibility = 'visible'; img.style.opacity = img.style.opacity || '1';
+      img.style.maxWidth = '95vw'; img.style.maxHeight = '85vh'; img.style.width = 'auto'; img.style.height = 'auto'; img.style.objectFit = 'contain';
+    }
+    return img;
+  }
+  function showViewerError(text){
+    var img = ensureViewerImg(); if (!img) return;
+    var holder = img.parentElement || document.getElementById('chat-lightbox'); if (!holder) return;
+    var err = document.getElementById('lifeos67g-r12-viewer-error');
+    if (!err) { err = document.createElement('div'); err.id = 'lifeos67g-r12-viewer-error'; err.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:999999;padding:12px 14px;border-radius:14px;background:rgba(15,23,42,.92);color:white;font-weight:800;text-align:center;max-width:86vw'; holder.appendChild(err); }
+    err.textContent = text || 'Không tải được ảnh qua relay /download'; err.style.display = 'block';
+  }
+  function hideViewerError(){ var e = document.getElementById('lifeos67g-r12-viewer-error'); if (e) e.style.display = 'none'; }
+  function getCounter(){ return document.getElementById('lightbox-counter') || document.getElementById('chat-lightbox-counter'); }
+  function getTitle(){ return document.getElementById('lightbox-title') || document.getElementById('chat-lightbox-title') || document.getElementById('lightbox-caption'); }
+  function findMessageByImage(img){
+    var msgId = img.getAttribute('data-msg-id'); var fileId = img.getAttribute('data-file-id');
+    var arr = currentMessages();
+    for (var i=0;i<arr.length;i++) { var n = normalizeFamilyMessage(arr[i]); if (String(n.id) === String(msgId) || (fileId && String(n.fileId) === String(fileId))) return arr[i]; }
+    return null;
+  }
+  function scheduleIdle(fn){
+    if ('requestIdleCallback' in window) requestIdleCallback(fn, {timeout:1200}); else setTimeout(fn, 80);
+  }
+  function installLazyHydrator(ce){
+    var seen = new WeakSet();
+    var io = null;
+    if ('IntersectionObserver' in window) {
+      io = window.__LifeOS67GR12ImageObserver;
+      if (!io) {
+        io = new IntersectionObserver(function(entries){
+          entries.forEach(function(en){ if (en.isIntersecting) { io.unobserve(en.target); hydrateOne(en.target); } });
+        }, {root:null, rootMargin:'900px 0px', threshold:0.01});
+        window.__LifeOS67GR12ImageObserver = io;
+      }
+    }
+    async function hydrateOne(img){
+      if (!img || seen.has(img)) return; seen.add(img);
+      var msg = findMessageByImage(img); if (!msg) return;
+      var n = normalizeInPlace(msg);
+      try {
+        var got = await FamilyImageResolver.getObjectUrl(msg);
+        img.onload = function(){ img.classList.remove('lifeos67g-r5-image-loading','animate-pulse'); log('thumbnail_loaded', {fileIdPrefix:n.fileId.slice(0,8), fileName:n.fileName, resolverMode:got.mode, cacheHit:got.cacheHit, blobSize:got.blobSize || (got.blob && got.blob.size) || '', imgNaturalWidth:img.naturalWidth, imgNaturalHeight:img.naturalHeight}); };
+        img.onerror = function(){ log('thumbnail_img_load_error', {fileIdPresent:!!n.fileId, fileIdPrefix:n.fileId.slice(0,8), fileName:n.fileName}); };
+        img.src = got.url;
+      } catch(e) { log('thumbnail_resolve_failed', {fileIdPresent:!!n.fileId, fileIdPrefix:n.fileId.slice(0,8), fileName:n.fileName, error:String(e && (e.code || e.message) || e)}); }
+    }
+    ce.hydrateFamilyImages = function(){
+      var imgs = Array.prototype.slice.call(document.querySelectorAll('#chat-messages img[data-msg-id], #chat-messages img[data-file-id]'));
+      imgs.forEach(function(img){
+        if (img.src && img.complete && img.naturalWidth > 0) return;
+        if (io) io.observe(img); else hydrateOne(img);
+      });
+      // persist local object URLs from newly uploaded images without forcing network downloads
+      scheduleIdle(function(){
+        currentMessages().forEach(function(m){ var n = normalizeFamilyMessage(m); if (n.isImage && n.localObjectUrl && n.fileId) persistLocalObjectUrl(n); });
+      });
+    };
+  }
+  function prefetchAround(ce){
+    try {
+      var imgs = ce.lightboxImages || [];
+      if (!imgs.length) return;
+      var i = Number(ce.lightboxIndex || 0);
+      var next = imgs[(i + 1) % imgs.length];
+      var prev = imgs[(i - 1 + imgs.length) % imgs.length];
+      scheduleIdle(function(){ FamilyImageResolver.prefetch(next); FamilyImageResolver.prefetch(prev); });
+    } catch(e) {}
+  }
+  function install(){
+    var ce = window.ChatEngine; if (!ce) return false;
+    if (ce.__lifeos67gR12PersistentGalleryCacheInstalled) return true;
+    ce.__lifeos67gR12PersistentGalleryCacheInstalled = true;
+    ce.normalizeFamilyMessage = normalizeFamilyMessage;
+    ce.normalizeFamilyAttachment = normalizeFamilyMessage;
+    ce.isImageMessage = function(m){ return FamilyImageResolver.isImageMessage(m); };
+    ce.getFileUrl = async function(fileId, fileName){
+      if (!fileId) throw new Error('missing_file_id');
+      if (mem.has(fileId)) return mem.get(fileId);
+      var pseudo = { type:'file', kind:'image_document', fileId:fileId, file_id:fileId, fileName:fileName || 'image', file_name:fileName || 'image', mime:'image/*' };
+      return (await FamilyImageResolver.getObjectUrl(pseudo)).url;
+    };
+    ce.getImageUrl = async function(fileIdOrMsg, fileName){
+      try { if (typeof fileIdOrMsg === 'object') return (await FamilyImageResolver.getObjectUrl(fileIdOrMsg)).url; return await this.getFileUrl(fileIdOrMsg, fileName || 'image'); }
+      catch(e){ log('get_image_url_failed', {fileIdPresent:!!fileIdOrMsg, error:String(e && (e.code || e.message) || e)}); return ''; }
+    };
+    if (!ce.getGalleryImages || !ce.getGalleryImages.__lifeos67gR12) {
+      ce.getGalleryImages = function(){ return currentMessages().filter(function(m){ var n = normalizeInPlace(m); return n.isImage && !!(n.fileId || n.localObjectUrl); }); };
+      ce.getGalleryImages.__lifeos67gR12 = true;
+    }
+    installLazyHydrator(ce);
+    ce.updateLightboxView = async function(){
+      var img = ensureViewerImg(), counter = getCounter(), title = getTitle();
+      if (!img || !this.lightboxImages || !this.lightboxImages.length) return;
+      var msg = this.lightboxImages[this.lightboxIndex] || this.lightboxImages[0];
+      var n = normalizeInPlace(msg);
+      if (counter) counter.textContent = (this.lightboxIndex + 1) + ' / ' + this.lightboxImages.length;
+      if (title) title.textContent = n.fileName || 'Ảnh';
+      hideViewerError(); img.style.opacity = '0.45'; img.classList.add('animate-pulse');
+      var proofBase = {messageId:n.id,index:this.lightboxIndex,total:this.lightboxImages.length,type:n.type,kind:n.kind,fileIdPresent:!!n.fileId,fileIdPrefix:n.fileId?String(n.fileId).slice(0,8):'',fileName:n.fileName,mime:n.mime,isImage:n.isImage,downloadEndpoint:'/download'};
+      try {
+        var got = await FamilyImageResolver.getObjectUrl(msg);
+        img.onload = function(){
+          img.style.opacity = '1'; img.classList.remove('animate-pulse');
+          log('open_viewer', Object.assign({}, proofBase, {resolverMode:got.mode, cacheHit:!!got.cacheHit, downloadDurationMs:(got.blob && got.blob.__lifeosDurationMs) || (got.meta && got.meta.durationMs) || '', downloadHttpStatus:(got.blob && got.blob.__lifeosHttpStatus) || '', downloadContentType:(got.blob && got.blob.__lifeosContentType) || '', blobSize:got.blobSize || (got.blob && got.blob.size) || (got.meta && got.meta.blobSize) || '', objectUrlCreated:/^blob:/i.test(got.url), imgNaturalWidth:img.naturalWidth, imgNaturalHeight:img.naturalHeight, error:''}));
+          prefetchAround(ce);
+        };
+        img.onerror = function(){ showViewerError('Ảnh tải về nhưng trình duyệt không đọc được.'); log('open_viewer_failed', Object.assign({}, proofBase, {resolverMode:got.mode, cacheHit:!!got.cacheHit, error:'img_load_error'})); prefetchAround(ce); };
+        img.src = got.url;
+        if (img.complete && img.naturalWidth > 0) { try { img.onload(); } catch(_e){} }
+      } catch(e) {
+        img.style.opacity = '0'; img.classList.remove('animate-pulse'); showViewerError('Không tải được ảnh qua relay /download');
+        log('open_viewer_failed', Object.assign({}, proofBase, {resolverMode:'failed', cacheHit:false, error:String(e && (e.code || e.message) || e)}));
+      }
+    };
+    ce.updateLightboxView.__lifeos67gR12 = true;
+    ce.nextLightbox = async function(){ if(!this.lightboxImages || !this.lightboxImages.length) return; this.lightboxIndex = (this.lightboxIndex + 1) % this.lightboxImages.length; await this.updateLightboxView(); };
+    ce.prevLightbox = async function(){ if(!this.lightboxImages || !this.lightboxImages.length) return; this.lightboxIndex = (this.lightboxIndex - 1 + this.lightboxImages.length) % this.lightboxImages.length; await this.updateLightboxView(); };
+    setTimeout(function(){ try { ce.hydrateFamilyImages(); } catch(e){} }, 120);
+    log('installed', {message:'persistent IndexedDB cache + shared viewer/thumbnail resolver installed'});
+    return true;
+  }
+  install();
+  document.addEventListener('DOMContentLoaded', install, {once:false});
+  setTimeout(install, 600); setTimeout(install, 1600); setTimeout(install, 3200);
+  window.LifeOSFamilyPersistentGalleryCache = {phase:PHASE, install:install, resolver:FamilyImageResolver, memorySize:function(){ return mem.size; }, dbName:DB_NAME, store:STORE};
+})();
+</script></body>
 </html>
