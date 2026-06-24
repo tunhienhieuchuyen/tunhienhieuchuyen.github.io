@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#fff7dc" />
+  <meta name="description" content="Hướng dẫn vận hành chính thức LifeOS Web/GitHub và Native APK, baseline cuối dự án." />
+  <title>LifeOS — Hướng dẫn vận hành chính thức</title>
+  <style>
+    :root{
+      --bg:#fff7dc;
+      --bg2:#fff1bc;
+      --paper:#fffdf6;
+      --paper2:#fff9e8;
+      --ink:#233243;
+      --muted:#64748b;
+      --line:#ead9ae;
+      --line2:#dec488;
+      --gold:#b7791f;
+      --gold2:#f4b740;
+      --green:#0f766e;
+      --green-bg:#e8f7ef;
+      --blue:#2563eb;
+      --blue-bg:#eaf1ff;
+      --red:#b42318;
+      --red-bg:#fff0ed;
+      --violet:#6d28d9;
+      --violet-bg:#f1e9ff;
+      --shadow:0 18px 50px rgba(120,83,20,.13);
+      --radius:22px;
+      --sidebar:315px;
+      --font:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 12% -5%, rgba(255,219,118,.72), transparent 38%),
+        radial-gradient(circle at 92% 0%, rgba(255,248,209,.94), transparent 34%),
+        linear-gradient(180deg,#fff7dc 0%,#fffdf6 46%,#fff2c2 100%);
+      line-height:1.58;
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit}
+    code,.mono{font-family:var(--mono)}
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      border-bottom:1px solid rgba(222,196,136,.82);
+      background:rgba(255,250,236,.88);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      box-shadow:0 10px 26px rgba(120,83,20,.06);
+    }
+    .top-inner{
+      max-width:1600px;
+      margin:0 auto;
+      padding:22px 26px 18px;
+    }
+    .brand-row{
+      display:flex;
+      justify-content:space-between;
+      gap:22px;
+      align-items:flex-start;
+    }
+    .logo{
+      width:58px;
+      height:58px;
+      border-radius:20px;
+      background:linear-gradient(145deg,#fff8e8,#f7c454 44%,#a86915);
+      box-shadow:inset 0 0 0 3px rgba(255,255,255,.55),0 14px 28px rgba(128,83,18,.25);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+    }
+    .logo span{font-size:31px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15))}
+    .title-wrap{display:flex;gap:16px;align-items:flex-start}
+    h1{
+      margin:0;
+      font-size:clamp(28px,4vw,54px);
+      line-height:1.03;
+      letter-spacing:-.045em;
+      color:#172033;
+    }
+    .subtitle{
+      max-width:1040px;
+      margin:10px 0 0;
+      color:#5e6d7e;
+      font-size:16px;
+      font-weight:560;
+    }
+    .stamp{
+      min-width:250px;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:7px;
+      color:#765018;
+      text-align:right;
+    }
+    .stamp strong{font-size:17px;color:#7c4a03}
+    .stamp small{font-weight:800;color:#8a5a1f}
+    .badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:18px;
+    }
+    .badge,.pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid var(--line2);
+      background:#fff7df;
+      color:#344357;
+      border-radius:999px;
+      padding:7px 11px;
+      font-size:12.5px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .badge.pass,.pill.pass{background:var(--green-bg);color:var(--green);border-color:#b8e6cd}
+    .badge.core,.pill.core{background:var(--violet-bg);color:var(--violet);border-color:#d9c7ff}
+    .badge.warn,.pill.warn{background:#fff1c7;color:#995d00;border-color:#f0d078}
+    .badge.blue,.pill.blue{background:var(--blue-bg);color:var(--blue);border-color:#c9dcff}
+    .badge.red,.pill.red{background:var(--red-bg);color:var(--red);border-color:#ffc7bf}
+    .layout{
+      max-width:1600px;
+      margin:0 auto;
+      padding:24px 26px 46px;
+      display:grid;
+      grid-template-columns:var(--sidebar) minmax(0,1fr);
+      gap:24px;
+    }
+    aside{
+      position:sticky;
+      top:154px;
+      height:calc(100vh - 176px);
+      overflow:auto;
+      align-self:start;
+      background:rgba(255,253,247,.86);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+    .aside-title{
+      margin:2px 0 12px;
+      color:#8a5a1f;
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:950;
+    }
+    .nav-list{display:flex;flex-direction:column;gap:8px}
+    .nav-item{
+      text-decoration:none;
+      display:grid;
+      grid-template-columns:34px 1fr auto;
+      align-items:center;
+      gap:10px;
+      padding:10px;
+      border-radius:16px;
+      border:1px solid transparent;
+      color:#28384b;
+    }
+    .nav-item:hover{background:#fff2cf;border-color:#e7cf94}
+    .nav-icon{
+      width:34px;height:34px;border-radius:12px;
+      background:linear-gradient(180deg,#fff9e9,#ffe9a7);
+      border:1px solid #ecd49a;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .nav-main{font-size:14px;font-weight:950;line-height:1.16}
+    .nav-sub{font-size:11px;color:#738195;margin-top:3px}
+    .toolbar{
+      position:sticky;
+      top:132px;
+      z-index:30;
+      background:linear-gradient(180deg,rgba(255,247,220,.96),rgba(255,247,220,.72));
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:12px;
+      padding:12px 0 14px;
+      margin-bottom:8px;
+    }
+    .search{
+      width:100%;
+      border:1px solid var(--line2);
+      border-radius:16px;
+      background:#fffdf6;
+      color:var(--ink);
+      padding:13px 14px;
+      font-size:15px;
+      outline:none;
+      box-shadow:0 8px 20px rgba(120,83,20,.06);
+    }
+    .filters{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+    .filter-btn{
+      border:1px solid var(--line2);
+      background:#fffdf6;
+      color:#586577;
+      border-radius:999px;
+      padding:10px 12px;
+      font-weight:950;
+      cursor:pointer;
+    }
+    .filter-btn.active{background:#7c4a03;color:#fff;border-color:#7c4a03}
+    main{min-width:0}
+    .panel{
+      background:rgba(255,253,247,.94);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin-bottom:20px;
+    }
+    .hero{
+      display:grid;
+      grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);
+      gap:18px;
+      align-items:stretch;
+    }
+    .kicker{
+      color:#8a5a1f;
+      font-size:12px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:8px;
+    }
+    h2{
+      margin:0 0 10px;
+      color:#1f2937;
+      font-size:clamp(24px,2.2vw,36px);
+      line-height:1.12;
+      letter-spacing:-.035em;
+    }
+    h3{
+      margin:0 0 8px;
+      color:#1f2937;
+      font-size:18px;
+      letter-spacing:-.015em;
+    }
+    .lead{color:#56667a;font-size:16px;margin:0}
+    .metric-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+    .metric{
+      background:linear-gradient(180deg,#fffaf0,#fff4d3);
+      border:1px solid #ead7a8;
+      border-radius:18px;
+      padding:15px;
+    }
+    .metric strong{
+      display:block;
+      font-size:30px;
+      color:#0f766e;
+      line-height:1;
+      margin-bottom:6px;
+    }
+    .metric span{color:#68778b;font-size:12.5px;font-weight:900}
+    .release-box{
+      background:linear-gradient(145deg,#fff9e8,#ffe8a2);
+      border:1px solid #e6c57c;
+      border-radius:20px;
+      padding:18px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);
+    }
+    .release-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px dashed #d6b46f;
+      padding:9px 0;
+      font-size:13px;
+    }
+    .release-row:last-child{border-bottom:0}
+    .release-row b{color:#704707}
+    .release-row code{font-size:11.5px;color:#344357;word-break:break-all;text-align:right}
+    .section{scroll-margin-top:205px}
+    .section-head{
+      display:flex;
+      gap:18px;
+      justify-content:space-between;
+      align-items:flex-start;
+      padding-bottom:14px;
+      margin-bottom:14px;
+      border-bottom:1px solid var(--line);
+    }
+    .section-head p{margin:5px 0 0;color:#64748b;max-width:950px}
+    .section-meta{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;min-width:210px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    details.card{
+      background:linear-gradient(180deg,#fffdf8,#fff8e8);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+    }
+    details.card[open]{box-shadow:0 12px 28px rgba(114,73,18,.10)}
+    summary{
+      list-style:none;
+      cursor:pointer;
+      padding:16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      font-weight:950;
+      color:#253448;
+    }
+    summary::-webkit-details-marker{display:none}
+    .summary-left{display:flex;gap:10px;align-items:center;min-width:0}
+    .dot{
+      width:13px;height:13px;border-radius:999px;background:var(--green);
+      box-shadow:0 0 0 4px rgba(15,118,110,.12);flex:0 0 auto;
+    }
+    .dot.core{background:#6d28d9;box-shadow:0 0 0 4px rgba(109,40,217,.13)}
+    .dot.warn{background:#d97706;box-shadow:0 0 0 4px rgba(217,119,6,.13)}
+    .dot.red{background:#d92d20;box-shadow:0 0 0 4px rgba(217,45,32,.13)}
+    .count{font-size:11px;border:1px solid #ead2a0;background:#fff2cc;color:#8a5a1f;border-radius:999px;padding:4px 8px;white-space:nowrap}
+    .card-body{padding:0 16px 16px;color:#445366}
+    ul.clean{margin:0;padding-left:18px}
+    ul.clean li{margin:7px 0}
+    .callout{
+      border-left:5px solid var(--green);
+      background:var(--green-bg);
+      color:#184e42;
+      padding:14px 16px;
+      border-radius:15px;
+      font-weight:760;
+      margin:14px 0;
+    }
+    .callout.warn{border-left-color:#d97706;background:#fff1c7;color:#744400}
+    .callout.red{border-left-color:#d92d20;background:#fff0ed;color:#80251a}
+    .table-wrap{overflow:auto;border-radius:18px;border:1px solid var(--line)}
+    table{width:100%;border-collapse:separate;border-spacing:0;background:#fffdf7}
+    th,td{padding:13px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+    th{background:#fff0c2;color:#664006;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+    tr:last-child td{border-bottom:0}
+    .mini{
+      background:#fffaf0;
+      border:1px dashed #e3cfaa;
+      border-radius:15px;
+      padding:12px;
+      margin-top:10px;
+    }
+    .code{
+      background:#122033;
+      color:#dbeafe;
+      border-radius:14px;
+      padding:12px;
+      overflow:auto;
+      font-family:var(--mono);
+      font-size:12px;
+      line-height:1.55;
+      white-space:pre-wrap;
+    }
+    .timeline{display:flex;flex-direction:column;gap:10px}
+    .timeline-item{
+      display:grid;
+      grid-template-columns:90px 1fr;
+      gap:12px;
+      background:#fffaf0;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:13px;
+    }
+    .phase{font-weight:950;color:#7c4a03}
+    .phase-desc{color:#445366}
+    .footer{
+      text-align:center;
+      color:#6b7280;
+      font-size:13px;
+      padding:18px 0 40px;
+    }
+    .hide{display:none!important}
+    mark{background:#ffdf7e;color:inherit;border-radius:3px;padding:0 2px}
+    .print-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .action-btn{
+      border:1px solid var(--line2);
+      background:#fffdf6;
+      color:#704707;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:950;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+    }
+    .action-btn.primary{background:#7c4a03;color:white;border-color:#7c4a03}
+    @media(max-width:1150px){
+      .layout{grid-template-columns:1fr;padding:18px}
+      aside{position:relative;top:auto;height:auto}
+      .toolbar{top:111px}
+      .hero{grid-template-columns:1fr}
+      .metric-grid{grid-template-columns:repeat(2,1fr)}
+      .grid-3{grid-template-columns:1fr}
+    }
+    @media(max-width:760px){
+      .top-inner{padding:18px 15px}
+      .brand-row{display:block}
+      .title-wrap{gap:12px}
+      .logo{width:48px;height:48px;border-radius:16px}
+      .stamp{align-items:flex-start;text-align:left;margin-top:14px}
+      .layout{padding:14px}
+      .toolbar{position:relative;top:auto;grid-template-columns:1fr}
+      .filters{justify-content:flex-start}
+      .metric-grid,.grid-2{grid-template-columns:1fr}
+      .section-head{display:block}
+      .section-meta{justify-content:flex-start;margin-top:10px}
+      .timeline-item{grid-template-columns:1fr}
+    }
+    @media print{
+      .topbar,.toolbar,aside{position:static}
+      body{background:white}
+      .layout{display:block;max-width:none}
+      aside,.toolbar .filters{display:none}
+      .panel{box-shadow:none;break-inside:avoid}
+      details.card:not([open]) .card-body{display:block}
+      details.card{break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="top-inner">
+      <div class="brand-row">
+        <div class="title-wrap">
+          <div class="logo" aria-hidden="true"><span>🕰️</span></div>
+          <div>
+            <h1>LifeOS — Hướng dẫn vận hành chính thức</h1>
+            <p class="subtitle">Tài liệu cuối cho LifeOS sau khi chốt Web/GitHub và Native APK. Trang này thay thế các bản hướng dẫn cũ: giữ tinh thần “chậm mà chắc”, nhưng cập nhật đúng thực tế dự án đã hoàn thành.</p>
+          </div>
+        </div>
+        <div class="stamp">
+          <strong>Final Baseline</strong>
+          <small>GitHub/Web + Native APK</small>
+          <span>R14_5 • AutoProxy • NotifyStable • Voice Core</span>
+        </div>
+      </div>
+      <div class="badges">
+        <span class="badge pass">✅ Dự án đã chốt baseline</span>
+        <span class="badge core">🧠 Native-first • Log-first</span>
+        <span class="badge pass">⏰ Alarm native ổn định</span>
+        <span class="badge pass">🗣️ Voice Core vi_VN</span>
+        <span class="badge blue">📻 Radio/Tivi AutoProxy</span>
+        <span class="badge pass">🔔 Native Notify</span>
+        <span class="badge warn">🛡️ Không vá chồng baseline</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <div class="aside-title">Mục lục vận hành</div>
+      <nav class="nav-list">
+        <a class="nav-item" href="#overview"><span class="nav-icon">🏁</span><span><span class="nav-main">Tổng quan final</span><span class="nav-sub">baseline, nguyên tắc, link</span></span><span class="pill pass">Final</span></a>
+        <a class="nav-item" href="#web"><span class="nav-icon">🌐</span><span><span class="nav-main">Web/GitHub</span><span class="nav-sub">nhánh đã chốt</span></span><span class="pill pass">OK</span></a>
+        <a class="nav-item" href="#native"><span class="nav-icon">📱</span><span><span class="nav-main">Native APK</span><span class="nav-sub">R14_5 stable</span></span><span class="pill core">Core</span></a>
+        <a class="nav-item" href="#tabs"><span class="nav-icon">🧭</span><span><span class="nav-main">Cẩm nang các tab</span><span class="nav-sub">Home, Tasks, Focus...</span></span><span class="pill pass">Use</span></a>
+        <a class="nav-item" href="#alarm"><span class="nav-icon">⏰</span><span><span class="nav-main">Báo thức & Voice</span><span class="nav-sub">stop, snooze, TTS</span></span><span class="pill pass">Native</span></a>
+        <a class="nav-item" href="#media"><span class="nav-icon">📻</span><span><span class="nav-main">Radio/Tivi/Proxy</span><span class="nav-sub">AutoProxy, HLS, fallback</span></span><span class="pill blue">Proxy</span></a>
+        <a class="nav-item" href="#family"><span class="nav-icon">👨‍👩‍👧</span><span><span class="nav-main">Gia đình</span><span class="nav-sub">chat, ảnh, file</span></span><span class="pill pass">OK</span></a>
+        <a class="nav-item" href="#weather"><span class="nav-icon">🌤️</span><span><span class="nav-main">Thời tiết / Nhịp sống</span><span class="nav-sub">24h, lời khuyên</span></span><span class="pill pass">OK</span></a>
+        <a class="nav-item" href="#permissions"><span class="nav-icon">🛡️</span><span><span class="nav-main">Quyền sống còn</span><span class="nav-sub">Android/OEM</span></span><span class="pill warn">Check</span></a>
+        <a class="nav-item" href="#rules"><span class="nav-icon">📜</span><span><span class="nav-main">Luật nâng cấp sau này</span><span class="nav-sub">không phá baseline</span></span><span class="pill core">Rules</span></a>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="toolbar">
+        <input class="search" id="searchBox" placeholder="Tìm nhanh: alarm, voice, proxy, family, weather, notify, profile..." />
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all">Tất cả</button>
+          <button class="filter-btn" data-filter="pass">PASS</button>
+          <button class="filter-btn" data-filter="core">CORE</button>
+          <button class="filter-btn" data-filter="warn">Lưu ý</button>
+          <button class="filter-btn" data-filter="proxy">Proxy</button>
+        </div>
+      </div>
+
+      <section class="panel hero section" id="overview" data-status="pass core">
+        <div>
+          <div class="kicker">LifeOS final operating manual</div>
+          <h2>LifeOS đã đi vào baseline ổn định</h2>
+          <p class="lead">LifeOS hiện có hai mốc chính: bản Web/GitHub đã chốt để vận hành trên trình duyệt và bản Native APK đã chốt để dùng như ứng dụng Android thật. Tài liệu này dùng để người dùng, coder, tester hoặc chính chủ dự án mở lên là biết cách vận hành, kiểm tra, bảo trì và nâng cấp mà không phá nền.</p>
+          <div class="metric-grid">
+            <div class="metric"><strong>2</strong><span>baseline chính: Web + APK</span></div>
+            <div class="metric"><strong>R14_5</strong><span>Native stable hiện tại</span></div>
+            <div class="metric"><strong>83/52</strong><span>TV/Radio load qua data hub</span></div>
+            <div class="metric"><strong>0</strong><span>FATAL / ANR / console đỏ runtime</span></div>
+          </div>
+          <div class="print-actions">
+            <a class="action-btn primary" href="https://tunhienhieuchuyen.github.io/" target="_blank" rel="noopener">🏠 Mở LifeOS Web</a>
+            <a class="action-btn" href="https://sua-json-proxy-kenhtivi.xiemsansang.workers.dev/" target="_blank" rel="noopener">🔌 Kiểm tra Proxy TV</a>
+            <button class="action-btn" onclick="window.print()">🖨️ In / lưu PDF</button>
+            <button class="action-btn" onclick="toggleAllDetails(true)">📖 Mở hết mục</button>
+          </div>
+        </div>
+        <div class="release-box">
+          <h3>Thông tin bản chốt</h3>
+          <div class="release-row"><b>Web final</b><code>index(2).html</code></div>
+          <div class="release-row"><b>Web SHA256</b><code>896f2e03da2f4eb4dd727d178e9d25f507c3fe6982be289ea1caa72745420ef3</code></div>
+          <div class="release-row"><b>Native kit</b><code>LifeOS_Native_APK_Kit_Pha68F2R13(2).zip</code></div>
+          <div class="release-row"><b>Native version</b><code>68F2R13-R14_5-home-guide-links-notify-stable</code></div>
+          <div class="release-row"><b>versionCode</b><code>68016</code></div>
+          <div class="release-row"><b>Manual path</b><code>/readlifeos.html</code></div>
+        </div>
+      </section>
+
+      <section class="panel section" id="web" data-status="pass">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Baseline 01</div>
+            <h2>Web/GitHub final</h2>
+            <p>Bản Web dùng cho truy cập nhanh, kiểm thử trình duyệt, GitHub Pages và làm mốc đối chiếu UI/logic trước khi đưa vào native.</p>
+          </div>
+          <div class="section-meta"><span class="pill pass">PASS</span><span class="pill core">Frozen</span></div>
+        </div>
+        <div class="grid-2">
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot"></span> Chuỗi đã chốt</span><span class="count">R2 → R8</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li><b>R2:</b> root navigation router không crosstalk Gia đình ↔ Nghe nhạc/Radio/Tivi.</li>
+              <li><b>R4:</b> Gia đình mobile touch select + haptic.</li>
+              <li><b>R5_2:</b> Family compact / panorama cho mobile landscape.</li>
+              <li><b>R6:</b> gửi nhiều ảnh nhỏ theo queue tuần tự.</li>
+              <li><b>R7_1:</b> Weather 24h scroll/label polish.</li>
+              <li><b>R8:</b> alarm guard không sai profile, không replay quá hạn.</li>
+            </ul></div>
+          </details>
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot core"></span> Vai trò hiện tại</span><span class="count">Reference</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Là mốc UI/logic để so với Native APK.</li>
+              <li>Không sửa trực tiếp nếu chưa có lệnh nâng cấp rõ.</li>
+              <li>Khi cần thử nhanh, dùng Web; khi nghiệm thu thật, dùng APK.</li>
+              <li>Đường hướng: giữ ổn định, chỉ nâng cấp theo nhánh mới.</li>
+            </ul></div>
+          </details>
+        </div>
+      </section>
+
+      <section class="panel section" id="native" data-status="pass core">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Baseline 02</div>
+            <h2>Native APK final — R14_5 NotifyStable</h2>
+            <p>Bản APK native là đích dùng thật trên điện thoại/LDPlayer. Nó đã vượt qua giai đoạn patch-debt media, ổn định notify, home/guide external link và proxy Radio/Tivi.</p>
+          </div>
+          <div class="section-meta"><span class="pill pass">Runtime PASS</span><span class="pill core">Native-first</span></div>
+        </div>
+        <div class="callout">Kết luận nghiệm thu runtime gần nhất: APK đúng package, đúng version, không FATAL, không ANR, không console đỏ, voice core vi_VN hoạt động, notification post được, Home/Hướng dẫn mở external browser, Radio/Tivi load data và dùng proxy đúng domain.</div>
+        <div class="grid-3">
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot"></span> Thông tin APK</span><span class="count">68016</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li><b>Package:</b> <code>com.tunhienhieuchuyen.lifeosnative</code></li>
+              <li><b>versionName:</b> <code>68F2R13-R14_5-home-guide-links-notify-stable</code></li>
+              <li><b>targetSdk:</b> 35</li>
+              <li><b>Baseline kit:</b> <code>LifeOS_Native_APK_Kit_Pha68F2R13</code></li>
+            </ul></div>
+          </details>
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot core"></span> Native bridge</span><span class="count">Stable</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Native Notification bridge.</li>
+              <li>Home / Hướng dẫn external URL bridge.</li>
+              <li>Native TTS / Voice Core.</li>
+              <li>Native alarm full-screen / service / snooze / stop.</li>
+            </ul></div>
+          </details>
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot warn"></span> Không làm bừa</span><span class="count">Rule</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Không quay lại patch-debt cũ Pha1.2–Pha1.5.</li>
+              <li>Không chạm profile/login/menu nếu không có lỗi thật.</li>
+              <li>Không thay proxy domain khi chưa test root Worker.</li>
+              <li>Không gọi lỗi từ WebView file:// là blocker nếu runtime app vẫn ổn.</li>
+            </ul></div>
+          </details>
+        </div>
+      </section>
+
+      <section class="panel section" id="tabs" data-status="pass">
+        <div class="section-head">
+          <div>
+            <div class="kicker">User guide</div>
+            <h2>Cẩm nang các tab chính</h2>
+            <p>Tóm tắt cách dùng và mục đích từng khu vực trong LifeOS.</p>
+          </div>
+          <div class="section-meta"><span class="pill pass">Daily use</span></div>
+        </div>
+        <div class="grid-2">
+          <details class="card" open><summary><span class="summary-left"><span class="dot"></span> Home / Tổng quan</span><span class="count">Điều phối</span></summary><div class="card-body"><ul class="clean"><li>Màn vào chính, xem trạng thái và đi nhanh tới các khu vực.</li><li>Nút Trang chủ và Hướng dẫn trong APK mở ra trình duyệt ngoài.</li><li>Không dùng Home để test media sâu; vào tab Nghe nhạc để test.</li></ul></div></details>
+          <details class="card" open><summary><span class="summary-left"><span class="dot"></span> Nhiệm vụ</span><span class="count">Task</span></summary><div class="card-body"><ul class="clean"><li>Tạo việc bằng nhập tự nhiên hoặc chọn ngày giờ.</li><li>Stop/Done phải cập nhật tiến độ và gạch nhiệm vụ đã xong.</li><li>Báo thức gắn nhiệm vụ dùng Native Alarm để đáng tin cậy hơn timer WebView.</li></ul></div></details>
+          <details class="card" open><summary><span class="summary-left"><span class="dot"></span> Tập trung</span><span class="count">Focus</span></summary><div class="card-body"><ul class="clean"><li>Pomodoro / Work / Break / DateClock / Weather / News theo workspace.</li><li>Landscape mini-PC ưu tiên dùng như màn điều phối.</li><li>Đồng hồ và ngày âm/dương đã được làm gọn cho mobile.</li></ul></div></details>
+          <details class="card" open><summary><span class="summary-left"><span class="dot"></span> Kho / Vault</span><span class="count">Lưu trữ</span></summary><div class="card-body"><ul class="clean"><li>Lưu ghi chú, mã, nội dung quan trọng.</li><li>Không dùng thao tác dọn rác nhạc để xóa trắng Vault.</li><li>Khi nâng cấp phải giữ localStorage/Firebase schema.</li></ul></div></details>
+          <details class="card" open><summary><span class="summary-left"><span class="dot"></span> Nghe nhạc / Radio / Tivi</span><span class="count">Media</span></summary><div class="card-body"><ul class="clean"><li>Nhạc, Radio, Tivi nằm trong MediaHub.</li><li>Radio/Tivi dùng queue direct → proxy → diagnostic.</li><li>Khi rời tab media, âm thanh/video phải dừng đúng.</li></ul></div></details>
+          <details class="card" open><summary><span class="summary-left"><span class="dot"></span> Cài đặt</span><span class="count">Survival</span></summary><div class="card-body"><ul class="clean"><li>Kiểm quyền thông báo, exact alarm, pin app, pin battery/autostart nếu máy có.</li><li>Không xem quyền OEM là lỗi app; mỗi hãng Android có cách khóa nền riêng.</li></ul></div></details>
+        </div>
+      </section>
+
+      <section class="panel section" id="alarm" data-status="pass core">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Native core</div>
+            <h2>Báo thức & Voice Core</h2>
+            <p>Đây là lõi sống còn của LifeOS Native APK: chuông phải nổ, giọng phải đọc, stop/snooze phải sạch, không nhầm profile.</p>
+          </div>
+          <div class="section-meta"><span class="pill pass">Alarm PASS</span><span class="pill pass">Voice PASS</span></div>
+        </div>
+        <div class="grid-2">
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot core"></span> Native Alarm</span><span class="count">Stop/Snooze</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Alarm dùng Android native service/full-screen thay vì dựa hoàn toàn WebView timer.</li>
+              <li>Stop phải dừng ringtone/beep/service và không replay lại việc đã qua.</li>
+              <li>Snooze mặc định 15 phút và cần được test bằng log nếu thay đổi.</li>
+              <li>Guard chống sai profile và không cho profile N/A đi vào alarm runtime.</li>
+            </ul></div>
+          </details>
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot core"></span> Voice Core</span><span class="count">vi_VN</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Voice Core dùng Android TTS engine, đã có dấu hiệu ổn với <code>com.google.android.tts</code>.</li>
+              <li>Tiếng Việt <code>vi_VN</code> sẵn sàng và đọc được tên mục/nhiệm vụ.</li>
+              <li>Nếu máy thiếu TTS, app phải báo rõ hoặc im lặng an toàn, không crash.</li>
+              <li>Không quay lại Google Translate GTX/WebView TTS cho production native.</li>
+            </ul></div>
+          </details>
+        </div>
+      </section>
+
+      <section class="panel section" id="media" data-status="pass proxy">
+        <div class="section-head">
+          <div>
+            <div class="kicker">MediaHub</div>
+            <h2>Radio / Tivi / AutoProxy</h2>
+            <p>Sau nhiều vòng lỗi đau, media đã chốt hướng đúng: HTML điều phối MediaHub, Worker proxy xử lý HLS/CORS, không để player đen im lặng.</p>
+          </div>
+          <div class="section-meta"><span class="pill blue">AutoProxy</span><span class="pill pass">Runtime OK</span></div>
+        </div>
+        <div class="callout">Proxy chính đang dùng: <code>https://sua-json-proxy-kenhtivi.xiemsansang.workers.dev/proxy?url=</code>. Trước khi nghi app lỗi, luôn mở root Worker để chắc proxy còn sống.</div>
+        <div class="grid-2">
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot"></span> Cơ chế phát</span><span class="count">Direct→Proxy</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>TV/Radio load data từ <code>smartbox_channels.json</code> online khi asset local không phù hợp.</li>
+              <li>MediaHub build source queue từ nhiều schema: <code>url/src/streamUrl/m3u8/link/proxyUrl</code>.</li>
+              <li>Tivi luôn được đưa proxy vào queue; nếu direct lỗi thì thử proxy.</li>
+              <li>HLS fatal/network error có retry/recover và diagnostic.</li>
+            </ul></div>
+          </details>
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot warn"></span> Khi Tivi không lên hình</span><span class="count">Checklist</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Kiểm root Worker có ra JSON OK không.</li>
+              <li>Dán URL <code>/proxy?url=...</code> vào Chrome xem có trả manifest không.</li>
+              <li>Nếu manifest sống nhưng WebView đen: kiểm codec/video track.</li>
+              <li>Nếu app báo diagnostic thay vì đen im lặng: cơ chế bảo vệ đang đúng.</li>
+            </ul></div>
+          </details>
+        </div>
+        <div class="code">Proxy health:
+https://sua-json-proxy-kenhtivi.xiemsansang.workers.dev/
+
+Proxy format:
+https://sua-json-proxy-kenhtivi.xiemsansang.workers.dev/proxy?url=ENCODED_STREAM_URL</div>
+      </section>
+
+      <section class="panel section" id="family" data-status="pass">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Family workspace</div>
+            <h2>Gia đình — chat, file, ảnh, video</h2>
+            <p>Khu vực Gia đình giữ vai trò liên lạc và lưu file/ảnh/video cho nhóm dùng LifeOS.</p>
+          </div>
+          <div class="section-meta"><span class="pill pass">Mobile OK</span><span class="pill pass">Queue OK</span></div>
+        </div>
+        <div class="grid-2">
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot"></span> Tính năng đã chốt</span><span class="count">Family</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Chọn ảnh/video/file trên mobile như file thường.</li>
+              <li>Hiển thị dung lượng, phân biệt media/file.</li>
+              <li>Viewer/gallery và compact thumbnails đã có nền ổn.</li>
+              <li>Gửi nhiều ảnh nhỏ dùng queue tuần tự để tránh nghẽn.</li>
+            </ul></div>
+          </details>
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot warn"></span> Quy tắc bảo trì</span><span class="count">No crosstalk</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Không để Gia đình tự kéo tab Nghe nhạc/Radio/Tivi lên.</li>
+              <li>Không vá sự kiện click Family bằng cách chặn toàn cục.</li>
+              <li>Không đụng schema upload/download relay nếu chưa có log lỗi thật.</li>
+            </ul></div>
+          </details>
+        </div>
+      </section>
+
+      <section class="panel section" id="weather" data-status="pass">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Lifestyle dashboard</div>
+            <h2>Thời tiết / Nhịp sống / DateClock</h2>
+            <p>Phần thời tiết và nhịp sống dùng để đưa lời khuyên ngắn, timeline 24h, ngày giờ, lịch sinh hoạt và trạng thái môi trường.</p>
+          </div>
+          <div class="section-meta"><span class="pill pass">24h</span><span class="pill pass">Scroll OK</span></div>
+        </div>
+        <div class="grid-2">
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot"></span> Thời tiết</span><span class="count">24h</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Timeline 24h có scroll/label rõ.</li>
+              <li>Chọn địa điểm như Hà Nội/Sóc Sơn phải hiển thị đúng tên chọn.</li>
+              <li>Worker weather cho phép localhost/LDPlayer khi test.</li>
+              <li>Fallback data chỉ để chống crash, không gọi là thời tiết thật.</li>
+            </ul></div>
+          </details>
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot"></span> DateClock / Focus</span><span class="count">Mini-PC</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Mobile dọc ưu tiên gọn, dễ đọc, không tràn.</li>
+              <li>Landscape mini-PC ưu tiên workspace rộng và scroll đúng vùng.</li>
+              <li>Không sửa global CSS làm hỏng tab khác.</li>
+            </ul></div>
+          </details>
+        </div>
+      </section>
+
+      <section class="panel section" id="permissions" data-status="warn core">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Survival kit</div>
+            <h2>Quyền Android sống còn</h2>
+            <p>App có thể đúng code nhưng vẫn bị Android/OEM chặn nếu thiếu quyền. Đây là phần người dùng cần kiểm khi cài máy thật.</p>
+          </div>
+          <div class="section-meta"><span class="pill warn">Device-specific</span><span class="pill core">Native</span></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Quyền / cài đặt</th><th>Mục đích</th><th>Dấu hiệu cần kiểm</th></tr></thead>
+            <tbody>
+              <tr><td>Notifications</td><td>Cho phép LifeOS hiện thông báo native.</td><td>Bấm Bật Thông báo, app post notification thật, không bị blocked.</td></tr>
+              <tr><td>Exact Alarm</td><td>Cho báo thức đúng giờ hơn trên Android mới.</td><td>Nếu máy yêu cầu quyền đặc biệt, cần bật trong Settings.</td></tr>
+              <tr><td>Battery / Doze</td><td>Tránh OEM giết service nền.</td><td>Alarm không nổ khi tắt màn hoặc app lâu không mở.</td></tr>
+              <tr><td>Autostart / Lock-screen</td><td>Cho app hoạt động sau reboot / khóa màn.</td><td>Máy Xiaomi/Oppo/Vivo thường cần bật thủ công.</td></tr>
+              <tr><td>Overlay / Full-screen</td><td>Cho màn báo thức nổi lên.</td><td>Chỉ cần khi thiết bị yêu cầu; không phải máy nào cũng giống nhau.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel section" id="rules" data-status="core warn">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Future-proof rules</div>
+            <h2>Luật nâng cấp sau khi đã chốt</h2>
+            <p>Dự án đã hoàn thành. Bất cứ pha mới nào sau này phải đi theo luật dưới đây để không phá mốc ổn định.</p>
+          </div>
+          <div class="section-meta"><span class="pill core">Golden rules</span><span class="pill warn">No patch-debt</span></div>
+        </div>
+        <div class="grid-2">
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot red"></span> Cấm</span><span class="count">Không làm</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Không dùng bản lỗi Pha1.2–Pha1.5 làm nền nâng cấp.</li>
+              <li>Không sửa profile/login/menu khi lỗi không liên quan profile.</li>
+              <li>Không vá bằng listener toàn cục chặn click.</li>
+              <li>Không xóa localStorage toàn bộ để “dọn rác”.</li>
+              <li>Không tuyên bố pass nếu chưa có log/video runtime.</li>
+            </ul></div>
+          </details>
+          <details class="card" open>
+            <summary><span class="summary-left"><span class="dot core"></span> Bắt buộc</span><span class="count">Làm đúng</span></summary>
+            <div class="card-body"><ul class="clean">
+              <li>Tách nhánh mới từ baseline đã chốt.</li>
+              <li>Giới hạn phạm vi sửa: lỗi ở đâu, sửa ở đó.</li>
+              <li>Test Web nhanh, nhưng nghiệm thu Native bằng APK/LDPlayer/điện thoại thật.</li>
+              <li>Ghi lại versionName, versionCode, log bundle và video nếu có.</li>
+              <li>Đặt khả năng rollback trước khi đụng core.</li>
+            </ul></div>
+          </details>
+        </div>
+        <div class="callout warn">Nguyên tắc dự án: “If it ain't broke, don't fix it.” Nếu chưa có bằng chứng lỗi thật, không đập đi xây lại.</div>
+      </section>
+
+      <section class="panel section" id="handoff" data-status="core pass">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Handoff</div>
+            <h2>Checklist bàn giao cho coder/tester</h2>
+            <p>Dùng phần này khi giao cho người khác build, test hoặc nâng cấp.</p>
+          </div>
+          <div class="section-meta"><span class="pill core">Handoff-ready</span></div>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item"><div class="phase">Bước 1</div><div class="phase-desc">Xác nhận đang dùng đúng kit <code>LifeOS_Native_APK_Kit_Pha68F2R13</code>, đúng <code>versionCode 68016</code>.</div></div>
+          <div class="timeline-item"><div class="phase">Bước 2</div><div class="phase-desc">Build APK bằng bộ script/Gradle local của kit, không thay source khi chưa cần.</div></div>
+          <div class="timeline-item"><div class="phase">Bước 3</div><div class="phase-desc">Cài APK vào LDPlayer/điện thoại, test Home, Nhiệm vụ, Alarm, Voice, Radio/Tivi, Gia đình, Weather, Notify.</div></div>
+          <div class="timeline-item"><div class="phase">Bước 4</div><div class="phase-desc">Nếu lỗi media: kiểm Worker root → /proxy URL → log MediaHub → video player diagnostic.</div></div>
+          <div class="timeline-item"><div class="phase">Bước 5</div><div class="phase-desc">Nếu lỗi alarm/voice: lấy logcat NativeAlarm/VoiceCore/TTS; không sửa HTML trước khi biết Android bridge nói gì.</div></div>
+        </div>
+      </section>
+
+      <section class="panel section" id="legacy" data-status="warn">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Lessons learned</div>
+            <h2>Bài học giữ lại từ các hướng dẫn cũ</h2>
+            <p>Hai file nền cũ để lại nhiều bài học đúng: chậm mà chắc, không vá bừa, không nhầm môi trường Web/PWA/Native.</p>
+          </div>
+          <div class="section-meta"><span class="pill warn">Kinh nghiệm</span></div>
+        </div>
+        <div class="grid-2">
+          <details class="card" open><summary><span class="summary-left"><span class="dot warn"></span> PWA/Web</span><span class="count">Bài học</span></summary><div class="card-body"><ul class="clean"><li>Service Worker/PWA cache có thể giữ file cũ gây lỗi giả.</li><li>Manifest/start_url phải đúng dự án, không copy nhầm app khác.</li><li>Clipboard/Share API cần xử lý Promise và môi trường WebView.</li></ul></div></details>
+          <details class="card" open><summary><span class="summary-left"><span class="dot warn"></span> Native/APK</span><span class="count">Bài học</span></summary><div class="card-body"><ul class="clean"><li>Timer/báo thức quan trọng nên native hóa.</li><li>Video HLS trong WebView cần proxy/diagnostic, không im lặng màn đen.</li><li>Patch-debt nguy hiểm hơn thiếu tính năng: sửa ít nhưng đúng, test sâu rồi mới giao.</li></ul></div></details>
+        </div>
+      </section>
+
+      <div class="footer">
+        LifeOS official manual • Final merged from warm operating manual + previous blueprint • Updated for Web final and Native APK R14_5 baseline.
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const searchBox = document.getElementById('searchBox');
+    const filterBtns = Array.from(document.querySelectorAll('.filter-btn'));
+    const sections = Array.from(document.querySelectorAll('.section'));
+
+    function norm(s){ return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+    function applySearchAndFilter(){
+      const q = norm(searchBox.value.trim());
+      const active = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+
+      sections.forEach(section => {
+        const text = norm(section.innerText);
+        const status = section.dataset.status || '';
+        const matchQuery = !q || text.includes(q);
+        const matchFilter = active === 'all' || status.includes(active);
+        section.classList.toggle('hide', !(matchQuery && matchFilter));
+      });
+    }
+
+    searchBox.addEventListener('input', applySearchAndFilter);
+    filterBtns.forEach(btn => btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applySearchAndFilter();
+    }));
+
+    function toggleAllDetails(open){
+      document.querySelectorAll('details.card').forEach(d => d.open = !!open);
+    }
+    window.toggleAllDetails = toggleAllDetails;
+  </script>
+</body>
+</html>
