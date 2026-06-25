@@ -3406,8 +3406,8 @@ body.music-player-active #mini-player {
 </div>
 <div class="lifeos-header-actions flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50">
 <div class="lifeos-header-link-group flex items-center gap-1.5 sm:gap-2">
-<a class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" href="/" target="_blank" title="Trang chủ"><i class="ph-bold ph-house text-sm sm:text-base"></i><span class="hidden md:inline">Trang chủ</span></a>
-<a class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" href="/readlifeos.html" target="_blank" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i><span class="hidden md:inline">Hướng dẫn</span></a>
+<a class="flex text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" href="https://tunhienhieuchuyen.github.io/" target="_blank" title="Trang chủ"><i class="ph-bold ph-house text-sm sm:text-base"></i><span class="hidden md:inline">Trang chủ</span></a>
+<a class="flex text-[11px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full items-center gap-1.5 shadow-sm transition-all active:scale-95 hover:brightness-95" href="https://tunhienhieuchuyen.github.io/readlifeos.html" target="_blank" title="Hướng dẫn"><i class="ph-bold ph-book-open text-sm sm:text-base"></i><span class="hidden md:inline">Hướng dẫn</span></a>
 </div>
 <span class="status-dot mt-0.5 hidden md:inline-block shrink-0" id="pwaStatusDot" title="Trạng thái Cloud"></span>
 <div class="relative ml-0.5 sm:ml-1 shrink-0 overflow-visible" id="profile-selector">
@@ -3637,7 +3637,7 @@ body.music-player-active #mini-player {
 <button class="w-9 h-9 flex justify-center items-center rounded-xl bg-rose-50 text-rose-600 active:scale-90 transition shadow-sm border border-rose-100" onclick="window.MusicApp.clearCache()" title="Xóa bộ nhớ đệm"><i class="ph-bold ph-trash text-lg"></i></button>
 <button class="w-9 h-9 flex justify-center items-center rounded-xl bg-slate-50 text-slate-600 border border-slate-200 active:scale-90 transition shadow-sm" onclick="window.MusicApp.refetch()" title="Tải lại danh sách"><i class="ph-bold ph-arrows-clockwise text-lg"></i></button>
 <button class="w-9 h-9 flex justify-center items-center rounded-xl bg-purple-50 text-purple-600 border border-purple-200 active:scale-90 transition shadow-sm" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.init(true,{userIntent:true,event:event})" title="Tải lại kênh Tivi/Radio"><i class="ph-bold ph-broadcast text-lg"></i></button>
-<a class="hidden lg:inline-flex" href="/upload.html" id="music-admin-btn" rel="noopener noreferrer" target="_blank" title="Admin nhạc"><i class="ph-bold ph-upload-simple"></i><span class="music-admin-label ml-1">Admin nhạc</span></a>
+<a class="hidden lg:inline-flex" href="https://tunhienhieuchuyen.github.io/upload.html" id="music-admin-btn" rel="noopener noreferrer" target="_blank" title="Admin nhạc"><i class="ph-bold ph-upload-simple"></i><span class="music-admin-label ml-1">Admin nhạc</span></a>
 </div>
 </div>
 <div class="px-2 mb-2 shrink-0">
@@ -20027,7 +20027,7 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
   function fileKind(file){ const mime=String(file && file.type || '').toLowerCase(); const name=String(file && file.name || '').toLowerCase(); if(mime.startsWith('image/') || IMG_RE.test(name)) return 'image'; if(mime.startsWith('video/') || VID_RE.test(name)) return 'video'; return 'file'; }
   function labelOf(k){ return k === 'image' ? 'Ảnh' : (k === 'video' ? 'Video' : 'File'); }
   function fmtSize(n){ n=Number(n||0); const engine=ce(); if(engine && typeof engine.formatFileSize==='function'){ try{return engine.formatFileSize(n);}catch(_){}} if(!n)return '0 B'; if(n<1024)return n+' B'; if(n<1048576)return (n/1024).toFixed(n<10240?1:0)+' KB'; return (n/1048576).toFixed(n<10485760?1:0)+' MB'; }
-  function safeName(engine,file){ try { return engine?.getSafeTelegramUploadName ? engine.getSafeTelegramUploadName(file.name || 'upload.bin', file.type || '') : (file.name || 'upload.bin'); } catch(_){ return String(file?.name || 'upload.bin').replace(/[\\/:*?"<>|]+/g,'_').slice(0,120) || 'upload.bin'; } }
+  function safeName(engine,file){ try { return engine?.getSafeTelegramUploadName ? engine.getSafeTelegramUploadName(file.name || 'upload.bin', file.type || '') : (file.name || 'upload.bin'); } catch(_){ return String(file?.name || 'upload.bin').replace(/[\/:*?"<>|]+/g,'_').slice(0,120) || 'upload.bin'; } }
   function profileKey(engine){ try { return engine?.getKey?.() || window.viewingUser || window.currentUser || 'tham'; } catch(_){ return window.viewingUser || window.currentUser || 'tham'; } }
   function currentTopic(engine){ try { return engine?.currentTopic && engine.currentTopic !== 'all' ? engine.currentTopic : null; } catch(_){ return null; } }
   function log(event, payload){ try { console.info('[FamilyQueue R6] ' + event, payload || {}); } catch(_){} }
@@ -20100,12 +20100,20 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
       let lastProgressAt=0;
       try{
         if(Number(file.size||0) > MAX_SINGLE && engine?.__lifeosR6OldSendFile){
+          // R14_16: large Family files must use the existing 67G bundle-split relay,
+          // not be treated as a single Telegram document. Telegram/relay single upload
+          // paths can fail above 50MB; bundle messages intentionally have no single file_id.
           const before=history().map(m=>String(m.id));
-          const result=await engine.__lifeosR6OldSendFile(file,item.index,item.total,{inputSource:'r6_large_fallback'});
-          const after=history(); const added=after.filter(m=>!before.includes(String(m.id)));
-          const ids = result && result.message ? {fileId:result.message.file_id||result.message.fileId||'', messageId:result.message.message_id||result.message.telegram_msg_id||''} : (added[0] ? {fileId:added[0].file_id||added[0].fileId||'', messageId:added[0].message_id||added[0].telegram_msg_id||''} : {});
+          const result=await engine.__lifeosR6OldSendFile(file,item.index,item.total,{inputSource:'r6_large_bundle_split'});
+          const after=history();
+          const added=after.filter(m=>!before.includes(String(m.id)));
+          const bundleMsg = (result && (result.message || result.bundleMessage)) || added.find(m => m && (m.isBundle || m.type === 'file_bundle' || m.bundleManifest)) || null;
           if(added.length) window.chatHistory = history().filter(m => !added.some(a => String(a.id) === String(m.id)));
-          if(!result || !result.ok || !ids.fileId) throw new Error(result?.error || 'large_fallback_failed');
+          if(result && result.ok && bundleMsg && (bundleMsg.bundleManifest || bundleMsg.manifest || bundleMsg.isBundle || bundleMsg.type === 'file_bundle')){
+            return { fileId:'', messageId:'', isBundle:true, bundleMessage:bundleMsg, bundleManifest:bundleMsg.bundleManifest || bundleMsg.manifest || result.manifest || null };
+          }
+          const ids = result && result.message ? {fileId:result.message.file_id||result.message.fileId||'', messageId:result.message.message_id||result.message.telegram_msg_id||''} : (added[0] ? {fileId:added[0].file_id||added[0].fileId||'', messageId:added[0].message_id||added[0].telegram_msg_id||''} : {});
+          if(!result || !result.ok || !ids.fileId) throw new Error(result?.error || 'large_bundle_split_failed');
           return ids;
         }
         const meta={batchId:item.batchId,queueId:item.id,index:item.index,total:item.total,fileName:file.name||name,safeFileName:name,fileSize:file.size||0,mime:file.type||'',kind:item.kind,attempt,maxAttempts:3,uploadId:item.uploadId};
@@ -20154,8 +20162,28 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
             const ids=await uploadWithRetry(item);
             item.status='success'; this.successCount++;
             const msg=findMsg(item.id);
-            if(msg){ Object.assign(msg,{type:item.kind==='video'?'video':'file',kind:item.kind==='image'?'image_document':(item.kind==='video'?'video_document':'file'),file_id:ids.fileId,fileId:ids.fileId,telegramFileId:ids.fileId,telegram_msg_id:ids.messageId||'',message_id:ids.messageId||'',__familyQueueStatus:'success',__familyQueueStatusLabel:statusText(item,'success'),uploadStatus:statusText(item,'success'),updatedAt:Date.now()}); }
-            log('Success item', {batchId:item.batchId,index:item.index,total:item.total,fileName:item.file.name||'',size:item.file.size||0,attempt:item.attempt,status:'success',successCount:this.successCount,failCount:this.failCount});
+            if(msg && ids && ids.isBundle){
+              const bm = ids.bundleMessage || {};
+              const mf = ids.bundleManifest || bm.bundleManifest || bm.manifest || {};
+              // Preserve the pending card id so the queue UI updates in place, but make it
+              // a real bundle message handled by the 67G renderer/downloader.
+              Object.assign(msg, bm, {
+                id: msg.id,
+                type:'file_bundle', isBundle:true, bundleManifest:mf,
+                file_name: bm.file_name || item.file.name || mf.originalName || 'Bundle',
+                name: bm.name || bm.file_name || item.file.name || mf.originalName || 'Bundle',
+                file_size: bm.file_size || item.file.size || mf.originalSize || 0,
+                size: bm.size || bm.file_size || item.file.size || mf.originalSize || 0,
+                mime_type: bm.mime_type || item.file.type || mf.mime || 'application/octet-stream',
+                mime: bm.mime || bm.mime_type || item.file.type || mf.mime || 'application/octet-stream',
+                sender: bm.sender || profileKey(engine), timestamp: bm.timestamp || Date.now(), topic_id: bm.topic_id || currentTopic(engine),
+                __familyQueueItem:false, __familyQueueStatus:'success', __familyQueueStatusLabel:`File lớn · ${fmtSize(item.file.size)} · Thành công`,
+                uploadStatus:`File lớn · ${fmtSize(item.file.size)} · Thành công`, updatedAt:Date.now()
+              });
+            } else if(msg){
+              Object.assign(msg,{type:item.kind==='video'?'video':'file',kind:item.kind==='image'?'image_document':(item.kind==='video'?'video_document':'file'),file_id:ids.fileId,fileId:ids.fileId,telegramFileId:ids.fileId,telegram_msg_id:ids.messageId||'',message_id:ids.messageId||'',__familyQueueStatus:'success',__familyQueueStatusLabel:statusText(item,'success'),uploadStatus:statusText(item,'success'),updatedAt:Date.now()});
+            }
+            log('Success item', {batchId:item.batchId,index:item.index,total:item.total,fileName:item.file.name||'',size:item.file.size||0,attempt:item.attempt,status:'success',isBundle:!!(ids&&ids.isBundle),successCount:this.successCount,failCount:this.failCount});
             if(engine?.setUploadStatus) engine.setUploadStatus(`Đã gửi ${item.index}/${item.total}: ${item.file.name || 'file'}`, 'done', true);
             try{ engine?.saveAndSync?.(); engine?.render?.(); }catch(e){}
           }catch(e){
@@ -21296,6 +21324,358 @@ Backport: Direct-first + proxy fallback + web-only MediaHub from accepted APK Na
 Protected unchanged: Family, Focus, Weather/Lifestyle, Alarm R8, Profile/navigation, Vault
 No ExoPlayer / No native TV fallback in media path
 -->
+
+
+<!-- GITHUB R10 WEBSAFE BACKPORT FROM QLYCUOCSONG APK: START -->
+<style id="github-r10-tv-fullscreen-websafe-style">
+#tv-video-element{background:#000!important;}
+#tv-video-element:fullscreen{width:100vw!important;height:100vh!important;object-fit:contain!important;background:#000!important;}
+</style>
+<script id="github-r10-tv-fullscreen-websafe-js">
+(function(){
+  if(window.__githubR10TvFullscreenWebsafe) return;
+  window.__githubR10TvFullscreenWebsafe=true;
+  window.lifeosToggleTvFullscreen=function(){
+    var v=document.getElementById('tv-video-element')||document.querySelector('video');
+    try{
+      if(document.fullscreenElement){ document.exitFullscreen&&document.exitFullscreen(); return true; }
+      if(v && v.requestFullscreen){ v.requestFullscreen(); return true; }
+      if(v && v.webkitEnterFullscreen){ v.webkitEnterFullscreen(); return true; }
+    }catch(e){ try{console.warn('[GitHub R10 fullscreen fail]', e&&e.message||e);}catch(_e){} }
+    return false;
+  };
+})();
+</script>
+
+<style id="lifeos-r14-14-vault-landscape-final-style">
+/* Landscape phone / LDPlayer mini-PC: Vault add/edit modal must be a real working workspace, not a portrait sheet. */
+@media (orientation: landscape) and (max-width: 1400px) {
+  #vaultFormModal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483000 !important;
+    padding: 10px 14px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(15,23,42,.58) !important;
+    backdrop-filter: blur(6px) !important;
+  }
+  #vaultFormModal.hidden { display: none !important; }
+  #vaultFormModal:not(.hidden) { display: flex !important; }
+  #vaultFormModal > div {
+    width: min(1180px, calc(100vw - 32px)) !important;
+    max-width: min(1180px, calc(100vw - 32px)) !important;
+    height: auto !important;
+    max-height: calc(100vh - 24px) !important;
+    min-height: 0 !important;
+    border-radius: 24px !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+    overflow: hidden !important;
+    transform: none !important;
+  }
+  #vaultFormModal > div > .flex-shrink-0:first-child {
+    padding: 10px 16px !important;
+    min-height: 48px !important;
+  }
+  #vaultFormModal #vaultModalTitle {
+    font-size: 20px !important;
+    line-height: 1.1 !important;
+  }
+  #vaultFormModal > div > .flex-grow {
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    padding: 12px 16px !important;
+  }
+  #vaultFormModal > div > .flex-grow > .mb-5 {
+    margin-bottom: 12px !important;
+    padding: 10px 12px !important;
+  }
+  #vaultFormModal #vaultForm {
+    display: grid !important;
+    grid-template-columns: minmax(260px, .86fr) minmax(420px, 1.14fr) !important;
+    gap: 12px 14px !important;
+    align-items: stretch !important;
+  }
+  #vaultFormModal #vaultForm > input[type="hidden"] { display:none !important; }
+  #vaultFormModal #vaultForm > div { min-width:0 !important; margin:0 !important; }
+  #vaultFormModal #vaultForm > div:nth-of-type(1) { grid-column: 1 !important; grid-row: 1 !important; }
+  #vaultFormModal #vaultForm > div:nth-of-type(2) { grid-column: 1 !important; grid-row: 2 !important; }
+  #vaultFormModal #vaultForm > div:nth-of-type(3) { grid-column: 2 !important; grid-row: 1 / span 2 !important; display:flex !important; flex-direction:column !important; min-height:0 !important; }
+  #vaultFormModal #vaultEntryCategory,
+  #vaultFormModal #vaultEntryName {
+    min-height: 44px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    font-size: 14px !important;
+  }
+  #vaultFormModal #vaultEntryContent {
+    flex: 1 1 auto !important;
+    height: clamp(160px, calc(100vh - 250px), 320px) !important;
+    min-height: 160px !important;
+    max-height: 320px !important;
+    resize: none !important;
+    overflow-y: auto !important;
+  }
+  #vaultFormModal > div > .flex-shrink-0:last-child {
+    padding: 10px 16px !important;
+    gap: 12px !important;
+  }
+  #vaultFormModal > div > .flex-shrink-0:last-child button {
+    min-height: 46px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+}
+@media (orientation: landscape) and (max-height: 470px) {
+  #vaultFormModal { padding: 6px 10px !important; }
+  #vaultFormModal > div { max-height: calc(100vh - 12px) !important; }
+  #vaultFormModal > div > .flex-grow > .mb-5 { display:none !important; }
+  #vaultFormModal #vaultEntryContent { height: clamp(110px, calc(100vh - 190px), 220px) !important; min-height:110px !important; }
+  #vaultFormModal > div > .flex-shrink-0:first-child,
+  #vaultFormModal > div > .flex-shrink-0:last-child { padding-top: 7px !important; padding-bottom:7px !important; }
+}
+</style>
+
+<script id="lifeos-r14-14-media-cache-vault-final-js">
+(function(){
+  if(window.__lifeosR1414FinalPolish) return;
+  window.__lifeosR1414FinalPolish = true;
+  var PHASE = 'R14_14_CACHE_VAULT_ALARM_FINAL';
+  function log(){ try{ console.info.apply(console, ['[LifeOS '+PHASE+']'].concat([].slice.call(arguments))); }catch(e){} }
+  function toast(msg, icon){ try{ window.showToast && window.showToast(msg, icon || 'ph-check-circle'); }catch(e){} }
+  function $(id){ return document.getElementById(id); }
+  function stopAudioElement(){
+    try{
+      var a = $('mstq-player');
+      if(a){ a.pause(); a.removeAttribute('src'); a.load(); }
+    }catch(e){}
+  }
+  function clearMusicRows(){
+    try{
+      var box = $('mp3-list-container');
+      if(box){ Array.prototype.slice.call(box.children).forEach(function(c){ if(c.id !== 'music-loading') c.remove(); }); }
+      var loading = $('music-loading');
+      if(loading){ loading.style.display='block'; loading.textContent='Đã xóa cache nhạc. Bấm tải lại danh sách để đồng bộ lại từ đầu.'; }
+      var title = $('mp-title'); if(title) title.textContent = 'Chưa có bài nhạc';
+      var artist = $('mp-artist'); if(artist) artist.textContent = 'Đã xóa cache';
+      var dur = $('mp-duration'); if(dur) dur.textContent = '0:00';
+      var cur = $('mp-current'); if(cur) cur.textContent = '0:00';
+      var prog = $('mp-progress'); if(prog) prog.style.width = '0%';
+      var play = $('btn-play-pause'); if(play) play.innerHTML = '<i class="ph-fill ph-play"></i>';
+    }catch(e){}
+  }
+  function clearMediaStorage(){
+    [
+      'xs_songs_v4','xs_shuffle','xs_repeat','xs_music_cache','xs_music_last_sync',
+      'lifeos_media_memory','lifeos_music_selected_track',
+      'lifeos_mediahub_smartbox_channels_cache_v68a',
+      'lifeos_mediahub_remote_channels_cache_v68a',
+      'lifeos_mediahub_cache','smartbox_channels_cache'
+    ].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+    try{ Object.keys(localStorage).forEach(function(k){ if(/^xs_|^lifeos_media|^smartbox_channels/i.test(k)) localStorage.removeItem(k); }); }catch(e){}
+  }
+  function patchMusic(){
+    if(!window.MusicApp || window.MusicApp.__r1414CacheFixed) return false;
+    var app = window.MusicApp;
+    var oldRefetch = typeof app.refetch === 'function' ? app.refetch.bind(app) : null;
+    app.clearCache = function(){
+      try{ window.vibrate && window.vibrate(20); }catch(e){}
+      stopAudioElement();
+      clearMediaStorage();
+      this.playlist = [];
+      this.currentIndex = -1;
+      this.playing = false;
+      this.hasUserSelectedTrack = false;
+      try{ this.hideMiniPlayerIfIdle && this.hideMiniPlayerIfIdle(); }catch(e){}
+      clearMusicRows();
+      toast('Đã xóa cache nhạc/kênh. Danh sách MP3 đã trống.', 'ph-trash');
+      log('MEDIA_CACHE_CLEAR_UI_DONE');
+      return true;
+    };
+    app.refetch = async function(){
+      var tab = '';
+      try{ tab = (window.MediaHub && window.MediaHub.currentTab) || ''; }catch(e){}
+      if(tab === 'radio' || tab === 'tv'){
+        try{
+          toast('Đang tải lại danh sách Radio/Tivi...', 'ph-spinner animate-spin');
+          if(window.MediaHub && typeof window.MediaHub.init === 'function') await window.MediaHub.init(true);
+          return true;
+        }catch(e){ toast('Tải lại Radio/Tivi chưa thành công', 'ph-warning-circle'); log('MEDIAHUB_RELOAD_FAIL', e && e.message); return false; }
+      }
+      try{ localStorage.removeItem('xs_songs_v4'); }catch(e){}
+      if($('music-loading')){ $('music-loading').style.display='block'; $('music-loading').textContent='Đang tải lại nhạc từ đầu...'; }
+      if(oldRefetch) return await oldRefetch();
+      return false;
+    };
+    app.__r1414CacheFixed = true;
+    log('MUSIC_CACHE_PATCH_INSTALLED');
+    return true;
+  }
+  function patchVault(){
+    try{
+      var modal = $('vaultFormModal');
+      if(modal){ modal.setAttribute('data-r1414-landscape-ready','true'); }
+      if(window.VaultUI && !window.VaultUI.__r1414OpenModalPatched && typeof window.VaultUI.openModal === 'function'){
+        var oldOpen = window.VaultUI.openModal.bind(window.VaultUI);
+        window.VaultUI.openModal = function(){
+          var r = oldOpen.apply(this, arguments);
+          setTimeout(function(){
+            try{
+              var m = $('vaultFormModal');
+              if(m){
+                m.style.zIndex = '2147483000';
+                m.classList.remove('pointer-events-none');
+                var first = $('vaultEntryName') || $('vaultEntryCategory') || $('vaultEntryContent');
+                if(first && window.matchMedia && window.matchMedia('(orientation: landscape)').matches){ first.focus({preventScroll:true}); }
+                log('VAULT_MODAL_OPEN_LANDSCAPE_READY', {w:innerWidth,h:innerHeight});
+              }
+            }catch(e){}
+          }, 80);
+          return r;
+        };
+        window.VaultUI.__r1414OpenModalPatched = true;
+      }
+    }catch(e){}
+  }
+  function boot(){ patchMusic(); patchVault(); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  var timer = setInterval(function(){ if(patchMusic()){ patchVault(); clearInterval(timer); } }, 250);
+  setTimeout(function(){ clearInterval(timer); boot(); }, 6000);
+})();
+</script>
+
+<style id="qly-r14-15-weather-area-selected-fix-style">
+body.lifeos-landscape-mini-pc #lifeos64q-weather-location-chips .lifeos64q-weather-chip.is-active,
+body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button.is-active,
+#mode-weather-ui .weather-loc-btn.is-active {
+  background: #6366f1 !important; border-color: #6366f1 !important; color: #fff !important;
+  box-shadow: 0 6px 14px rgba(99,102,241,.22) !important;
+}
+body.lifeos-landscape-mini-pc #lifeos64q-weather-location-chips .lifeos64q-weather-chip:not(.is-active),
+body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
+  background: rgba(255,255,255,.72) !important; border-color: rgba(226,232,240,.95) !important; color: #64748b !important;
+}
+</style>
+
+<script id="qly-r14-15-weather-area-selected-fix-js">
+(function(){
+  if (window.__qlyR1415WeatherAreaSelectedFix) return;
+  window.__qlyR1415WeatherAreaSelectedFix = true;
+  const VALID = {hanoi:1,noibai:1,socson:1};
+  function byId(id){ return document.getElementById(id); }
+  function norm(s){ s = String(s || '').trim().toLowerCase(); try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); } catch(e) {} return s; }
+  function keyFromDom(){
+    const st = window.weatherState || {};
+    const direct = String(st.selected || st.lastData?.location?.key || '').toLowerCase();
+    if (VALID[direct]) return direct;
+    const n = norm((byId('weather-location-name') || {}).textContent || '');
+    if (n.includes('ha noi')) return 'hanoi';
+    if (n.includes('san bay noi bai') || n.includes('noi bai')) return 'noibai';
+    if (n.includes('soc son')) return 'socson';
+    return 'hanoi';
+  }
+  function setActive(key){
+    key = VALID[key] ? key : keyFromDom();
+    if (window.weatherState) window.weatherState.selected = key;
+    document.querySelectorAll('#lifeos64q-weather-location-chips [data-loc], #lifeos64h-weather-locs [data-loc]').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.loc === key);
+      btn.setAttribute('aria-pressed', btn.dataset.loc === key ? 'true' : 'false');
+    });
+    Object.keys(VALID).forEach(k => {
+      const b = byId('weather-loc-' + k); if (!b) return;
+      const active = k === key;
+      b.className = 'weather-loc-btn shrink-0 px-4 py-2 rounded-xl text-[12px] font-bold active:scale-95 transition-all ' + (active ? 'bg-primary text-white shadow-sm is-active' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100');
+      b.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+  window.qlyWeatherSetSelectedArea = setActive;
+  const oldSet = window.setWeatherLocation;
+  if (typeof oldSet === 'function' && !oldSet.__qlyR1415Wrapped) {
+    const wrapped = function(locationKey){
+      const key = VALID[String(locationKey || '').toLowerCase()] ? String(locationKey).toLowerCase() : 'hanoi';
+      if (window.weatherState) window.weatherState.selected = key;
+      setActive(key);
+      const ret = oldSet.apply(this, arguments);
+      setTimeout(()=>setActive(key), 80); setTimeout(()=>setActive(key), 260); setTimeout(()=>setActive(keyFromDom()), 900);
+      return ret;
+    };
+    wrapped.__qlyR1415Wrapped = true; window.setWeatherLocation = wrapped;
+  }
+  const oldRenderTabs = window.renderWeatherLocationTabs;
+  if (typeof oldRenderTabs === 'function' && !oldRenderTabs.__qlyR1415Wrapped) {
+    const wrappedTabs = function(selected){ const ret = oldRenderTabs.apply(this, arguments); setActive(VALID[selected] ? selected : keyFromDom()); return ret; };
+    wrappedTabs.__qlyR1415Wrapped = true; window.renderWeatherLocationTabs = wrappedTabs;
+  }
+  function sync(){ setActive(keyFromDom()); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sync, {once:true}); else sync();
+  window.addEventListener('load', sync, {once:true});
+  window.addEventListener('orientationchange', () => setTimeout(sync, 180), {passive:true});
+  window.addEventListener('resize', () => setTimeout(sync, 180), {passive:true});
+  const target = byId('weather-location-name');
+  if (target && window.MutationObserver) new MutationObserver(sync).observe(target, {childList:true, characterData:true, subtree:true});
+  setInterval(function(){
+    const pane = byId('lifeos64g-weather-pane');
+    if (document.body.classList.contains('lifeos-landscape-mini-pc') && pane && pane.classList.contains('is-active')) sync();
+  }, 700);
+})();
+</script>
+
+<script id="lifeos-r14-16-family-large-upload-final-fix-js">
+(function(){
+  'use strict';
+  const PHASE='Qlycuocsong-R14_16-family-large-upload-final';
+  window.LIFEOS_UPLOAD_RELAY_URL = window.LIFEOS_UPLOAD_RELAY_URL || 'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
+  window.LIFEOS_UPLOAD_RELAY_ENABLED = true;
+  window.LIFEOS_UPLOAD_RELAY_MODE = 'always';
+  window.LifeOSFamilyUploadFinal = { phase:PHASE, largeFileMode:'bundle_split_manifest', singleTelegramLimitMB:50, relay:window.LIFEOS_UPLOAD_RELAY_URL };
+  function patch(){
+    const ce=window.ChatEngine;
+    if(!ce || ce.__r14_16_upload_debug_patch) return false;
+    ce.__r14_16_upload_debug_patch=true;
+    const old=ce.buildUploadDebug && ce.buildUploadDebug.bind(ce);
+    ce.buildUploadDebug=function(meta){
+      const d = old ? old(meta || {}) : Object.assign({}, meta || {});
+      d.phase = d.phase || PHASE;
+      d.transport = d.transport || meta?.transport || (window.LIFEOS_UPLOAD_RELAY_URL ? 'relay' : 'direct_telegram');
+      d.endpointHost = d.endpointHost || (()=>{try{return new URL(meta?.relayUrl || window.LIFEOS_UPLOAD_RELAY_URL || '').host}catch(e){return ''}})();
+      d.uploadMethod = d.uploadMethod || meta?.uploadMethod || 'xhr_cloudflare_worker_relay';
+      d.timeoutMs = d.timeoutMs || meta?.timeoutMs || '';
+      d.networkType = d.networkType || (()=>{try{return navigator.connection && (navigator.connection.effectiveType || navigator.connection.type || '') || ''}catch(e){return ''}})();
+      return d;
+    };
+    console.info('[R14_16] Family large upload final patch ready', window.LifeOSFamilyUploadFinal);
+    return true;
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', patch, {once:true}); else patch();
+  setTimeout(patch,300); setTimeout(patch,1200);
+})();
+</script>
+
+<style id="github-r10-family-download-close-style">
+#lifeos-family-download-proof-panel{position:relative!important;}
+#lifeos-family-download-proof-panel .github-r10-close-download-panel{min-width:34px;min-height:34px;border-radius:999px;border:1px solid #bbf7d0;background:#fff;color:#047857;font-weight:900;font-size:20px;line-height:1;box-shadow:0 2px 8px rgba(15,23,42,.08)}
+</style>
+<script id="github-r10-family-download-close-js">
+(function(){
+  if(window.__githubR10FamilyDownloadClose) return; window.__githubR10FamilyDownloadClose=true;
+  function closePanel(){ var p=document.getElementById('lifeos-family-download-proof-panel'); if(p){ p.classList.add('hidden'); p.innerHTML=''; } }
+  window.lifeosCloseFamilySavedPanel=closePanel;
+  function enhance(){
+    var p=document.getElementById('lifeos-family-download-proof-panel'); if(!p || p.__githubR10CloseEnhanced) return;
+    p.__githubR10CloseEnhanced=true;
+    if(!p.querySelector('.github-r10-close-download-panel')){
+      var b=document.createElement('button'); b.type='button'; b.className='github-r10-close-download-panel'; b.title='Đóng'; b.setAttribute('aria-label','Đóng bảng tải về'); b.textContent='×';
+      b.onclick=function(ev){ try{ev.preventDefault();ev.stopPropagation();}catch(e){} closePanel(); };
+      var wrap=document.createElement('div'); wrap.style.cssText='position:absolute;right:8px;top:8px;z-index:2'; wrap.appendChild(b); p.appendChild(wrap);
+    }
+  }
+  try{ new MutationObserver(enhance).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',enhance,{once:true}); else enhance();
+})();
+</script>
+<!-- GITHUB R10 WEBSAFE BACKPORT FROM QLYCUOCSONG APK: END -->
 </body>
 </html>
 
