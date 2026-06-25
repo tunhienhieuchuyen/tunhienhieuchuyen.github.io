@@ -4822,7 +4822,7 @@ window.reconcileVaultData = function(localVault, cloudVault, options = {}) {
     const cloudMaxTime = window.getVaultMaxUpdatedAt(cloud);
     const localHash = window.hashVaultData(local);
     const cloudHash = window.hashVaultData(cloud);
-    console.log('[VAULT RECONCILE INPUT]', { localLen, cloudLen, localMaxTime, cloudMaxTime, localHash, cloudHash, options });
+    window.LIFEOS_DEBUG&&console.log('[VAULT RECONCILE INPUT]', { localLen, cloudLen, localMaxTime, cloudMaxTime, localHash, cloudHash, options });
 
     if (cloudLen > 0 && localLen === 0) return { action: 'PULL_CLOUD', reason: 'Local empty, cloud has data', data: cloud };
     if (cloudLen === 0 && localLen === 0) return { action: 'BOTH_EMPTY', reason: 'Both local and cloud empty', data: [] };
@@ -4858,7 +4858,7 @@ window.applyVaultReconciliation = async function(cloudVault, context = {}) {
         allowLocalPushAfterCloudRead: context.allowLocalPushAfterCloudRead === true,
         profile
     });
-    console.log('[VAULT RECONCILE DECISION]', decision);
+    window.LIFEOS_DEBUG&&console.log('[VAULT RECONCILE DECISION]', decision);
 
     if (decision.action === 'PULL_CLOUD' || decision.action === 'MERGE') {
         const cleanData = window.VaultUtils?.migrateLegacyData ? window.VaultUtils.migrateLegacyData(decision.data || []) : (decision.data || []);
@@ -4871,28 +4871,28 @@ window.applyVaultReconciliation = async function(cloudVault, context = {}) {
             if (search) search.value = '';
             window.VaultUI.renderVaultCards();
         }
-        console.log('[VAULT RECONCILE LOCAL UPDATED]', {
+        window.LIFEOS_DEBUG&&console.log('[VAULT RECONCILE LOCAL UPDATED]', {
             action: decision.action,
             count: window.VaultStorageLayer.getData().length,
             key: window.VaultStorageLayer._k,
             raw: localStorage.getItem(window.VaultStorageLayer._k)
         });
         if (decision.action === 'MERGE' && window.FirebaseSync?._i) {
-            console.log('[VAULT RECONCILE MERGE PUSH]');
+            window.LIFEOS_DEBUG&&console.log('[VAULT RECONCILE MERGE PUSH]');
             await window.FirebaseSync.pushAll({ reason: 'vault-merge-after-cloud-read', allowEmptyVaultPush: false });
         }
         return decision;
     }
 
     if (decision.action === 'PUSH_LOCAL') {
-        console.log('[VAULT RECONCILE PUSH LOCAL]');
+        window.LIFEOS_DEBUG&&console.log('[VAULT RECONCILE PUSH LOCAL]');
         if (window.FirebaseSync?._i) await window.FirebaseSync.pushAll({ reason: 'local-newer-after-cloud-read', allowEmptyVaultPush: false });
         if (window.VaultUI) window.VaultUI.renderVaultCards();
         return decision;
     }
 
     if (decision.action === 'KEEP_LOCAL_NO_PUSH' || decision.action === 'NOOP' || decision.action === 'BOTH_EMPTY') {
-        console.log('[VAULT RECONCILE KEEP/NOOP]');
+        window.LIFEOS_DEBUG&&console.log('[VAULT RECONCILE KEEP/NOOP]');
         if (window.VaultUI) window.VaultUI.renderVaultCards();
         return decision;
     }
@@ -5502,7 +5502,7 @@ window.ChatEngine = {
             });
             let data = {};
             try { data = await res.json(); } catch(e) {}
-            console.info('[ChatEngine deleteMessage response]', { endpoint: 'deleteMessage', status: res.status, response: data, file_name: msg.file_name || '' });
+            window.LIFEOS_DEBUG&&console.info('[ChatEngine deleteMessage response]', { endpoint: 'deleteMessage', status: res.status, response: data, file_name: msg.file_name || '' });
 
             if (res.ok && data.ok) {
                 window.showToast?.('Đã xóa tin nhắn', 'ph-trash');
@@ -6385,7 +6385,7 @@ window.FirebaseSync={
         }
     },
     init(k){
-        console.log('[FB:init] profile=', k);
+        window.LIFEOS_DEBUG&&console.log('[FB:init] profile=', k);
         this._k=k;
         try{ window.ChatEngine?.init?.(); }catch(e){ console.warn('[ChatEngine init before Firebase]', e); }
         window.cloudSyncCompleted = false;
@@ -6418,20 +6418,20 @@ window.FirebaseSync={
     },
     _listen(){
         if(!this._d||!this._k)return;
-        console.log('[FB:listen] doc=', this._k);
+        window.LIFEOS_DEBUG&&console.log('[FB:listen] doc=', this._k);
         try{
             if(this._u){ try{ this._u(); }catch(e){ console.warn('[FB:unsubscribe before listen failed]', e); } this._u=null; }
             this._u=this._d.collection('LifeOS_Profiles').doc(this._k).onSnapshot(async d=>{
-                console.log('[FB:snapshot exists]', d.exists);
+                window.LIFEOS_DEBUG&&console.log('[FB:snapshot exists]', d.exists);
                 if(!d.exists) { window.cloudSyncCompleted = true; return; }
                 const c=d.data();
-                console.log('[FB:data keys]', Object.keys(c || {}));
+                window.LIFEOS_DEBUG&&console.log('[FB:data keys]', Object.keys(c || {}));
                 if(!c) return;
                 let cloudTime = 0;
                 if (c.updatedAt) cloudTime = typeof c.updatedAt.toMillis === 'function' ? c.updatedAt.toMillis() : (parseInt(c.updatedAt) || 0);
                 const localTime = parseInt(localStorage.getItem('lifeos_v8_time_'+this._k) || '0') || 0;
-                console.log('[FB:cloudTime/localTime]', cloudTime, localTime);
-                console.log('[FB:vaultData isArray]', Array.isArray(c.vaultData), 'len=', Array.isArray(c.vaultData) ? c.vaultData.length : 'NO_ARRAY');
+                window.LIFEOS_DEBUG&&console.log('[FB:cloudTime/localTime]', cloudTime, localTime);
+                window.LIFEOS_DEBUG&&console.log('[FB:vaultData isArray]', Array.isArray(c.vaultData), 'len=', Array.isArray(c.vaultData) ? c.vaultData.length : 'NO_ARRAY');
 
                 let skipTodoPullBecausePendingPush = false;
                 if(window._pendingPush) {
@@ -6454,7 +6454,7 @@ window.FirebaseSync={
                             window.renderTasksOnly();
                         }
                     } else if (localTime > cloudTime) {
-                        console.log('[FB:todo pull skip] localTime newer than cloudTime; no auto push from snapshot');
+                        window.LIFEOS_DEBUG&&console.log('[FB:todo pull skip] localTime newer than cloudTime; no auto push from snapshot');
                     }
                 }
                 if(c.stats){ localStorage.setItem('lifeos_stats_v8_'+this._k,JSON.stringify(c.stats));window.stats=c.stats; setTxt('streak-count',window.stats.streak||0); }
@@ -6484,7 +6484,7 @@ window.FirebaseSync={
             if(!window.cloudSyncCompleted) console.warn('[SAFE-GUARD] Omit vaultData before first cloud pull with empty vault; task sync still allowed', options);
             else console.warn('[SAFE-GUARD] Omit empty vaultData without explicit allowEmptyVaultPush; task sync still allowed', options);
         }
-        console.log('[FB:pushAll]', { profile:this._k, todoLen:safeTodos.length, vaultLen:safeVault.length, includeVaultData, cloudSyncCompleted:window.cloudSyncCompleted, options });
+        window.LIFEOS_DEBUG&&console.log('[FB:pushAll]', { profile:this._k, todoLen:safeTodos.length, vaultLen:safeVault.length, includeVaultData, cloudSyncCompleted:window.cloudSyncCompleted, options });
         const payload = { data:safeTodos, stats:window.stats||{streak:0}, sentinelLogs:window.sentinelLogs||[], updatedAt: currentTs };
         if(includeVaultData) payload.vaultData = safeVault;
         try{
@@ -6500,34 +6500,34 @@ window.FirebaseSync={
 window.debugVaultNow = async function() {
     console.group('=== LIFEOS VAULT DEBUG NOW ===');
     try {
-        console.log('[BUILD]', window.LIFEOS_BUILD_ID);
-        console.log('currentUser=', window.currentUser);
-        console.log('viewingUser=', window.viewingUser);
-        console.log('FirebaseSync._i=', window.FirebaseSync?._i);
-        console.log('FirebaseSync._k=', window.FirebaseSync?._k);
-        console.log('VaultStorageLayer._k=', window.VaultStorageLayer?._k);
-        console.log('cloudSyncCompleted=', window.cloudSyncCompleted);
-        console.log('_pendingPush=', window._pendingPush);
+        window.LIFEOS_DEBUG&&console.log('[BUILD]', window.LIFEOS_BUILD_ID);
+        window.LIFEOS_DEBUG&&console.log('currentUser=', window.currentUser);
+        window.LIFEOS_DEBUG&&console.log('viewingUser=', window.viewingUser);
+        window.LIFEOS_DEBUG&&console.log('FirebaseSync._i=', window.FirebaseSync?._i);
+        window.LIFEOS_DEBUG&&console.log('FirebaseSync._k=', window.FirebaseSync?._k);
+        window.LIFEOS_DEBUG&&console.log('VaultStorageLayer._k=', window.VaultStorageLayer?._k);
+        window.LIFEOS_DEBUG&&console.log('cloudSyncCompleted=', window.cloudSyncCompleted);
+        window.LIFEOS_DEBUG&&console.log('_pendingPush=', window._pendingPush);
         const vaultKey = 'lifeos_v8_vault_' + (window.FirebaseSync?._k || window.viewingUser || '');
-        console.log('vaultKey=', vaultKey);
-        console.log('localStorage raw=', localStorage.getItem(vaultKey));
-        console.log('VaultStorageLayer data=', window.VaultStorageLayer?.getData?.());
-        console.log('VaultStorageLayer count=', window.VaultStorageLayer?.getData?.()?.length);
+        window.LIFEOS_DEBUG&&console.log('vaultKey=', vaultKey);
+        window.LIFEOS_DEBUG&&console.log('localStorage raw=', localStorage.getItem(vaultKey));
+        window.LIFEOS_DEBUG&&console.log('VaultStorageLayer data=', window.VaultStorageLayer?.getData?.());
+        window.LIFEOS_DEBUG&&console.log('VaultStorageLayer count=', window.VaultStorageLayer?.getData?.()?.length);
         const container = document.getElementById('vaultCardsContainer');
         const empty = document.getElementById('vaultEmptyState');
-        console.log('vaultCardsContainer exists=', !!container);
-        console.log('vaultCardsContainer children=', container ? container.children.length : 'NO_CONTAINER');
-        console.log('vaultCardsContainer html=', container ? container.innerHTML.slice(0, 500) : 'NO_CONTAINER');
-        console.log('vaultEmptyState display=', empty ? getComputedStyle(empty).display : 'NO_EMPTY_STATE');
+        window.LIFEOS_DEBUG&&console.log('vaultCardsContainer exists=', !!container);
+        window.LIFEOS_DEBUG&&console.log('vaultCardsContainer children=', container ? container.children.length : 'NO_CONTAINER');
+        window.LIFEOS_DEBUG&&console.log('vaultCardsContainer html=', container ? container.innerHTML.slice(0, 500) : 'NO_CONTAINER');
+        window.LIFEOS_DEBUG&&console.log('vaultEmptyState display=', empty ? getComputedStyle(empty).display : 'NO_EMPTY_STATE');
         try {
             if (window.FirebaseSync?._d && window.FirebaseSync?._k) {
                 const snap = await window.FirebaseSync._d.collection('LifeOS_Profiles').doc(window.FirebaseSync._k).get();
-                console.log('[DIRECT GET exists]', snap.exists);
+                window.LIFEOS_DEBUG&&console.log('[DIRECT GET exists]', snap.exists);
                 const data = snap.data();
-                console.log('[DIRECT GET data]', data);
-                console.log('[DIRECT GET vaultData isArray]', Array.isArray(data?.vaultData));
-                console.log('[DIRECT GET vaultData length]', Array.isArray(data?.vaultData) ? data.vaultData.length : 'NO_ARRAY');
-                console.log('[DIRECT GET vaultData]', data?.vaultData);
+                window.LIFEOS_DEBUG&&console.log('[DIRECT GET data]', data);
+                window.LIFEOS_DEBUG&&console.log('[DIRECT GET vaultData isArray]', Array.isArray(data?.vaultData));
+                window.LIFEOS_DEBUG&&console.log('[DIRECT GET vaultData length]', Array.isArray(data?.vaultData) ? data.vaultData.length : 'NO_ARRAY');
+                window.LIFEOS_DEBUG&&console.log('[DIRECT GET vaultData]', data?.vaultData);
             } else console.warn('[DIRECT GET skipped] Firebase not ready or missing key');
         } catch (err) { console.error('[DIRECT GET error]', err); }
     } finally { console.groupEnd(); }
@@ -6537,7 +6537,7 @@ window.forcePullVaultFromFirebase = async function() {
     console.group('=== FORCE PULL VAULT FROM FIREBASE ===');
     try {
         const k = window.viewingUser || window.FirebaseSync?._k;
-        console.log('[FORCE] profile=', k);
+        window.LIFEOS_DEBUG&&console.log('[FORCE] profile=', k);
         if (!k) throw new Error('Missing viewingUser/FirebaseSync._k');
         if (!window.FirebaseSync?._d) throw new Error('Firestore not ready');
         if (window.VaultStorageLayer?._k !== 'lifeos_v8_vault_' + k) {
@@ -6545,24 +6545,24 @@ window.forcePullVaultFromFirebase = async function() {
             window.VaultStorageLayer.init(k);
         }
         const snap = await window.FirebaseSync._d.collection('LifeOS_Profiles').doc(k).get();
-        console.log('[FORCE] exists=', snap.exists);
+        window.LIFEOS_DEBUG&&console.log('[FORCE] exists=', snap.exists);
         if (!snap.exists) throw new Error('Firebase document not found: ' + k);
         const c = snap.data();
-        console.log('[FORCE] data keys=', Object.keys(c || {}));
-        console.log('[FORCE] vaultData=', c?.vaultData);
-        console.log('[FORCE] vaultData length=', Array.isArray(c?.vaultData) ? c.vaultData.length : 'NO_ARRAY');
+        window.LIFEOS_DEBUG&&console.log('[FORCE] data keys=', Object.keys(c || {}));
+        window.LIFEOS_DEBUG&&console.log('[FORCE] vaultData=', c?.vaultData);
+        window.LIFEOS_DEBUG&&console.log('[FORCE] vaultData length=', Array.isArray(c?.vaultData) ? c.vaultData.length : 'NO_ARRAY');
         if (!Array.isArray(c?.vaultData)) throw new Error('vaultData is not array');
         const cleanCloudVault = window.VaultUtils.migrateLegacyData(c.vaultData);
-        console.log('[FORCE] cleanCloudVault length=', cleanCloudVault.length);
+        window.LIFEOS_DEBUG&&console.log('[FORCE] cleanCloudVault length=', cleanCloudVault.length);
         const decision = await window.applyVaultReconciliation(cleanCloudVault, { cloudReadOk: true, allowLocalPushAfterCloudRead: true, profile: k, source: 'forcePullVaultFromFirebase' });
-        console.log('[FORCE] decision=', decision);
-        console.log('[FORCE] after replace count=', window.VaultStorageLayer.getData().length);
-        console.log('[FORCE] localStorage=', localStorage.getItem('lifeos_v8_vault_' + k));
+        window.LIFEOS_DEBUG&&console.log('[FORCE] decision=', decision);
+        window.LIFEOS_DEBUG&&console.log('[FORCE] after replace count=', window.VaultStorageLayer.getData().length);
+        window.LIFEOS_DEBUG&&console.log('[FORCE] localStorage=', localStorage.getItem('lifeos_v8_vault_' + k));
         const container = document.getElementById('vaultCardsContainer');
         const empty = document.getElementById('vaultEmptyState');
-        console.log('[FORCE] container children=', container ? container.children.length : 'NO_CONTAINER');
-        console.log('[FORCE] container html=', container ? container.innerHTML.slice(0, 800) : 'NO_CONTAINER');
-        console.log('[FORCE] empty display=', empty ? getComputedStyle(empty).display : 'NO_EMPTY_STATE');
+        window.LIFEOS_DEBUG&&console.log('[FORCE] container children=', container ? container.children.length : 'NO_CONTAINER');
+        window.LIFEOS_DEBUG&&console.log('[FORCE] container html=', container ? container.innerHTML.slice(0, 800) : 'NO_CONTAINER');
+        window.LIFEOS_DEBUG&&console.log('[FORCE] empty display=', empty ? getComputedStyle(empty).display : 'NO_EMPTY_STATE');
         const count = window.VaultStorageLayer.getData().length;
         if (count > 0) window.showToast?.('Đã kéo Vault từ Firebase: ' + count + ' mục', 'ph-cloud-arrow-down');
     } catch (err) {
@@ -6759,7 +6759,7 @@ window.startDateClock=function(){window.stopDateClock?.();window.updateDateClock
 window.stopDateClock=function(){if(window.dateClockTimeout){clearTimeout(window.dateClockTimeout);window.dateClockTimeout=null}if(window.dateClockInterval){clearInterval(window.dateClockInterval);window.dateClockInterval=null}};
 window.WEATHER_LOCATIONS={hanoi:{key:'hanoi',name:'Hà Nội',lat:21.0285,lon:105.8542},noibai:{key:'noibai',name:'Sân bay Nội Bài',lat:21.2187,lon:105.8042},socson:{key:'socson',name:'Sóc Sơn',lat:21.2578,lon:105.8480}};
 window.WEATHER_CACHE_KEYS={hanoi:'lifeos_weather_cache_hanoi',noibai:'lifeos_weather_cache_noibai',socson:'lifeos_weather_cache_socson'};
-window.testWeatherSources=async function(){const results={};for(const key of Object.keys(window.WEATHER_LOCATIONS)){const loc=window.WEATHER_LOCATIONS[key];const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&timezone=Asia%2FBangkok&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,precipitation,rain,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,weather_code&forecast_days=5`;try{console.log(`[WEATHER TEST] ${key} source=open-meteo START`,loc);const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();const dailyLen=Array.isArray(data?.daily?.time)?data.daily.time.length:0;const current=data?.current||null;const ok=!!current&&dailyLen>=3;console.log(`[WEATHER TEST] ${key} source=open-meteo ${ok?'OK':'FAIL'}`);console.log(`[WEATHER TEST] ${key} current`,current);console.log(`[WEATHER TEST] ${key} daily length`,dailyLen);results[key]={ok,current,dailyLength:dailyLen,data}}catch(err){console.error(`[WEATHER TEST] ${key} source=open-meteo FAIL`,err);results[key]={ok:false,error:String(err?.message||err)}}}console.log('[WEATHER TEST] SUMMARY',results);return results};
+window.testWeatherSources=async function(){const results={};for(const key of Object.keys(window.WEATHER_LOCATIONS)){const loc=window.WEATHER_LOCATIONS[key];const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&timezone=Asia%2FBangkok&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,precipitation,rain,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,weather_code&forecast_days=5`;try{window.LIFEOS_DEBUG&&console.log(`[WEATHER TEST] ${key} source=open-meteo START`,loc);const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();const dailyLen=Array.isArray(data?.daily?.time)?data.daily.time.length:0;const current=data?.current||null;const ok=!!current&&dailyLen>=3;window.LIFEOS_DEBUG&&console.log(`[WEATHER TEST] ${key} source=open-meteo ${ok?'OK':'FAIL'}`);window.LIFEOS_DEBUG&&console.log(`[WEATHER TEST] ${key} current`,current);window.LIFEOS_DEBUG&&console.log(`[WEATHER TEST] ${key} daily length`,dailyLen);results[key]={ok,current,dailyLength:dailyLen,data}}catch(err){console.error(`[WEATHER TEST] ${key} source=open-meteo FAIL`,err);results[key]={ok:false,error:String(err?.message||err)}}}window.LIFEOS_DEBUG&&console.log('[WEATHER TEST] SUMMARY',results);return results};
 
 window.WEATHER_CACHE_TTL_MS=20*60*1000;
 window.weatherState={selected:'hanoi',loading:false,lastData:null};
@@ -8203,7 +8203,7 @@ window.pwaEngine = {
                 navigator.serviceWorker.register('./sw.js', {
                     scope: './'
                 }).then((registration) => {
-                    console.log('[LifeOS SW] registered:', registration.scope);
+                    window.LIFEOS_DEBUG&&console.log('[LifeOS SW] registered:', registration.scope);
                 }).catch((err) => {
                     console.warn('[LifeOS SW] registration failed:', err);
                 });
@@ -9025,7 +9025,7 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
   function $(id){ return document.getElementById(id); }
   function safeToast(msg, icon){
     if(window.showToast) window.showToast(msg, icon || 'ph-check-circle');
-    else console.log('[LifeOS]', msg);
+    else window.LIFEOS_DEBUG&&console.log('[LifeOS]', msg);
   }
   function vibrate(pattern){ try{ if(window.vibrate) window.vibrate(pattern); }catch(e){} }
   function escAttr(value){
@@ -11381,7 +11381,7 @@ setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}c
 // Boot khởi động mồi Nano âm thầm
 setTimeout(() => {
     if(window.WeatherAIEngine) {
-        // window.WeatherAIEngine.primeGeminiNano().catch(e=>console.log('Nano Prime Skip'));
+        // window.WeatherAIEngine.primeGeminiNano().catch(e=>window.LIFEOS_DEBUG&&console.log('Nano Prime Skip'));
     }
 }, 3000); // Trễ 3s để không chặn quá trình load UI ban đầu
 </script>
@@ -11817,7 +11817,7 @@ window.MediaHub = {
             try {
                 if (!el.paused || el.readyState >= 3) {
                     el.volume = 0.9;
-                    console.log('[MediaHub] playing', type);
+                    window.LIFEOS_DEBUG&&console.log('[MediaHub] playing', type);
                 }
             } catch(e) {}
         };
@@ -12034,7 +12034,7 @@ window.MediaHub = {
             const decoded = decodedSource(playUrl);
             const isM3u8 = /\.m3u8($|\?)/i.test(decoded) || String(decoded).toLowerCase().includes('m3u8') || /\.m3u($|\?)/i.test(decoded);
 
-            console.log('[MediaHub] load start', type, `${sourceIndex + 1}/${sources.length}`, route, playUrl);
+            window.LIFEOS_DEBUG&&console.log('[MediaHub] load start', type, `${sourceIndex + 1}/${sources.length}`, route, playUrl);
 
             clearWatch();
             destroyHls();
@@ -12104,7 +12104,7 @@ window.MediaHub = {
                 this[hlsKey] = hls;
 
                 hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-                    if (this._mediaLoadSeq === loadToken) console.log('[MediaHub] media attached', type, route);
+                    if (this._mediaLoadSeq === loadToken) window.LIFEOS_DEBUG&&console.log('[MediaHub] media attached', type, route);
                 });
 
                 hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
@@ -12709,7 +12709,7 @@ this.currentRadioIdx = idx;
     const ch = data[idx] || {};
     const status = Object.assign({}, this._lifeosGetStatus(type, idx) || {}, opt, { type, idx, state, name: ch.name || opt.name || '', ts: Date.now() });
     this.lifeosStatusMap[this._lifeosKey(type, idx)] = status;
-    try { console.log('[LifeOS SmartTV] STATUS', JSON.stringify(status)); } catch(e) {}
+    try { window.LIFEOS_DEBUG&&console.log('[LifeOS SmartTV] STATUS', JSON.stringify(status)); } catch(e) {}
     if (type === 'tv') this._lifeosRenderTvStatusLine(ch, status);
     else this._lifeosRenderRadioStatusLine(ch, status);
     this._lifeosRequestRender(type);
@@ -14404,7 +14404,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-text {
     if (!ce || ce.__lifeos64f3Verified) return;
     ce.__lifeos64f3Verified = true;
     try {
-      console.info('[64F3 Family upload check]', {
+      window.LIFEOS_DEBUG&&console.info('[64F3 Family upload check]', {
         hasSafeName: typeof ce.getSafeTelegramUploadName === 'function',
         hasLastError: 'lastUploadError' in ce,
         localStorageKey: 'lifeos_family_last_upload_error',
@@ -16864,9 +16864,8 @@ body.lifeos65c-family-drag-active #chat-messages {
 }
 </style>
 
-<style id="lifeos-pha66b-task-alarm-native-bridge-style">
-/* PHA 66B: Native Alarm Bridge architecture lock status.
-   This is a small status surface only; it does not change Task/Weather/Family layout logic. */
+<style id="lifeos-native-alarm-bridge-style">
+/* Native Alarm Bridge status surface. Hidden on GitHub HTML to keep the runtime clean. */
 #lifeos-native-alarm-bridge-status {
   display: none;
   margin: 8px 0;
@@ -16899,22 +16898,22 @@ body.lifeos65c-family-drag-active #chat-messages {
 }
 body[data-desktop-workspace="tasks"] #lifeos-native-alarm-bridge-status,
 body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-native-alarm-bridge-status {
-  display: block;
+  display: none !important;
 }
 </style>
-<script id="lifeos-pha66b-task-alarm-native-bridge-stub-js">
+<script id="lifeos-native-alarm-bridge-js">
 (function(){
   'use strict';
-  if (window.__lifeosPha66bTaskAlarmNativeBridgeStub) return;
-  window.__lifeosPha66bTaskAlarmNativeBridgeStub = true;
+  if (window.__lifeosNativeAlarmBridgeStub) return;
+  window.__lifeosNativeAlarmBridgeStub = true;
 
-  const PATCH_ID = 'lifeos-pha66b-task-alarm-native-bridge-stub-js';
+  const PATCH_ID = 'lifeos-native-alarm-bridge-js';
   const SCHEMA_VERSION = 'lifeos_alarm_bridge_v1';
   const LOG_KEY = 'lifeos_native_alarm_bridge_last_log';
-  const ARCH_KEY = 'lifeos_alarm_architecture_lock_v66b';
+  const ARCH_KEY = 'lifeos_alarm_architecture_lock';
 
   window.LifeOSAlarmArchitecture = Object.assign({}, window.LifeOSAlarmArchitecture || {}, {
-    phase: '66B',
+    phase: 'native_alarm_bridge',
     htmlRole: 'ui_task_editor_sync_data',
     nativeRole: 'android_alarmmanager_exact_alarm',
     foregroundFallback: 'html_active_only',
@@ -16999,7 +16998,7 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
   }
 
   const Controller = {
-    phase: '66B',
+    phase: 'native_alarm_bridge',
     schemaVersion: SCHEMA_VERSION,
     fallback: 'html_active_only',
     get nativeAlarmAvailable(){ return nativeAvailable(); },
@@ -17015,7 +17014,7 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
       return {
         schemaVersion: SCHEMA_VERSION,
         source: 'LifeOS.HTML',
-        phase: '66B',
+        phase: 'native_alarm_bridge',
         action: meta.action || 'setAlarm',
         taskId: String(t.id || meta.taskId || ''),
         title,
@@ -17043,13 +17042,13 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
 
     log(entry = {}){
       const payload = Object.assign({
-        phase: '66B',
+        phase: 'native_alarm_bridge',
         timestamp: nowIso(),
         nativeAlarmAvailable: nativeAvailable(),
         fallback: nativeAvailable() ? null : this.fallback
       }, entry || {});
       try { localStorage.setItem(LOG_KEY, JSON.stringify(payload)); } catch(e) {}
-      console.info('[LifeOS 66B NativeAlarmBridge]', payload);
+      if (window.LIFEOS_DEBUG_NATIVE_ALARM) console.info('[LifeOS NativeAlarmBridge]', payload);
       return payload;
     },
 
@@ -17084,7 +17083,7 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
       const payload = {
         schemaVersion: SCHEMA_VERSION,
         source: 'LifeOS.HTML',
-        phase: '66B',
+        phase: 'native_alarm_bridge',
         action: 'cancelAlarm',
         taskId: id,
         profileId: String(meta.profileId || profileId()),
@@ -17114,7 +17113,7 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
     },
 
     listScheduledAlarms(){
-      return this.callBridge('listScheduledAlarms', { schemaVersion: SCHEMA_VERSION, phase:'66B', action:'listScheduledAlarms', profileId: profileId(), timestamp: nowIso() });
+      return this.callBridge('listScheduledAlarms', { schemaVersion: SCHEMA_VERSION, phase:'native_alarm_bridge', action:'listScheduledAlarms', profileId: profileId(), timestamp: nowIso() });
     },
 
     testAlarmNow(taskId){
@@ -17125,11 +17124,11 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
     },
 
     requestExactAlarmPermission(){
-      return this.callBridge('requestExactAlarmPermission', { schemaVersion: SCHEMA_VERSION, phase:'66B', action:'requestExactAlarmPermission', timestamp: nowIso() });
+      return this.callBridge('requestExactAlarmPermission', { schemaVersion: SCHEMA_VERSION, phase:'native_alarm_bridge', action:'requestExactAlarmPermission', timestamp: nowIso() });
     },
 
     requestNotificationPermission(){
-      return this.callBridge('requestNotificationPermission', { schemaVersion: SCHEMA_VERSION, phase:'66B', action:'requestNotificationPermission', timestamp: nowIso() });
+      return this.callBridge('requestNotificationPermission', { schemaVersion: SCHEMA_VERSION, phase:'native_alarm_bridge', action:'requestNotificationPermission', timestamp: nowIso() });
     }
   };
 
@@ -17150,22 +17149,7 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
     };
   }
 
-  function ensureStatus(){
-    const view = document.getElementById('view-tasks');
-    if (!view) return null;
-    let box = document.getElementById('lifeos-native-alarm-bridge-status');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'lifeos-native-alarm-bridge-status';
-      const target = view.querySelector('#todo-form, form, .task-input-container') || view.firstElementChild || view;
-      if (target && target.parentNode) target.parentNode.insertBefore(box, target.nextSibling);
-      else view.insertBefore(box, view.firstChild);
-    }
-    const s = statusText();
-    box.className = s.cls;
-    box.innerHTML = '<div class="lifeos-bridge-mini"><i class="' + s.icon + '"></i><div>' + s.html + '<div class="mt-1 text-[10px] opacity-75">nativeAlarmAvailable: ' + Controller.isNativeBridgeAvailable() + ' · fallback: ' + (Controller.isNativeBridgeAvailable() ? 'native_alarmmanager' : 'html_active_only') + '</div></div></div>';
-    return box;
-  }
+  function ensureStatus(){ return null; }
 
   function debounce(fn, ms){
     let id = null;
@@ -17178,8 +17162,8 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
   const reconcileSoon = debounce(function(reason){ Controller.reconcileAll(reason || 'debounced'); ensureStatus(); }, 300);
 
   function hookGlobals(){
-    if (window.__lifeosPha66bAlarmHooksInstalled) return;
-    window.__lifeosPha66bAlarmHooksInstalled = true;
+    if (window.__lifeosNativeAlarmHooksInstalled) return;
+    window.__lifeosNativeAlarmHooksInstalled = true;
 
     const oldSaveLocalTodos = window.saveLocalTodos;
     if (typeof oldSaveLocalTodos === 'function') {
@@ -17256,12 +17240,7 @@ body.lifeos-landscape-mini-pc[data-lifeos-landscape-root-mode="tasks"] #lifeos-n
     window.addEventListener('storage', function(e){
       if (e.key && /todo|task|lifeos/i.test(e.key)) reconcileSoon('storage:' + e.key);
     });
-
-    console.info('[LifeOS 66B] Task alarm native bridge hooks installed', {
-      nativeAlarmAvailable: Controller.isNativeBridgeAvailable(),
-      fallback: Controller.isNativeBridgeAvailable() ? null : 'html_active_only',
-      note: 'HTML timers remain foreground fallback only. Overnight alarm requires APK native AlarmManager bridge.'
-    });
+    if (window.LIFEOS_DEBUG_NATIVE_ALARM) console.info('[LifeOS NativeAlarmBridge] hooks installed', { nativeAlarmAvailable: Controller.isNativeBridgeAvailable() });
   }
 
   window.lifeosOnNativeAlarmFired = function(payloadJson){
@@ -17502,7 +17481,7 @@ Không đụng: Task/Alarm, Family, Vault, APK native bridge, dữ liệu kênh.
 
     applyScrollSurface();
     setTimeout(applyScrollSurface, 120);
-    console.info('[LifeOS ' + PATCH_ID + '] installed');
+    window.LIFEOS_DEBUG&&console.info('[LifeOS ' + PATCH_ID + '] installed');
     return true;
   }
 
@@ -17771,7 +17750,7 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
   function logProof(event, data){
     const payload = Object.assign({phase:PHASE, event, timestamp:new Date().toISOString()}, data || {});
     try { window.LIFEOS_67G_R6_GALLERY_LAST_PROOF = payload; localStorage.setItem('lifeos_67g_r6_gallery_last_proof', JSON.stringify(payload)); } catch(_) {}
-    if (window.LIFEOS_GALLERY_DEBUG === true || localStorage.getItem('lifeos_gallery_debug') === '1') console.info('[LifeOS 67G-R6 Gallery]', payload);
+    if (window.LIFEOS_GALLERY_DEBUG === true || localStorage.getItem('lifeos_gallery_debug') === '1') window.LIFEOS_DEBUG&&console.info('[LifeOS 67G-R6 Gallery]', payload);
     return payload;
   }
   function relayDownloadUrl(fileId, name){
@@ -18370,7 +18349,7 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
       size: item.size,
       selectedCount: selectedSet().size
     };
-    console.info('[FamilySelect R3] Toggle item', payload);
+    window.LIFEOS_DEBUG&&console.info('[FamilySelect R3] Toggle item', payload);
     try { window.LIFEOS_67H_R3_LAST_TOGGLE = payload; localStorage.setItem('lifeos_67h_r3_last_toggle', JSON.stringify(payload)); } catch(_) {}
   }
   function toggle(id){
@@ -19788,7 +19767,7 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
       if (lastLog[key] && now - lastLog[key] < LOG_DEDUPE_MS) return p;
     }
     lastLog[key] = now;
-    try { console.info(PREFIX + ' ' + label, p); } catch(e) {}
+    try { window.LIFEOS_DEBUG&&console.info(PREFIX + ' ' + label, p); } catch(e) {}
     try { localStorage.setItem('lifeos_alarm_guard_r8final_last_log', JSON.stringify({ label, payload:p })); } catch(e) {}
     return p;
   }
@@ -20755,7 +20734,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     }, 120);
     window.addEventListener('resize', () => setTimeout(applyCss, 60), {passive:true});
     window.addEventListener('orientationchange', () => { setTimeout(applyCss, 120); setTimeout(applyCss, 420); }, {passive:true});
-    console.info('[LifeOS ' + PATCH_ID + '] installed');
+    window.LIFEOS_DEBUG&&console.info('[LifeOS ' + PATCH_ID + '] installed');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
@@ -20766,18 +20745,18 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 
 
 
-<style id="lifeos-r24-transfer-singleflight-css">
+<style id="lifeos-r25-transfer-singleflight-css">
 #chat-upload-status .lifeos-transfer-progress-wrap{height:7px;border-radius:999px;background:rgba(148,163,184,.22);overflow:hidden;margin-top:7px;}
 #chat-upload-status .lifeos-transfer-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#6366f1);border-radius:999px;transition:width .16s linear;}
 #chat-upload-status .lifeos-transfer-stage{font-size:11px;opacity:.82;margin-top:2px;line-height:1.25;}
 #chat-upload-status .lifeos-transfer-cancel{min-width:52px;height:28px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.35);font-size:11px;font-weight:900;padding:0 10px;}
 </style>
-<script id="lifeos-r24-transfer-singleflight-js">
+<script id="lifeos-r25-transfer-singleflight-js">
 (function(){
   'use strict';
-  var PHASE='R24_TRANSFER_SINGLE_FLIGHT_R16_SPEED';
-  if(window.__lifeosR24TransferSingleFlight) return;
-  window.__lifeosR24TransferSingleFlight=true;
+  var PHASE='R25_TRANSFER_SINGLE_FLIGHT_R16_SPEED_HTML_CLEAN';
+  if(window.__lifeosR25TransferSingleFlight) return;
+  window.__lifeosR25TransferSingleFlight=true;
 
   var MB=1024*1024;
   var RELAY='https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
@@ -20809,7 +20788,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
   function cleanText(text){
     var s=String(text==null?'':text);
     s=s.replace(/\bPHA\s*\d+[A-Z0-9._-]*/gi,'').replace(/\bPha\s*\d+[A-Z0-9._-]*/g,'');
-    s=s.replace(/\bR\d{1,3}[_A-Z0-9-]*\b/g,'').replace(/\b66B\b/gi,'');
+    s=s.replace(/\bR\d{1,3}[_A-Z0-9-]*\b/g,'').replace(/\bNativeAlarm\b/gi,'');
     s=s.replace(/cloudflare_worker_relay|raw_stream/gi,'máy chủ').replace(/telegram_sendDocument_error/gi,'Telegram lỗi').replace(/telegram_timeout/gi,'Telegram quá chậm');
     s=s.replace(/\s{2,}/g,' ').replace(/\s+([:,.!?])/g,'$1').trim();
     return s||'Đang xử lý...';
