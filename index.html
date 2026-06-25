@@ -3411,7 +3411,7 @@ body.music-player-active #mini-player {
 </div>
 <span class="status-dot mt-0.5 hidden md:inline-block shrink-0" id="pwaStatusDot" title="Trạng thái Cloud"></span>
 <div class="relative ml-0.5 sm:ml-1 shrink-0 overflow-visible" id="profile-selector">
-<button class="text-[11px] sm:text-[12px] font-bold text-primary bg-slate-50 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all active:scale-95 hover:brightness-95" id="profile-btn" onclick="window.toggleProfileMenu()"><span id="profile-name-badge">N/A</span><i class="ph-bold ph-caret-down text-[10px]"></i></button>
+<button class="text-[11px] sm:text-[12px] font-bold text-primary bg-slate-50 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all active:scale-95 hover:brightness-95" id="profile-btn" onclick="window.toggleProfileMenu()"><span id="profile-name-badge">🟢 Live</span><i class="ph-bold ph-caret-down text-[10px]"></i></button>
 <div class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-[9999] origin-top-right transition-transform" id="profile-menu" style="animation:scaleIn .2s cubic-bezier(.16,1,.3,1)"></div>
 </div>
 <button class="p-1.5 sm:p-2.5 rounded-xl bg-slate-50 active:scale-90 transition border border-slate-200 shadow-sm ml-0.5 hover:brightness-95 flex items-center justify-center" id="theme-toggle" onclick="window.cycleTheme()"><i class="ph-bold ph-sun text-base sm:text-lg transition-transform" id="theme-icon"></i></button>
@@ -4198,90 +4198,162 @@ document.addEventListener('visibilitychange', () => { 
 
 window.highlightError=id=>{const e=el(id);if(e){e.classList.add('input-error-glow');setTimeout(()=>e.classList.remove('input-error-glow'),1500)}};
 
-/* PHA 2A PROFILE LIVE PATCH */
-window.showLoginGate=()=>{
-    showFlex('login-gate');
-    const profiles = window.PROFILES || {};
-    setHtml('login-profiles', Object.entries(profiles).map(([k,v])=>`
-        <button onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all">
-            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon}</div>
-            <span class="font-black text-slate-800">${v.name}</span>
-        </button>`).join(''));
-};
-
-window.loginAsProfile=(k,opts={})=>{
-    const prof = window.PROFILES && window.PROFILES[k];
-    if(!prof) return false;
-    try { window.unlockAudio?.(); } catch(e) {}
-    try { window.vibrate?.([20,30]); } catch(e) {}
-    localStorage.setItem('lifeos_v8_session', k);
-    localStorage.setItem('lifeos_v8_viewing', k);
-    window.currentUser = k;
-    window.viewingUser = k;
-    try { window.closePasswordModal?.(); } catch(e) {}
-    hideEl('login-gate');
-    window.loadUserData?.();
-    if(!opts.silent) window.showToast?.(`Đang dùng hồ sơ ${prof.name}`, 'ph-user-switch');
-    if(!opts.noSpeech && window.soundEnabled && prof.name !== 'Live') window.playSpeechTTS?.('Xin chào');
-    return true;
-};
-
-window.requestPin=k=>{
-    const prof = window.PROFILES && window.PROFILES[k];
-    if(!prof) return;
-    window.vibrate?.(15);
-    if(k === 'live' || prof.noPin === true || prof.pin === '') {
-        window.loginAsProfile(k, { noSpeech:true });
-        return;
+/* R28 PROFILE GUARD CORE — không cho Live làm sập hệ thống, không động transfer/worker. */
+(function(){
+    'use strict';
+    const DEFAULT_PROFILE = 'live';
+    function profiles(){ return window.PROFILES || {}; }
+    function hasProfile(k){ return !!(k && profiles()[k]); }
+    function norm(k){ return String(k || '').trim().toLowerCase(); }
+    function safeKey(k){
+        k = norm(k);
+        if (hasProfile(k)) return k;
+        return hasProfile(DEFAULT_PROFILE) ? DEFAULT_PROFILE : Object.keys(profiles())[0] || DEFAULT_PROFILE;
     }
-    window.tempProfile = k;
-    setTxt('pwd-title', `Mật khẩu của ${prof.name}`);
-    showFlex('password-modal');
-    setVal('pwd-input','');
-    setTimeout(()=>{ const i=el('pwd-input'); if(i) i.focus(); },100);
-};
-
-window.closePasswordModal=()=>hideEl('password-modal');
-
-window.submitPassword=()=>{
-    const u = window.tempProfile;
-    const p = getVal('pwd-input');
-    const prof = window.PROFILES && window.PROFILES[u];
-    if(prof && (prof.pin === p || p === '9999')) {
-        window.loginAsProfile(u, { noSpeech:false });
-    } else {
-        window.vibrate?.([50,50]);
-        window.highlightError?.('pwd-input');
-        window.showToast?.('Sai mật khẩu!', 'ph-warning-circle');
+    function setStore(k){
+        try { localStorage.setItem('lifeos_v8_session', k); } catch(e) {}
+        try { localStorage.setItem('lifeos_v8_viewing', k); } catch(e) {}
     }
-};
-
-window.selectProfileFromMenu=k=>{
-    const m = el('profile-menu');
-    if(m) m.classList.add('hidden');
-    return window.requestPin(k);
-};
-
-window.toggleProfileMenu=()=>{
-    window.vibrate?.(10);
-    const m = el('profile-menu');
-    if(!m) return;
-    m.classList.toggle('hidden');
-    if(m.classList.contains('hidden')) return;
-    const current = window.viewingUser || window.currentUser || 'live';
-    const rows = Object.entries(window.PROFILES || {}).map(([k,v])=>`
-        <button onclick="window.selectProfileFromMenu('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${current===k?'text-primary':'text-slate-600'}">
-            ${v.icon} ${v.name} ${current===k?'<i class="ph-bold ph-check ml-2"></i>':''}
+    function storedKey(){
+        let s = '';
+        try { s = localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || ''; } catch(e) {}
+        return safeKey(s || window.viewingUser || window.currentUser || DEFAULT_PROFILE);
+    }
+    function setRuntime(k, persist){
+        k = safeKey(k);
+        window.currentUser = k;
+        window.viewingUser = k;
+        if (persist !== false) setStore(k);
+        return k;
+    }
+    function badgeText(k){
+        const prof = profiles()[safeKey(k)] || { icon:'🟢', name:'Live' };
+        return `${prof.icon || '👤'} ${prof.name || 'Live'}`;
+    }
+    function renderBadge(k){
+        const e = el('profile-name-badge');
+        if (e) e.textContent = badgeText(k);
+    }
+    function closeMenu(){ const m = el('profile-menu'); if(m) m.classList.add('hidden'); }
+    function renderMenu(){
+        const m = el('profile-menu');
+        if(!m) return;
+        const current = safeKey(window.viewingUser || window.currentUser || storedKey());
+        const rows = Object.entries(profiles()).map(([k,v])=>`
+        <button type="button" onclick="window.selectProfileFromMenu('${k}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm ${current===k?'text-primary':'text-slate-600'}">
+            ${v.icon || '👤'} ${v.name || k} ${current===k?'<i class="ph-bold ph-check ml-2"></i>':''}
         </button>`).join('');
-    setHtml('profile-menu', rows + 
-        `<div class="h-px bg-slate-200 my-1"></div>
-         <button onclick="window.FirebaseSync.requestPushPermission()" class="w-full text-left px-4 py-3 hover:bg-emerald-50 text-emerald-600 font-bold text-sm flex items-center gap-2"><i class="ph-bold ph-bell-ringing text-lg"></i> Bật Thông báo</button>
-         <div class="h-px bg-slate-200 my-1"></div>
-         <button onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm flex items-center gap-2"><i class="ph-bold ph-sign-out text-lg"></i> Đăng xuất</button>`
-    );
-};
+        setHtml('profile-menu', rows +
+            `<div class="h-px bg-slate-200 my-1"></div>
+             <button type="button" onclick="window.FirebaseSync&&window.FirebaseSync.requestPushPermission&&window.FirebaseSync.requestPushPermission()" class="w-full text-left px-4 py-3 hover:bg-emerald-50 text-emerald-600 font-bold text-sm flex items-center gap-2"><i class="ph-bold ph-bell-ringing text-lg"></i> Bật Thông báo</button>
+             <div class="h-px bg-slate-200 my-1"></div>
+             <button type="button" onclick="window.logout()" class="w-full text-left px-4 py-3 hover:bg-rose-50 text-rose-500 font-bold text-sm flex items-center gap-2"><i class="ph-bold ph-sign-out text-lg"></i> Đăng xuất</button>`);
+    }
+    function ensureProfile(reason){
+        const k = setRuntime(storedKey(), true);
+        renderBadge(k);
+        return k;
+    }
 
-window.switchViewing=k=>window.selectProfileFromMenu(k);
+    window.showLoginGate=()=>{
+        showFlex('login-gate');
+        const p = profiles();
+        setHtml('login-profiles', Object.entries(p).map(([k,v])=>`
+            <button type="button" onclick="window.requestPin('${k}')" class="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md active:scale-95 transition-all">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black border border-primary/20">${v.icon || '👤'}</div>
+                <span class="font-black text-slate-800">${v.name || k}</span>
+            </button>`).join(''));
+    };
+
+    window.loginAsProfile=(k,opts={})=>{
+        k = safeKey(k);
+        const prof = profiles()[k];
+        if(!prof) return false;
+        try { window.unlockAudio?.(); } catch(e) {}
+        try { window.vibrate?.([20,30]); } catch(e) {}
+        setRuntime(k, true);
+        renderBadge(k);
+        closeMenu();
+        try { window.closePasswordModal?.(); } catch(e) {}
+        hideEl('login-gate');
+        window.loadUserData?.();
+        if(!opts.silent) window.showToast?.(`Đang dùng hồ sơ ${prof.name}`, 'ph-user-switch');
+        if(!opts.noSpeech && window.soundEnabled && prof.name !== 'Live') window.playSpeechTTS?.('Xin chào');
+        return true;
+    };
+
+    window.requestPin=k=>{
+        k = safeKey(k);
+        const prof = profiles()[k];
+        if(!prof) return;
+        window.vibrate?.(15);
+        if(k === DEFAULT_PROFILE || prof.noPin === true || prof.pin === '') {
+            window.loginAsProfile(k, { noSpeech:true });
+            return;
+        }
+        window.tempProfile = k;
+        setTxt('pwd-title', `Mật khẩu của ${prof.name}`);
+        showFlex('password-modal');
+        setVal('pwd-input','');
+        setTimeout(()=>{ const i=el('pwd-input'); if(i) i.focus(); },100);
+    };
+
+    window.closePasswordModal=()=>hideEl('password-modal');
+
+    window.submitPassword=()=>{
+        const u = safeKey(window.tempProfile);
+        const p = getVal('pwd-input');
+        const prof = profiles()[u];
+        if(prof && (prof.pin === p || p === '9999')) {
+            window.loginAsProfile(u, { noSpeech:false });
+        } else {
+            window.vibrate?.([50,50]);
+            window.highlightError?.('pwd-input');
+            window.showToast?.('Sai mật khẩu!', 'ph-warning-circle');
+        }
+    };
+
+    window.selectProfileFromMenu=k=>{
+        closeMenu();
+        return window.requestPin(k);
+    };
+
+    window.toggleProfileMenu=()=>{
+        window.vibrate?.(10);
+        const m = el('profile-menu');
+        if(!m) return;
+        renderMenu();
+        m.classList.toggle('hidden');
+    };
+
+    window.switchViewing=k=>window.selectProfileFromMenu(k);
+
+    window.loadUserData=()=>{
+        const k = ensureProfile('loadUserData');
+        const prof = profiles()[k];
+        try{
+            renderBadge(k);
+            const localTasks = localStorage.getItem('lifeos_v8_data_' + k);
+            if(localTasks) { window.todos = JSON.parse(localTasks); } else { window.todos = []; }
+            window.renderTasksOnly?.();
+            window.VaultStorageLayer?.init?.(k);
+            window.VaultUI?.renderVaultCards?.();
+            setTxt('streak-count',window.stats?.streak||0);
+            window.cloudSyncCompleted = false;
+            if(window.FirebaseSync) window.FirebaseSync.init(k);
+        }catch(e){
+            // Không để lỗi phụ làm rơi profile về trạng thái rỗng.
+            renderBadge(k);
+            try { window.todos = Array.isArray(window.todos) ? window.todos : []; window.renderTasksOnly?.(); } catch(_) {}
+        }
+        return prof || null;
+    };
+
+    window.LifeOSProfileGuard = { phase:'R28_profile_guard_no_na', safeKey, ensureProfile, renderBadge, renderMenu };
+    setTimeout(()=>ensureProfile('boot-0'), 0);
+    setTimeout(()=>ensureProfile('boot-300'), 300);
+    setTimeout(()=>ensureProfile('boot-1200'), 1200);
+})();
 
 // ĐĂNG XUẤT CHUẨN MỰC
 window.logout=()=>{
@@ -4294,7 +4366,7 @@ window.logout=()=>{
 window.loadUserData=()=>{
     try{
         const prof = window.PROFILES[window.viewingUser];
-        setHtml('profile-name-badge', prof ? `${prof.icon} ${prof.name}` : 'N/A');
+        setHtml('profile-name-badge', prof ? `${prof.icon} ${prof.name}` : 'Live');
         
         const localTasks = localStorage.getItem('lifeos_v8_data_' + window.viewingUser);
         if(localTasks) { window.todos = JSON.parse(localTasks); } else { window.todos = []; }
@@ -7929,41 +8001,25 @@ document.addEventListener('DOMContentLoaded', () => {
             swObj.el = null;
         });
     }
-
-    try {
-    let sS = localStorage.getItem('lifeos_v8_session');
-    if (!sS) {
-        sS = 'live';
+    try {
+        const guard = window.LifeOSProfileGuard;
+        if (guard && guard.ensureProfile) guard.ensureProfile('main-bootstrap');
+        else {
+            localStorage.setItem('lifeos_v8_session', 'live');
+            localStorage.setItem('lifeos_v8_viewing', 'live');
+            window.currentUser = 'live';
+            window.viewingUser = 'live';
+        }
+        hideEl('login-gate');
+        window.loadUserData?.();
+    } catch (err) {
         localStorage.setItem('lifeos_v8_session', 'live');
         localStorage.setItem('lifeos_v8_viewing', 'live');
+        window.currentUser = 'live';
+        window.viewingUser = 'live';
+        hideEl('login-gate');
+        window.loadUserData?.();
     }
-    sS = String(sS).toLowerCase();
-    let sV = localStorage.getItem('lifeos_v8_viewing');
-    sV = sV ? String(sV).toLowerCase() : sS;
-
-    if (!window.PROFILES || !window.PROFILES[sS]) {
-        sS = 'live';
-        sV = 'live';
-        localStorage.setItem('lifeos_v8_session', 'live');
-        localStorage.setItem('lifeos_v8_viewing', 'live');
-    } else if (!window.PROFILES[sV]) {
-        sV = sS;
-        localStorage.setItem('lifeos_v8_viewing', sV);
-    }
-
-    window.currentUser = sS;
-    window.viewingUser = sV;
-    hideEl('login-gate');
-    window.loadUserData();
-} catch (err) {
-    console.error('[PHA2A Live profile bootstrap]', err);
-    localStorage.setItem('lifeos_v8_session', 'live');
-    localStorage.setItem('lifeos_v8_viewing', 'live');
-    window.currentUser = 'live';
-    window.viewingUser = 'live';
-    hideEl('login-gate');
-    window.loadUserData?.();
-}
 
 
     // PHA 08: LOGIC KÉO THẢ MỌI LOẠI FILE VÀO KHUNG CHAT
@@ -19823,7 +19879,7 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
     try {
       const badge = document.getElementById('profile-name-badge');
       const badgeText = safeString(badge && badge.textContent).trim();
-      if (/^N\/A$/i.test(badgeText)) return null;
+      // R28: badge is display-only. Never let a stale/empty badge override real profile state.
     } catch(e) {}
     const candidates = [];
     try { candidates.push(window.viewingUser); } catch(e) {}
@@ -20778,7 +20834,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 <script id="lifeos-r27-transfer-aux-reup-resume-copy-js">
 (function(){
   'use strict';
-  var PHASE='R27_HTML_CLEAN_AUX_REUP_RESUME_COPY_ISO';
+  var PHASE='R28_PROFILE_GUARD_NO_NA_TRANSFER_STABLE';
   if(window.__lifeosR27TransferAuxReupResumeCopy) return;
   window.__lifeosR27TransferAuxReupResumeCopy=true;
 
