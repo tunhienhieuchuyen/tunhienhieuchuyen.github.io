@@ -21905,6 +21905,302 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 </script>
 <!-- LIFEOS R11 MOBILE UNIVERSAL TOUCH SCROLL - END -->
 
+
+
+<!-- PHA67H_R12_GITHUB_FAMILY_TRANSFER_SMOOTH_FINAL_START -->
+<style id="lifeos-pha67h-r12-family-transfer-smooth-final-style">
+/* R12: Family upload/download smooth web-safe.
+   Scope only Family Chat transfer UI. No change to Alarm/Weather/Music/Vault core. */
+#view-chat #chat-messages,
+#chat-messages {
+  overflow-anchor: none !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain !important;
+}
+#chat-messages .lifeos67h-r6-queue-card,
+#chat-messages .chat-file-card,
+#chat-messages .lifeos67g-select-wrap {
+  contain: layout paint !important;
+  transform: none !important;
+  will-change: auto !important;
+  backface-visibility: hidden !important;
+}
+#chat-messages .lifeos67h-r6-queue-card {
+  width: clamp(158px, 23vw, 210px) !important;
+  min-width: clamp(158px, 23vw, 210px) !important;
+  max-width: clamp(158px, 23vw, 210px) !important;
+  box-sizing: border-box !important;
+}
+#chat-messages .lifeos67h-r6-queue-card .lifeos67h-r6-preview {
+  width: 100% !important;
+  height: 92px !important;
+  min-height: 92px !important;
+  max-height: 92px !important;
+  overflow: hidden !important;
+}
+#chat-messages .lifeos67h-r6-queue-card .lifeos67h-r6-status {
+  min-height: 32px !important;
+  max-height: 48px !important;
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  line-height: 1.15 !important;
+  word-break: break-word !important;
+}
+#chat-messages .lifeos67h-r6-queue-card .lifeos67h-r6-actions {
+  min-height: 36px !important;
+  height: 36px !important;
+  overflow: hidden !important;
+}
+#chat-upload-status,
+#family-upload-status,
+#chat-status-bar {
+  contain: layout paint !important;
+  transform: none !important;
+}
+body.lifeos-family-transfer-busy #chat-messages * {
+  scroll-behavior: auto !important;
+}
+body.lifeos-family-transfer-busy #chat-messages .lifeos67h-r6-queue-card,
+body.lifeos-family-transfer-busy #chat-messages .chat-file-card {
+  transition: background-color .15s ease, border-color .15s ease, opacity .15s ease !important;
+  animation: none !important;
+}
+@media (max-width: 767px) {
+  #chat-messages .lifeos67h-r6-queue-card {
+    width: min(72vw, 216px) !important;
+    min-width: min(72vw, 216px) !important;
+    max-width: min(72vw, 216px) !important;
+  }
+  #chat-messages .lifeos67h-r6-queue-card .lifeos67h-r6-preview {
+    height: 86px !important;
+    min-height: 86px !important;
+    max-height: 86px !important;
+  }
+}
+@media (orientation: landscape) and (max-height: 620px) and (max-width: 1023px) {
+  #chat-messages .lifeos67h-r6-queue-card {
+    width: 176px !important;
+    min-width: 176px !important;
+    max-width: 176px !important;
+  }
+  #chat-messages .lifeos67h-r6-queue-card .lifeos67h-r6-preview {
+    height: 74px !important;
+    min-height: 74px !important;
+    max-height: 74px !important;
+  }
+  #chat-messages .lifeos67h-r6-queue-card .lifeos67h-r6-status {
+    min-height: 28px !important;
+    max-height: 40px !important;
+    font-size: 10px !important;
+  }
+}
+</style>
+<script id="lifeos-pha67h-r12-family-transfer-smooth-final-js">
+(function(){
+  'use strict';
+  if (window.__lifeos67hR12FamilyTransferSmoothFinal) return;
+  window.__lifeos67hR12FamilyTransferSmoothFinal = true;
+  const PHASE = 'Pha67H_R12_github_family_transfer_smooth_final';
+  const RELAY = 'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
+  const BUSY_CLASS = 'lifeos-family-transfer-busy';
+  const now = () => Date.now();
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  function ce(){ return window.ChatEngine || null; }
+  function chatBox(){ return document.getElementById('chat-messages') || document.querySelector('#view-chat [data-chat-messages], #view-chat .overflow-y-auto'); }
+  function isQueueRunning(){ const q = window.FamilyUploadQueue; return !!(q && (q.running || (Array.isArray(q.items) && q.items.some(x => ['queued','retry_queued','uploading','retry'].includes(String(x.status||'')))))); }
+  function setBusy(on){ try { document.body.classList.toggle(BUSY_CLASS, !!on); window.__lifeosFamilyTransferBusy = !!on; } catch(e){} }
+  function safeToast(text, icon){ try { if (typeof window.showToast === 'function') window.showToast(text, icon || 'ph-check-circle'); } catch(e){} }
+  function relayDownloadUrl(fileId, name){
+    const u = new URL(RELAY + '/download');
+    u.searchParams.set('file_id', String(fileId || ''));
+    u.searchParams.set('name', String(name || 'download.bin'));
+    return u.toString();
+  }
+  function pick(obj, paths){
+    for (const p of paths){
+      let cur = obj;
+      for (const part of String(p).split('.')) cur = cur && cur[part];
+      if (cur !== undefined && cur !== null && String(cur) !== '') return cur;
+    }
+    return '';
+  }
+  function fileMeta(m){
+    const name = String(pick(m, ['file_name','fileName','safeFileName','name','bundleManifest.originalName','manifest.originalName']) || 'download.bin');
+    const fileId = String(pick(m, ['file_id','fileId','telegramFileId','telegram_file_id','document.file_id','attachment.file_id']) || '');
+    return {name, fileId, isBundle: !!(m && (m.isBundle || m.type === 'file_bundle' || m.bundleManifest || m.manifest))};
+  }
+  function withScrollAnchor(fn){
+    const box = chatBox();
+    let oldBottom = 0, atBottom = true;
+    if (box) {
+      oldBottom = Math.max(0, box.scrollHeight - box.scrollTop);
+      atBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 96;
+    }
+    const ret = fn();
+    if (box && !atBottom) {
+      requestAnimationFrame(() => {
+        try { box.scrollTop = Math.max(0, box.scrollHeight - oldBottom); } catch(e){}
+      });
+    }
+    return ret;
+  }
+  function patchConsoleGate(){
+    if (console.__lifeosR12FamilyGate) return;
+    console.__lifeosR12FamilyGate = true;
+    const oldInfo = console.info ? console.info.bind(console) : function(){};
+    console.info = function(){
+      const first = String(arguments[0] || '');
+      if ((first.indexOf('[FamilyQueue R6]') === 0 || first.indexOf('[LifeOS 67G-R2 FamilyRuntime]') === 0) && localStorage.getItem('lifeos_family_runtime_debug') !== '1') return;
+      return oldInfo.apply(console, arguments);
+    };
+  }
+  function patchToastThrottle(){
+    if (!window.showToast || window.showToast.__lifeosR12TransferThrottle) return;
+    const old = window.showToast.bind(window);
+    let lastText = '', lastAt = 0;
+    window.showToast = function(text, icon){
+      const t = String(text || '');
+      const n = now();
+      if (t && t === lastText && n - lastAt < 1600) return;
+      lastText = t; lastAt = n;
+      return old(text, icon);
+    };
+    window.showToast.__lifeosR12TransferThrottle = true;
+  }
+  function patchChatEngine(){
+    const engine = ce(); if (!engine || engine.__lifeosR12FamilyTransferPatched) return !!engine;
+    engine.__lifeosR12FamilyTransferPatched = true;
+
+    if (typeof engine.setUploadStatus === 'function') {
+      const oldStatus = engine.setUploadStatus.bind(engine);
+      let lastStatusText = '', lastStatusMode = '', lastStatusAt = 0;
+      engine.setUploadStatus = function(text, mode, autoHide){
+        const t = String(text || ''); const m = String(mode || 'info'); const n = now();
+        const isFinal = /hoàn tất|thành công|lỗi|thất bại|đã tải|đã gửi|queue hoàn tất|đã mở link|đã sao chép/i.test(t) || m === 'error' || m === 'done';
+        if (!isFinal && t === lastStatusText && m === lastStatusMode && n - lastStatusAt < 1400) return;
+        if (!isFinal && isQueueRunning() && n - lastStatusAt < 950) return;
+        lastStatusText = t; lastStatusMode = m; lastStatusAt = n;
+        return oldStatus(text, mode, autoHide);
+      };
+    }
+
+    if (typeof engine.render === 'function') {
+      const oldRender = engine.render.bind(engine);
+      let renderTimer = null, lastRender = 0, pendingArgs = null;
+      engine.render = function(){
+        if (isQueueRunning()) {
+          pendingArgs = arguments;
+          const n = now();
+          if (renderTimer) return;
+          const delay = Math.max(0, 1100 - (n - lastRender));
+          renderTimer = setTimeout(() => {
+            renderTimer = null; lastRender = now();
+            withScrollAnchor(() => oldRender.apply(engine, pendingArgs || []));
+          }, delay);
+          return;
+        }
+        lastRender = now();
+        return withScrollAnchor(() => oldRender.apply(engine, arguments));
+      };
+    }
+
+    if (typeof engine.saveAndSync === 'function') {
+      const oldSave = engine.saveAndSync.bind(engine);
+      let lastSave = 0, saveTimer = null;
+      engine.saveAndSync = function(){
+        if (isQueueRunning()) {
+          const n = now();
+          if (n - lastSave > 4500) { lastSave = n; return oldSave.apply(engine, arguments); }
+          if (!saveTimer) saveTimer = setTimeout(() => { saveTimer = null; lastSave = now(); try { oldSave(); } catch(e){} }, 4800);
+          return;
+        }
+        lastSave = now();
+        return oldSave.apply(engine, arguments);
+      };
+    }
+
+    if (typeof engine.downloadChatFile === 'function') {
+      const oldDownload = engine.downloadChatFile.bind(engine);
+      engine.downloadChatFile = async function(id){
+        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        const meta = fileMeta(m || {});
+        if (!m) { safeToast('Không tìm thấy file để tải', 'ph-warning-circle'); return false; }
+        if (meta.isBundle) {
+          // Bundle lớn vẫn cần cơ chế gộp cũ; chỉ khóa UI để không nhảy loạn trong lúc tải/gộp.
+          setBusy(true);
+          try { return await oldDownload(id); }
+          finally { setTimeout(() => setBusy(isQueueRunning()), 800); }
+        }
+        if (!meta.fileId) return oldDownload(id);
+        const url = relayDownloadUrl(meta.fileId, meta.name);
+        try {
+          if (this.setUploadStatus) this.setUploadStatus('Đang mở tải xuống: ' + meta.name, 'info', false);
+          const a = document.createElement('a');
+          a.href = url; a.download = meta.name; a.target = '_blank'; a.rel = 'noopener';
+          document.body.appendChild(a); a.click(); a.remove();
+          if (this.setUploadStatus) this.setUploadStatus('Đã mở tải xuống: ' + meta.name, 'done', true);
+          return true;
+        } catch(e) {
+          console.warn('[LifeOS R12 direct relay download failed]', e);
+          return oldDownload(id);
+        }
+      };
+    }
+
+    if (typeof engine.copyFileLink === 'function') {
+      const oldCopy = engine.copyFileLink.bind(engine);
+      engine.copyFileLink = async function(id){
+        const m = (window.chatHistory || []).find(x => String(x.id) === String(id));
+        const meta = fileMeta(m || {});
+        if (meta.fileId && !meta.isBundle) {
+          const url = relayDownloadUrl(meta.fileId, meta.name);
+          try { await navigator.clipboard.writeText(url); this.setUploadStatus?.('Đã sao chép link tải', 'done', true); safeToast('Đã sao chép link tải', 'ph-check-circle'); return true; } catch(e){}
+        }
+        return oldCopy(id);
+      };
+    }
+    return true;
+  }
+  function patchQueue(){
+    const q = window.FamilyUploadQueue;
+    if (!q || q.__lifeosR12SmoothPatched) return !!q;
+    q.__lifeosR12SmoothPatched = true;
+    if (typeof q.enqueue === 'function') {
+      const oldEnqueue = q.enqueue.bind(q);
+      q.enqueue = function(files, source){ setBusy(true); return oldEnqueue(files, source); };
+    }
+    if (typeof q.process === 'function') {
+      const oldProcess = q.process.bind(q);
+      q.process = async function(){
+        setBusy(true);
+        try { return await oldProcess(); }
+        finally { setTimeout(() => setBusy(isQueueRunning()), 1200); }
+      };
+    }
+    return true;
+  }
+  function patchInput(){
+    const input = document.getElementById('chat-file-input');
+    if (!input || input.__lifeosR12InputPatched) return;
+    input.__lifeosR12InputPatched = true;
+    input.addEventListener('change', function(){ setBusy(true); }, {capture:true, passive:true});
+  }
+  function heartbeat(){ setBusy(isQueueRunning()); }
+  function boot(){
+    patchConsoleGate(); patchToastThrottle(); patchChatEngine(); patchQueue(); patchInput(); heartbeat();
+    setTimeout(boot, 700);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  window.addEventListener('load', boot, {once:true});
+  setInterval(heartbeat, 2000);
+  window.LifeOSFamilyTransferSmoothFinal = { phase: PHASE, relay: RELAY, patchChatEngine, patchQueue, relayDownloadUrl };
+})();
+</script>
+<!-- PHA67H_R12_GITHUB_FAMILY_TRANSFER_SMOOTH_FINAL_END -->
+
 </body>
 </html>
 
