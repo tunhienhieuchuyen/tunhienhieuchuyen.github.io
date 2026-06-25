@@ -13,11 +13,11 @@
 <meta content="LifeOS" name="application-name"/>
 <title>LifeOS Master Pha40 - Push Trigger</title>
 
-<script id="lifeos-r19-production-console-quiet-gate">
+<script id="lifeos-r20-production-console-quiet-gate">
 (function(){
   'use strict';
-  if (window.__lifeosR19ProductionConsoleQuietGate) return;
-  window.__lifeosR19ProductionConsoleQuietGate = true;
+  if (window.__lifeosR20ProductionConsoleQuietGate) return;
+  window.__lifeosR20ProductionConsoleQuietGate = true;
   window.LIFEOS_PRODUCTION_QUIET = true;
   var raw = { log: console.log, info: console.info, warn: console.warn };
   var noise = /(LifeOS\s*66B|NativeAlarmBridge|NativeAlarmFix|\[VAULT|\[FB:|\[BUILD\]|currentUser=|viewingUser=|FirebaseSync\.|VaultStorageLayer\.|cloudSyncCompleted=|_pendingPush=|vaultKey=|localStorage raw=|vaultCardsContainer|vaultEmptyState|\[DIRECT GET|\[FORCE\]|\[ChatEngine shared|\[ChatEngine old local|\[ChatEngine direct file queue|\[ChatEngine file batch summary|\[ChatEngine deleteMessage|\[ChatEngine getFile|\[ChatEngine copy file|\[UploadOffline|\[Push |\[NEWS CACHE|\[Weather AI|\[WEATHER |\[WEATHER TEST|\[LifeOS SW|\[PHA\d|\[LifeOS R|\[FamilySelect R3|\[64F|\[MediaHub\]|\[LifeOS SmartTV|Worker Fallback)/i;
@@ -20785,8 +20785,8 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 <!-- LIFEOS R11 MOBILE UNIVERSAL TOUCH SCROLL - END -->
 
 
-<!-- LIFEOS R19 FAMILY TRANSFER ISO CLEAN 6MB PARALLEL2 QUIET - START -->
-<style id="lifeos-r19-family-transfer-iso-clean-css">
+<!-- LIFEOS R20 FAMILY TRANSFER ISO CLEAN 12MB FAST QUIET - START -->
+<style id="lifeos-r20-family-transfer-iso-clean-css">
 #chat-upload-status{position:relative!important;z-index:30!important;contain:layout paint!important;transform:translateZ(0)!important;}
 #chat-upload-status .lifeos-r17-progress-wrap{height:8px;border-radius:999px;background:rgba(148,163,184,.22);overflow:hidden;margin-top:8px;}
 #chat-upload-status .lifeos-r17-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#10b981);border-radius:999px;transition:width .16s linear;}
@@ -20794,26 +20794,26 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 #family-upload-error-modal{z-index:99999999!important;}
 .lifeos-transfer-noise,[data-lifeos-transfer-noise="1"],#lifeos67g-bulk-toolbar{display:none!important;visibility:hidden!important;pointer-events:none!important;}
 </style>
-<script id="lifeos-r19-family-transfer-iso-clean-parallel2-js">
+<script id="lifeos-r20-family-transfer-iso-clean-fast-js">
 (function(){
   'use strict';
-  var PHASE = 'R19_FAMILY_TRANSFER_ISO_CLEAN_6MB_PARALLEL2_QUIET';
-  if (window.__lifeosR19FamilyTransferIsoClean6MBParallel2) return;
-  window.__lifeosR19FamilyTransferIsoClean6MBParallel2 = true;
+  var PHASE = 'R20_FAMILY_TRANSFER_ISO_CLEAN_12MB_FAST_QUIET';
+  if (window.__lifeosR20FamilyTransferIsoClean12MBFast) return;
+  window.__lifeosR20FamilyTransferIsoClean12MBFast = true;
 
   var MB = 1024 * 1024;
   var RELAY = 'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
-  var SINGLE_LIMIT = 6 * MB;     // file nhỏ/vừa an toàn đi một request raw; lớn hơn chia part
-  var PART_SIZE = 6 * MB;        // file lớn chia part 6MB, tránh sát trần Telegram/Worker
+  var SINGLE_LIMIT = 12 * MB;    // file <=12MB đi một request raw để giảm lượt xác nhận
+  var PART_SIZE = 12 * MB;       // file lớn chia part 12MB: nhanh hơn 6MB nhưng vẫn dưới trần download 20MB
   var MAX_RETRIES = 4;
-  var BETWEEN_PART_DELAY_MS = 120;
-  var PART_CONCURRENCY = 2;       // song song an toàn tối đa 2 part: mượt hơn 6MB tuần tự, không sát trần Telegram
-  var STATUS_THROTTLE_MS = 520;
-  var SERVER_WAIT_TIMEOUT_MS = 240000;
+  var BETWEEN_PART_DELAY_MS = 0;
+  var PART_CONCURRENCY = 2;      // tối đa 2 luồng; ít part hơn nên không bắn quá nhiều request
+  var STATUS_THROTTLE_MS = 900;
+  var SERVER_WAIT_TIMEOUT_MS = 300000;
 
 
   window.LifeOSFamilyTransferAudit = {
-    uploadKernel: 'single-r19-iso-clean-6mb-resume-parallel2',
+    uploadKernel: 'single-r20-iso-clean-12mb-resume-fast',
     removedRouters: ['legacy-stable-fast-router','legacy-18mb-router'],
     partSizeBytes: PART_SIZE,
     singleLimitBytes: SINGLE_LIMIT,
@@ -20823,8 +20823,8 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 
   window.LIFEOS_UPLOAD_RELAY_URL = RELAY;
   window.LIFEOS_UPLOAD_RELAY_ENABLED = true;
-  window.LIFEOS_UPLOAD_RELAY_MODE = 'r19-iso-clean-6mb-resume-parallel2-raw';
-  window.LifeOSFamilyTransferR19 = { phase: PHASE, relay: RELAY, singleLimitMB: Math.round(SINGLE_LIMIT/MB), partSizeMB: Math.round(PART_SIZE/MB), retries: MAX_RETRIES, partConcurrency: PART_CONCURRENCY, patchDebtClean:true, quietRuntime:true };
+  window.LIFEOS_UPLOAD_RELAY_MODE = 'r20-iso-clean-12mb-resume-fast-raw';
+  window.LifeOSFamilyTransferR20 = { phase: PHASE, relay: RELAY, singleLimitMB: Math.round(SINGLE_LIMIT/MB), partSizeMB: Math.round(PART_SIZE/MB), retries: MAX_RETRIES, partConcurrency: PART_CONCURRENCY, patchDebtClean:true, quietRuntime:true };
 
   function now(){ return Date.now(); }
   function base(){ return String(window.LIFEOS_UPLOAD_RELAY_URL || RELAY).replace(/\/+$/,''); }
@@ -20899,7 +20899,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     var size = Number((file && file.size) || (extra && extra.file_size) || ids.fileSize || 0);
     return Object.assign({id:id('chat'),type:'file',kind:/^image\//i.test(mime)?'image_document':'file',file_id:ids.fileId,fileId:ids.fileId,telegramFileId:ids.fileId,telegram_msg_id:ids.messageId||'',message_id:ids.messageId||'',file_name:name,name:name,file_size:size,size:size,mime_type:mime,mime:mime,sender:(ce&&ce.getKey&&ce.getKey())||window.viewingUser||window.currentUser||'family',timestamp:Date.now(),topic_id:ce&&ce.currentTopic&&ce.currentTopic!=='all'?ce.currentTopic:null,uploadStatus:''},extra||{});
   }
-  function planKey(file){ return 'lifeos_family_r19_resume_' + safeName(file) + '_' + Number(file.size||0) + '_' + Number(file.lastModified||0); }
+  function planKey(file){ return 'lifeos_family_r20_resume_' + safeName(file) + '_' + Number(file.size||0) + '_' + Number(file.lastModified||0); }
   function readPlan(file){ try { return JSON.parse(localStorage.getItem(planKey(file)) || 'null'); } catch(e) { return null; } }
   function writePlan(file, plan){ try { localStorage.setItem(planKey(file), JSON.stringify(plan)); } catch(e) {} }
   function clearPlan(file){ try { localStorage.removeItem(planKey(file)); } catch(e) {} }
@@ -20994,7 +20994,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
       try { xhr.setRequestHeader('X-LifeOS-File-Name', name); } catch(e) {}
       try { xhr.setRequestHeader('X-LifeOS-File-Size', String(size)); } catch(e) {}
       try { xhr.setRequestHeader('X-LifeOS-Mime', mime); } catch(e) {}
-      try { xhr.setRequestHeader('X-LifeOS-Upload-Mode', 'r17_raw_stream'); } catch(e) {}
+      try { xhr.setRequestHeader('X-LifeOS-Upload-Mode', 'r20_raw_stream'); } catch(e) {}
       xhr.upload.onprogress = function(e){
         if (e && e.lengthComputable) { var pct = Math.round(e.loaded/e.total*100); if (pct >= 100) uploaded = true; if (progressCb) progressCb(e, now()-started); }
       };
@@ -21039,7 +21039,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
       var res = await rawUploadRetry(file, name, {strategy:'single', mime:file.type}, function(e){ if(!e.lengthComputable) return; var pct=Math.round(e.loaded/e.total*100), t=now(); if(pct===lastPct || (t-lastTs<360 && pct<100)) return; lastPct=pct; lastTs=t; status('Đang gửi '+file.name+' · '+pct+'%', 'info', false, pct); }, 'file');
       if (!res.ids.fileId) throw Object.assign(new Error('server_missing_file_id'), {debug:res.data});
       window.chatHistory = Array.isArray(window.chatHistory) ? window.chatHistory : [];
-      var msg = makeMsg(ce, file, res.ids, {uploadMode:'r17_raw_single'});
+      var msg = makeMsg(ce, file, res.ids, {uploadMode:'r20_raw_single'});
       window.chatHistory.push(msg); saveRender(ce); clearPlan(file);
       status('Đã gửi xong: '+file.name+' · '+fmt(file.size), 'done', true, 100, 'Máy chủ xác nhận '+Math.round((res.elapsed||0)/1000)+'s');
       return {ok:true, message:msg, ids:res.ids};
@@ -21060,8 +21060,8 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     var doneMap = {}; (plan.parts||[]).forEach(function(p){ if(p && p.fileId) doneMap[Number(p.index)] = p; });
     var doneCount = Object.keys(doneMap).length;
     var perPartProgress = {};
-    var concurrency = totalParts >= 4 ? PART_CONCURRENCY : 1;
-    status('File lớn: '+original+' · '+doneCount+'/'+totalParts+' phần đã xong', 'info', false, Math.round(doneCount/totalParts*100), 'Chia phần '+Math.round(PART_SIZE/MB)+'MB · gửi song song an toàn '+concurrency+' luồng');
+    var concurrency = totalParts >= 3 ? PART_CONCURRENCY : 1;
+    status('File lớn: '+original+' · '+doneCount+'/'+totalParts+' phần đã xong', 'info', false, Math.round(doneCount/totalParts*100), 'Chia phần '+Math.round(PART_SIZE/MB)+'MB · tối đa '+concurrency+' luồng');
 
     var pending = [];
     for (var i=0; i<totalParts; i++) {
@@ -21095,7 +21095,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         var lastPct=-1, lastTs=0;
         try {
           status('Đang gửi phần '+partIndex+'/'+totalParts+' · luồng '+slot+'/'+concurrency, 'info', false, aggregateProgress(), fmt(blob.size)+' / tổng '+fmt(file.size));
-          var res = await rawUploadRetry(blob, partName, {strategy:'bundle_part_parallel2', bundleId:plan.bundleId, currentPart:partIndex, totalParts:totalParts, mime:file.type}, function(e){
+          var res = await rawUploadRetry(blob, partName, {strategy:'bundle_part_fast12', bundleId:plan.bundleId, currentPart:partIndex, totalParts:totalParts, mime:file.type}, function(e){
             if(!e.lengthComputable) return;
             var pct=Math.round(e.loaded/e.total*100), t=now(); if(pct===lastPct || (t-lastTs<420 && pct<100)) return; lastPct=pct; lastTs=t;
             perPartProgress[partIndex] = pct;
@@ -21119,7 +21119,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 
     if (firstError) {
       var e = firstError.error, partIndex = firstError.partIndex;
-      saveError(ce, file, e, {strategy:'bundle_part_parallel2', bundleId:plan.bundleId, currentPart:partIndex, totalParts:totalParts, completedParts:(plan.parts||[]).length, resumePlan:plan});
+      saveError(ce, file, e, {strategy:'bundle_part_fast12', bundleId:plan.bundleId, currentPart:partIndex, totalParts:totalParts, completedParts:(plan.parts||[]).length, resumePlan:plan});
       status('Tạm dừng ở phần '+partIndex+'/'+totalParts+' · đã giữ '+(plan.parts||[]).length+' phần, bấm Chi tiết lỗi để gửi tiếp', 'error', false, Math.round((plan.parts||[]).length/totalParts*100));
       return {ok:false, error:e.message||String(e), resumePlan:plan};
     }
@@ -21127,7 +21127,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     var parts = (plan.parts||[]).slice().sort(function(a,b){ return Number(a.index)-Number(b.index); });
     if (parts.length !== totalParts) {
       var err = new Error('bundle_incomplete_parts');
-      saveError(ce, file, err, {strategy:'bundle_final_check_parallel2', bundleId:plan.bundleId, totalParts:totalParts, completedParts:parts.length, resumePlan:plan});
+      saveError(ce, file, err, {strategy:'bundle_final_check_fast12', bundleId:plan.bundleId, totalParts:totalParts, completedParts:parts.length, resumePlan:plan});
       status('File lớn chưa đủ phần: '+parts.length+'/'+totalParts, 'error', false);
       return {ok:false, error:'bundle_incomplete_parts'};
     }
@@ -21158,7 +21158,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 
   function install(){
     var ce = window.ChatEngine; if(!ce) return false;
-    ce.__r19IsoClean6MBParallel2Installed = true;
+    ce.__r20IsoClean12MBFastInstalled = true;
     ce.setUploadStatus = function(text,state,autoHide,pct){ status(text,state,autoHide,pct); };
     ce.showUploadErrorDetail = function(){ return showErrorModal(this); };
     ce.copyLastUploadError = async function(){ try{ await navigator.clipboard.writeText(errorText(this.lastUploadError)); status('Đã sao chép lỗi upload','done',true); } catch(e){ status('Không sao chép được lỗi, hãy chụp màn hình','error',false); } };
@@ -21190,20 +21190,20 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
   }
 
   function wrapToast(){
-    if (window.__lifeosR19ToastCleaned || typeof window.showToast !== 'function') return;
+    if (window.__lifeosR20ToastCleaned || typeof window.showToast !== 'function') return;
     var old = window.showToast; var last='', lastT=0;
     window.showToast = function(m,i){ var raw=String(m||''); if(/queue|fallback|bundle_split|large_fallback|PHA|\bR\d{1,3}\b|66B|67D|67G|67H/i.test(raw)) return; var msg=cleanText(raw); var t=now(); if(msg===last && t-lastT<1500) return; last=msg; lastT=t; return old.call(this,msg,i); };
-    window.__lifeosR19ToastCleaned = true;
+    window.__lifeosR20ToastCleaned = true;
   }
   function schedule(){ install(); wrapToast(); setTimeout(function(){install();wrapToast();},300); setTimeout(function(){install();wrapToast();},1200); setTimeout(function(){install();wrapToast();},3200); setTimeout(function(){install();wrapToast();},6500); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', schedule, {once:true}); else schedule();
   window.addEventListener('load', schedule, {once:true});
 })();
 </script>
-<!-- LIFEOS R19 FAMILY TRANSFER ISO CLEAN 6MB PARALLEL2 QUIET - END -->
+<!-- LIFEOS R20 FAMILY TRANSFER ISO CLEAN 12MB FAST QUIET - END -->
 
 
-<!-- LIFEOS R9.2 MEDIA SUBTAB ROUTER HARD FIX - KEPT INSIDE VALID HTML BY R19 CLEAN BUILD -->
+<!-- LIFEOS R9.2 MEDIA SUBTAB ROUTER HARD FIX - KEPT INSIDE VALID HTML BY R20 CLEAN BUILD -->
 <script id="lifeos-r9-2-media-subtab-router-hard-fix">
 (function(){
   if (window.__lifeosR92MediaSubtabRouterFix) return;
@@ -21335,11 +21335,12 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 </script>
 
 
-<!-- LIFEOS R19 FAMILY TRANSFER ISO CLEAN 6MB PARALLEL2 QUIET
-- Upload routers kept: R19 ISO resume kernel only.
+<!-- LIFEOS R20 FAMILY TRANSFER ISO CLEAN 12MB FAST QUIET
+- Upload routers kept: R20 ISO resume kernel only.
 - Removed runtime upload patch debt: legacy stable-fast router and legacy 18MB router.
 - Enforced valid HTML boundary: no script/style after </html>.
-- Large files use 6MB parts with local resume plan, retry/error detail UI, and safe 2-part parallel upload for smoother large files.
+- Large files use 12MB parts with local resume plan, retry/error detail UI, and max 2-part adaptive parallel upload.
+- 12MB is chosen to reduce request/Telegram-confirmation count versus 6MB while staying below the 20MB download/getFile safety ceiling.
 - Noisy 66B native-alarm diagnostic console source is quiet unless LIFEOS_DEBUG_ALARM_BRIDGE=true.
 -->
 </body>
