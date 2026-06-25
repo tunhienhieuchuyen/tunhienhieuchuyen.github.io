@@ -20745,18 +20745,32 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 
 
 
-<style id="lifeos-r25-transfer-singleflight-css">
+<style id="lifeos-r26-transfer-aux-resume-copy-css">
 #chat-upload-status .lifeos-transfer-progress-wrap{height:7px;border-radius:999px;background:rgba(148,163,184,.22);overflow:hidden;margin-top:7px;}
 #chat-upload-status .lifeos-transfer-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#6366f1);border-radius:999px;transition:width .16s linear;}
 #chat-upload-status .lifeos-transfer-stage{font-size:11px;opacity:.82;margin-top:2px;line-height:1.25;}
 #chat-upload-status .lifeos-transfer-cancel{min-width:52px;height:28px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.35);font-size:11px;font-weight:900;padding:0 10px;}
+
+#chat-upload-status .lifeos-transfer-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+#chat-upload-status .lifeos-transfer-action{height:30px;border-radius:999px;background:rgba(255,255,255,.9);border:1px solid rgba(148,163,184,.38);font-size:11px;font-weight:950;padding:0 10px;color:#334155;}
+#lifeos-transfer-error-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.46);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
+#lifeos-transfer-error-modal.lifeos-open{display:flex;}
+#lifeos-transfer-error-modal .lifeos-transfer-error-box{width:min(620px,calc(100vw - 24px));max-height:min(78vh,720px);overflow:hidden;border-radius:24px;background:#fff;border:1px solid rgba(226,232,240,.95);box-shadow:0 24px 80px rgba(15,23,42,.24);display:flex;flex-direction:column;}
+#lifeos-transfer-error-modal .lifeos-transfer-error-head{padding:14px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+#lifeos-transfer-error-modal .lifeos-transfer-error-title{font-weight:950;font-size:14px;color:#0f172a;}
+#lifeos-transfer-error-modal .lifeos-transfer-error-body{padding:12px 16px;overflow:auto;}
+#lifeos-transfer-error-modal pre{white-space:pre-wrap;word-break:break-word;background:#0f172a;color:#e2e8f0;border-radius:16px;padding:12px;font-size:11px;line-height:1.45;max-height:46vh;overflow:auto;}
+#lifeos-transfer-error-modal .lifeos-transfer-error-actions{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px 16px;border-top:1px solid #e2e8f0;}
+#lifeos-transfer-error-modal .lifeos-transfer-error-btn{height:36px;border-radius:999px;padding:0 14px;font-size:12px;font-weight:950;border:1px solid #cbd5e1;background:#fff;color:#334155;}
+#lifeos-transfer-error-modal .lifeos-transfer-error-btn.primary{background:#4f46e5;color:#fff;border-color:#4f46e5;}
+
 </style>
-<script id="lifeos-r25-transfer-singleflight-js">
+<script id="lifeos-r26-transfer-aux-resume-copy-js">
 (function(){
   'use strict';
-  var PHASE='R25_TRANSFER_SINGLE_FLIGHT_R16_SPEED_HTML_CLEAN';
-  if(window.__lifeosR25TransferSingleFlight) return;
-  window.__lifeosR25TransferSingleFlight=true;
+  var PHASE='R26_HTML_CLEAN_AUX_REUP_RESUME_COPY_SMALLFILE';
+  if(window.__lifeosR26TransferAuxResumeCopy) return;
+  window.__lifeosR26TransferAuxResumeCopy=true;
 
   var MB=1024*1024;
   var RELAY='https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
@@ -20768,7 +20782,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
   window.LIFEOS_UPLOAD_RELAY_URL=RELAY;
   window.LIFEOS_UPLOAD_RELAY_ENABLED=true;
   window.LIFEOS_UPLOAD_RELAY_MODE='raw-worker-fast-singleflight';
-  window.LifeOSFamilyTransferSingleFlight={phase:PHASE,relay:RELAY,endpoint:'/upload-raw',singleLimitMB:18,partSizeMB:18,serverCalls:'strict-one-at-a-time'};
+  window.LifeOSFamilyTransferSingleFlight={phase:PHASE,relay:RELAY,endpoint:'/upload-raw',singleLimitMB:18,partSizeMB:18,serverCalls:'strict-one-at-a-time',aux:'retry-copy-error-reselect-smallfile'};
 
   function base(){return String(window.LIFEOS_UPLOAD_RELAY_URL||RELAY).replace(/\/+$/,'');}
   function now(){return Date.now();}
@@ -20816,6 +20830,75 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     bar.innerHTML='<div class="flex items-center justify-between gap-3"><span>'+esc(msg)+'</span><div class="flex items-center gap-2">'+cancel+'<button type="button" class="w-7 h-7 rounded-full bg-white/70 border flex items-center justify-center active:scale-95" onclick="this.closest(\'#chat-upload-status\')?.classList.add(\'hidden\')"><i class="ph-bold ph-x text-xs pointer-events-none"></i></button></div></div>'+st+progress;
     if(autoHide){clearTimeout(status._tm);status._tm=setTimeout(function(){bar.classList.add('hidden');},3000);}
   }
+
+  function getStoredLastError(){
+    try{var raw=localStorage.getItem('lifeos_family_last_upload_error');return raw?JSON.parse(raw):null;}catch(e){return null;}
+  }
+  function stringifyErrorPayload(ce){
+    var payload=(ce&&ce.lastUploadError)||getStoredLastError()||{message:'Chưa có lỗi upload được lưu.'};
+    try{return JSON.stringify(payload,null,2);}catch(e){return String(payload||'');}
+  }
+  function copyText(text){
+    text=String(text||'');
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(text).then(function(){return true;}).catch(function(){return fallbackCopy(text);});
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  function fallbackCopy(text){
+    try{var ta=document.createElement('textarea');ta.value=String(text||'');ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');ta.remove();return !!ok;}catch(e){return false;}
+  }
+  function ensureErrorModal(){
+    var m=document.getElementById('lifeos-transfer-error-modal');
+    if(m)return m;
+    m=document.createElement('div');m.id='lifeos-transfer-error-modal';
+    m.innerHTML='<div class="lifeos-transfer-error-box"><div class="lifeos-transfer-error-head"><div class="lifeos-transfer-error-title">Chi tiết lỗi gửi file</div><button type="button" class="lifeos-transfer-error-btn" onclick="document.getElementById(\'lifeos-transfer-error-modal\')?.classList.remove(\'lifeos-open\')">Đóng</button></div><div class="lifeos-transfer-error-body"><pre id="lifeos-transfer-error-text"></pre></div><div class="lifeos-transfer-error-actions"><button type="button" class="lifeos-transfer-error-btn primary" onclick="window.ChatEngine&&window.ChatEngine.copyLastUploadError&&window.ChatEngine.copyLastUploadError()">Copy lỗi</button><button type="button" class="lifeos-transfer-error-btn" onclick="window.ChatEngine&&window.ChatEngine.retryLastFailedUpload&&window.ChatEngine.retryLastFailedUpload()">Gửi lại file lỗi</button><button type="button" class="lifeos-transfer-error-btn" onclick="window.ChatEngine&&window.ChatEngine.reselectFailedUpload&&window.ChatEngine.reselectFailedUpload()">Chọn lại file</button></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('lifeos-open');});
+    return m;
+  }
+  function showErrorModal(ce){
+    var m=ensureErrorModal();
+    var pre=document.getElementById('lifeos-transfer-error-text');
+    if(pre)pre.textContent=stringifyErrorPayload(ce);
+    m.classList.add('lifeos-open');
+    return true;
+  }
+  function copyLastError(ce){
+    return copyText(stringifyErrorPayload(ce)).then(function(ok){status(ok?'Đã copy lỗi upload':'Không copy được, mở Chi tiết lỗi để copy tay',ok?'done':'warn',true);return ok;});
+  }
+  function triggerReuploadPicker(ce){
+    ce=ce||window.ChatEngine;
+    var input=document.getElementById('lifeos-transfer-reupload-picker');
+    if(!input){
+      input=document.createElement('input');input.id='lifeos-transfer-reupload-picker';input.type='file';input.multiple=true;input.style.display='none';
+      input.addEventListener('change',function(){var files=Array.from(input.files||[]);input.value='';if(files.length&&(window.ChatEngine&&window.ChatEngine.uploadRouter)){window.ChatEngine.uploadRouter(files,'reselect-after-error');}});
+      document.body.appendChild(input);
+    }
+    status('Chọn lại file lỗi để gửi lại','warn',false,undefined,'Trình duyệt không giữ file sau reload; chọn lại là bước resume an toàn');
+    input.click();
+    return true;
+  }
+  function showFailureActions(ce){
+    var bar=getStatusBar(); if(!bar)return;
+    var old=bar.querySelector('.lifeos-transfer-actions'); if(old)old.remove();
+    var wrap=document.createElement('div');wrap.className='lifeos-transfer-actions';
+    wrap.innerHTML='<button type="button" class="lifeos-transfer-action" onclick="window.ChatEngine&&window.ChatEngine.showUploadErrorDetail&&window.ChatEngine.showUploadErrorDetail()">Chi tiết lỗi</button><button type="button" class="lifeos-transfer-action" onclick="window.ChatEngine&&window.ChatEngine.copyLastUploadError&&window.ChatEngine.copyLastUploadError()">Copy lỗi</button><button type="button" class="lifeos-transfer-action" onclick="window.ChatEngine&&window.ChatEngine.retryLastFailedUpload&&window.ChatEngine.retryLastFailedUpload()">Gửi lại</button><button type="button" class="lifeos-transfer-action" onclick="window.ChatEngine&&window.ChatEngine.reselectFailedUpload&&window.ChatEngine.reselectFailedUpload()">Chọn lại file</button>';
+    bar.appendChild(wrap);
+  }
+  function recordUploadFailure(ce,files,err,extra){
+    ce=ce||window.ChatEngine||{};
+    var arr=Array.from(files||[]).filter(Boolean);
+    ce.lastFailedUploadFile=arr[0]||null;
+    ce.lastFailedUploadFiles=arr;
+    var payload={phase:PHASE,scope:(extra&&extra.scope)||'upload',retryAvailable:arr.length>0,reselectAvailable:true,files:arr.map(function(f){return{name:f.name||'',size:Number(f.size||0),type:f.type||''};}),fileName:arr[0]&&arr[0].name||extra&&extra.fileName||'',fileSize:arr[0]&&Number(arr[0].size||0)||extra&&extra.fileSize||0,errorName:err&&err.name||'',errorMessage:err&&err.message||String(err||'upload_error'),timestamp:new Date().toISOString(),navigatorOnLine:navigator.onLine,userAgent:navigator.userAgent,debug:err&&err.debug||null,extra:extra||{}};
+    ce.lastUploadError=payload;
+    try{localStorage.setItem('lifeos_family_last_upload_error',JSON.stringify(payload));}catch(x){}
+    status('Gửi lỗi: '+(payload.fileName||'file')+' · '+payload.errorMessage,'error',false,undefined,'Có thể copy lỗi, gửi lại hoặc chọn lại file');
+    showFailureActions(ce);
+    return payload;
+  }
+
 
   var Gate={
     active:null,
@@ -20922,9 +21005,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
       window.chatHistory=Array.isArray(window.chatHistory)?window.chatHistory:[];var msg=makeMsg(ce,file,res.ids,{uploadMode:'raw_stream'});window.chatHistory.push(msg);saveRender(ce);status('Đã gửi xong: '+file.name+' · '+fmt(file.size),'done',true,100,'Server xác nhận '+Math.round((res.elapsed||0)/1000)+'s');return{ok:true,message:msg,ids:res.ids};
     }catch(e){
       if(e&&e.aborted){status('Đã hủy gửi: '+file.name,'warn',true);return{ok:false,aborted:true,error:'abort'};}
-      ce.lastFailedUploadFile=file;ce.lastUploadError={phase:PHASE,fileName:file.name,safeFileName:name,fileSize:file.size,errorName:e.name||'',errorMessage:e.message||String(e),timestamp:new Date().toISOString(),navigatorOnLine:navigator.onLine,userAgent:navigator.userAgent,debug:e.debug||null};
-      try{localStorage.setItem('lifeos_family_last_upload_error',JSON.stringify(ce.lastUploadError));}catch(x){}
-      status('Gửi lỗi: '+file.name+' · '+(e.message||e),'error',false,undefined,'Bấm Chi tiết lỗi để xem lỗi copy');return{ok:false,error:e.message||String(e)};
+      recordUploadFailure(ce,[file],e,{scope:'single',safeFileName:name,source:'uploadSingle'});return{ok:false,error:e.message||String(e)};
     }
   }
   async function uploadBundle(ce,file,index,total,token){
@@ -20938,7 +21019,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         parts.push({index:partIndex,name:partName,size:blob.size,fileId:res.ids.fileId,messageId:res.ids.messageId||''});
       }catch(e){
         if(e&&e.aborted){status('Đã hủy gửi file lớn: '+original,'warn',true);return{ok:false,aborted:true,error:'abort'};}
-        ce.lastFailedUploadFile=file;ce.lastUploadError={phase:PHASE,fileName:original,fileSize:file.size,bundleId:bundleId,currentPart:partIndex,totalParts:totalParts,errorMessage:e.message||String(e),debug:e.debug||null,timestamp:new Date().toISOString()};try{localStorage.setItem('lifeos_family_last_upload_error',JSON.stringify(ce.lastUploadError));}catch(x){}status('Gửi lỗi phần '+partIndex+'/'+totalParts+': '+original,'error',false);return{ok:false,error:e.message||String(e)};
+        recordUploadFailure(ce,[file],e,{scope:'bundle_part',bundleId:bundleId,currentPart:partIndex,totalParts:totalParts,fileName:original,fileSize:file.size});return{ok:false,error:e.message||String(e)};
       }
     }
     var manifest={type:'lifeos_family_file_bundle_manifest',version:6,mode:PHASE,bundleId:bundleId,originalName:original,safeName:safe,originalSize:file.size,mime:file.type||'application/octet-stream',partSize:PART_SIZE,totalParts:totalParts,createdAt:new Date().toISOString(),parts:parts};
@@ -20968,12 +21049,16 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 
   function install(){
     var ce=window.ChatEngine;if(!ce)return false;
-    ce.__r24TransferSingleFlightInstalled=true;
+    ce.__r26TransferAuxResumeCopyInstalled=true;
+    ce.__r24TransferSingleFlightInstalled=false;
     ce.__r16RawFastInstalled=false;
+    if(!ce.lastUploadError){ce.lastUploadError=getStoredLastError();}
     ce.setUploadStatus=function(text,state,autoHide){status(text,state,autoHide);};
-    ce.showUploadErrorDetail=function(){alert('LỖI UPLOAD FAMILY CHAT\n'+JSON.stringify(this.lastUploadError||{},null,2));};
+    ce.showUploadErrorDetail=function(){return showErrorModal(this);};
+    ce.copyLastUploadError=function(){return copyLastError(this);};
+    ce.reselectFailedUpload=function(){return triggerReuploadPicker(this);};
     ce.cancelFamilyTransfer=function(){return Gate.cancelActive('user');};
-    ce.retryLastFailedUpload=function(){return this.lastFailedUploadFile?this.uploadRouter([this.lastFailedUploadFile],'retry'):status('Không có file lỗi để gửi lại','warn',true);};
+    ce.retryLastFailedUpload=function(){var arr=Array.isArray(this.lastFailedUploadFiles)?this.lastFailedUploadFiles.filter(Boolean):(this.lastFailedUploadFile?[this.lastFailedUploadFile]:[]);if(arr.length)return this.uploadRouter(arr,'retry-last-failed');status('Không còn giữ được file trong phiên này, hãy chọn lại file để gửi','warn',false);return triggerReuploadPicker(this);};
     ce.uploadRouter=async function(files,source){
       var arr=Array.from(files||[]).filter(Boolean);if(!arr.length)return{ok:true,okCount:0,failCount:0};
       var token; try{token=await Gate.prepare('upload','upload '+arr.length+' file');}catch(e){return{ok:false,error:e.message||'busy'};}
