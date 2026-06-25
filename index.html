@@ -21676,6 +21676,235 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 })();
 </script>
 <!-- GITHUB R10 WEBSAFE BACKPORT FROM QLYCUOCSONG APK: END -->
+
+
+<!-- LIFEOS R11 MOBILE UNIVERSAL TOUCH SCROLL - START -->
+<style id="lifeos-r11-mobile-universal-touch-scroll-css">
+/* R11: Vuốt danh sách Radio/Tivi/Nhạc ở mọi điểm trên card, không chỉ mép scrollbar. Web-safe. */
+@media (max-width: 1023px), (max-height: 560px) and (orientation: landscape) {
+  #view-music,
+  #view-music * {
+    -webkit-tap-highlight-color: rgba(99,102,241,.10);
+  }
+
+  #view-music #music-list-container,
+  #view-music #mp3-list-container,
+  #view-music #radio-list-container,
+  #view-music #tv-list-container,
+  #view-music #media-group-sidebar,
+  #view-music #media-group-mobile-bar {
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+
+  #view-music #music-list-container,
+  #view-music #mp3-list-container,
+  #view-music #radio-list-container,
+  #view-music #tv-list-container,
+  #view-music #media-group-sidebar {
+    touch-action: pan-y !important;
+  }
+
+  #view-music #media-subtabs,
+  #view-music #media-group-mobile-bar {
+    touch-action: pan-x pan-y !important;
+  }
+
+  #view-music .media-item,
+  #view-music .media-item *,
+  #view-music .song-row,
+  #view-music .song-row *,
+  #view-music #music-list-container button,
+  #view-music #music-list-container button * {
+    touch-action: pan-y !important;
+  }
+
+  #view-music #music-list-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-gutter: stable both-edges;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+<script id="lifeos-r11-mobile-universal-touch-scroll-js">
+(function(){
+  const PATCH_ID = 'R11_MOBILE_UNIVERSAL_TOUCH_SCROLL';
+  if (window.__lifeosR11UniversalTouchScroll) return;
+  window.__lifeosR11UniversalTouchScroll = true;
+
+  const ROOT_SELECTOR = '#view-music';
+  const VSCROLL_SELECTOR = '#music-list-container,#mp3-list-container,#radio-list-container,#tv-list-container,#media-group-sidebar';
+  const HSCROLL_SELECTOR = '#media-subtabs,#media-group-mobile-bar';
+  const CARD_SELECTOR = '#radio-list-container .media-item,#tv-list-container .media-item,#mp3-list-container .song-row,#music-list-container .song-row,#music-list-container .media-item';
+
+  let state = null;
+  let suppressClickUntil = 0;
+
+  function isTouchDevice(){
+    return ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0 || window.innerWidth < 1024;
+  }
+
+  function visible(el){
+    if (!el) return false;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 2 && r.height > 2;
+  }
+
+  function canScrollY(el){
+    return !!(el && el.scrollHeight > el.clientHeight + 2);
+  }
+
+  function nearestVerticalScroller(target){
+    if (!target || !target.closest) return null;
+    const direct = target.closest(VSCROLL_SELECTOR);
+    if (direct && visible(direct) && canScrollY(direct)) return direct;
+    const list = document.getElementById('music-list-container');
+    if (list && visible(list) && canScrollY(list)) return list;
+    return null;
+  }
+
+  function nearestHorizontalScroller(target){
+    if (!target || !target.closest) return null;
+    const h = target.closest(HSCROLL_SELECTOR);
+    if (h && visible(h) && h.scrollWidth > h.clientWidth + 2) return h;
+    return null;
+  }
+
+  function applyCss(){
+    if (!isTouchDevice()) return;
+    document.querySelectorAll(VSCROLL_SELECTOR).forEach(el => {
+      if (!el || !visible(el)) return;
+      el.style.setProperty('-webkit-overflow-scrolling', 'touch');
+      el.style.setProperty('overscroll-behavior', 'contain', 'important');
+      el.style.setProperty('touch-action', 'pan-y', 'important');
+      if (el.id === 'music-list-container') {
+        el.style.setProperty('overflow-y', 'auto', 'important');
+        el.style.setProperty('overflow-x', 'hidden', 'important');
+      }
+    });
+    document.querySelectorAll(CARD_SELECTOR).forEach(el => {
+      el.style.setProperty('touch-action', 'pan-y', 'important');
+    });
+  }
+
+  function onTouchStart(e){
+    if (!isTouchDevice()) return;
+    const root = e.target && e.target.closest && e.target.closest(ROOT_SELECTOR);
+    if (!root) return;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    const v = nearestVerticalScroller(e.target);
+    const h = nearestHorizontalScroller(e.target);
+    state = {
+      x: t.clientX,
+      y: t.clientY,
+      lastX: t.clientX,
+      lastY: t.clientY,
+      vScroller: v,
+      hScroller: h,
+      mode: '',
+      moved: false,
+      startedOnCard: !!(e.target.closest && e.target.closest(CARD_SELECTOR))
+    };
+  }
+
+  function onTouchMove(e){
+    if (!state) return;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    const dxTotal = t.clientX - state.x;
+    const dyTotal = t.clientY - state.y;
+    const ax = Math.abs(dxTotal);
+    const ay = Math.abs(dyTotal);
+
+    if (!state.mode && (ax > 6 || ay > 6)) {
+      state.mode = ay >= ax ? 'y' : 'x';
+    }
+
+    if (state.mode === 'y' && state.vScroller) {
+      const dy = t.clientY - state.lastY;
+      if (Math.abs(dy) > 0) {
+        const before = state.vScroller.scrollTop;
+        state.vScroller.scrollTop = before - dy;
+        const after = state.vScroller.scrollTop;
+        if (after !== before || state.startedOnCard) {
+          try { e.preventDefault(); } catch(_) {}
+          state.moved = true;
+          suppressClickUntil = Date.now() + 380;
+        }
+      }
+    } else if (state.mode === 'x' && state.hScroller) {
+      const dx = t.clientX - state.lastX;
+      const before = state.hScroller.scrollLeft;
+      state.hScroller.scrollLeft = before - dx;
+      if (state.hScroller.scrollLeft !== before) {
+        try { e.preventDefault(); } catch(_) {}
+        state.moved = true;
+        suppressClickUntil = Date.now() + 300;
+      }
+    }
+
+    state.lastX = t.clientX;
+    state.lastY = t.clientY;
+  }
+
+  function onTouchEnd(){
+    if (state && state.moved) suppressClickUntil = Date.now() + 380;
+    state = null;
+  }
+
+  function onClick(e){
+    if (Date.now() > suppressClickUntil) return;
+    if (!(e.target && e.target.closest && e.target.closest(CARD_SELECTOR))) return;
+    try { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); } catch(_) {}
+  }
+
+  function wrapMediaHub(){
+    const mh = window.MediaHub;
+    if (!mh || mh.__lifeosR11UniversalTouchScrollPatched) return false;
+    mh.__lifeosR11UniversalTouchScrollPatched = true;
+    ['switchTab','renderLists','setGroup','init','handleSearch'].forEach(name => {
+      const original = mh[name];
+      if (typeof original !== 'function') return;
+      mh[name] = function(){
+        const ret = original.apply(this, arguments);
+        requestAnimationFrame(applyCss);
+        setTimeout(applyCss, 80);
+        setTimeout(applyCss, 240);
+        return ret;
+      };
+    });
+    return true;
+  }
+
+  function boot(){
+    document.addEventListener('touchstart', onTouchStart, {capture:true, passive:true});
+    document.addEventListener('touchmove', onTouchMove, {capture:true, passive:false});
+    document.addEventListener('touchend', onTouchEnd, {capture:true, passive:true});
+    document.addEventListener('touchcancel', onTouchEnd, {capture:true, passive:true});
+    document.addEventListener('click', onClick, true);
+    applyCss();
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      const ok = wrapMediaHub();
+      applyCss();
+      if (ok || tries > 50) clearInterval(timer);
+    }, 120);
+    window.addEventListener('resize', () => setTimeout(applyCss, 60), {passive:true});
+    window.addEventListener('orientationchange', () => { setTimeout(applyCss, 120); setTimeout(applyCss, 420); }, {passive:true});
+    console.info('[LifeOS ' + PATCH_ID + '] installed');
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
+  else boot();
+})();
+</script>
+<!-- LIFEOS R11 MOBILE UNIVERSAL TOUCH SCROLL - END -->
+
 </body>
 </html>
 
