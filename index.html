@@ -20765,398 +20765,35 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 <!-- LIFEOS R11 MOBILE UNIVERSAL TOUCH SCROLL - END -->
 
 
-<style id="lifeos-r15-github-family-transfer-stable-fast-css">
-/* R15 GitHub Family Transfer Stable/Fast - clean status, no artificial 60s timeout */
-#chat-upload-status{
-  position:relative!important; z-index:20!important; contain:layout paint!important;
-  transform:translateZ(0)!important; transition:opacity .16s ease, background-color .16s ease!important;
-}
-#chat-upload-status .lifeos-r15-progress-wrap{height:7px;border-radius:999px;background:rgba(148,163,184,.22);overflow:hidden;margin-top:7px;}
-#chat-upload-status .lifeos-r15-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#10b981);border-radius:999px;transition:width .18s linear;}
-#chat-messages .chat-file-card{contain:layout paint!important; transform:translateZ(0)!important; max-width:min(82vw,340px)!important; overflow:hidden!important;}
-#chat-messages .chat-file-card *{animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.12s!important;}
-.lifeos-transfer-noise{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+
+<style id="lifeos-r24-transfer-singleflight-css">
+#chat-upload-status .lifeos-transfer-progress-wrap{height:7px;border-radius:999px;background:rgba(148,163,184,.22);overflow:hidden;margin-top:7px;}
+#chat-upload-status .lifeos-transfer-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#6366f1);border-radius:999px;transition:width .16s linear;}
+#chat-upload-status .lifeos-transfer-stage{font-size:11px;opacity:.82;margin-top:2px;line-height:1.25;}
+#chat-upload-status .lifeos-transfer-cancel{min-width:52px;height:28px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.35);font-size:11px;font-weight:900;padding:0 10px;}
 </style>
-<script id="lifeos-r15-github-family-transfer-stable-fast-js">
+<script id="lifeos-r24-transfer-singleflight-js">
 (function(){
   'use strict';
-  var PHASE = 'FAMILY_TRANSFER_STABLE_FAST';
-  if (window.__lifeosR15GithubFamilyTransferStableFast) return;
-  window.__lifeosR15GithubFamilyTransferStableFast = true;
+  var PHASE='R24_TRANSFER_SINGLE_FLIGHT_R16_SPEED';
+  if(window.__lifeosR24TransferSingleFlight) return;
+  window.__lifeosR24TransferSingleFlight=true;
 
-  var MB = 1024 * 1024;
-  var RELAY = 'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
-  var SINGLE_LIMIT = 49 * MB;
-  var PART_SIZE = 16 * MB;
-  var STATUS_THROTTLE_MS = 650;
-
-  window.LIFEOS_UPLOAD_RELAY_URL = RELAY;
-  window.LIFEOS_UPLOAD_RELAY_ENABLED = true;
-  window.LIFEOS_UPLOAD_RELAY_MODE = 'stable-fast-no-browser-timeout';
-  window.LifeOSFamilyTransferStableFast = {
-    name: PHASE,
-    relay: RELAY,
-    mode: 'xhr-direct-progress-no-sha-no-base64-no-artificial-timeout',
-    singleLimitMB: Math.round(SINGLE_LIMIT/MB),
-    partSizeMB: Math.round(PART_SIZE/MB)
-  };
-
-  function base(){ return String(window.LIFEOS_UPLOAD_RELAY_URL || RELAY).replace(/\/+$/,''); }
-  function now(){ return Date.now(); }
-  function id(prefix){ return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,9); }
-  function esc(x){ return String(x == null ? '' : x).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
-  function fmt(n){ n=Number(n||0); if(n>=MB)return (n/MB).toFixed(n>=10*MB?1:2).replace(/\.0$/,'')+' MB'; if(n>=1024)return (n/1024).toFixed(n>=100*1024?0:1).replace(/\.0$/,'')+' KB'; return n+' B'; }
-  function safeName(file){
-    var raw=String(file&&file.name||'file.bin').trim()||'file.bin';
-    var dot=raw.lastIndexOf('.'); var ext=dot>0?raw.slice(dot).replace(/[^.a-zA-Z0-9_-]/g,'').slice(0,24):'';
-    var name=dot>0?raw.slice(0,dot):raw;
-    try{name=name.normalize('NFD').replace(/[\u0300-\u036f]/g,'');}catch(e){}
-    name=name.replace(/[^a-zA-Z0-9._-]+/g,'_').replace(/_{2,}/g,'_').replace(/^[._-]+|[._-]+$/g,'');
-    if(!name)name='file'; if(name.length>96)name=name.slice(0,96).replace(/[._-]+$/g,'');
-    return name+ext;
-  }
-  function cleanText(text){
-    var s=String(text==null?'':text);
-    s=s.replace(/\bPHA\s*\d+[A-Z0-9._-]*/gi,'').replace(/\bPha\s*\d+[A-Z0-9._-]*/g,'');
-    s=s.replace(/\bR\d{1,3}[_A-Z0-9-]*\b/g,'').replace(/\blifeos\d+[a-z0-9_-]*\b/gi,'');
-    s=s.replace(/bundle_split_manifest/gi,'file lớn').replace(/cloudflare_worker_relay/gi,'máy chủ').replace(/large_fallback_failed/gi,'đường gửi file lớn lỗi');
-    s=s.replace(/legacy|fallback|queue|relay/gi,function(m){return m.toLowerCase()==='relay'?'máy chủ':'';});
-    s=s.replace(/\s{2,}/g,' ').replace(/\s+([:,.!?])/g,'$1').trim();
-    return s || 'Đang xử lý...';
-  }
-  function extractIds(data){
-    var fileId='', messageId='', fileName='', fileSize=0; var seen=[];
-    function has(o){ return seen.indexOf(o)>=0; }
-    function walk(x, depth){
-      if(!x || depth>8 || (fileId&&messageId&&fileName))return; if(typeof x!=='object')return; if(has(x))return; seen.push(x);
-      if(!fileId) fileId=String(x.file_id||x.fileId||x.telegramFileId||x.telegram_file_id||'');
-      if(!messageId) messageId=String(x.message_id||x.messageId||x.telegramMessageId||x.telegram_msg_id||'');
-      if(!fileName) fileName=String(x.file_name||x.fileName||x.name||'');
-      if(!fileSize) fileSize=Number(x.file_size||x.fileSize||x.size||0)||0;
-      if(Array.isArray(x)){ x.forEach(function(v){walk(v,depth+1);}); return; }
-      Object.keys(x).forEach(function(k){walk(x[k],depth+1);});
-    }
-    walk(data,0); return {fileId:fileId, messageId:messageId, fileName:fileName, fileSize:fileSize};
-  }
-  function getStatusBar(){
-    if(window.ChatEngine && typeof window.ChatEngine.ensureUploadStatus==='function') return window.ChatEngine.ensureUploadStatus();
-    var bar=document.getElementById('chat-upload-status');
-    if(!bar){
-      var box=document.getElementById('chat-messages')||document.body;
-      bar=document.createElement('div'); bar.id='chat-upload-status';
-      bar.className='mx-4 mb-3 p-3 rounded-2xl border bg-slate-50 text-xs font-bold';
-      box.parentNode ? box.parentNode.insertBefore(bar, box.nextSibling) : document.body.appendChild(bar);
-    }
-    return bar;
-  }
-  var lastStatus='', lastAt=0;
-  function status(text, state, autoHide, pct){
-    var msg=cleanText(text); var t=now();
-    if(msg===lastStatus && t-lastAt<STATUS_THROTTLE_MS)return;
-    lastStatus=msg; lastAt=t;
-    var bar=getStatusBar(); if(!bar)return;
-    bar.classList.remove('hidden');
-    var tone = state==='error' ? 'bg-rose-50 border-rose-200 text-rose-700' : (state==='done' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-700');
-    bar.className='mx-4 mb-3 p-3 rounded-2xl border text-xs font-black flex flex-col gap-1 '+tone;
-    var progress = typeof pct==='number' ? '<div class="lifeos-r15-progress-wrap"><div class="lifeos-r15-progress-bar" style="width:'+Math.max(0,Math.min(100,pct))+'%"></div></div>' : '';
-    bar.innerHTML='<div class="flex items-center justify-between gap-3"><span>'+esc(msg)+'</span><button type="button" class="w-7 h-7 rounded-full bg-white/70 border flex items-center justify-center active:scale-95" onclick="this.closest(\'#chat-upload-status\')?.classList.add(\'hidden\')"><i class="ph-bold ph-x text-xs pointer-events-none"></i></button></div>'+progress;
-    if(autoHide){ clearTimeout(status._tm); status._tm=setTimeout(function(){bar.classList.add('hidden');}, 3200); }
-  }
-  function saveRender(ce){ try{ce&&ce.saveAndSync&&ce.saveAndSync();}catch(e){console.warn('[Family save]',e);} try{ce&&ce.render&&ce.render();}catch(e){console.warn('[Family render]',e);} }
-  function makeMsg(ce, file, ids, extra){
-    var mime=(file&&file.type)||(extra&&extra.mime_type)||'application/octet-stream'; var name=(file&&file.name)||(extra&&extra.file_name)||ids.fileName||'file.bin'; var size=Number((file&&file.size)||(extra&&extra.file_size)||ids.fileSize||0);
-    return Object.assign({id:id('chat'),type:'file',kind:/^image\//i.test(mime)?'image_document':'file',file_id:ids.fileId,fileId:ids.fileId,telegramFileId:ids.fileId,telegram_msg_id:ids.messageId||'',message_id:ids.messageId||'',file_name:name,name:name,file_size:size,size:size,mime_type:mime,mime:mime,sender:(ce&&ce.getKey&&ce.getKey())||window.viewingUser||window.currentUser||'family',timestamp:Date.now(),topic_id:ce&&ce.currentTopic&&ce.currentTopic!=='all'?ce.currentTopic:null,uploadStatus:''},extra||{});
-  }
-  function debugBase(name,size,extra){
-    return Object.assign({feature:'family_transfer', fileName:name, fileSize:Number(size||0), endpoint:base()+'/upload', timestamp:new Date().toISOString(), navigatorOnLine:navigator.onLine, userAgent:navigator.userAgent}, extra||{});
-  }
-  function xhrUpload(blob, name, meta, progressCb){
-    return new Promise(function(resolve,reject){
-      var fd=new FormData(); var size=Number(blob&&blob.size||0); var started=now(); var uploadDone=false; var lastLoaded=0; var lastProgressAt=started; var lastHintAt=0;
-      fd.append('file', blob, name);
-      fd.append('file_name', name);
-      fd.append('filename', name);
-      fd.append('mime', blob.type || meta.mime || 'application/octet-stream');
-      fd.append('size', String(size));
-      fd.append('target','family');
-      fd.append('chat_id','family');
-      fd.append('caption', name);
-      fd.append('upload_id', meta.uploadId || id('upload'));
-      fd.append('client_meta', JSON.stringify(Object.assign({mode:PHASE, uploadMethod:'xhr_direct_no_browser_timeout', fileName:name, fileSize:size, timestamp:new Date().toISOString(), navigatorOnLine:navigator.onLine}, meta||{})));
-      var xhr=new XMLHttpRequest();
-      xhr.open('POST', base()+'/upload', true);
-      xhr.timeout = 0; // không cắt ngang ảo ở 60s; để máy chủ trả kết quả thật
-      xhr.upload.onprogress=function(e){
-        if(e && typeof e.loaded==='number'){ lastLoaded=e.loaded; lastProgressAt=now(); if(e.lengthComputable && e.total && e.loaded>=e.total) uploadDone=true; }
-        if(progressCb)progressCb(e, now()-started);
-      };
-      var monitor=setInterval(function(){
-        var elapsed=now()-started;
-        if(elapsed-lastHintAt<12000) return;
-        lastHintAt=elapsed;
-        if(uploadDone){ status('Đã gửi dữ liệu, đang chờ máy chủ xác nhận: '+name+' · '+Math.round(elapsed/1000)+'s', 'info', false, 98); }
-        else if(elapsed>25000){ status('Đang gửi '+name+' · '+fmt(lastLoaded)+'/'+fmt(size)+' · giữ trang mở', 'info', false, size?Math.min(95, Math.round(lastLoaded/size*100)):undefined); }
-      }, 5000);
-      function done(){ clearInterval(monitor); }
-      xhr.onload=function(){
-        done();
-        var text=xhr.responseText||''; var data={}; try{data=text?JSON.parse(text):{};}catch(e){}
-        var ids=extractIds(data); var ok=xhr.status>=200&&xhr.status<300&&data.ok!==false&&!!ids.fileId;
-        if(!ok){ var er=new Error((data&&(data.description||data.error||data.message))||('upload_http_'+(xhr.status||0))); er.debug=debugBase(name,size,{httpStatus:xhr.status||0,durationMs:now()-started,responseTextShort:String(text).slice(0,800), serverReturned:!!text}); reject(er); return; }
-        resolve({ok:true,data:data,ids:ids,durationMs:now()-started,status:xhr.status});
-      };
-      xhr.onerror=function(){ done(); var er=new Error('network_error'); er.debug=debugBase(name,size,{durationMs:now()-started,xhrEvent:'network_error',uploadedBytes:lastLoaded,uploadDone:uploadDone}); reject(er); };
-      xhr.onabort=function(){ done(); var er=new Error('abort'); er.debug=debugBase(name,size,{durationMs:now()-started,xhrEvent:'abort',uploadedBytes:lastLoaded,uploadDone:uploadDone}); reject(er); };
-      try{xhr.send(fd);}catch(e){ done(); reject(e); }
-    });
-  }
-  async function uploadSingle(ce, file, index, total){
-    var name=safeName(file); var lastPct=-1; var lastTs=0;
-    status('Đang gửi '+index+'/'+total+': '+name+' · 0%', 'info', false, 0);
-    try{
-      var res=await xhrUpload(file, name, {strategy:'single_direct', uploadId:id('single'), originalName:file.name||name, mime:file.type||''}, function(e){
-        if(!e || !e.lengthComputable)return; var pct=Math.round(e.loaded/e.total*100); var t=now();
-        if(pct===lastPct || (t-lastTs<500 && pct<100))return; lastPct=pct; lastTs=t;
-        status(pct>=100?'Đã gửi dữ liệu, đang xác nhận: '+name:'Đang gửi '+index+'/'+total+': '+name+' · '+pct+'%', 'info', false, pct);
-      });
-      window.chatHistory=Array.isArray(window.chatHistory)?window.chatHistory:[]; var msg=makeMsg(ce,file,res.ids,{}); window.chatHistory.push(msg); saveRender(ce);
-      status('Đã gửi xong: '+name+' · '+fmt(file.size)+' · '+Math.max(1,Math.round(res.durationMs/1000))+'s', 'done', true, 100); return {ok:true,message:msg,fileId:res.ids.fileId,durationMs:res.durationMs};
-    }catch(e){ ce.lastFailedUploadFile=file; ce.lastUploadError=Object.assign(debugBase(name,file.size,{safeFileName:name,errorMessage:e.message||String(e)}), e.debug||{}); try{localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify(ce.lastUploadError));}catch(x){} status('Gửi lỗi: '+name+' · bấm Chi tiết lỗi', 'error', false); console.warn('[Family upload fail]', ce.lastUploadError); return {ok:false,error:e.message||String(e),debug:ce.lastUploadError}; }
-  }
-  async function uploadBundle(ce,file,index,total){
-    var original=file.name||'file.bin'; var safe=safeName(file); var bundleId=id('bundle'); var totalParts=Math.ceil(file.size/PART_SIZE); var parts=[];
-    status('File lớn: '+original+' · chia '+totalParts+' phần', 'info', false, 0);
-    for(var i=0;i<totalParts;i++){
-      var partIndex=i+1; var blob=file.slice(i*PART_SIZE, Math.min(file.size,(i+1)*PART_SIZE), file.type||'application/octet-stream'); var partName=safe+'.part'+String(partIndex).padStart(2,'0'); var lastPct=-1,lastTs=0;
-      try{
-        var res=await xhrUpload(blob, partName, {strategy:'bundle_part_direct',bundleId:bundleId,originalName:original,originalSize:file.size,totalParts:totalParts,currentPart:partIndex}, function(e){ if(!e.lengthComputable)return; var pct=Math.round(e.loaded/e.total*100); var t=now(); if(pct===lastPct||(t-lastTs<700&&pct<100))return; lastPct=pct; lastTs=t; var totalPct=Math.round(((i)+(pct/100))/totalParts*100); status('Đang gửi file lớn phần '+partIndex+'/'+totalParts+' · '+pct+'%', 'info', false, totalPct); });
-        parts.push({index:partIndex,name:partName,size:blob.size,fileId:res.ids.fileId,messageId:res.ids.messageId||''});
-      }catch(e){ ce.lastFailedUploadFile=file; ce.lastUploadError=Object.assign(debugBase(original,file.size,{strategy:'bundle_part_direct',bundleId:bundleId,currentPart:partIndex,totalParts:totalParts,errorMessage:e.message||String(e)}), e.debug||{}); try{localStorage.setItem('lifeos_family_last_upload_error', JSON.stringify(ce.lastUploadError));}catch(x){} status('Gửi lỗi ở phần '+partIndex+'/'+totalParts+': '+original, 'error', false); return {ok:false,error:e.message||String(e)}; }
-    }
-    var manifest={type:'lifeos_family_file_bundle_manifest',version:4,mode:PHASE,bundleId:bundleId,originalName:original,safeName:safe,originalSize:file.size,mime:file.type||'application/octet-stream',partSize:PART_SIZE,totalParts:totalParts,createdAt:new Date().toISOString(),parts:parts};
-    window.chatHistory=Array.isArray(window.chatHistory)?window.chatHistory:[]; var msg={id:id('bundle_msg'),type:'file_bundle',isBundle:true,bundleManifest:manifest,file_name:original,name:original,file_size:file.size,size:file.size,mime_type:file.type||'application/octet-stream',mime:file.type||'application/octet-stream',sender:(ce.getKey&&ce.getKey())||window.viewingUser||window.currentUser||'family',timestamp:Date.now(),topic_id:ce.currentTopic&&ce.currentTopic!=='all'?ce.currentTopic:null,uploadStatus:''};
-    window.chatHistory.push(msg); saveRender(ce); status('Đã gửi xong file lớn: '+original+' · '+totalParts+' phần', 'done', true, 100); return {ok:true,message:msg,manifest:manifest};
-  }
-  function findMsg(mid){ mid=String(mid||''); var a=Array.isArray(window.chatHistory)?window.chatHistory:[]; return a.find(function(m){return String(m&&m.id||'')===mid;}); }
-  function downloadUrl(fid,name){ var u=new URL(base()+'/download'); u.searchParams.set('file_id',fid); if(name)u.searchParams.set('name',name); return u.toString(); }
-  function directDownload(fid,name){ var a=document.createElement('a'); a.href=downloadUrl(fid,name); a.download=name||'file'; a.rel='noopener'; a.style.display='none'; document.body.appendChild(a); a.click(); setTimeout(function(){a.remove();},1000); }
-  async function downloadBundle(ce,msg){
-    var mf=msg.bundleManifest||msg.manifest||{}; var parts=Array.isArray(mf.parts)?mf.parts.slice().sort(function(a,b){return Number(a.index||0)-Number(b.index||0);}):[]; if(!parts.length)throw new Error('Bundle thiếu part');
-    var blobs=[]; status('Đang tải file lớn 0/'+parts.length+': '+(mf.originalName||msg.file_name||'file'), 'info', false, 0);
-    for(var i=0;i<parts.length;i++){ var p=parts[i]; var res=await fetch(downloadUrl(p.fileId||p.file_id,p.name||''),{cache:'no-store'}); if(!res.ok)throw new Error('download_http_'+res.status); blobs.push(await res.blob()); status('Đang tải file lớn '+(i+1)+'/'+parts.length, 'info', false, Math.round((i+1)/parts.length*100)); }
-    var blob=new Blob(blobs,{type:mf.mime||msg.mime_type||'application/octet-stream'}); var name=mf.originalName||msg.file_name||'file.bin'; var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; a.style.display='none'; document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(url);a.remove();},15000); status('Đã tạo file tải về: '+name+' · xem Downloads', 'done', true, 100); return true;
-  }
-  function cleanHistoryStatuses(ce){
-    var arr=Array.isArray(window.chatHistory)?window.chatHistory:[]; var changed=false;
-    arr.forEach(function(m){ if(m && typeof m.uploadStatus==='string' && /PHA|R\d|queue|fallback|bundle_split|relay|lỗi mạng/i.test(m.uploadStatus)){ m.uploadStatus=''; changed=true; } });
-    if(changed)saveRender(ce);
-  }
-  function install(){
-    var ce=window.ChatEngine; if(!ce)return false;
-    if(ce.__r15StableFastInstalled)return true; ce.__r15StableFastInstalled=true;
-    ce.setUploadStatus=function(text,state,autoHide){ status(text,state,autoHide); };
-    ce.showUploadErrorDetail=function(){ var d=this.lastUploadError || {}; alert('LỖI UPLOAD FAMILY CHAT\n'+JSON.stringify(d,null,2)); };
-    ce.retryLastFailedUpload=function(){ return this.lastFailedUploadFile ? this.uploadRouter([this.lastFailedUploadFile],'retry') : status('Không có file lỗi để gửi lại','warn',true); };
-    ce.uploadRouter=async function(files,source){
-      var arr=Array.from(files||[]).filter(Boolean); if(!arr.length)return {ok:true,okCount:0,failCount:0};
-      if(this.__familyUploadBusy){ status('Đang gửi file trước đó, vui lòng chờ...', 'warn', false); return {ok:false,error:'busy'}; }
-      this.__familyUploadBusy=true; var ok=0, errors=[];
-      try{ for(var i=0;i<arr.length;i++){ var f=arr[i]; var res=Number(f.size||0)>SINGLE_LIMIT ? await uploadBundle(this,f,i+1,arr.length) : await uploadSingle(this,f,i+1,arr.length); if(res&&res.ok)ok++; else errors.push({file:f.name,error:res&&res.error||'failed'}); if(i<arr.length-1) await new Promise(function(r){setTimeout(r,120);}); } }
-      finally{ this.__familyUploadBusy=false; }
-      if(errors.length){ status('Hoàn tất '+ok+'/'+arr.length+', lỗi '+errors.length+' file', 'error', false); return {ok:false,okCount:ok,failCount:errors.length,errors:errors}; }
-      status('Hoàn tất '+ok+'/'+arr.length+' file', 'done', true, 100); return {ok:true,okCount:ok,failCount:0};
-    };
-    ce.sendMultipleFiles=function(files){ return this.uploadRouter(files,'input'); };
-    ce.handleFiles=function(files){ return this.uploadRouter(files,'handleFiles'); };
-    ce.handleFile=function(file){ return this.uploadRouter(file?[file]:[],'handleFile'); };
-    ce.sendFile=function(file){ return this.uploadRouter(file?[file]:[],'sendFile'); };
-    ce.downloadChatFile=async function(mid){
-      var msg=findMsg(mid); if(!msg){status('Không tìm thấy file để tải','error',false);return false;}
-      var name=msg.file_name||msg.name||'file.bin';
-      try{ if(msg.isBundle||msg.type==='file_bundle'||msg.bundleManifest||msg.manifest)return await downloadBundle(this,msg); var fid=msg.file_id||msg.fileId||msg.telegramFileId; if(!fid)throw new Error('Thiếu file_id'); directDownload(fid,name); status('Đã bắt đầu tải: '+name+' · xem Downloads', 'done', true); return true; }
-      catch(e){ status('Tải lỗi: '+(e.message||e),'error',false); console.warn('[Family download fail]',e); return false; }
-    };
-    if(window.FamilyUploadQueue){
-      window.FamilyUploadQueue.enqueue=function(files,source){ return ce.uploadRouter(files,source||'family'); };
-      window.FamilyUploadQueue.start=function(){ return true; };
-      window.FamilyUploadQueue.cancel=function(){};
-      window.FamilyUploadQueue.queue=[]; window.FamilyUploadQueue.active=false;
-    } else {
-      window.FamilyUploadQueue={queue:[],active:false,enqueue:function(files,source){ return ce.uploadRouter(files,source||'family'); },start:function(){return true;},cancel:function(){}};
-    }
-    cleanHistoryStatuses(ce);
-    try{ if(/PHA|R14|67G|large_fallback/i.test(localStorage.getItem('lifeos_family_last_upload_error')||'')) localStorage.removeItem('lifeos_family_last_upload_error'); }catch(e){}
-    return true;
-  }
-  var oldToast=window.showToast;
-  if(typeof oldToast==='function'&&!oldToast.__familyStableFast){
-    var lastToast='', lastToastAt=0;
-    window.showToast=function(m,i){ var raw=String(m||''); var msg=cleanText(raw); var t=now(); if(msg===lastToast&&t-lastToastAt<1500)return; lastToast=msg; lastToastAt=t; if(/queue|fallback|bundle_split|PHA|R\d{1,3}/i.test(raw)) return; return oldToast.call(this,msg,i); };
-    window.showToast.__familyStableFast=true;
-  }
-  function schedule(){ install(); setTimeout(install,200); setTimeout(install,800); setTimeout(install,1800); setTimeout(install,3500); }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true}); else schedule();
-  window.addEventListener('load',schedule,{once:true});
-})();
-</script>
-
-</body>
-</html>
-
-<script id="lifeos-r9-2-media-subtab-router-hard-fix">
-(function(){
-  if (window.__lifeosR92MediaSubtabRouterFix) return;
-  window.__lifeosR92MediaSubtabRouterFix = true;
-
-  function qs(id){ return document.getElementById(id); }
-  function show(el, val){ if (el) el.style.display = val; }
-  function setCls(btn, on, tab){
-    if (!btn) return;
-    const active = tab === 'music'
-      ? 'bg-primary text-white shadow-sm border-primary'
-      : tab === 'radio'
-        ? 'bg-emerald-500 text-white shadow-sm border-emerald-500'
-        : 'bg-rose-500 text-white shadow-sm border-rose-500';
-    const idle = 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100';
-    btn.className = 'px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap ' + (on ? active : idle);
-  }
-
-  function forceMediaTab(tab, opts){
-    const hub = window.MediaHub;
-    tab = (tab === 'radio' || tab === 'tv' || tab === 'music') ? tab : 'music';
-
-    try { if (hub) hub.currentTab = tab; } catch(e) {}
-    try {
-      if (tab === 'music') {
-        if (hub) hub.currentGroup = 'all';
-      } else if (hub && (!hub.currentGroup || hub.currentGroup === 'music')) {
-        hub.currentGroup = 'all';
-      }
-    } catch(e) {}
-
-    setCls(qs('tab-media-music'), tab === 'music', 'music');
-    setCls(qs('tab-media-radio'), tab === 'radio', 'radio');
-    setCls(qs('tab-media-tv'), tab === 'tv', 'tv');
-
-    show(qs('mp3-list-container'), tab === 'music' ? 'block' : 'none');
-    show(qs('radio-list-container'), tab === 'radio' ? 'block' : 'none');
-    show(qs('tv-list-container'), tab === 'tv' ? 'grid' : 'none');
-    show(qs('radio-player-container'), tab === 'radio' ? 'block' : 'none');
-    show(qs('tv-player-container'), tab === 'tv' ? 'block' : 'none');
-
-    const sidebar = qs('media-group-sidebar');
-    const mobBar = qs('media-group-mobile-bar');
-    if (tab === 'music') {
-      if (sidebar) sidebar.className = 'hidden';
-      if (mobBar) mobBar.className = 'hidden';
-    } else {
-      if (sidebar) sidebar.className = 'hidden lg:flex lg:col-span-3 flex-col gap-1.5 overflow-y-auto pr-1';
-      if (mobBar) mobBar.className = 'flex lg:hidden w-full gap-2 px-2 pb-2 overflow-x-auto custom-scroll-area shrink-0';
-    }
-
-    try { document.body.dataset.l64fMediaTab = tab; } catch(e) {}
-    try { if (window.LifeOSRootRouter && window.LifeOSRootRouter.enterWorkspace) window.LifeOSRootRouter.enterWorkspace('music','media-subtab-r9-2'); } catch(e) {}
-
-    if (hub) {
-      try { if (tab !== 'music' && typeof hub.renderGroupMenus === 'function') hub.renderGroupMenus(); } catch(e) {}
-      try { if (typeof hub.renderLists === 'function') hub.renderLists(); } catch(e) {}
-    }
-    if (tab === 'music') {
-      try { if (window.MusicApp && !window.MusicApp.isInitialized) window.MusicApp.initAudioEngine(); } catch(e) {}
-      try { if (window.MusicApp && typeof window.MusicApp.renderList === 'function') window.MusicApp.renderList(); } catch(e) {}
-      try { if (window.MusicApp && typeof window.MusicApp.filterList === 'function') window.MusicApp.filterList(qs('music-search')?.value || ''); } catch(e) {}
-    } else {
-      try { window.MusicApp?.hideMiniPlayerIfIdle?.(); } catch(e) {}
-      try { const mini = qs('mini-player'); if (mini) mini.style.display = 'none'; } catch(e) {}
-    }
-
-    try { console.log('[LifeOS R9.2] MEDIA_SUBTAB_SWITCH_OK', tab); } catch(e) {}
-    return false;
-  }
-
-  window.lifeosR92ForceMediaTab = forceMediaTab;
-
-  function bind(){
-    const map = {
-      'tab-media-music': 'music',
-      'tab-media-radio': 'radio',
-      'tab-media-tv': 'tv'
-    };
-    Object.keys(map).forEach(function(id){
-      const btn = qs(id);
-      if (!btn || btn.__lifeosR92Bound) return;
-      btn.__lifeosR92Bound = true;
-      btn.setAttribute('onclick', 'return window.lifeosR92ForceMediaTab("' + map[id] + '",{source:"inline"})');
-    });
-
-    const subtabs = qs('media-subtabs');
-    if (subtabs && !subtabs.__lifeosR92CaptureBound) {
-      subtabs.__lifeosR92CaptureBound = true;
-      subtabs.addEventListener('click', function(ev){
-        const btn = ev.target && ev.target.closest && ev.target.closest('#tab-media-music,#tab-media-radio,#tab-media-tv');
-        if (!btn) return;
-        ev.preventDefault();
-        ev.stopPropagation();
-        if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-        const tab = btn.id === 'tab-media-radio' ? 'radio' : btn.id === 'tab-media-tv' ? 'tv' : 'music';
-        forceMediaTab(tab, {source:'capture', event:ev});
-      }, true);
-    }
-  }
-
-  function patchHub(){
-    const hub = window.MediaHub;
-    if (!hub || hub.__lifeosR92SwitchPatched) return;
-    hub.__lifeosR92SwitchPatched = true;
-    const oldSwitch = typeof hub.switchTab === 'function' ? hub.switchTab.bind(hub) : null;
-    hub.switchTab = function(tab, keepGroup, opts){
-      // R9.2: media subtab routing must never be blocked by root workspace guards.
-      if (tab === 'music' || tab === 'radio' || tab === 'tv') {
-        if (oldSwitch) {
-          try { oldSwitch(tab, keepGroup, Object.assign({}, opts || {}, { event: null, userIntent:true })); } catch(e) {}
-        }
-        return forceMediaTab(tab, opts || {});
-      }
-      return oldSwitch ? oldSwitch.apply(this, arguments) : false;
-    };
-  }
-
-  function schedule(){
-    bind();
-    patchHub();
-    setTimeout(bind, 100); setTimeout(patchHub, 100);
-    setTimeout(bind, 600); setTimeout(patchHub, 600);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once:true });
-  else schedule();
-  window.addEventListener('resize', schedule, { passive:true });
-})();
-</script>
-
-
-<style id="lifeos-r16-family-raw-upload-fast-css">
-#chat-upload-status .lifeos-r16-progress-wrap{height:7px;border-radius:999px;background:rgba(148,163,184,.22);overflow:hidden;margin-top:7px;}
-#chat-upload-status .lifeos-r16-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#6366f1);border-radius:999px;transition:width .16s linear;}
-#chat-upload-status .lifeos-r16-stage{font-size:11px;opacity:.82;margin-top:2px;line-height:1.25;}
-</style>
-<script id="lifeos-r16-family-raw-upload-fast-js">
-(function(){
-  'use strict';
-  var PHASE='R16_GITHUB_FAMILY_RAW_WORKER_FAST';
-  if(window.__lifeosR16FamilyRawWorkerFast) return;
-  window.__lifeosR16FamilyRawWorkerFast=true;
   var MB=1024*1024;
   var RELAY='https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
-  var SINGLE_LIMIT=18*MB;       // single <= 18MB để tải xuống/gộp an toàn qua Telegram getFile
-  var PART_SIZE=18*MB;          // vài trăm MB -> chia part, không dồn 1 cục
-  var STATUS_THROTTLE_MS=420;
+  var SINGLE_LIMIT=18*MB;
+  var PART_SIZE=18*MB;
+  var STATUS_THROTTLE_MS=360;
+  var DOWNLOAD_IDLE_WAIT_MS=3000;
+
   window.LIFEOS_UPLOAD_RELAY_URL=RELAY;
   window.LIFEOS_UPLOAD_RELAY_ENABLED=true;
-  window.LIFEOS_UPLOAD_RELAY_MODE='raw-worker-fast';
-  window.LifeOSFamilyTransferRawWorkerFast={phase:PHASE, relay:RELAY, endpoint:'/upload-raw', singleLimitMB:18, partSizeMB:18};
+  window.LIFEOS_UPLOAD_RELAY_MODE='raw-worker-fast-singleflight';
+  window.LifeOSFamilyTransferSingleFlight={phase:PHASE,relay:RELAY,endpoint:'/upload-raw',singleLimitMB:18,partSizeMB:18,serverCalls:'strict-one-at-a-time'};
 
   function base(){return String(window.LIFEOS_UPLOAD_RELAY_URL||RELAY).replace(/\/+$/,'');}
   function now(){return Date.now();}
+  function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
   function id(p){return p+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);}
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function fmt(n){n=Number(n||0);if(n>=MB)return (n/MB).toFixed(n>=10*MB?1:2).replace(/\.0$/,'')+' MB';if(n>=1024)return (n/1024).toFixed(n>=100*1024?0:1).replace(/\.0$/,'')+' KB';return n+' B';}
@@ -21181,110 +20818,207 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     var bar=document.getElementById('chat-upload-status');
     if(!bar){
       var box=document.getElementById('chat-messages')||document.body;
-      bar=document.createElement('div');bar.id='chat-upload-status';bar.className='mx-4 mb-3 p-3 rounded-2xl border bg-slate-50 text-xs font-bold';
+      bar=document.createElement('div'); bar.id='chat-upload-status'; bar.className='mx-4 mb-3 p-3 rounded-2xl border bg-slate-50 text-xs font-bold';
       box.parentNode?box.parentNode.insertBefore(bar,box.nextSibling):document.body.appendChild(bar);
     }
     return bar;
   }
   var lastMsg='',lastAt=0;
-  function status(text,state,autoHide,pct,stage){
+  function status(text,state,autoHide,pct,stage,canCancel){
     var msg=cleanText(text),t=now();
-    if(msg===lastMsg&&t-lastAt<STATUS_THROTTLE_MS)return;lastMsg=msg;lastAt=t;
+    if(msg===lastMsg&&t-lastAt<STATUS_THROTTLE_MS)return; lastMsg=msg; lastAt=t;
     var bar=getStatusBar(); if(!bar)return;
     bar.classList.remove('hidden');
-    var tone=state==='error'?'bg-rose-50 border-rose-200 text-rose-700':state==='done'?'bg-emerald-50 border-emerald-200 text-emerald-700':'bg-slate-50 border-slate-200 text-slate-700';
+    var tone=state==='error'?'bg-rose-50 border-rose-200 text-rose-700':state==='done'?'bg-emerald-50 border-emerald-200 text-emerald-700':state==='warn'?'bg-amber-50 border-amber-200 text-amber-700':'bg-slate-50 border-slate-200 text-slate-700';
     bar.className='mx-4 mb-3 p-3 rounded-2xl border text-xs font-black flex flex-col gap-1 '+tone;
-    var progress=typeof pct==='number'?'<div class="lifeos-r16-progress-wrap"><div class="lifeos-r16-progress-bar" style="width:'+Math.max(0,Math.min(100,pct))+'%"></div></div>':'';
-    var st=stage?'<div class="lifeos-r16-stage">'+esc(stage)+'</div>':'';
-    bar.innerHTML='<div class="flex items-center justify-between gap-3"><span>'+esc(msg)+'</span><button type="button" class="w-7 h-7 rounded-full bg-white/70 border flex items-center justify-center active:scale-95" onclick="this.closest(\'#chat-upload-status\')?.classList.add(\'hidden\')"><i class="ph-bold ph-x text-xs pointer-events-none"></i></button></div>'+st+progress;
+    var progress=typeof pct==='number'?'<div class="lifeos-transfer-progress-wrap"><div class="lifeos-transfer-progress-bar" style="width:'+Math.max(0,Math.min(100,pct))+'%"></div></div>':'';
+    var st=stage?'<div class="lifeos-transfer-stage">'+esc(stage)+'</div>':'';
+    var cancel=canCancel?'<button type="button" class="lifeos-transfer-cancel active:scale-95" onclick="window.LifeOSTransferGate&&window.LifeOSTransferGate.cancelActive(\'user\')">Hủy</button>':'';
+    bar.innerHTML='<div class="flex items-center justify-between gap-3"><span>'+esc(msg)+'</span><div class="flex items-center gap-2">'+cancel+'<button type="button" class="w-7 h-7 rounded-full bg-white/70 border flex items-center justify-center active:scale-95" onclick="this.closest(\'#chat-upload-status\')?.classList.add(\'hidden\')"><i class="ph-bold ph-x text-xs pointer-events-none"></i></button></div></div>'+st+progress;
     if(autoHide){clearTimeout(status._tm);status._tm=setTimeout(function(){bar.classList.add('hidden');},3000);}
   }
+
+  var Gate={
+    active:null,
+    seq:0,
+    prepare:async function(kind,label){
+      var a=this.active;
+      if(a){
+        if(a.kind==='download' && kind==='upload'){
+          this.cancelActive('upload_priority');
+          status('Đang hủy tải xuống để ưu tiên gửi file...','warn',false,undefined,'Chờ đường truyền rảnh, không gọi server chồng',true);
+          await this.waitIdle(DOWNLOAD_IDLE_WAIT_MS);
+        } else if(a.kind==='download' && kind==='download'){
+          this.cancelActive('new_download');
+          await this.waitIdle(DOWNLOAD_IDLE_WAIT_MS);
+        } else {
+          status(a.kind==='upload'?'Đang gửi file, không tải/gửi chồng':'Đang xử lý, vui lòng chờ','warn',false,undefined,'Một thời điểm chỉ có một yêu cầu server');
+          throw Object.assign(new Error('transfer_busy'),{busy:true,active:a.kind});
+        }
+      }
+      if(this.active) throw Object.assign(new Error('transfer_busy'),{busy:true,active:this.active.kind});
+      var ctrl=new AbortController();
+      var token={id:++this.seq,kind:kind,label:label||kind,controller:ctrl,startedAt:now(),cancelReason:''};
+      this.active=token;
+      return token;
+    },
+    finish:function(token){ if(this.active&&token&&this.active.id===token.id) this.active=null; },
+    cancelActive:function(reason){
+      var a=this.active; if(!a) return false;
+      a.cancelReason=reason||'user';
+      try{a.controller.abort(a.cancelReason);}catch(e){}
+      status(a.kind==='download'?'Đã yêu cầu hủy tải xuống':'Đã yêu cầu hủy gửi file','warn',false,undefined,'Đang đóng yêu cầu server hiện tại',false);
+      return true;
+    },
+    waitIdle:async function(maxMs){
+      var end=now()+Number(maxMs||1500);
+      while(this.active&&now()<end){ await sleep(60); }
+      return !this.active;
+    },
+    isActive:function(token){return !!(token&&this.active&&this.active.id===token.id&&!token.controller.signal.aborted);}
+  };
+  window.LifeOSTransferGate=Gate;
+
   function extractIds(data){
     var fileId='',messageId='',fileName='',fileSize=0,seen=[];
-    function walk(x,d){if(!x||d>8||typeof x!=='object'||seen.indexOf(x)>=0)return;seen.push(x);if(!fileId)fileId=String(x.file_id||x.fileId||x.telegramFileId||'');if(!messageId)messageId=String(x.message_id||x.messageId||x.messageId||'');if(!fileName)fileName=String(x.file_name||x.fileName||x.name||'');if(!fileSize)fileSize=Number(x.file_size||x.fileSize||x.size||0)||0;if(Array.isArray(x)){x.forEach(function(v){walk(v,d+1);});return;}Object.keys(x).forEach(function(k){walk(x[k],d+1);});}
-    walk(data,0);return{fileId:fileId,messageId:messageId,fileName:fileName,fileSize:fileSize};
+    function walk(x,d){if(!x||d>8||typeof x!=='object'||seen.indexOf(x)>=0)return;seen.push(x);if(!fileId)fileId=String(x.file_id||x.fileId||x.telegramFileId||'');if(!messageId)messageId=String(x.message_id||x.messageId||'');if(!fileName)fileName=String(x.file_name||x.fileName||x.name||'');if(!fileSize)fileSize=Number(x.file_size||x.fileSize||x.size||0)||0;if(Array.isArray(x)){x.forEach(function(v){walk(v,d+1);});return;}Object.keys(x).forEach(function(k){walk(x[k],d+1);});}
+    walk(data,0); return{fileId:fileId,messageId:messageId,fileName:fileName,fileSize:fileSize};
   }
-  function saveRender(ce){try{ce&&ce.saveAndSync&&ce.saveAndSync();}catch(e){}try{ce&&ce.render&&ce.render();}catch(e){console.warn('[Family render]',e);}}
+  function saveRender(ce){try{ce&&ce.saveAndSync&&ce.saveAndSync();}catch(e){}try{ce&&ce.render&&ce.render();}catch(e){}}
   function makeMsg(ce,file,ids,extra){
-    var mime=(file&&file.type)||(extra&&extra.mime_type)||'application/octet-stream';var name=(file&&file.name)||(extra&&extra.file_name)||ids.fileName||'file.bin';var size=Number((file&&file.size)||(extra&&extra.file_size)||ids.fileSize||0);
+    var mime=(file&&file.type)||(extra&&extra.mime_type)||'application/octet-stream';
+    var name=(file&&file.name)||(extra&&extra.file_name)||ids.fileName||'file.bin';
+    var size=Number((file&&file.size)||(extra&&extra.file_size)||ids.fileSize||0);
     return Object.assign({id:id('chat'),type:'file',kind:/^image\//i.test(mime)?'image_document':'file',file_id:ids.fileId,fileId:ids.fileId,telegramFileId:ids.fileId,telegram_msg_id:ids.messageId||'',message_id:ids.messageId||'',file_name:name,name:name,file_size:size,size:size,mime_type:mime,mime:mime,sender:(ce&&ce.getKey&&ce.getKey())||window.viewingUser||window.currentUser||'family',timestamp:Date.now(),topic_id:ce&&ce.currentTopic&&ce.currentTopic!=='all'?ce.currentTopic:null,uploadStatus:''},extra||{});
   }
-  function rawUpload(blob,name,meta,progressCb){
+  function downloadUrl(fid,name){var u=new URL(base()+'/download');u.searchParams.set('file_id',fid);if(name)u.searchParams.set('name',name);return u.toString();}
+  function buildUploadUrl(name,size,mime,meta){
+    var u=new URL(base()+'/upload-raw');
+    u.searchParams.set('name',name); u.searchParams.set('size',String(size)); u.searchParams.set('mime',mime||'application/octet-stream'); u.searchParams.set('caption',name);
+    if(meta&&meta.uploadId)u.searchParams.set('upload_id',meta.uploadId);
+    if(meta&&meta.partIndex!=null)u.searchParams.set('part_index',String(meta.partIndex));
+    if(meta&&meta.partCount!=null)u.searchParams.set('part_count',String(meta.partCount));
+    return u.toString();
+  }
+  function rawUpload(blob,name,meta,token,progressCb){
     return new Promise(function(resolve,reject){
+      if(token&&token.controller.signal.aborted) return reject(Object.assign(new Error('abort'),{aborted:true}));
       var size=Number(blob&&blob.size||0),started=now(),lastHint=0,uploaded=false;
       var mime=blob.type||meta.mime||'application/octet-stream';
-      var u=base()+'/upload-raw?name='+encodeURIComponent(name)+'&size='+encodeURIComponent(size)+'&mime='+encodeURIComponent(mime)+'&caption='+encodeURIComponent(name);
       var xhr=new XMLHttpRequest();
-      xhr.open('POST',u,true);
+      xhr.open('POST',buildUploadUrl(name,size,mime,meta),true);
       xhr.timeout=180000;
       try{xhr.setRequestHeader('Content-Type',mime);}catch(e){}
       try{xhr.setRequestHeader('X-LifeOS-File-Name',name);}catch(e){}
       try{xhr.setRequestHeader('X-LifeOS-File-Size',String(size));}catch(e){}
       try{xhr.setRequestHeader('X-LifeOS-Mime',mime);}catch(e){}
       try{xhr.setRequestHeader('X-LifeOS-Upload-Mode','raw_stream');}catch(e){}
-      xhr.upload.onprogress=function(e){
-        if(e&&e.lengthComputable){var pct=Math.round(e.loaded/e.total*100);if(pct>=100)uploaded=true;if(progressCb)progressCb(e,now()-started);}
-      };
+      if(meta&&meta.uploadId)try{xhr.setRequestHeader('X-LifeOS-Upload-Id',meta.uploadId);}catch(e){}
+      if(meta&&meta.partIndex!=null)try{xhr.setRequestHeader('X-LifeOS-Part-Index',String(meta.partIndex));}catch(e){}
+      if(meta&&meta.partCount!=null)try{xhr.setRequestHeader('X-LifeOS-Part-Count',String(meta.partCount));}catch(e){}
+      var aborted=false;
+      function aborter(){aborted=true;try{xhr.abort();}catch(e){}}
+      if(token)token.controller.signal.addEventListener('abort',aborter,{once:true});
+      xhr.upload.onprogress=function(e){if(e&&e.lengthComputable){var pct=Math.round(e.loaded/e.total*100);if(pct>=100)uploaded=true;if(progressCb)progressCb(e,now()-started);}};
       var monitor=setInterval(function(){
+        if(aborted)return;
         var elapsed=now()-started;if(elapsed-lastHint<7000)return;lastHint=elapsed;
-        if(uploaded)status('Đã gửi xong dữ liệu, đang chờ máy chủ xác nhận: '+name,'info',false,98,'Giai đoạn: Telegram/Worker xác nhận · '+Math.round(elapsed/1000)+'s');
-        else status('Đang gửi lên máy chủ: '+name,'info',false,undefined,'Giữ trang mở · '+Math.round(elapsed/1000)+'s');
+        if(uploaded)status('Đã gửi xong dữ liệu, đang chờ máy chủ xác nhận: '+name,'info',false,98,'Telegram/Worker xác nhận · '+Math.round(elapsed/1000)+'s',true);
+        else status('Đang gửi lên máy chủ: '+name,'info',false,undefined,'Giữ trang mở · '+Math.round(elapsed/1000)+'s',true);
       },3000);
-      function clear(){clearInterval(monitor);}
-      xhr.onload=function(){clear();var text=xhr.responseText||'',data={};try{data=text?JSON.parse(text):{};}catch(e){return reject(Object.assign(new Error('server_non_json'),{debug:{responseTextShort:text.slice(0,800),httpStatus:xhr.status}}));}
-        if(xhr.status>=200&&xhr.status<300&&data&&data.ok){return resolve({data:data,ids:extractIds(data),elapsed:now()-started});}
-        reject(Object.assign(new Error(data.errorType||data.message||('http_'+xhr.status)),{debug:{httpStatus:xhr.status,data:data,responseTextShort:text.slice(0,1000)}}));
-      };
-      xhr.onerror=function(){clear();reject(Object.assign(new Error('network_error'),{debug:{httpStatus:xhr.status,event:'error'}}));};
-      xhr.ontimeout=function(){clear();reject(Object.assign(new Error('timeout_server_wait'),{debug:{httpStatus:xhr.status,event:'timeout',timeoutMs:xhr.timeout}}));};
-      xhr.onabort=function(){clear();reject(Object.assign(new Error('abort'),{debug:{event:'abort'}}));};
+      function clear(){clearInterval(monitor);if(token)try{token.controller.signal.removeEventListener('abort',aborter);}catch(e){}}
+      xhr.onload=function(){clear();var text=xhr.responseText||'',data={};try{data=text?JSON.parse(text):{};}catch(e){return reject(Object.assign(new Error('server_non_json'),{debug:{responseTextShort:text.slice(0,800),httpStatus:xhr.status}}));}if(xhr.status>=200&&xhr.status<300&&data&&data.ok){return resolve({data:data,ids:extractIds(data),elapsed:now()-started});}reject(Object.assign(new Error(data.errorType||data.message||('http_'+xhr.status)),{debug:{httpStatus:xhr.status,data:data,responseTextShort:text.slice(0,1000)}}));};
+      xhr.onerror=function(){clear();reject(Object.assign(new Error('network_error'),{debug:{httpStatus:xhr.status,event:'error',uploadedBytes:size,uploadDone:uploaded}}));};
+      xhr.ontimeout=function(){clear();reject(Object.assign(new Error('timeout_server_wait'),{debug:{httpStatus:xhr.status,event:'timeout',timeoutMs:xhr.timeout,uploadedBytes:size,uploadDone:uploaded}}));};
+      xhr.onabort=function(){clear();reject(Object.assign(new Error('abort'),{aborted:true,debug:{event:'abort'}}));};
       xhr.send(blob);
     });
   }
-  async function uploadSingle(ce,file,index,total){
+  async function uploadSingle(ce,file,index,total,token){
     var name=safeName(file),lastPct=-1,lastTs=0;
-    status('Đang gửi '+(total>1?index+'/'+total+' · ':'')+file.name+' · '+fmt(file.size),'info',false,0,'Raw stream → Worker → Telegram');
+    status('Đang gửi '+(total>1?index+'/'+total+' · ':'')+file.name+' · '+fmt(file.size),'info',false,0,'Raw stream → Worker → Telegram · một server-call',true);
     try{
-      var res=await rawUpload(file,name,{strategy:'raw_single',originalName:file.name,mime:file.type},function(e){if(!e.lengthComputable)return;var pct=Math.round(e.loaded/e.total*100),t=now();if(pct===lastPct||(t-lastTs<350&&pct<100))return;lastPct=pct;lastTs=t;status('Đang gửi '+file.name+' · '+pct+'%','info',false,pct,'Raw stream: không FormData, không base64');});
+      var res=await rawUpload(file,name,{strategy:'raw_single',uploadId:id('single'),originalName:file.name,mime:file.type},token,function(e){if(!e.lengthComputable)return;var pct=Math.round(e.loaded/e.total*100),t=now();if(pct===lastPct||(t-lastTs<350&&pct<100))return;lastPct=pct;lastTs=t;status('Đang gửi '+file.name+' · '+pct+'%','info',false,pct,'Không FormData nặng, không base64',true);});
       if(!res.ids.fileId) throw Object.assign(new Error('server_missing_file_id'),{debug:res.data});
       window.chatHistory=Array.isArray(window.chatHistory)?window.chatHistory:[];var msg=makeMsg(ce,file,res.ids,{uploadMode:'raw_stream'});window.chatHistory.push(msg);saveRender(ce);status('Đã gửi xong: '+file.name+' · '+fmt(file.size),'done',true,100,'Server xác nhận '+Math.round((res.elapsed||0)/1000)+'s');return{ok:true,message:msg,ids:res.ids};
     }catch(e){
+      if(e&&e.aborted){status('Đã hủy gửi: '+file.name,'warn',true);return{ok:false,aborted:true,error:'abort'};}
       ce.lastFailedUploadFile=file;ce.lastUploadError={phase:PHASE,fileName:file.name,safeFileName:name,fileSize:file.size,errorName:e.name||'',errorMessage:e.message||String(e),timestamp:new Date().toISOString(),navigatorOnLine:navigator.onLine,userAgent:navigator.userAgent,debug:e.debug||null};
       try{localStorage.setItem('lifeos_family_last_upload_error',JSON.stringify(ce.lastUploadError));}catch(x){}
-      console.warn('[R16 family upload fail]',ce.lastUploadError);status('Gửi lỗi: '+file.name+' · '+(e.message||e),'error',false,undefined,'Bấm Chi tiết lỗi để xem stage server');return{ok:false,error:e.message||String(e)};
+      status('Gửi lỗi: '+file.name+' · '+(e.message||e),'error',false,undefined,'Bấm Chi tiết lỗi để xem lỗi copy');return{ok:false,error:e.message||String(e)};
     }
   }
-  async function uploadBundle(ce,file,index,total){
+  async function uploadBundle(ce,file,index,total,token){
     var original=file.name||'file.bin',safe=safeName(file),bundleId=id('bundle'),totalParts=Math.ceil(file.size/PART_SIZE),parts=[];
-    status('File lớn: '+original+' · chia '+totalParts+' phần '+Math.round(PART_SIZE/MB)+'MB','info',false,0,'Vài trăm MB bắt buộc chia part');
+    status('File lớn: '+original+' · chia '+totalParts+' phần '+Math.round(PART_SIZE/MB)+'MB','info',false,0,'Giữ tốc độ kiểu R16, gửi tuần tự không chồng server',true);
     for(var i=0;i<totalParts;i++){
+      if(!Gate.isActive(token)) return{ok:false,aborted:true,error:'abort'};
       var partIndex=i+1;var blob=file.slice(i*PART_SIZE,Math.min(file.size,(i+1)*PART_SIZE),file.type||'application/octet-stream');var partName=safe+'.part'+String(partIndex).padStart(3,'0');var lastPct=-1,lastTs=0;
-      try{var res=await rawUpload(blob,partName,{strategy:'raw_bundle_part',bundleId:bundleId,originalName:original,originalSize:file.size,totalParts:totalParts,currentPart:partIndex,mime:file.type},function(e){if(!e.lengthComputable)return;var pct=Math.round(e.loaded/e.total*100),t=now();if(pct===lastPct||(t-lastTs<450&&pct<100))return;lastPct=pct;lastTs=t;var totalPct=Math.round(((i)+(pct/100))/totalParts*100);status('Đang gửi phần '+partIndex+'/'+totalParts+' · '+pct+'%','info',false,totalPct,'Raw part '+fmt(blob.size)+' / tổng '+fmt(file.size));});
+      try{var res=await rawUpload(blob,partName,{strategy:'raw_bundle_part',uploadId:bundleId,partIndex:partIndex,partCount:totalParts,bundleId:bundleId,originalName:original,originalSize:file.size,totalParts:totalParts,currentPart:partIndex,mime:file.type},token,function(e){if(!e.lengthComputable)return;var pct=Math.round(e.loaded/e.total*100),t=now();if(pct===lastPct||(t-lastTs<450&&pct<100))return;lastPct=pct;lastTs=t;var totalPct=Math.round(((i)+(pct/100))/totalParts*100);status('Đang gửi phần '+partIndex+'/'+totalParts+' · '+pct+'%','info',false,totalPct,'Raw part '+fmt(blob.size)+' / tổng '+fmt(file.size),true);});
         if(!res.ids.fileId)throw Object.assign(new Error('server_missing_part_file_id'),{debug:res.data});
         parts.push({index:partIndex,name:partName,size:blob.size,fileId:res.ids.fileId,messageId:res.ids.messageId||''});
-      }catch(e){ce.lastFailedUploadFile=file;ce.lastUploadError={phase:PHASE,fileName:original,fileSize:file.size,bundleId:bundleId,currentPart:partIndex,totalParts:totalParts,errorMessage:e.message||String(e),debug:e.debug||null,timestamp:new Date().toISOString()};try{localStorage.setItem('lifeos_family_last_upload_error',JSON.stringify(ce.lastUploadError));}catch(x){}status('Gửi lỗi phần '+partIndex+'/'+totalParts+': '+original,'error',false);return{ok:false,error:e.message||String(e)};}
+      }catch(e){
+        if(e&&e.aborted){status('Đã hủy gửi file lớn: '+original,'warn',true);return{ok:false,aborted:true,error:'abort'};}
+        ce.lastFailedUploadFile=file;ce.lastUploadError={phase:PHASE,fileName:original,fileSize:file.size,bundleId:bundleId,currentPart:partIndex,totalParts:totalParts,errorMessage:e.message||String(e),debug:e.debug||null,timestamp:new Date().toISOString()};try{localStorage.setItem('lifeos_family_last_upload_error',JSON.stringify(ce.lastUploadError));}catch(x){}status('Gửi lỗi phần '+partIndex+'/'+totalParts+': '+original,'error',false);return{ok:false,error:e.message||String(e)};
+      }
     }
-    var manifest={type:'lifeos_family_file_bundle_manifest',version:5,mode:PHASE,bundleId:bundleId,originalName:original,safeName:safe,originalSize:file.size,mime:file.type||'application/octet-stream',partSize:PART_SIZE,totalParts:totalParts,createdAt:new Date().toISOString(),parts:parts};
+    var manifest={type:'lifeos_family_file_bundle_manifest',version:6,mode:PHASE,bundleId:bundleId,originalName:original,safeName:safe,originalSize:file.size,mime:file.type||'application/octet-stream',partSize:PART_SIZE,totalParts:totalParts,createdAt:new Date().toISOString(),parts:parts};
     window.chatHistory=Array.isArray(window.chatHistory)?window.chatHistory:[];var msg={id:id('bundle_msg'),type:'file_bundle',isBundle:true,bundleManifest:manifest,file_name:original,name:original,file_size:file.size,size:file.size,mime_type:file.type||'application/octet-stream',mime:file.type||'application/octet-stream',sender:(ce.getKey&&ce.getKey())||window.viewingUser||window.currentUser||'family',timestamp:Date.now(),topic_id:ce.currentTopic&&ce.currentTopic!=='all'?ce.currentTopic:null,uploadStatus:''};
     window.chatHistory.push(msg);saveRender(ce);status('Đã gửi xong file lớn: '+original+' · '+totalParts+' phần','done',true,100,'Có thể tải/gộp lại từ các part');return{ok:true,message:msg,manifest:manifest};
   }
+  async function fetchBlobWithProgress(url,name,token,pctBase,pctSpan){
+    var res=await fetch(url,{cache:'no-store',signal:token.controller.signal});
+    if(!res.ok)throw new Error('download_http_'+res.status);
+    var len=Number(res.headers.get('Content-Length')||0); var type=res.headers.get('Content-Type')||'application/octet-stream';
+    if(!res.body){var b=await res.blob(); return b;}
+    var reader=res.body.getReader(),chunks=[],loaded=0,lastPct=-1,lastTs=0;
+    try{
+      while(true){
+        if(!Gate.isActive(token)) throw Object.assign(new Error('abort'),{aborted:true});
+        var r=await reader.read(); if(r.done)break;
+        chunks.push(r.value); loaded+=r.value.byteLength||r.value.length||0;
+        if(len){var pct=Math.round((pctBase||0)+(loaded/len)*(pctSpan||100)),t=now();if(pct!==lastPct&&(t-lastTs>250||pct>=100)){lastPct=pct;lastTs=t;status('Đang tải: '+name+' · '+Math.round(loaded/Math.max(1,len)*100)+'%','info',false,pct,'Một server-call, có thể hủy để nhường upload',true);}}
+      }
+    }catch(e){try{reader.cancel(e);}catch(x){}throw e;}
+    return new Blob(chunks,{type:type});
+  }
+  function saveBlob(blob,name){var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=name||'file';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove();},15000);}
   function findMsg(mid){mid=String(mid||'');var a=Array.isArray(window.chatHistory)?window.chatHistory:[];return a.find(function(m){return String(m&&m.id||'')===mid;});}
-  function downloadUrl(fid,name){var u=new URL(base()+'/download');u.searchParams.set('file_id',fid);if(name)u.searchParams.set('name',name);return u.toString();}
-  function directDownload(fid,name){var a=document.createElement('a');a.href=downloadUrl(fid,name);a.download=name||'file';a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){a.remove();},1000);}
-  async function downloadBundle(ce,msg){var mf=msg.bundleManifest||msg.manifest||{},parts=Array.isArray(mf.parts)?mf.parts.slice().sort(function(a,b){return Number(a.index||0)-Number(b.index||0);}):[];if(!parts.length)throw new Error('Bundle thiếu part');var blobs=[];status('Đang tải file lớn 0/'+parts.length+': '+(mf.originalName||msg.file_name||'file'),'info',false,0);for(var i=0;i<parts.length;i++){var p=parts[i];var res=await fetch(downloadUrl(p.fileId||p.file_id,p.name||''),{cache:'no-store'});if(!res.ok)throw new Error('download_http_'+res.status);blobs.push(await res.blob());status('Đang tải file lớn '+(i+1)+'/'+parts.length,'info',false,Math.round((i+1)/parts.length*100));}var blob=new Blob(blobs,{type:mf.mime||msg.mime_type||'application/octet-stream'});var name=mf.originalName||msg.file_name||'file.bin';var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove();},15000);status('Đã tạo file tải về: '+name,'done',true,100);return true;}
+  async function downloadSingle(msg,token){var fid=msg.file_id||msg.fileId||msg.telegramFileId;if(!fid)throw new Error('Thiếu file_id');var name=msg.file_name||msg.name||'file.bin';status('Đang tải: '+name,'info',false,0,'Tải có kiểm soát, không chồng server',true);var blob=await fetchBlobWithProgress(downloadUrl(fid,name),name,token,0,100);saveBlob(blob,name);status('Đã tải xong: '+name,'done',true,100);return true;}
+  async function downloadBundle(ce,msg,token){var mf=msg.bundleManifest||msg.manifest||{},parts=Array.isArray(mf.parts)?mf.parts.slice().sort(function(a,b){return Number(a.index||0)-Number(b.index||0);}):[];if(!parts.length)throw new Error('Bundle thiếu part');var blobs=[];var name=mf.originalName||msg.file_name||'file.bin';status('Đang tải file lớn 0/'+parts.length+': '+name,'info',false,0,'Tải tuần tự từng part, không gọi server chồng',true);for(var i=0;i<parts.length;i++){if(!Gate.isActive(token))throw Object.assign(new Error('abort'),{aborted:true});var p=parts[i];var partBlob=await fetchBlobWithProgress(downloadUrl(p.fileId||p.file_id,p.name||''),p.name||('part '+(i+1)),token,Math.round(i/parts.length*100),100/parts.length);blobs.push(partBlob);status('Đang tải file lớn '+(i+1)+'/'+parts.length,'info',false,Math.round((i+1)/parts.length*100),'Server-call đã đóng trước khi gọi part tiếp theo',true);}var blob=new Blob(blobs,{type:mf.mime||msg.mime_type||'application/octet-stream'});saveBlob(blob,name);status('Đã tạo file tải về: '+name,'done',true,100);return true;}
+
   function install(){
     var ce=window.ChatEngine;if(!ce)return false;
-    ce.__r16RawFastInstalled=true;
+    ce.__r24TransferSingleFlightInstalled=true;
+    ce.__r16RawFastInstalled=false;
     ce.setUploadStatus=function(text,state,autoHide){status(text,state,autoHide);};
     ce.showUploadErrorDetail=function(){alert('LỖI UPLOAD FAMILY CHAT\n'+JSON.stringify(this.lastUploadError||{},null,2));};
+    ce.cancelFamilyTransfer=function(){return Gate.cancelActive('user');};
     ce.retryLastFailedUpload=function(){return this.lastFailedUploadFile?this.uploadRouter([this.lastFailedUploadFile],'retry'):status('Không có file lỗi để gửi lại','warn',true);};
-    ce.uploadRouter=async function(files,source){var arr=Array.from(files||[]).filter(Boolean);if(!arr.length)return{ok:true,okCount:0,failCount:0};if(this.__familyUploadBusy){status('Đang gửi file trước đó, vui lòng chờ...','warn',false);return{ok:false,error:'busy'};}this.__familyUploadBusy=true;var ok=0,errors=[];try{for(var i=0;i<arr.length;i++){var f=arr[i];var res=Number(f.size||0)>SINGLE_LIMIT?await uploadBundle(this,f,i+1,arr.length):await uploadSingle(this,f,i+1,arr.length);if(res&&res.ok)ok++;else errors.push({file:f.name,error:res&&res.error||'failed'});if(i<arr.length-1)await new Promise(function(r){setTimeout(r,80);});}}finally{this.__familyUploadBusy=false;}if(errors.length){status('Hoàn tất '+ok+'/'+arr.length+', lỗi '+errors.length+' file','error',false);return{ok:false,okCount:ok,failCount:errors.length,errors:errors};}status('Hoàn tất '+ok+'/'+arr.length+' file','done',true,100);return{ok:true,okCount:ok,failCount:0};};
+    ce.uploadRouter=async function(files,source){
+      var arr=Array.from(files||[]).filter(Boolean);if(!arr.length)return{ok:true,okCount:0,failCount:0};
+      var token; try{token=await Gate.prepare('upload','upload '+arr.length+' file');}catch(e){return{ok:false,error:e.message||'busy'};}
+      this.__familyUploadBusy=true;var ok=0,errors=[];
+      try{for(var i=0;i<arr.length;i++){if(!Gate.isActive(token)){errors.push({file:arr[i].name,error:'abort'});break;}var f=arr[i];var res=Number(f.size||0)>SINGLE_LIMIT?await uploadBundle(this,f,i+1,arr.length,token):await uploadSingle(this,f,i+1,arr.length,token);if(res&&res.ok)ok++;else if(res&&res.aborted){errors.push({file:f.name,error:'abort'});break;}else errors.push({file:f.name,error:res&&res.error||'failed'});if(i<arr.length-1)await sleep(60);}}
+      finally{this.__familyUploadBusy=false;Gate.finish(token);}
+      if(errors.length){if(errors.some(function(x){return x.error==='abort';}))return{ok:false,okCount:ok,failCount:errors.length,aborted:true,errors:errors};status('Hoàn tất '+ok+'/'+arr.length+', lỗi '+errors.length+' file','error',false);return{ok:false,okCount:ok,failCount:errors.length,errors:errors};}
+      status('Hoàn tất '+ok+'/'+arr.length+' file','done',true,100);return{ok:true,okCount:ok,failCount:0};
+    };
     ce.sendMultipleFiles=function(files){return this.uploadRouter(files,'input');};ce.handleFiles=function(files){return this.uploadRouter(files,'handleFiles');};ce.handleFile=function(file){return this.uploadRouter(file?[file]:[],'handleFile');};ce.sendFile=function(file){return this.uploadRouter(file?[file]:[],'sendFile');};
-    ce.downloadChatFile=async function(mid){var msg=findMsg(mid);if(!msg){status('Không tìm thấy file để tải','error',false);return false;}var name=msg.file_name||msg.name||'file.bin';try{if(msg.isBundle||msg.type==='file_bundle'||msg.bundleManifest||msg.manifest)return await downloadBundle(this,msg);var fid=msg.file_id||msg.fileId||msg.telegramFileId;if(!fid)throw new Error('Thiếu file_id');directDownload(fid,name);status('Đã bắt đầu tải: '+name,'done',true);return true;}catch(e){status('Tải lỗi: '+(e.message||e),'error',false);console.warn('[Family download fail]',e);return false;}};
-    if(window.FamilyUploadQueue){window.FamilyUploadQueue.enqueue=function(files,source){return ce.uploadRouter(files,source||'family');};window.FamilyUploadQueue.start=function(){return true;};window.FamilyUploadQueue.cancel=function(){};window.FamilyUploadQueue.queue=[];window.FamilyUploadQueue.active=false;}else{window.FamilyUploadQueue={queue:[],active:false,enqueue:function(files,source){return ce.uploadRouter(files,source||'family');},start:function(){return true;},cancel:function(){}};}
+    ce.downloadChatFile=async function(mid){
+      var msg=findMsg(mid);if(!msg){status('Không tìm thấy file để tải','error',false);return false;}
+      var token; try{token=await Gate.prepare('download','download');}catch(e){return false;}
+      try{var ok=(msg.isBundle||msg.type==='file_bundle'||msg.bundleManifest||msg.manifest)?await downloadBundle(this,msg,token):await downloadSingle(msg,token);return ok;}
+      catch(e){if(e&&e.aborted){status('Đã hủy tải xuống','warn',true);return false;}status('Tải lỗi: '+(e.message||e),'error',false);return false;}
+      finally{Gate.finish(token);}
+    };
+    window.FamilyUploadQueue={queue:[],active:false,enqueue:function(files,source){return ce.uploadRouter(files,source||'family');},start:function(){return true;},cancel:function(){return Gate.cancelActive('queue_cancel');}};
     return true;
   }
   function schedule(){install();setTimeout(install,300);setTimeout(install,1200);setTimeout(install,3200);setTimeout(install,6500);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();window.addEventListener('load',schedule,{once:true});
 })();
 </script>
+
+</body>
+</html>
