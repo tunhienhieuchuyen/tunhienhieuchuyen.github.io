@@ -20745,17 +20745,27 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 
 
 
-<style id="lifeos-r26-transfer-aux-resume-copy-css">
+<style id="lifeos-r27-transfer-aux-reup-resume-copy-css">
+#chat-upload-status{position:relative;}
 #chat-upload-status .lifeos-transfer-progress-wrap{height:7px;border-radius:999px;background:rgba(148,163,184,.22);overflow:hidden;margin-top:7px;}
 #chat-upload-status .lifeos-transfer-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#6366f1);border-radius:999px;transition:width .16s linear;}
 #chat-upload-status .lifeos-transfer-stage{font-size:11px;opacity:.82;margin-top:2px;line-height:1.25;}
 #chat-upload-status .lifeos-transfer-cancel{min-width:52px;height:28px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.35);font-size:11px;font-weight:900;padding:0 10px;}
-
 #chat-upload-status .lifeos-transfer-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-#chat-upload-status .lifeos-transfer-action{height:30px;border-radius:999px;background:rgba(255,255,255,.9);border:1px solid rgba(148,163,184,.38);font-size:11px;font-weight:950;padding:0 10px;color:#334155;}
+.lifeos-transfer-action,#lifeos-transfer-aux-panel button{height:30px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid rgba(148,163,184,.42);font-size:11px;font-weight:950;padding:0 10px;color:#334155;white-space:nowrap;}
+.lifeos-transfer-action.primary,#lifeos-transfer-aux-panel button.primary{background:#4f46e5;border-color:#4f46e5;color:#fff;}
+.lifeos-transfer-action:disabled,#lifeos-transfer-aux-panel button:disabled{opacity:.45;filter:grayscale(.3);}
+#lifeos-transfer-aux-panel{margin:0 16px 8px;padding:8px 10px;border-radius:18px;border:1px solid rgba(226,232,240,.92);background:rgba(248,250,252,.94);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:900;color:#64748b;}
+#lifeos-transfer-aux-panel .lifeos-transfer-aux-left{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;}
+#lifeos-transfer-aux-panel .lifeos-transfer-aux-dot{width:8px;height:8px;border-radius:999px;background:#22c55e;flex:0 0 auto;}
+#lifeos-transfer-aux-panel.lifeos-has-error{background:#fff1f2;border-color:#fecdd3;color:#be123c;}
+#lifeos-transfer-aux-panel.lifeos-has-error .lifeos-transfer-aux-dot{background:#ef4444;}
+#lifeos-transfer-aux-panel .lifeos-transfer-aux-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#lifeos-transfer-aux-panel .lifeos-transfer-aux-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto;overflow-x:auto;scrollbar-width:none;}
+#lifeos-transfer-aux-panel .lifeos-transfer-aux-actions::-webkit-scrollbar{display:none;}
 #lifeos-transfer-error-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.46);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
 #lifeos-transfer-error-modal.lifeos-open{display:flex;}
-#lifeos-transfer-error-modal .lifeos-transfer-error-box{width:min(620px,calc(100vw - 24px));max-height:min(78vh,720px);overflow:hidden;border-radius:24px;background:#fff;border:1px solid rgba(226,232,240,.95);box-shadow:0 24px 80px rgba(15,23,42,.24);display:flex;flex-direction:column;}
+#lifeos-transfer-error-modal .lifeos-transfer-error-box{width:min(640px,calc(100vw - 24px));max-height:min(78vh,720px);overflow:hidden;border-radius:24px;background:#fff;border:1px solid rgba(226,232,240,.95);box-shadow:0 24px 80px rgba(15,23,42,.24);display:flex;flex-direction:column;}
 #lifeos-transfer-error-modal .lifeos-transfer-error-head{padding:14px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;}
 #lifeos-transfer-error-modal .lifeos-transfer-error-title{font-weight:950;font-size:14px;color:#0f172a;}
 #lifeos-transfer-error-modal .lifeos-transfer-error-body{padding:12px 16px;overflow:auto;}
@@ -20763,31 +20773,32 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 #lifeos-transfer-error-modal .lifeos-transfer-error-actions{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px 16px;border-top:1px solid #e2e8f0;}
 #lifeos-transfer-error-modal .lifeos-transfer-error-btn{height:36px;border-radius:999px;padding:0 14px;font-size:12px;font-weight:950;border:1px solid #cbd5e1;background:#fff;color:#334155;}
 #lifeos-transfer-error-modal .lifeos-transfer-error-btn.primary{background:#4f46e5;color:#fff;border-color:#4f46e5;}
-
+@media(max-width:520px){#lifeos-transfer-aux-panel{align-items:stretch;flex-direction:column;}#lifeos-transfer-aux-panel .lifeos-transfer-aux-actions{width:100%;justify-content:flex-start;}#lifeos-transfer-aux-panel button{height:32px;}}
 </style>
-<script id="lifeos-r26-transfer-aux-resume-copy-js">
+<script id="lifeos-r27-transfer-aux-reup-resume-copy-js">
 (function(){
   'use strict';
-  var PHASE='R26_HTML_CLEAN_AUX_REUP_RESUME_COPY_SMALLFILE';
-  if(window.__lifeosR26TransferAuxResumeCopy) return;
-  window.__lifeosR26TransferAuxResumeCopy=true;
+  var PHASE='R27_HTML_CLEAN_AUX_REUP_RESUME_COPY_ISO';
+  if(window.__lifeosR27TransferAuxReupResumeCopy) return;
+  window.__lifeosR27TransferAuxReupResumeCopy=true;
 
   var MB=1024*1024;
   var RELAY='https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
   var SINGLE_LIMIT=18*MB;
   var PART_SIZE=18*MB;
-  var STATUS_THROTTLE_MS=360;
-  var DOWNLOAD_IDLE_WAIT_MS=3000;
+  var STATUS_THROTTLE_MS=320;
+  var DOWNLOAD_IDLE_WAIT_MS=1800;
+  var INSTALL_MAX_TICKS=240;
 
   window.LIFEOS_UPLOAD_RELAY_URL=RELAY;
   window.LIFEOS_UPLOAD_RELAY_ENABLED=true;
   window.LIFEOS_UPLOAD_RELAY_MODE='raw-worker-fast-singleflight';
-  window.LifeOSFamilyTransferSingleFlight={phase:PHASE,relay:RELAY,endpoint:'/upload-raw',singleLimitMB:18,partSizeMB:18,serverCalls:'strict-one-at-a-time',aux:'retry-copy-error-reselect-smallfile'};
+  window.LifeOSFamilyTransferSingleFlight={phase:PHASE,relay:RELAY,endpoint:'/upload-raw',singleLimitMB:18,partSizeMB:18,serverCalls:'strict-one-at-a-time',aux:'visible-retry-copy-reselect'};
 
   function base(){return String(window.LIFEOS_UPLOAD_RELAY_URL||RELAY).replace(/\/+$/,'');}
   function now(){return Date.now();}
   function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
-  function id(p){return p+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);}
+  function uid(p){return p+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);}
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function fmt(n){n=Number(n||0);if(n>=MB)return (n/MB).toFixed(n>=10*MB?1:2).replace(/\.0$/,'')+' MB';if(n>=1024)return (n/1024).toFixed(n>=100*1024?0:1).replace(/\.0$/,'')+' KB';return n+' B';}
   function safeName(file){
@@ -20810,9 +20821,9 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
   function getStatusBar(){
     var bar=document.getElementById('chat-upload-status');
     if(!bar){
-      var box=document.getElementById('chat-messages')||document.body;
-      bar=document.createElement('div'); bar.id='chat-upload-status'; bar.className='mx-4 mb-3 p-3 rounded-2xl border bg-slate-50 text-xs font-bold';
-      box.parentNode?box.parentNode.insertBefore(bar,box.nextSibling):document.body.appendChild(bar);
+      var box=document.getElementById('chat-messages')||document.getElementById('chat-form')||document.body;
+      bar=document.createElement('div'); bar.id='chat-upload-status'; bar.className='mx-4 mb-3 p-3 rounded-2xl border bg-slate-50 text-xs font-bold hidden';
+      if(box&&box.parentNode) box.parentNode.insertBefore(bar, box.id==='chat-form'?box:box.nextSibling); else document.body.appendChild(bar);
     }
     return bar;
   }
@@ -20828,166 +20839,145 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     var st=stage?'<div class="lifeos-transfer-stage">'+esc(stage)+'</div>':'';
     var cancel=canCancel?'<button type="button" class="lifeos-transfer-cancel active:scale-95" onclick="window.LifeOSTransferGate&&window.LifeOSTransferGate.cancelActive(\'user\')">Hủy</button>':'';
     bar.innerHTML='<div class="flex items-center justify-between gap-3"><span>'+esc(msg)+'</span><div class="flex items-center gap-2">'+cancel+'<button type="button" class="w-7 h-7 rounded-full bg-white/70 border flex items-center justify-center active:scale-95" onclick="this.closest(\'#chat-upload-status\')?.classList.add(\'hidden\')"><i class="ph-bold ph-x text-xs pointer-events-none"></i></button></div></div>'+st+progress;
-    if(autoHide){clearTimeout(status._tm);status._tm=setTimeout(function(){bar.classList.add('hidden');},3000);}
+    if(state==='error') appendFailureActions();
+    if(autoHide){clearTimeout(status._tm);status._tm=setTimeout(function(){bar.classList.add('hidden');},2800);}
   }
 
-  function getStoredLastError(){
-    try{var raw=localStorage.getItem('lifeos_family_last_upload_error');return raw?JSON.parse(raw):null;}catch(e){return null;}
-  }
-  function stringifyErrorPayload(ce){
-    var payload=(ce&&ce.lastUploadError)||getStoredLastError()||{message:'Chưa có lỗi upload được lưu.'};
-    try{return JSON.stringify(payload,null,2);}catch(e){return String(payload||'');}
-  }
-  function copyText(text){
-    text=String(text||'');
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      return navigator.clipboard.writeText(text).then(function(){return true;}).catch(function(){return fallbackCopy(text);});
-    }
-    return Promise.resolve(fallbackCopy(text));
-  }
-  function fallbackCopy(text){
-    try{var ta=document.createElement('textarea');ta.value=String(text||'');ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');ta.remove();return !!ok;}catch(e){return false;}
-  }
+  function getStoredLastError(){try{var raw=localStorage.getItem('lifeos_family_last_upload_error');return raw?JSON.parse(raw):null;}catch(e){return null;}}
+  function setStoredLastError(payload){try{localStorage.setItem('lifeos_family_last_upload_error',JSON.stringify(payload));}catch(e){}}
+  function getEngine(){return window.ChatEngine||{};}
+  function currentError(){var ce=getEngine();return ce.lastUploadError||getStoredLastError()||null;}
+  function stringifyErrorPayload(){var payload=currentError()||{message:'Chưa có lỗi upload được lưu.',phase:PHASE,timestamp:new Date().toISOString()};try{return JSON.stringify(payload,null,2);}catch(e){return String(payload||'');}}
+  function copyText(text){text=String(text||'');if(navigator.clipboard&&navigator.clipboard.writeText){return navigator.clipboard.writeText(text).then(function(){return true;}).catch(function(){return fallbackCopy(text);});}return Promise.resolve(fallbackCopy(text));}
+  function fallbackCopy(text){try{var ta=document.createElement('textarea');ta.value=String(text||'');ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');ta.remove();return !!ok;}catch(e){return false;}}
+
   function ensureErrorModal(){
-    var m=document.getElementById('lifeos-transfer-error-modal');
-    if(m)return m;
-    m=document.createElement('div');m.id='lifeos-transfer-error-modal';
-    m.innerHTML='<div class="lifeos-transfer-error-box"><div class="lifeos-transfer-error-head"><div class="lifeos-transfer-error-title">Chi tiết lỗi gửi file</div><button type="button" class="lifeos-transfer-error-btn" onclick="document.getElementById(\'lifeos-transfer-error-modal\')?.classList.remove(\'lifeos-open\')">Đóng</button></div><div class="lifeos-transfer-error-body"><pre id="lifeos-transfer-error-text"></pre></div><div class="lifeos-transfer-error-actions"><button type="button" class="lifeos-transfer-error-btn primary" onclick="window.ChatEngine&&window.ChatEngine.copyLastUploadError&&window.ChatEngine.copyLastUploadError()">Copy lỗi</button><button type="button" class="lifeos-transfer-error-btn" onclick="window.ChatEngine&&window.ChatEngine.retryLastFailedUpload&&window.ChatEngine.retryLastFailedUpload()">Gửi lại file lỗi</button><button type="button" class="lifeos-transfer-error-btn" onclick="window.ChatEngine&&window.ChatEngine.reselectFailedUpload&&window.ChatEngine.reselectFailedUpload()">Chọn lại file</button></div></div>';
+    var m=document.getElementById('lifeos-transfer-error-modal'); if(m)return m;
+    m=document.createElement('div'); m.id='lifeos-transfer-error-modal';
+    m.innerHTML='<div class="lifeos-transfer-error-box"><div class="lifeos-transfer-error-head"><div class="lifeos-transfer-error-title">Chi tiết lỗi gửi file</div><button type="button" class="lifeos-transfer-error-btn" data-lifeos-transfer-close>Đóng</button></div><div class="lifeos-transfer-error-body"><pre id="lifeos-transfer-error-text"></pre></div><div class="lifeos-transfer-error-actions"><button type="button" class="lifeos-transfer-error-btn primary" data-lifeos-transfer-copy>Copy lỗi</button><button type="button" class="lifeos-transfer-error-btn" data-lifeos-transfer-retry>Gửi lại file lỗi</button><button type="button" class="lifeos-transfer-error-btn" data-lifeos-transfer-reselect>Chọn lại file</button></div></div>';
     document.body.appendChild(m);
-    m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('lifeos-open');});
+    m.addEventListener('click',function(e){
+      if(e.target===m||e.target.closest('[data-lifeos-transfer-close]')) m.classList.remove('lifeos-open');
+      if(e.target.closest('[data-lifeos-transfer-copy]')) copyLastError();
+      if(e.target.closest('[data-lifeos-transfer-retry]')) retryLastFailedUpload();
+      if(e.target.closest('[data-lifeos-transfer-reselect]')) triggerReuploadPicker();
+    });
     return m;
   }
-  function showErrorModal(ce){
-    var m=ensureErrorModal();
-    var pre=document.getElementById('lifeos-transfer-error-text');
-    if(pre)pre.textContent=stringifyErrorPayload(ce);
-    m.classList.add('lifeos-open');
-    return true;
-  }
-  function copyLastError(ce){
-    return copyText(stringifyErrorPayload(ce)).then(function(ok){status(ok?'Đã copy lỗi upload':'Không copy được, mở Chi tiết lỗi để copy tay',ok?'done':'warn',true);return ok;});
-  }
-  function triggerReuploadPicker(ce){
-    ce=ce||window.ChatEngine;
+  function showErrorModal(){var m=ensureErrorModal();var pre=document.getElementById('lifeos-transfer-error-text');if(pre)pre.textContent=stringifyErrorPayload();m.classList.add('lifeos-open');return true;}
+  function copyLastError(){return copyText(stringifyErrorPayload()).then(function(ok){status(ok?'Đã copy lỗi upload':'Không copy được, mở Chi tiết lỗi để copy tay',ok?'done':'warn',true);return ok;});}
+  function triggerReuploadPicker(){
     var input=document.getElementById('lifeos-transfer-reupload-picker');
     if(!input){
-      input=document.createElement('input');input.id='lifeos-transfer-reupload-picker';input.type='file';input.multiple=true;input.style.display='none';
-      input.addEventListener('change',function(){var files=Array.from(input.files||[]);input.value='';if(files.length&&(window.ChatEngine&&window.ChatEngine.uploadRouter)){window.ChatEngine.uploadRouter(files,'reselect-after-error');}});
+      input=document.createElement('input'); input.id='lifeos-transfer-reupload-picker'; input.type='file'; input.multiple=true; input.style.display='none';
+      input.addEventListener('change',function(){var files=Array.from(input.files||[]);input.value='';if(files.length) routeFiles(files,'reselect-after-error');});
       document.body.appendChild(input);
     }
-    status('Chọn lại file lỗi để gửi lại','warn',false,undefined,'Trình duyệt không giữ file sau reload; chọn lại là bước resume an toàn');
-    input.click();
-    return true;
+    status('Chọn lại file lỗi để gửi lại','warn',false,undefined,'Nếu trình duyệt không còn giữ file, chọn lại là cách resume sạch');
+    input.click(); return true;
   }
-  function showFailureActions(ce){
+  function retryLastFailedUpload(){
+    var ce=getEngine();
+    var arr=Array.isArray(ce.lastFailedUploadFiles)?ce.lastFailedUploadFiles.filter(Boolean):(ce.lastFailedUploadFile?[ce.lastFailedUploadFile]:[]);
+    if(arr.length) return routeFiles(arr,'retry-last-failed');
+    status('Không còn giữ được file lỗi trong phiên này, hãy chọn lại file','warn',false,undefined,'Dữ liệu lỗi vẫn copy được, file cần chọn lại');
+    return triggerReuploadPicker();
+  }
+  function ensureAuxPanel(){
+    var panel=document.getElementById('lifeos-transfer-aux-panel');
+    if(panel) return panel;
+    var form=document.getElementById('chat-form');
+    if(!form||!form.parentNode) return null;
+    panel=document.createElement('div'); panel.id='lifeos-transfer-aux-panel';
+    panel.innerHTML='<div class="lifeos-transfer-aux-left"><span class="lifeos-transfer-aux-dot"></span><span class="lifeos-transfer-aux-text">Tải lên/tải xuống sẵn sàng</span></div><div class="lifeos-transfer-aux-actions"><button type="button" data-lifeos-transfer-error>Chi tiết lỗi</button><button type="button" data-lifeos-transfer-copy>Copy lỗi</button><button type="button" data-lifeos-transfer-retry>Gửi lại</button><button type="button" class="primary" data-lifeos-transfer-reselect>Chọn lại file</button></div>';
+    form.parentNode.insertBefore(panel, form);
+    panel.addEventListener('click',function(e){
+      if(e.target.closest('[data-lifeos-transfer-error]')) showErrorModal();
+      if(e.target.closest('[data-lifeos-transfer-copy]')) copyLastError();
+      if(e.target.closest('[data-lifeos-transfer-retry]')) retryLastFailedUpload();
+      if(e.target.closest('[data-lifeos-transfer-reselect]')) triggerReuploadPicker();
+    });
+    updateAuxPanel();
+    return panel;
+  }
+  function updateAuxPanel(){
+    var panel=document.getElementById('lifeos-transfer-aux-panel')||ensureAuxPanel(); if(!panel)return;
+    var err=currentError();
+    panel.classList.toggle('lifeos-has-error',!!err);
+    var txt=panel.querySelector('.lifeos-transfer-aux-text');
+    if(txt) txt.textContent=err?('Lỗi gần nhất: '+cleanText(err.fileName||err.errorMessage||'upload')):'Tải lên/tải xuống sẵn sàng';
+    var ce=getEngine();
+    var hasFiles=!!(ce.lastFailedUploadFile||(Array.isArray(ce.lastFailedUploadFiles)&&ce.lastFailedUploadFiles.length));
+    var retry=panel.querySelector('[data-lifeos-transfer-retry]'); if(retry) retry.disabled=!err&&!hasFiles;
+    var copy=panel.querySelector('[data-lifeos-transfer-copy]'); if(copy) copy.disabled=false;
+    var detail=panel.querySelector('[data-lifeos-transfer-error]'); if(detail) detail.disabled=false;
+  }
+  function appendFailureActions(){
     var bar=getStatusBar(); if(!bar)return;
     var old=bar.querySelector('.lifeos-transfer-actions'); if(old)old.remove();
-    var wrap=document.createElement('div');wrap.className='lifeos-transfer-actions';
-    wrap.innerHTML='<button type="button" class="lifeos-transfer-action" onclick="window.ChatEngine&&window.ChatEngine.showUploadErrorDetail&&window.ChatEngine.showUploadErrorDetail()">Chi tiết lỗi</button><button type="button" class="lifeos-transfer-action" onclick="window.ChatEngine&&window.ChatEngine.copyLastUploadError&&window.ChatEngine.copyLastUploadError()">Copy lỗi</button><button type="button" class="lifeos-transfer-action" onclick="window.ChatEngine&&window.ChatEngine.retryLastFailedUpload&&window.ChatEngine.retryLastFailedUpload()">Gửi lại</button><button type="button" class="lifeos-transfer-action" onclick="window.ChatEngine&&window.ChatEngine.reselectFailedUpload&&window.ChatEngine.reselectFailedUpload()">Chọn lại file</button>';
+    var wrap=document.createElement('div'); wrap.className='lifeos-transfer-actions';
+    wrap.innerHTML='<button type="button" class="lifeos-transfer-action" data-lifeos-transfer-error>Chi tiết lỗi</button><button type="button" class="lifeos-transfer-action primary" data-lifeos-transfer-copy>Copy lỗi</button><button type="button" class="lifeos-transfer-action" data-lifeos-transfer-retry>Gửi lại</button><button type="button" class="lifeos-transfer-action" data-lifeos-transfer-reselect>Chọn lại file</button>';
     bar.appendChild(wrap);
+    wrap.addEventListener('click',function(e){
+      if(e.target.closest('[data-lifeos-transfer-error]')) showErrorModal();
+      if(e.target.closest('[data-lifeos-transfer-copy]')) copyLastError();
+      if(e.target.closest('[data-lifeos-transfer-retry]')) retryLastFailedUpload();
+      if(e.target.closest('[data-lifeos-transfer-reselect]')) triggerReuploadPicker();
+    },{once:false});
+    updateAuxPanel();
   }
   function recordUploadFailure(ce,files,err,extra){
-    ce=ce||window.ChatEngine||{};
+    ce=ce||getEngine();
     var arr=Array.from(files||[]).filter(Boolean);
     ce.lastFailedUploadFile=arr[0]||null;
     ce.lastFailedUploadFiles=arr;
-    var payload={phase:PHASE,scope:(extra&&extra.scope)||'upload',retryAvailable:arr.length>0,reselectAvailable:true,files:arr.map(function(f){return{name:f.name||'',size:Number(f.size||0),type:f.type||''};}),fileName:arr[0]&&arr[0].name||extra&&extra.fileName||'',fileSize:arr[0]&&Number(arr[0].size||0)||extra&&extra.fileSize||0,errorName:err&&err.name||'',errorMessage:err&&err.message||String(err||'upload_error'),timestamp:new Date().toISOString(),navigatorOnLine:navigator.onLine,userAgent:navigator.userAgent,debug:err&&err.debug||null,extra:extra||{}};
-    ce.lastUploadError=payload;
-    try{localStorage.setItem('lifeos_family_last_upload_error',JSON.stringify(payload));}catch(x){}
-    status('Gửi lỗi: '+(payload.fileName||'file')+' · '+payload.errorMessage,'error',false,undefined,'Có thể copy lỗi, gửi lại hoặc chọn lại file');
-    showFailureActions(ce);
-    return payload;
+    var payload={phase:PHASE,scope:(extra&&extra.scope)||'upload',retryAvailable:arr.length>0,reselectAvailable:true,files:arr.map(function(f){return{name:f.name||'',size:Number(f.size||0),type:f.type||''};}),fileName:(arr[0]&&arr[0].name)||(extra&&extra.fileName)||'',fileSize:(arr[0]&&Number(arr[0].size||0))||(extra&&extra.fileSize)||0,errorName:err&&err.name||'',errorMessage:err&&err.message||String(err||'upload_error'),timestamp:new Date().toISOString(),navigatorOnLine:navigator.onLine,userAgent:navigator.userAgent,debug:err&&err.debug||null,extra:extra||{}};
+    ce.lastUploadError=payload; setStoredLastError(payload);
+    status('Gửi lỗi: '+(payload.fileName||'file')+' · '+payload.errorMessage,'error',false,undefined,'Copy lỗi, gửi lại hoặc chọn lại file đều dùng được');
+    appendFailureActions(); updateAuxPanel(); return payload;
   }
 
-
   var Gate={
-    active:null,
-    seq:0,
+    active:null, seq:0,
     prepare:async function(kind,label){
       var a=this.active;
       if(a){
-        if(a.kind==='download' && kind==='upload'){
+        if(a.kind==='download'&&kind==='upload'){
           this.cancelActive('upload_priority');
-          status('Đang hủy tải xuống để ưu tiên gửi file...','warn',false,undefined,'Chờ đường truyền rảnh, không gọi server chồng',true);
+          status('Đang hủy tải xuống để ưu tiên gửi file...','warn',false,undefined,'Không gọi server chồng',true);
           await this.waitIdle(DOWNLOAD_IDLE_WAIT_MS);
-        } else if(a.kind==='download' && kind==='download'){
-          this.cancelActive('new_download');
-          await this.waitIdle(DOWNLOAD_IDLE_WAIT_MS);
-        } else {
-          status(a.kind==='upload'?'Đang gửi file, không tải/gửi chồng':'Đang xử lý, vui lòng chờ','warn',false,undefined,'Một thời điểm chỉ có một yêu cầu server');
+        }else{
+          status(a.kind==='upload'?'Đang gửi file, không gọi server chồng':'Đang tải, vui lòng hủy hoặc chờ xong','warn',false,undefined,'Một thời điểm chỉ một yêu cầu server');
           throw Object.assign(new Error('transfer_busy'),{busy:true,active:a.kind});
         }
       }
       if(this.active) throw Object.assign(new Error('transfer_busy'),{busy:true,active:this.active.kind});
-      var ctrl=new AbortController();
-      var token={id:++this.seq,kind:kind,label:label||kind,controller:ctrl,startedAt:now(),cancelReason:''};
-      this.active=token;
-      return token;
+      var ctrl=new AbortController(); var token={id:++this.seq,kind:kind,label:label||kind,controller:ctrl,startedAt:now(),cancelReason:''}; this.active=token; updateAuxPanel(); return token;
     },
-    finish:function(token){ if(this.active&&token&&this.active.id===token.id) this.active=null; },
-    cancelActive:function(reason){
-      var a=this.active; if(!a) return false;
-      a.cancelReason=reason||'user';
-      try{a.controller.abort(a.cancelReason);}catch(e){}
-      status(a.kind==='download'?'Đã yêu cầu hủy tải xuống':'Đã yêu cầu hủy gửi file','warn',false,undefined,'Đang đóng yêu cầu server hiện tại',false);
-      return true;
-    },
-    waitIdle:async function(maxMs){
-      var end=now()+Number(maxMs||1500);
-      while(this.active&&now()<end){ await sleep(60); }
-      return !this.active;
-    },
+    finish:function(token){if(this.active&&token&&this.active.id===token.id){this.active=null; updateAuxPanel();}},
+    cancelActive:function(reason){var a=this.active;if(!a)return false;a.cancelReason=reason||'user';try{a.controller.abort(a.cancelReason);}catch(e){}status(a.kind==='download'?'Đã yêu cầu hủy tải xuống':'Đã yêu cầu hủy gửi file','warn',false,undefined,'Đang đóng yêu cầu server hiện tại',false);return true;},
+    waitIdle:async function(maxMs){var end=now()+Number(maxMs||1500);while(this.active&&now()<end){await sleep(60);}return !this.active;},
     isActive:function(token){return !!(token&&this.active&&this.active.id===token.id&&!token.controller.signal.aborted);}
   };
   window.LifeOSTransferGate=Gate;
 
-  function extractIds(data){
-    var fileId='',messageId='',fileName='',fileSize=0,seen=[];
-    function walk(x,d){if(!x||d>8||typeof x!=='object'||seen.indexOf(x)>=0)return;seen.push(x);if(!fileId)fileId=String(x.file_id||x.fileId||x.telegramFileId||'');if(!messageId)messageId=String(x.message_id||x.messageId||'');if(!fileName)fileName=String(x.file_name||x.fileName||x.name||'');if(!fileSize)fileSize=Number(x.file_size||x.fileSize||x.size||0)||0;if(Array.isArray(x)){x.forEach(function(v){walk(v,d+1);});return;}Object.keys(x).forEach(function(k){walk(x[k],d+1);});}
-    walk(data,0); return{fileId:fileId,messageId:messageId,fileName:fileName,fileSize:fileSize};
-  }
+  function extractIds(data){var fileId='',messageId='',fileName='',fileSize=0,seen=[];function walk(x,d){if(!x||d>8||typeof x!=='object'||seen.indexOf(x)>=0)return;seen.push(x);if(!fileId)fileId=String(x.file_id||x.fileId||x.telegramFileId||'');if(!messageId)messageId=String(x.message_id||x.messageId||'');if(!fileName)fileName=String(x.file_name||x.fileName||x.name||'');if(!fileSize)fileSize=Number(x.file_size||x.fileSize||x.size||0)||0;if(Array.isArray(x)){x.forEach(function(v){walk(v,d+1);});return;}Object.keys(x).forEach(function(k){walk(x[k],d+1);});}walk(data,0);return{fileId:fileId,messageId:messageId,fileName:fileName,fileSize:fileSize};}
   function saveRender(ce){try{ce&&ce.saveAndSync&&ce.saveAndSync();}catch(e){}try{ce&&ce.render&&ce.render();}catch(e){}}
-  function makeMsg(ce,file,ids,extra){
-    var mime=(file&&file.type)||(extra&&extra.mime_type)||'application/octet-stream';
-    var name=(file&&file.name)||(extra&&extra.file_name)||ids.fileName||'file.bin';
-    var size=Number((file&&file.size)||(extra&&extra.file_size)||ids.fileSize||0);
-    return Object.assign({id:id('chat'),type:'file',kind:/^image\//i.test(mime)?'image_document':'file',file_id:ids.fileId,fileId:ids.fileId,telegramFileId:ids.fileId,telegram_msg_id:ids.messageId||'',message_id:ids.messageId||'',file_name:name,name:name,file_size:size,size:size,mime_type:mime,mime:mime,sender:(ce&&ce.getKey&&ce.getKey())||window.viewingUser||window.currentUser||'family',timestamp:Date.now(),topic_id:ce&&ce.currentTopic&&ce.currentTopic!=='all'?ce.currentTopic:null,uploadStatus:''},extra||{});
-  }
+  function makeMsg(ce,file,ids,extra){var mime=(file&&file.type)||(extra&&extra.mime_type)||'application/octet-stream';var name=(file&&file.name)||(extra&&extra.file_name)||ids.fileName||'file.bin';var size=Number((file&&file.size)||(extra&&extra.file_size)||ids.fileSize||0);return Object.assign({id:uid('chat'),type:'file',kind:/^image\//i.test(mime)?'image_document':'file',file_id:ids.fileId,fileId:ids.fileId,telegramFileId:ids.fileId,telegram_msg_id:ids.messageId||'',message_id:ids.messageId||'',file_name:name,name:name,file_size:size,size:size,mime_type:mime,mime:mime,sender:(ce&&ce.getKey&&ce.getKey())||window.viewingUser||window.currentUser||'family',timestamp:Date.now(),topic_id:ce&&ce.currentTopic&&ce.currentTopic!=='all'?ce.currentTopic:null,uploadStatus:''},extra||{});}
   function downloadUrl(fid,name){var u=new URL(base()+'/download');u.searchParams.set('file_id',fid);if(name)u.searchParams.set('name',name);return u.toString();}
-  function buildUploadUrl(name,size,mime,meta){
-    var u=new URL(base()+'/upload-raw');
-    u.searchParams.set('name',name); u.searchParams.set('size',String(size)); u.searchParams.set('mime',mime||'application/octet-stream'); u.searchParams.set('caption',name);
-    if(meta&&meta.uploadId)u.searchParams.set('upload_id',meta.uploadId);
-    if(meta&&meta.partIndex!=null)u.searchParams.set('part_index',String(meta.partIndex));
-    if(meta&&meta.partCount!=null)u.searchParams.set('part_count',String(meta.partCount));
-    return u.toString();
-  }
+  function buildUploadUrl(name,size,mime,meta){var u=new URL(base()+'/upload-raw');u.searchParams.set('name',name);u.searchParams.set('size',String(size));u.searchParams.set('mime',mime||'application/octet-stream');u.searchParams.set('caption',name);if(meta&&meta.uploadId)u.searchParams.set('upload_id',meta.uploadId);if(meta&&meta.partIndex!=null)u.searchParams.set('part_index',String(meta.partIndex));if(meta&&meta.partCount!=null)u.searchParams.set('part_count',String(meta.partCount));return u.toString();}
+
   function rawUpload(blob,name,meta,token,progressCb){
     return new Promise(function(resolve,reject){
       if(token&&token.controller.signal.aborted) return reject(Object.assign(new Error('abort'),{aborted:true}));
       var size=Number(blob&&blob.size||0),started=now(),lastHint=0,uploaded=false;
       var mime=blob.type||meta.mime||'application/octet-stream';
-      var xhr=new XMLHttpRequest();
-      xhr.open('POST',buildUploadUrl(name,size,mime,meta),true);
-      xhr.timeout=180000;
-      try{xhr.setRequestHeader('Content-Type',mime);}catch(e){}
-      try{xhr.setRequestHeader('X-LifeOS-File-Name',name);}catch(e){}
-      try{xhr.setRequestHeader('X-LifeOS-File-Size',String(size));}catch(e){}
-      try{xhr.setRequestHeader('X-LifeOS-Mime',mime);}catch(e){}
-      try{xhr.setRequestHeader('X-LifeOS-Upload-Mode','raw_stream');}catch(e){}
-      if(meta&&meta.uploadId)try{xhr.setRequestHeader('X-LifeOS-Upload-Id',meta.uploadId);}catch(e){}
-      if(meta&&meta.partIndex!=null)try{xhr.setRequestHeader('X-LifeOS-Part-Index',String(meta.partIndex));}catch(e){}
-      if(meta&&meta.partCount!=null)try{xhr.setRequestHeader('X-LifeOS-Part-Count',String(meta.partCount));}catch(e){}
-      var aborted=false;
-      function aborter(){aborted=true;try{xhr.abort();}catch(e){}}
-      if(token)token.controller.signal.addEventListener('abort',aborter,{once:true});
-      xhr.upload.onprogress=function(e){if(e&&e.lengthComputable){var pct=Math.round(e.loaded/e.total*100);if(pct>=100)uploaded=true;if(progressCb)progressCb(e,now()-started);}};
-      var monitor=setInterval(function(){
-        if(aborted)return;
-        var elapsed=now()-started;if(elapsed-lastHint<7000)return;lastHint=elapsed;
-        if(uploaded)status('Đã gửi xong dữ liệu, đang chờ máy chủ xác nhận: '+name,'info',false,98,'Telegram/Worker xác nhận · '+Math.round(elapsed/1000)+'s',true);
-        else status('Đang gửi lên máy chủ: '+name,'info',false,undefined,'Giữ trang mở · '+Math.round(elapsed/1000)+'s',true);
-      },3000);
+      var xhr=new XMLHttpRequest(); xhr.open('POST',buildUploadUrl(name,size,mime,meta),true); xhr.timeout=180000;
+      try{xhr.setRequestHeader('Content-Type',mime);}catch(e){} try{xhr.setRequestHeader('X-LifeOS-File-Name',name);}catch(e){} try{xhr.setRequestHeader('X-LifeOS-File-Size',String(size));}catch(e){} try{xhr.setRequestHeader('X-LifeOS-Mime',mime);}catch(e){} try{xhr.setRequestHeader('X-LifeOS-Upload-Mode','raw_stream');}catch(e){}
+      if(meta&&meta.uploadId)try{xhr.setRequestHeader('X-LifeOS-Upload-Id',meta.uploadId);}catch(e){} if(meta&&meta.partIndex!=null)try{xhr.setRequestHeader('X-LifeOS-Part-Index',String(meta.partIndex));}catch(e){} if(meta&&meta.partCount!=null)try{xhr.setRequestHeader('X-LifeOS-Part-Count',String(meta.partCount));}catch(e){}
+      var aborted=false; function aborter(){aborted=true;try{xhr.abort();}catch(e){}} if(token)token.controller.signal.addEventListener('abort',aborter,{once:true});
+      xhr.upload.onprogress=function(e){if(e&&e.lengthComputable){if(e.loaded>=e.total)uploaded=true;if(progressCb)progressCb(e,now()-started);}};
+      var monitor=setInterval(function(){if(aborted)return;var elapsed=now()-started;if(elapsed-lastHint<7000)return;lastHint=elapsed;if(uploaded)status('Đã gửi xong dữ liệu, đang chờ máy chủ xác nhận: '+name,'info',false,98,'Worker/Telegram xác nhận · '+Math.round(elapsed/1000)+'s',true);else status('Đang gửi lên máy chủ: '+name,'info',false,undefined,'Giữ trang mở · '+Math.round(elapsed/1000)+'s',true);},3000);
       function clear(){clearInterval(monitor);if(token)try{token.controller.signal.removeEventListener('abort',aborter);}catch(e){}}
       xhr.onload=function(){clear();var text=xhr.responseText||'',data={};try{data=text?JSON.parse(text):{};}catch(e){return reject(Object.assign(new Error('server_non_json'),{debug:{responseTextShort:text.slice(0,800),httpStatus:xhr.status}}));}if(xhr.status>=200&&xhr.status<300&&data&&data.ok){return resolve({data:data,ids:extractIds(data),elapsed:now()-started});}reject(Object.assign(new Error(data.errorType||data.message||('http_'+xhr.status)),{debug:{httpStatus:xhr.status,data:data,responseTextShort:text.slice(0,1000)}}));};
       xhr.onerror=function(){clear();reject(Object.assign(new Error('network_error'),{debug:{httpStatus:xhr.status,event:'error',uploadedBytes:size,uploadDone:uploaded}}));};
@@ -21000,87 +20990,73 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     var name=safeName(file),lastPct=-1,lastTs=0;
     status('Đang gửi '+(total>1?index+'/'+total+' · ':'')+file.name+' · '+fmt(file.size),'info',false,0,'Raw stream → Worker → Telegram · một server-call',true);
     try{
-      var res=await rawUpload(file,name,{strategy:'raw_single',uploadId:id('single'),originalName:file.name,mime:file.type},token,function(e){if(!e.lengthComputable)return;var pct=Math.round(e.loaded/e.total*100),t=now();if(pct===lastPct||(t-lastTs<350&&pct<100))return;lastPct=pct;lastTs=t;status('Đang gửi '+file.name+' · '+pct+'%','info',false,pct,'Không FormData nặng, không base64',true);});
+      var res=await rawUpload(file,name,{strategy:'raw_single',uploadId:uid('single'),originalName:file.name,mime:file.type},token,function(e){if(!e.lengthComputable)return;var pct=Math.round(e.loaded/e.total*100),t=now();if(pct===lastPct||(t-lastTs<350&&pct<100))return;lastPct=pct;lastTs=t;status('Đang gửi '+file.name+' · '+pct+'%','info',false,pct,'Không FormData nặng, không base64',true);});
       if(!res.ids.fileId) throw Object.assign(new Error('server_missing_file_id'),{debug:res.data});
       window.chatHistory=Array.isArray(window.chatHistory)?window.chatHistory:[];var msg=makeMsg(ce,file,res.ids,{uploadMode:'raw_stream'});window.chatHistory.push(msg);saveRender(ce);status('Đã gửi xong: '+file.name+' · '+fmt(file.size),'done',true,100,'Server xác nhận '+Math.round((res.elapsed||0)/1000)+'s');return{ok:true,message:msg,ids:res.ids};
-    }catch(e){
-      if(e&&e.aborted){status('Đã hủy gửi: '+file.name,'warn',true);return{ok:false,aborted:true,error:'abort'};}
-      recordUploadFailure(ce,[file],e,{scope:'single',safeFileName:name,source:'uploadSingle'});return{ok:false,error:e.message||String(e)};
-    }
+    }catch(e){if(e&&e.aborted){status('Đã hủy gửi: '+file.name,'warn',true);return{ok:false,aborted:true,error:'abort'};}recordUploadFailure(ce,[file],e,{scope:'single',safeFileName:name,source:'uploadSingle'});return{ok:false,error:e.message||String(e)};}
   }
   async function uploadBundle(ce,file,index,total,token){
-    var original=file.name||'file.bin',safe=safeName(file),bundleId=id('bundle'),totalParts=Math.ceil(file.size/PART_SIZE),parts=[];
-    status('File lớn: '+original+' · chia '+totalParts+' phần '+Math.round(PART_SIZE/MB)+'MB','info',false,0,'Giữ tốc độ kiểu R16, gửi tuần tự không chồng server',true);
+    var original=file.name||'file.bin',safe=safeName(file),bundleId=uid('bundle'),totalParts=Math.ceil(file.size/PART_SIZE),parts=[];
+    status('File lớn: '+original+' · chia '+totalParts+' phần 18MB','info',false,0,'Giữ tốc độ kiểu R16, gửi tuần tự không chồng server',true);
     for(var i=0;i<totalParts;i++){
-      if(!Gate.isActive(token)) return{ok:false,aborted:true,error:'abort'};
-      var partIndex=i+1;var blob=file.slice(i*PART_SIZE,Math.min(file.size,(i+1)*PART_SIZE),file.type||'application/octet-stream');var partName=safe+'.part'+String(partIndex).padStart(3,'0');var lastPct=-1,lastTs=0;
-      try{var res=await rawUpload(blob,partName,{strategy:'raw_bundle_part',uploadId:bundleId,partIndex:partIndex,partCount:totalParts,bundleId:bundleId,originalName:original,originalSize:file.size,totalParts:totalParts,currentPart:partIndex,mime:file.type},token,function(e){if(!e.lengthComputable)return;var pct=Math.round(e.loaded/e.total*100),t=now();if(pct===lastPct||(t-lastTs<450&&pct<100))return;lastPct=pct;lastTs=t;var totalPct=Math.round(((i)+(pct/100))/totalParts*100);status('Đang gửi phần '+partIndex+'/'+totalParts+' · '+pct+'%','info',false,totalPct,'Raw part '+fmt(blob.size)+' / tổng '+fmt(file.size),true);});
+      if(!Gate.isActive(token))return{ok:false,aborted:true,error:'abort'};
+      var partIndex=i+1,blob=file.slice(i*PART_SIZE,Math.min(file.size,(i+1)*PART_SIZE),file.type||'application/octet-stream'),partName=safe+'.part'+String(partIndex).padStart(3,'0'),lastPct=-1,lastTs=0;
+      try{
+        var res=await rawUpload(blob,partName,{strategy:'raw_bundle_part',uploadId:bundleId,partIndex:partIndex,partCount:totalParts,bundleId:bundleId,originalName:original,originalSize:file.size,totalParts:totalParts,currentPart:partIndex,mime:file.type},token,function(e){if(!e.lengthComputable)return;var pct=Math.round(e.loaded/e.total*100),t=now();if(pct===lastPct||(t-lastTs<450&&pct<100))return;lastPct=pct;lastTs=t;var totalPct=Math.round(((i)+(pct/100))/totalParts*100);status('Đang gửi phần '+partIndex+'/'+totalParts+' · '+pct+'%','info',false,totalPct,'Raw part '+fmt(blob.size)+' / tổng '+fmt(file.size),true);});
         if(!res.ids.fileId)throw Object.assign(new Error('server_missing_part_file_id'),{debug:res.data});
         parts.push({index:partIndex,name:partName,size:blob.size,fileId:res.ids.fileId,messageId:res.ids.messageId||''});
-      }catch(e){
-        if(e&&e.aborted){status('Đã hủy gửi file lớn: '+original,'warn',true);return{ok:false,aborted:true,error:'abort'};}
-        recordUploadFailure(ce,[file],e,{scope:'bundle_part',bundleId:bundleId,currentPart:partIndex,totalParts:totalParts,fileName:original,fileSize:file.size});return{ok:false,error:e.message||String(e)};
-      }
+      }catch(e){if(e&&e.aborted){status('Đã hủy gửi file lớn: '+original,'warn',true);return{ok:false,aborted:true,error:'abort'};}recordUploadFailure(ce,[file],e,{scope:'bundle_part',bundleId:bundleId,currentPart:partIndex,totalParts:totalParts,fileName:original,fileSize:file.size});return{ok:false,error:e.message||String(e)};}
     }
-    var manifest={type:'lifeos_family_file_bundle_manifest',version:6,mode:PHASE,bundleId:bundleId,originalName:original,safeName:safe,originalSize:file.size,mime:file.type||'application/octet-stream',partSize:PART_SIZE,totalParts:totalParts,createdAt:new Date().toISOString(),parts:parts};
-    window.chatHistory=Array.isArray(window.chatHistory)?window.chatHistory:[];var msg={id:id('bundle_msg'),type:'file_bundle',isBundle:true,bundleManifest:manifest,file_name:original,name:original,file_size:file.size,size:file.size,mime_type:file.type||'application/octet-stream',mime:file.type||'application/octet-stream',sender:(ce.getKey&&ce.getKey())||window.viewingUser||window.currentUser||'family',timestamp:Date.now(),topic_id:ce.currentTopic&&ce.currentTopic!=='all'?ce.currentTopic:null,uploadStatus:''};
+    var manifest={type:'lifeos_family_file_bundle_manifest',version:7,mode:PHASE,bundleId:bundleId,originalName:original,safeName:safe,originalSize:file.size,mime:file.type||'application/octet-stream',partSize:PART_SIZE,totalParts:totalParts,createdAt:new Date().toISOString(),parts:parts};
+    window.chatHistory=Array.isArray(window.chatHistory)?window.chatHistory:[];var msg={id:uid('bundle_msg'),type:'file_bundle',isBundle:true,bundleManifest:manifest,file_name:original,name:original,file_size:file.size,size:file.size,mime_type:file.type||'application/octet-stream',mime:file.type||'application/octet-stream',sender:(ce.getKey&&ce.getKey())||window.viewingUser||window.currentUser||'family',timestamp:Date.now(),topic_id:ce.currentTopic&&ce.currentTopic!=='all'?ce.currentTopic:null,uploadStatus:''};
     window.chatHistory.push(msg);saveRender(ce);status('Đã gửi xong file lớn: '+original+' · '+totalParts+' phần','done',true,100,'Có thể tải/gộp lại từ các part');return{ok:true,message:msg,manifest:manifest};
   }
-  async function fetchBlobWithProgress(url,name,token,pctBase,pctSpan){
-    var res=await fetch(url,{cache:'no-store',signal:token.controller.signal});
-    if(!res.ok)throw new Error('download_http_'+res.status);
-    var len=Number(res.headers.get('Content-Length')||0); var type=res.headers.get('Content-Type')||'application/octet-stream';
-    if(!res.body){var b=await res.blob(); return b;}
-    var reader=res.body.getReader(),chunks=[],loaded=0,lastPct=-1,lastTs=0;
-    try{
-      while(true){
-        if(!Gate.isActive(token)) throw Object.assign(new Error('abort'),{aborted:true});
-        var r=await reader.read(); if(r.done)break;
-        chunks.push(r.value); loaded+=r.value.byteLength||r.value.length||0;
-        if(len){var pct=Math.round((pctBase||0)+(loaded/len)*(pctSpan||100)),t=now();if(pct!==lastPct&&(t-lastTs>250||pct>=100)){lastPct=pct;lastTs=t;status('Đang tải: '+name+' · '+Math.round(loaded/Math.max(1,len)*100)+'%','info',false,pct,'Một server-call, có thể hủy để nhường upload',true);}}
-      }
-    }catch(e){try{reader.cancel(e);}catch(x){}throw e;}
-    return new Blob(chunks,{type:type});
-  }
-  function saveBlob(blob,name){var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=name||'file';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove();},15000);}
+  async function fetchBlobWithProgress(url,name,token,pctBase,pctSpan){var res=await fetch(url,{cache:'no-store',signal:token.controller.signal});if(!res.ok)throw new Error('download_http_'+res.status);var len=Number(res.headers.get('Content-Length')||0),type=res.headers.get('Content-Type')||'application/octet-stream';if(!res.body){return await res.blob();}var reader=res.body.getReader(),chunks=[],loaded=0,lastPct=-1,lastTs=0;try{while(true){if(!Gate.isActive(token))throw Object.assign(new Error('abort'),{aborted:true});var r=await reader.read();if(r.done)break;chunks.push(r.value);loaded+=r.value.byteLength||r.value.length||0;if(len){var pct=Math.round((pctBase||0)+(loaded/len)*(pctSpan||100)),t=now();if(pct!==lastPct&&(t-lastTs>250||pct>=100)){lastPct=pct;lastTs=t;status('Đang tải: '+name+' · '+Math.round(loaded/Math.max(1,len)*100)+'%','info',false,pct,'Một server-call, có thể hủy để nhường upload',true);}}}}catch(e){try{reader.cancel(e);}catch(x){}throw e;}return new Blob(chunks,{type:type});}
+  function saveBlob(blob,name){var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name||'file';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);a.remove();},15000);}
   function findMsg(mid){mid=String(mid||'');var a=Array.isArray(window.chatHistory)?window.chatHistory:[];return a.find(function(m){return String(m&&m.id||'')===mid;});}
   async function downloadSingle(msg,token){var fid=msg.file_id||msg.fileId||msg.telegramFileId;if(!fid)throw new Error('Thiếu file_id');var name=msg.file_name||msg.name||'file.bin';status('Đang tải: '+name,'info',false,0,'Tải có kiểm soát, không chồng server',true);var blob=await fetchBlobWithProgress(downloadUrl(fid,name),name,token,0,100);saveBlob(blob,name);status('Đã tải xong: '+name,'done',true,100);return true;}
-  async function downloadBundle(ce,msg,token){var mf=msg.bundleManifest||msg.manifest||{},parts=Array.isArray(mf.parts)?mf.parts.slice().sort(function(a,b){return Number(a.index||0)-Number(b.index||0);}):[];if(!parts.length)throw new Error('Bundle thiếu part');var blobs=[];var name=mf.originalName||msg.file_name||'file.bin';status('Đang tải file lớn 0/'+parts.length+': '+name,'info',false,0,'Tải tuần tự từng part, không gọi server chồng',true);for(var i=0;i<parts.length;i++){if(!Gate.isActive(token))throw Object.assign(new Error('abort'),{aborted:true});var p=parts[i];var partBlob=await fetchBlobWithProgress(downloadUrl(p.fileId||p.file_id,p.name||''),p.name||('part '+(i+1)),token,Math.round(i/parts.length*100),100/parts.length);blobs.push(partBlob);status('Đang tải file lớn '+(i+1)+'/'+parts.length,'info',false,Math.round((i+1)/parts.length*100),'Server-call đã đóng trước khi gọi part tiếp theo',true);}var blob=new Blob(blobs,{type:mf.mime||msg.mime_type||'application/octet-stream'});saveBlob(blob,name);status('Đã tạo file tải về: '+name,'done',true,100);return true;}
+  async function downloadBundle(ce,msg,token){var mf=msg.bundleManifest||msg.manifest||{},parts=Array.isArray(mf.parts)?mf.parts.slice().sort(function(a,b){return Number(a.index||0)-Number(b.index||0);}):[];if(!parts.length)throw new Error('Bundle thiếu part');var blobs=[],name=mf.originalName||msg.file_name||'file.bin';status('Đang tải file lớn 0/'+parts.length+': '+name,'info',false,0,'Tải tuần tự từng part, không gọi server chồng',true);for(var i=0;i<parts.length;i++){if(!Gate.isActive(token))throw Object.assign(new Error('abort'),{aborted:true});var p=parts[i],partBlob=await fetchBlobWithProgress(downloadUrl(p.fileId||p.file_id,p.name||''),p.name||('part '+(i+1)),token,Math.round(i/parts.length*100),100/parts.length);blobs.push(partBlob);status('Đang tải file lớn '+(i+1)+'/'+parts.length,'info',false,Math.round((i+1)/parts.length*100),'Server-call đã đóng trước khi gọi part tiếp theo',true);}var blob=new Blob(blobs,{type:mf.mime||msg.mime_type||'application/octet-stream'});saveBlob(blob,name);status('Đã tạo file tải về: '+name,'done',true,100);return true;}
 
-  function install(){
-    var ce=window.ChatEngine;if(!ce)return false;
-    ce.__r26TransferAuxResumeCopyInstalled=true;
-    ce.__r24TransferSingleFlightInstalled=false;
-    ce.__r16RawFastInstalled=false;
-    if(!ce.lastUploadError){ce.lastUploadError=getStoredLastError();}
-    ce.setUploadStatus=function(text,state,autoHide){status(text,state,autoHide);};
-    ce.showUploadErrorDetail=function(){return showErrorModal(this);};
-    ce.copyLastUploadError=function(){return copyLastError(this);};
-    ce.reselectFailedUpload=function(){return triggerReuploadPicker(this);};
-    ce.cancelFamilyTransfer=function(){return Gate.cancelActive('user');};
-    ce.retryLastFailedUpload=function(){var arr=Array.isArray(this.lastFailedUploadFiles)?this.lastFailedUploadFiles.filter(Boolean):(this.lastFailedUploadFile?[this.lastFailedUploadFile]:[]);if(arr.length)return this.uploadRouter(arr,'retry-last-failed');status('Không còn giữ được file trong phiên này, hãy chọn lại file để gửi','warn',false);return triggerReuploadPicker(this);};
-    ce.uploadRouter=async function(files,source){
-      var arr=Array.from(files||[]).filter(Boolean);if(!arr.length)return{ok:true,okCount:0,failCount:0};
-      var token; try{token=await Gate.prepare('upload','upload '+arr.length+' file');}catch(e){return{ok:false,error:e.message||'busy'};}
-      this.__familyUploadBusy=true;var ok=0,errors=[];
-      try{for(var i=0;i<arr.length;i++){if(!Gate.isActive(token)){errors.push({file:arr[i].name,error:'abort'});break;}var f=arr[i];var res=Number(f.size||0)>SINGLE_LIMIT?await uploadBundle(this,f,i+1,arr.length,token):await uploadSingle(this,f,i+1,arr.length,token);if(res&&res.ok)ok++;else if(res&&res.aborted){errors.push({file:f.name,error:'abort'});break;}else errors.push({file:f.name,error:res&&res.error||'failed'});if(i<arr.length-1)await sleep(60);}}
-      finally{this.__familyUploadBusy=false;Gate.finish(token);}
-      if(errors.length){if(errors.some(function(x){return x.error==='abort';}))return{ok:false,okCount:ok,failCount:errors.length,aborted:true,errors:errors};status('Hoàn tất '+ok+'/'+arr.length+', lỗi '+errors.length+' file','error',false);return{ok:false,okCount:ok,failCount:errors.length,errors:errors};}
-      status('Hoàn tất '+ok+'/'+arr.length+' file','done',true,100);return{ok:true,okCount:ok,failCount:0};
-    };
-    ce.sendMultipleFiles=function(files){return this.uploadRouter(files,'input');};ce.handleFiles=function(files){return this.uploadRouter(files,'handleFiles');};ce.handleFile=function(file){return this.uploadRouter(file?[file]:[],'handleFile');};ce.sendFile=function(file){return this.uploadRouter(file?[file]:[],'sendFile');};
-    ce.downloadChatFile=async function(mid){
-      var msg=findMsg(mid);if(!msg){status('Không tìm thấy file để tải','error',false);return false;}
-      var token; try{token=await Gate.prepare('download','download');}catch(e){return false;}
-      try{var ok=(msg.isBundle||msg.type==='file_bundle'||msg.bundleManifest||msg.manifest)?await downloadBundle(this,msg,token):await downloadSingle(msg,token);return ok;}
-      catch(e){if(e&&e.aborted){status('Đã hủy tải xuống','warn',true);return false;}status('Tải lỗi: '+(e.message||e),'error',false);return false;}
-      finally{Gate.finish(token);}
-    };
-    window.FamilyUploadQueue={queue:[],active:false,enqueue:function(files,source){return ce.uploadRouter(files,source||'family');},start:function(){return true;},cancel:function(){return Gate.cancelActive('queue_cancel');}};
+  async function routeFiles(files,source){var ce=getEngine();if(!ce)return{ok:false,error:'chat_engine_missing'};return ce.uploadRouter?ce.uploadRouter(Array.from(files||[]),source||'direct'):uploadRouterImpl.call(ce,Array.from(files||[]),source||'direct');}
+  async function uploadRouterImpl(files,source){var ce=this||getEngine(),arr=Array.from(files||[]).filter(Boolean);if(!arr.length)return{ok:true,okCount:0,failCount:0};var token;try{token=await Gate.prepare('upload','upload '+arr.length+' file');}catch(e){return{ok:false,error:e.message||'busy'};}ce.__familyUploadBusy=true;var ok=0,errors=[];try{for(var i=0;i<arr.length;i++){if(!Gate.isActive(token)){errors.push({file:arr[i].name,error:'abort'});break;}var f=arr[i],res=Number(f.size||0)>SINGLE_LIMIT?await uploadBundle(ce,f,i+1,arr.length,token):await uploadSingle(ce,f,i+1,arr.length,token);if(res&&res.ok)ok++;else if(res&&res.aborted){errors.push({file:f.name,error:'abort'});break;}else errors.push({file:f.name,error:res&&res.error||'failed'});if(i<arr.length-1)await sleep(60);}}finally{ce.__familyUploadBusy=false;Gate.finish(token);}if(errors.length){if(errors.some(function(x){return x.error==='abort';}))return{ok:false,okCount:ok,failCount:errors.length,aborted:true,errors:errors};status('Hoàn tất '+ok+'/'+arr.length+', lỗi '+errors.length+' file','error',false);appendFailureActions();return{ok:false,okCount:ok,failCount:errors.length,errors:errors};}status('Hoàn tất '+ok+'/'+arr.length+' file','done',true,100);return{ok:true,okCount:ok,failCount:0};}
+
+  function bindFileInput(){
+    var input=document.getElementById('chat-file-input'); if(!input||input.__lifeosR27Bound)return !!input;
+    input.__lifeosR27Bound=true;
+    input.addEventListener('change',function(e){
+      var files=Array.from(input.files||[]); input.value='';
+      if(!files.length)return;
+      try{e.preventDefault();e.stopImmediatePropagation();}catch(x){}
+      routeFiles(files,'chat-file-input');
+    },true);
     return true;
   }
-  function schedule(){install();setTimeout(install,300);setTimeout(install,1200);setTimeout(install,3200);setTimeout(install,6500);}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();window.addEventListener('load',schedule,{once:true});
+  function install(){
+    ensureAuxPanel(); bindFileInput();
+    var ce=window.ChatEngine; if(!ce)return false;
+    if(!ce.lastUploadError) ce.lastUploadError=getStoredLastError();
+    ce.__r27TransferAuxReupResumeCopyInstalled=true;
+    ce.__r26TransferAuxResumeCopyInstalled=false;
+    ce.__r24TransferSingleFlightInstalled=false;
+    ce.__r16RawFastInstalled=false;
+    ce.setUploadStatus=function(text,state,autoHide){status(text,state,autoHide);};
+    ce.showUploadErrorDetail=function(){return showErrorModal();};
+    ce.copyLastUploadError=function(){return copyLastError();};
+    ce.reselectFailedUpload=function(){return triggerReuploadPicker();};
+    ce.retryLastFailedUpload=function(){return retryLastFailedUpload();};
+    ce.cancelFamilyTransfer=function(){return Gate.cancelActive('user');};
+    ce.uploadRouter=uploadRouterImpl;
+    ce.sendMultipleFiles=function(files){return this.uploadRouter(files,'input');};
+    ce.handleFiles=function(files){return this.uploadRouter(files,'handleFiles');};
+    ce.handleFile=function(file){return this.uploadRouter(file?[file]:[],'handleFile');};
+    ce.sendFile=function(file){return this.uploadRouter(file?[file]:[],'sendFile');};
+    ce.downloadChatFile=async function(mid){var msg=findMsg(mid);if(!msg){status('Không tìm thấy file để tải','error',false);return false;}var token;try{token=await Gate.prepare('download','download');}catch(e){return false;}try{return (msg.isBundle||msg.type==='file_bundle'||msg.bundleManifest||msg.manifest)?await downloadBundle(this,msg,token):await downloadSingle(msg,token);}catch(e){if(e&&e.aborted){status('Đã hủy tải xuống','warn',true);return false;}status('Tải lỗi: '+(e.message||e),'error',false);return false;}finally{Gate.finish(token);}};
+    window.FamilyUploadQueue={queue:[],active:false,enqueue:function(files,source){return routeFiles(files,source||'family');},start:function(){return true;},cancel:function(){return Gate.cancelActive('queue_cancel');}};
+    updateAuxPanel(); return true;
+  }
+  window.LifeOSFamilyTransfer={phase:PHASE,install:install,showErrorDetail:showErrorModal,copyLastError:copyLastError,retryLastFailedUpload:retryLastFailedUpload,reselectFailedUpload:triggerReuploadPicker,cancel:function(){return Gate.cancelActive('user');},status:status};
+  function boot(){install();var ticks=0;var tm=setInterval(function(){ticks++;install();if(ticks>=INSTALL_MAX_TICKS)clearInterval(tm);},500);try{new MutationObserver(function(){install();}).observe(document.documentElement,{childList:true,subtree:true});}catch(e){} }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();window.addEventListener('load',function(){setTimeout(install,80);setTimeout(install,600);},{once:true});
 })();
 </script>
 
