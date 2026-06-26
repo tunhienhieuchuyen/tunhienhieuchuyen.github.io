@@ -11965,6 +11965,10 @@ window.MediaHub = {
         let retryCount = 0;
         let nativeRetryCount = 0;
         let watchdog = 0;
+        let hadPlayback = false;
+        let lastPlaybackAt = 0;
+        let softReconnectCount = 0;
+        let softFragErrorCount = 0;
         const loadToken = (this._mediaLoadSeq = (this._mediaLoadSeq || 0) + 1);
 
         const tokenAlive = () => this._mediaLoadSeq === loadToken;
@@ -12031,6 +12035,54 @@ window.MediaHub = {
         // Direct WebView first, proxy second, then per-channel diagnostic only.
         const tryNativeFallback = (reason, url) => false;
 
+        const markTvPlayback = () => {
+            if (type !== 'tv') return;
+            hadPlayback = true;
+            lastPlaybackAt = Date.now();
+            softReconnectCount = 0;
+            softFragErrorCount = 0;
+        };
+        const hasTvPlaybackSignal = () => {
+            if (type !== 'tv' || !el) return false;
+            return hadPlayback || el.currentTime > 0.6 || el.readyState >= 2 || el.videoWidth > 0 || el.videoHeight > 0;
+        };
+        const isTransientTvProblem = (reason) => {
+            if (type !== 'tv') return false;
+            const s = String(reason || '').toLowerCase();
+            return s.includes('segment') || s.includes('frag') || s.includes('network') || s.includes('timeout') || s.includes('chậm') || s.includes('phản hồi') || s.includes('server') || s.includes('fetch') || s.includes('stalled');
+        };
+        const softReconnectTv = (reason, url) => {
+            if (type !== 'tv' || !tokenAlive()) return false;
+            if (!hasTvPlaybackSignal() && softReconnectCount >= 1) return false;
+            if (softReconnectCount >= 5) return false;
+            softReconnectCount++;
+            clearWatch();
+            const route = routeFor(url || sources[sourceIndex]);
+            setStatus('buffering_reconnect', route, 'Đường truyền/segment TV chập chờn, đang tự nối lại lần ' + softReconnectCount + '. Không đánh dấu kênh chết.', url || sources[sourceIndex], { softReconnectCount, reason: String(reason || '').slice(0, 160) });
+            try {
+                const h = this[hlsKey];
+                if (h) {
+                    try { h.stopLoad(); } catch(_) {}
+                    setTimeout(() => {
+                        if (!tokenAlive()) return;
+                        try { h.startLoad(Math.max(0, (el && el.currentTime) || -1)); } catch(_) { try { h.startLoad(); } catch(__) {} }
+                    }, Math.min(2800, 650 + softReconnectCount * 420));
+                } else if (el) {
+                    setTimeout(() => {
+                        if (!tokenAlive()) return;
+                        try { el.load(); } catch(_) {}
+                        try { const p = el.play(); if (p && p.catch) p.catch(() => {}); } catch(_) {}
+                    }, Math.min(2800, 650 + softReconnectCount * 420));
+                }
+            } catch(e) {}
+            watchdog = setTimeout(() => {
+                if (!tokenAlive() || type !== 'tv') return;
+                if (hasTvPlaybackSignal()) return;
+                setStatus('loading_slow', route, 'Đường truyền vẫn chậm, đang chờ thêm trước khi thử nguồn khác', url || sources[sourceIndex], { softReconnectCount });
+            }, 15000);
+            return true;
+        };
+
         const failSource = (reason, url, skipNativeFallback) => {
             if (!tokenAlive()) return;
 
@@ -12041,6 +12093,7 @@ window.MediaHub = {
 
             clearWatch();
             const failedRoute = routeFor(url || sources[sourceIndex]);
+            if (isTransientTvProblem(reason) && softReconnectTv(reason, url || sources[sourceIndex])) return;
             setStatus('source_error', failedRoute, reason || 'Nguồn hiện tại lỗi, đang thử nguồn tiếp theo', url || sources[sourceIndex]);
 
             // R9 GitHub: thử web direct -> proxy; không gọi web fallback.
@@ -12126,14 +12179,16 @@ window.MediaHub = {
                 el.dataset.lifeosSourceTotal = String(sources.length);
             } catch(e) {}
 
-            // Nếu manifest/proxy đứng im quá lâu thì chuyển nguồn tiếp theo, không để người dùng tưởng đơ.
+            // Nếu manifest/proxy đứng im quá lâu thì chỉ báo chậm và thử nối lại mềm; không đánh dấu kênh chết khi luồng đã từng phát.
             if (type === 'tv') {
                 watchdog = setTimeout(() => {
                     if (!tokenAlive()) return;
                     const cur = el && (el.currentSrc || el.src || '');
-                    if (el && el.videoWidth > 0 && el.videoHeight > 0) return;
-                    failSource((route === 'webview_proxy' ? 'Proxy/HLS phản hồi quá chậm hoặc segment không về' : 'Direct HLS phản hồi quá chậm') + ' sau 10s', playUrl || cur);
-                }, 10000);
+                    if (el && (el.videoWidth > 0 || el.videoHeight > 0 || el.readyState >= 2 || el.currentTime > 0.6)) return;
+                    const slowReason = (route === 'webview_proxy' ? 'Proxy/HLS phản hồi chậm hoặc segment chưa về' : 'Direct HLS phản hồi chậm') + ' sau 12s';
+                    if (softReconnectTv(slowReason, playUrl || cur)) return;
+                    failSource(slowReason, playUrl || cur);
+                }, 12000);
             }
 
             el.onloadedmetadata = () => {
@@ -12143,14 +12198,18 @@ window.MediaHub = {
             };
             el.onplaying = () => {
                 if (!tokenAlive()) return;
+                if (type === 'tv') markTvPlayback();
                 setStatus('playing', route, route === 'webview_proxy' ? 'Kênh đang phát qua WebView + proxy' : 'Kênh đang phát bình thường qua WebView direct', playUrl);
                 if (type === 'tv') scheduleTvWatch(playUrl);
                 if (type === 'radio') { this.isRadioPlaying = true; this.updateRadioUI(); }
             };
+            el.onwaiting = () => { if (tokenAlive() && type === 'tv' && hasTvPlaybackSignal()) setStatus('buffering_reconnect', route, 'Mạng/luồng đang buffer, giữ kênh và chờ nối lại', playUrl); };
+            el.onstalled = () => { if (tokenAlive() && type === 'tv' && hasTvPlaybackSignal()) softReconnectTv('stalled sau khi đã phát', playUrl); };
             el.oncanplay = () => { if (tokenAlive() && type === 'tv') scheduleTvWatch(playUrl); };
             el.ontimeupdate = () => {
                 if (!tokenAlive() || type !== 'tv') return;
                 if (el.currentTime > 1.5) {
+                    markTvPlayback();
                     if (verifyTvFrame(playUrl, 'timeupdate')) setStatus('playing', route, route === 'webview_proxy' ? 'Kênh đang phát qua WebView + proxy' : 'Kênh đang phát bình thường qua WebView direct', playUrl);
                 }
             };
@@ -12166,13 +12225,14 @@ window.MediaHub = {
                 const hls = new Hls({
                     enableWorker: true,
                     lowLatencyMode: false,
-                    manifestLoadingTimeOut: 9000,
-                    levelLoadingTimeOut: 9000,
-                    fragLoadingTimeOut: 11000,
-                    manifestLoadingMaxRetry: 0,
-                    levelLoadingMaxRetry: 0,
-                    fragLoadingMaxRetry: 1,
-                    fragLoadingRetryDelay: 350
+                    manifestLoadingTimeOut: 11000,
+                    levelLoadingTimeOut: 11000,
+                    fragLoadingTimeOut: 14000,
+                    manifestLoadingMaxRetry: 1,
+                    levelLoadingMaxRetry: 1,
+                    fragLoadingMaxRetry: 3,
+                    fragLoadingRetryDelay: 700,
+                    fragLoadingMaxRetryTimeout: 6000
                 });
                 this[hlsKey] = hls;
 
@@ -12200,12 +12260,10 @@ window.MediaHub = {
                     if (this._mediaLoadSeq !== loadToken) return;
                     window.LIFEOS_DEBUG&&console.warn('[MediaHub] hls error', type, route, data);
                     if (type === 'tv' && data && !data.fatal && String(data.details || '').indexOf('fragLoadError') >= 0) {
-                        this.__lifeosTvFragFail = this.__lifeosTvFragFail || {};
-                        const k = String(route || '') + '|' + String(playUrl || '');
-                        const n = (this.__lifeosTvFragFail[k] || 0) + 1;
-                        this.__lifeosTvFragFail[k] = n;
-                        if (n >= 2) {
-                            failSource('Segment HLS lỗi liên tiếp, dừng nguồn này để tránh spam server/console', playUrl);
+                        softFragErrorCount++;
+                        setStatus('buffering_reconnect', route, 'Segment live bị hụt tạm thời, HLS đang tự retry/buffer. Không đánh dấu proxy/kênh chết.', playUrl, { softFragErrorCount });
+                        if (hasTvPlaybackSignal()) {
+                            try { hls.startLoad(Math.max(0, (el && el.currentTime) || -1)); } catch(_) {}
                         }
                         return;
                     }
@@ -12218,13 +12276,16 @@ window.MediaHub = {
                         return;
                     }
 
-                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR && retryCount < 1) {
-                        retryCount++;
-                        setStatus('recovering', route, 'HLS network lỗi, đang tải lại manifest/segment một lần', playUrl);
-                        try { hls.stopLoad(); hls.startLoad(); } catch(e) {
-                            try { hls.loadSource(playUrl); } catch(err) { failSource(classifyError(err), playUrl); }
+                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                        if (softReconnectTv(classifyError(data), playUrl)) return;
+                        if (retryCount < 2) {
+                            retryCount++;
+                            setStatus('recovering', route, 'HLS network lỗi, đang tải lại manifest/segment lần ' + retryCount, playUrl);
+                            try { hls.stopLoad(); setTimeout(() => { if (tokenAlive()) hls.startLoad(Math.max(0, (el && el.currentTime) || -1)); }, 700 * retryCount); } catch(e) {
+                                try { hls.loadSource(playUrl); } catch(err) { failSource(classifyError(err), playUrl); }
+                            }
+                            return;
                         }
-                        return;
                     }
 
                     failSource(classifyError(data), playUrl);
@@ -12938,7 +12999,7 @@ this.currentRadioIdx = idx;
       if (!v) return;
       if (v.error) {
         const code = v.error && v.error.code;
-        this.lifeosSetChannelStatus('tv', idx, 'webview_error', { route:routeNow, detail:'Luồng chính WebView báo lỗi media code=' + code + ', đang thử nguồn kế tiếp nếu có', url: src });
+        this.lifeosSetChannelStatus('tv', idx, 'buffering_reconnect', { route:routeNow, detail:'WebView báo media code=' + code + '; đang chờ HLS tự nối lại, chưa kết luận kênh/proxy chết', url: src });
         return;
       }
       if (v.videoWidth > 0 && v.videoHeight > 0 && (v.currentTime > 0.2 || v.readyState >= 2)) {
@@ -12961,7 +13022,7 @@ this.currentRadioIdx = idx;
         const sig = 'fallback_wait';
         if (lastSig !== sig) {
           lastSig = sig;
-          this.lifeosSetChannelStatus('tv', idx, 'source_error', { route: routeNow, detail:'Luồng ' + routeNow + ' có metadata nhưng chưa có hình; đang thử nguồn tiếp theo nếu có', url: src });
+          this.lifeosSetChannelStatus('tv', idx, 'buffering_reconnect', { route: routeNow, detail:'Luồng ' + routeNow + ' đang có metadata/buffer chậm; giữ kênh và chờ nối lại, chưa kết luận proxy chết', url: src });
         }
       } else if (elapsed > 9000) {
         const sig = 'slow';
@@ -20753,7 +20814,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         state.vScroller.scrollTop = before - dy;
         const after = state.vScroller.scrollTop;
         if (after !== before || state.startedOnCard) {
-          try { e.preventDefault(); } catch(_) {}
+          if (e.cancelable) { try { e.preventDefault(); } catch(_) {} }
           state.moved = true;
           suppressClickUntil = Date.now() + 380;
         }
@@ -20763,7 +20824,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
       const before = state.hScroller.scrollLeft;
       state.hScroller.scrollLeft = before - dx;
       if (state.hScroller.scrollLeft !== before) {
-        try { e.preventDefault(); } catch(_) {}
+        if (e.cancelable) { try { e.preventDefault(); } catch(_) {} }
         state.moved = true;
         suppressClickUntil = Date.now() + 300;
       }
@@ -21476,7 +21537,278 @@ window.LIFEOS_R33_STATIC_PROOF={phase:'R33_HTML_CLEAN_LAZY_DOWNLOAD_NO_AUTOFETCH
 
 <script id="lifeos-r37-html-clean-media-debt-marker">
 window.LIFEOS_R37_HTML_CLEAN_MEDIA_DEBT = true;
-window.LIFEOS_R37_SCOPE = 'html_only_media_console_debt_transfer_stable';
+window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
 </script>
+
+
+
+
+<!-- LIFEOS R43 MEDIA SUBTAB STRONG REOPEN + SAFE SWITCH - START -->
+<script id="lifeos-r43-media-strong-reopen-safe-switch-js">
+(function(){
+  'use strict';
+  if (window.__lifeosR43MediaStrongReopen) return;
+  window.__lifeosR43MediaStrongReopen = true;
+
+  var last = { tab:'', at:0 };
+  var monitorTimer = null;
+  var reopenTimers = [];
+  var reopenLock = { tv:0, radio:0 };
+  var tvAlive = { idx:-1, at:0, time:0, maxTime:0, route:'', url:'' };
+
+  function mh(){ return window.MediaHub || null; }
+  function el(id){ return document.getElementById(id); }
+  function valid(tab){ return tab === 'music' || tab === 'radio' || tab === 'tv'; }
+  function isNum(n){ return Number.isFinite(Number(n)) && Number(n) >= 0; }
+  function dataFor(m, type){ return type === 'tv' ? (Array.isArray(m.tvData) ? m.tvData : []) : (Array.isArray(m.radioData) ? m.radioData : []); }
+  function currentIdx(m, type){ return type === 'tv' ? (isNum(m.currentTvIdx) ? Number(m.currentTvIdx) : -1) : (isNum(m.currentRadioIdx) ? Number(m.currentRadioIdx) : -1); }
+  function setCurrentIdx(m, type, idx){ try { if (type === 'tv') m.currentTvIdx = idx; else m.currentRadioIdx = idx; } catch(_) {} }
+  function firstVisibleIdx(m, type){
+    var data = dataFor(m, type);
+    if (!data.length) return -1;
+    try {
+      if (typeof m._lifeosVisibleEntries === 'function') {
+        var list = m._lifeosVisibleEntries(type);
+        if (list && list.length && isNum(list[0].actualIdx)) return Number(list[0].actualIdx);
+      }
+    } catch(_) {}
+    return 0;
+  }
+  function playableIdx(m, type){
+    var data = dataFor(m, type);
+    var idx = currentIdx(m, type);
+    if (!isNum(idx) || !data[idx]) idx = firstVisibleIdx(m, type);
+    return data[idx] ? idx : -1;
+  }
+  function mediaEl(type){ return type === 'tv' ? el('tv-video-element') : el('radio-audio-element'); }
+
+  function syncButtons(tab){
+    var active = {
+      music:'bg-primary text-white shadow-sm border-primary',
+      radio:'bg-emerald-500 text-white shadow-sm border-emerald-500',
+      tv:'bg-rose-500 text-white shadow-sm border-rose-500'
+    };
+    var idle = 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100';
+    ['music','radio','tv'].forEach(function(t){
+      var b = el('tab-media-' + t);
+      if (!b) return;
+      b.className = 'px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap ' + (t === tab ? active[t] : idle);
+    });
+  }
+  function show(id, yes, mode){
+    var n = el(id); if (!n) return;
+    n.style.setProperty('display', yes ? (mode || 'block') : 'none', 'important');
+  }
+  function syncPanels(tab){
+    show('mp3-list-container', tab === 'music', 'block');
+    show('radio-list-container', tab === 'radio', 'block');
+    show('tv-list-container', tab === 'tv', 'grid');
+    show('tv-player-container', tab === 'tv', 'block');
+    show('radio-player-container', tab === 'radio', 'block');
+    var side = el('media-group-sidebar');
+    var mob = el('media-group-mobile-bar');
+    if (side) side.className = tab === 'music' ? 'hidden' : 'hidden lg:flex lg:col-span-3 flex-col gap-1.5 overflow-y-auto pr-1';
+    if (mob) mob.className = tab === 'music' ? 'hidden' : 'flex lg:hidden w-full gap-2 px-2 pb-2 overflow-x-auto custom-scroll-area shrink-0';
+    try { document.body.dataset.l64fMediaTab = tab; document.body.dataset.lifeosMediaTab = tab; } catch(_) {}
+  }
+  function stopOther(target){
+    try { if (target !== 'tv') { var v = mediaEl('tv'); if (v) v.pause(); } } catch(_) {}
+    try { if (target !== 'radio') { var a = mediaEl('radio'); if (a) a.pause(); } } catch(_) {}
+    try { if (target !== 'tv' && window.MediaHub && window.MediaHub.hlsTv && typeof window.MediaHub.hlsTv.stopLoad === 'function') window.MediaHub.hlsTv.stopLoad(); } catch(_) {}
+  }
+  function clearReopenTimers(){
+    while (reopenTimers.length) { try { clearTimeout(reopenTimers.pop()); } catch(_) {} }
+  }
+  function setStatus(type, idx, state, detail){
+    var m = mh(); if (!m || !isNum(idx)) return;
+    try {
+      if (typeof m.lifeosSetChannelStatus === 'function') {
+        m.lifeosSetChannelStatus(type, idx, state, { detail: detail || '', r43:true });
+      } else if (type === 'tv' && typeof m.setTvInstruction === 'function') {
+        m.setTvInstruction(detail || 'Đang nối lại kênh...', state === 'playing' ? 'ok' : 'loading');
+      } else if (type === 'radio' && typeof m.setRadioInstruction === 'function') {
+        m.setRadioInstruction(detail || 'Đang nối lại đài...', state === 'playing' ? 'ok' : 'loading');
+      }
+    } catch(_) {}
+  }
+  function resetElement(type){
+    var node = mediaEl(type);
+    if (!node) return;
+    try { node.pause(); } catch(_) {}
+    try { node.removeAttribute('src'); } catch(_) {}
+    try { node.load(); } catch(_) {}
+    try {
+      if (type === 'tv' && window.MediaHub && window.MediaHub.hlsTv && typeof window.MediaHub.hlsTv.destroy === 'function') { window.MediaHub.hlsTv.destroy(); window.MediaHub.hlsTv = null; }
+      if (type === 'radio' && window.MediaHub && window.MediaHub.hlsRadio && typeof window.MediaHub.hlsRadio.destroy === 'function') { window.MediaHub.hlsRadio.destroy(); window.MediaHub.hlsRadio = null; }
+    } catch(_) {}
+  }
+  function strongOpen(type, reason, forceReset){
+    var m = mh(); if (!m || (type !== 'tv' && type !== 'radio')) return false;
+    var idx = playableIdx(m, type);
+    if (!isNum(idx)) return false;
+    var now = Date.now();
+    if (now - (reopenLock[type] || 0) < 950) return true;
+    reopenLock[type] = now;
+    setCurrentIdx(m, type, idx);
+    try { m.currentTab = type; } catch(_) {}
+    syncButtons(type);
+    syncPanels(type);
+    if (forceReset) resetElement(type);
+    setStatus(type, idx, 'buffering_reconnect', (type === 'tv' ? 'Đang mở lại kênh từ đầu' : 'Đang mở lại đài từ đầu') + (reason ? ' — ' + reason : ''));
+    try { if (typeof m.renderLists === 'function') m.renderLists(); } catch(_) {}
+    try { if (typeof m.playStream === 'function') m.playStream(idx, type); } catch(e) { return false; }
+    startMonitor(type, idx);
+    return true;
+  }
+  function scheduleStrongOpen(type, reason){
+    clearReopenTimers();
+    strongOpen(type, reason || 'mở ngay', true);
+    [1800, 5200, 9800].forEach(function(ms){
+      reopenTimers.push(setTimeout(function(){
+        if (!stillNeedsReopen(type)) return;
+        strongOpen(type, 'chưa thấy tín hiệu ổn sau ' + Math.round(ms/1000) + 's', true);
+      }, ms));
+    });
+  }
+  function stillNeedsReopen(type){
+    var m = mh(); if (!m || m.currentTab !== type) return false;
+    var node = mediaEl(type); if (!node) return true;
+    if (type === 'tv') {
+      try {
+        if (node.videoWidth > 0 && node.videoHeight > 0 && node.currentTime > 0.7 && !node.paused) return false;
+        if (tvAlive.at && (Date.now() - tvAlive.at) < 6500 && tvAlive.maxTime > 1.5) return false;
+      } catch(_) {}
+      return true;
+    }
+    try { return !(node.currentSrc || node.src) || node.paused || node.readyState < 2; } catch(_) { return true; }
+  }
+  function switchTab(tab, reason){
+    if (!valid(tab)) tab = 'music';
+    var m = mh(); if (!m) return false;
+    clearReopenTimers();
+    try { m.currentTab = tab; } catch(_) {}
+    if (tab === 'music') {
+      stopOther(tab);
+      syncButtons(tab); syncPanels(tab);
+      try { if (window.MusicApp && typeof window.MusicApp.renderList === 'function') window.MusicApp.renderList(); } catch(_) {}
+      try { if (window.MusicApp && typeof window.MusicApp.updateMiniPlayer === 'function') window.MusicApp.updateMiniPlayer(); } catch(_) {}
+    } else {
+      stopOther(tab);
+      try { if (typeof m.renderGroupMenus === 'function') m.renderGroupMenus(); } catch(_) {}
+      syncButtons(tab); syncPanels(tab);
+      try { if (typeof m.renderLists === 'function') m.renderLists(); } catch(_) {}
+      scheduleStrongOpen(tab, reason || 'chuyển mục');
+    }
+    try { localStorage.setItem('lifeos_media_memory', JSON.stringify({ tab:tab, group:m.currentGroup || 'all', tvIdx:m.currentTvIdx, radioIdx:m.currentRadioIdx, source:'r43-strong-reopen' })); } catch(_) {}
+    setTimeout(function(){ syncButtons(tab); syncPanels(tab); try { if (typeof m.renderLists === 'function') m.renderLists(); } catch(_) {} }, 120);
+    setTimeout(function(){ syncButtons(tab); syncPanels(tab); }, 420);
+    return false;
+  }
+  function onTab(ev, tab){
+    try { ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); } catch(_) {}
+    var now = Date.now();
+    if (last.tab === tab && now - last.at < 220) return false;
+    last.tab = tab; last.at = now;
+    return switchTab(tab, 'người dùng chọn tab');
+  }
+  function bindTabs(){
+    ['music','radio','tv'].forEach(function(tab){
+      var b = el('tab-media-' + tab);
+      if (!b || b.__lifeosR43Bound) return;
+      b.__lifeosR43Bound = true;
+      b.addEventListener('click', function(ev){ return onTab(ev, tab); }, true);
+      b.addEventListener('touchend', function(ev){ return onTab(ev, tab); }, { capture:true, passive:false });
+    });
+  }
+  function markTvAlive(){
+    var v = mediaEl('tv'); var m = mh(); if (!v || !m) return;
+    try {
+      tvAlive.idx = currentIdx(m, 'tv');
+      tvAlive.at = Date.now();
+      tvAlive.time = Number(v.currentTime || 0);
+      tvAlive.maxTime = Math.max(tvAlive.maxTime || 0, tvAlive.time);
+      tvAlive.route = (v.dataset && v.dataset.lifeosPlayRoute) || tvAlive.route || '';
+      tvAlive.url = (v.dataset && (v.dataset.lifeosPlayUrl || v.dataset.lifeosSourceUrl)) || v.currentSrc || v.src || tvAlive.url || '';
+    } catch(_) {}
+  }
+  function hookVideo(){
+    var v = mediaEl('tv'); if (!v || v.__lifeosR43Hooked) return;
+    v.__lifeosR43Hooked = true;
+    ['playing','timeupdate','canplay','loadeddata','loadedmetadata'].forEach(function(name){ v.addEventListener(name, markTvAlive, true); });
+    ['waiting','stalled','suspend'].forEach(function(name){
+      v.addEventListener(name, function(){
+        markTvAlive();
+        var m = mh(); if (!m || m.currentTab !== 'tv') return;
+        setStatus('tv', currentIdx(m,'tv'), 'buffering_reconnect', 'Mạng/luồng đang hụt buffer, sẽ tự mở lại kênh nếu không hồi phục');
+        setTimeout(function(){ if (stillNeedsReopen('tv')) strongOpen('tv', 'buffer không hồi phục', true); }, 6500);
+      }, true);
+    });
+  }
+  function startMonitor(type, idx){
+    if (type !== 'tv') return;
+    clearInterval(monitorTimer);
+    var lastTime = -1, stuckCount = 0;
+    monitorTimer = setInterval(function(){
+      var m = mh(); var v = mediaEl('tv');
+      if (!m || m.currentTab !== 'tv' || currentIdx(m,'tv') !== idx || !v) { clearInterval(monitorTimer); return; }
+      var t = 0;
+      try { t = Number(v.currentTime || 0); } catch(_) {}
+      if (t > 0.7 && t !== lastTime && (v.videoWidth > 0 || v.videoHeight > 0 || v.readyState >= 2)) {
+        lastTime = t; stuckCount = 0; markTvAlive();
+        return;
+      }
+      stuckCount += 1;
+      if (stuckCount === 3) setStatus('tv', idx, 'buffering_reconnect', 'Đường truyền đang chậm, đang giữ kênh và chuẩn bị mở lại nếu cần');
+      if (stuckCount >= 5) { stuckCount = 0; strongOpen('tv', 'monitor thấy kênh không tiến, mở lại từ đầu', true); }
+    }, 2500);
+  }
+  function patchMediaHub(){
+    var m = mh(); if (!m || m.__lifeosR43Patched) return false;
+    m.__lifeosR43Patched = true;
+    var oldSwitch = m.switchTab;
+    if (typeof oldSwitch === 'function') {
+      m.switchTab = function(tab, skip, opt){
+        if (tab === 'music' || tab === 'radio' || tab === 'tv') return switchTab(tab, 'MediaHub.switchTab');
+        return oldSwitch.apply(this, arguments);
+      };
+    }
+    var oldPlay = m.playStream;
+    if (typeof oldPlay === 'function') {
+      m.playStream = function(idx, type){
+        var out = oldPlay.apply(this, arguments);
+        if (type === 'tv') { tvAlive.maxTime = 0; setTimeout(function(){ hookVideo(); startMonitor('tv', Number(idx)); }, 200); }
+        return out;
+      };
+    }
+    var oldErr = m.showPlayerLoadError;
+    if (typeof oldErr === 'function') {
+      m.showPlayerLoadError = function(type, reason, url){
+        if (type === 'tv' && tvAlive.at && Date.now() - tvAlive.at < 90000) {
+          setStatus('tv', currentIdx(this,'tv'), 'buffering_reconnect', 'Kênh từng phát được; coi là hụt buffer/mạng chậm, đang mở lại từ đầu');
+          setTimeout(function(){ strongOpen('tv', 'showPlayerLoadError sau khi đã phát', true); }, 800);
+          return false;
+        }
+        return oldErr.apply(this, arguments);
+      };
+    }
+    return true;
+  }
+  function boot(){
+    bindTabs(); hookVideo(); patchMediaHub();
+    var n = 0;
+    var timer = setInterval(function(){
+      n += 1; bindTabs(); hookVideo(); if (patchMediaHub() || n > 60) clearInterval(timer);
+    }, 200);
+    setTimeout(function(){ var m = mh(); if (m && valid(m.currentTab)) { syncButtons(m.currentTab); syncPanels(m.currentTab); } }, 700);
+  }
+  window.lifeosR43SwitchMediaTab = switchTab;
+  window.lifeosR42SwitchMediaTab = switchTab;
+  window.lifeosR41SwitchMediaTab = switchTab;
+  window.lifeosR43ReopenCurrentMedia = function(type){ return strongOpen(type || ((mh() && mh().currentTab) || 'tv'), 'manual-api', true); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+})();
+</script>
+<!-- LIFEOS R43 MEDIA SUBTAB STRONG REOPEN + SAFE SWITCH - END -->
+
 </body>
 </html>
