@@ -28,6 +28,26 @@
   if(oi) console.info = function(){ if(isKnownThirdPartyNoise(arguments)) return; return oi.apply(console, arguments); };
 })();
 </script>
+<script id="lifeos-r37-startup-debt-guard">
+(function(){
+  if(window.__lifeosR37StartupDebtGuard) return;
+  window.__lifeosR37StartupDebtGuard = true;
+  // Hạn chế rung khi không có transient user activation để tránh Intervention spam.
+  try{
+    var oldVibrate = window.vibrate;
+    window.vibrate = function(pattern){
+      try{
+        var ua = navigator.userActivation;
+        if(ua && ua.isActive !== true) return false;
+        if(!ua && !window.__lifeosUserGesture) return false;
+        if(typeof oldVibrate === 'function') return oldVibrate(pattern);
+        if(navigator.vibrate) return navigator.vibrate(pattern);
+      }catch(e){}
+      return false;
+    };
+  }catch(e){}
+})();
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
     window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
@@ -3950,7 +3970,7 @@ window.getIsoDate = (dateObj) => { const d = dateObj || new Date(); return `${d.
 window.getTodayStr=()=>window.getIsoDate(); 
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
 window.__lifeosUserGesture=false;['pointerdown','touchstart','keydown','click'].forEach(function(ev){try{window.addEventListener(ev,function(){window.__lifeosUserGesture=true;},{capture:true,passive:true});}catch(e){}});
-window.vibrate=function(p){if(!window.__lifeosUserGesture) return false; if(navigator.vibrate)try{return navigator.vibrate(p)}catch(e){} return false;};
+window.vibrate=function(p){try{var ua=navigator.userActivation;if(ua&&ua.isActive!==true)return false;if(!ua&&!window.__lifeosUserGesture)return false;if(navigator.vibrate)return navigator.vibrate(p);}catch(e){}return false;};
 </script>
 <div class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-md items-center justify-center p-4" id="sentinel-panel">
     <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]">
@@ -11879,7 +11899,7 @@ window.MediaHub = {
             this.setRadioInstruction(msg + extra, 'error');
             window.showToast?.(msg, 'ph-warning-circle');
         }
-        console.warn('[MediaHub] player load error', { type, reason: msg, url });
+        window.LIFEOS_DEBUG&&console.warn('[MediaHub] player load error', { type, reason: msg, url });
     },
     buildSourceQueue(channel) {
         const raw = [
@@ -11910,11 +11930,16 @@ window.MediaHub = {
             u = (u || '').trim();
             if (!u) return;
             try {
-                // R13.7: TV phải ưu tiên nguồn gốc WebView trước vì đây là luồng cũ gọn/đẹp/đã chứng minh chạy nhiều kênh.
-                // Proxy là nguồn thứ hai để nghiệm thu Worker và cứu kênh bị CORS/header, không được ép proxy làm nguồn chính.
-                add(u);
                 const shouldAddProxy = type === 'tv' || (window.lifeosNeedsProxy && window.lifeosNeedsProxy(u, channel));
                 const proxy = window.lifeosProxyUrl ? window.lifeosProxyUrl(u) : '';
+                const likelyCorsOnlyTv = type === 'tv' && /(^|\.)vtvdigital\.vn\//i.test(u.replace(/^https?:\/\//i, ''));
+                // R37: với VTV/VTVGo, direct HLS trên GitHub luôn sinh CORS + sw.js fetch error.
+                // Không thử direct trước nữa; thử proxy gọn một lần để tránh console/network spam.
+                if (likelyCorsOnlyTv && proxy && proxy !== u && !isProxy(u)) {
+                    add(proxy);
+                    return;
+                }
+                add(u);
                 if (shouldAddProxy && proxy && proxy !== u && !isProxy(u)) add(proxy);
             } catch(e) {
                 add(u);
@@ -12010,7 +12035,7 @@ window.MediaHub = {
             if (!tokenAlive()) return;
 
             if (type === 'tv' && nativeRetryCount > 0 && !skipNativeFallback) {
-                console.warn('[MediaHub] ignore stale WebView error while web fallback is active', { reason, url });
+                window.LIFEOS_DEBUG&&console.warn('[MediaHub] ignore stale WebView error while web fallback is active', { reason, url });
                 return;
             }
 
@@ -12022,7 +12047,7 @@ window.MediaHub = {
             if (sourceIndex + 1 < sources.length) {
                 sourceIndex++;
                 retryCount = 0;
-                console.warn('[MediaHub] try next media source', type, reason || '', `${sourceIndex + 1}/${sources.length}`, sources[sourceIndex]);
+                window.LIFEOS_DEBUG&&console.warn('[MediaHub] try next media source', type, reason || '', `${sourceIndex + 1}/${sources.length}`, sources[sourceIndex]);
                 loadCurrentSource();
                 return;
             }
@@ -12143,7 +12168,11 @@ window.MediaHub = {
                     lowLatencyMode: false,
                     manifestLoadingTimeOut: 9000,
                     levelLoadingTimeOut: 9000,
-                    fragLoadingTimeOut: 11000
+                    fragLoadingTimeOut: 11000,
+                    manifestLoadingMaxRetry: 0,
+                    levelLoadingMaxRetry: 0,
+                    fragLoadingMaxRetry: 1,
+                    fragLoadingRetryDelay: 350
                 });
                 this[hlsKey] = hls;
 
@@ -12169,7 +12198,17 @@ window.MediaHub = {
 
                 hls.on(Hls.Events.ERROR, (event, data) => {
                     if (this._mediaLoadSeq !== loadToken) return;
-                    console.warn('[MediaHub] hls error', type, route, data);
+                    window.LIFEOS_DEBUG&&console.warn('[MediaHub] hls error', type, route, data);
+                    if (type === 'tv' && data && !data.fatal && String(data.details || '').indexOf('fragLoadError') >= 0) {
+                        this.__lifeosTvFragFail = this.__lifeosTvFragFail || {};
+                        const k = String(route || '') + '|' + String(playUrl || '');
+                        const n = (this.__lifeosTvFragFail[k] || 0) + 1;
+                        this.__lifeosTvFragFail[k] = n;
+                        if (n >= 2) {
+                            failSource('Segment HLS lỗi liên tiếp, dừng nguồn này để tránh spam server/console', playUrl);
+                        }
+                        return;
+                    }
                     if (!data || !data.fatal) return;
 
                     if (data.type === Hls.ErrorTypes.MEDIA_ERROR && retryCount < 1) {
@@ -21434,5 +21473,10 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 window.LIFEOS_R33_STATIC_PROOF={phase:'R33_HTML_CLEAN_LAZY_DOWNLOAD_NO_AUTOFETCH',noAutoDownloadOnRender:true,uploadDownloadWorkerUnchanged:true,smallFilePath:'R32/R16 raw worker fast path retained'};
 </script>
 
+
+<script id="lifeos-r37-html-clean-media-debt-marker">
+window.LIFEOS_R37_HTML_CLEAN_MEDIA_DEBT = true;
+window.LIFEOS_R37_SCOPE = 'html_only_media_console_debt_transfer_stable';
+</script>
 </body>
 </html>
