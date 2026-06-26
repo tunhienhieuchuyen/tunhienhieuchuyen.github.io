@@ -12,6 +12,22 @@
 <meta content="LifeOS" name="application-name"/>
 <title>LifeOS Master Pha40 - Push Trigger</title>
 <link href="./manifest.json" id="manifest-link" rel="manifest"/>
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236366f1'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='34' fill='white'%3EL%3C/text%3E%3C/svg%3E" rel="icon" type="image/svg+xml"/>
+<script id="lifeos-r36-startup-console-guard">
+(function(){
+  if(window.__lifeosR36StartupConsoleGuard) return;
+  window.__lifeosR36StartupConsoleGuard = true;
+  var ow = console.warn && console.warn.bind(console);
+  var oi = console.info && console.info.bind(console);
+  function isKnownThirdPartyNoise(args){
+    var first = String((args && args[0]) || '');
+    return first.indexOf('cdn.tailwindcss.com should not be used in production') >= 0 ||
+           first.indexOf('Banner not shown: beforeinstallpromptevent.preventDefault() called') >= 0;
+  }
+  if(ow) console.warn = function(){ if(isKnownThirdPartyNoise(arguments)) return; return ow.apply(console, arguments); };
+  if(oi) console.info = function(){ if(isKnownThirdPartyNoise(arguments)) return; return oi.apply(console, arguments); };
+})();
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
     window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
@@ -22,7 +38,46 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsotp@1.2.0/dist/jsOTP.min.js"></script>
+<script id="lifeos-r36-jsotp-local-shim">
+(function(){
+  if(window.jsOTP && window.jsOTP.totp) return;
+  function b32(s){
+    var alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', bits='', out=[];
+    s=String(s||'').replace(/\s+/g,'').replace(/=+$/,'').toUpperCase();
+    for(var i=0;i<s.length;i++){ var v=alphabet.indexOf(s.charAt(i)); if(v>=0) bits += v.toString(2).padStart(5,'0'); }
+    for(var j=0;j+8<=bits.length;j+=8) out.push(parseInt(bits.slice(j,j+8),2));
+    return out;
+  }
+  function rol(n,b){ return ((n<<b)|(n>>>(32-b)))>>>0; }
+  function sha1(bytes){
+    var ml=bytes.length*8, data=bytes.slice(); data.push(0x80); while((data.length%64)!==56) data.push(0);
+    for(var i=7;i>=0;i--) data.push((ml/(Math.pow(2,8*i)))&255);
+    var h0=0x67452301,h1=0xEFCDAB89,h2=0x98BADCFE,h3=0x10325476,h4=0xC3D2E1F0;
+    for(var c=0;c<data.length;c+=64){
+      var w=new Array(80); for(i=0;i<16;i++){ var k=c+i*4; w[i]=((data[k]<<24)|(data[k+1]<<16)|(data[k+2]<<8)|data[k+3])>>>0; }
+      for(i=16;i<80;i++) w[i]=rol((w[i-3]^w[i-8]^w[i-14]^w[i-16])>>>0,1);
+      var a=h0,b=h1,d=h3,e=h4,cc=h2,f,t;
+      for(i=0;i<80;i++){
+        if(i<20){f=(b&cc)|((~b)&d); k=0x5A827999;} else if(i<40){f=b^cc^d; k=0x6ED9EBA1;} else if(i<60){f=(b&cc)|(b&d)|(cc&d); k=0x8F1BBCDC;} else {f=b^cc^d; k=0xCA62C1D6;}
+        t=(rol(a,5)+f+e+k+w[i])>>>0; e=d; d=cc; cc=rol(b,30); b=a; a=t;
+      }
+      h0=(h0+a)>>>0; h1=(h1+b)>>>0; h2=(h2+cc)>>>0; h3=(h3+d)>>>0; h4=(h4+e)>>>0;
+    }
+    var hs=[h0,h1,h2,h3,h4], out=[]; for(i=0;i<hs.length;i++){ out.push((hs[i]>>>24)&255,(hs[i]>>>16)&255,(hs[i]>>>8)&255,hs[i]&255); } return out;
+  }
+  function hmacSha1(key,msg){
+    if(key.length>64) key=sha1(key); while(key.length<64) key.push(0);
+    var o=[], inn=[]; for(var i=0;i<64;i++){ o[i]=key[i]^0x5c; inn[i]=key[i]^0x36; }
+    return sha1(o.concat(sha1(inn.concat(msg))));
+  }
+  function counterBytes(counter){ var out=new Array(8); for(var i=7;i>=0;i--){ out[i]=counter&255; counter=Math.floor(counter/256); } return out; }
+  window.jsOTP = { totp:function(){ this.getOtp=function(secret){
+    var key=b32(secret), step=Math.floor(Date.now()/30000), hs=hmacSha1(key,counterBytes(step)), off=hs[19]&15;
+    var bin=((hs[off]&127)<<24)|(hs[off+1]<<16)|(hs[off+2]<<8)|hs[off+3];
+    return String(bin%1000000).padStart(6,'0');
+  }; } };
+})();
+</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -3894,7 +3949,8 @@ window.escapeHTML=s=>{const t=document.createElement('textarea');t.innerText=s||
 window.getIsoDate = (dateObj) => { const d = dateObj || new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 window.getTodayStr=()=>window.getIsoDate(); 
 window.formatTimeVN=t=>t?t.replace(':',' giờ ')+' phút':'';
-window.vibrate=p=>{if(navigator.vibrate)try{navigator.vibrate(p)}catch(e){}};
+window.__lifeosUserGesture=false;['pointerdown','touchstart','keydown','click'].forEach(function(ev){try{window.addEventListener(ev,function(){window.__lifeosUserGesture=true;},{capture:true,passive:true});}catch(e){}});
+window.vibrate=function(p){if(!window.__lifeosUserGesture) return false; if(navigator.vibrate)try{return navigator.vibrate(p)}catch(e){} return false;};
 </script>
 <div class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-md items-center justify-center p-4" id="sentinel-panel">
     <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]">
@@ -6522,7 +6578,7 @@ window.debugVaultNow = async function() {
 };
 
 window.forcePullVaultFromFirebase = async function() {
-    console.group('=== FORCE PULL VAULT FROM FIREBASE ===');
+    var __lifeosForcePullDebug=!!window.LIFEOS_DEBUG; if(__lifeosForcePullDebug) console.group('=== FORCE PULL VAULT FROM FIREBASE ===');
     try {
         const k = window.viewingUser || window.FirebaseSync?._k;
         window.LIFEOS_DEBUG&&console.log('[FORCE] profile=', k);
@@ -6556,7 +6612,7 @@ window.forcePullVaultFromFirebase = async function() {
     } catch (err) {
         console.error('[FORCE PULL ERROR]', err);
         window.showToast?.('Force pull Vault lỗi: ' + err.message, 'ph-warning');
-    } finally { console.groupEnd(); }
+    } finally { if(__lifeosForcePullDebug) console.groupEnd(); }
 };
 
 // ==============================================================================
@@ -20301,7 +20357,7 @@ No ExoPlayer / No native TV fallback in media path
   if(window.__lifeosR1414FinalPolish) return;
   window.__lifeosR1414FinalPolish = true;
   var PHASE = 'R14_14_CACHE_VAULT_ALARM_FINAL';
-  function log(){ try{ console.info.apply(console, ['[LifeOS '+PHASE+']'].concat([].slice.call(arguments))); }catch(e){} }
+  function log(){ try{ if(!window.LIFEOS_DEBUG) return; console.info.apply(console, ['[LifeOS '+PHASE+']'].concat([].slice.call(arguments))); }catch(e){} }
   function toast(msg, icon){ try{ window.showToast && window.showToast(msg, icon || 'ph-check-circle'); }catch(e){} }
   function $(id){ return document.getElementById(id); }
   function stopAudioElement(){
@@ -20756,7 +20812,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 <script id="lifeos-r34-transfer-large-breath-savepicker-js">
 (function(){
   'use strict';
-  var PHASE='R35_HTML_CLEAN_TRANSFER_QUIET_FB_NO_OVERLAP';
+  var PHASE='R36_HTML_CLEAN_STARTUP_QUIET_TRANSFER_STABLE';
   if(window.__lifeosR35TransferQuietFbNoOverlap) return;
   window.__lifeosR35TransferQuietFbNoOverlap=true;
 
