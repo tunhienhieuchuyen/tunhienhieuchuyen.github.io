@@ -21810,5 +21810,1033 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
 </script>
 <!-- LIFEOS R43 MEDIA SUBTAB STRONG REOPEN + SAFE SWITCH - END -->
 
+
+
+<!-- LIFEOS GITHUB TV/RADIO STRONG RELOAD GUARD FROM APK NATIVE - START -->
+<script id="lifeos-tv-radio-strong-reload-pha02j-js">
+(function(){
+  'use strict';
+  var MARKER = 'Pha02J_TV_RADIO_STRONG_RELOAD_GUARD';
+  if (window.__lifeosTvRadioStrongReloadPha02J) return;
+  window.__lifeosTvRadioStrongReloadPha02J = true;
+
+  var MAX_FAILURE = 5;
+  var WAITING_LIMIT_MS = 10000;
+  var NO_PROGRESS_LIMIT_MS = 12000;
+  var MONITOR_MS = 3000;
+  var PATCH_MS = 250;
+
+  var logs = window.__lifeosTvRadioStrongReloadLogs = window.__lifeosTvRadioStrongReloadLogs || [];
+  var failureCount = window.__lifeosTvRadioFailureCount = window.__lifeosTvRadioFailureCount || {};
+  var retryTimers = [];
+  var monitorTimer = 0;
+  var patchTimer = 0;
+  var internalPauseUntil = 0;
+  var reloadLock = {tv:0, radio:0};
+  var eventBound = {tv:false, radio:false};
+
+  var state = {
+    activeType: null,
+    activeIdx: -1,
+    activeChannel: null,
+    activeChannelId: '',
+    autoRetryAllowed: false,
+    userPaused: false,
+    waitingSince: 0,
+    lastProgressMs: 0,
+    lastCurrentTime: 0,
+    lastEventName: '',
+    lastReloadReason: '',
+    suppressUntil: 0
+  };
+
+  function now(){ return Date.now(); }
+  function mh(){ return window.MediaHub || null; }
+  function el(id){ return document.getElementById(id); }
+  function mediaEl(type){ return type === 'tv' ? el('tv-video-element') : el('radio-audio-element'); }
+  function validType(type){ return type === 'tv' || type === 'radio'; }
+  function isNum(v){ return Number.isFinite(Number(v)) && Number(v) >= 0; }
+  function activeTab(){ try { return (window.MediaHub && window.MediaHub.currentTab) || document.body.dataset.lifeosMediaTab || document.body.dataset.l64fMediaTab || ''; } catch(_) { return ''; } }
+  function dataFor(type){ var m = mh(); return !m ? [] : (type === 'tv' ? (Array.isArray(m.tvData) ? m.tvData : []) : (Array.isArray(m.radioData) ? m.radioData : [])); }
+  function channelFor(type, idx){ return dataFor(type)[Number(idx)] || null; }
+  function channelId(type, idx, channel){
+    channel = channel || channelFor(type, idx) || {};
+    return String(channel.id || channel.channelId || channel.key || channel.name || (type + ':' + idx));
+  }
+  function channelName(channel){ return String((channel && (channel.name || channel.title || channel.label)) || ''); }
+  function channelUrl(channel){ return String((channel && (channel.url || channel.src || channel.streamUrl || channel.stream_url || channel.stream || channel.link || channel.m3u8 || channel.proxyUrl)) || ''); }
+  function clampLog(){ while (logs.length > 80) logs.shift(); }
+  function log(eventName, extra){
+    var type = (extra && extra.type) || state.activeType || '';
+    var idx = isNum(extra && extra.idx) ? Number(extra.idx) : state.activeIdx;
+    var ch = (extra && extra.channel) || (validType(type) && isNum(idx) ? channelFor(type, idx) : state.activeChannel) || {};
+    var node = validType(type) ? mediaEl(type) : null;
+    var item = Object.assign({
+      at: new Date().toISOString(),
+      marker: MARKER,
+      eventName: eventName || state.lastEventName || '',
+      type: type || '',
+      idx: isNum(idx) ? Number(idx) : -1,
+      channelId: channelId(type || 'media', idx, ch),
+      channelName: channelName(ch),
+      url: channelUrl(ch),
+      reason: (extra && extra.reason) || state.lastReloadReason || '',
+      isSameChannel: !!(extra && extra.isSameChannel),
+      manualOrAuto: (extra && extra.manualOrAuto) || '',
+      failureCount: failureCount[channelId(type || 'media', idx, ch)] || 0,
+      readyState: node ? node.readyState : -1,
+      networkState: node ? node.networkState : -1,
+      currentTimeBefore: extra && extra.currentTimeBefore !== undefined ? extra.currentTimeBefore : (node ? Number(node.currentTime || 0) : 0),
+      currentTimeAfter: extra && extra.currentTimeAfter !== undefined ? extra.currentTimeAfter : undefined,
+      lastTimeUpdateMs: state.lastProgressMs || 0,
+      errorCode: node && node.error ? node.error.code : 0,
+      userPaused: !!state.userPaused,
+      activeTab: activeTab()
+    }, extra || {});
+    delete item.channel;
+    logs.push(item); clampLog();
+    try { console.info('[LifeOSMediaStrongGuard]', item); } catch(_) {}
+    return item;
+  }
+  function clearRetryTimers(){ while(retryTimers.length){ try{ clearTimeout(retryTimers.pop()); }catch(_){} } }
+  function destroyHls(type){
+    var m = mh(); if(!m) return;
+    try { if(type !== 'radio' && m.hlsTv && typeof m.hlsTv.destroy === 'function'){ m.hlsTv.destroy(); m.hlsTv = null; } } catch(_) {}
+    try { if(type !== 'tv' && m.hlsRadio && typeof m.hlsRadio.destroy === 'function'){ m.hlsRadio.destroy(); m.hlsRadio = null; } } catch(_) {}
+    try { if(type === 'tv' && m.hlsTv && typeof m.hlsTv.destroy === 'function'){ m.hlsTv.destroy(); m.hlsTv = null; } } catch(_) {}
+    try { if(type === 'radio' && m.hlsRadio && typeof m.hlsRadio.destroy === 'function'){ m.hlsRadio.destroy(); m.hlsRadio = null; } } catch(_) {}
+  }
+  function resetElement(type){
+    var node = mediaEl(type); if(!node) return;
+    internalPauseUntil = now() + 1200;
+    try { node.__lifeosStrongReloadResetting = true; } catch(_) {}
+    try { node.pause(); } catch(_) {}
+    try { node.removeAttribute('src'); } catch(_) {}
+    try { node.src = ''; } catch(_) {}
+    try { node.load(); } catch(_) {}
+    try { setTimeout(function(){ try{ node.__lifeosStrongReloadResetting = false; }catch(_){} }, 800); } catch(_) {}
+  }
+  function resetMedia(type){
+    clearRetryTimers();
+    destroyHls(type);
+    if(type === 'tv' || !type) resetElement('tv');
+    if(type === 'radio' || !type) resetElement('radio');
+  }
+  function setStatus(type, msg, level){
+    var m = mh();
+    try {
+      if(type === 'tv' && m && typeof m.setTvInstruction === 'function') m.setTvInstruction(msg, level || 'action');
+      else if(type === 'radio' && m && typeof m.setRadioInstruction === 'function') m.setRadioInstruction(msg, level || 'action');
+      else if(window.showToast) window.showToast(msg, level === 'error' ? 'ph-warning-circle' : 'ph-broadcast');
+    } catch(_) {}
+  }
+  function stopRetry(type, idx, channel, reason){
+    var key = channelId(type, idx, channel);
+    failureCount[key] = MAX_FAILURE;
+    state.autoRetryAllowed = false;
+    clearRetryTimers();
+    setStatus(type, 'Kênh này đang lỗi hoặc mạng/WebView không hỗ trợ. Vui lòng thử kênh khác.', 'error');
+    log('stopRetry', {type:type, idx:idx, channel:channel, reason:reason || 'max_failure', manualOrAuto:'auto'});
+    return false;
+  }
+  function markActive(type, idx, channel, opt){
+    state.activeType = type;
+    state.activeIdx = Number(idx);
+    state.activeChannel = channel || channelFor(type, idx) || null;
+    state.activeChannelId = channelId(type, idx, state.activeChannel);
+    state.autoRetryAllowed = true;
+    state.userPaused = false;
+    state.waitingSince = 0;
+    state.lastProgressMs = now();
+    state.lastCurrentTime = 0;
+    if (opt && opt.manual) failureCount[state.activeChannelId] = 0;
+  }
+  function originalPlay(m){ return m && (m.__lifeosPha02JStrongOriginalPlayStream || m.playStream); }
+  function strongReloadChannel(type, idx, reason, opt){
+    opt = opt || {};
+    if(!validType(type)) return false;
+    var m = mh(); if(!m || typeof originalPlay(m) !== 'function') return false;
+    idx = isNum(idx) ? Number(idx) : (type === 'tv' ? Number(m.currentTvIdx) : Number(m.currentRadioIdx));
+    var ch = channelFor(type, idx);
+    if(!ch) return false;
+    var same = state.activeType === type && Number(state.activeIdx) === Number(idx);
+    var manual = !!opt.manual;
+    var key = channelId(type, idx, ch);
+    var node = mediaEl(type);
+    var ctBefore = node ? Number(node.currentTime || 0) : 0;
+    if(!manual && (failureCount[key] || 0) >= MAX_FAILURE) return stopRetry(type, idx, ch, reason || 'max_failure');
+    if(!manual){ failureCount[key] = (failureCount[key] || 0) + 1; }
+    if(manual){ failureCount[key] = 0; }
+    var t = now();
+    if(!manual && t - (reloadLock[type] || 0) < 1800){ return true; }
+    reloadLock[type] = t;
+    state.lastReloadReason = reason || (manual ? (same ? 'manual_reclick_same_channel' : 'manual_click') : 'retry');
+    markActive(type, idx, ch, {manual: manual});
+    state.suppressUntil = now() + 900;
+    setStatus(type, type === 'tv' ? 'Đang nạp lại kênh từ đầu...' : 'Đang nạp lại đài từ đầu...', 'action');
+    log('strongReload.begin', {type:type, idx:idx, channel:ch, reason:state.lastReloadReason, isSameChannel:same, manualOrAuto:manual?'manual':'auto', currentTimeBefore:ctBefore});
+    try { if(type === 'tv') { var a = mediaEl('radio'); if(a) a.pause(); } else { var v = mediaEl('tv'); if(v) v.pause(); } } catch(_) {}
+    resetMedia(type);
+    try { if(type === 'tv') m.currentTvIdx = idx; else m.currentRadioIdx = idx; m.currentTab = type; } catch(_) {}
+    try { if(typeof m.renderLists === 'function') m.renderLists(); } catch(_) {}
+    try { originalPlay(m).call(m, idx, type); } catch(e) { log('strongReload.playStream.error', {type:type, idx:idx, channel:ch, reason:e && e.message || String(e), manualOrAuto:manual?'manual':'auto'}); return false; }
+    armElementWatch(type);
+    startMonitor();
+    retryTimers.push(setTimeout(function(){
+      var n = mediaEl(type);
+      log('strongReload.after', {type:type, idx:idx, channel:ch, reason:state.lastReloadReason, manualOrAuto:manual?'manual':'auto', currentTimeBefore:ctBefore, currentTimeAfter:n ? Number(n.currentTime || 0) : 0});
+    }, 900));
+    return true;
+  }
+  function maybeAutoReload(type, reason, eventName){
+    if(!validType(type)) return false;
+    var m = mh(); if(!m) return false;
+    var idx = type === 'tv' ? Number(m.currentTvIdx) : Number(m.currentRadioIdx);
+    var ch = channelFor(type, idx);
+    if(!ch) return false;
+    if(activeTab() && activeTab() !== type) return false;
+    if(state.userPaused || !state.autoRetryAllowed){ log('autoReload.skip.userPaused', {type:type, idx:idx, channel:ch, reason:reason, eventName:eventName, manualOrAuto:'auto'}); return false; }
+    var key = channelId(type, idx, ch);
+    if((failureCount[key] || 0) >= MAX_FAILURE) return stopRetry(type, idx, ch, reason || 'max_failure');
+    log('autoReload.try', {type:type, idx:idx, channel:ch, reason:reason, eventName:eventName, manualOrAuto:'auto'});
+    return strongReloadChannel(type, idx, reason || 'retry', {manual:false});
+  }
+  function onMediaEvent(type, ev){
+    var node = mediaEl(type); if(!node) return;
+    var name = ev && ev.type || '';
+    state.lastEventName = name;
+    if(name === 'timeupdate'){
+      var ct = Number(node.currentTime || 0);
+      if(Math.abs(ct - state.lastCurrentTime) > 0.2){ state.lastCurrentTime = ct; state.lastProgressMs = now(); state.waitingSince = 0; }
+      return;
+    }
+    if(name === 'playing' || name === 'canplay' || name === 'loadedmetadata' || name === 'play'){
+      state.lastProgressMs = now(); state.waitingSince = 0;
+      if(!state.userPaused) state.autoRetryAllowed = true;
+      log('media.' + name, {type:type, idx:state.activeIdx, eventName:name, manualOrAuto:'event'});
+      return;
+    }
+    if(name === 'pause'){
+      var internal = now() < internalPauseUntil || !!node.__lifeosStrongReloadResetting;
+      if(!internal && state.activeType === type){
+        state.userPaused = true; state.autoRetryAllowed = false; clearRetryTimers();
+        log('media.pause.user', {type:type, idx:state.activeIdx, eventName:name, manualOrAuto:'user'});
+      } else {
+        log('media.pause.internal', {type:type, idx:state.activeIdx, eventName:name, manualOrAuto:'internal'});
+      }
+      return;
+    }
+    if(name === 'waiting' || name === 'stalled' || name === 'suspend'){
+      if(!state.waitingSince) state.waitingSince = now();
+      log('media.' + name, {type:type, idx:state.activeIdx, eventName:name, manualOrAuto:'event'});
+      retryTimers.push(setTimeout(function(){
+        if(state.activeType !== type || state.userPaused || !state.autoRetryAllowed) return;
+        if(state.waitingSince && now() - state.waitingSince >= WAITING_LIMIT_MS) maybeAutoReload(type, 'stream_waiting_too_long', name);
+      }, WAITING_LIMIT_MS + 80));
+      return;
+    }
+    if(name === 'error'){
+      log('media.error', {type:type, idx:state.activeIdx, eventName:name, manualOrAuto:'event'});
+      retryTimers.push(setTimeout(function(){ maybeAutoReload(type, 'stream_error', 'error'); }, 350));
+    }
+  }
+  function armElementWatch(type){
+    if(!validType(type)) return;
+    var node = mediaEl(type); if(!node || node.__lifeosPha02JStrongWatch) return;
+    node.__lifeosPha02JStrongWatch = true;
+    ['waiting','stalled','suspend','error','playing','canplay','loadedmetadata','timeupdate','pause','play'].forEach(function(name){
+      try { node.addEventListener(name, function(ev){ onMediaEvent(type, ev); }, {passive:true}); } catch(_) {}
+    });
+    eventBound[type] = true;
+  }
+  function startMonitor(){
+    if(monitorTimer) return;
+    monitorTimer = setInterval(function(){
+      var type = state.activeType;
+      if(!validType(type) || state.userPaused || !state.autoRetryAllowed) return;
+      if(activeTab() && activeTab() !== type) return;
+      var node = mediaEl(type); if(!node) return;
+      if(state.waitingSince && now() - state.waitingSince >= WAITING_LIMIT_MS){ maybeAutoReload(type, 'stream_waiting_too_long', 'monitor_waiting'); return; }
+      if(!node.paused && state.lastProgressMs && now() - state.lastProgressMs >= NO_PROGRESS_LIMIT_MS){ maybeAutoReload(type, 'stream_stalled', 'monitor_no_progress'); }
+    }, MONITOR_MS);
+  }
+  function stopAllMediaOnTabLeave(reason, opt){
+    opt = opt || {};
+    var except = opt.except || '';
+    clearRetryTimers();
+    state.autoRetryAllowed = false;
+    state.userPaused = false;
+    state.waitingSince = 0;
+    state.activeType = null;
+    state.activeIdx = -1;
+    state.activeChannel = null;
+    state.activeChannelId = '';
+    log('stopAllMediaOnTabLeave', {type:except || '', idx:-1, reason:reason || 'tab_leave', manualOrAuto:'system'});
+    if(except !== 'tv') resetMedia('tv');
+    if(except !== 'radio') resetMedia('radio');
+  }
+  function patchHub(){
+    var m = mh(); if(!m || m.__lifeosPha02JStrongPatched) return !!m;
+    m.__lifeosPha02JStrongPatched = true;
+    if(typeof m.playStream === 'function'){
+      m.__lifeosPha02JStrongOriginalPlayStream = m.playStream;
+      m.playStream = function(idx, type){
+        if(validType(type)){
+          var same = state.activeType === type && Number(state.activeIdx) === Number(idx);
+          return strongReloadChannel(type, idx, same ? 'manual_reclick_same_channel' : 'manual_click', {manual:true});
+        }
+        return m.__lifeosPha02JStrongOriginalPlayStream.apply(this, arguments);
+      };
+    }
+    if(typeof m.switchTab === 'function'){
+      m.__lifeosPha02JStrongOriginalSwitchTab = m.switchTab;
+      m.switchTab = function(tab){
+        var prev = this.currentTab || activeTab();
+        if(prev && validType(prev) && prev !== tab) stopAllMediaOnTabLeave('media_subtab_switch_to_' + tab, {except: validType(tab) ? tab : ''});
+        var out = m.__lifeosPha02JStrongOriginalSwitchTab.apply(this, arguments);
+        if(!validType(tab)) stopAllMediaOnTabLeave('media_subtab_leave_' + tab);
+        return out;
+      };
+    }
+    ['tv','radio'].forEach(armElementWatch);
+    startMonitor();
+    log('patchHub.ok', {reason:'MediaHub patched', manualOrAuto:'system'});
+    return true;
+  }
+  function patchWorkspace(){
+    if(window.__lifeosPha02JStrongWorkspacePatched) return;
+    window.__lifeosPha02JStrongWorkspacePatched = true;
+    var oldSet = window.setDesktopWorkspace;
+    if(typeof oldSet === 'function'){
+      window.setDesktopWorkspace = function(mode){
+        if(String(mode || '') !== 'music') stopAllMediaOnTabLeave('desktop_workspace_' + mode);
+        return oldSet.apply(this, arguments);
+      };
+    }
+    var oldSwitch = window.switchTab;
+    if(typeof oldSwitch === 'function'){
+      window.switchTab = function(id){
+        var s = String(id || '');
+        if(s !== 'view-music' && s !== 'music') stopAllMediaOnTabLeave('root_switch_' + s);
+        return oldSwitch.apply(this, arguments);
+      };
+    }
+  }
+  function bindDirectTabs(){
+    // GitHub đã có router tab media riêng; không bắt capture click ở đây để tránh double-open.
+    // Guard chỉ bọc MediaHub.switchTab/playStream và dừng media khi rời workspace.
+    return true;
+  }
+  function boot(){
+    patchHub(); patchWorkspace(); bindDirectTabs(); ['tv','radio'].forEach(armElementWatch); startMonitor();
+    var tries = 0;
+    patchTimer = setInterval(function(){
+      tries++;
+      patchHub(); patchWorkspace(); bindDirectTabs(); ['tv','radio'].forEach(armElementWatch);
+      if(tries > 80 && mh()) { try{ clearInterval(patchTimer); }catch(_){} }
+    }, PATCH_MS);
+  }
+  window.LifeOSMediaStrongGuard = {
+    marker: MARKER,
+    constants: {MAX_FAILURE:MAX_FAILURE, WAITING_LIMIT_MS:WAITING_LIMIT_MS, NO_PROGRESS_LIMIT_MS:NO_PROGRESS_LIMIT_MS, MONITOR_MS:MONITOR_MS},
+    strongReloadChannel: strongReloadChannel,
+    stopAllMediaOnTabLeave: stopAllMediaOnTabLeave,
+    maybeAutoReload: maybeAutoReload,
+    armElementWatch: armElementWatch,
+    startMonitor: startMonitor,
+    patchHub: patchHub,
+    patchWorkspace: patchWorkspace,
+    summary: function(){ return {marker:MARKER, state:Object.assign({}, state), failureCount:Object.assign({}, failureCount), logs:logs.slice(-80)}; },
+    resetFailures: function(){ Object.keys(failureCount).forEach(function(k){ delete failureCount[k]; }); return true; }
+  };
+  window.lifeosPha02JStrongReloadChannel = strongReloadChannel;
+  window.lifeosPha02JStopAllMediaOnTabLeave = stopAllMediaOnTabLeave;
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+})();
+</script>
+<!-- LIFEOS GITHUB TV/RADIO STRONG RELOAD GUARD FROM APK NATIVE - END -->
+
+
+
+<!-- LifeOS GitHub Pha03 Family Card / Media Card / Action Menu START -->
+<style id="lifeos-github-pha03-family-card-action-menu-css">
+/* Pha03 scope: Family Chat card/action/menu only. Do not touch TV/Radio/Profile/Alarm/Worker/Upload kernel. */
+#chat-messages .lifeos-pha03-file-row{padding-left:8px!important;padding-right:8px!important;box-sizing:border-box!important;}
+#chat-messages .lifeos-pha03-file-shell{width:min(100%,340px)!important;max-width:min(100%,340px)!important;min-width:0!important;}
+#chat-messages .lifeos-pha03-file-bubble{padding:7px!important;border-radius:28px!important;background:transparent!important;border:0!important;box-shadow:none!important;color:#0f172a!important;overflow:visible!important;}
+#chat-messages .lifeos-pha03-card{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%)!important;border:1px solid rgba(226,232,240,.96)!important;border-radius:20px!important;padding:10px!important;box-shadow:0 10px 28px rgba(15,23,42,.08)!important;color:#0f172a!important;touch-action:manipulation!important;overflow:hidden!important;}
+#chat-messages .lifeos-pha03-card:active{transform:scale(.992);}
+#chat-messages .lifeos-pha03-row{display:grid!important;grid-template-columns:68px minmax(0,1fr)!important;gap:10px!important;align-items:center!important;width:100%!important;min-width:0!important;}
+#chat-messages .lifeos-pha03-preview{position:relative!important;width:68px!important;height:68px!important;min-width:68px!important;min-height:68px!important;border-radius:17px!important;border:1px solid rgba(226,232,240,.95)!important;background:#eef2f7!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;color:#475569!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)!important;}
+#chat-messages .lifeos-pha03-preview img,#chat-messages .lifeos-pha03-preview video{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;background:#e2e8f0!important;}
+#chat-messages .lifeos-pha03-preview-file i,#chat-messages .lifeos-pha03-preview-audio i{font-size:30px!important;line-height:1!important;}
+#chat-messages .lifeos-pha03-preview-video .lifeos-pha03-play{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:34px!important;height:34px!important;border-radius:999px!important;background:rgba(15,23,42,.72)!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:14px!important;padding-left:2px!important;box-shadow:0 8px 18px rgba(15,23,42,.25)!important;}
+#chat-messages .lifeos-pha03-duration{position:absolute!important;right:4px!important;bottom:4px!important;border-radius:999px!important;background:rgba(15,23,42,.76)!important;color:#fff!important;font-size:9px!important;font-weight:950!important;line-height:1!important;padding:3px 5px!important;max-width:58px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;}
+#chat-messages .lifeos-pha03-wave{font-size:18px!important;font-weight:900!important;color:#a21caf!important;letter-spacing:-1px!important;}
+#chat-messages .lifeos-pha03-main{min-width:0!important;width:100%!important;display:flex!important;flex-direction:column!important;gap:7px!important;}
+#chat-messages .lifeos-pha03-title{font-size:13.5px!important;line-height:1.12!important;font-weight:950!important;color:#0f172a!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important;word-break:break-word!important;overflow-wrap:anywhere!important;}
+#chat-messages .lifeos-pha03-meta{display:flex!important;align-items:center!important;gap:5px!important;flex-wrap:wrap!important;min-width:0!important;}
+#chat-messages .lifeos-pha03-meta span{font-size:9.5px!important;line-height:1!important;font-weight:950!important;color:#64748b!important;background:#f1f5f9!important;border:1px solid rgba(226,232,240,.86)!important;border-radius:999px!important;padding:3px 6px!important;max-width:92px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+#chat-messages .lifeos-pha03-status{font-size:10px!important;font-weight:900!important;color:#b45309!important;line-height:1.15!important;}
+#chat-messages .lifeos-pha03-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important;}
+#chat-messages .lifeos-pha03-action-btn{width:100%!important;min-width:0!important;min-height:34px!important;height:34px!important;border-radius:14px!important;padding:0 8px!important;font-size:11.5px!important;font-weight:950!important;line-height:1!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;border:1px solid rgba(226,232,240,.95)!important;box-shadow:0 6px 14px rgba(15,23,42,.04)!important;user-select:none!important;-webkit-user-select:none!important;touch-action:manipulation!important;}
+#chat-messages .lifeos-pha03-action-btn:active{transform:scale(.96)!important;filter:brightness(.98)!important;}
+#chat-messages .lifeos-pha03-action-primary{background:var(--c-primary)!important;color:#fff!important;border-color:transparent!important;}
+#chat-messages .lifeos-pha03-action-neutral{background:#fff7c2!important;color:#111827!important;border-color:#f6d86b!important;}
+#chat-messages .lifeos-pha03-action-danger{background:#fff1f2!important;color:#e11d48!important;border-color:#fecdd3!important;}
+#chat-messages .lifeos-pha03-media-slot{margin-top:9px!important;border-radius:16px!important;overflow:hidden!important;background:#0f172a!important;border:1px solid rgba(15,23,42,.12)!important;}
+#chat-messages .lifeos-pha03-media-slot.hidden{display:none!important;}
+#chat-messages .lifeos-pha03-inline-wrap{background:#0f172a!important;color:#fff!important;padding:8px!important;}
+#chat-messages .lifeos-pha03-inline-title{font-size:11px!important;font-weight:900!important;line-height:1.15!important;margin:0 0 6px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+#chat-messages .lifeos-pha03-inline-media{width:100%!important;max-width:100%!important;border-radius:12px!important;display:block!important;background:#020617!important;}
+#chat-messages .lifeos-pha03-inline-video{max-height:220px!important;}
+#chat-messages .lifeos-pha03-inline-audio{height:42px!important;background:#fff!important;}
+#chat-messages .lifeos-pha03-media-loading,#chat-messages .lifeos-pha03-media-error{font-size:11px!important;font-weight:900!important;padding:10px!important;color:#fff!important;background:#0f172a!important;}
+#chat-messages .lifeos-pha03-media-error{background:#7f1d1d!important;color:#fecaca!important;}
+#chat-msg-menu{overscroll-behavior:contain!important;touch-action:none!important;}
+#chat-msg-menu>div{max-height:min(82vh,620px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;}
+#chat-msg-menu button{touch-action:manipulation!important;user-select:none!important;-webkit-user-select:none!important;}
+#chat-msg-menu.lifeos-pha03-menu-ready>div{border-radius:24px!important;box-shadow:0 24px 80px rgba(15,23,42,.28)!important;}
+#chat-msg-menu .lifeos-pha03-menu-pressed{transform:scale(.985)!important;filter:brightness(.98)!important;}
+@media (max-width:420px){
+  #chat-messages .lifeos-pha03-file-shell{width:min(100%,315px)!important;max-width:min(100%,315px)!important;}
+  #chat-messages .lifeos-pha03-card{padding:8px!important;border-radius:18px!important;}
+  #chat-messages .lifeos-pha03-row{grid-template-columns:56px minmax(0,1fr)!important;gap:8px!important;}
+  #chat-messages .lifeos-pha03-preview{width:56px!important;height:56px!important;min-width:56px!important;min-height:56px!important;border-radius:15px!important;}
+  #chat-messages .lifeos-pha03-title{font-size:12.5px!important;line-height:1.14!important;}
+  #chat-messages .lifeos-pha03-meta span{font-size:9px!important;padding:2px 5px!important;}
+  #chat-messages .lifeos-pha03-actions{gap:6px!important;}
+  #chat-messages .lifeos-pha03-action-btn{height:32px!important;min-height:32px!important;font-size:11px!important;border-radius:12px!important;padding:0 5px!important;}
+}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-file-row{justify-content:center!important;margin-bottom:7px!important;padding-left:4px!important;padding-right:4px!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-file-shell{width:min(100%,300px)!important;max-width:min(100%,300px)!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-file-bubble{padding:5px!important;border-radius:18px!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-card{padding:7px!important;border-radius:16px!important;min-height:82px!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-row{grid-template-columns:48px minmax(0,1fr)!important;gap:7px!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-preview{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;border-radius:13px!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-preview-file i,body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-preview-audio i{font-size:23px!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-title{font-size:11.5px!important;line-height:1.12!important;-webkit-line-clamp:2!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-meta{gap:3px!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-meta span{font-size:8.5px!important;padding:2px 4px!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;}
+body.lifeos-landscape-mini-pc #chat-messages .lifeos-pha03-action-btn{height:29px!important;min-height:29px!important;border-radius:10px!important;font-size:10.5px!important;padding:0 4px!important;}
+body.lifeos-landscape-mini-pc #chat-msg-menu>div{max-height:72vh!important;}
+</style>
+<script id="lifeos-github-pha03-family-card-action-menu-js">
+(function(){
+  'use strict';
+  var MARKER='LifeOS GitHub Pha03 Family Card Action Menu';
+  if(window.__lifeosGithubPha03FamilyCardActionMenu) return;
+  window.__lifeosGithubPha03FamilyCardActionMenu=true;
+  var logs=[];
+  function log(type,data){try{var row=Object.assign({t:Date.now(),type:type,phase:'Pha03'},data||{});logs.push(row);if(logs.length>80)logs.shift();if(window.LIFEOS_DEBUG)console.info('[Pha03 FamilyCard]',row);}catch(_){}}
+  function esc(s){try{return window.escapeHTML?window.escapeHTML(String(s??'')):String(s??'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}catch(_){return '';}}
+  function q(s){try{return String(s||'').replace(/\\/g,'\\\\').replace(/"/g,'\\"');}catch(_){return String(s||'');}}
+  function $id(id){return document.getElementById(id);}
+  function ce(){return window.ChatEngine||null;}
+  function byId(id){var e=ce();return e&&Array.isArray(window.chatHistory)?window.chatHistory.find(function(m){return String(m&&m.id)===String(id);}):null;}
+  function fileExt(name){var clean=String(name||'').split('?')[0].split('#')[0];var part=clean.indexOf('.')>=0?clean.split('.').pop():'';return String(part||'').toLowerCase();}
+  function isImage(m){var e=ce();if(e&&typeof e.isImageMessage==='function')return e.isImageMessage(m||{});var n=String((m&&m.file_name)||(m&&m.name)||'').toLowerCase(), mime=String((m&&m.mime_type)||(m&&m.mime)||'').toLowerCase(), ext=fileExt(n);return String(m&&m.type)==='image'||mime.indexOf('image/')===0||['jpg','jpeg','png','webp','gif','bmp','heic','heif'].indexOf(ext)>=0;}
+  function getMeta(m){var e=ce();if(e&&typeof e.getFileMeta==='function')return e.getFileMeta(m||{});var name=String((m&&m.file_name)||(m&&m.name)||'Tập tin');var ext=fileExt(name);var mime=String((m&&m.mime_type)||(m&&m.mime)||'').toLowerCase();return {name:name,ext:ext,mime:mime,label:ext?ext.toUpperCase():'FILE',sizeText:'',icon:'ph-file',tone:''};}
+  function mediaKind(m){if(!m)return'';var meta=getMeta(m), ext=String(meta.ext||'').toLowerCase(), mime=String(meta.mime||m.mime_type||m.mime||'').toLowerCase(), type=String(m.type||'').toLowerCase();if(type==='video'||mime.indexOf('video/')===0||['mp4','m4v','mov','webm','3gp','mkv'].indexOf(ext)>=0)return'video';if(type==='audio'||mime.indexOf('audio/')===0||['mp3','m4a','aac','wav','ogg','opus','flac','webm'].indexOf(ext)>=0)return'audio';return'';}
+  function iconFor(meta,kind,img){var ext=String(meta.ext||'').toLowerCase();if(img)return'ph-image';if(kind==='video')return'ph-video';if(kind==='audio')return'ph-speaker-high';if(ext==='pdf')return'ph-file-pdf';if(['zip','rar','7z'].indexOf(ext)>=0)return'ph-file-zip';if(['doc','docx','xls','xlsx','ppt','pptx'].indexOf(ext)>=0)return'ph-file-doc';if(ext==='apk')return'ph-android-logo';return meta.icon||'ph-file';}
+  function labelFor(meta,kind,img){if(img)return'Ảnh';if(kind==='video')return'Video';if(kind==='audio')return'Audio';return meta.label||((meta.ext||'FILE').toUpperCase());}
+  function ensureId(raw){return 'file-'+String(raw||'').replace(/[^a-zA-Z0-9_-]/g,'_');}
+  function fmtDur(n){n=Number(n||0);if(!isFinite(n)||n<=0)return'';var m=Math.floor(n/60),s=Math.floor(n%60);return m+':'+String(s).padStart(2,'0');}
+  function bindDuration(card){try{var v=card&&card.querySelector&&card.querySelector('video.lifeos-pha03-preview-video-el');var d=card&&card.querySelector&&card.querySelector('.lifeos-pha03-duration');if(!v||!d||v.__pha03Duration)return;v.__pha03Duration=true;v.addEventListener('loadedmetadata',function(){var t=fmtDur(v.duration);if(t)d.textContent=t;},true);}catch(_){}}
+  function renderCard(m, forcedElId){var meta=getMeta(m||{}), rawId=String((m&&m.id)||''), msgId=esc(rawId), elId=forcedElId?esc(forcedElId):ensureId(rawId);var img=isImage(m||{}), kind=img?'image':(mediaKind(m||{})||'file');var name=esc(meta.name||'Tệp');var label=esc(labelFor(meta,kind,img));var size=esc(meta.sizeText||'');var sent=esc(new Date((m&&(m.sentAt||m.timestamp))||Date.now()).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}));var status=m&&m.uploadStatus?'<div class="lifeos-pha03-status">'+esc(m.uploadStatus)+'</div>':'';var icon=iconFor(meta,kind,img);var preview='';
+    if(img){preview='<button type="button" class="lifeos-pha03-preview lifeos-pha03-preview-image" onclick="event.stopPropagation(); window.ChatEngine.openLightbox(\''+msgId+'\')" aria-label="Xem ảnh"><img id="'+esc(elId)+'" src="" alt="'+name+'" loading="lazy" decoding="async"></button>';}
+    else if(kind==='video'){preview='<button type="button" class="lifeos-pha03-preview lifeos-pha03-preview-video" onclick="event.stopPropagation(); window.ChatEngine.toggleChatMedia(\''+msgId+'\',\'video\', this.closest(\'.lifeos-pha03-card\')?.querySelector(\'[data-lifeos-pha03-media-btn]\'))" aria-label="Xem video"><video id="'+esc(elId)+'" class="lifeos-pha03-preview-video-el" muted playsinline preload="metadata"></video><span class="lifeos-pha03-play">▶</span><span class="lifeos-pha03-duration">Video</span></button>';}
+    else if(kind==='audio'){preview='<button type="button" class="lifeos-pha03-preview lifeos-pha03-preview-audio" onclick="event.stopPropagation(); window.ChatEngine.toggleChatMedia(\''+msgId+'\',\'audio\', this.closest(\'.lifeos-pha03-card\')?.querySelector(\'[data-lifeos-pha03-media-btn]\'))" aria-label="Nghe"><i class="ph-bold ph-speaker-high"></i><span class="lifeos-pha03-wave">▂▄▆▄▂</span></button>';}
+    else {preview='<div class="lifeos-pha03-preview lifeos-pha03-preview-file"><i class="ph-bold '+esc(icon)+'"></i></div>';}
+    var actions='';
+    if(img){actions='<button type="button" onclick="event.stopPropagation(); window.ChatEngine.openLightbox(\''+msgId+'\')" class="lifeos-pha03-action-btn lifeos-pha03-action-primary">Xem</button><button type="button" onclick="event.stopPropagation(); window.ChatEngine.downloadChatFile(\''+msgId+'\')" class="lifeos-pha03-action-btn lifeos-pha03-action-neutral">Tải</button>';}
+    else if(kind==='video'){actions='<button type="button" data-lifeos-pha03-media-btn="'+msgId+'" data-lifeos-pha03-media-kind="video" onclick="event.stopPropagation(); window.ChatEngine.toggleChatMedia(\''+msgId+'\',\'video\', this)" class="lifeos-pha03-action-btn lifeos-pha03-action-primary">Xem</button><button type="button" onclick="event.stopPropagation(); window.ChatEngine.downloadChatFile(\''+msgId+'\')" class="lifeos-pha03-action-btn lifeos-pha03-action-neutral">Tải</button>';}
+    else if(kind==='audio'){actions='<button type="button" data-lifeos-pha03-media-btn="'+msgId+'" data-lifeos-pha03-media-kind="audio" onclick="event.stopPropagation(); window.ChatEngine.toggleChatMedia(\''+msgId+'\',\'audio\', this)" class="lifeos-pha03-action-btn lifeos-pha03-action-primary">Nghe</button><button type="button" onclick="event.stopPropagation(); window.ChatEngine.downloadChatFile(\''+msgId+'\')" class="lifeos-pha03-action-btn lifeos-pha03-action-neutral">Tải</button>';}
+    else {var dl=(meta.ext==='apk')?'Tải APK':'Tải';actions='<button type="button" onclick="event.stopPropagation(); window.ChatEngine.downloadChatFile(\''+msgId+'\')" class="lifeos-pha03-action-btn lifeos-pha03-action-neutral">'+dl+'</button><button type="button" onclick="event.stopPropagation(); window.ChatEngine.deleteChatFile(\''+msgId+'\')" class="lifeos-pha03-action-btn lifeos-pha03-action-danger">Xóa</button>';}
+    var slot=(kind==='video'||kind==='audio')?'<div class="lifeos-pha03-media-slot hidden" data-lifeos-pha03-media-slot="'+msgId+'"></div>':'';
+    return '<div class="chat-file-card lifeos-pha03-card" data-lifeos-msg-id="'+msgId+'" data-lifeos-pha03-card-kind="'+esc(kind)+'" onclick="event.stopPropagation(); window.ChatEngine.openMsgMenu(\''+msgId+'\')"><div class="lifeos-pha03-row">'+preview+'<div class="lifeos-pha03-main"><div class="lifeos-pha03-title">'+name+'</div><div class="lifeos-pha03-meta"><span>'+label+'</span><span>'+size+'</span><span>'+sent+'</span></div>'+status+'<div class="lifeos-pha03-actions">'+actions+'</div></div></div>'+slot+'</div>';}
+  function pauseOther(activeId){try{document.querySelectorAll('#chat-messages .lifeos-pha03-card audio,#chat-messages .lifeos-pha03-card video').forEach(function(el){var card=el.closest('.lifeos-pha03-card');var id=card&&card.getAttribute('data-lifeos-msg-id');if(String(id)!==String(activeId)&&!el.paused)el.pause();var kind=card&&card.getAttribute('data-lifeos-pha03-card-kind');var btn=card&&card.querySelector('[data-lifeos-pha03-media-btn]');if(String(id)!==String(activeId)&&btn)btn.textContent=kind==='video'?'Xem':'Nghe';});}catch(_){}}
+  async function toggleMedia(id,kind,btn){var e=ce(),msg=byId(id);if(!e||!msg||!msg.file_id){window.showToast&&window.showToast('Không tìm thấy file media','ph-warning-circle');return false;}kind=kind||mediaKind(msg);if(!kind)return false;var card=document.querySelector('[data-lifeos-msg-id="'+q(id)+'"].lifeos-pha03-card');var slot=card&&card.querySelector('[data-lifeos-pha03-media-slot="'+q(id)+'"]');var actionBtn=btn||(card&&card.querySelector('[data-lifeos-pha03-media-btn]'));if(!slot)return false;var existing=slot.querySelector('audio,video');if(existing){if(existing.paused){pauseOther(id);try{await existing.play();}catch(_e){}slot.classList.remove('hidden');if(actionBtn)actionBtn.textContent='Tạm dừng';}else{existing.pause();if(actionBtn)actionBtn.textContent=kind==='video'?'Xem':'Nghe';}return true;}pauseOther(id);slot.classList.remove('hidden');slot.innerHTML='<div class="lifeos-pha03-media-loading">Đang mở '+(kind==='video'?'video':'âm thanh')+'...</div>';if(actionBtn)actionBtn.textContent='Đang mở...';try{var meta=getMeta(msg);var url=await e.getFileUrl(msg.file_id,meta.name);var safeName=esc(meta.name||'media');var html=kind==='video'?'<video class="lifeos-pha03-inline-media lifeos-pha03-inline-video" controls playsinline preload="metadata" src="'+esc(url)+'"></video>':'<audio class="lifeos-pha03-inline-media lifeos-pha03-inline-audio" controls preload="metadata" src="'+esc(url)+'"></audio>';slot.innerHTML='<div class="lifeos-pha03-inline-wrap"><div class="lifeos-pha03-inline-title">'+safeName+'</div>'+html+'</div>';var media=slot.querySelector('audio,video');if(media){media.addEventListener('play',function(){pauseOther(id);if(actionBtn)actionBtn.textContent='Tạm dừng';},{passive:true});media.addEventListener('pause',function(){if(actionBtn)actionBtn.textContent=kind==='video'?'Xem':'Nghe';},{passive:true});media.addEventListener('ended',function(){if(actionBtn)actionBtn.textContent=kind==='video'?'Xem':'Nghe';},{passive:true});try{await media.play();}catch(_){}}log('toggleMedia.ok',{id:id,kind:kind});return true;}catch(err){slot.innerHTML='<div class="lifeos-pha03-media-error">Không mở được media. Có thể dùng nút Tải.</div>';if(actionBtn)actionBtn.textContent=kind==='video'?'Xem':'Nghe';console.warn('[Pha03 media open failed]',{id:id,kind:kind,error:String(err&&err.message||err)});log('toggleMedia.fail',{id:id,kind:kind,error:String(err&&err.message||err)});return false;}}
+  function wrapRender(e){if(!e||e.__pha03FamilyCardInstalled)return;e.__pha03FamilyCardInstalled=true;var oldRender=e.render;
+    e.getChatMediaKind=function(m){return mediaKind(m);};
+    e.renderFileCard=function(m){return renderCard(m);};
+    e.renderImagePreview=function(m,elId){return renderCard(m,elId);};
+    e.pauseOtherChatMedia=function(activeId){return pauseOther(activeId);};
+    e.toggleChatMedia=function(id,kind,btn){return toggleMedia(id,kind,btn);};
+    e.deleteChatFile=function(id){var hidden=$id('chat-msg-active-id');if(hidden)hidden.value=String(id||'');return this.deleteMsg();};
+    e.render=function(){var r=oldRender&&oldRender.apply(this,arguments);try{postRenderEnhance();}catch(err){console.warn('[Pha03 postRender]',err);}return r;};
+    log('installed',{hasOldRender:typeof oldRender==='function'});
+  }
+  function postRenderEnhance(){try{document.querySelectorAll('#chat-messages [data-chat-msg-id]').forEach(function(bubble){var id=bubble.getAttribute('data-chat-msg-id');var m=byId(id);if(!m||String(m.type||'')==='text')return;bubble.classList.add('lifeos-pha03-file-bubble');var row=bubble.closest('.flex.w-full');if(row)row.classList.add('lifeos-pha03-file-row');var shell=bubble.closest('.flex.flex-col');if(shell)shell.classList.add('lifeos-pha03-file-shell');if((m.type==='video'||m.type==='audio')&&!bubble.querySelector('.lifeos-pha03-card')){var node=bubble.querySelector('video,audio');if(node){var holder=document.createElement('div');holder.innerHTML=renderCard(m);node.replaceWith(holder.firstElementChild);}}
+      var card=bubble.querySelector('.lifeos-pha03-card');if(card){bindDuration(card);var el=card.querySelector('img[id^="file-"],video[id^="file-"]');if(el&&!el.getAttribute('src')&&m.file_id){var e=ce();if(e&&typeof e.getImageUrl==='function'){e.getImageUrl(m.file_id).then(function(url){if(el&&url&&!el.getAttribute('src')){el.src=url;el.classList&&el.classList.remove('animate-pulse');}}).catch(function(){});}}}}
+    );}catch(_){}}
+  var scrollGuard={down:false,moved:false,sx:0,sy:0,blockUntil:0};
+  function menu(){return $id('chat-msg-menu');}
+  function isOpen(){var m=menu();return !!(m&&!m.classList.contains('hidden')&&m.style.display!=='none');}
+  function activeMsg(){var id=$id('chat-msg-active-id')&&$id('chat-msg-active-id').value;return byId(id);}
+  function ensureMenuButton(){var m=menu(),dl=$id('chat-menu-download');if(!m||!dl)return null;var btn=$id('chat-menu-view-image');if(!btn){btn=document.createElement('button');btn.id='chat-menu-view-image';btn.type='button';btn.className='hidden items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition';dl.parentNode&&dl.parentNode.insertBefore(btn,dl);}return btn;}
+  function tag(btn,action,label,icon,cls){if(!btn)return;btn.setAttribute('data-lifeos-pha03-action',action);if(label){btn.innerHTML='<i class="ph-bold '+icon+' text-xl '+(cls||'text-sky-500')+' pointer-events-none"></i> '+label;}}
+  function prepareMenu(){var m=menu();if(!m)return;m.classList.add('lifeos-pha03-menu-ready');var msg=activeMsg();var img=isImage(msg),kind=mediaKind(msg);var view=ensureMenuButton();if(view){if(img){view.classList.remove('hidden');view.classList.add('flex');tag(view,'view','Xem','ph-image-square','text-sky-500');}
+      else if(kind==='video'){view.classList.remove('hidden');view.classList.add('flex');tag(view,'media','Xem video','ph-play-circle','text-purple-500');}
+      else if(kind==='audio'){view.classList.remove('hidden');view.classList.add('flex');tag(view,'media','Nghe','ph-speaker-high','text-fuchsia-500');}
+      else {view.classList.remove('flex');view.classList.add('hidden');}}
+    var dl=$id('chat-menu-download');if(dl){if(msg&&String(msg.type||'')!=='text'){dl.classList.remove('hidden');dl.classList.add('flex');tag(dl,'download',img?'Tải ảnh':(kind==='video'?'Tải video':(kind==='audio'?'Tải nhạc':'Tải file')),'ph-download-simple','text-purple-500');}else{dl.classList.remove('flex');dl.classList.add('hidden');}}
+    Array.from(document.querySelectorAll('#chat-msg-menu button')).forEach(function(b){var oc=b.getAttribute('onclick')||'';if(b.id==='chat-menu-view-image')return;if(b.id==='chat-menu-download')return;if(oc.indexOf('deleteMsg')>=0)tag(b,'delete','Xóa','ph-trash','text-rose-500');else if(oc.indexOf('copyMsg')>=0)tag(b,'copy',msg&&String(msg.type||'')!=='text'?'Sao chép link':'Sao chép','ph-copy','text-blue-500');else if(oc.indexOf('replyMsg')>=0)b.setAttribute('data-lifeos-pha03-action','reply');else if(oc.indexOf('togglePinMsg')>=0)b.setAttribute('data-lifeos-pha03-action','pin');else if(oc.indexOf('editMsgInit')>=0)b.setAttribute('data-lifeos-pha03-action','edit');else if(oc.indexOf('closeMsgMenu')>=0)b.setAttribute('data-lifeos-pha03-action','close');});
+  }
+  function swallow(e){try{e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();}catch(_){}return false;}
+  function runMenuAction(btn,e){var engine=ce(),msg=activeMsg();if(!engine||!btn||!msg)return false;var action=btn.getAttribute('data-lifeos-pha03-action')||'';if(!action){prepareMenu();action=btn.getAttribute('data-lifeos-pha03-action')||'';}if(!action)return false;if(Date.now()<scrollGuard.blockUntil){log('menu.action.blockedAfterScroll',{action:action});return swallow(e);}swallow(e);btn.classList.add('lifeos-pha03-menu-pressed');setTimeout(function(){try{btn.classList.remove('lifeos-pha03-menu-pressed');}catch(_){}},160);var id=String(msg.id||'');log('menu.action',{action:action,id:id,type:msg.type||'',kind:mediaKind(msg)});if(action==='view'){engine.openLightbox&&engine.openLightbox(id);engine.closeMsgMenu&&engine.closeMsgMenu();return true;}if(action==='media'){engine.toggleChatMedia&&engine.toggleChatMedia(id,mediaKind(msg));engine.closeMsgMenu&&engine.closeMsgMenu();return true;}if(action==='download'){engine.downloadChatFile&&engine.downloadChatFile(id);engine.closeMsgMenu&&engine.closeMsgMenu();return true;}if(action==='delete'){engine.deleteMsg&&engine.deleteMsg();return true;}if(action==='copy'){engine.copyMsg&&engine.copyMsg();return true;}if(action==='reply'){engine.replyMsg&&engine.replyMsg();return true;}if(action==='pin'){engine.togglePinMsg&&engine.togglePinMsg();return true;}if(action==='edit'){engine.editMsgInit&&engine.editMsgInit();return true;}if(action==='close'){engine.closeMsgMenu&&engine.closeMsgMenu();return true;}return false;}
+  function bindMenu(){if(window.__lifeosGithubPha03MenuBound)return;window.__lifeosGithubPha03MenuBound=true;document.addEventListener('touchstart',function(e){if(!isOpen())return;var t=e.touches&&e.touches[0];if(!t)return;scrollGuard.down=true;scrollGuard.moved=false;scrollGuard.sx=t.clientX;scrollGuard.sy=t.clientY;},true);document.addEventListener('touchmove',function(e){if(!isOpen()||!scrollGuard.down)return;var t=e.touches&&e.touches[0];if(!t)return;var dx=Math.abs(t.clientX-scrollGuard.sx),dy=Math.abs(t.clientY-scrollGuard.sy);if(dx>10||dy>10){scrollGuard.moved=true;scrollGuard.blockUntil=Date.now()+520;}},true);document.addEventListener('touchend',function(){if(scrollGuard.moved)scrollGuard.blockUntil=Date.now()+520;scrollGuard.down=false;},true);document.addEventListener('scroll',function(e){if(isOpen()&&e.target&&e.target.closest&&e.target.closest('#chat-msg-menu'))scrollGuard.blockUntil=Date.now()+520;},true);
+    document.addEventListener('click',function(e){var m=menu();if(!m||!isOpen())return;if(e.target===m){return swallow(e),ce()&&ce().closeMsgMenu&&ce().closeMsgMenu();}var btn=e.target&&e.target.closest&&e.target.closest('#chat-msg-menu button');if(!btn)return;if(runMenuAction(btn,e))return;},true);
+    document.addEventListener('keydown',function(e){if(!isOpen())return;if(e.key==='Escape'||e.key==='Backspace'){swallow(e);ce()&&ce().closeMsgMenu&&ce().closeMsgMenu();}},true);
+  }
+  function install(){var engine=ce();if(!engine){setTimeout(install,120);return;}wrapRender(engine);bindMenu();var oldOpen=engine.openMsgMenu;if(typeof oldOpen==='function'&&!engine.__pha03OpenMenuWrapped){engine.__pha03OpenMenuWrapped=true;engine.openMsgMenu=function(id){var r=oldOpen.apply(this,arguments);setTimeout(prepareMenu,0);return r;};}var oldClose=engine.closeMsgMenu;if(typeof oldClose==='function'&&!engine.__pha03CloseMenuWrapped){engine.__pha03CloseMenuWrapped=true;engine.closeMsgMenu=function(){var r=oldClose.apply(this,arguments);var m=menu();if(m)m.classList.remove('lifeos-pha03-menu-ready');return r;};}
+    try{if(document.getElementById('chat-messages')){engine.render&&engine.render();postRenderEnhance();}}catch(err){console.warn('[Pha03 initial render]',err);} }
+  window.LifeOSFamilyCardActionMenuPha03={version:MARKER,install:install,postRenderEnhance:postRenderEnhance,summary:function(){return{version:MARKER,installed:!!(ce()&&ce().__pha03FamilyCardInstalled),menuReady:!!(menu()&&menu().classList.contains('lifeos-pha03-menu-ready')),logs:logs.slice(-80)};}};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+})();
+</script>
+<!-- LifeOS GitHub Pha03 Family Card / Media Card / Action Menu END -->
+
+
+
+<!-- LifeOS GitHub Pha04 Duplicate-safe Filename / Download Name Safe START -->
+<script id="lifeos-github-pha04-download-filename-safe-js">
+(function(){
+  'use strict';
+  var MARKER = 'Pha04_DUPLICATE_SAFE_DOWNLOAD_FILENAME';
+  if(window.__lifeosGithubPha04DownloadFilenameSafeBooted) return;
+  window.__lifeosGithubPha04DownloadFilenameSafeBooted = true;
+
+  var logs = window.__lifeosPha04DownloadFilenameLogs = window.__lifeosPha04DownloadFilenameLogs || [];
+  function log(event, data){
+    var row = Object.assign({t:Date.now(), phase:MARKER, event:event}, data || {});
+    logs.push(row); if(logs.length > 120) logs.splice(0, logs.length - 120);
+    try{ if(window.LIFEOS_DEBUG) console.info('[Pha04 download filename]', row); }catch(_){ }
+    return row;
+  }
+  function str(v){ return v == null ? '' : String(v); }
+  function first(){
+    for(var i=0;i<arguments.length;i++){
+      var v = arguments[i];
+      if(v == null) continue;
+      v = String(v).trim();
+      if(v && !/^(undefined|null|nan)$/i.test(v)) return v;
+    }
+    return '';
+  }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function formatTs(v){
+    var n = Number(v || 0);
+    var d = n > 0 ? new Date(n < 1e12 ? n * 1000 : n) : new Date();
+    if(!isFinite(d.getTime())) d = new Date();
+    return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+  }
+  function cleanPart(s, fallback){
+    s = first(s, fallback || 'file');
+    try{ s = s.normalize('NFKC'); }catch(_){ }
+    s = s.replace(/[<>:"/\\|?*\x00-\x1F]/g, '_')
+         .replace(/[\u202A-\u202E\u2066-\u2069]/g, '')
+         .replace(/\s+/g, ' ')
+         .replace(/[. ]+$/g, '')
+         .replace(/^[. ]+/g, '')
+         .trim();
+    if(!s || /^(undefined|null|nan)$/i.test(s)) s = fallback || 'file';
+    if(s.length > 90) s = s.slice(0, 90).replace(/[. _-]+$/g, '') || (fallback || 'file');
+    return s;
+  }
+  function mimeOf(m, meta){ return first(meta && (meta.mime || meta.mime_type), m && (m.mime_type || m.mime), m && m.document && m.document.mime_type, m && m.video && m.video.mime_type, m && m.audio && m.audio.mime_type); }
+  function idOf(m, meta){ return first(meta && (meta.fileId || meta.file_id || meta.telegramFileId || meta.messageId || meta.id), m && (m.file_id || m.fileId || m.telegramFileId || m.message_id || m.messageId || m.telegram_msg_id || m.id)); }
+  function rawNameOf(m, meta){
+    return first(meta && (meta.name || meta.fileName || meta.file_name),
+      m && (m.file_name || m.fileName || m.name),
+      m && m.document && (m.document.file_name || m.document.fileName || m.document.name),
+      m && m.video && (m.video.file_name || m.video.fileName || m.video.name),
+      m && m.audio && (m.audio.file_name || m.audio.fileName || m.audio.name),
+      m && m.photo && (m.photo.file_name || m.photo.fileName || m.photo.name));
+  }
+  function extFromMime(mime){
+    mime = String(mime || '').toLowerCase().split(';')[0].trim();
+    var map = {
+      'image/jpeg':'jpg','image/jpg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','image/heic':'heic','image/heif':'heif',
+      'video/mp4':'mp4','video/webm':'webm','video/quicktime':'mov','video/x-matroska':'mkv','video/3gpp':'3gp',
+      'audio/mpeg':'mp3','audio/mp3':'mp3','audio/mp4':'m4a','audio/aac':'aac','audio/ogg':'ogg','audio/wav':'wav','audio/webm':'webm',
+      'application/pdf':'pdf','application/zip':'zip','application/x-zip-compressed':'zip','application/vnd.android.package-archive':'apk',
+      'text/plain':'txt','text/csv':'csv','application/json':'json'
+    };
+    return map[mime] || '';
+  }
+  function splitName(name, mime){
+    name = first(name);
+    name = name.replace(/[?#].*$/,'');
+    var base = name, ext = '';
+    var idx = name.lastIndexOf('.');
+    if(idx > 0 && idx < name.length - 1){
+      var cand = name.slice(idx + 1).toLowerCase().replace(/[^a-z0-9]/g, '');
+      if(cand && cand.length <= 10){ ext = cand; base = name.slice(0, idx); }
+    }
+    if(!ext) ext = extFromMime(mime);
+    return {base: cleanPart(base, ''), ext: ext};
+  }
+  function prefixFor(m, mime, name){
+    var type = String((m && (m.type || m.kind)) || '').toLowerCase();
+    mime = String(mime || '').toLowerCase();
+    name = String(name || '').toLowerCase();
+    if(type.indexOf('image') >= 0 || mime.indexOf('image/') === 0) return 'IMG';
+    if(type.indexOf('video') >= 0 || mime.indexOf('video/') === 0 || /\.(mp4|mov|webm|mkv|3gp)$/i.test(name)) return 'VIDEO';
+    if(type.indexOf('audio') >= 0 || type.indexOf('voice') >= 0 || mime.indexOf('audio/') === 0 || /\.(mp3|m4a|aac|ogg|wav|webm)$/i.test(name)) return 'AUDIO';
+    return 'FILE';
+  }
+  function safeId(raw){
+    raw = first(raw).replace(/[^a-zA-Z0-9_-]/g, '');
+    if(!raw) return '';
+    return raw.length > 12 ? raw.slice(-12) : raw;
+  }
+  function ensureExt(name, ext){
+    ext = String(ext || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10);
+    name = cleanPart(name, 'file');
+    if(ext && !new RegExp('\\.' + ext.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$','i').test(name)) name += '.' + ext;
+    return name;
+  }
+  function buildSafeDownloadName(message, fileMeta){
+    var m = message || {}, meta = fileMeta || {};
+    var rawName = rawNameOf(m, meta);
+    var mime = mimeOf(m, meta);
+    var parts = splitName(rawName, mime);
+    var id = safeId(idOf(m, meta));
+    var ts = formatTs(m.timestamp || m.createdAt || m.date || meta.timestamp);
+    var hasRealName = !!parts.base && !/^(file|upload_file|download|blob|undefined|null)$/i.test(parts.base);
+    var base;
+    if(hasRealName){
+      base = cleanPart(parts.base, 'file');
+      if(id && base.toLowerCase().indexOf(id.toLowerCase()) < 0) base += '_id_' + id;
+    } else {
+      base = prefixFor(m, mime, rawName) + '_' + ts + (id ? '_fileId_' + id : '');
+    }
+    var out = ensureExt(base, parts.ext || extFromMime(mime) || 'bin');
+    out = out.replace(/_{2,}/g, '_').replace(/\s{2,}/g, ' ');
+    if(!out || /^(undefined|null|nan)(\.|$)/i.test(out)) out = 'FILE_' + ts + (id ? '_fileId_' + id : '') + '.bin';
+    return cleanPart(out, 'file.bin');
+  }
+
+  function applyTemporaryName(msg, safe){
+    var undo = [];
+    function set(obj, key, val){
+      if(!obj || typeof obj !== 'object') return;
+      var old = obj[key];
+      undo.push(function(){ if(old === undefined) { try{ delete obj[key]; }catch(_){ obj[key] = old; } } else obj[key] = old; });
+      obj[key] = val;
+    }
+    set(msg, 'file_name', safe);
+    set(msg, 'fileName', safe);
+    set(msg, 'name', safe);
+    if(msg && msg.bundleManifest) set(msg.bundleManifest, 'originalName', safe);
+    if(msg && msg.manifest) set(msg.manifest, 'originalName', safe);
+    return function(){ for(var i=undo.length-1;i>=0;i--){ try{ undo[i](); }catch(_){ } } };
+  }
+  function findMsg(mid){
+    mid = String(mid || '');
+    var arr = Array.isArray(window.chatHistory) ? window.chatHistory : [];
+    return arr.find(function(m){ return String(m && m.id || '') === mid; });
+  }
+  function wrapEngine(ce){
+    if(!ce || typeof ce.downloadChatFile !== 'function') return false;
+    if(ce.downloadChatFile.__lifeosPha04Wrapped) return true;
+    var original = ce.downloadChatFile;
+    var wrapped = async function(mid){
+      var msg = findMsg(mid);
+      if(!msg) return original.apply(this, arguments);
+      var safe = buildSafeDownloadName(msg, (this && typeof this.getFileMeta === 'function') ? this.getFileMeta(msg) : null);
+      var raw = rawNameOf(msg, null);
+      var restore = applyTemporaryName(msg, safe);
+      log('download.name.safe', {messageId:String(mid||''), rawName:raw, safeName:safe, fileId:idOf(msg, null), mime:mimeOf(msg, null)});
+      try{ return await original.apply(this, arguments); }
+      finally{ restore(); }
+    };
+    wrapped.__lifeosPha04Wrapped = true;
+    wrapped.__lifeosPha04Original = original;
+    ce.downloadChatFile = wrapped;
+    ce.buildSafeDownloadName = buildSafeDownloadName;
+    ce.__lifeosPha04DownloadFilenameSafeInstalled = true;
+    log('installed', {hasEngine:true});
+    return true;
+  }
+  function install(){
+    window.buildSafeDownloadName = buildSafeDownloadName;
+    window.lifeosBuildSafeDownloadName = buildSafeDownloadName;
+    return wrapEngine(window.ChatEngine);
+  }
+  window.LifeOSDownloadFilenameSafePha04 = {
+    marker: MARKER,
+    buildSafeDownloadName: buildSafeDownloadName,
+    install: install,
+    summary: function(){
+      return {marker:MARKER, installed:!!(window.ChatEngine && window.ChatEngine.__lifeosPha04DownloadFilenameSafeInstalled), logs:logs.slice(-80)};
+    }
+  };
+  function boot(){
+    install();
+    var tries = 0;
+    var timer = setInterval(function(){
+      tries++;
+      try{ install(); }catch(e){ log('install.error', {error:String(e && e.message || e)}); }
+      if(tries > 120 && window.ChatEngine && window.ChatEngine.__lifeosPha04DownloadFilenameSafeInstalled) clearInterval(timer);
+    }, 250);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+})();
+</script>
+<!-- LifeOS GitHub Pha04 Duplicate-safe Filename / Download Name Safe END -->
+
+
+
+<!-- LIFEOS GITHUB PHA05 IMAGE VIEWER PINCH ZOOM J17B WEB START -->
+<style id="lifeos-pha05-image-viewer-pinch-zoom-style">
+  #chat-lightbox .lifeos-pha05-viewer-stage{
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    touch-action: none !important;
+    -ms-touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+  #chat-lightbox #lightbox-img{
+    max-width: 95vw !important;
+    max-height: 85vh !important;
+    object-fit: contain !important;
+    transform-origin: center center !important;
+    will-change: transform !important;
+    cursor: grab !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+    -webkit-user-select: none !important;
+    touch-action: none !important;
+  }
+  #chat-lightbox #lightbox-img.lifeos-pha05-dragging{ cursor: grabbing !important; }
+  #lifeos-pha05-zoom-toolbar{
+    position: absolute !important;
+    left: 50% !important;
+    bottom: calc(env(safe-area-inset-bottom) + 72px) !important;
+    transform: translateX(-50%) !important;
+    z-index: 70 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 7px !important;
+    border-radius: 999px !important;
+    background: rgba(0,0,0,.52) !important;
+    border: 1px solid rgba(255,255,255,.18) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    color: #fff !important;
+    box-shadow: 0 10px 26px rgba(0,0,0,.24) !important;
+    touch-action: manipulation !important;
+  }
+  #lifeos-pha05-zoom-toolbar button{
+    min-width: 38px !important;
+    height: 34px !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255,255,255,.14) !important;
+    border: 1px solid rgba(255,255,255,.20) !important;
+    color: #fff !important;
+    font-weight: 950 !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+  }
+  #lifeos-pha05-zoom-toolbar button:active{ transform: scale(.94) !important; }
+  #lifeos-pha05-zoom-label{
+    min-width: 46px !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    font-weight: 950 !important;
+    color: rgba(255,255,255,.92) !important;
+  }
+  /* Pha05: viewer thuần xem/zoom; không can thiệp download pipeline, chỉ ẩn nút tải cũ trong lightbox. */
+  #chat-lightbox #lightbox-download-btn{ display: none !important; pointer-events: none !important; }
+  @media (orientation: landscape) and (max-width: 1023px){
+    #lifeos-pha05-zoom-toolbar{
+      right: calc(env(safe-area-inset-right) + 16px) !important;
+      left: auto !important;
+      bottom: calc(env(safe-area-inset-bottom) + 18px) !important;
+      transform: none !important;
+    }
+    #chat-lightbox #lightbox-img{
+      max-height: 92vh !important;
+      max-width: 92vw !important;
+    }
+  }
+</style>
+<script id="lifeos-pha05-image-viewer-pinch-zoom-j17b-web-js">
+(function(){
+  'use strict';
+  var MARKER = 'Pha05_IMAGE_VIEWER_PINCH_ZOOM_J17B_WEB_CLAMP_STAGE';
+  if (window.__lifeosPha05ImageViewerPinchZoomWeb) return;
+  window.__lifeosPha05ImageViewerPinchZoomWeb = true;
+
+  var MIN_SCALE = 1;
+  var MAX_SCALE = 5;
+  var DOUBLE_TAP_SCALE = 2.25;
+  var logs = [];
+  var state = {
+    scale: 1, x: 0, y: 0,
+    mode: '', startScale: 1, startX: 0, startY: 0,
+    startDist: 0, startMid: null, panStart: null,
+    lastTapAt: 0, lastTapX: 0, lastTapY: 0,
+    currentSrc: ''
+  };
+
+  function log(event, data){
+    try{
+      logs.push(Object.assign({t:new Date().toISOString(), event:event}, data || {}));
+      if (logs.length > 120) logs.shift();
+    }catch(_e){}
+  }
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+  function dist(a,b){ var dx=a.clientX-b.clientX, dy=a.clientY-b.clientY; return Math.sqrt(dx*dx+dy*dy); }
+  function mid(a,b){ return {x:(a.clientX+b.clientX)/2, y:(a.clientY+b.clientY)/2}; }
+  function lb(){ return document.getElementById('chat-lightbox'); }
+  function img(){ return document.getElementById('lightbox-img'); }
+  function stage(){
+    var im = img();
+    if (!im) return null;
+    var p = im.parentElement;
+    if (!p) return null;
+    p.id = p.id || 'lifeos-pha05-viewer-stage';
+    p.classList.add('lifeos-pha05-viewer-stage');
+    return p;
+  }
+  function toolbarLabel(){ return document.getElementById('lifeos-pha05-zoom-label'); }
+  function updateLabel(){
+    var el = toolbarLabel();
+    if (el) el.textContent = Math.round(state.scale * 100) + '%';
+  }
+  function getBaseBox(){
+    var im = img(), st = stage();
+    if (!im || !st) return null;
+    var sr = st.getBoundingClientRect();
+    // clientWidth/clientHeight are layout dimensions before CSS transform, exactly what clamp needs.
+    var iw = im.clientWidth || im.naturalWidth || 1;
+    var ih = im.clientHeight || im.naturalHeight || 1;
+    return {stageW: sr.width || st.clientWidth || 1, stageH: sr.height || st.clientHeight || 1, imgW: iw, imgH: ih};
+  }
+  function clampXY(){
+    if (state.scale <= 1.0001) { state.scale = 1; state.x = 0; state.y = 0; return; }
+    var box = getBaseBox();
+    if (!box) return;
+    var maxX = Math.max(0, (box.imgW * state.scale - box.stageW) / 2);
+    var maxY = Math.max(0, (box.imgH * state.scale - box.stageH) / 2);
+    state.x = clamp(state.x, -maxX, maxX);
+    state.y = clamp(state.y, -maxY, maxY);
+  }
+  function apply(reason){
+    var im = img();
+    if (!im) return;
+    state.scale = clamp(Number(state.scale) || 1, MIN_SCALE, MAX_SCALE);
+    clampXY();
+    im.style.transform = 'translate3d(' + state.x.toFixed(2) + 'px,' + state.y.toFixed(2) + 'px,0) scale(' + state.scale.toFixed(4) + ')';
+    im.style.transformOrigin = 'center center';
+    updateLabel();
+    log('apply', {reason:reason || '', scale:+state.scale.toFixed(3), x:+state.x.toFixed(1), y:+state.y.toFixed(1)});
+  }
+  function reset(reason){
+    state.scale = 1; state.x = 0; state.y = 0; state.mode = '';
+    state.startScale = 1; state.startX = 0; state.startY = 0; state.startDist = 0;
+    state.startMid = null; state.panStart = null;
+    var im = img(); if (im) im.classList.remove('lifeos-pha05-dragging');
+    apply(reason || 'reset');
+  }
+  function zoomAt(clientX, clientY, nextScale, reason){
+    var st = stage(); if (!st) return;
+    var old = state.scale;
+    nextScale = clamp(Number(nextScale) || 1, MIN_SCALE, MAX_SCALE);
+    if (Math.abs(nextScale - old) < 0.001) return;
+    var r = st.getBoundingClientRect();
+    var fx = clientX - (r.left + r.width / 2);
+    var fy = clientY - (r.top + r.height / 2);
+    var ratio = nextScale / old;
+    state.x = fx - (fx - state.x) * ratio;
+    state.y = fy - (fy - state.y) * ratio;
+    state.scale = nextScale;
+    apply(reason || 'zoomAt');
+  }
+  function zoomBy(factor, reason){
+    var st = stage(); if (!st) return;
+    var r = st.getBoundingClientRect();
+    zoomAt(r.left + r.width/2, r.top + r.height/2, state.scale * factor, reason || 'zoomBy');
+  }
+  function ensureToolbar(){
+    var L = lb(); if (!L) return;
+    var tb = document.getElementById('lifeos-pha05-zoom-toolbar');
+    if (!tb) {
+      tb = document.createElement('div');
+      tb.id = 'lifeos-pha05-zoom-toolbar';
+      tb.innerHTML = '<button type="button" id="lifeos-pha05-zoom-out" aria-label="Thu nhỏ ảnh">−</button><span id="lifeos-pha05-zoom-label">100%</span><button type="button" id="lifeos-pha05-zoom-in" aria-label="Phóng to ảnh">+</button><button type="button" id="lifeos-pha05-zoom-reset" aria-label="Đưa ảnh về 100%">100</button>';
+      L.appendChild(tb);
+      tb.addEventListener('click', function(e){ e.stopPropagation(); }, true);
+      tb.addEventListener('touchstart', function(e){ e.stopPropagation(); }, {passive:true, capture:true});
+      tb.querySelector('#lifeos-pha05-zoom-out').addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); zoomBy(0.80, 'toolbar_minus'); });
+      tb.querySelector('#lifeos-pha05-zoom-in').addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); zoomBy(1.25, 'toolbar_plus'); });
+      tb.querySelector('#lifeos-pha05-zoom-reset').addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); reset('toolbar_100'); });
+    }
+    updateLabel();
+  }
+  function ensureStageHandlers(){
+    var st = stage(), im = img();
+    if (!st || !im || st.__lifeosPha05TouchReady) return;
+    st.__lifeosPha05TouchReady = true;
+    im.setAttribute('draggable','false');
+
+    st.addEventListener('touchstart', function(e){
+      if (!e.touches || !e.touches.length) return;
+      // The stage owns image gestures; stop older lightbox swipe handlers from mixing with pinch/pan.
+      e.stopPropagation();
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        state.mode = 'pinch';
+        state.startDist = Math.max(1, dist(e.touches[0], e.touches[1]));
+        state.startScale = state.scale;
+        state.startX = state.x; state.startY = state.y;
+        state.startMid = mid(e.touches[0], e.touches[1]);
+        im.classList.add('lifeos-pha05-dragging');
+        log('touch_pinch_start', {scale:state.scale});
+      } else if (e.touches.length === 1) {
+        state.mode = 'pan';
+        state.panStart = {x:e.touches[0].clientX, y:e.touches[0].clientY};
+        state.startX = state.x; state.startY = state.y;
+        if (state.scale > 1) im.classList.add('lifeos-pha05-dragging');
+      }
+    }, {passive:false});
+
+    st.addEventListener('touchmove', function(e){
+      if (!e.touches || !e.touches.length) return;
+      e.stopPropagation();
+      if (state.mode === 'pinch' && e.touches.length >= 2) {
+        e.preventDefault();
+        var d = Math.max(1, dist(e.touches[0], e.touches[1]));
+        var m = mid(e.touches[0], e.touches[1]);
+        var stRect = st.getBoundingClientRect();
+        var sf = {x: state.startMid.x - (stRect.left + stRect.width/2), y: state.startMid.y - (stRect.top + stRect.height/2)};
+        var cf = {x: m.x - (stRect.left + stRect.width/2), y: m.y - (stRect.top + stRect.height/2)};
+        var ns = clamp(state.startScale * (d / state.startDist), MIN_SCALE, MAX_SCALE);
+        var contentX = (sf.x - state.startX) / state.startScale;
+        var contentY = (sf.y - state.startY) / state.startScale;
+        state.scale = ns;
+        state.x = cf.x - contentX * ns;
+        state.y = cf.y - contentY * ns;
+        apply('pinch_move');
+      } else if (state.mode === 'pan' && e.touches.length === 1 && state.scale > 1) {
+        e.preventDefault();
+        state.x = state.startX + (e.touches[0].clientX - state.panStart.x);
+        state.y = state.startY + (e.touches[0].clientY - state.panStart.y);
+        apply('pan_move');
+      }
+    }, {passive:false});
+
+    st.addEventListener('touchend', function(e){
+      e.stopPropagation();
+      var now = Date.now();
+      var t = e.changedTouches && e.changedTouches[0];
+      var wasPinch = state.mode === 'pinch';
+      var wasPan = state.mode === 'pan';
+      if (wasPinch || wasPan) {
+        if (e.cancelable) e.preventDefault();
+        im.classList.remove('lifeos-pha05-dragging');
+        clampXY(); apply('touch_end');
+      }
+      if (t && !wasPinch) {
+        var dx = Math.abs(t.clientX - (state.panStart ? state.panStart.x : t.clientX));
+        var dy = Math.abs(t.clientY - (state.panStart ? state.panStart.y : t.clientY));
+        var isTap = dx < 12 && dy < 12;
+        if (isTap && now - state.lastTapAt < 320 && Math.abs(t.clientX - state.lastTapX) < 32 && Math.abs(t.clientY - state.lastTapY) < 32) {
+          if (e.cancelable) e.preventDefault();
+          var target = state.scale > 1.05 ? 1 : DOUBLE_TAP_SCALE;
+          zoomAt(t.clientX, t.clientY, target, 'double_tap');
+          state.lastTapAt = 0;
+        } else if (isTap) {
+          state.lastTapAt = now; state.lastTapX = t.clientX; state.lastTapY = t.clientY;
+        }
+      }
+      state.mode = '';
+    }, {passive:false});
+
+    st.addEventListener('touchcancel', function(e){ e.stopPropagation(); state.mode=''; im.classList.remove('lifeos-pha05-dragging'); clampXY(); apply('touch_cancel'); }, {passive:false});
+
+    // Mouse/pointer fallback for desktop debugging: drag when zoomed.
+    var dragging = false, px = 0, py = 0, ox = 0, oy = 0;
+    st.addEventListener('pointerdown', function(e){
+      if (e.pointerType === 'touch') return;
+      if (state.scale <= 1 || e.button !== 0) return;
+      dragging = true; px = e.clientX; py = e.clientY; ox = state.x; oy = state.y;
+      try { st.setPointerCapture(e.pointerId); } catch(_e) {}
+      im.classList.add('lifeos-pha05-dragging');
+      e.preventDefault(); e.stopPropagation();
+    });
+    st.addEventListener('pointermove', function(e){
+      if (!dragging) return;
+      state.x = ox + (e.clientX - px); state.y = oy + (e.clientY - py); apply('pointer_pan');
+      e.preventDefault(); e.stopPropagation();
+    });
+    st.addEventListener('pointerup', function(e){ if (!dragging) return; dragging=false; im.classList.remove('lifeos-pha05-dragging'); clampXY(); apply('pointer_up'); e.preventDefault(); e.stopPropagation(); });
+    st.addEventListener('pointercancel', function(){ dragging=false; im.classList.remove('lifeos-pha05-dragging'); });
+
+    im.addEventListener('load', function(){
+      if (state.currentSrc !== im.currentSrc) { state.currentSrc = im.currentSrc; reset('image_load_new_src'); }
+      else { apply('image_load_same_src'); }
+    });
+  }
+  function ensureAll(){ ensureToolbar(); ensureStageHandlers(); apply('ensure'); }
+  function patchChatEngine(){
+    var ce = window.ChatEngine;
+    if (!ce || ce.__lifeosPha05ViewerPatched) return false;
+    ce.__lifeosPha05ViewerPatched = true;
+    ['openLightbox','updateLightboxView','nextLightbox','prevLightbox','closeLightbox'].forEach(function(name){
+      if (typeof ce[name] !== 'function') return;
+      var old = ce[name];
+      ce[name] = function(){
+        if (name === 'nextLightbox' || name === 'prevLightbox' || name === 'closeLightbox' || name === 'openLightbox' || name === 'updateLightboxView') reset('before_' + name);
+        var ret = old.apply(this, arguments);
+        try {
+          if (ret && typeof ret.then === 'function') ret.then(function(){ setTimeout(function(){ ensureAll(); reset('after_' + name); }, 40); }).catch(function(){ setTimeout(ensureAll, 40); });
+          else setTimeout(function(){ ensureAll(); if(name !== 'closeLightbox') apply('after_' + name); }, 40);
+        } catch(_e) { setTimeout(ensureAll, 80); }
+        return ret;
+      };
+      try { ce[name].__lifeosPha05Wrapped = true; } catch(_e) {}
+    });
+    log('patch_chat_engine', {ok:true});
+    return true;
+  }
+  function install(){
+    ensureAll();
+    patchChatEngine();
+  }
+  document.addEventListener('DOMContentLoaded', install);
+  window.addEventListener('resize', function(){ setTimeout(function(){ clampXY(); apply('resize'); }, 80); });
+  window.addEventListener('orientationchange', function(){ setTimeout(function(){ reset('orientationchange'); }, 220); });
+  setTimeout(install, 80);
+  setTimeout(install, 500);
+  setTimeout(install, 1400);
+  setTimeout(install, 3000);
+
+  window.LifeOSImageViewerPha05 = {
+    marker: MARKER,
+    reset: reset,
+    zoomIn: function(){ zoomBy(1.25, 'api_zoom_in'); },
+    zoomOut: function(){ zoomBy(0.8, 'api_zoom_out'); },
+    summary: function(){ return {marker:MARKER, state:Object.assign({}, state), logs:logs.slice(-80), hasStage:!!stage(), hasToolbar:!!document.getElementById('lifeos-pha05-zoom-toolbar'), patched:!!(window.ChatEngine && window.ChatEngine.__lifeosPha05ViewerPatched)}; }
+  };
+})();
+</script>
+<!-- LIFEOS GITHUB PHA05 IMAGE VIEWER PINCH ZOOM J17B WEB END -->
+
 </body>
 </html>
