@@ -3,17 +3,28 @@
    File path: /sw.js
    Scope    : /
    Purpose  : PWA cache an toàn trên GitHub Pages Gốc
+              + Pha13 PWA Share Target POST -> IndexedDB
    ============================================================ */
 
-const SW_VERSION = 'tnhc-sw-v1-20260607';
-const CACHE_NAME = 'tnhc-cache-v1-20260607';
+'use strict';
 
-/* Chỉ cache các file gốc hiện có, thêm file tĩnh của ông vào đây sau */
+const SW_VERSION = 'tnhc-sw-v2-20260628-pha13-full-merge';
+const CACHE_NAME = 'tnhc-cache-v2-20260628-pha13-full-merge';
+
+/* Core shell assets. Bump SW_VERSION/CACHE_NAME when replacing index/manifest/sw. */
 const CORE_ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/sw.js'
 ];
+
+/* Pha13 Share Target inbox. Must match index.html Pha13 client block. */
+const LIFEOS_SHARE_DB = 'lifeos_pwa_share_v1';
+const LIFEOS_SHARE_STORE = 'shares';
+const LIFEOS_SHARE_KEY = 'latest';
+const LIFEOS_SHARE_ROUTE_PARAM = 'lifeos_share_target';
+const LIFEOS_SHARE_RECEIVED_URL = '/index.html?lifeos_share_target_received=1';
 
 self.addEventListener('install', (event) => {
   console.log('[TNHC SW] install', SW_VERSION);
@@ -66,6 +77,85 @@ function isAppSameOrigin(requestUrl) {
   }
 }
 
+function isShareTargetPost(request) {
+  try {
+    if (!request || request.method !== 'POST') return false;
+    const url = new URL(request.url);
+    return url.origin === self.location.origin && url.searchParams.get(LIFEOS_SHARE_ROUTE_PARAM) === '1';
+  } catch (e) {
+    return false;
+  }
+}
+
+function openShareDb() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(LIFEOS_SHARE_DB, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(LIFEOS_SHARE_STORE)) db.createObjectStore(LIFEOS_SHARE_STORE);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error('indexedDB_open_failed'));
+  });
+}
+
+async function putLatestShare(payload) {
+  const db = await openShareDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(LIFEOS_SHARE_STORE, 'readwrite');
+    tx.objectStore(LIFEOS_SHARE_STORE).put(payload, LIFEOS_SHARE_KEY);
+    tx.oncomplete = () => {
+      try { db.close(); } catch (e) {}
+      resolve(true);
+    };
+    tx.onerror = () => {
+      try { db.close(); } catch (e) {}
+      reject(tx.error || new Error('indexedDB_put_failed'));
+    };
+  });
+}
+
+function isFormFile(value) {
+  return value && typeof value === 'object' && typeof value.name === 'string' && typeof value.size === 'number' && typeof value.arrayBuffer === 'function';
+}
+
+async function handleShareTargetPost(request) {
+  const createdAt = new Date().toISOString();
+  try {
+    const form = await request.formData();
+    const files = [];
+    for (const key of ['files', 'file', 'media']) {
+      const values = form.getAll(key) || [];
+      for (const value of values) {
+        if (isFormFile(value)) files.push(value);
+      }
+    }
+    const payload = {
+      source: 'pwa_share_target',
+      swVersion: SW_VERSION,
+      createdAt,
+      title: String(form.get('title') || ''),
+      text: String(form.get('text') || ''),
+      url: String(form.get('url') || ''),
+      files
+    };
+    await putLatestShare(payload);
+    console.log('[TNHC SW] Pha13 share stored', { files: files.length, title: !!payload.title, text: !!payload.text, url: !!payload.url });
+  } catch (err) {
+    console.warn('[TNHC SW] Pha13 share failed', err);
+    try {
+      await putLatestShare({
+        source: 'pwa_share_target',
+        swVersion: SW_VERSION,
+        createdAt,
+        error: String(err && err.message || err),
+        files: []
+      });
+    } catch (e) {}
+  }
+  return Response.redirect(new URL(LIFEOS_SHARE_RECEIVED_URL, self.location.origin).href, 303);
+}
+
 async function handleNavigation(request) {
   try {
     const fresh = await fetch(request);
@@ -98,6 +188,12 @@ async function handleAppAsset(request) {
 
 self.addEventListener('fetch', (event) => {
   const request = event.request;
+
+  if (isShareTargetPost(request)) {
+    event.respondWith(handleShareTargetPost(request));
+    return;
+  }
+
   if (!isGetRequest(request)) return;
 
   if (request.mode === 'navigate') {
