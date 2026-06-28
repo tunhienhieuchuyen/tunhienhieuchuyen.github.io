@@ -23233,5 +23233,291 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+
+<!-- LIFEOS GITHUB WEB PURE FAMILY PERSISTENCE CONTRACT FIX - START -->
+<script id="lifeos-github-web-family-persistence-contract-fix-js">
+(function(){
+  'use strict';
+  if (window.__LifeOSFamilyPersistenceContractFixV1) return;
+  window.__LifeOSFamilyPersistenceContractFixV1 = true;
+
+  var PHASE = 'GITHUB_WEB_PURE_PERSISTENCE_FIX_V1';
+  var LS_SHARED = 'lifeos_v8_chat_shared';
+  var LS_TOMBS = 'lifeos_family_chat_tombstones_v1';
+  var LS_COMMITS = 'lifeos_family_chat_committed_messages_v1';
+  var LS_QUARANTINE = 'lifeos_family_chat_quarantined_diagnostic_v1';
+  var MAX_COMMITS = 800;
+  var MAX_TOMBS = 2000;
+  var MAX_QUARANTINE = 100;
+  var installing = false;
+
+  function log(){ try { if (window.LIFEOS_DEBUG) console.info.apply(console, ['[FamilyPersistenceFix]'].concat([].slice.call(arguments))); } catch(e) {} }
+  function warn(){ try { console.warn.apply(console, ['[FamilyPersistenceFix]'].concat([].slice.call(arguments))); } catch(e) {} }
+  function readJSON(key, fallback){ try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch(e) { return fallback; } }
+  function writeJSON(key, value){ try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch(e) { warn('localStorage write failed', key, e); return false; } }
+  function now(){ return Date.now(); }
+  function str(v){ return v == null ? '' : String(v); }
+  function getId(m){ return str(m && (m.id || m.clientId || m.client_id || m.local_id)); }
+  function getFileId(m){ return str(m && (m.file_id || m.fileId || m.telegramFileId || m.telegram_file_id)); }
+  function getMsgId(m){ return str(m && (m.telegram_msg_id || m.message_id || m.messageId || m.telegramMessageId)); }
+  function getText(m){ return str(m && (m.text || m.body || m.content || m.message || '')); }
+  function hashText(t){
+    t = str(t); var h = 2166136261;
+    for (var i=0;i<t.length;i++){ h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return 'h' + (h >>> 0).toString(36) + ':' + t.length;
+  }
+  function msgKeys(m){
+    var out = [];
+    var id = getId(m), fid = getFileId(m), mid = getMsgId(m), text = getText(m);
+    if (id) out.push('id:' + id);
+    if (fid) out.push('file:' + fid);
+    if (mid) out.push('tg:' + mid);
+    if (text && text.length > 120) out.push('text:' + hashText(text));
+    return out;
+  }
+  function loadTombs(){ var v = readJSON(LS_TOMBS, {}); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
+  function saveTombs(t){
+    t = t && typeof t === 'object' ? t : {};
+    var keys = Object.keys(t);
+    if (keys.length > MAX_TOMBS) {
+      keys.sort(function(a,b){ return Number((t[a]&&t[a].deletedAt)||0) - Number((t[b]&&t[b].deletedAt)||0); });
+      keys.slice(0, keys.length - MAX_TOMBS).forEach(function(k){ delete t[k]; });
+    }
+    writeJSON(LS_TOMBS, t);
+  }
+  function isTombstoned(m, tombs){
+    tombs = tombs || loadTombs();
+    var keys = msgKeys(m);
+    for (var i=0;i<keys.length;i++) if (tombs[keys[i]]) return true;
+    return !!(m && (m.deletedAt || m.isDeleted || m.deleted === true));
+  }
+  function addTombstone(m, reason){
+    var tombs = loadTombs();
+    var keys = msgKeys(m);
+    var rec = { deletedAt: now(), reason: reason || 'user_delete', id:getId(m), file_id:getFileId(m), message_id:getMsgId(m), file_name: str(m && (m.file_name || m.name || '')), type:str(m && m.type) };
+    keys.forEach(function(k){ tombs[k] = rec; });
+    if (!keys.length && m) tombs['anon:' + now()] = rec;
+    saveTombs(tombs);
+    try { window.LifeOSDiagnosticLog && window.LifeOSDiagnosticLog.add && window.LifeOSDiagnosticLog.add('family_delete_tombstone', rec); } catch(e) {}
+    return rec;
+  }
+  function loadCommits(){ var a = readJSON(LS_COMMITS, []); return Array.isArray(a) ? a : []; }
+  function saveCommits(a){
+    a = Array.isArray(a) ? a : [];
+    var map = {}, out = [];
+    a.forEach(function(m){
+      if (!m || typeof m !== 'object') return;
+      var key = getId(m) || getFileId(m) || getMsgId(m) || ('anon:' + Math.random());
+      if (!map[key]) { map[key]=1; out.push(m); }
+    });
+    out.sort(function(a,b){ return Number(a.timestamp||a.createdAt||0) - Number(b.timestamp||b.createdAt||0); });
+    if (out.length > MAX_COMMITS) out = out.slice(out.length - MAX_COMMITS);
+    writeJSON(LS_COMMITS, out);
+  }
+  function commitMessage(m){
+    if (!m || typeof m !== 'object') return false;
+    if (isDiagnosticPollution(m)) return false;
+    var hasFile = !!getFileId(m) || /file|image|video|audio|document|bundle/i.test(str(m.type) + ' ' + str(m.kind));
+    var isLocal = str(m.sender || '') === str((window.ChatEngine && window.ChatEngine.getKey && window.ChatEngine.getKey()) || window.viewingUser || window.currentUser || '') || hasFile;
+    if (!isLocal) return false;
+    var commits = loadCommits();
+    var keys = msgKeys(m);
+    var exists = commits.some(function(x){ return msgKeys(x).some(function(k){ return keys.indexOf(k) >= 0; }); });
+    if (!exists) { commits.push(sanitizeMessage(m)); saveCommits(commits); log('committed message', keys); return true; }
+    return false;
+  }
+  function sanitizeMessage(m){
+    var c = Object.assign({}, m || {});
+    if (!c.id) c.id = 'local_' + now() + '_' + Math.random().toString(36).slice(2);
+    c.id = str(c.id);
+    if (!c.timestamp) c.timestamp = now();
+    Object.keys(c).forEach(function(k){ if (c[k] === undefined || typeof c[k] === 'function') delete c[k]; });
+    return c;
+  }
+  function isDiagnosticPollution(m){
+    if (!m || typeof m !== 'object') return false;
+    var text = getText(m);
+    var type = str(m.type).toLowerCase();
+    var fname = str(m.file_name || m.name).toLowerCase();
+    if (m.__lifeosDiagnostic === true || m.diagnostic === true || m.logType || m.errorType && !getFileId(m)) return true;
+    if (/diagnostic|debug|log_json|jsondiagnostic/.test(type + ' ' + fname)) return true;
+    if (!text) return false;
+    var trimmed = text.trim();
+    if (trimmed.length < 900) return false;
+    var score = 0;
+    if (/^\s*[\{\[]/.test(trimmed)) score += 2;
+    ['LifeOSDiagnosticLog','errorType','telegramDescription','responseTextShort','httpStatus','xhrReadyState','userAgent','stack','endpoint','service','worker_uncaught_exception','family_upload_last_error','content-range','accept-ranges'].forEach(function(tok){ if (trimmed.indexOf(tok) >= 0) score++; });
+    if (trimmed.length > 2500 && /[\{\}\[\]\":,]/.test(trimmed)) score += 1;
+    return score >= 4;
+  }
+  function quarantine(m, reason){
+    try {
+      var q = readJSON(LS_QUARANTINE, []); if (!Array.isArray(q)) q = [];
+      q.push({ at: now(), reason: reason || 'diagnostic_pollution', message: sanitizeMessage(m), textPreview: getText(m).slice(0, 1200) });
+      if (q.length > MAX_QUARANTINE) q = q.slice(q.length - MAX_QUARANTINE);
+      writeJSON(LS_QUARANTINE, q);
+    } catch(e) {}
+    addTombstone(m, reason || 'diagnostic_pollution');
+  }
+  function mergeByIdentity(messages, commits){
+    var out = [], seen = {};
+    function add(m, preferCommit){
+      if (!m || typeof m !== 'object') return;
+      var sm = sanitizeMessage(m);
+      var keys = msgKeys(sm);
+      var existingIndex = -1;
+      for (var i=0;i<out.length;i++) {
+        var ok = msgKeys(out[i]).some(function(k){ return keys.indexOf(k) >= 0; });
+        if (ok) { existingIndex = i; break; }
+      }
+      if (existingIndex >= 0) {
+        if (preferCommit) out[existingIndex] = Object.assign({}, out[existingIndex], sm);
+        return;
+      }
+      var k = keys[0] || ('anon:' + out.length + ':' + now());
+      if (!seen[k]) { seen[k]=1; out.push(sm); }
+    }
+    (messages || []).forEach(function(m){ add(m, false); });
+    (commits || []).forEach(function(m){ add(m, true); });
+    out.sort(function(a,b){ return Number(a.timestamp || a.createdAt || 0) - Number(b.timestamp || b.createdAt || 0); });
+    return out;
+  }
+  function persistShared(messages, folders){
+    writeJSON(LS_SHARED, { m: messages || [], f: folders || (window.ChatEngine && window.ChatEngine.chatFolders) || [] });
+  }
+  function applyState(reason){
+    if (installing) return false;
+    var ce = window.ChatEngine || {};
+    var tombs = loadTombs();
+    var current = Array.isArray(window.chatHistory) ? window.chatHistory.slice() : [];
+    var commits = loadCommits();
+    var changed = false;
+    var filtered = [];
+    current.forEach(function(m){
+      if (!m || typeof m !== 'object') { changed = true; return; }
+      if (isDiagnosticPollution(m)) { quarantine(m, 'diagnostic_pollution_' + (reason || 'apply')); changed = true; return; }
+      if (isTombstoned(m, tombs)) { changed = true; return; }
+      filtered.push(sanitizeMessage(m));
+    });
+    // Keep successful local file/text commits alive even if Firebase/snapshot is stale.
+    var liveCommits = commits.filter(function(m){ return m && !isDiagnosticPollution(m) && !isTombstoned(m, tombs); });
+    var merged = mergeByIdentity(filtered, liveCommits);
+    if (merged.length !== current.length || JSON.stringify(merged.map(function(m){return [getId(m), getFileId(m), getMsgId(m), m.timestamp, m.file_name, m.type];})) !== JSON.stringify(current.map(function(m){return [getId(m), getFileId(m), getMsgId(m), m.timestamp, m.file_name, m.type];}))) changed = true;
+    if (changed) {
+      window.chatHistory = merged;
+      persistShared(merged, ce.chatFolders || []);
+      log('state applied', reason, {before:current.length, after:merged.length, commits:liveCommits.length});
+    }
+    return changed;
+  }
+  function scrubDomDiagnostic(){
+    try {
+      var root = document.getElementById('chat-messages'); if (!root) return;
+      var nodes = root.querySelectorAll('[data-chat-msg-id], .chat-message, .message, .lifeos-pha03-card');
+      nodes.forEach(function(n){
+        var txt = (n.innerText || n.textContent || '').trim();
+        if (txt.length > 2000 && /LifeOSDiagnosticLog|errorType|responseTextShort|telegramDescription|xhrReadyState|userAgent|worker_uncaught_exception/.test(txt)) {
+          n.style.display = 'none';
+          n.setAttribute('data-lifeos-persistence-hidden-diagnostic','1');
+        }
+      });
+    } catch(e) {}
+  }
+  function install(){
+    var ce = window.ChatEngine;
+    if (!ce || ce.__lifeosPersistenceContractFixed) return false;
+    ce.__lifeosPersistenceContractFixed = true;
+
+    var oldSave = typeof ce.saveAndSync === 'function' ? ce.saveAndSync : null;
+    ce.saveAndSync = function(){
+      try {
+        applyState('before_save');
+        (window.chatHistory || []).forEach(function(m){ commitMessage(m); });
+      } catch(e) { warn('pre-save failed', e); }
+      var ret;
+      if (oldSave) ret = oldSave.apply(this, arguments);
+      else persistShared(window.chatHistory || [], this.chatFolders || []);
+      try { applyState('after_save'); } catch(e) {}
+      try {
+        if (this.dbRef) {
+          var tombs = loadTombs();
+          var tombKeys = Object.keys(tombs);
+          var slim = tombKeys.slice(Math.max(0, tombKeys.length - 600)).reduce(function(o,k){ o[k]=tombs[k]; return o; }, {});
+          this.dbRef.set({ deletedMessageTombstones: slim, updatedAt: now() }, { merge: true }).catch(function(){});
+        }
+      } catch(e) {}
+      return ret;
+    };
+
+    var oldRender = typeof ce.render === 'function' ? ce.render : null;
+    ce.render = function(){
+      try { applyState('before_render'); } catch(e) { warn('before render', e); }
+      var ret = oldRender ? oldRender.apply(this, arguments) : undefined;
+      try { scrubDomDiagnostic(); } catch(e) {}
+      return ret;
+    };
+
+    var oldSendText = typeof ce.sendText === 'function' ? ce.sendText : null;
+    ce.sendText = function(text){
+      if (isDiagnosticPollution({type:'text', text:text})) {
+        try { quarantine({id:'blocked_diag_'+now(), type:'text', text:String(text||''), sender:this.getKey&&this.getKey(), timestamp:now()}, 'blocked_send_diagnostic'); } catch(e) {}
+        window.showToast && window.showToast('Đã chặn log JSON khỏi Family Chat. Dùng nút Copy/Download Log.', 'ph-shield-warning');
+        return false;
+      }
+      return oldSendText ? oldSendText.apply(this, arguments) : false;
+    };
+
+    ce.deleteMsg = async function(){
+      var idEl = document.getElementById('chat-msg-active-id');
+      var id = idEl && idEl.value;
+      var msg = (window.chatHistory || []).find(function(m){ return String(getId(m)) === String(id); });
+      if (!msg) { this.closeMsgMenu && this.closeMsgMenu(); return false; }
+      var name = msg.type === 'text' ? getText(msg).slice(0,80) : (msg.file_name || msg.name || msg.type || 'file');
+      if (!window.confirm('Xóa vĩnh viễn khỏi LifeOS Web? Tin này sẽ được ghi tombstone để không hồi sinh sau khi tải lại.\n\n' + name)) {
+        this.closeMsgMenu && this.closeMsgMenu(); return false;
+      }
+      addTombstone(msg, 'user_delete');
+      window.chatHistory = (window.chatHistory || []).filter(function(m){ return !isTombstoned(m); });
+      try {
+        var commits = loadCommits().filter(function(m){ return !isTombstoned(m); });
+        saveCommits(commits);
+      } catch(e) {}
+      this.saveAndSync && this.saveAndSync();
+      this.render && this.render();
+      this.closeMsgMenu && this.closeMsgMenu();
+      window.showToast && window.showToast('Đã xóa và ghi tombstone chống hồi sinh', 'ph-trash');
+      return true;
+    };
+    ce.deleteChatFile = function(id){ var h=document.getElementById('chat-msg-active-id'); if(h) h.value=String(id||''); return this.deleteMsg(); };
+
+    ce.commitFamilyMessage = function(m){ var ok = commitMessage(m); applyState('manual_commit'); this.saveAndSync && this.saveAndSync(); this.render && this.render(); return ok; };
+    ce.getFamilyPersistenceSummary = function(){ return { phase:PHASE, tombstoneCount:Object.keys(loadTombs()).length, commitCount:loadCommits().length, quarantineCount:(readJSON(LS_QUARANTINE,[])||[]).length, currentMessages:(window.chatHistory||[]).length }; };
+    window.LifeOSFamilyPersistence = {
+      phase: PHASE,
+      summary: function(){ return ce.getFamilyPersistenceSummary ? ce.getFamilyPersistenceSummary() : {}; },
+      applyState: applyState,
+      tombstones: loadTombs,
+      commits: loadCommits,
+      quarantine: function(){ return readJSON(LS_QUARANTINE, []); },
+      clearQuarantine: function(){ writeJSON(LS_QUARANTINE, []); return true; }
+    };
+
+    applyState('install');
+    log('installed', ce.getFamilyPersistenceSummary());
+    return true;
+  }
+  function schedule(){
+    if (installing) return;
+    installing = true;
+    function step(){ installing=false; install(); }
+    step(); setTimeout(step,300); setTimeout(step,1200); setTimeout(step,3000); setTimeout(function(){ try{ window.ChatEngine && window.ChatEngine.render && window.ChatEngine.render(); }catch(e){} }, 3600);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once:true}); else schedule();
+  window.addEventListener('load', schedule, {once:true});
+})();
+</script>
+<!-- LIFEOS GITHUB WEB PURE FAMILY PERSISTENCE CONTRACT FIX - END -->
+
 </body>
 </html>
