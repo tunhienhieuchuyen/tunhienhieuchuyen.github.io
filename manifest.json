@@ -2,8 +2,8 @@
   "id": "tunhienhieuchuyen-app",
   "name": "Tự Nhiên Hiểu Chuyện",
   "short_name": "TNHC",
-  "description": "Giải Mã Vạn Vật",
-  "start_url": "/index.html",
+  "description": "Giải Mã Vạn Vật - GitHub Web Clean",
+  "start_url": "/index.html?webclean=1",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -41,11 +41,15 @@
             "text/*",
             "application/pdf",
             "application/zip",
-            "application/vnd.openxmlformats-officedocument.*",
+            "application/octet-stream",
             "*/*"
           ]
         }
       ]
     }
-  }
+  },
+  "categories": [
+    "productivity",
+    "utilities"
+  ]
 }

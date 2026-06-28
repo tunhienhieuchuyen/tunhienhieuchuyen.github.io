@@ -24854,5 +24854,318 @@ body.lifeos-pha13-drag-active #chat-messages{
      Files expected on GitHub root: index.html + manifest.json + sw.js
      Service worker keeps TNHC cache/offline and adds PWA share target POST -> IndexedDB.
 -->
+
+
+<!-- LIFEOS GITHUB WEB REPAIR CLEAN - PURE WEB CONTRACT START -->
+<style id="lifeos-github-web-repair-clean-css">
+/* Web Repair Clean: chỉ vá hành vi web thật, không thêm native bridge/APK giả định. */
+.lifeos-webclean-media-error{
+  margin-top:8px!important;padding:9px 10px!important;border-radius:14px!important;
+  background:#fff7ed!important;border:1px solid rgba(251,146,60,.45)!important;color:#9a3412!important;
+  font-size:12px!important;font-weight:850!important;line-height:1.35!important;max-width:100%!important;
+}
+.lifeos-webclean-media-error .wrc-actions{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin-top:7px!important;}
+.lifeos-webclean-media-error button{
+  height:25px!important;border-radius:999px!important;border:1px solid rgba(251,146,60,.38)!important;
+  background:#fff!important;color:#9a3412!important;font-size:11px!important;font-weight:950!important;padding:0 9px!important;
+}
+#chat-messages img.lifeos-webclean-img-error,
+#chat-messages video.lifeos-webclean-video-error{
+  background:linear-gradient(135deg,#f1f5f9,#fff7ed)!important;border:1px dashed rgba(251,146,60,.55)!important;
+  min-height:96px!important;object-fit:contain!important;
+}
+.lifeos-webclean-collapsed-json{
+  margin:8px 0!important;padding:10px 12px!important;border-radius:16px!important;
+  background:#f8fafc!important;border:1px solid rgba(100,116,139,.28)!important;color:#334155!important;
+  font-size:12px!important;font-weight:850!important;line-height:1.35!important;
+}
+.lifeos-webclean-collapsed-json details{max-width:100%!important;}
+.lifeos-webclean-collapsed-json summary{cursor:pointer!important;font-weight:1000!important;color:#475569!important;}
+.lifeos-webclean-collapsed-json pre{white-space:pre-wrap!important;word-break:break-word!important;max-height:220px!important;overflow:auto!important;font-size:11px!important;margin-top:8px!important;}
+#lifeos-webclean-status{
+  position:fixed!important;left:12px!important;right:12px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 82px)!important;
+  z-index:9999997!important;display:none!important;pointer-events:none!important;
+}
+#lifeos-webclean-status .wrc-toast{
+  margin:auto!important;max-width:680px!important;padding:10px 13px!important;border-radius:16px!important;
+  background:rgba(15,23,42,.94)!important;color:#fff!important;box-shadow:0 18px 45px rgba(15,23,42,.28)!important;
+  font-size:12px!important;font-weight:900!important;line-height:1.35!important;
+}
+@media(max-width:720px){
+  #view-chat.active, body[data-desktop-workspace="chat"] #view-chat{min-height:calc(100dvh - 86px)!important;}
+  #chat-messages{
+    overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+    max-height:calc(100dvh - 170px)!important;
+  }
+  #chat-messages .lifeos-pha03-card{max-width:100%!important;}
+  #chat-messages .lifeos-pha03-preview,
+  #chat-messages .lifeos-pha03-media-slot,
+  #chat-messages .lifeos-pha10-video-wrap{max-width:100%!important;overflow:hidden!important;}
+  #lifeos-pha13-drop-overlay{pointer-events:none!important;}
+}
+@media(orientation:landscape) and (max-height:560px){
+  #chat-messages{max-height:calc(100dvh - 118px)!important;}
+  #chat-form,.chat-composer{min-height:42px!important;}
+}
+</style>
+<script id="lifeos-github-web-repair-clean-js">
+(function(){
+  'use strict';
+  var MARKER='WEB_REPAIR_CLEAN_GITHUB_PURE_WEB';
+  if(window.__lifeosGithubWebRepairCleanInstalled) return;
+  window.__lifeosGithubWebRepairCleanInstalled=true;
+  window.LIFEOS_WEB_ONLY=true;
+  window.LIFEOS_DEBUG=false;
+
+  var MAX_FILE_BYTES = 45 * 1024 * 1024;
+  var MAX_BATCH_BYTES = 120 * 1024 * 1024;
+  var logs=[];
+  function iso(){try{return new Date().toISOString();}catch(_){return String(Date.now());}}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function bytes(n){n=Number(n||0); if(!n)return'0 B'; var u=['B','KB','MB','GB']; var i=0; while(n>=1024&&i<u.length-1){n/=1024;i++;} return (i?n.toFixed(n>=10?1:2):Math.round(n))+' '+u[i];}
+  function fileArr(files){return Array.from(files||[]).filter(function(f){return f&&typeof f.name==='string'&&typeof f.size==='number';});}
+  function safeName(v){return String(v||'file').replace(/[\\/:*?"<>|\x00-\x1F]/g,'_').replace(/\s+/g,' ').trim()||('FILE_'+Date.now());}
+  function pick(obj,keys){for(var i=0;i<keys.length;i++){var cur=obj,parts=String(keys[i]).split('.');for(var j=0;j<parts.length&&cur!=null;j++)cur=cur[parts[j]];if(cur!=null&&cur!=='')return cur;}return '';}
+  function log(event,data,level){
+    var item=Object.assign({ts:iso(),phase:MARKER,event:event,level:level||'info'},data||{});
+    logs.push(item); if(logs.length>180) logs.splice(0,logs.length-180);
+    try{window.LifeOSDiagnosticLog&&window.LifeOSDiagnosticLog.push&&window.LifeOSDiagnosticLog.push('web_repair_clean',event,item,level||'info');}catch(_){ }
+    return item;
+  }
+  function status(text,type,ms){
+    try{ if(window.ChatEngine&&typeof window.ChatEngine.setUploadStatus==='function'){window.ChatEngine.setUploadStatus(text,type||'info',type==='done',undefined,'Web Repair Clean');} }catch(_){ }
+    try{ window.showToast&&window.showToast(text,type==='error'?'ph-warning-circle':'ph-info'); }catch(_){ }
+    try{
+      var box=document.getElementById('lifeos-webclean-status');
+      if(!box){box=document.createElement('div');box.id='lifeos-webclean-status';box.innerHTML='<div class="wrc-toast"></div>';document.body.appendChild(box);} 
+      var t=box.querySelector('.wrc-toast'); if(t)t.textContent=text; box.style.display='block'; clearTimeout(box.__wrcTimer); box.__wrcTimer=setTimeout(function(){box.style.display='none';},ms||3600);
+    }catch(_){ }
+  }
+
+  function throttleNoisyConsole(){
+    if(console.__lifeosWebCleanThrottled) return;
+    console.__lifeosWebCleanThrottled=true;
+    var origInfo=console.info, origWarn=console.warn;
+    var seen={};
+    function noisyKey(args){
+      var s=''; try{s=Array.from(args).map(function(x){return typeof x==='string'?x:(x&&x.phase)||'';}).join(' ');}catch(_){s='';}
+      if(/LifeOSMediaStrongGuard|Pha08 Telegram Pipeline|Pha09 Stream Endpoint Client|Pha10 Family Video|LifeOSDiagnosticLog\.summary|range_probe/.test(s)) return s.replace(/\d+/g,'#').slice(0,120);
+      return '';
+    }
+    function shouldMute(args){
+      var k=noisyKey(args); if(!k) return false;
+      var now=Date.now(), rec=seen[k]||(seen[k]={n:0,t:now,muted:0});
+      if(now-rec.t>6000){rec.n=0;rec.t=now;rec.muted=0;}
+      rec.n++;
+      if(rec.n<=3) return false;
+      rec.muted++;
+      return true;
+    }
+    console.info=function(){ if(shouldMute(arguments)) return; return origInfo.apply(console,arguments); };
+    console.warn=function(){ if(shouldMute(arguments)) return; return origWarn.apply(console,arguments); };
+  }
+
+  function patchDiagnosticLog(){
+    var api=window.LifeOSDiagnosticLog;
+    if(!api || api.__lifeosWebCleanPatched) return false;
+    api.__lifeosWebCleanPatched=true;
+    var origPush=api.push;
+    var origSummary=api.summary;
+    api.push=function(scope,action,detail,level){
+      try{
+        if(/scroll|mousemove|pointermove|timeupdate|progress/.test(String(action||''))) return null;
+        var ret=origPush&&origPush.apply(api,arguments);
+        var arr=window.__lifeosDiagnosticLogs;
+        if(Array.isArray(arr)&&arr.length>320) arr.splice(0,arr.length-320);
+        return ret;
+      }catch(e){return null;}
+    };
+    api.summary=function(copy){
+      var data;
+      try{data=origSummary?origSummary.call(api,false):{phase:'diagnostic',logs:(window.__lifeosDiagnosticLogs||[]).slice(-120)};}catch(e){data={error:String(e&&e.message||e),logs:(window.__lifeosDiagnosticLogs||[]).slice(-120)};}
+      try{if(data&&Array.isArray(data.logs))data.logs=data.logs.slice(-120);data.webRepairClean={marker:MARKER,diagnosticCap:320,consoleThrottle:true};}catch(_){ }
+      if(copy){try{navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(data,null,2));status('Đã copy log JSON gọn sau Web Repair Clean','done');}catch(_){ }}
+      try{console.info('[LifeOSDiagnosticLog.summary.webclean]',data);}catch(_){ }
+      return data;
+    };
+    log('diagnostic_log_patched',{cap:320});
+    return true;
+  }
+
+  function getRelay(){return String(window.LIFEOS_UPLOAD_RELAY_URL||'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev').replace(/\/+$/,'');}
+  function msgList(){return Array.isArray(window.chatHistory)?window.chatHistory:(window.ChatEngine&&Array.isArray(window.ChatEngine.messages)?window.ChatEngine.messages:[]);}
+  function byId(id){id=String(id||'');return msgList().find(function(m){return String(m&&m.id)===id||String(m&&m.message_id)===id||String(m&&m.telegram_msg_id)===id;})||null;}
+  function fileIdFrom(obj){ if(typeof obj==='string') return /^(https?:|blob:|data:)/i.test(obj)?'':obj.trim(); return String(pick(obj||{},['file_id','fileId','telegramFileId','telegram_file_id','attachment.file_id','document.file_id','photo.file_id','video.file_id','audio.file_id'])||'').trim(); }
+  function filePathFrom(obj){ return String(pick(obj||{},['file_path','filePath','telegramFilePath','telegram_file_path','result.file_path','file.file_path'])||'').replace(/^\/+/, '').trim(); }
+  function fileNameFrom(obj){return safeName(pick(obj||{},['safeFileName','file_name','fileName','name','title','document.file_name','video.file_name','audio.file_name'])||'file');}
+  function mimeFrom(obj){return String(pick(obj||{},['mime_type','mimeType','mime','document.mime_type','video.mime_type','audio.mime_type'])||'').trim();}
+  function relayUrl(endpoint,params){var u=new URL(getRelay()+endpoint);Object.keys(params||{}).forEach(function(k){var v=params[k];if(v!=null&&v!=='')u.searchParams.set(k,String(v));});return u.toString();}
+
+  async function resolveWebFile(input,opt){
+    opt=opt||{}; var msg=(typeof input==='object'&&input)?input:(opt.message||{});
+    var fid=fileIdFrom(input)||fileIdFrom(msg); var path=filePathFrom(input)||filePathFrom(msg); var name=safeName(opt.fileName||fileNameFrom(msg)); var mime=mimeFrom(msg)||opt.mime||'';
+    if(window.LifeOSTelegramGetFilePipelinePha08&&typeof window.LifeOSTelegramGetFilePipelinePha08.resolve==='function'){
+      try{
+        var info=await window.LifeOSTelegramGetFilePipelinePha08.resolve(input,{message:msg,fileName:name,purpose:opt.purpose||'download'});
+        if(info) return Object.assign({},info,{fileId:info.fileId||fid,fileName:info.fileName||name,mime:info.mime||mime});
+      }catch(e){log('pha08_resolve_failed',{fileName:name,hasFileId:!!fid,error:String(e&&e.message||e)},'warn');}
+    }
+    return {
+      marker:MARKER,fileId:fid,filePath:path,fileName:name,mime:mime,
+      downloadUrl:relayUrl('/download',{file_id:fid,file_path:path,filename:name,name:name,mime:mime,inline:'1'}),
+      streamUrl:relayUrl('/stream',{file_id:fid,file_path:path,filename:name,name:name,mime:mime}),
+      thumbnailUrl:relayUrl('/download',{file_id:fid,file_path:path,filename:name,name:name,mime:mime,inline:'1',thumb:'1'}),
+      mode:'webclean_relay_direct',directFileIdAsUrl:false
+    };
+  }
+
+  function patchChatEngineUrls(){
+    var ce=window.ChatEngine; if(!ce || ce.__lifeosWebCleanUrlPatched) return false;
+    ce.__lifeosWebCleanUrlPatched=true;
+    ce.__lifeosWebCleanOriginalGetImageUrl=ce.getImageUrl;
+    ce.__lifeosWebCleanOriginalGetFileUrl=ce.getFileUrl;
+    ce.getImageUrl=async function(fileIdOrMsg,fileName,opt){
+      var msg=(typeof fileIdOrMsg==='object'&&fileIdOrMsg)?fileIdOrMsg:{};
+      var info=await resolveWebFile(fileIdOrMsg,{message:msg,fileName:fileName||fileNameFrom(msg),purpose:'download'});
+      return info.downloadUrl || info.thumbnailUrl || info.streamUrl;
+    };
+    ce.getFileUrl=async function(fileIdOrMsg,fileName,opt){
+      var msg=(typeof fileIdOrMsg==='object'&&fileIdOrMsg)?fileIdOrMsg:{};
+      var purpose=(opt&&opt.purpose)||'download';
+      var info=await resolveWebFile(fileIdOrMsg,{message:msg,fileName:fileName||fileNameFrom(msg),purpose:purpose});
+      return purpose==='stream'?(info.streamUrl||info.downloadUrl):(info.downloadUrl||info.streamUrl);
+    };
+    log('chatengine_url_patched',{imageUsesDownload:true,videoUsesStream:true,noNativeBridge:true});
+    return true;
+  }
+
+  function mediaErrorBox(host,msg,reloadFn){
+    if(!host || host.__lifeosWebCleanErrorBox) return;
+    host.__lifeosWebCleanErrorBox=true;
+    var box=document.createElement('div');box.className='lifeos-webclean-media-error';
+    box.innerHTML='<div>'+esc(msg)+'</div><div class="wrc-actions"><button type="button" data-wrc-reload>Thử tải lại</button><button type="button" data-wrc-copy>Copy chẩn đoán</button></div>';
+    try{host.insertAdjacentElement('afterend',box);}catch(_){try{host.parentNode&&host.parentNode.appendChild(box);}catch(__){}}
+    var r=box.querySelector('[data-wrc-reload]'); if(r)r.onclick=function(e){e.preventDefault();try{host.__lifeosWebCleanErrorBox=false;box.remove();reloadFn&&reloadFn();}catch(_){}};
+    var c=box.querySelector('[data-wrc-copy]'); if(c)c.onclick=function(e){e.preventDefault();try{navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify({phase:MARKER,message:msg,src:host.currentSrc||host.src||'',className:host.className||'',time:iso()},null,2));status('Đã copy chẩn đoán media lỗi','done');}catch(_){}};
+  }
+  function cardMessage(img){var card=img&&img.closest&&img.closest('[data-lifeos-msg-id],[data-chat-msg-id],.lifeos-pha03-card');var id=card&&(card.getAttribute('data-lifeos-msg-id')||card.getAttribute('data-chat-msg-id')||card.dataset.lifeosMsgId||card.dataset.chatMsgId);return byId(id);}
+  async function reloadImage(img){
+    try{
+      var msg=cardMessage(img); var input=msg||img.getAttribute('data-lifeos-file-id')||img.getAttribute('data-file-id')||'';
+      if(!input){status('Không tìm thấy message/file_id để tải lại ảnh','error');return;}
+      img.classList.remove('lifeos-webclean-img-error'); img.removeAttribute('data-webclean-error');
+      var url=await (window.ChatEngine&&window.ChatEngine.getImageUrl?window.ChatEngine.getImageUrl(input,fileNameFrom(msg||{})):resolveWebFile(input,{message:msg||{},purpose:'download'}).then(function(x){return x.downloadUrl;}));
+      if(url){img.src=url;log('image_reload',{fileName:fileNameFrom(msg||{}),urlType:url.indexOf('/download')>=0?'download':'other'});} 
+    }catch(e){status('Tải lại ảnh lỗi: '+String(e&&e.message||e),'error');}
+  }
+  function bindMediaErrors(root){
+    root=root||document;
+    root.querySelectorAll&&root.querySelectorAll('#chat-messages img').forEach(function(img){
+      if(img.__lifeosWebCleanImgBound) return; img.__lifeosWebCleanImgBound=true;
+      img.setAttribute('decoding','async'); if(!img.getAttribute('loading')) img.setAttribute('loading','lazy');
+      img.addEventListener('error',function(){
+        img.classList.add('lifeos-webclean-img-error');
+        mediaErrorBox(img,'Ảnh chưa tải được trên Web GitHub. Kiểm tra Cloudflare Worker /getFile → /download, Content-Type image/*, không dùng file_id trực tiếp.',function(){reloadImage(img);});
+        log('image_error',{src:(img.currentSrc||img.src||'').slice(0,260),className:String(img.className||'').slice(0,160)},'warn');
+      },true);
+    });
+    root.querySelectorAll&&root.querySelectorAll('#chat-messages video').forEach(function(v){
+      if(v.__lifeosWebCleanVideoBound) return; v.__lifeosWebCleanVideoBound=true; v.setAttribute('playsinline',''); v.setAttribute('preload','metadata');
+      v.addEventListener('error',function(){
+        v.classList.add('lifeos-webclean-video-error');
+        mediaErrorBox(v,'Video chưa phát được inline. Web cần /stream trả 206 Partial Content, Accept-Ranges, Content-Range và Content-Type video/*.',function(){try{v.load();}catch(_){}});
+        log('video_error',{src:(v.currentSrc||v.src||'').slice(0,260),errorCode:v.error&&v.error.code||0},'warn');
+      },true);
+    });
+  }
+  function collapseDiagnosticJson(root){
+    root=root||document; var nodes=[];
+    try{nodes=Array.from(root.querySelectorAll('#chat-messages .chat-message,#chat-messages [data-chat-msg-id],#chat-messages .message-bubble,#chat-messages .bubble'));}catch(_){return;}
+    nodes.forEach(function(n){
+      if(n.__lifeosWebCleanJsonChecked) return; n.__lifeosWebCleanJsonChecked=true;
+      var txt=(n.innerText||n.textContent||'').trim();
+      if(txt.length<900 || txt.length>12000) return;
+      if(!/^\s*[\{\[]/.test(txt)) return;
+      if(!/(Pha1[0-3]|LifeOSDiagnostic|UploadQueue|phase|marker|httpStatus|fileId)/.test(txt)) return;
+      var pre=esc(txt.slice(0,5000));
+      n.innerHTML='<div class="lifeos-webclean-collapsed-json"><details><summary>Đã thu gọn JSON diagnostic trong chat để tránh làm nghẽn Family</summary><pre>'+pre+(txt.length>5000?'\n…':'')+'</pre></details></div>';
+      log('collapsed_diagnostic_json',{length:txt.length});
+    });
+  }
+
+  function validateWebFiles(files,source){
+    var list=fileArr(files); var accepted=[],blocked=[],total=0;
+    list.forEach(function(f){total+=f.size||0; if((f.size||0)>MAX_FILE_BYTES) blocked.push({file:f,reason:'file_too_large_web_limit'}); else accepted.push(f);});
+    if(total>MAX_BATCH_BYTES){
+      var run=0, keep=[];
+      accepted.forEach(function(f){if(run+f.size<=MAX_BATCH_BYTES){keep.push(f);run+=f.size;}else blocked.push({file:f,reason:'batch_too_large_web_limit'});});
+      accepted=keep;
+    }
+    if(blocked.length){
+      var msg='Web đã chặn '+blocked.length+' file quá lớn/ngoài batch để tránh retry vô ích: '+blocked.slice(0,3).map(function(x){return x.file.name+' ('+bytes(x.file.size)+')';}).join(', ')+(blocked.length>3?'…':'');
+      status(msg,'error',7200); log('upload_files_blocked',{source:source,total:list.length,accepted:accepted.length,blocked:blocked.map(function(x){return{name:x.file.name,size:x.file.size,type:x.file.type,reason:x.reason};})},'warn');
+    }
+    return accepted;
+  }
+  function patchUploadGuards(){
+    var q=window.LifeOSFamilyUploadQueueV11;
+    if(q&&q.enqueue&&!q.__lifeosWebCleanUploadPatched){
+      var orig=q.enqueue; q.__lifeosWebCleanUploadPatched=true;
+      q.enqueue=function(files,source){var accepted=validateWebFiles(files,source||'queue'); if(!accepted.length)return Promise.resolve({ok:false,total:fileArr(files).length,okCount:0,failCount:fileArr(files).length,error:'web_file_limit_blocked'}); return orig.call(q,accepted,source);};
+      log('upload_queue_guard_patched',{maxFileBytes:MAX_FILE_BYTES,maxBatchBytes:MAX_BATCH_BYTES});
+    }
+    var ce=window.ChatEngine;
+    if(ce&&!ce.__lifeosWebCleanUploadPatched){
+      ['sendMultipleFiles','handleFiles'].forEach(function(name){
+        if(typeof ce[name]==='function'&&!ce[name].__lifeosWebCleanWrapped){var old=ce[name];var fn=function(files){var accepted=validateWebFiles(files,name); if(!accepted.length)return Promise.resolve({ok:false,error:'web_file_limit_blocked'}); return old.call(this,accepted);}; fn.__lifeosWebCleanWrapped=true; ce[name]=fn;}
+      });
+      ['sendFile','handleFile'].forEach(function(name){
+        if(typeof ce[name]==='function'&&!ce[name].__lifeosWebCleanWrapped){var old=ce[name];var fn=function(file){var accepted=validateWebFiles(file?[file]:[],name); if(!accepted.length)return Promise.resolve({ok:false,error:'web_file_limit_blocked'}); return old.call(this,accepted[0]);}; fn.__lifeosWebCleanWrapped=true; ce[name]=fn;}
+      });
+      ce.__lifeosWebCleanUploadPatched=true;
+    }
+  }
+
+  async function probeRelay(copy){
+    var relay=getRelay(); var out={phase:MARKER,relay:relay,checks:[],note:'Không dùng native/APK. Web phải có Cloudflare Worker relay đúng contract.'};
+    async function check(path,opts){
+      var item={path:path,status:0,ok:false,contentType:'',acceptRanges:'',contentRange:'',error:''};
+      try{var res=await fetch(relay+path,opts||{method:'GET',cache:'no-store'});item.status=res.status;item.ok=res.ok;item.contentType=res.headers.get('content-type')||'';item.acceptRanges=res.headers.get('accept-ranges')||'';item.contentRange=res.headers.get('content-range')||'';try{await res.body&&res.body.cancel&&res.body.cancel();}catch(_){}}catch(e){item.error=String(e&&e.message||e);} out.checks.push(item);return item;}
+    await check('/getFile?file_id=__probe__');
+    await check('/download?file_id=__probe__&filename=probe.bin');
+    await check('/stream?file_id=__probe__&filename=probe.mp4',{method:'GET',headers:{Range:'bytes=0-1'},cache:'no-store'});
+    log('relay_probe',out); if(copy){try{navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(out,null,2));status('Đã copy kết quả probe Worker relay','done');}catch(_){ }} return out;
+  }
+
+  function installObservers(){
+    bindMediaErrors(document); collapseDiagnosticJson(document);
+    if(!document.__lifeosWebCleanMutationObserver && window.MutationObserver){
+      document.__lifeosWebCleanMutationObserver=true;
+      var mo=new MutationObserver(function(muts){
+        var touched=false;
+        muts.forEach(function(m){if(m.addedNodes&&m.addedNodes.length)touched=true;});
+        if(touched){setTimeout(function(){bindMediaErrors(document);collapseDiagnosticJson(document);},60);}
+      });
+      mo.observe(document.documentElement||document.body,{childList:true,subtree:true});
+    }
+  }
+  function install(){
+    throttleNoisyConsole(); patchDiagnosticLog(); patchChatEngineUrls(); patchUploadGuards(); installObservers();
+    setTimeout(function(){patchDiagnosticLog();patchChatEngineUrls();patchUploadGuards();bindMediaErrors(document);collapseDiagnosticJson(document);},700);
+    setTimeout(function(){patchDiagnosticLog();patchChatEngineUrls();patchUploadGuards();bindMediaErrors(document);collapseDiagnosticJson(document);},2200);
+  }
+  window.LifeOSWebRepairClean={
+    marker:MARKER, version:'20260628-webclean-1', maxFileBytes:MAX_FILE_BYTES, maxBatchBytes:MAX_BATCH_BYTES,
+    resolve:resolveWebFile, reloadBrokenImages:function(){document.querySelectorAll('#chat-messages img.lifeos-webclean-img-error').forEach(reloadImage);},
+    probeRelay:probeRelay, validateWebFiles:validateWebFiles,
+    summary:function(copy){var data={marker:MARKER,installed:true,webOnly:!!window.LIFEOS_WEB_ONLY,relay:getRelay(),chatEngineUrlPatched:!!(window.ChatEngine&&window.ChatEngine.__lifeosWebCleanUrlPatched),uploadGuardPatched:!!(window.LifeOSFamilyUploadQueueV11&&window.LifeOSFamilyUploadQueueV11.__lifeosWebCleanUploadPatched),diagnosticPatched:!!(window.LifeOSDiagnosticLog&&window.LifeOSDiagnosticLog.__lifeosWebCleanPatched),mediaErrors:document.querySelectorAll('.lifeos-webclean-media-error').length,logs:logs.slice(-80)}; if(copy){try{navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(data,null,2));status('Đã copy summary Web Repair Clean','done');}catch(_){}} try{console.info('[LifeOSWebRepairClean.summary]',data);}catch(_){ } return data;}
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install,{once:true}); else install();
+  window.addEventListener('load',function(){install();}, {once:true});
+  log('installed',{webOnly:true,noNativeBridge:true,imageUsesDownload:true,videoUsesStream206:true,uploadSizeGuard:true,diagnosticCap:true});
+})();
+</script>
+<!-- LIFEOS GITHUB WEB REPAIR CLEAN - PURE WEB CONTRACT END -->
+
 </body>
 </html>
