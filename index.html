@@ -25712,5 +25712,57 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
 </script>
 <!-- Pha14J20R19_VideoRangeStream_GitHub_R18Base_NoAudioTouch - END -->
 
+
+
+<!-- Pha14J20R20C_FinalCleanHideFloatingDebug_InstallFab_R19Base - START -->
+<style id="lifeos-j20r20c-final-hide-floating-debug-style">
+  /*
+    R20C: FINAL UI CLEANUP FROM CLEAN R19 BASE ONLY.
+    Scope cực hẹp: ẩn các nút/panel nổi phục vụ nội soi/cài app đang che UI.
+    Không đụng layout, không xóa API debug, không đụng audio/video/upload/delete/D1/Firebase.
+    Muốn lấy lại tạm thời để nâng cấp/debug:
+      document.documentElement.setAttribute('data-lifeos-show-floating-debug','1')
+    Ẩn lại:
+      document.documentElement.removeAttribute('data-lifeos-show-floating-debug')
+  */
+  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19c-ultra-root,
+  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19o-ultra-root,
+  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19s-ultra-root,
+  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19c-ultra-toggle,
+  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19o-ultra-toggle,
+  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19s-ultra-toggle,
+  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19c-ultra-panel,
+  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19o-ultra-panel,
+  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19s-ultra-panel,
+  html:not([data-lifeos-show-floating-debug="1"]) #btnInstall,
+  html:not([data-lifeos-show-floating-debug="1"]) .install-fab,
+  html:not([data-lifeos-show-floating-debug="1"]) [aria-label="Cài App LifeOS"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+</style>
+<script id="lifeos-pha14j20r20c-final-hide-floating-debug-js">
+(function(){
+  'use strict';
+  if (window.__lifeosPha14J20R20CFinalHideFloatingDebugInstalled) return;
+  window.__lifeosPha14J20R20CFinalHideFloatingDebugInstalled = true;
+  var PHASE = 'Pha14J20R20C_FinalCleanHideFloatingDebug_InstallFab_R19Base';
+  window.LifeOSFinalFloatingDebugUI = {
+    phase: PHASE,
+    show: function(){ document.documentElement.setAttribute('data-lifeos-show-floating-debug','1'); return true; },
+    hide: function(){ document.documentElement.removeAttribute('data-lifeos-show-floating-debug'); return true; },
+    isVisible: function(){ return document.documentElement.getAttribute('data-lifeos-show-floating-debug') === '1'; },
+    note: 'Final mặc định ẩn UltraLog/Nội soi/Cài App nổi; debug API vẫn giữ nguyên.'
+  };
+  try{
+    window.__lifeosFinalHideFloatingDebugPhase = PHASE;
+  }catch(e){}
+})();
+</script>
+<!-- Pha14J20R20C_FinalCleanHideFloatingDebug_InstallFab_R19Base - END -->
+
 </body>
 </html>
