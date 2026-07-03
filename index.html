@@ -26005,5 +26005,568 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
 </script>
 <!-- Pha14J20R21_D1Folders_KeepInstallApp_HideUltra_R19Base - END -->
 
+<!-- Pha14J20R22_MusicFullMp3AutoLoad - START -->
+<style id="lifeos-j20r22-music-autoload-style">
+#mp3-list-container .lifeos-music-autoload-status{
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
+  min-height:44px!important;margin:10px 0 16px!important;padding:10px 12px!important;border-radius:16px!important;
+  border:1px dashed rgba(99,102,241,.35)!important;background:rgba(255,255,255,.78)!important;
+  color:var(--c-mut)!important;font-size:12px!important;font-weight:850!important;text-align:center!important;
+}
+#mp3-list-container .lifeos-music-autoload-status.is-done{border-style:solid!important;color:var(--c-primary)!important;background:var(--c-sub)!important;}
+#mp3-list-container .lifeos-music-autoload-status button{padding:8px 12px!important;border-radius:999px!important;background:var(--c-primary)!important;color:#fff!important;font-weight:900!important;box-shadow:0 8px 18px rgba(15,23,42,.12)!important;}
+</style>
+<script id="lifeos-j20r22-music-full-mp3-autoload-js">
+(function(){
+  if(window.__lifeosJ20R22MusicFullMp3AutoLoad) return;
+  window.__lifeosJ20R22MusicFullMp3AutoLoad = true;
+  var PHASE = 'Pha14J20R22_MusicFullMp3AutoLoad';
+  var CACHE_KEY = 'xs_songs_v4';
+  var META_KEY = 'xs_songs_v4_full_meta';
+  var DEFAULT_IDENTIFIERS = ['giai-toa-moi-thu'];
+  var MIN_FRESH_ACCEPT = 16;
+  var PAGE_SIZE = 50;
+  var loadingRun = null;
+  function byId(id){ return document.getElementById(id); }
+  function log(){ try{ if(window.LIFEOS_DEBUG) console.info.apply(console, ['[LifeOS '+PHASE+']'].concat([].slice.call(arguments))); }catch(e){} }
+  function toast(msg, icon){ try{ window.showToast && window.showToast(msg, icon || 'ph-music-note'); }catch(e){} }
+  function safeText(v){ return String(v == null ? '' : v).trim(); }
+  function stripExt(v){ return safeText(v).replace(/\.mp3(?:\?.*)?$/i,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim(); }
+  function isMp3Like(obj, name, url){
+    var mix = [name, url, obj && obj.format, obj && obj.mime, obj && obj.mimeType, obj && obj.type, obj && obj.kind, obj && obj.mediaType].map(safeText).join(' ').toLowerCase();
+    return /\.mp3(?:$|[?#\s])/.test(mix) || mix.indexOf('vbr mp3') >= 0 || mix.indexOf('mp3') >= 0 || mix.indexOf('audio/mpeg') >= 0;
+  }
+  function encodePath(path){ return safeText(path).split('/').map(function(x){ return encodeURIComponent(x); }).join('/'); }
+  function archiveUrl(identifier, name){ return 'https://archive.org/download/' + encodeURIComponent(identifier) + '/' + encodePath(name); }
+  function normalizeSong(s){
+    if(!s) return null;
+    var url = safeText(s.stream_url || s.streamUrl || s.url || s.download_url || s.downloadUrl || s.link || s.src || s.href || s.playUrl);
+    var name = safeText(s.name || s.fileName || s.filename || s.title || s.label || s.original || s.path || url);
+    var identifier = safeText(s.identifier || s.archiveIdentifier || s.item || s.itemId || s.parentIdentifier);
+    if(!url && identifier && name) url = archiveUrl(identifier, name);
+    if(!url || !isMp3Like(s, name, url)) return null;
+    var id = safeText(s.id || s.key || (identifier ? identifier + '/' + name : '') || url);
+    return {
+      id: id || url,
+      title: stripExt(s.title && safeText(s.title) !== safeText(s.name) ? s.title : name) || 'Bài nhạc chưa có tên',
+      artist: stripExt(s.artist || s.creator || s.uploader || s.owner || s.collection || s.source || 'Archive'),
+      stream_url: url,
+      duration: parseFloat(s.duration || s.length || s.runtime || 0) || 0,
+      source: safeText(s.source || 'mp3_full_loader'),
+      identifier: identifier || (id.indexOf('/') > 0 ? id.split('/')[0] : '')
+    };
+  }
+  function makeSongFromArchiveFile(identifier, file, meta){
+    var name = safeText(file && (file.name || file.fileName || file.filename));
+    if(!identifier || !name || !isMp3Like(file, name, '')) return null;
+    var trackTitle = safeText(file.title || name);
+    if(meta && meta.metadata && trackTitle === safeText(meta.metadata.title)) trackTitle = name;
+    return normalizeSong({
+      id: identifier + '/' + name,
+      identifier: identifier,
+      name: name,
+      title: trackTitle,
+      artist: (meta && meta.metadata && (meta.metadata.creator || meta.metadata.uploader || meta.metadata.title)) || 'Xiemsansang',
+      stream_url: archiveUrl(identifier, name),
+      duration: parseFloat(file.length || file.duration || 0) || 0,
+      format: file.format,
+      mime: file.mime,
+      source: 'archive_metadata'
+    });
+  }
+  function dedupe(list){
+    var out = [], seen = Object.create(null);
+    (Array.isArray(list) ? list : []).forEach(function(s){
+      s = normalizeSong(s); if(!s) return;
+      var key = (safeText(s.id) || safeText(s.stream_url)).toLowerCase();
+      if(!key || seen[key]) return;
+      seen[key] = true; out.push(s);
+    });
+    return out;
+  }
+  function readCache(){
+    try{ return dedupe(JSON.parse(localStorage.getItem(CACHE_KEY) || '[]')); }catch(e){ return []; }
+  }
+  function writeCache(list, source){
+    try{
+      var clean = dedupe(list);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(clean));
+      localStorage.setItem(META_KEY, JSON.stringify({phase:PHASE,count:clean.length,source:source || '', savedAt:Date.now()}));
+    }catch(e){ log('CACHE_WRITE_FAIL', e && e.message); }
+  }
+  function walkLocal(node, ctx, out, depth){
+    if(!node || depth > 7 || out.length > 2000) return;
+    if(Array.isArray(node)){ node.forEach(function(x){ walkLocal(x, ctx, out, depth + 1); }); return; }
+    if(typeof node !== 'object') return;
+    var identifier = safeText(node.identifier || node.archiveIdentifier || node.item || node.itemId || (node.metadata && node.metadata.identifier) || ctx.identifier);
+    var nextCtx = {identifier: identifier || ctx.identifier};
+    var song = normalizeSong(Object.assign({}, node, {identifier: identifier || node.identifier || ctx.identifier, source: 'local_storage_scan'}));
+    if(song) out.push(song);
+    if(Array.isArray(node.files) && (identifier || ctx.identifier)){
+      node.files.forEach(function(f){ var s = makeSongFromArchiveFile(identifier || ctx.identifier, f, node); if(s) out.push(s); });
+    }
+    Object.keys(node).forEach(function(k){
+      if(k === 'files') return;
+      var v = node[k];
+      if(v && (Array.isArray(v) || typeof v === 'object')) walkLocal(v, nextCtx, out, depth + 1);
+    });
+  }
+  function scanLocalStorageSongs(){
+    var out = [];
+    try{
+      Object.keys(localStorage).forEach(function(k){
+        if(!/(song|music|mp3|archive|upload|file|media|xs_|audio|storage)/i.test(k)) return;
+        var raw = localStorage.getItem(k); if(!raw || raw.length > 6000000) return;
+        var parsed; try{ parsed = JSON.parse(raw); }catch(e){ return; }
+        walkLocal(parsed, {}, out, 0);
+      });
+    }catch(e){ log('LOCAL_SCAN_FAIL', e && e.message); }
+    return dedupe(out);
+  }
+  async function fetchJson(url){
+    var r = await fetch(url, {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP ' + r.status + ' ' + url);
+    return await r.json();
+  }
+  async function fetchArchiveIdentifier(identifier){
+    identifier = safeText(identifier); if(!identifier) return [];
+    try{
+      var meta = await fetchJson('https://archive.org/metadata/' + encodeURIComponent(identifier));
+      var out = [];
+      (meta.files || []).forEach(function(f){ var s = makeSongFromArchiveFile(identifier, f, meta); if(s) out.push(s); });
+      log('ARCHIVE_IDENTIFIER', identifier, out.length);
+      return dedupe(out);
+    }catch(e){ log('ARCHIVE_IDENTIFIER_FAIL', identifier, e && e.message); return []; }
+  }
+  async function mapLimit(items, limit, fn){
+    var arr = Array.isArray(items) ? items.slice() : [], out = [], idx = 0;
+    async function worker(){
+      while(idx < arr.length){
+        var i = idx++; try{ out[i] = await fn(arr[i], i); }catch(e){ out[i] = []; }
+      }
+    }
+    var workers = []; for(var n=0;n<Math.min(limit, arr.length);n++) workers.push(worker());
+    await Promise.all(workers); return out;
+  }
+  async function fetchArchiveSearch(){
+    var docs = [];
+    try{
+      var q = '(identifier:giai-toa-moi-thu OR uploader:xiemsansang) AND mediatype:audio';
+      var url = 'https://archive.org/advancedsearch.php?q=' + encodeURIComponent(q) + '&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json';
+      var j = await fetchJson(url);
+      docs = (j && j.response && j.response.docs) || [];
+    }catch(e){ log('ARCHIVE_SEARCH_FAIL', e && e.message); return []; }
+    var ids = docs.map(function(d){ return safeText(d.identifier); }).filter(Boolean);
+    var parts = await mapLimit(ids.slice(0, 120), 5, fetchArchiveIdentifier);
+    return dedupe([].concat.apply([], parts));
+  }
+  function knownIdentifiers(app){
+    var m = Object.create(null);
+    DEFAULT_IDENTIFIERS.forEach(function(id){ m[id] = true; });
+    try{
+      (readCache() || []).concat((app && app.playlist) || []).forEach(function(s){
+        var id = safeText(s.identifier || (s.id && String(s.id).split('/')[0]) || '');
+        if(id && /^[a-z0-9_\-.]+$/i.test(id)) m[id] = true;
+      });
+    }catch(e){}
+    return Object.keys(m);
+  }
+  async function collectFullPlaylist(app){
+    var cache = readCache();
+    var local = scanLocalStorageSongs();
+    var ids = knownIdentifiers(app);
+    var directParts = await mapLimit(ids, 4, fetchArchiveIdentifier);
+    var direct = dedupe([].concat.apply([], directParts));
+    var search = direct.length >= Math.max(MIN_FRESH_ACCEPT, cache.length, local.length) ? [] : await fetchArchiveSearch();
+    return dedupe([].concat(cache, local, direct, search));
+  }
+  function getFiltered(app){
+    var keyword = safeText(app.filterText).toLowerCase();
+    var clean = typeof app.cleanSongTitle === 'function' ? app.cleanSongTitle.bind(app) : stripExt;
+    var base = Array.isArray(app.playlist) ? app.playlist : [];
+    return keyword ? base.filter(function(s){ return (clean(s.title) + ' ' + safeText(s.artist)).toLowerCase().indexOf(keyword) >= 0; }) : base;
+  }
+  function nextPage(app){
+    var filtered = getFiltered(app);
+    if(filtered.length > app.visibleCount){ app.visibleCount = Math.min(filtered.length, Number(app.visibleCount || PAGE_SIZE) + PAGE_SIZE); app.renderList(); return true; }
+    return false;
+  }
+  function installAutoLoad(app){
+    if(app.__j20r22AutoLoadInstalled) return;
+    app.__j20r22AutoLoadInstalled = true;
+    var host = byId('music-list-container');
+    if(!host) return;
+    var ticking = false;
+    var onScroll = function(){
+      if(ticking) return; ticking = true;
+      requestAnimationFrame(function(){
+        ticking = false;
+        if(!window.MusicApp || ((window.MediaHub && window.MediaHub.currentTab) || 'music') !== 'music') return;
+        var nearBottom = host.scrollTop + host.clientHeight >= host.scrollHeight - 180;
+        if(nearBottom) nextPage(window.MusicApp);
+      });
+    };
+    host.addEventListener('scroll', onScroll, {passive:true});
+    host.addEventListener('touchmove', onScroll, {passive:true});
+  }
+  function patchRender(app){
+    app.pageSize = PAGE_SIZE;
+    app.visibleCount = Math.max(PAGE_SIZE, Number(app.visibleCount || PAGE_SIZE));
+    app.renderList = function(){
+      var container = byId('mp3-list-container'); if(!container) return;
+      Array.prototype.slice.call(container.children).forEach(function(c){ if(c.id !== 'music-loading') c.remove(); });
+      var loading = byId('music-loading'); if(loading) loading.style.display = 'none';
+      var list = getFiltered(this);
+      var show = list.slice(0, this.visibleCount);
+      var clean = typeof this.cleanSongTitle === 'function' ? this.cleanSongTitle.bind(this) : stripExt;
+      var self = this;
+      show.forEach(function(s, i){
+        var actualIndex = self.playlist.findIndex(function(x){ return x && x.id === s.id; });
+        if(actualIndex < 0) actualIndex = self.playlist.indexOf(s);
+        var isCurrent = self.currentIndex === actualIndex;
+        var title = clean(s.title);
+        var artist = clean(s.artist || 'Archive');
+        var div = document.createElement('div');
+        div.className = 'song-row ' + (isCurrent ? 'active' : '');
+        div.setAttribute('role','button'); div.setAttribute('tabindex','0');
+        div.onclick = function(e){ if(e.target.closest('button') || e.target.closest('a')) return; self.play(actualIndex); };
+        div.onkeydown = function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); self.play(actualIndex); } };
+        div.innerHTML = '<div class="song-left text-xs font-mono flex-shrink-0 '+(isCurrent?'song-idx text-primary font-black':'text-slate-400 font-bold')+'">'+(isCurrent?'▶':(i+1))+'</div>'+
+          '<div class="song-main pr-1"><div class="song-title text-[0.95rem] '+(isCurrent?'text-primary font-black':'text-slate-800 font-bold')+'">'+window.escapeHTML(title)+'</div><div class="song-artist text-[11px] font-semibold text-slate-500 mt-0.5">'+window.escapeHTML(artist)+'</div></div>'+
+          '<div class="song-actions"><span class="song-duration text-xs font-mono font-bold text-slate-400">'+self.formatTime(s.duration)+'</span>'+
+          '<button type="button" onclick="event.preventDefault(); event.stopPropagation(); window.MusicApp.shareSong('+actualIndex+')" class="song-action-btn text-slate-400 hover:text-blue-500 active:scale-90 transition bg-white rounded-lg shadow-sm border border-slate-200" aria-label="Chia sẻ bài hát"><i class="ph-bold ph-share-network text-sm"></i></button>'+
+          '<a href="'+String(s.stream_url).replace(/"/g,'%22')+'" target="_blank" download onclick="event.stopPropagation();" class="song-action-btn text-slate-400 hover:text-emerald-500 active:scale-90 transition bg-white rounded-lg shadow-sm border border-slate-200" aria-label="Tải bài hát"><i class="ph-bold ph-download-simple text-sm"></i></a></div>';
+        container.appendChild(div);
+      });
+      var status = document.createElement('div');
+      status.className = 'lifeos-music-autoload-status' + (list.length <= this.visibleCount ? ' is-done' : '');
+      if(!this.playlist.length){
+        status.innerHTML = '<span>Chưa có danh sách MP3. Bấm tải lại để đồng bộ kho nhạc.</span><button type="button">Tải lại</button>';
+        status.querySelector('button').onclick = function(){ self.refetch({force:true}); };
+      } else if(list.length > this.visibleCount){
+        status.innerHTML = '<span>Đang hiển thị '+Math.min(this.visibleCount, list.length)+'/'+list.length+' bài. Kéo xuống cuối để tự nạp thêm.</span><button type="button">Tải thêm</button>';
+        status.querySelector('button').onclick = function(){ nextPage(self); };
+      } else {
+        status.textContent = this.filterText ? ('Đã hiển thị đủ '+list.length+' kết quả tìm kiếm / '+this.playlist.length+' bài trong kho.') : ('Đã hiển thị đủ '+this.playlist.length+' bài MP3 trong kho.');
+      }
+      container.appendChild(status);
+      installAutoLoad(this);
+      setTimeout(function(){
+        var host = byId('music-list-container');
+        if(host && getFiltered(self).length > self.visibleCount && host.scrollHeight <= host.clientHeight + 80){ nextPage(self); }
+      }, 60);
+      try{ this.updateMiniPlayer(); }catch(e){}
+    };
+  }
+  function patchRefetch(app){
+    app.refetch = async function(options){
+      options = options || {};
+      var tab = ''; try{ tab = (window.MediaHub && window.MediaHub.currentTab) || 'music'; }catch(e){ tab = 'music'; }
+      if(tab === 'radio' || tab === 'tv'){
+        try{ if(window.MediaHub && typeof window.MediaHub.init === 'function') return await window.MediaHub.init(true); }catch(e){}
+        return false;
+      }
+      var token = Date.now() + '_' + Math.random().toString(36).slice(2); loadingRun = token;
+      var loading = byId('music-loading');
+      var oldId = this.playlist && this.playlist[this.currentIndex] && this.playlist[this.currentIndex].id;
+      var cached = readCache();
+      if(cached.length && !options.force){
+        this.playlist = cached; this.visibleCount = Math.max(PAGE_SIZE, Number(this.visibleCount || PAGE_SIZE)); this.renderList();
+        if(loading){ loading.style.display = 'block'; loading.textContent = 'Đang kiểm tra kho MP3 đầy đủ...'; }
+      } else if(loading){ loading.style.display = 'block'; loading.textContent = 'Đang đồng bộ kho MP3 đầy đủ...'; }
+      try{
+        var full = await collectFullPlaylist(this);
+        if(loadingRun !== token) return false;
+        if(full.length >= Math.max(cached.length, this.playlist.length || 0, MIN_FRESH_ACCEPT)){
+          this.playlist = full;
+          if(oldId){ var ni = this.playlist.findIndex(function(s){ return s.id === oldId; }); if(ni >= 0) this.currentIndex = ni; }
+          writeCache(full, 'full_refetch');
+          if(!this.filterText) this.visibleCount = Math.min(Math.max(PAGE_SIZE, Number(this.visibleCount || PAGE_SIZE)), Math.max(PAGE_SIZE, full.length));
+          this.renderList();
+          if(full.length > cached.length) toast('Đã đồng bộ '+full.length+' bài MP3', 'ph-check-circle');
+        } else if(cached.length){
+          this.playlist = cached; this.renderList();
+        } else {
+          throw new Error('Không tìm được file MP3');
+        }
+      }catch(e){
+        log('FULL_REFETCH_FAIL', e && e.message);
+        if(!this.playlist.length && cached.length){ this.playlist = cached; this.renderList(); }
+        if(loading){ loading.style.display = 'block'; loading.textContent = 'Chưa đồng bộ được kho MP3 đầy đủ. Bấm tải lại để thử lại.'; }
+      }
+      if(loading){ loading.style.display = 'none'; }
+      return true;
+    };
+    app.filterList = function(val){ this.filterText = val || ''; this.visibleCount = PAGE_SIZE; this.renderList(); };
+    var oldClear = app.clearCache;
+    app.clearCache = function(){
+      try{ localStorage.removeItem(CACHE_KEY); localStorage.removeItem(META_KEY); }catch(e){}
+      this.playlist = []; this.currentIndex = -1; this.playing = false; this.hasUserSelectedTrack = false; this.visibleCount = PAGE_SIZE;
+      try{ this.hideMiniPlayerIfIdle && this.hideMiniPlayerIfIdle(); }catch(e){}
+      var container = byId('mp3-list-container'); if(container) Array.prototype.slice.call(container.children).forEach(function(c){ if(c.id !== 'music-loading') c.remove(); });
+      var loading = byId('music-loading'); if(loading){ loading.style.display='block'; loading.textContent='Đã xóa cache nhạc. Đang đồng bộ lại kho MP3...'; }
+      toast('Đã xóa cache nhạc, đang tải lại danh sách.', 'ph-trash');
+      return this.refetch({force:true});
+    };
+    app.__j20r22OldClear = oldClear;
+  }
+  function patchMusic(){
+    var app = window.MusicApp;
+    if(!app || app.__j20r22FullMp3Patched) return false;
+    app.__j20r22FullMp3Patched = true;
+    patchRender(app);
+    patchRefetch(app);
+    installAutoLoad(app);
+    setTimeout(function(){
+      try{
+        var len = Array.isArray(app.playlist) ? app.playlist.length : 0;
+        if(len <= 25 || !readCache().length) app.refetch({background:true});
+        else app.renderList();
+      }catch(e){}
+    }, 350);
+    log('INSTALLED');
+    return true;
+  }
+  function boot(){
+    if(patchMusic()) return;
+    var tries = 0;
+    var timer = setInterval(function(){ tries++; if(patchMusic() || tries > 80) clearInterval(timer); }, 120);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  window.addEventListener('load', function(){ setTimeout(boot, 500); setTimeout(function(){ try{ if(window.MusicApp && window.MusicApp.playlist && window.MusicApp.playlist.length <= 25) window.MusicApp.refetch({background:true}); }catch(e){} }, 2500); }, {once:true});
+})();
+</script>
+<!-- Pha14J20R22_MusicFullMp3AutoLoad - END -->
+
+
+<!-- Pha14J20R23_MusicPlayableArchive136_AutoLoad - START -->
+<style id="lifeos-j20r23-music-playable-archive-style">
+#mp3-list-container .lifeos-music-autoload-status{
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;flex-wrap:wrap!important;
+  min-height:44px!important;margin:10px 0 16px!important;padding:10px 12px!important;border-radius:16px!important;
+  border:1px dashed rgba(99,102,241,.35)!important;background:rgba(255,255,255,.78)!important;
+  color:var(--c-mut)!important;font-size:12px!important;font-weight:850!important;text-align:center!important;
+}
+#mp3-list-container .lifeos-music-autoload-status.is-done{border-style:solid!important;color:var(--c-primary)!important;background:var(--c-sub)!important;}
+#mp3-list-container .lifeos-music-autoload-status button{padding:8px 12px!important;border-radius:999px!important;background:var(--c-primary)!important;color:#fff!important;font-weight:900!important;box-shadow:0 8px 18px rgba(15,23,42,.12)!important;}
+.song-format-badge{display:inline-flex!important;align-items:center!important;justify-content:center!important;margin-left:6px!important;padding:1px 5px!important;border-radius:999px!important;background:rgba(99,102,241,.10)!important;color:var(--c-primary)!important;font-size:9px!important;font-weight:950!important;letter-spacing:.03em!important;vertical-align:middle!important;}
+@media(max-width:1023px){.song-format-badge{font-size:8px!important;padding:1px 4px!important;margin-left:4px!important;}}
+</style>
+<script id="lifeos-j20r23-music-playable-archive-136-js">
+(function(){
+  if(window.__lifeosJ20R23MusicPlayableArchive136) return;
+  window.__lifeosJ20R23MusicPlayableArchive136 = true;
+  var PHASE = 'Pha14J20R23_MusicPlayableArchive136_AutoLoad';
+  var CACHE_KEY = 'xs_songs_v4';
+  var META_KEY = 'xs_songs_v4_full_meta';
+  var PAGE_SIZE = 50;
+  var MIN_EXPECTED_LIBRARY = 120; // probe 01/07/2026: Archive item có 15 MP3 + 121 MP4 = 136 playable files
+  var DEFAULT_IDENTIFIERS = ['giai-toa-moi-thu'];
+  var runToken = null;
+  function byId(id){ return document.getElementById(id); }
+  function safeText(v){ return String(v == null ? '' : v).trim(); }
+  function log(){ try{ if(window.LIFEOS_DEBUG) console.info.apply(console, ['[LifeOS '+PHASE+']'].concat([].slice.call(arguments))); }catch(e){} }
+  function toast(msg, icon){ try{ window.showToast && window.showToast(msg, icon || 'ph-music-note'); }catch(e){} }
+  function escapeAttr(v){ return String(v||'').replace(/"/g,'%22'); }
+  function extOf(name){ var m=String(name||'').match(/\.([a-z0-9]+)(?:$|[?#])/i); return m ? m[1].toLowerCase() : ''; }
+  function stripExt(v){ return safeText(v).replace(/\.(mp3|mp4|m4a|aac|wav|ogg|oga|opus|webm|flac)(?:\?.*)?$/i,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim(); }
+  function isPlayableMusicLike(obj, name, url){
+    name = safeText(name); url = safeText(url); obj = obj || {};
+    var ext = extOf(name) || extOf(url);
+    var fmt = safeText(obj.format).toUpperCase();
+    var mime = [obj.mime, obj.mimeType, obj.type].map(safeText).join(' ').toLowerCase();
+    if(/^(mp3|mp4|m4a|aac|wav|ogg|oga|opus|webm|flac)$/.test(ext)) return true;
+    if(fmt.indexOf('VBR MP3') >= 0 || fmt === 'MP3' || fmt.indexOf('MP3') >= 0) return true;
+    if(fmt === 'MPEG4' || fmt.indexOf('MPEG-4') >= 0 || fmt.indexOf('M4A') >= 0 || fmt.indexOf('OGG') >= 0 || fmt.indexOf('OPUS') >= 0 || fmt.indexOf('FLAC') >= 0 || fmt.indexOf('WAVE') >= 0) return true;
+    if(/^audio\//.test(mime) || mime.indexOf('audio') >= 0) return true;
+    // Không lấy ảnh bìa, spectrogram, metadata, torrent/sqlite/xml.
+    if(/^(png|jpg|jpeg|gif|webp|xml|sqlite|torrent|txt|json|pdf)$/.test(ext)) return false;
+    return false;
+  }
+  function formatLabel(s){ var e = extOf(s && (s.name || s.fileName || s.filename || s.stream_url || s.url)); if(!e && s && s.format) e = String(s.format).toLowerCase().replace(/\s+/g,''); return e ? e.toUpperCase() : 'AUDIO'; }
+  function encodePath(path){ return safeText(path).split('/').map(function(x){ return encodeURIComponent(x); }).join('/'); }
+  function archiveUrl(identifier, name){ return 'https://archive.org/download/' + encodeURIComponent(identifier) + '/' + encodePath(name); }
+  function normalizeSong(s){
+    if(!s) return null;
+    var url = safeText(s.stream_url || s.streamUrl || s.url || s.download_url || s.downloadUrl || s.link || s.src || s.href || s.playUrl);
+    var name = safeText(s.name || s.fileName || s.filename || s.title || s.label || s.original || s.path || url);
+    var identifier = safeText(s.identifier || s.archiveIdentifier || s.item || s.itemId || s.parentIdentifier);
+    if(!url && identifier && name) url = archiveUrl(identifier, name);
+    if(!url || !isPlayableMusicLike(s, name, url)) return null;
+    var id = safeText(s.id || s.key || (identifier ? identifier + '/' + name : '') || url);
+    var title = stripExt((s.title && safeText(s.title) !== safeText(s.name)) ? s.title : name) || 'Bài nhạc chưa có tên';
+    return {
+      id: id || url,
+      title: title,
+      artist: stripExt(s.artist || s.creator || s.uploader || s.owner || s.collection || s.source || 'Archive'),
+      stream_url: url,
+      duration: parseFloat(s.duration || s.length || s.runtime || 0) || 0,
+      source: safeText(s.source || 'archive_playable_loader'),
+      identifier: identifier || (id.indexOf('/') > 0 ? id.split('/')[0] : ''),
+      file_name: name,
+      format: safeText(s.format || formatLabel({name:name,stream_url:url}))
+    };
+  }
+  function makeSongFromArchiveFile(identifier, file, meta){
+    var name = safeText(file && (file.name || file.fileName || file.filename));
+    if(!identifier || !name || !isPlayableMusicLike(file, name, '')) return null;
+    var metaTitle = meta && meta.metadata && safeText(meta.metadata.title);
+    var trackTitle = safeText(file.title || name);
+    if(trackTitle && metaTitle && trackTitle === metaTitle) trackTitle = name;
+    return normalizeSong({
+      id: identifier + '/' + name,
+      identifier: identifier,
+      name: name,
+      title: trackTitle,
+      artist: (meta && meta.metadata && (meta.metadata.creator || meta.metadata.uploader || meta.metadata.title)) || 'Xiemsansang',
+      stream_url: archiveUrl(identifier, name),
+      duration: parseFloat(file.length || file.duration || 0) || 0,
+      format: file.format,
+      mime: file.mime,
+      source: 'archive_metadata_playable'
+    });
+  }
+  function dedupe(list){
+    var out=[], seen=Object.create(null);
+    (Array.isArray(list)?list:[]).forEach(function(x){
+      var s=normalizeSong(x); if(!s) return;
+      var key=(safeText(s.id)||safeText(s.stream_url)).toLowerCase();
+      if(!key || seen[key]) return; seen[key]=true; out.push(s);
+    });
+    return out;
+  }
+  function readCache(){ try{ return dedupe(JSON.parse(localStorage.getItem(CACHE_KEY)||'[]')); }catch(e){ return []; } }
+  function writeCache(list, source){ try{ var clean=dedupe(list); localStorage.setItem(CACHE_KEY, JSON.stringify(clean)); localStorage.setItem(META_KEY, JSON.stringify({phase:PHASE,count:clean.length,source:source||'',savedAt:Date.now(),includes:['mp3','mp4','m4a','wav','ogg','opus','webm','flac']})); return clean; }catch(e){ log('CACHE_WRITE_FAIL', e&&e.message); return list; } }
+  function walkLocal(node, ctx, out, depth){
+    if(!node || depth>7 || out.length>3000) return;
+    if(Array.isArray(node)){ node.forEach(function(v){ walkLocal(v,ctx,out,depth+1); }); return; }
+    if(typeof node !== 'object') return;
+    var identifier=safeText(node.identifier||node.archiveIdentifier||node.item||node.itemId||(node.metadata&&node.metadata.identifier)||ctx.identifier);
+    var song=normalizeSong(Object.assign({}, node, {identifier:identifier||ctx.identifier, source:'local_storage_scan_playable'}));
+    if(song) out.push(song);
+    if(Array.isArray(node.files) && (identifier||ctx.identifier)) node.files.forEach(function(f){ var s=makeSongFromArchiveFile(identifier||ctx.identifier, f, node); if(s) out.push(s); });
+    Object.keys(node).forEach(function(k){ if(k==='files') return; var v=node[k]; if(v && (Array.isArray(v)||typeof v==='object')) walkLocal(v,{identifier:identifier||ctx.identifier},out,depth+1); });
+  }
+  function scanLocalStorageSongs(){
+    var out=[];
+    try{ Object.keys(localStorage).forEach(function(k){
+      if(!/(song|music|mp3|archive|upload|file|media|xs_|audio|storage)/i.test(k)) return;
+      var raw=localStorage.getItem(k); if(!raw || raw.length>7000000) return;
+      try{ walkLocal(JSON.parse(raw), {}, out, 0); }catch(e){}
+    }); }catch(e){ log('LOCAL_SCAN_FAIL', e&&e.message); }
+    return dedupe(out);
+  }
+  async function fetchJson(url){ var r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status+' '+url); return await r.json(); }
+  async function fetchArchiveIdentifier(identifier){
+    identifier=safeText(identifier); if(!identifier) return [];
+    try{ var meta=await fetchJson('https://archive.org/metadata/'+encodeURIComponent(identifier)); var out=[]; (meta.files||[]).forEach(function(f){ var s=makeSongFromArchiveFile(identifier,f,meta); if(s) out.push(s); }); log('ARCHIVE_IDENTIFIER_PLAYABLE',identifier,out.length); return dedupe(out); }
+    catch(e){ log('ARCHIVE_IDENTIFIER_FAIL',identifier,e&&e.message); return []; }
+  }
+  async function mapLimit(items, limit, fn){
+    var arr=Array.isArray(items)?items.slice():[], out=[], idx=0;
+    async function worker(){ while(idx<arr.length){ var i=idx++; try{ out[i]=await fn(arr[i],i); }catch(e){ out[i]=[]; } } }
+    var workers=[]; for(var n=0;n<Math.min(limit,arr.length);n++) workers.push(worker()); await Promise.all(workers); return out;
+  }
+  async function fetchArchiveSearch(){
+    try{
+      var q='(identifier:giai-toa-moi-thu OR uploader:xiemsansang) AND mediatype:audio';
+      var url='https://archive.org/advancedsearch.php?q='+encodeURIComponent(q)+'&fl[]=identifier,title,creator&sort[]=publicdate+desc&rows=500&page=1&output=json';
+      var j=await fetchJson(url); var docs=(j&&j.response&&j.response.docs)||[];
+      var ids=docs.map(function(d){return safeText(d.identifier);}).filter(Boolean);
+      var parts=await mapLimit(ids.slice(0,120),5,fetchArchiveIdentifier);
+      return dedupe([].concat.apply([],parts));
+    }catch(e){ log('ARCHIVE_SEARCH_FAIL', e&&e.message); return []; }
+  }
+  function knownIdentifiers(app){
+    var m=Object.create(null); DEFAULT_IDENTIFIERS.forEach(function(id){m[id]=true;});
+    try{ (readCache()||[]).concat((app&&app.playlist)||[]).forEach(function(s){ var id=safeText(s.identifier || (s.id&&String(s.id).split('/')[0]) || ''); if(id && /^[a-z0-9_\-.]+$/i.test(id)) m[id]=true; }); }catch(e){}
+    return Object.keys(m);
+  }
+  async function collectFullPlaylist(app){
+    var cache=readCache(); var local=scanLocalStorageSongs(); var ids=knownIdentifiers(app);
+    var parts=await mapLimit(ids,4,fetchArchiveIdentifier); var direct=dedupe([].concat.apply([],parts));
+    var needSearch = direct.length < Math.max(cache.length, local.length, MIN_EXPECTED_LIBRARY);
+    var search = needSearch ? await fetchArchiveSearch() : [];
+    return dedupe([].concat(cache, local, direct, search));
+  }
+  function getFiltered(app){ var kw=safeText(app.filterText).toLowerCase(); var base=Array.isArray(app.playlist)?app.playlist:[]; var clean=typeof app.cleanSongTitle==='function'?app.cleanSongTitle.bind(app):stripExt; return kw ? base.filter(function(s){ return (clean(s.title)+' '+safeText(s.artist)+' '+safeText(s.file_name)+' '+safeText(s.format)).toLowerCase().indexOf(kw)>=0; }) : base; }
+  function nextPage(app){ var list=getFiltered(app); if(list.length>app.visibleCount){ app.visibleCount=Math.min(list.length,Number(app.visibleCount||PAGE_SIZE)+PAGE_SIZE); app.renderList(); return true; } return false; }
+  function installAutoLoad(app){
+    var host=byId('music-list-container'); if(!host || app.__j20r23AutoLoadInstalled) return;
+    app.__j20r23AutoLoadInstalled=true; var ticking=false;
+    function onScroll(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ ticking=false; if(!window.MusicApp || ((window.MediaHub&&window.MediaHub.currentTab)||'music')!=='music') return; if(host.scrollTop+host.clientHeight>=host.scrollHeight-220) nextPage(window.MusicApp); }); }
+    host.addEventListener('scroll',onScroll,{passive:true}); host.addEventListener('touchmove',onScroll,{passive:true});
+  }
+  function patchRender(app){
+    app.pageSize=PAGE_SIZE; app.visibleCount=Math.max(PAGE_SIZE, Number(app.visibleCount||PAGE_SIZE));
+    app.cleanSongTitle=function(value){ return stripExt(value)||'Bài nhạc chưa có tên'; };
+    app.renderList=function(){
+      var container=byId('mp3-list-container'); if(!container) return;
+      Array.prototype.slice.call(container.children).forEach(function(c){ if(c.id!=='music-loading') c.remove(); });
+      var loading=byId('music-loading'); if(loading) loading.style.display='none';
+      var list=getFiltered(this); var show=list.slice(0,this.visibleCount); var self=this;
+      show.forEach(function(s,i){
+        var actualIndex=self.playlist.findIndex(function(x){return x&&x.id===s.id;}); if(actualIndex<0) actualIndex=self.playlist.indexOf(s);
+        var isCurrent=self.currentIndex===actualIndex; var title=self.cleanSongTitle(s.title); var artist=self.cleanSongTitle(s.artist||'Archive'); var fmt=formatLabel(s);
+        var div=document.createElement('div'); div.className='song-row '+(isCurrent?'active':''); div.setAttribute('role','button'); div.setAttribute('tabindex','0');
+        div.onclick=function(e){ if(e.target.closest('button')||e.target.closest('a')) return; self.play(actualIndex); };
+        div.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); self.play(actualIndex); } };
+        div.innerHTML='<div class="song-left text-xs font-mono flex-shrink-0 '+(isCurrent?'song-idx text-primary font-black':'text-slate-400 font-bold')+'">'+(isCurrent?'▶':(i+1))+'</div>'+ 
+          '<div class="song-main pr-1"><div class="song-title text-[0.95rem] '+(isCurrent?'text-primary font-black':'text-slate-800 font-bold')+'">'+window.escapeHTML(title)+'<span class="song-format-badge">'+window.escapeHTML(fmt)+'</span></div><div class="song-artist text-[11px] font-semibold text-slate-500 mt-0.5">'+window.escapeHTML(artist)+'</div></div>'+ 
+          '<div class="song-actions"><span class="song-duration text-xs font-mono font-bold text-slate-400">'+self.formatTime(s.duration)+'</span>'+ 
+          '<button type="button" onclick="event.preventDefault(); event.stopPropagation(); window.MusicApp.shareSong('+actualIndex+')" class="song-action-btn text-slate-400 hover:text-blue-500 active:scale-90 transition bg-white rounded-lg shadow-sm border border-slate-200" aria-label="Chia sẻ bài hát"><i class="ph-bold ph-share-network text-sm"></i></button>'+ 
+          '<a href="'+escapeAttr(s.stream_url)+'" target="_blank" download onclick="event.stopPropagation();" class="song-action-btn text-slate-400 hover:text-emerald-500 active:scale-90 transition bg-white rounded-lg shadow-sm border border-slate-200" aria-label="Tải bài hát"><i class="ph-bold ph-download-simple text-sm"></i></a></div>';
+        container.appendChild(div);
+      });
+      var status=document.createElement('div'); status.className='lifeos-music-autoload-status'+(list.length<=this.visibleCount?' is-done':'');
+      if(!this.playlist.length){ status.innerHTML='<span>Chưa có danh sách nhạc. Bấm tải lại để đồng bộ kho.</span><button type="button">Tải lại</button>'; status.querySelector('button').onclick=function(){ self.refetch({force:true}); }; }
+      else if(list.length>this.visibleCount){ status.innerHTML='<span>Đang hiển thị '+Math.min(this.visibleCount,list.length)+'/'+list.length+' bài. Kéo xuống cuối để tự nạp thêm.</span><button type="button">Tải thêm</button>'; status.querySelector('button').onclick=function(){ nextPage(self); }; }
+      else { status.textContent=this.filterText?('Đã hiển thị đủ '+list.length+' kết quả tìm kiếm / '+this.playlist.length+' bài trong kho.'):('Đã hiển thị đủ '+this.playlist.length+' bài trong kho nhạc.'); }
+      container.appendChild(status); installAutoLoad(this);
+      setTimeout(function(){ var host=byId('music-list-container'); if(host && getFiltered(self).length>self.visibleCount && host.scrollHeight<=host.clientHeight+90) nextPage(self); },80);
+      try{ this.updateMiniPlayer(); }catch(e){}
+    };
+  }
+  function patchRefetch(app){
+    app.refetch=async function(options){
+      options=options||{}; var tab=''; try{ tab=(window.MediaHub&&window.MediaHub.currentTab)||'music'; }catch(e){ tab='music'; }
+      if(tab==='radio'||tab==='tv'){ try{ if(window.MediaHub&&typeof window.MediaHub.init==='function') return await window.MediaHub.init(true); }catch(e){} return false; }
+      var token=Date.now()+'_'+Math.random().toString(36).slice(2); runToken=token; var loading=byId('music-loading');
+      var oldId=this.playlist&&this.playlist[this.currentIndex]&&this.playlist[this.currentIndex].id; var cached=readCache();
+      if(cached.length && !options.force){ this.playlist=cached; this.visibleCount=Math.max(PAGE_SIZE,Number(this.visibleCount||PAGE_SIZE)); this.renderList(); if(loading){loading.style.display='block'; loading.textContent='Đang kiểm tra kho nhạc đầy đủ...';} }
+      else if(loading){ loading.style.display='block'; loading.textContent='Đang đồng bộ kho nhạc đầy đủ...'; }
+      try{
+        var full=await collectFullPlaylist(this); if(runToken!==token) return false;
+        if(full.length>=Math.max(cached.length,this.playlist.length||0,15)){
+          this.playlist=full; if(oldId){ var ni=this.playlist.findIndex(function(s){return s.id===oldId;}); if(ni>=0) this.currentIndex=ni; }
+          writeCache(full,'playable_archive_refetch'); if(!this.filterText) this.visibleCount=Math.min(Math.max(PAGE_SIZE,Number(this.visibleCount||PAGE_SIZE)), Math.max(PAGE_SIZE,full.length)); this.renderList();
+          if(full.length>cached.length) toast('Đã đồng bộ '+full.length+' bài trong kho nhạc','ph-check-circle');
+        } else if(cached.length){ this.playlist=cached; this.renderList(); } else throw new Error('Không tìm được file nhạc');
+      }catch(e){ log('REFETCH_FAIL',e&&e.message); if(!this.playlist.length&&cached.length){ this.playlist=cached; this.renderList(); } if(loading){ loading.style.display='block'; loading.textContent='Chưa đồng bộ được kho nhạc đầy đủ. Bấm tải lại để thử lại.'; } }
+      if(loading) loading.style.display='none'; return true;
+    };
+    app.filterList=function(val){ this.filterText=val||''; this.visibleCount=PAGE_SIZE; this.renderList(); };
+    app.clearCache=function(){
+      try{ localStorage.removeItem(CACHE_KEY); localStorage.removeItem(META_KEY); }catch(e){}
+      this.playlist=[]; this.currentIndex=-1; this.playing=false; this.hasUserSelectedTrack=false; this.visibleCount=PAGE_SIZE;
+      try{ this.hideMiniPlayerIfIdle&&this.hideMiniPlayerIfIdle(); }catch(e){}
+      var container=byId('mp3-list-container'); if(container) Array.prototype.slice.call(container.children).forEach(function(c){ if(c.id!=='music-loading') c.remove(); });
+      var loading=byId('music-loading'); if(loading){ loading.style.display='block'; loading.textContent='Đã xóa cache nhạc. Đang đồng bộ lại kho đầy đủ...'; }
+      toast('Đã xóa cache nhạc, đang tải lại danh sách.','ph-trash'); return this.refetch({force:true});
+    };
+  }
+  function patchMusic(){
+    var app=window.MusicApp; if(!app || app.__j20r23PlayableArchivePatched) return false; app.__j20r23PlayableArchivePatched=true;
+    patchRender(app); patchRefetch(app); installAutoLoad(app);
+    setTimeout(function(){ try{ var len=Array.isArray(app.playlist)?app.playlist.length:0; var cacheLen=readCache().length; if(len<MIN_EXPECTED_LIBRARY || cacheLen<MIN_EXPECTED_LIBRARY) app.refetch({background:true}); else app.renderList(); }catch(e){} },250);
+    log('INSTALLED'); return true;
+  }
+  function boot(){ if(patchMusic()) return; var tries=0; var timer=setInterval(function(){ tries++; if(patchMusic()||tries>80) clearInterval(timer); },120); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
+  window.addEventListener('load',function(){ setTimeout(boot,500); setTimeout(function(){ try{ if(window.MusicApp && window.MusicApp.playlist && window.MusicApp.playlist.length<MIN_EXPECTED_LIBRARY) window.MusicApp.refetch({background:true}); }catch(e){} },1800); },{once:true});
+})();
+</script>
+<!-- Pha14J20R23_MusicPlayableArchive136_AutoLoad - END -->
+
 </body>
 </html>
