@@ -11617,7 +11617,18 @@ window.MediaHub = {
                     }
                 }, 500);
             }
-            if(force) window.showToast?.('Cập nhật 194 kênh kim cương thành công!', 'ph-check-circle');
+            if(force) {
+                const tvCount = Array.isArray(this.tvData) ? this.tvData.length : 0;
+                const radioCount = Array.isArray(this.radioData) ? this.radioData.length : 0;
+                const totalCount = Array.isArray(this.allChannels) ? this.allChannels.length : (tvCount + radioCount);
+                const otherCount = Math.max(0, totalCount - tvCount - radioCount);
+                const parts = [];
+                if (tvCount) parts.push(`${tvCount} TV`);
+                if (radioCount) parts.push(`${radioCount} Radio`);
+                if (otherCount) parts.push(`${otherCount} khác`);
+                const detail = parts.length ? `${totalCount} kênh: ${parts.join(' + ')}` : `${totalCount} kênh`;
+                window.showToast?.(`Cập nhật ${detail} thành công!`, 'ph-check-circle');
+            }
 
             if (!this.remoteBound) {
                 this.initRemoteControl();
