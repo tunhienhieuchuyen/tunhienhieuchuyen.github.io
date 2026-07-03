@@ -25714,55 +25714,296 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
 
 
 
-<!-- Pha14J20R20C_FinalCleanHideFloatingDebug_InstallFab_R19Base - START -->
-<style id="lifeos-j20r20c-final-hide-floating-debug-style">
-  /*
-    R20C: FINAL UI CLEANUP FROM CLEAN R19 BASE ONLY.
-    Scope cực hẹp: ẩn các nút/panel nổi phục vụ nội soi/cài app đang che UI.
-    Không đụng layout, không xóa API debug, không đụng audio/video/upload/delete/D1/Firebase.
-    Muốn lấy lại tạm thời để nâng cấp/debug:
-      document.documentElement.setAttribute('data-lifeos-show-floating-debug','1')
-    Ẩn lại:
-      document.documentElement.removeAttribute('data-lifeos-show-floating-debug')
-  */
-  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19c-ultra-root,
-  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19o-ultra-root,
-  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19s-ultra-root,
-  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19c-ultra-toggle,
-  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19o-ultra-toggle,
-  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19s-ultra-toggle,
-  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19c-ultra-panel,
-  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19o-ultra-panel,
-  html:not([data-lifeos-show-floating-debug="1"]) #lifeos-j19s-ultra-panel,
-  html:not([data-lifeos-show-floating-debug="1"]) #btnInstall,
-  html:not([data-lifeos-show-floating-debug="1"]) .install-fab,
-  html:not([data-lifeos-show-floating-debug="1"]) [aria-label="Cài App LifeOS"] {
+<!-- Pha14J20R21_D1Folders_KeepInstallApp_HideUltra_R19Base - START -->
+<style id="lifeos-j20r21-hide-ultralog-only-keep-install-css">
+  /* R21: Ẩn đúng UltraLog/Nội soi nổi. KHÔNG chạm #btnInstall / .install-fab / PWA Cài App. */
+  #lifeos-j19c-ultra-root,
+  #lifeos-j19o-ultra-root,
+  #lifeos-j19s-ultra-root,
+  #lifeos-j19c-ultra-panel,
+  #lifeos-j19o-ultra-panel,
+  #lifeos-j19s-ultra-panel,
+  #lifeos-j19c-ultra-toggle,
+  #lifeos-j19o-ultra-toggle,
+  #lifeos-j19s-ultra-toggle {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
-    transform: none !important;
   }
 </style>
-<script id="lifeos-pha14j20r20c-final-hide-floating-debug-js">
+<script id="lifeos-j20r21-d1-folders-keep-install-app-js">
 (function(){
   'use strict';
-  if (window.__lifeosPha14J20R20CFinalHideFloatingDebugInstalled) return;
-  window.__lifeosPha14J20R20CFinalHideFloatingDebugInstalled = true;
-  var PHASE = 'Pha14J20R20C_FinalCleanHideFloatingDebug_InstallFab_R19Base';
-  window.LifeOSFinalFloatingDebugUI = {
+  if (window.__lifeosJ20R21D1FoldersKeepInstallInstalled) return;
+  window.__lifeosJ20R21D1FoldersKeepInstallInstalled = true;
+  var PHASE = 'Pha14J20R21_D1Folders_KeepInstallApp_HideUltra_R19Base';
+  var D1_DEFAULT = 'https://lifeos-family-d1-api.tunhienhieuchuyen.workers.dev';
+  var LS_CACHE = 'lifeos_j20r21_d1_folders_cache_v1';
+  var LS_TRACE = 'lifeos_j20r21_d1_folders_trace_v1';
+  var STATE = { phase: PHASE, d1Folders: [], lastLoadAt: 0, lastError: '', installedAt: Date.now(), keepInstallApp: true, hiddenOnly: 'UltraLog/Nội soi' };
+
+  function now(){ return Date.now(); }
+  function S(v){ return v == null ? '' : String(v); }
+  function N(v,d){ var n = Number(v); return Number.isFinite(n) ? Math.trunc(n) : (d || 0); }
+  function readJSON(k,d){ try { var r = localStorage.getItem(k); return r ? JSON.parse(r) : d; } catch(e){ return d; } }
+  function writeJSON(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  function trace(type,payload,level){
+    var o = Object.assign({ phase: PHASE, type: type, at: now(), time: new Date().toLocaleTimeString('vi-VN',{hour12:false}) }, payload || {});
+    try { var a = readJSON(LS_TRACE, []); if(!Array.isArray(a)) a=[]; a.push(o); writeJSON(LS_TRACE, a.slice(-220)); } catch(e){}
+    try { (level === 'error' ? console.error : level === 'warn' ? console.warn : console.info)('[J20R21]', type, payload || {}); } catch(e){}
+    return o;
+  }
+  function base(){ return S(window.LIFEOS_FAMILY_D1_API_BASE || D1_DEFAULT).replace(/\/+$/,''); }
+  function token(){ return S(window.LIFEOS_FAMILY_D1_TOKEN || localStorage.getItem('lifeos_family_d1_token') || localStorage.getItem('lifeos_d1_token') || ''); }
+  function headers(){ var h = {'Content-Type':'application/json','Accept':'application/json','X-LifeOS-Phase':PHASE}; var tk = token(); if(tk){ h.Authorization='Bearer '+tk; h['X-LifeOS-Token']=tk; } return h; }
+  async function api(path,opt){
+    opt = opt || {};
+    var url = /^https?:\/\//i.test(path) ? path : base() + path;
+    var init = { method: opt.method || 'GET', headers: headers() };
+    if (opt.body !== undefined) init.body = JSON.stringify(opt.body);
+    var res = await fetch(url, init);
+    var txt = await res.text();
+    var data = null;
+    try { data = txt ? JSON.parse(txt) : {}; } catch(e){ data = {ok:false,error:'invalid_json',responseText:txt.slice(0,500)}; }
+    if (!res.ok || !data.ok) { var er = new Error((data && (data.error || data.message)) || ('HTTP '+res.status)); er.status=res.status; er.data=data; er.url=url; throw er; }
+    return data;
+  }
+  function arrFrom(x){ if(Array.isArray(x)) return x; if(!x || typeof x !== 'object') return []; return Array.isArray(x.data)?x.data:(Array.isArray(x.items)?x.items:(Array.isArray(x.messages)?x.messages:(Array.isArray(x.result)?x.result:[]))); }
+  function parsePayload(row){
+    var out = Object.assign({}, row || {});
+    var raw = out.payload_json || out.payloadJson || (out._row && out._row.payload_json) || '';
+    if (raw && typeof raw === 'string') { try { out = Object.assign({}, JSON.parse(raw), out); } catch(e){} }
+    if (out._row && typeof out._row === 'object') out = Object.assign({}, out._row, out);
+    return out;
+  }
+  function cleanFolder(f){
+    f = f || {};
+    var id = S(f.folder_id || f.folderId || f.id || '').trim();
+    if(!id) id = 'folder_' + now().toString(36) + '_' + Math.random().toString(36).slice(2,6);
+    return {
+      id: id,
+      name: S(f.folder_name || f.folderName || f.name || 'Thư mục').trim() || 'Thư mục',
+      icon: S(f.folder_icon || f.folderIcon || f.icon || '📁').trim() || '📁',
+      color: S(f.folder_color || f.folderColor || f.color || 'bg-blue-500').trim() || 'bg-blue-500',
+      createdAt: N(f.createdAt || f.created_at || f.folder_created_at, now()),
+      updatedAt: N(f.updatedAt || f.updated_at, now()),
+      source: 'd1_folder_official'
+    };
+  }
+  function isFolderRow(row){
+    var p = parsePayload(row);
+    var kind = S(p.kind || p.type || '').toLowerCase();
+    var key = S(p.msg_key || p.id || p.messageId || '');
+    return kind === 'folder' || kind === 'family_folder' || kind === 'lifeos_folder' || !!(p.folder_id || p.folderId || p.folder_name || p.folderName) || /^folder_row_/.test(key);
+  }
+  function isDeleted(row){ var p = parsePayload(row); return !!(p.deleted_at || p.deletedAt || (p._row && p._row.deleted_at)); }
+  function rowKey(id){ return 'folder_row_' + encodeURIComponent(S(id)).replace(/%/g,'_'); }
+  function localSharedCache(folders){
+    try {
+      var old = JSON.parse(localStorage.getItem('lifeos_v8_chat_shared') || '{}');
+      var m = Array.isArray(old) ? old : (Array.isArray(old.m) ? old.m : (Array.isArray(window.chatHistory) ? window.chatHistory : []));
+      localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify({m:m, f:folders, d1Folders:true, phase:PHASE, at:now()}));
+    } catch(e){}
+    writeJSON(LS_CACHE, {folders:folders, phase:PHASE, at:now()});
+  }
+  function applyFolders(folders, reason){
+    folders = (Array.isArray(folders) ? folders : []).map(cleanFolder);
+    var seen = Object.create(null), out = [];
+    folders.forEach(function(f){ if(!seen[f.id]){ seen[f.id] = true; out.push(f); } });
+    out.sort(function(a,b){ return (a.createdAt||0) - (b.createdAt||0) || S(a.name).localeCompare(S(b.name)); });
+    STATE.d1Folders = out;
+    STATE.lastLoadAt = now();
+    localSharedCache(out);
+    try {
+      var ce = window.ChatEngine;
+      if (ce) {
+        ce.chatFolders = out;
+        if (ce.currentTopic !== 'all' && !out.some(function(f){ return S(f.id) === S(ce.currentTopic); })) ce.currentTopic = 'all';
+        if (typeof ce.renderFolders === 'function') ce.renderFolders();
+      }
+    } catch(e){}
+    trace('D1_FOLDERS_APPLIED', {count:out.length, reason:reason || ''});
+    return out;
+  }
+  async function loadFolders(reason){
+    try {
+      var d = await api('/api/family/messages?since=0&limit=500');
+      var rows = arrFrom(d).map(parsePayload).filter(function(r){ return isFolderRow(r) && !isDeleted(r); });
+      var folders = rows.map(cleanFolder);
+      STATE.lastError = '';
+      return applyFolders(folders, reason || 'load');
+    } catch(e) {
+      STATE.lastError = S(e && e.message || e);
+      trace('D1_FOLDERS_LOAD_FAILED', {error:STATE.lastError, status:e.status||0}, 'warn');
+      var cached = readJSON(LS_CACHE, null);
+      if(cached && Array.isArray(cached.folders)) return applyFolders(cached.folders, 'cache_after_load_fail');
+      return [];
+    }
+  }
+  async function upsertFolder(folder, reason){
+    folder = cleanFolder(folder);
+    var key = rowKey(folder.id);
+    var body = {
+      msg_key: key,
+      id: key,
+      messageId: key,
+      type: 'folder',
+      kind: 'folder',
+      sender: 'lifeos-system',
+      profile_id: 'lifeos-family-clean-owner',
+      file_name: 'folder:' + folder.name,
+      file_size: 0,
+      mime: 'application/x-lifeos-folder',
+      topic_id: folder.id,
+      folder_id: folder.id,
+      folder_name: folder.name,
+      folder_icon: folder.icon,
+      folder_color: folder.color,
+      folder_created_at: folder.createdAt,
+      created_at: folder.createdAt,
+      updated_at: now(),
+      source: 'd1_folder_official',
+      d1FolderOfficial: true,
+      payload_json: JSON.stringify(Object.assign({}, folder, {msg_key:key, type:'folder', kind:'folder', d1FolderOfficial:true, phase:PHASE}))
+    };
+    await api('/api/family/messages', {method:'POST', body: body});
+    trace('D1_FOLDER_UPSERT_OK', {folderId:folder.id, name:folder.name, reason:reason || ''});
+    return folder;
+  }
+  async function deleteFolderD1(id){
+    var key = rowKey(id);
+    try {
+      await api('/api/family/delete', {method:'POST', body:{id:key, msg_key:key, messageId:key, reason:'user_delete_folder_d1', kind:'folder', folder_id:S(id)}});
+      trace('D1_FOLDER_DELETE_OK', {folderId:S(id)});
+      return true;
+    } catch(e) {
+      trace('D1_FOLDER_DELETE_FAILED', {folderId:S(id), error:S(e&&e.message||e), status:e.status||0}, 'error');
+      throw e;
+    }
+  }
+  function hideUltraOnly(){
+    ['lifeos-j19c-ultra-root','lifeos-j19o-ultra-root','lifeos-j19s-ultra-root','lifeos-j19c-ultra-panel','lifeos-j19o-ultra-panel','lifeos-j19s-ultra-panel'].forEach(function(id){
+      var el = document.getElementById(id); if(el){ el.style.setProperty('display','none','important'); el.style.setProperty('visibility','hidden','important'); el.style.setProperty('pointer-events','none','important'); }
+    });
+    // Cố ý KHÔNG chạm #btnInstall/.install-fab vì bản GitHub bắt buộc giữ nút Cài App.
+  }
+  function patchChatEngine(){
+    var ce = window.ChatEngine; if(!ce || ce.__j20r21D1FoldersPatched) return false;
+    ce.__j20r21D1FoldersPatched = true;
+    var oldRenderFolders = ce.renderFolders && ce.renderFolders.bind(ce);
+    var oldSaveAndSync = ce.saveAndSync && ce.saveAndSync.bind(ce);
+    var oldSaveFolder = ce.saveFolder && ce.saveFolder.bind(ce);
+    var oldDeleteFolder = ce.deleteFolder && ce.deleteFolder.bind(ce);
+
+    ce.renderFolders = function(){
+      try { if (STATE.d1Folders && STATE.d1Folders.length) this.chatFolders = STATE.d1Folders.slice(); } catch(e){}
+      return oldRenderFolders ? oldRenderFolders.apply(this, arguments) : undefined;
+    };
+
+    ce.saveAndSync = function(){
+      // Text vẫn đi Firebase theo R18/R19. Folder được D1 sync riêng và ghi đè lại sau save.
+      var res = oldSaveAndSync ? oldSaveAndSync.apply(this, arguments) : true;
+      try { if (STATE.d1Folders && STATE.d1Folders.length) { this.chatFolders = STATE.d1Folders.slice(); localSharedCache(this.chatFolders); } } catch(e){}
+      return res;
+    };
+
+    ce.saveFolder = async function(){
+      var id = document.getElementById('folder-id')?.value;
+      var name = document.getElementById('folder-name')?.value.trim();
+      var icon = document.getElementById('folder-icon')?.value.trim() || '📁';
+      var color = document.getElementById('folder-color-val')?.value || 'bg-blue-500';
+      if(!name) { window.showToast?.('Vui lòng nhập tên thư mục', 'ph-warning-circle'); return; }
+      var list = (STATE.d1Folders && STATE.d1Folders.length ? STATE.d1Folders : (this.chatFolders || [])).map(cleanFolder);
+      var folder;
+      if(id) {
+        folder = list.find(function(x){ return S(x.id) === S(id); });
+        if(folder) { folder.name = name; folder.icon = icon; folder.color = color; folder.updatedAt = now(); }
+        else { folder = cleanFolder({id:id,name:name,icon:icon,color:color,createdAt:now()}); list.push(folder); }
+      } else {
+        folder = cleanFolder({id:'folder_' + now(), name:name, icon:icon, color:color, createdAt:now(), updatedAt:now()});
+        list.push(folder);
+        this.currentTopic = folder.id;
+      }
+      applyFolders(list, 'local_before_d1_save');
+      this.closeFolderManager && this.closeFolderManager();
+      window.showToast?.(id ? 'Đang lưu thư mục vào D1...' : 'Đang tạo thư mục D1...', 'ph-cloud-arrow-up');
+      try {
+        await upsertFolder(folder, id ? 'update' : 'create');
+        await loadFolders('after_save_folder');
+        window.showToast?.(id ? 'Đã cập nhật thư mục D1' : 'Đã tạo thư mục D1', 'ph-check-circle');
+      } catch(e) {
+        window.showToast?.('D1 lỗi khi lưu thư mục: ' + S(e && e.message || e), 'ph-warning-circle');
+        trace('SAVE_FOLDER_D1_FAILED', {folderId:folder.id, name:folder.name, error:S(e&&e.message||e), status:e.status||0}, 'error');
+        if (oldSaveFolder) return oldSaveFolder.apply(this, arguments);
+      }
+    };
+
+    ce.deleteFolder = async function(){
+      var id = document.getElementById('folder-id')?.value;
+      if(!id) return;
+      var list = (STATE.d1Folders && STATE.d1Folders.length ? STATE.d1Folders : (this.chatFolders || [])).filter(function(x){ return S(x.id) !== S(id); });
+      window.chatHistory = (window.chatHistory || []).map(function(m){ if(S(m.topic_id) === S(id)) { try{ delete m.topic_id; }catch(e){} } return m; });
+      applyFolders(list, 'local_before_d1_delete');
+      if(S(this.currentTopic) === S(id)) this.currentTopic = 'all';
+      this.closeFolderManager && this.closeFolderManager();
+      try {
+        await deleteFolderD1(id);
+        await loadFolders('after_delete_folder');
+        window.showToast?.('Đã xóa thư mục D1 (giữ nguyên file)', 'ph-trash');
+      } catch(e) {
+        window.showToast?.('D1 lỗi khi xóa thư mục: ' + S(e && e.message || e), 'ph-warning-circle');
+        if (oldDeleteFolder) return oldDeleteFolder.apply(this, arguments);
+      }
+    };
+    trace('CHATENGINE_D1_FOLDERS_PATCHED', {keepInstallApp:true});
+    return true;
+  }
+  async function migrateLocalFoldersOnce(){
+    var ce = window.ChatEngine;
+    if(!ce) return;
+    var candidates = [];
+    try { candidates = (ce.chatFolders || []).map(cleanFolder); } catch(e){}
+    var cached = readJSON(LS_CACHE, null);
+    if((!candidates.length) && cached && Array.isArray(cached.folders)) candidates = cached.folders.map(cleanFolder);
+    if(!candidates.length) return;
+    // Chỉ backfill folder local/Firebase hiện có lên D1; không xóa D1 folder.
+    try {
+      var existing = await loadFolders('before_local_folder_migration');
+      var have = Object.create(null); existing.forEach(function(f){ have[S(f.id)] = true; });
+      for (var i=0;i<candidates.length;i++) if(!have[S(candidates[i].id)]) await upsertFolder(candidates[i], 'migrate_existing_local_or_firebase');
+      await loadFolders('after_local_folder_migration');
+    } catch(e) { trace('D1_FOLDER_MIGRATION_FAILED', {error:S(e&&e.message||e), status:e.status||0}, 'warn'); }
+  }
+  function install(){
+    hideUltraOnly();
+    patchChatEngine();
+    var cached = readJSON(LS_CACHE, null);
+    if(cached && Array.isArray(cached.folders) && cached.folders.length) applyFolders(cached.folders, 'boot_cache');
+    loadFolders('install').then(function(){ setTimeout(migrateLocalFoldersOnce, 800); }).catch(function(){});
+  }
+  window.LifeOSJ20R21D1Folders = {
     phase: PHASE,
-    show: function(){ document.documentElement.setAttribute('data-lifeos-show-floating-debug','1'); return true; },
-    hide: function(){ document.documentElement.removeAttribute('data-lifeos-show-floating-debug'); return true; },
-    isVisible: function(){ return document.documentElement.getAttribute('data-lifeos-show-floating-debug') === '1'; },
-    note: 'Final mặc định ẩn UltraLog/Nội soi/Cài App nổi; debug API vẫn giữ nguyên.'
+    state: STATE,
+    load: function(){ return loadFolders('manual'); },
+    upsert: upsertFolder,
+    delete: deleteFolderD1,
+    hideUltraOnly: hideUltraOnly,
+    summary: function(){ return {phase:PHASE,state:STATE,trace:readJSON(LS_TRACE,[]),contract:{folders:'D1 official',firebase:'text only',keepInstallApp:true,hideOnly:'UltraLog/Nội soi'}}; },
+    copy: function(){ var txt=JSON.stringify(this.summary(),null,2); try{ navigator.clipboard && navigator.clipboard.writeText(txt); }catch(e){} console.log(this.summary()); return txt; }
   };
-  try{
-    window.__lifeosFinalHideFloatingDebugPhase = PHASE;
-  }catch(e){}
+  window.showLifeOSUltraLog = function(){
+    // Đường lấy lại khi cần debug sau này, không hiện mặc định.
+    var root = document.getElementById('lifeos-j19s-ultra-root') || document.getElementById('lifeos-j19o-ultra-root') || document.getElementById('lifeos-j19c-ultra-root');
+    if(root){ root.style.setProperty('display','block','important'); root.style.setProperty('visibility','visible','important'); root.style.setProperty('opacity','1','important'); root.style.setProperty('pointer-events','auto','important'); }
+    return root || null;
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, {once:true}); else install();
+  window.addEventListener('load', function(){ setTimeout(install,300); setTimeout(install,1500); setTimeout(function(){ loadFolders('post_load_5s'); },5000); }, {once:true});
+  setInterval(hideUltraOnly, 3000);
 })();
 </script>
-<!-- Pha14J20R20C_FinalCleanHideFloatingDebug_InstallFab_R19Base - END -->
+<!-- Pha14J20R21_D1Folders_KeepInstallApp_HideUltra_R19Base - END -->
 
 </body>
 </html>
