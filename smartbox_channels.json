@@ -1,6 +1,6 @@
 {
   "version": "smartbox_channels_v10_11_ERGONOMIC_CLEAN",
-  "generated_at": "2026-07-04T17:59:21.374Z",
+  "generated_at": "2026-07-04T18:43:28.798Z",
   "note": "Xuất từ V10.9 Pro Manager: Dead/Deleted bị bỏ; CORS suspect giữ riêng; hỗ trợ source/import/move group.",
   "groups": [
     {
@@ -9,7 +9,7 @@
       "type": "tv",
       "priority": 1,
       "icon": "📰",
-      "count": 14
+      "count": 21
     },
     {
       "id": "tv_dia_phuong",
@@ -17,7 +17,7 @@
       "type": "tv",
       "priority": 3,
       "icon": "📍",
-      "count": 5
+      "count": 11
     },
     {
       "id": "tv_kham_pha",
@@ -105,7 +105,7 @@
       "type": "radio",
       "priority": 4,
       "icon": "🎶",
-      "count": 8
+      "count": 7
     },
     {
       "id": "radio_nhac_vang_bolero",
@@ -193,14 +193,14 @@
       "group": "tv_thoi_su",
       "group_name": "Thời sự",
       "type": "tv",
-      "count": 14,
+      "count": 21,
       "status": "OK"
     },
     {
       "group": "tv_dia_phuong",
       "group_name": "TV địa phương",
       "type": "tv",
-      "count": 5,
+      "count": 11,
       "status": "OK"
     },
     {
@@ -277,7 +277,7 @@
       "group": "radio_nhac_viet",
       "group_name": "Nhạc Việt",
       "type": "radio",
-      "count": 8,
+      "count": 7,
       "status": "OK"
     },
     {
@@ -5666,7 +5666,12 @@
         "badge": "Radio chính thống",
         "icon": "📻",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6jg9yv_54muyq",
@@ -5693,7 +5698,12 @@
         "badge": "Radio chính thống",
         "icon": "📻",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6ji12e_7a8nis",
@@ -5720,7 +5730,12 @@
         "badge": "Quốc tế tiếng Việt",
         "icon": "🌐",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6jk5jy_hmktzu",
@@ -5747,7 +5762,12 @@
         "badge": "Quốc tế tiếng Việt",
         "icon": "🌐",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6jlwcu_ul1ewo",
@@ -5774,7 +5794,12 @@
         "badge": "Nhạc vàng / Bolero",
         "icon": "🎙️",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6js3eo_24xczj",
@@ -5801,7 +5826,12 @@
         "badge": "Quốc tế tiếng Việt",
         "icon": "🌐",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6juq5a_3337eo",
@@ -5828,7 +5858,12 @@
         "badge": "Tin tức / Giao thông",
         "icon": "🚦",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6jxerq_15oa49",
@@ -5855,34 +5890,12 @@
         "badge": "Nhạc vàng / Bolero",
         "icon": "🎙️",
         "backup_count": 0
-      }
-    },
-    {
-      "id": "ch_mr6jyoi6_u1uyva",
-      "added_at": "2026-07-04T16:04:21.006Z",
-      "status_admin": "new",
-      "import_flag": "manual_new",
-      "display_name": "Cai Luong Viet Nam",
-      "name": "Cai Luong Viet Nam",
-      "type": "radio",
-      "group": "radio_nhac_viet",
-      "group_name": "Nhạc Việt",
-      "subtitle": "Nhạc Việt",
-      "url": "https://stream.zeno.fm/0trm6wrnga0uv",
-      "backup_urls": [],
-      "note": "",
-      "updated_at": "2026-07-04T16:04:21.006Z",
-      "play_url": "https://stream.zeno.fm/0trm6wrnga0uv",
-      "backup_play_urls": [],
-      "status": "ready",
-      "quality": "owner_added",
-      "ui": {
-        "title": "Cai Luong Viet Nam",
-        "subtitle": "Nhạc Việt",
-        "badge": "Nhạc Việt",
-        "icon": "🎶",
-        "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6jzs4u_kww4i6",
@@ -5909,7 +5922,12 @@
         "badge": "Nhạc Việt",
         "icon": "🎶",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6k18ji_kl9r7y",
@@ -5936,7 +5954,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6k2iqu_5eosf0",
@@ -5963,7 +5986,12 @@
         "badge": "Quốc tế tiếng Việt",
         "icon": "🌐",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6k3mn1_ad82zw",
@@ -5990,7 +6018,12 @@
         "badge": "Radio địa phương",
         "icon": "📍",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6k4nau_70ifo0",
@@ -6017,7 +6050,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6k6259_dret92",
@@ -6044,7 +6082,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6k7sz9_n84ia0",
@@ -6071,7 +6114,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6k9m51_f0bg12",
@@ -6098,7 +6146,12 @@
         "badge": "Không lời / Thư giãn",
         "icon": "🌿",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kbswl_efvc6n",
@@ -6125,7 +6178,12 @@
         "badge": "Nhạc Việt",
         "icon": "🎶",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kd2bx_uorljh",
@@ -6152,7 +6210,12 @@
         "badge": "Nhạc Việt",
         "icon": "🎶",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kevzh_xbv9ry",
@@ -6179,7 +6242,12 @@
         "badge": "Nhạc Việt",
         "icon": "🎶",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kgpvh_a9v5vv",
@@ -6206,7 +6274,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6khsud_p3r8x4",
@@ -6233,7 +6306,12 @@
         "badge": "Nhạc Việt",
         "icon": "🎶",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kj2yd_qi7gh5",
@@ -6260,7 +6338,12 @@
         "badge": "Không lời / Thư giãn",
         "icon": "🌿",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kk25x_jza9i4",
@@ -6287,7 +6370,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kl6f1_6uxntx",
@@ -6314,7 +6402,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6km9gq_c9pn80",
@@ -6341,7 +6434,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kn959_43nmg8",
@@ -6368,7 +6466,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kp4bh_997c5e",
@@ -6395,7 +6498,12 @@
         "badge": "Nhạc vàng / Bolero",
         "icon": "🎙️",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kr24l_b6hyeg",
@@ -6422,7 +6530,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6ksc38_66bn94",
@@ -6449,7 +6562,12 @@
         "badge": "Không lời / Thư giãn",
         "icon": "🌿",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6ku6t9_oa6js1",
@@ -6476,7 +6594,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6kvyfh_nvbgpw",
@@ -6503,7 +6626,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6l12y5_o185nu",
@@ -6530,7 +6658,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6l31c4_ngcrqu",
@@ -6557,7 +6690,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6ldid0_fk61b6",
@@ -6584,7 +6722,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6lg6pw_lw5gq1",
@@ -6611,7 +6754,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6lhlws_vg9ax5",
@@ -6638,7 +6786,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6liykk_u7ho5f",
@@ -6665,7 +6818,12 @@
         "badge": "Không lời / Thư giãn",
         "icon": "🌿",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6lw7hn_du46ry",
@@ -6692,7 +6850,12 @@
         "badge": "Nhạc vàng / Bolero",
         "icon": "🎙️",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6lyd04_8ygywm",
@@ -6719,7 +6882,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6lzx7n_hc84bo",
@@ -6746,7 +6914,12 @@
         "badge": "Nhạc Việt",
         "icon": "🎶",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6m3x63_s145rn",
@@ -6773,7 +6946,12 @@
         "badge": "Radio chính thống",
         "icon": "📻",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6m7hvw_ble4bg",
@@ -6800,7 +6978,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6mcfoj_3b9uet",
@@ -6827,7 +7010,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6me10r_0gnp3o",
@@ -6854,7 +7042,12 @@
         "badge": "Không lời / Thư giãn",
         "icon": "🌿",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6mj2pf_uix4ek",
@@ -6881,7 +7074,12 @@
         "badge": "Nhạc Việt",
         "icon": "🎶",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6msnki_edojna",
@@ -6908,7 +7106,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6mvuz6_bb5tjt",
@@ -6935,7 +7138,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6mxpki_j0hcnj",
@@ -6962,7 +7170,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6mz3gi_v4anot",
@@ -6989,7 +7202,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6n1c6i_6nd3gd",
@@ -7016,7 +7234,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6n5ole_kgncxh",
@@ -7043,7 +7266,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6n7rhe_16dv8g",
@@ -7070,7 +7298,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6ncuiy_8sgt8t",
@@ -7097,7 +7330,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr6nplox_de5yh6",
@@ -7123,6 +7361,362 @@
         "subtitle": "TV khác",
         "badge": "TV khác",
         "icon": "📺",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6otyzs_itvpja",
+      "added_at": "2026-07-04T18:20:39.400Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV9 HD",
+      "name": "VTV9 HD",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https://vips-livecdn.fptplay.net/live/media/v9abr/live247-hls-avc/v9abr-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:20:39.400Z",
+      "play_url": "https://vips-livecdn.fptplay.net/live/media/v9abr/live247-hls-avc/v9abr-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV9 HD",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6ousxk_9tzlad",
+      "added_at": "2026-07-04T18:21:18.200Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV 7",
+      "name": "VTV 7",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https://vips-livecdn.fptplay.net/live/media/v7abr/live247-hls-avc/v7abr-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:21:18.200Z",
+      "play_url": "https://vips-livecdn.fptplay.net/live/media/v7abr/live247-hls-avc/v7abr-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV 7",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6ovkv4_q31n8c",
+      "added_at": "2026-07-04T18:21:54.400Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV2",
+      "name": "VTV2",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https://vips-livecdn.fptplay.net/live/media/v2abr/live247-hls-avc/v2abr-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:21:54.400Z",
+      "play_url": "https://vips-livecdn.fptplay.net/live/media/v2abr/live247-hls-avc/v2abr-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV2",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6owlzk_mqk9z8",
+      "added_at": "2026-07-04T18:22:42.512Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV5P",
+      "name": "VTV5P",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https://live.fptplay53.net/live/media/vtv5/live247-hls-avc/index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:22:42.512Z",
+      "play_url": "https://live.fptplay53.net/live/media/vtv5/live247-hls-avc/index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV5P",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6oxo7s_ia43r6",
+      "added_at": "2026-07-04T18:23:32.056Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV3",
+      "name": "VTV3",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https://vips-livecdn.fptplay.net/live/media/v3abr/live247-hls-avc/v3abr-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:23:32.056Z",
+      "play_url": "https://vips-livecdn.fptplay.net/live/media/v3abr/live247-hls-avc/v3abr-avc1_5600000=10000-mp4a_140800_vie=20000.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV3",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6oyfuw_03ow0u",
+      "added_at": "2026-07-04T18:24:07.880Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HTV7",
+      "name": "HTV7",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https://live.fptplay53.net/epzhd1/htv7hd_vhls.smil/chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:24:07.880Z",
+      "play_url": "https://live.fptplay53.net/epzhd1/htv7hd_vhls.smil/chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HTV7",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6ozux4_3jxuj8",
+      "added_at": "2026-07-04T18:25:14.056Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "THVL2",
+      "name": "THVL2",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "https://live.fptplay53.net/epzhd2/vinhlong2_vhls.smil/chunklist_b5000000.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:25:14.056Z",
+      "play_url": "https://live.fptplay53.net/epzhd2/vinhlong2_vhls.smil/chunklist_b5000000.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "THVL2",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6p0mnc_y0gnsu",
+      "added_at": "2026-07-04T18:25:49.992Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV8",
+      "name": "VTV8",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https://vips-livecdn.fptplay.net/live/media/vtv8/live-hls-avc/vtv8-avc1_4000000=10000-mp4a_131600=20000.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:25:49.992Z",
+      "play_url": "https://vips-livecdn.fptplay.net/live/media/vtv8/live-hls-avc/vtv8-avc1_4000000=10000-mp4a_131600=20000.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV8",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6pci8n_803llk",
+      "added_at": "2026-07-04T18:35:04.151Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HTV9",
+      "name": "HTV9",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "https://live.fptplay53.net/epzhd1/htv9hd_vhls.smil/chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:35:04.152Z",
+      "play_url": "https://live.fptplay53.net/epzhd1/htv9hd_vhls.smil/chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HTV9",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6pd3w0_uhwqyx",
+      "added_at": "2026-07-04T18:35:32.208Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HTV4",
+      "name": "HTV4",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "https://liveh12.vtvprime.vn/hls/HTVKey/index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:35:32.208Z",
+      "play_url": "https://liveh12.vtvprime.vn/hls/HTVKey/index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HTV4",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6pdps7_0xw2vf",
+      "added_at": "2026-07-04T18:36:00.583Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HTV1",
+      "name": "HTV1",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "https://live.fptplay53.net/epzhd1/htv1_vhls.smil/chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:36:00.583Z",
+      "play_url": "https://live.fptplay53.net/epzhd1/htv1_vhls.smil/chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HTV1",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6pelpj_a1ee9f",
+      "added_at": "2026-07-04T18:36:41.959Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HTV3",
+      "name": "HTV3",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "https://live.fptplay53.net/epzhd1/htv3_vhls.smil/chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:36:41.959Z",
+      "play_url": "https://live.fptplay53.net/epzhd1/htv3_vhls.smil/chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HTV3",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6pfcrk_tzzljp",
+      "added_at": "2026-07-04T18:37:17.024Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "THUẦN VIỆT",
+      "name": "THUẦN VIỆT",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "https://live.fptplay53.net/epzhd1/htvcthuanviethd_vhls.smil/chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T18:37:17.024Z",
+      "play_url": "https://live.fptplay53.net/epzhd1/htvcthuanviethd_vhls.smil/chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "THUẦN VIỆT",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
         "backup_count": 0
       }
     }
