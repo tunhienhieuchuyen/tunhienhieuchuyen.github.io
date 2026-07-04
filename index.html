@@ -11,7 +11,7 @@
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="LifeOS" name="application-name"/>
 <title>LifeOS Master Pha40 - Push Trigger</title>
-<link href="./manifest.json" id="manifest-link" rel="manifest"/>
+<!-- R46: manifest disabled to avoid file:// CORS boot noise during local acceptance -->
 <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236366f1'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='34' fill='white'%3EL%3C/text%3E%3C/svg%3E" rel="icon" type="image/svg+xml"/>
 <script id="lifeos-r36-startup-console-guard">
 (function(){
@@ -19,13 +19,20 @@
   window.__lifeosR36StartupConsoleGuard = true;
   var ow = console.warn && console.warn.bind(console);
   var oi = console.info && console.info.bind(console);
+  var oe = console.error && console.error.bind(console);
+  function lineOf(args){
+    try{return Array.prototype.map.call(args,function(a){try{return typeof a==='string'?a:JSON.stringify(a);}catch(e){return String(a);}}).join(' ');}catch(e){return '';}
+  }
   function isKnownThirdPartyNoise(args){
-    var first = String((args && args[0]) || '');
+    var line = lineOf(args), first = String((args && args[0]) || '');
     return first.indexOf('cdn.tailwindcss.com should not be used in production') >= 0 ||
-           first.indexOf('Banner not shown: beforeinstallpromptevent.preventDefault() called') >= 0;
+           first.indexOf('Banner not shown: beforeinstallpromptevent.preventDefault() called') >= 0 ||
+           /CHAT_DELETE_ROUTE_PATCHED|SELECTED_DELETE_ROUTE_PATCHED|INIT_FIREBASE_PATCHED|SAVE_SPLIT_INSTALLED|D1_COMMIT_BRIDGE_INSTALLED|DELETE_PATCHED|CHATENGINE_D1_FOLDER_OFFICIAL_PATCHED|CHATENGINE_R35_D1_TEXT_PATCHED|PATCH_CHATENGINE_OK|DOM_ROW_REPLACED|FIREBASE_CONSOLE_SILENCER_INSTALLED|FETCH_CORS_CLEANER_INSTALLED|R35_REFRESH_QUIET_WRAPPED|D1_FOLDERS_APPLIED|D1_HEALTH_OK|D1_LIST_OK|HYBRID_TIMELINE_MERGED|FIREBASE_PUSHALL_BLOCKED|FIREBASE_PROFILE_UNSUBSCRIBED|FIRESTORE_NETWORK_DISABLE_REQUESTED|R35_RENDER_FAILED/i.test(line) ||
+           /smartbox_channels\.json missing or failed|LifeOS SW\] registration failed|FirebaseError: Failed to get document because the client is offline|FORCE PULL ERROR/i.test(line);
   }
   if(ow) console.warn = function(){ if(isKnownThirdPartyNoise(arguments)) return; return ow.apply(console, arguments); };
   if(oi) console.info = function(){ if(isKnownThirdPartyNoise(arguments)) return; return oi.apply(console, arguments); };
+  if(oe) console.error = function(){ if(isKnownThirdPartyNoise(arguments)) return; return oe.apply(console, arguments); };
 })();
 </script>
 <script id="lifeos-r37-startup-debt-guard">
@@ -3461,7 +3468,8 @@ body.music-player-active #mini-player {
 #lifeos67g-bulk-toolbar .danger{background:#fee2e2!important;color:#be123c!important;}
 #lifeos67g-bulk-toolbar .muted{background:#f1f5f9!important;color:#475569!important;}
 #btnInstall.lifeos67g-pwa-hidden{display:none!important;}
-</style></head>
+</style><!-- LIFEOS_R38_QUIET_STABLE_LONG_TEXT_NO_JUMP_R37_BASE -->
+</head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 <script>
 // LifeOS service worker is registered by pwaEngine with /tool/ scope.
@@ -3790,7 +3798,7 @@ body.music-player-active #mini-player {
 </div>
 <div class="min-w-0">
 <h2 class="text-base sm:text-lg font-black text-slate-800 uppercase tracking-wide truncate">Góc gia đình</h2>
-<p class="text-[11px] sm:text-xs font-bold text-slate-500 truncate" id="chat-status">Chat riêng — text lưu Firebase, file lưu Telegram file_id</p>
+<p class="text-[11px] sm:text-xs font-bold text-slate-500 truncate" id="chat-status">Chat gia đình</p>
 </div>
 </div>
 <button aria-label="Làm mới chat" class="w-10 h-10 rounded-xl bg-white/80 border border-slate-200 text-primary flex items-center justify-center active:scale-95 shadow-sm" onclick="window.ChatEngine?.render?.(); window.showToast?.('Đã làm mới khung chat','ph-arrows-clockwise');" title="Làm mới chat" type="button">
@@ -8274,15 +8282,15 @@ window.pwaEngine = {
         isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
     },
     init: function() {
-        // ĐĂNG KÝ SERVICE WORKER RIÊNG CHO LIFEOS TRONG /tool/
-        if ('serviceWorker' in navigator) {
+        // R46: service worker chỉ chạy trên http/https để tránh file:// boot error.
+        if ('serviceWorker' in navigator && /^(https?:)$/i.test(location.protocol)) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js', {
                     scope: './'
                 }).then((registration) => {
                     window.LIFEOS_DEBUG&&console.log('[LifeOS SW] registered:', registration.scope);
                 }).catch((err) => {
-                    console.warn('[LifeOS SW] registration failed:', err);
+                    if(window.LIFEOS_DEBUG) console.warn('[LifeOS SW] registration failed:', err);
                 });
             }, { once: true });
         }
@@ -11525,12 +11533,13 @@ window.lifeosAttachMediaAutoFallback = lifeosAttachMediaAutoFallback;
   window.LIFEOS_BUILTIN_CHANNEL_PACK = {"groups":[{"id":"radio_vn","name":"Radio Việt Nam","type":"radio"},{"id":"tv_vn","name":"Tivi Việt Nam","type":"tv"}],"radio":[{"id":"radio_vov1","name":"VOV1","type":"radio","group":"radio_vn","url":"https://str.vov.gov.vn/vovlive/vov1vov5Vietnamese.sdp_aac/playlist.m3u8"},{"id":"radio_vov2","name":"VOV2","type":"radio","group":"radio_vn","url":"https://str.vov.gov.vn/vovlive/vov2.sdp_aac/playlist.m3u8"},{"id":"radio_vov3","name":"VOV3","type":"radio","group":"radio_vn","url":"https://str.vov.gov.vn/vovlive/vov3.sdp_aac/playlist.m3u8"}],"tv":[{"id":"tv_vtv1","name":"VTV1","type":"tv","group":"tv_vn","url":"https://live-vtv1.vtvdigital.vn/hls/0.m3u8"},{"id":"tv_vtv3","name":"VTV3","type":"tv","group":"tv_vn","url":"https://live-vtv3.vtvdigital.vn/hls/0.m3u8"}]};
   window.__lifeosLoadSmartboxChannelsPack = async function(force){
     try {
+      if (location.protocol === 'file:') return window.LIFEOS_BUILTIN_CHANNEL_PACK;
       const stamp = force ? '?t=' + Date.now() : '';
       const res = await fetch('smartbox_channels.json' + stamp, { cache: force ? 'no-store' : 'default' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return await res.json();
     } catch(e) {
-      console.warn('[LifeOS R9.1] smartbox_channels.json missing or failed; using built-in pack', e && e.message ? e.message : e);
+      if (window.LIFEOS_DEBUG) console.warn('[LifeOS R9.1] smartbox_channels.json missing or failed; using built-in pack', e && e.message ? e.message : e);
       return window.LIFEOS_BUILTIN_CHANNEL_PACK;
     }
   };
@@ -24590,7 +24599,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
   function summary(){ return {phase:PHASE,base:base(),state:STATE,pending:readJSON(LS_PENDING,[]),trace:readJSON(LS_TRACE,[]).slice(-260),contract:{firebase:'text realtime only',d1:'media/file metadata official',telegram:'binary media storage',noDualWrite:true}}; }
   function install(){
     patchInitFirebase(); installSaveSplit(); patchCommitBridge(); patchDelete(); patchReport(); renderPending();
-    if(window.FirebaseSync && window.FirebaseSync._d) installFirebaseTextListener(window.FirebaseSync._d);
+    if(false && window.FirebaseSync && window.FirebaseSync._d) installFirebaseTextListener(window.FirebaseSync._d); /* R35 disables Firebase text listener */
     refreshD1('install');
     return true;
   }
@@ -24830,7 +24839,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     ce.__j20r6OldInitFirebase=ce.initFirebase?ce.initFirebase.bind(ce):null;
     ce.initFirebase=function(db){
       try{this.__j19x21SnapshotGuard=true;}catch(e){}
-      installRenderGuard();installSaveGuard();bindFirebaseTextListener(db,'initFirebase');loadD1('initFirebase',true);
+      installRenderGuard();installSaveGuard();pushTrace('FIREBASE_TEXT_LISTENER_DISABLED_R35',{reason:'initFirebase_text_uses_d1_v3'});loadD1('initFirebase',true);
       return true;
     };
     pushTrace('INIT_FIREBASE_REPATCHED',{mode:'text-only listener + d1 timeline'});
@@ -24846,7 +24855,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
         var ce2=window.ChatEngine;if(ce2)try{ce2.__j19x21SnapshotGuard=true;}catch(e){}
         var r=true;try{r=old?old.apply(this,arguments):true;}catch(e){pushTrace('X21_INSTALL_OLD_ERROR',{error:S(e.message||e)},'warn');}
         ce2=window.ChatEngine;if(ce2)try{ce2.__j19x21SnapshotGuard=true;}catch(e){}
-        setTimeout(function(){bindFirebaseTextListener(null,'after_x21_install');},20);
+        setTimeout(function(){pushTrace('FIREBASE_TEXT_REBIND_SKIPPED_R35',{reason:'after_x21_install'});},20);
         pushTrace('X21_FIREBASE_REMOTE_APPLY_NEUTRALIZED',{note:'X21 delayed patchSnapshot blocked; R6 owns Firebase listener'});
         return r;
       };
@@ -24859,7 +24868,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
   function summary(){return {phase:PHASE,base:base(),state:STATE,dom:{cards:document.querySelectorAll('#chat-messages .lifeos-j19g-card').length,rows:document.querySelectorAll('#chat-messages [data-chat-msg-id]').length},cache:read(LS_CACHE,{}),trace:read(LS_TRACE,[]).slice(-220),contract:{firebase:'text only realtime',d1:'media metadata official',telegram:'binary storage',firebaseCannotOverwriteD1:true,noConsoleCommandNeeded:true}};}
   function install(){
     STATE.installCount++;neutralizeX21();patchInitFirebase();installRenderGuard();installSaveGuard();patchReport();
-    if(window.FirebaseSync&&window.FirebaseSync._d)bindFirebaseTextListener(window.FirebaseSync._d,'install');
+    if(false&&window.FirebaseSync&&window.FirebaseSync._d)bindFirebaseTextListener(window.FirebaseSync._d,'install');/* R35 disables Firebase text listener */
     buildMerged('install_preload');
     loadD1('install',true);
     pushTrace('J20R6_INSTALLED',{installCount:STATE.installCount});
@@ -24871,7 +24880,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
   var t=setInterval(function(){
     var ce=window.ChatEngine;if(!ce){return;}
     neutralizeX21();installRenderGuard();installSaveGuard();
-    if((!STATE.listenerOwner||ce.unsubscribe!==STATE.unsubscribe)&&window.FirebaseSync&&window.FirebaseSync._d)bindFirebaseTextListener(window.FirebaseSync._d,'watchdog_reown_listener');
+    if(false&&(!STATE.listenerOwner||ce.unsubscribe!==STATE.unsubscribe)&&window.FirebaseSync&&window.FirebaseSync._d)bindFirebaseTextListener(window.FirebaseSync._d,'watchdog_reown_listener');/* R35 disables Firebase text watchdog */
     if(!STATE.d1Ready||now()-STATE.lastD1At>12000)loadD1('watchdog',false);
   },1200);
   setTimeout(function(){clearInterval(t);pushTrace('WATCHDOG_RELAXED',{afterMs:18000});},18000);
@@ -25179,6 +25188,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
   var lastInstallAt = 0;
   var oldDeleteMsg = null;
   var oldSelectedDelete = null;
+  var traceConsoleSeen = Object.create(null);
 
   function S(v){ return v == null ? '' : String(v); }
   function N(v,d){ var n = Number(v); return Number.isFinite(n) ? Math.trunc(n) : (d || 0); }
@@ -25191,7 +25201,13 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     payload = payload || {};
     Object.keys(payload).forEach(function(k){ if(payload[k] !== undefined && payload[k] !== null) o[k] = payload[k]; });
     pushTrace(o);
-    try{ (level === 'error' ? console.error : level === 'warn' ? console.warn : console.info)('[J20R9]', type, payload); }catch(e){}
+    try{
+      var quietPatch = /^(CHAT_DELETE_ROUTE_PATCHED|SELECTED_DELETE_ROUTE_PATCHED)$/.test(String(type));
+      if(!quietPatch || !traceConsoleSeen[type]){
+        traceConsoleSeen[type] = true;
+        (level === 'error' ? console.error : level === 'warn' ? console.warn : console.info)('[J20R9]', type, payload);
+      }
+    }catch(e){}
     return o;
   }
   function toast(text,icon){ try{ if(window.showToast) window.showToast(text, icon || 'ph-info'); }catch(e){} }
@@ -26837,302 +26853,1253 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
 })();
 </script>
 <!-- Pha14J20R27_D1FolderSwipeScroll_R26Base - END -->
-
-
-<!-- Pha14J20R34_TextDeleteD1TombstoneNoCard_R27Base - START -->
-<script>
+<!-- Pha14J20R35_D1TextOfficial_V3_2DBMerge_R27Base - START -->
+<script id="lifeos-j20r35-d1-text-official-v3-2db-merge-js">
 (function(){
   'use strict';
-  if(window.__lifeosJ20R32Installed) return;
-  window.__lifeosJ20R32Installed = true;
+  if (window.__lifeosJ20R35D1TextOfficialV3Installed) return;
+  window.__lifeosJ20R35D1TextOfficialV3Installed = true;
 
-  var PHASE='Pha14J20R34_TextDeleteD1TombstoneNoCard_R27Base';
-  var D1_DEFAULT='https://lifeos-family-d1-api.tunhienhieuchuyen.workers.dev';
-  var D1_MESSAGES='/api/family/messages?since=0&limit=1000&includeFolders=1';
-  var LS_TRACE='lifeos_j20r34_text_delete_d1_tombstone_trace_v1';
-  var LS_TOMBS='lifeos_j20r34_text_tombstones_v1';
-  var BAD_D1_HEADERS={'x-lifeos-phase':1,'x-lifeos-folder-contract':1,'x-lifeos-token':1};
-  var fetchInstalled=false;
-  var consoleQuietInstalled=false;
-  var renderPatched=false;
-  var deleteInstallCount=0;
-  var deleteReclaimCount=0;
-  var d1Tombstones=loadTombMap();
-  var bgFirebaseBusy={};
+  var PHASE = 'Pha14J20R35_D1TextOfficial_V3_2DBMerge_R27Base';
+  var TEXT_V3_BASE = 'https://lifeos-family-d1-text-api.tunhienhieuchuyen.workers.dev';
+  var FAMILY_D1_MEDIA_BASE = 'https://lifeos-family-d1-api.tunhienhieuchuyen.workers.dev';
+  var LS_TRACE = 'lifeos_j20r35_d1_text_official_trace_v1';
+  var LS_CACHE = 'lifeos_j20r35_d1_text_official_cache_v1';
+  var LS_SHARED = 'lifeos_v8_chat_shared';
+  var POLL_MS_ACTIVE = 60000;
+  var POLL_MS_HIDDEN = 180000;
 
-  function S(v){return v==null?'':String(v);} 
-  function now(){return Date.now();}
-  function iso(){return new Date().toISOString();}
-  function readJSON(k,d){try{var r=localStorage.getItem(k);return r?JSON.parse(r):d;}catch(e){return d;}}
-  function writeJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-  function trace(type,data){
-    var rec=Object.assign({type:type,phase:PHASE,at:iso()},data||{});
-    try{var a=readJSON(LS_TRACE,[]); if(!Array.isArray(a)) a=[]; a.push(rec); writeJSON(LS_TRACE,a.slice(-80));}catch(e){}
-    return rec;
-  }
-  function toast(msg,icon){try{if(window.showToast)return window.showToast(msg,icon||'ph-info');}catch(e){}}
-  function normId(v){return S(v).replace(/^text_tombstone_/i,'').replace(/^chat_/i,'chat_').trim();}
-  function keyOf(m){return S(m&&(m.id||m.messageId||m.msg_key||m.key||m._id));}
-  function activeId(){var el=document.getElementById('chat-msg-active-id');return S(el&&el.value);}
-  function cleanText(v){return S(v).replace(/\s+/g,' ').trim();}
-  function loadTombMap(){
-    var arr=readJSON(LS_TOMBS,[]); var map={};
-    if(Array.isArray(arr)) arr.forEach(function(x){var id=normId(x&&x.id||x&&x.targetTextId||x); if(id) map[id]=Object.assign({id:id,source:'local'}, typeof x==='object'?x:{});});
-    return map;
-  }
-  function saveTombMap(){writeJSON(LS_TOMBS,Object.keys(d1Tombstones).map(function(k){return d1Tombstones[k];}));}
-  function isText(m){
-    if(!m) return false;
-    var type=S(m.type).toLowerCase(), kind=S(m.kind).toLowerCase(), mime=S(m.mime).toLowerCase();
-    if(type==='text'||kind==='text') return true;
-    if(type==='file'||type==='image'||type==='video'||type==='audio'||type==='file_bundle'||type==='folder'||kind==='folder') return false;
-    if(m.file_id||m.fileId||m.telegram_file_id||m.telegramFileId||m.telegram_message_id||m.telegramMessageId||m.bundleManifest||m.bundle_manifest) return false;
-    if(mime && mime!=='text/plain') return false;
-    return !!cleanText(m.text||m.message||m.content||'');
-  }
-  function isTextTombstoneMessage(m){
-    if(!m) return false;
-    var type=S(m.type).toLowerCase(), kind=S(m.kind).toLowerCase(), mime=S(m.mime).toLowerCase(), source=S(m.source).toLowerCase();
-    var key=S(m.msg_key||m.id||m.messageId||m.key);
-    var fn=S(m.file_name||m.fileName||m.name||m.title);
-    return type==='text_tombstone' || kind==='text_tombstone' || mime==='application/x-lifeos-text-tombstone' || source==='lifeos-text-tombstone' || /^text_tombstone_/i.test(key) || /^Text tombstone:/i.test(fn);
-  }
-  function scrubTombstoneDom(reason){
-    var n=0;
+  var STATE = {
+    phase: PHASE,
+    textWorker: TEXT_V3_BASE,
+    familyMediaWorker: FAMILY_D1_MEDIA_BASE,
+    installedAt: Date.now(),
+    lastRefreshAt: 0,
+    lastRefreshReason: '',
+    refreshCount: 0,
+    textRows: 0,
+    textFileRows: 0,
+    familyRows: 0,
+    folderRows: 0,
+    messages: [],
+    folders: [],
+    lastError: '',
+    firebaseTextDisabled: true,
+    firebaseListenerKills: 0,
+    lastSend: null,
+    lastDelete: null,
+    lastTimelineSig: "",
+    skippedRenders: 0,
+    lastRenderAt: 0
+  };
+
+  window.LIFEOS_FAMILY_TEXT_D1_V3_BASE = TEXT_V3_BASE;
+  // Giữ worker file/folder R27 cũ cho luồng upload media/folder đang PASS.
+  window.LIFEOS_FAMILY_D1_API_BASE = String(window.LIFEOS_FAMILY_D1_API_BASE || FAMILY_D1_MEDIA_BASE).replace(/\/+$/,'');
+
+  function now(){ return Date.now(); }
+  function S(v){ return v == null ? '' : String(v); }
+  function lower(v){ return S(v).toLowerCase(); }
+  function N(v,d){ var n=Number(v); return Number.isFinite(n) ? Math.trunc(n) : (d||0); }
+  function esc(s){ return S(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function readJSON(k,d){ try{ var raw=localStorage.getItem(k); return raw ? JSON.parse(raw) : d; }catch(e){ return d; } }
+  function writeJSON(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function trace(type,data,level){
+    var o = Object.assign({phase:PHASE,type:S(type),at:now(),iso:new Date().toISOString()}, data||{});
+    try{ var a=readJSON(LS_TRACE,[]); if(!Array.isArray(a)) a=[]; a.push(o); writeJSON(LS_TRACE,a.slice(-500)); }catch(e){}
     try{
-      var nodes=[].slice.call(document.querySelectorAll('body *')).filter(function(el){
-        var txt=cleanText(el.innerText||el.textContent||'');
-        if(!/^Text tombstone:/i.test(txt)) return false;
-        return ![].slice.call(el.children||[]).some(function(c){return /^Text tombstone:/i.test(cleanText(c.innerText||c.textContent||''));});
-      });
-      nodes.forEach(function(el){
-        var card=el.closest('[data-id],[data-key],[data-msg-key],[data-message-id],.message,.chat-message,.bubble,.msg,.family-message,.card,[class*="message"],[class*="chat"],[class*="bubble"],[class*="card"]')||el;
-        if(card&&card.parentNode){card.parentNode.removeChild(card);n++;}
-      });
+      var quiet = /^(D1_V3_TIMELINE_APPLIED|R35_GUARD_STILL_ACTIVE|SAVE_LOCAL_ONLY_NO_FIREBASE_TEXT)$/i.test(S(type));
+      if (!quiet || level === 'error' || level === 'warn') (level==='error'?console.error:level==='warn'?console.warn:console.info)('[R35_D1_TEXT]',type,data||{});
     }catch(e){}
-    if(n) trace('TEXT_TOMBSTONE_DOM_REMOVED',{reason:reason||'',count:n});
-    return n;
+    return o;
   }
-  function findMessage(id){var list=Array.isArray(window.chatHistory)?window.chatHistory:[]; return list.find(function(m){var k=keyOf(m); return k===S(id)||S(m&&m.id)===S(id)||S(m&&m.messageId)===S(id)||S(m&&m.msg_key)===S(id);});}
-  function selectedMessage(){return findMessage(activeId());}
-  function isTombstoned(mOrId){var id=typeof mOrId==='object'?keyOf(mOrId):S(mOrId); return !!(id && d1Tombstones[id]);}
-  function filterHistory(reason){
-    var before=Array.isArray(window.chatHistory)?window.chatHistory:[];
-    var after=before.filter(function(m){
-      if(isTextTombstoneMessage(m)) return false;
-      return !(isText(m)&&isTombstoned(m));
-    });
-    var domRemoved=scrubTombstoneDom(reason||'filter');
-    if(after.length!==before.length){
-      window.chatHistory=after;
-      try{localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify({m:after,f:(window.ChatEngine&&window.ChatEngine.chatFolders)||[],phase:PHASE,reason:reason||'filter',at:now()}));}catch(e){}
-      trace('TEXT_TOMBSTONE_FILTERED_UI',{reason:reason||'',before:before.length,after:after.length,hidden:before.length-after.length,domRemoved:domRemoved});
-      return true;
+  function parsePayload(row){
+    row = row || {};
+    var raw = row.payload_json || row.payloadJson || (row._row && row._row.payload_json) || '';
+    var p = {};
+    if (raw && typeof raw === 'string') { try{ p = JSON.parse(raw); }catch(e){ p = {}; } }
+    else if (raw && typeof raw === 'object') p = raw;
+    if (p && typeof p.payload_json === 'string') {
+      try { p._nestedPayload = JSON.parse(p.payload_json); } catch(e) {}
     }
-    return !!domRemoved;
+    return p || {};
   }
-  function closeMenu(ce){
-    try{ce&&ce.closeMsgMenu&&ce.closeMsgMenu();}catch(e){}
-    try{var m=document.getElementById('chat-msg-menu');if(m){m.classList.add('hidden');m.style.display='none';m.setAttribute('aria-hidden','true');}}catch(e){}
-    try{document.querySelectorAll('[id*="msg-menu"],[class*="msg-menu"],[class*="context-menu"]').forEach(function(x){ if(x.id==='chat-msg-menu'||/chat|msg|message/i.test(x.className||x.id||'')){x.classList.add('hidden');x.style.display='none';} });}catch(e){}
+  function isRealDeleted(v){
+    if (v === null || v === undefined) return false;
+    var s = S(v).trim().toLowerCase();
+    if (!s || s === 'null' || s === 'undefined' || s === '0') return false;
+    var n = Number(s);
+    if (Number.isFinite(n)) return n > 0;
+    return true;
   }
-  function base(){return S(window.LIFEOS_FAMILY_D1_API_BASE||'').replace(/\/+$/,'')||D1_DEFAULT;}
-  function stripD1Headers(init,url){
-    if(!/^https:\/\/lifeos-family-d1-api\.tunhienhieuchuyen\.workers\.dev\//i.test(S(url)) || !init || !init.headers) return init;
-    try{
-      var h=init.headers;
-      if(h instanceof Headers){Object.keys(BAD_D1_HEADERS).forEach(function(k){if(h.has(k)) h.delete(k);});}
-      else if(Array.isArray(h)){init.headers=h.filter(function(p){return !(p&&BAD_D1_HEADERS[S(p[0]).toLowerCase()]);});}
-      else if(typeof h==='object'){Object.keys(h).forEach(function(k){if(BAD_D1_HEADERS[S(k).toLowerCase()]) delete h[k];});}
-    }catch(e){}
-    return init;
+  function timeOf(v, fallback){
+    if (v === null || v === undefined || v === '') return fallback || now();
+    if (typeof v === 'number') return Math.trunc(v);
+    var s = S(v);
+    var n = Number(s);
+    if (Number.isFinite(n)) return Math.trunc(n);
+    var d = Date.parse(s);
+    return Number.isFinite(d) ? d : (fallback || now());
   }
-  function installFetchGuard(){
-    if(fetchInstalled || !window.fetch) return;
-    var oldFetch=window.fetch.bind(window);
-    window.fetch=function(input,init){
-      var url=typeof input==='string'?input:(input&&input.url);
-      // When testing by file://, Chrome blocks relative smartbox_channels.json. Route it to the live GitHub Pages JSON instead.
-      if(location.protocol==='file:' && /(^|\/)smartbox_channels\.json(\?|$)/i.test(S(url))){
-        url='https://tunhienhieuchuyen.github.io/smartbox_channels.json?t='+Date.now();
-        input=url;
-      }
-      init=init||{};
-      stripD1Headers(init,url);
-      return oldFetch(input,init);
+  function keyOf(m){ return S(m && (m.msg_key || m.id || m.messageId || m.message_id || m.bundleId || m.localId || m.clientId)); }
+  function fileNameOf(m){ return S(m && (m.file_name || m.fileName || m.name || m.filename || (m.bundleManifest && (m.bundleManifest.originalName || m.bundleManifest.fileName)) || 'file')); }
+  function isFolderRow(row){
+    var p=parsePayload(row), kind=lower(row.kind||row.type||p.kind||p.type), source=lower(row.source||p.source), mime=lower(row.mime||row.mime_type||p.mime||p.mime_type);
+    var k=keyOf(row) || S(p.msg_key || p.id || p.messageId);
+    return kind==='folder' || source==='lifeos-family-folder' || mime==='application/x-lifeos-folder' || /^folder_row_/i.test(k);
+  }
+  function stripFolderPrefixName(name){ return S(name||'').replace(/^\s*folder\s*:\s*/i,'').trim(); }
+  function stripFolderRowPrefix(id){ return S(id||'').replace(/^folder_row_/i,'').trim(); }
+  function normalizeFolder(row){
+    var p=parsePayload(row), nested=p._nestedPayload||{};
+    var rawId = row.folder_id || row.folderId || p.folder_id || p.folderId || p.id || nested.folder_id || nested.folderId || row.msg_key || row.id;
+    var rawName = row.folder_name || row.folderName || p.folder_name || p.folderName || p.name || nested.folder_name || nested.folderName || nested.name || row.file_name || row.name || 'Thư mục';
+    var id = stripFolderRowPrefix(rawId) || ('folder_'+now());
+    return {
+      id: id,
+      folderId: id,
+      name: stripFolderPrefixName(rawName) || 'Thư mục',
+      icon: S(row.folder_icon || p.folder_icon || p.folderIcon || p.icon || nested.folder_icon || nested.icon || '📁') || '📁',
+      color: S(row.folder_color || p.folder_color || p.folderColor || p.color || nested.folder_color || nested.color || 'bg-blue-500') || 'bg-blue-500',
+      createdAt: timeOf(row.folder_created_at || row.created_at || p.createdAt || p.created_at || nested.createdAt, now()),
+      updatedAt: timeOf(row.updated_at || p.updatedAt || p.updated_at || nested.updatedAt, now()),
+      msg_key: row.msg_key || ('folder_row_'+id),
+      source: row.source || p.source || 'lifeos-family-folder',
+      raw: row
     };
-    fetchInstalled=true;
-    trace('FETCH_GUARD_INSTALLED',{policy:'strip_bad_d1_headers_redirect_local_smartbox'});
   }
-  function installQuietConsole(){
-    if(consoleQuietInstalled) return;
-    var oldLog=console.log&&console.log.bind(console), oldInfo=console.info&&console.info.bind(console), oldWarn=console.warn&&console.warn.bind(console);
-    function noisy(args){
-      var s=Array.prototype.slice.call(args).map(function(x){return S(x);}).join(' ');
-      return /\[J20R2\]\s*(FIREBASE_TEXT_LISTENER_INSTALLED|FIREBASE_TEXT_SNAPSHOT|HYBRID_TIMELINE_MERGED|D1_LIST_OK|D1_HEALTH_OK)|\[J20R9\]\s*(CHAT_DELETE_ROUTE_PATCHED|SELECTED_DELETE_ROUTE_PATCHED)|smartbox_channels\.json missing or failed; using built-in pack/i.test(s);
+  function isTextRow(row){ return lower(row.kind)==='text' || lower(row.source)==='lifeos-family-text-d1' || /^text_row_/i.test(keyOf(row)); }
+  function isTextFileRow(row){ return lower(row.source)==='lifeos-family-text-file-d1' || /^text_file_/i.test(keyOf(row)); }
+  function rowLooksDeleted(row){ return isRealDeleted(row && (row.deleted_at || row.deletedAt || row.tombstone_reason || row.tombstoneReason)); }
+  function textFromPayload(row,p){ return S((p && (p.text || p.body || p.content)) || row.text || row.body || ''); }
+  function normalizeMessageRow(row){
+    if (!row || typeof row !== 'object' || rowLooksDeleted(row) || isFolderRow(row)) return null;
+    var p=parsePayload(row), nested=p._nestedPayload||{};
+    var k=keyOf(row) || keyOf(p) || ('d1_'+now()+'_'+Math.random().toString(36).slice(2,8));
+    var created = timeOf(row.created_at || row.createdAt || row.timestamp || p.created_at || p.createdAt || nested.createdAt, now());
+    var sender = S(row.sender || p.sender || nested.sender || row.profile_id || p.profile_id || window.viewingUser || window.currentUser || 'family');
+
+    if (isTextRow(row)) {
+      var txt = textFromPayload(row,p);
+      return {
+        id:k, msg_key:k, messageId:k, type:'text', kind:'text', text:txt,
+        sender:sender, profile_id:S(row.profile_id || p.profile_id || sender), timestamp:created, created_at:created, createdAt:created,
+        reply_to: row.reply_to || p.reply_to || null,
+        topic_id: row.topic_id || p.topic_id || null,
+        isPrivate: !!(row.isPrivate || p.isPrivate),
+        source: 'lifeos-family-text-d1', _lifeosSource:'d1_text', _origin_db: row._origin_db || 'TEXT_DB', _row:row, payload:p
+      };
     }
-    console.log=function(){if(noisy(arguments))return; return oldLog&&oldLog.apply(console,arguments);};
-    console.info=function(){if(noisy(arguments))return; return oldInfo&&oldInfo.apply(console,arguments);};
-    console.warn=function(){if(noisy(arguments))return; return oldWarn&&oldWarn.apply(console,arguments);};
-    consoleQuietInstalled=true;
-    trace('QUIET_CONSOLE_INSTALLED',{policy:'suppress_repeated_lifeos_status_logs_only'});
+
+    var mime = S(row.mime || row.mime_type || p.mime || p.mime_type || nested.mime || 'application/octet-stream');
+    var name = S(row.file_name || row.fileName || row.name || p.file_name || p.fileName || p.name || nested.file_name || nested.name || 'file');
+    var kind = S(row.kind || row.type || p.kind || p.type || (/^image\//i.test(mime)?'image':/^video\//i.test(mime)?'video':/^audio\//i.test(mime)?'audio':'file'));
+    var fileId = S(row.telegram_file_id || row.telegramFileId || row.file_id || row.fileId || p.telegram_file_id || p.telegramFileId || p.file_id || p.fileId || nested.telegram_file_id || nested.file_id || '');
+    var tgMsg = S(row.telegram_message_id || row.telegramMessageId || row.telegram_msg_id || row.message_id || p.telegram_message_id || p.telegramMessageId || p.telegram_msg_id || p.message_id || '');
+    var source = S(row.source || p.source || 'telegram_d1_official');
+    var isTextFile = isTextFileRow(row);
+    var body = isTextFile ? textFromPayload(row,p) : '';
+    var type = S(p.type || row.type || kind || 'file');
+    if (isTextFile) type = 'file';
+    else if (/bundle/i.test(kind) || /bundle/i.test(type)) type = type || 'file_bundle';
+    else if (/^image\//i.test(mime)) type = 'image';
+    else if (/^video\//i.test(mime)) type = 'video';
+    else if (/^audio\//i.test(mime)) type = 'audio';
+    else if (!type || type === 'text') type = 'file';
+    var msg = Object.assign({}, p, row, {
+      id:k, msg_key:k, messageId:k,
+      type:type, kind:kind,
+      sender:sender, profile_id:S(row.profile_id || p.profile_id || sender),
+      timestamp:created, created_at:created, createdAt:created,
+      file_name:name, fileName:name, name:name,
+      file_size:N(row.file_size || row.fileSize || row.size || p.file_size || p.fileSize || p.size, body ? body.length : 0),
+      fileSize:N(row.file_size || row.fileSize || row.size || p.file_size || p.fileSize || p.size, body ? body.length : 0),
+      size:N(row.file_size || row.fileSize || row.size || p.file_size || p.fileSize || p.size, body ? body.length : 0),
+      mime:mime, mime_type:mime,
+      source:source, _lifeosSource:'d1', _origin_db:row._origin_db || (isTextFile?'TEXT_DB':'FAMILY_DB'), _row:row, payload:p,
+      uploadStatus:''
+    });
+    if (fileId) { msg.file_id=fileId; msg.fileId=fileId; msg.telegram_file_id=fileId; msg.telegramFileId=fileId; }
+    if (tgMsg) { msg.telegram_message_id=tgMsg; msg.telegramMessageId=tgMsg; msg.telegram_msg_id=tgMsg; }
+    if (isTextFile) {
+      msg._lifeosVirtualTextFile = true;
+      msg._lifeosTextFileBody = body;
+      msg.source = 'lifeos-family-text-file-d1';
+      msg.kind = 'file';
+      msg.type = 'file';
+      msg.mime = msg.mime_type = mime || 'text/plain';
+    }
+    return msg;
   }
+  function uniqueByKey(arr){
+    var map=Object.create(null),out=[];
+    (Array.isArray(arr)?arr:[]).forEach(function(m){ var k=keyOf(m); if(!k) return; if(!map[k]){map[k]=m;out.push(m);} else { var idx=out.indexOf(map[k]); map[k]=m; if(idx>=0) out[idx]=m; } });
+    return out;
+  }
+  function sortTimeline(arr){ return uniqueByKey(arr).sort(function(a,b){ var ta=timeOf(a.timestamp||a.created_at,0), tb=timeOf(b.timestamp||b.created_at,0); return ta-tb || keyOf(a).localeCompare(keyOf(b)); }); }
+  function compactCacheMsg(m){
+    if(!m || typeof m !== 'object') return m;
+    var keys=['id','msg_key','messageId','message_id','localId','clientId','bundleId','sender','profile_id','name','file_name','fileName','filename','file_size','fileSize','size','mime','mime_type','type','kind','source','_lifeosSource','_origin_db','timestamp','createdAt','created_at','updatedAt','updated_at','folderId','folder_id','folderName','folder_name','folder_id','folder_icon','folder_color','file_id','fileId','telegram_file_id','telegramFileId','telegram_unique_id','reply_to','topic_id','isPrivate','private','_lifeosVirtualTextFile','uploadStatus','deleted_at','deletedAt'];
+    var x={}; keys.forEach(function(k){ if(m[k] !== undefined) x[k]=m[k]; });
+    var txt=S(m.text || m.body || ''); if(txt) x.text=txt.length>700 ? txt.slice(0,700) : txt;
+    if(m.payload && typeof m.payload==='object'){
+      var p={}, pp=m.payload;
+      ['text','body','name','file_name','fileName','file_size','fileSize','size','mime','mime_type','type','kind','source','msg_key','id','created_at','createdAt'].forEach(function(k){ if(pp[k]!==undefined) p[k]=pp[k]; });
+      if(S(p.text).length>700) p.text=S(p.text).slice(0,700);
+      if(S(p.body).length>700) p.body=S(p.body).slice(0,700);
+      if(Object.keys(p).length) x.payload=p;
+    }
+    return x;
+  }
+  function compactCacheList(a){ return (Array.isArray(a)?a:[]).filter(Boolean).map(compactCacheMsg); }
+  function applyTimeline(rows, reason){
+    rows = Array.isArray(rows) ? rows : [];
+    var folders = [], messages = [];
+    rows.forEach(function(row){
+      if (rowLooksDeleted(row)) return;
+      if (isFolderRow(row)) { folders.push(normalizeFolder(row)); return; }
+      var m = normalizeMessageRow(row); if (m) messages.push(m);
+    });
+    var folderMap=Object.create(null); folders.forEach(function(f){ folderMap[S(f.id)] = f; });
+    folders = Object.keys(folderMap).map(function(k){ return folderMap[k]; }).sort(function(a,b){ return timeOf(a.createdAt,0)-timeOf(b.createdAt,0) || S(a.name).localeCompare(S(b.name)); });
+    messages = sortTimeline(messages);
+    STATE.messages = messages; STATE.folders = folders;
+    STATE.textRows = messages.filter(function(m){return m.source==='lifeos-family-text-d1';}).length;
+    STATE.textFileRows = messages.filter(function(m){return m.source==='lifeos-family-text-file-d1';}).length;
+    STATE.familyRows = messages.filter(function(m){return m._origin_db==='FAMILY_DB';}).length;
+    STATE.folderRows = folders.length;
+    STATE.lastRefreshAt = now(); STATE.lastRefreshReason = reason || ''; STATE.refreshCount++;
+
+    window.chatHistory = messages.slice();
+    var ce = window.ChatEngine;
+    if (ce) {
+      ce.chatFolders = folders.slice();
+      if (ce.currentTopic !== 'all' && !folders.some(function(f){ return S(f.id)===S(ce.currentTopic); })) ce.currentTopic = 'all';
+      try { if (typeof ce.renderFolders === 'function') ce.renderFolders(); } catch(e) {}
+    }
+    var compactMessages=compactCacheList(messages), compactFolders=compactCacheList(folders);
+    writeJSON(LS_CACHE, {phase:PHASE, at:now(), reason:reason||'', compact:true, m:compactMessages, f:compactFolders, counts:{text:STATE.textRows,textFile:STATE.textFileRows,family:STATE.familyRows,folders:STATE.folderRows,total:messages.length}});
+    try { localStorage.setItem(LS_SHARED, JSON.stringify({m:compactMessages, f:compactFolders, d1TextOfficial:true, compact:true, phase:PHASE, at:now(), reason:reason||''})); } catch(e) {}
+    trace('D1_V3_TIMELINE_APPLIED', {reason:reason||'', total:messages.length, textRows:STATE.textRows, textFileRows:STATE.textFileRows, familyRows:STATE.familyRows, folderRows:STATE.folderRows});
+    return {messages:messages, folders:folders};
+  }
+  function textBase(){ return String(window.LIFEOS_FAMILY_TEXT_D1_V3_BASE || TEXT_V3_BASE).replace(/\/+$/,''); }
   async function api(path,opt){
-    opt=opt||{}; var method=S(opt.method||'GET').toUpperCase(); var url=/^https?:\/\//i.test(path)?path:base()+path;
-    var headers={'Accept':'application/json'}; if(method!=='GET') headers['Content-Type']='application/json';
-    var init={method:method,cache:'no-store',headers:headers}; if(opt.body!==undefined) init.body=JSON.stringify(opt.body);
-    var res=await fetch(url,init); var txt=await res.text(); var data=null;
-    try{data=txt?JSON.parse(txt):{};}catch(e){data={ok:false,error:'invalid_json',text:txt.slice(0,600)};}
-    if(!res.ok || (data&&data.ok===false)){var er=new Error((data&&(data.error||data.message))||('HTTP '+res.status)); er.status=res.status; er.data=data; er.url=url; throw er;}
+    opt=opt||{};
+    var res=await fetch(textBase()+path, {method:opt.method||'GET', cache:'no-store', headers:Object.assign({'Content-Type':'application/json'}, opt.headers||{}), body:opt.body!==undefined?JSON.stringify(opt.body):undefined});
+    var txt=await res.text(), data={};
+    try{ data=txt?JSON.parse(txt):{}; }catch(e){ data={ok:false,error:'invalid_json',responseText:txt.slice(0,800)}; }
+    if(!res.ok || data.ok===false){ var er=new Error(data.error||data.message||('HTTP '+res.status)); er.status=res.status; er.data=data; throw er; }
     return data;
   }
-  function arrFrom(d){return Array.isArray(d)?d:(Array.isArray(d&&d.data)?d.data:(Array.isArray(d&&d.rows)?d.rows:(Array.isArray(d&&d.items)?d.items:(Array.isArray(d&&d.messages)?d.messages:[]))));}
-  function parsePayload(row){
-    var p={}; var raw=row&&(row.payload_json||row.payloadJson||row.payload);
-    if(typeof raw==='string'){try{p=JSON.parse(raw);}catch(e){p={};}} else if(raw&&typeof raw==='object') p=raw;
-    return Object.assign({}, p, row||{});
+  function timelineSig(rows){
+    rows = Array.isArray(rows) ? rows : [];
+    var live = rows.filter(function(r){ return !rowLooksDeleted(r); }).map(function(r){
+      var p = parsePayload(r);
+      return [
+        keyOf(r) || keyOf(p),
+        S(r.kind || p.kind || r.type || p.type),
+        S(r.source || p.source),
+        S(r.file_name || r.fileName || p.file_name || p.fileName || p.name),
+        S(r.file_size || r.fileSize || r.size || p.file_size || p.fileSize || p.size),
+        S(r.created_at || r.createdAt || r.timestamp || p.created_at || p.createdAt),
+        isRealDeleted(r.deleted_at || r.deletedAt || r.tombstone_reason || r.tombstoneReason) ? 'D' : 'L'
+      ].join('|');
+    }).sort();
+    return live.join('\n');
   }
-  function isTextTombstoneRow(row){
-    var p=parsePayload(row); var kind=S(p.kind||p.type).toLowerCase(), mime=S(p.mime).toLowerCase(), source=S(p.source).toLowerCase(), key=S(p.msg_key||p.id);
-    return kind==='text_tombstone' || mime==='application/x-lifeos-text-tombstone' || source==='lifeos-text-tombstone' || /^text_tombstone_/i.test(key);
-  }
-  function targetIdFromRow(row){
-    var p=parsePayload(row); var id=S(p.targetTextId||p.target_text_id||p.targetId||p.target_id||p.textId||p.text_id||p.originalId||p.original_id||'');
-    if(!id){ var k=S(p.msg_key||p.id||''); id=k.replace(/^text_tombstone_/i,''); }
-    return normId(id);
-  }
-  async function reloadTextTombstones(reason){
+  async function refresh(reason, force){
+    if (STATE.loading && !force) return false;
+    STATE.loading = true;
     try{
-      var d=await api(D1_MESSAGES,{method:'GET'}); var rows=arrFrom(d); var count=0;
-      rows.forEach(function(r){ if(isTextTombstoneRow(r)){ var id=targetIdFromRow(r); if(id){ d1Tombstones[id]=Object.assign({id:id,source:'d1',reason:reason||'reload'}, parsePayload(r)); count++; } } });
-      saveTombMap(); var changed=filterHistory('reload_d1_text_tombstones_'+(reason||''));
-      if(changed && window.ChatEngine&&window.ChatEngine.render) try{window.ChatEngine.render();}catch(e){}
-      trace('TEXT_TOMBSTONES_RELOADED',{reason:reason||'',count:count,total:Object.keys(d1Tombstones).length});
-      return d1Tombstones;
-    }catch(e){trace('TEXT_TOMBSTONES_RELOAD_FAILED',{reason:reason||'',error:S(e&&e.message||e),status:e.status||0}); return d1Tombstones;}
-  }
-  function tombstoneBody(msg){
-    var id=keyOf(msg); var ts=now(); var preview=cleanText(msg&& (msg.text||msg.message||msg.content||''));
-    var key='text_tombstone_'+id;
-    var payload={targetTextId:id,target_text_id:id,originalId:id,preview:preview,reason:'user_delete_text_d1_overlay_firebase_quota_safe',createdAt:ts,phase:PHASE};
-    return {
-      msg_key:key,id:key,messageId:key,message_id:key,
-      type:'text_tombstone',kind:'text_tombstone',sender:'lifeos-system',profile_id:'lifeos-family-clean-owner',
-      file_name:'Text tombstone: '+id,file_size:0,mime:'application/x-lifeos-text-tombstone',topic_id:'text-delete-overlay',
-      created_at:ts,updated_at:ts,source:'lifeos-text-tombstone',target_text_id:id,
-      payload_json:JSON.stringify(payload)
-    };
-  }
-  async function writeD1TextTombstone(msg){
-    var id=keyOf(msg); if(!id) throw new Error('missing_text_id');
-    if(d1Tombstones[id]) return {already:true,id:id};
-    var body=tombstoneBody(msg);
-    await api('/api/family/messages',{method:'POST',body:body});
-    await reloadTextTombstones('readback_after_text_delete');
-    if(!d1Tombstones[id]){
-      // readback may be filtered by Worker in rare cases; keep local tombstone only after POST success.
-      d1Tombstones[id]={id:id,source:'d1_post_ok_local_readback_pending',preview:cleanText(msg.text||msg.message||'')};
-      saveTombMap();
-    }
-    trace('TEXT_D1_TOMBSTONE_OK',{id:id,readback:!!d1Tombstones[id]});
-    return {ok:true,id:id};
-  }
-  function firebaseRef(ce){
-    if(ce&&ce.dbRef&&typeof ce.dbRef.set==='function')return ce.dbRef;
-    try{var db=window.FirebaseSync&&window.FirebaseSync._d;if(db&&db.collection)return db.collection('LifeOS_Shared').doc('family_chat');}catch(e){}
-    return null;
-  }
-  function cleanDeep(v){
-    if(v===undefined||typeof v==='function')return undefined;
-    if(v===null||typeof v!=='object')return v;
-    if(v instanceof Date)return v.toISOString();
-    if(Array.isArray(v))return v.map(cleanDeep).filter(function(x){return x!==undefined;});
-    var o={};Object.keys(v).forEach(function(k){if(/^_row$|^_lifeos/i.test(k))return;var cv=cleanDeep(v[k]);if(cv!==undefined)o[k]=cv;});return o;
-  }
-  function timeout(ms){return new Promise(function(_,rej){setTimeout(function(){var e=new Error('firebase_delete_background_timeout_or_quota'); e.code='lifeos-background-timeout'; rej(e);},ms);});}
-  async function tryFirebaseCleanupBackground(ce,id){
-    if(bgFirebaseBusy[id]) return; bgFirebaseBusy[id]=true;
-    try{
-      var ref=firebaseRef(ce); if(!ref) throw new Error('firebase_dbref_missing');
-      var before=Array.isArray(window.chatHistory)?window.chatHistory.slice():[];
-      // The visible history is already tombstone-filtered. Preserve this clean list in Firebase when quota allows.
-      var safe=cleanDeep(before.filter(function(m){return !(isText(m)&&isTombstoned(m));}));
-      await Promise.race([ref.set({messages:safe,updatedAt:now(),textD1TombstoneCleanup:{phase:PHASE,targetId:id,at:now()}},{merge:true}), timeout(1800)]);
-      trace('TEXT_FIREBASE_BACKGROUND_CLEAN_OK',{id:id,count:safe.length});
-      toast('Đã dọn thêm Firebase khi quota cho phép','ph-check-circle');
+      var d = await api('/api/family/messages?since=0&limit=1000&includeFolders=1&includeText=1');
+      var rows = Array.isArray(d.data) ? d.data : [];
+      var sig = timelineSig(rows);
+      var unchanged = !!STATE.lastTimelineSig && STATE.lastTimelineSig === sig;
+      STATE.lastRefreshAt = now();
+      STATE.lastRefreshReason = reason || 'refresh';
+      var forceReason = S(reason || '');
+      var mustRender = !!force && /^(after_send_text_|after_delete_text_|install|load_|initFirebase_d1_text|manual|r37_|r38_|r39_)/i.test(forceReason);
+      if (unchanged && !mustRender) {
+        STATE.skippedRenders = (STATE.skippedRenders || 0) + 1;
+        STATE.lastError = '';
+        return {ok:true, unchanged:true, skippedRender:true, reason:reason||'refresh'};
+      }
+      STATE.lastTimelineSig = sig;
+      applyTimeline(rows, reason || 'refresh');
+      renderOfficial(reason || 'refresh');
+      STATE.lastRenderAt = now();
+      STATE.lastError = '';
+      return true;
     }catch(e){
-      trace('TEXT_FIREBASE_BACKGROUND_CLEAN_DEFERRED',{id:id,error:S(e&&e.message||e).slice(0,300),code:S(e&&e.code)});
-    }finally{bgFirebaseBusy[id]=false;}
+      STATE.lastError = S(e && e.message || e);
+      trace('D1_V3_TIMELINE_REFRESH_FAILED', {reason:reason||'', error:STATE.lastError, status:e.status||0}, 'error');
+      try { window.showToast && window.showToast('Danh sách chat lỗi: '+STATE.lastError, 'ph-warning-circle'); }catch(_e){}
+      return false;
+    }finally{ STATE.loading = false; }
   }
-  function makeDeleteHandler(ce){
-    var handler=async function(){
-      var msg=selectedMessage(); closeMenu(ce);
-      if(!msg||!isText(msg)){ toast('Xóa file/media dùng tuyến Telegram/D1 riêng. Guard này chỉ xử lý text.', 'ph-info'); return false; }
-      var id=keyOf(msg), preview=cleanText(msg.text||msg.message||'').slice(0,100);
-      if(!window.confirm('Xóa/ẩn text này khỏi Family Chat bằng D1 tombstone chính thức?\n"'+preview+'"')){closeMenu(ce);return false;}
-      closeMenu(ce);
+  function baseRenderFn(ce){
+    if (!ce) return null;
+    if (typeof ce.__r35BaseRender === 'function') return ce.__r35BaseRender;
+    if (typeof ce.__j20r6BaseRender === 'function') ce.__r35BaseRender = ce.__j20r6BaseRender;
+    else if (typeof ce.__j19gBaseRender === 'function') ce.__r35BaseRender = ce.__j19gBaseRender;
+    else if (typeof ce.render === 'function') ce.__r35BaseRender = ce.render.bind(ce);
+    return ce.__r35BaseRender || null;
+  }
+  function chatDomReadyForR35(){
+    try{ var c=document.getElementById('chat-messages'); return !!(c && c.isConnected); }catch(e){ return false; }
+  }
+  function renderOfficial(reason){
+    var ce=window.ChatEngine; if(!ce) return false;
+    var rn=S(reason||'');
+    var t=now();
+    if(!chatDomReadyForR35() && !/after_send_text_|after_delete_text_|manual|user|switch|chat/i.test(rn)) return false;
+    if((window.__lifeosR35RenderBackoffUntil||0)>t && !/after_send_text_|after_delete_text_|manual|user|switch|chat/i.test(rn)) return false;
+    window.chatHistory = (STATE.messages || []).slice();
+    ce.chatFolders = (STATE.folders || []).slice();
+    try { if (typeof ce.renderFolders === 'function') ce.renderFolders(); } catch(e) {}
+    var br = baseRenderFn(ce);
+    try{
+      ce.__r35InsideRender = true;
+      if (br) br();
+      else if (typeof ce.render === 'function') ce.render();
+      STATE.renderFailCount = 0;
+      STATE.lastRenderError = '';
+    }catch(e){
+      var msg=S(e && (e.message || e.name) || e);
+      STATE.renderFailCount = (STATE.renderFailCount||0) + 1;
+      STATE.lastRenderError = msg;
+      window.__lifeosR35RenderBackoffUntil = t + Math.min(12000, 1200 * STATE.renderFailCount);
+      var sig=rn+'|'+msg;
+      if(window.__lifeosR35LastRenderFailSig!==sig || t-(window.__lifeosR35LastRenderFailAt||0)>10000){
+        window.__lifeosR35LastRenderFailSig=sig; window.__lifeosR35LastRenderFailAt=t;
+        trace('R35_RENDER_FAILED_ONCE', {reason:rn, error:msg, count:STATE.renderFailCount, backoffMs:Math.max(0,(window.__lifeosR35RenderBackoffUntil||0)-t)}, 'warn');
+      }
+    }
+    finally{ ce.__r35InsideRender = false; }
+    return true;
+  }
+  function killChatFirebaseListener(reason){
+    var ce=window.ChatEngine;
+    try{
+      if (ce && typeof ce.unsubscribe === 'function') { ce.unsubscribe(); STATE.firebaseListenerKills++; trace('FIREBASE_TEXT_LISTENER_UNSUBSCRIBED', {reason:reason||'', count:STATE.firebaseListenerKills}, 'warn'); }
+    }catch(e){ trace('FIREBASE_TEXT_LISTENER_UNSUBSCRIBE_WARN', {reason:reason||'', error:S(e&&e.message||e)}, 'warn'); }
+    if (ce) { ce.unsubscribe = null; ce.dbRef = null; ce.__j20r6ListenerOwner = 'R35_DISABLED'; ce.__j19x21SnapshotGuard = true; }
+    STATE.firebaseTextDisabled = true;
+  }
+  function patchChatEngine(){
+    var ce=window.ChatEngine; if(!ce || ce.__r35D1TextOfficialPatched) return false;
+    ce.__r35D1TextOfficialPatched = true;
+    baseRenderFn(ce);
+    ce.__r35OldSendText = typeof ce.sendText === 'function' ? ce.sendText.bind(ce) : null;
+    ce.__r35OldDeleteMsg = typeof ce.deleteMsg === 'function' ? ce.deleteMsg.bind(ce) : null;
+    ce.__r35OldDownloadChatFile = typeof ce.downloadChatFile === 'function' ? ce.downloadChatFile.bind(ce) : null;
+    ce.__r35OldCopyFileLink = typeof ce.copyFileLink === 'function' ? ce.copyFileLink.bind(ce) : null;
+    ce.__r35OldRenderFileCard = typeof ce.renderFileCard === 'function' ? ce.renderFileCard.bind(ce) : null;
+
+    ce.initFirebase = function(){
+      killChatFirebaseListener('initFirebase_disabled_for_text_d1');
+      refresh('initFirebase_d1_text', true);
+      return true;
+    };
+    ce.saveAndSync = function(){
+      try { localStorage.setItem(LS_SHARED, JSON.stringify({m:(window.chatHistory||[]), f:(this.chatFolders||STATE.folders||[]), d1TextOfficial:true, phase:PHASE, at:now(), localOnly:true})); } catch(e) {}
+      trace('SAVE_LOCAL_ONLY_NO_FIREBASE_TEXT', {messages:(window.chatHistory||[]).length, folders:(this.chatFolders||[]).length});
+      return true;
+    };
+    ce.render = function(){
+      if (ce.__r35InsideRender) { var br=baseRenderFn(ce); return br ? br() : undefined; }
+      window.chatHistory = (STATE.messages || window.chatHistory || []).slice();
+      return renderOfficial('ce.render');
+    };
+    ce.sendText = async function(text){
+      text = S(text).trim(); if(!text) return false;
+      var isPriv = document.getElementById('chat-private-toggle')?.dataset.private === '1';
+      var sender = (this.getKey && this.getKey()) || window.viewingUser || window.currentUser || 'family';
       try{
-        toast('Đang ghi D1 tombstone cho text...','ph-cloud-arrow-up');
-        await writeD1TextTombstone(msg);
-        filterHistory('delete_text_d1_tombstone_'+id);
-        try{ce&&ce.render&&ce.render();}catch(e){}
-        toast('Đã ẩn text bằng D1 tombstone. Firebase sẽ dọn khi hết quota.','ph-trash');
-        tryFirebaseCleanupBackground(ce,id);
-        return true;
+        try{ this.setUploadStatus && this.setUploadStatus('Đang gửi text vào D1...', 'info', false); }catch(_e){}
+        var res = await api('/api/family/text', {method:'POST', body:{sender:sender, profile_id:sender, text:text, created_at:now(), isPrivate:isPriv, topic_id:this.currentTopic !== 'all' ? this.currentTopic : null, reply_to:this.replyingTo || null}});
+        STATE.lastSend = res;
+        this.cancelReply && this.cancelReply();
+        await refresh('after_send_text_'+S(res.msg_key), true);
+        try{ this.setUploadStatus && this.setUploadStatus(res.packed_as_file ? 'Đã gửi văn bản dài' : 'Đã gửi tin nhắn', 'done', true); }catch(_e){}
+        try{ window.showToast && window.showToast(res.packed_as_file ? 'Đã gửi văn bản dài thành file' : 'Đã gửi tin nhắn', 'ph-check-circle'); }catch(_e){}
+        trace('D1_TEXT_SEND_OK', {msg_key:res.msg_key, packed_as_file:!!res.packed_as_file, wrote_db:res.wrote_db||'TEXT_DB'});
+        return res;
       }catch(e){
-        trace('TEXT_D1_TOMBSTONE_FAILED',{id:id,error:S(e&&e.message||e),status:e.status||0});
-        toast('Chưa xóa được text: D1 tombstone lỗi, giữ nguyên để tránh ghost.','ph-warning-circle');
+        STATE.lastError = S(e&&e.message||e);
+        trace('D1_TEXT_SEND_FAILED', {error:STATE.lastError, status:e.status||0}, 'error');
+        try{ this.setUploadStatus && this.setUploadStatus('Gửi tin nhắn lỗi: '+STATE.lastError, 'error', false); }catch(_e){}
+        try{ window.showToast && window.showToast('Gửi tin nhắn lỗi: '+STATE.lastError, 'ph-warning-circle'); }catch(_e){}
         return false;
       }
     };
-    handler.__phase=PHASE; handler.__lifeosTextD1TombstoneGuard=true; return handler;
-  }
-  function patchChatEngine(reason){
-    var ce=window.ChatEngine; if(!ce) return false;
-    if(!renderPatched && ce.render){
-      var oldRender=ce.render.bind(ce);
-      ce.render=function(){
-        filterHistory('before_render');
-        var ret=oldRender.apply(ce,arguments);
-        setTimeout(function(){filterHistory('after_render');},0);
-        setTimeout(function(){scrubTombstoneDom('after_render_late');},80);
-        return ret;
-      };
-      ce.render.__phase=PHASE; renderPatched=true;
-    }
-    if(!(ce.deleteMsg&&ce.deleteMsg.__phase===PHASE)){ ce.deleteMsg=makeDeleteHandler(ce); deleteReclaimCount++; }
-    deleteInstallCount++;
+    ce.deleteMsg = async function(){
+      var id = document.getElementById('chat-msg-active-id')?.value;
+      var msg = (window.chatHistory || []).find(function(m){ return S(m.id)===S(id) || S(m.msg_key)===S(id); });
+      if(!msg) return false;
+      var k=keyOf(msg);
+      var isD1Text = msg.source === 'lifeos-family-text-d1' || msg.source === 'lifeos-family-text-file-d1' || /^text_(row|file)_/i.test(k);
+      if(!isD1Text) return ce.__r35OldDeleteMsg ? ce.__r35OldDeleteMsg() : false;
+      if(!window.confirm('Xóa tin nhắn này khỏi mọi máy/profile?')) { this.closeMsgMenu && this.closeMsgMenu(); return false; }
+      try{
+        var del = await api('/api/family/text/delete', {method:'POST', body:{msg_key:k, reason:'r35_user_delete_text'}});
+        STATE.lastDelete = del;
+        this.closeMsgMenu && this.closeMsgMenu();
+        await refresh('after_delete_text_'+k, true);
+        try{ window.showToast && window.showToast('Đã xóa tin nhắn', 'ph-trash'); }catch(_e){}
+        trace('D1_TEXT_DELETE_OK', {msg_key:k, deleted_at:del.deleted_at, wrote_db:del.wrote_db||'TEXT_DB'});
+        return del;
+      }catch(e){
+        STATE.lastError=S(e&&e.message||e);
+        trace('D1_TEXT_DELETE_FAILED', {msg_key:k, error:STATE.lastError, status:e.status||0}, 'error');
+        try{ window.showToast && window.showToast('Xóa tin nhắn lỗi: '+STATE.lastError, 'ph-warning-circle'); }catch(_e){}
+        return false;
+      }
+    };
+    ce.renderFileCard = function(m){
+      if (m && m._lifeosVirtualTextFile) {
+        var old = this.__r35OldRenderFileCard;
+        var html = old ? old(m) : '';
+        html = html.replace(/Tải file/g, 'Tải TXT').replace(/Sao chép link/g, 'Sao chép nội dung');
+        return html || '<div class="chat-file-card rounded-2xl p-3 bg-white border border-slate-200">Văn bản dài</div>';
+      }
+      return this.__r35OldRenderFileCard ? this.__r35OldRenderFileCard(m) : '';
+    };
+    ce.downloadChatFile = async function(id){
+      var m=(window.chatHistory||[]).find(function(x){ return S(x.id)===S(id) || S(x.msg_key)===S(id); });
+      if(m && m._lifeosVirtualTextFile){
+        var body = await getTextFileBody(m);
+        var meta = this.getFileMeta ? this.getFileMeta(m) : {name:fileNameOf(m)};
+        var blob = new Blob([body], {type: m.mime || 'text/plain;charset=utf-8'});
+        var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=meta.name || 'lifeos_text.txt'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){try{URL.revokeObjectURL(a.href);}catch(e){}},1200);
+        try{ window.showToast && window.showToast('Đã tải văn bản lưu trữ', 'ph-download-simple'); }catch(_e){}
+        return true;
+      }
+      return this.__r35OldDownloadChatFile ? this.__r35OldDownloadChatFile(id) : false;
+    };
+    ce.copyFileLink = async function(id){
+      var m=(window.chatHistory||[]).find(function(x){ return S(x.id)===S(id) || S(x.msg_key)===S(id); });
+      if(m && m._lifeosVirtualTextFile){
+        var body = await getTextFileBody(m);
+        try{ await navigator.clipboard.writeText(body); window.showToast && window.showToast('Đã sao chép nội dung văn bản lưu trữ', 'ph-copy'); return true; }
+        catch(e){ window.showToast && window.showToast('Không sao chép được nội dung', 'ph-warning-circle'); return false; }
+      }
+      return this.__r35OldCopyFileLink ? this.__r35OldCopyFileLink(id) : false;
+    };
+    trace('CHATENGINE_R35_D1_TEXT_PATCHED', {textWorker:TEXT_V3_BASE, fileWorker:window.LIFEOS_FAMILY_D1_API_BASE});
     return true;
   }
-  function install(reason){ installFetchGuard(); installQuietConsole(); patchChatEngine(reason); filterHistory('install_'+(reason||'')); setTimeout(function(){scrubTombstoneDom('install_late_'+(reason||''));},120); }
-
-  window.LifeOSJ20R34TextDeleteGuard={
-    phase:PHASE,
-    install:install,
-    reloadTombstones:reloadTextTombstones,
-    filter:filterHistory,
-    selectedMessage:selectedMessage,
-    summary:function(){
-      var vis=[];
-      try{vis=[].slice.call(document.querySelectorAll('body *')).map(function(el){return cleanText(el.innerText||el.textContent||'');}).filter(function(t){return /^Text tombstone:/i.test(t);}).slice(0,10);}catch(e){}
-      return {phase:PHASE,fetchGuard:fetchInstalled,consoleQuiet:consoleQuietInstalled,deleteGuard:!!(window.ChatEngine&&window.ChatEngine.deleteMsg&&window.ChatEngine.deleteMsg.__phase===PHASE),renderFilter:renderPatched,installCount:deleteInstallCount,reclaimCount:deleteReclaimCount,tombstoneCount:Object.keys(d1Tombstones).length,tombstones:Object.keys(d1Tombstones).slice(0,30),visibleTombstoneText:vis,traces:readJSON(LS_TRACE,[]).slice(-25)};
-    }
+  async function getTextFileBody(m){
+    if (m && S(m._lifeosTextFileBody)) return S(m._lifeosTextFileBody);
+    var k=keyOf(m); if(!k) return '';
+    try{
+      var d=await api('/api/family/text/content?msg_key='+encodeURIComponent(k));
+      var txt=S(d.text || (d.row && d.row.payload && (d.row.payload.text || d.row.payload.body)) || '');
+      if(m) m._lifeosTextFileBody=txt;
+      return txt;
+    }catch(e){ trace('TEXT_FILE_CONTENT_READ_FAILED', {msg_key:k, error:S(e&&e.message||e)}, 'warn'); return S(m && (m.text || m.body || '')); }
+  }
+  function patchStatusText(){
+    try{
+      var el=document.getElementById('chat-status');
+      if(el) el.textContent='Chat gia đình';
+    }catch(e){}
+  }
+  function install(){
+    patchStatusText();
+    patchChatEngine();
+    killChatFirebaseListener('r35_install');
+    refresh('install', true);
+    return true;
+  }
+  function poll(){
+    patchChatEngine();
+    killChatFirebaseListener('r35_poll_guard');
+    var visible = document.visibilityState !== 'hidden';
+    var ms = visible ? POLL_MS_ACTIVE : POLL_MS_HIDDEN;
+    if (now() - STATE.lastRefreshAt >= ms) refresh('poll_'+(visible?'active':'hidden'), false);
+  }
+  window.LifeOSR35D1TextOfficial = {
+    phase: PHASE,
+    state: STATE,
+    refresh: function(){ return refresh('manual', true); },
+    install: install,
+    killFirebaseText: killChatFirebaseListener,
+    trace: function(){ return readJSON(LS_TRACE,[]); },
+    summary: function(){ return {phase:PHASE, state:STATE, textWorker:TEXT_V3_BASE, familyMediaWorker:window.LIFEOS_FAMILY_D1_API_BASE, firebaseTextDisabled:true, cache:readJSON(LS_CACHE,{})}; },
+    copy: function(){ var txt=JSON.stringify(this.summary(),null,2); try{navigator.clipboard&&navigator.clipboard.writeText(txt);}catch(e){} console.log('=== R35 D1 TEXT OFFICIAL ===', this.summary()); return txt; }
   };
+  window.copyR35D1TextOfficial = function(){ return window.LifeOSR35D1TextOfficial.copy(); };
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){install('domcontentloaded'); reloadTextTombstones('domcontentloaded');},{once:true});
-  else { install('immediate'); reloadTextTombstones('immediate'); }
-  window.addEventListener('load',function(){
-    [200,1200,3500,8000].forEach(function(ms){setTimeout(function(){install('late_'+ms); if(ms===1200||ms===8000) reloadTextTombstones('late_'+ms);},ms);});
-  },{once:true});
-  var reclaimLeft=12;
-  var t=setInterval(function(){
-    if(--reclaimLeft<0){clearInterval(t);return;}
-    if(!(window.ChatEngine&&window.ChatEngine.deleteMsg&&window.ChatEngine.deleteMsg.__phase===PHASE)) install('reclaim');
-    filterHistory('reclaim_filter');
-  },2500);
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, {once:true}); else install();
+  window.addEventListener('load', function(){ setTimeout(install,100); setTimeout(function(){refresh('load_check_3s',false);},3000); }, {once:true});
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') poll(); });
+  window.addEventListener('focus', function(){ poll(); });
+  var guard=setInterval(poll, 10000);
+  setTimeout(function(){ try{STATE.r38GuardStillActive=true;}catch(e){} }, 20000);
 })();
 </script>
-<!-- Pha14J20R34_TextDeleteD1TombstoneNoCard_R27Base - END -->
+<!-- Pha14J20R35_D1TextOfficial_V3_2DBMerge_R27Base - END -->
+
+<style id="lifeos-j20r37-long-text-dom-guard-css">
+.lifeos-r37-textfile-row{width:100%!important;max-width:100%!important;margin-bottom:.85rem;display:flex;gap:.7rem;align-items:flex-start}
+.lifeos-r37-textfile-row.lifeos-j19g-me{justify-content:flex-end}
+.lifeos-r37-textfile-card{width:100%!important;max-width:100%!important;border:1px solid #bfdbfe;background:linear-gradient(135deg,#eff6ff 0%,#ffffff 60%,#f8fafc 100%);border-radius:22px;padding:13px;box-shadow:0 10px 28px rgba(15,23,42,.07);display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;position:relative;overflow:hidden}
+.lifeos-r37-textfile-icon{width:46px;height:46px;border-radius:18px;background:#2563eb;color:white;display:flex;align-items:center;justify-content:center;font-size:25px;box-shadow:0 8px 20px rgba(37,99,235,.25)}
+.lifeos-r37-textfile-main{min-width:0;display:flex;flex-direction:column;gap:6px}
+.lifeos-r37-textfile-kicker{font-size:10px;font-weight:1000;letter-spacing:.04em;text-transform:uppercase;color:#2563eb;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.lifeos-r37-textfile-title{font-size:14px;font-weight:1000;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lifeos-r37-textfile-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:10px;font-weight:900;color:#64748b}
+.lifeos-r37-textfile-meta span{border:1px solid #dbeafe;background:white;border-radius:999px;padding:3px 7px}
+.lifeos-r37-textfile-preview{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:11px;line-height:1.45;color:#334155;background:rgba(255,255,255,.82);border:1px dashed #bfdbfe;border-radius:14px;padding:9px;max-height:74px;overflow:hidden;white-space:pre-wrap;word-break:break-word}
+.lifeos-r37-textfile-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px}
+.lifeos-r37-textfile-actions button{border-radius:12px;border:1px solid #cbd5e1;background:white;color:#334155;padding:8px 10px;font-size:11px;font-weight:1000;display:inline-flex;gap:5px;align-items:center;box-shadow:0 2px 7px rgba(15,23,42,.04)}
+.lifeos-r37-textfile-actions button.r37-primary{background:#2563eb;color:white;border-color:#2563eb}
+.lifeos-r37-textfile-actions button.r37-danger{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+#lifeos-r37-textfile-viewer{position:fixed;inset:0;z-index:99999999;background:rgba(15,23,42,.58);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:14px}
+#lifeos-r37-textfile-viewer.open{display:flex}
+#lifeos-r37-textfile-viewer .r37-panel{width:min(980px,96vw);height:min(82vh,780px);background:#fff;border-radius:24px;box-shadow:0 26px 90px rgba(15,23,42,.35);border:1px solid #dbeafe;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden}
+#lifeos-r37-textfile-viewer .r37-head{padding:13px 16px;background:linear-gradient(135deg,#eff6ff,#fff);border-bottom:1px solid #dbeafe;display:flex;gap:10px;align-items:center;justify-content:space-between}
+#lifeos-r37-textfile-viewer .r37-name{font-size:15px;font-weight:1000;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:64vw}
+#lifeos-r37-textfile-viewer .r37-meta{font-size:11px;font-weight:900;color:#64748b;margin-top:2px}
+#lifeos-r37-textfile-viewer textarea{width:100%;height:100%;border:0;resize:none;outline:none;padding:16px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:13px;line-height:1.55;color:#0f172a;background:#f8fafc;white-space:pre;tab-size:2}
+#lifeos-r37-textfile-viewer .r37-foot{padding:12px 14px;border-top:1px solid #dbeafe;background:#f8fafc;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#lifeos-r37-textfile-viewer button{border-radius:13px;padding:9px 11px;font-size:12px;font-weight:1000;border:1px solid #cbd5e1;background:#fff;color:#334155}
+#lifeos-r37-textfile-viewer button.r37-primary{background:#2563eb;color:#fff;border-color:#2563eb}
+#lifeos-r37-textfile-viewer button.r37-danger{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+</style>
+<script id="lifeos-j20r37-long-text-dom-guard-js">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R37LongTextDomGuardInstalled) return;
+  window.__lifeosJ20R37LongTextDomGuardInstalled = true;
+  var PHASE='Pha14J20R38_QuietStableLongText_NoJump_R37Base';
+  var BASE='https://lifeos-family-d1-text-api.tunhienhieuchuyen.workers.dev';
+  var LS_TRACE='lifeos_j20r37_long_text_dom_guard_trace_v1';
+  var transforming=false, renderWrapped=false; var traceSeen=Object.create(null);
+  function S(v){return v==null?'':String(v);}
+  function N(v,d){var n=Number(v);return Number.isFinite(n)?Math.trunc(n):(d||0);}
+  function esc(s){return S(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function now(){return Date.now();}
+  function trace(type,data,level){try{var k=String(type)+'|'+(data&&data.msg_key||'');var quiet=/^(DOM_ROW_REPLACED|PATCH_CHATENGINE_OK)$/.test(String(type));if(!quiet||!traceSeen[k]){traceSeen[k]=true;(console[level||'info']||console.log)('[R38_LONG_TEXT_STABLE]',type,data||{});}}catch(e){} try{var a=JSON.parse(localStorage.getItem(LS_TRACE)||'[]');a.push(Object.assign({phase:PHASE,type:type,at:now()},data||{}));localStorage.setItem(LS_TRACE,JSON.stringify(a.slice(-300)));}catch(e){} }
+  function toast(t,icon){try{window.showToast&&window.showToast(t,icon||'ph-check-circle');}catch(e){}}
+  function keyOf(m){return S(m&&(m.msg_key||m.id||m.messageId||m.message_id||m.localId||m.clientId||m.bundleId));}
+  function parsePayload(m){
+    if(!m||typeof m!=='object')return {};
+    var p=(m.payload&&typeof m.payload==='object')?Object.assign({},m.payload):{};
+    var raw=m.payload_json||(m._row&&m._row.payload_json)||(p&&p.payload_json)||'';
+    if(raw&&typeof raw==='string'){try{p=Object.assign({},JSON.parse(raw),p);}catch(e){}}
+    if(p.payload_json&&typeof p.payload_json==='string'){try{p=Object.assign({},JSON.parse(p.payload_json),p);}catch(e){}}
+    return p||{};
+  }
+  function isTextFile(m){
+    if(!m||typeof m!=='object')return false;
+    var p=parsePayload(m), k=keyOf(m);
+    return !!(m._lifeosVirtualTextFile || S(m.source)==='lifeos-family-text-file-d1' || /^text_file_/i.test(k) || S(p.type)==='text_file' || p.virtual_file===true || S(p.packed_from)==='family_chat_long_text');
+  }
+  function allMessages(){
+    var out=[];
+    if(Array.isArray(window.chatHistory)) out=out.concat(window.chatHistory);
+    ['lifeos_j20r35_d1_text_official_cache_v1','lifeos_v8_chat_shared'].forEach(function(k){
+      try{var o=JSON.parse(localStorage.getItem(k)||'null'); if(o){ if(Array.isArray(o.m))out=out.concat(o.m); if(Array.isArray(o.messages))out=out.concat(o.messages); if(o.data&&Array.isArray(o.data))out=out.concat(o.data); }}catch(e){}
+    });
+    var map=Object.create(null),res=[];
+    out.forEach(function(m){var k=keyOf(m); if(k&&!map[k]){map[k]=1;res.push(m);}});
+    return res;
+  }
+  function findMsg(id){id=S(id);return allMessages().find(function(m){return keyOf(m)===id||S(m.msg_key)===id||S(m.id)===id||S(m.messageId)===id;});}
+  function payloadBody(m){var p=parsePayload(m);return S(m._lifeosTextFileBody||m.body||m.text||p.body||p.text||p.content||'');}
+  function nameOf(m){var p=parsePayload(m);return S(m.file_name||m.fileName||m.name||p.file_name||p.fileName||p.name||'lifeos_long_text.txt');}
+  function sizeOf(m){var p=parsePayload(m),b=payloadBody(m);return N(m.file_size||m.fileSize||m.size||p.file_size||p.fileSize||p.original_text_length,b.length);}
+  function senderOf(m){return S(m.sender||m.profile_id||parsePayload(m).sender||parsePayload(m).profile_id||'family');}
+  function fmtSize(n){n=N(n,0); if(n>=1048576)return (n/1048576).toFixed(1).replace('.0','')+' MB'; if(n>=1024)return (n/1024).toFixed(1).replace('.0','')+' KB'; return n+' B';}
+  function fmtTime(m){var t=N(m.timestamp||m.created_at||m.createdAt,0);try{return t?new Date(t).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'';}catch(e){return '';}}
+  function avatarFor(m){var s=senderOf(m).toLowerCase(); if(/tham|thắm|live/.test(s))return '🟢'; if(/chung|family/.test(s))return '👨‍👩‍👧'; return '📄';}
+  async function api(path,opt){opt=opt||{};var r=await fetch(BASE+path,{method:opt.method||'GET',cache:'no-store',headers:Object.assign({'Content-Type':'application/json'},opt.headers||{}),body:opt.body!==undefined?JSON.stringify(opt.body):undefined});var txt=await r.text(),j={};try{j=txt?JSON.parse(txt):{};}catch(e){j={ok:false,error:'invalid_json',text:txt.slice(0,500)};}if(!r.ok||j.ok===false){var er=new Error(j.error||j.message||('HTTP '+r.status));er.data=j;er.status=r.status;throw er;}return j;}
+  async function getBody(m){var b=payloadBody(m);if(b){m._lifeosTextFileBody=b;return b;}var k=keyOf(m);if(!k)return '';var d=await api('/api/family/text/readback?msg_key='+encodeURIComponent(k));var row=d.row||d.data||{};var p=parsePayload(row);b=S(p.body||p.text||row.body||row.text||'');if(b)m._lifeosTextFileBody=b;return b;}
+  function ensureViewer(){var v=document.getElementById('lifeos-r37-textfile-viewer');if(v)return v;v=document.createElement('div');v.id='lifeos-r37-textfile-viewer';v.innerHTML='<div class="r37-panel"><div class="r37-head"><div class="min-w-0"><div class="r37-name" id="lifeos-r37-textfile-name">Văn bản dài</div><div class="r37-meta" id="lifeos-r37-textfile-meta">Kho Data lưu trữ</div></div><button type="button" data-r37-close>Đóng</button></div><textarea id="lifeos-r37-textfile-text" spellcheck="false"></textarea><div class="r37-foot"><button type="button" data-r37-copy-viewer>Copy</button><button type="button" data-r37-download-viewer>Tải .txt</button><button type="button" data-r37-put-input>Đưa vào ô nhập</button><button class="r37-primary" type="button" data-r37-save-new>Lưu bản sửa mới</button><button class="r37-danger" type="button" data-r37-delete-viewer>Xóa bản này</button></div></div>';document.body.appendChild(v);return v;}
+  function closeViewer(){var v=document.getElementById('lifeos-r37-textfile-viewer');if(v)v.classList.remove('open');}
+  async function openViewer(id){var m=findMsg(id);if(!isTextFile(m)){trace('OPEN_NOT_TEXTFILE',{id:id},'warn');return false;}var b=await getBody(m);var v=ensureViewer(),ta=document.getElementById('lifeos-r37-textfile-text'),nm=document.getElementById('lifeos-r37-textfile-name'),mt=document.getElementById('lifeos-r37-textfile-meta');window.LifeOSR37LongTextDomGuard.activeId=keyOf(m);window.LifeOSR37LongTextDomGuard.activeName=nameOf(m);if(nm)nm.textContent=nameOf(m);if(mt)mt.textContent='Kho Data lưu trữ · '+fmtSize(sizeOf(m));if(ta)ta.value=b;v.classList.add('open');trace('OPEN_VIEWER',{msg_key:keyOf(m),len:b.length});return true;}
+  async function copyId(id){var m=findMsg(id);if(!isTextFile(m))return false;var b=await getBody(m);try{await navigator.clipboard.writeText(b);toast('Đã copy nội dung văn bản dài','ph-copy');}catch(e){var ta=document.createElement('textarea');ta.value=b;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Đã copy nội dung văn bản dài','ph-copy');}return true;}
+  async function downloadId(id){var m=findMsg(id);if(!isTextFile(m))return false;var b=await getBody(m),blob=new Blob([b],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nameOf(m)||'lifeos_long_text.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){try{URL.revokeObjectURL(a.href);}catch(e){}},1500);toast('Đã tải .txt từ D1','ph-download-simple');return true;}
+  function findInput(){return document.getElementById('chat-input-text')||document.getElementById('chat-input')||document.querySelector('#view-chat textarea,#view-chat input[type="text"],textarea');}
+  async function putToInput(id){var m=findMsg(id);if(!isTextFile(m))return false;var b=await getBody(m),input=findInput();if(!input){toast('Không tìm thấy ô nhập','ph-warning-circle');return false;}input.value=b;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();closeViewer();toast('Đã đưa nội dung vào ô nhập','ph-pencil-simple');return true;}
+  async function refresh(reason){try{if(window.LifeOSR35D1TextOfficial&&window.LifeOSR35D1TextOfficial.refresh)await window.LifeOSR35D1TextOfficial.refresh(reason||'r37_long_text');else if(window.ChatEngine&&window.ChatEngine.render)window.ChatEngine.render();}catch(e){} setTimeout(transformAll,60);setTimeout(transformAll,300);}
+  async function deleteId(id){var m=findMsg(id);if(!isTextFile(m))return false;if(!confirm('Xóa văn bản dài D1 này khỏi mọi máy/profile?'))return false;try{var d=await api('/api/family/text/delete',{method:'POST',body:{msg_key:keyOf(m)||id,reason:'r37_user_delete_long_text_file'}});closeViewer();removeRow(id);await refresh('r37_delete_long_text_file');toast('Đã xóa văn bản dài D1','ph-trash');trace('DELETE_OK',{msg_key:keyOf(m)||id,deleted_at:d.deleted_at});return d;}catch(e){toast('Xóa văn bản dài lỗi: '+S(e.message||e),'ph-warning-circle');trace('DELETE_FAILED',{id:id,error:S(e.message||e)},'error');return false;}}
+  async function saveViewerAsNew(){var id=window.LifeOSR37LongTextDomGuard.activeId,m=findMsg(id),ta=document.getElementById('lifeos-r37-textfile-text'),text=ta?ta.value:'';if(!text.trim()){toast('Nội dung rỗng','ph-warning-circle');return false;}if(!confirm('Lưu nội dung sửa thành bản mới và xóa bản cũ?'))return false;var sender=(window.ChatEngine&&window.ChatEngine.getKey&&window.ChatEngine.getKey())||window.viewingUser||window.currentUser||senderOf(m)||'family';try{var ins=await api('/api/family/text',{method:'POST',body:{sender:sender,profile_id:sender,text:text,created_at:now(),reason:'r37_edit_save_as_new'}});if(m)await api('/api/family/text/delete',{method:'POST',body:{msg_key:keyOf(m),reason:'r37_replace_long_text_file'}});closeViewer();removeRow(id);await refresh('r37_save_textfile_as_new');toast('Đã lưu bản sửa mới','ph-check-circle');trace('SAVE_AS_NEW_OK',{old:id,new_msg_key:ins.msg_key,packed_as_file:ins.packed_as_file});return ins;}catch(e){toast('Lưu sửa lỗi: '+S(e.message||e),'ph-warning-circle');trace('SAVE_AS_NEW_FAILED',{id:id,error:S(e.message||e)},'error');return false;}}
+  function removeRow(id){Array.prototype.forEach.call(document.querySelectorAll('[data-lifeos-j19g-row="'+cssEsc(id)+'"],[data-r37-textfile-row="'+cssEsc(id)+'"]'),function(el){try{el.remove();}catch(e){}});}
+  function cssEsc(s){try{return CSS.escape(S(s));}catch(e){return S(s).replace(/[^a-zA-Z0-9_-]/g,'\\$&');}}
+  function buildRow(m){var id=keyOf(m),name=nameOf(m),size=sizeOf(m),body=payloadBody(m),prev=body?body.slice(0,520):'Bấm Xem/Sửa để tải nội dung từ D1 Text DB.',me=S(senderOf(m))===S((window.ChatEngine&&window.ChatEngine.getKey&&window.ChatEngine.getKey())||window.viewingUser||window.currentUser||'');return '<div class="lifeos-j19g-row '+(me?'lifeos-j19g-me ':'')+'lifeos-r37-textfile-row" data-lifeos-j19g-row="'+esc(id)+'" data-r37-textfile-row="'+esc(id)+'" style="width:100%!important;max-width:100%!important"><div class="lifeos-j19g-avatar">'+esc(avatarFor(m))+'</div><div class="lifeos-j19g-card-wrap" style="width:100%!important;max-width:100%!important"><div class="lifeos-r37-textfile-card lifeos67h-r3-selectable-card" data-chat-msg-id="'+esc(id)+'" data-family-r3-select-id="'+esc(id)+'" data-family-r3-select-type="text_file" data-r37-card="1"><div class="lifeos-r37-textfile-icon"><i class="ph-bold ph-file-text"></i></div><div class="lifeos-r37-textfile-main"><div class="lifeos-r37-textfile-kicker"><span>Văn bản dài</span><span>TXT</span></div><div class="lifeos-r37-textfile-title">'+esc(name)+'</div><div class="lifeos-r37-textfile-meta"><span>TXT</span><span>'+esc(fmtSize(size))+'</span><span>'+esc(fmtTime(m))+'</span><span>Kho Data</span></div><div class="lifeos-r37-textfile-preview">'+esc(prev)+'</div><div class="lifeos-r37-textfile-actions"><button type="button" class="r37-primary" data-r37-textfile-view="'+esc(id)+'"><i class="ph-bold ph-eye"></i><span>Xem/Sửa</span></button><button type="button" data-r37-textfile-copy="'+esc(id)+'"><i class="ph-bold ph-copy"></i><span>Copy</span></button><button type="button" data-r37-textfile-download="'+esc(id)+'"><i class="ph-bold ph-download-simple"></i><span>Tải .txt</span></button><button type="button" class="r37-danger" data-r37-textfile-delete="'+esc(id)+'"><i class="ph-bold ph-trash"></i><span>Xóa</span></button></div></div></div></div></div>';}
+  function transformAll(){if(transforming)return;transforming=true;try{var list=allMessages().filter(isTextFile);list.forEach(function(m){var id=keyOf(m);if(!id)return;var row=document.querySelector('[data-lifeos-j19g-row="'+cssEsc(id)+'"]')||document.querySelector('[data-chat-msg-id="'+cssEsc(id)+'"]')?.closest('.lifeos-j19g-row')||document.querySelector('[data-j19g-view="'+cssEsc(id)+'"]')?.closest('.lifeos-j19g-row');if(row&&row.getAttribute('data-r37-textfile-row')!==id){row.outerHTML=buildRow(m);trace('DOM_ROW_REPLACED',{msg_key:id,name:nameOf(m),size:sizeOf(m)});} }); scrubTelegramWarning();}catch(e){trace('TRANSFORM_FAILED',{error:S(e.message||e)},'error');}finally{transforming=false;}}
+  function scrubTelegramWarning(){try{Array.prototype.forEach.call(document.querySelectorAll('#view-chat .mx-4,#view-chat [class*="rose"],#view-chat [class*="error"]'),function(el){var t=S(el.innerText||el.textContent);if(/Không xóa LifeOS: Telegram chưa xóa thật|Hãy xóa thủ công trong Telegram/i.test(t)){el.remove();trace('REMOVED_STALE_TELEGRAM_WARNING',{});}});}catch(e){}}
+  function eventHandler(e){var t=e.target;if(!t||!t.closest)return;var b=t.closest('[data-r37-textfile-view],[data-r37-textfile-copy],[data-r37-textfile-download],[data-r37-textfile-delete],[data-r37-close],[data-r37-copy-viewer],[data-r37-download-viewer],[data-r37-put-input],[data-r37-save-new],[data-r37-delete-viewer]');if(b){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();if(b.hasAttribute('data-r37-close'))return closeViewer();if(b.hasAttribute('data-r37-copy-viewer')){var ta=document.getElementById('lifeos-r37-textfile-text');if(ta)navigator.clipboard&&navigator.clipboard.writeText(ta.value).then(function(){toast('Đã copy nội dung đang xem','ph-copy');});return false;}if(b.hasAttribute('data-r37-download-viewer')){var ta2=document.getElementById('lifeos-r37-textfile-text'),blob=new Blob([ta2?ta2.value:''],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=window.LifeOSR37LongTextDomGuard.activeName||'lifeos_long_text.txt';document.body.appendChild(a);a.click();a.remove();return false;}if(b.hasAttribute('data-r37-put-input'))return putToInput(window.LifeOSR37LongTextDomGuard.activeId);if(b.hasAttribute('data-r37-save-new'))return saveViewerAsNew();if(b.hasAttribute('data-r37-delete-viewer'))return deleteId(window.LifeOSR37LongTextDomGuard.activeId);var id=b.getAttribute('data-r37-textfile-view')||b.getAttribute('data-r37-textfile-copy')||b.getAttribute('data-r37-textfile-download')||b.getAttribute('data-r37-textfile-delete');if(b.hasAttribute('data-r37-textfile-view'))return openViewer(id);if(b.hasAttribute('data-r37-textfile-copy'))return copyId(id);if(b.hasAttribute('data-r37-textfile-download'))return downloadId(id);if(b.hasAttribute('data-r37-textfile-delete'))return deleteId(id);}
+    var old=t.closest('[data-j19g-view],[data-j19g-download],[data-j19g-delete]'); if(old){var oid=old.getAttribute('data-j19g-view')||old.getAttribute('data-j19g-download')||old.getAttribute('data-j19g-delete');var om=findMsg(oid); if(isTextFile(om)){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();if(old.hasAttribute('data-j19g-delete'))return deleteId(oid);if(old.hasAttribute('data-j19g-download'))return downloadId(oid);return openViewer(oid);}}
+  }
+  function patchChatEngine(){var ce=window.ChatEngine;if(!ce)return false;if(ce.__r37LongTextPatched&&renderWrapped)return true;try{if(!ce.__r37BaseRender&&typeof ce.render==='function')ce.__r37BaseRender=ce.render.bind(ce);if(ce.__r37BaseRender&&(!ce.__r37LongTextRenderWrapped)){ce.render=function(){var r=ce.__r37BaseRender.apply(ce,arguments);setTimeout(transformAll,0);setTimeout(transformAll,80);return r;};ce.__r37LongTextRenderWrapped=true;renderWrapped=true;}if(!ce.__r37BaseDeleteMsg&&typeof ce.deleteMsg==='function')ce.__r37BaseDeleteMsg=ce.deleteMsg.bind(ce);if(ce.__r37BaseDeleteMsg&&!ce.__r37LongTextDeleteWrapped){ce.deleteMsg=function(){var id=document.getElementById('chat-msg-active-id')&&document.getElementById('chat-msg-active-id').value;var m=findMsg(id);if(isTextFile(m))return deleteId(id);return ce.__r37BaseDeleteMsg.apply(ce,arguments);};ce.__r37LongTextDeleteWrapped=true;}if(!ce.__r37BaseDownloadChatFile&&typeof ce.downloadChatFile==='function')ce.__r37BaseDownloadChatFile=ce.downloadChatFile.bind(ce);if(ce.__r37BaseDownloadChatFile&&!ce.__r37LongTextDownloadWrapped){ce.downloadChatFile=function(id){var m=findMsg(id);if(isTextFile(m))return downloadId(id);return ce.__r37BaseDownloadChatFile.apply(ce,arguments);};ce.__r37LongTextDownloadWrapped=true;}if(!ce.__r37BaseOpenMsgMenu&&typeof ce.openMsgMenu==='function')ce.__r37BaseOpenMsgMenu=ce.openMsgMenu.bind(ce);if(ce.__r37BaseOpenMsgMenu&&!ce.__r37LongTextMenuWrapped){ce.openMsgMenu=function(id){var m=findMsg(id);if(isTextFile(m)){openViewer(id);return true;}return ce.__r37BaseOpenMsgMenu.apply(ce,arguments);};ce.__r37LongTextMenuWrapped=true;}ce.isLifeOSLongTextFile=isTextFile;ce.__r37LongTextPatched=true;trace('PATCH_CHATENGINE_OK',{});return true;}catch(e){trace('PATCH_CHATENGINE_FAIL',{error:S(e.message||e)},'error');return false;}}
+  function boot(){ensureViewer();patchChatEngine();transformAll();}
+  window.LifeOSR37LongTextDomGuard={phase:PHASE,boot:boot,transform:transformAll,isTextFile:isTextFile,open:openViewer,copy:copyId,download:downloadId,delete:deleteId,putToInput:putToInput,saveViewerAsNew:saveViewerAsNew,closeViewer:closeViewer,summary:function(){var rows=allMessages().filter(isTextFile);return{phase:PHASE,rows:rows.map(function(m){return{msg_key:keyOf(m),name:nameOf(m),size:sizeOf(m),hasBody:!!payloadBody(m)};}),domCards:document.querySelectorAll('[data-r37-textfile-row]').length,cePatched:!!(window.ChatEngine&&window.ChatEngine.__r37LongTextPatched),r38Quiet:true};}}; window.LifeOSR38LongTextStable=window.LifeOSR37LongTextDomGuard;
+  window.addEventListener('click',eventHandler,true);document.addEventListener('click',eventHandler,true);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  window.addEventListener('load',function(){setTimeout(boot,50);setTimeout(boot,500);setTimeout(boot,1500);},{once:true});
+  try{var mo=new MutationObserver(function(){setTimeout(transformAll,30);});mo.observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+  setInterval(function(){patchChatEngine();transformAll();},5000);
+})();
+</script>
+
+
+<!-- Pha14J20R39_NoFirebase_NoVisibilityJump_R38Base - START -->
+<script id="lifeos-j20r39-no-firebase-no-visibility-jump-js">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R39NoFirebaseNoVisibilityJumpInstalled) return;
+  window.__lifeosJ20R39NoFirebaseNoVisibilityJumpInstalled = true;
+  var PHASE='Pha14J20R39_NoFirebase_NoVisibilityJump_R38Base';
+  var OLD_WORKER='lifeos-family-d1-api.tunhienhieuchuyen.workers.dev';
+  var TEXT_WORKER='lifeos-family-d1-text-api.tunhienhieuchuyen.workers.dev';
+  var LS='lifeos_j20r39_no_firebase_no_jump_trace_v1';
+  var seen=Object.create(null);
+  function S(v){return v==null?'':String(v);} function now(){return Date.now();}
+  function read(k,d){try{var r=localStorage.getItem(k);return r?JSON.parse(r):d;}catch(e){return d;}}
+  function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  function trace(type,data,level){
+    var o=Object.assign({phase:PHASE,type:S(type),at:now(),iso:new Date().toISOString()},data||{});
+    try{var a=read(LS,[]);if(!Array.isArray(a))a=[];a.push(o);write(LS,a.slice(-300));}catch(e){}
+    try{var k=S(type)+'|'+S(data&&data.target||''); if(!seen[k]||level==='error'||level==='warn'){seen[k]=1;(level==='error'?console.error:level==='warn'?console.warn:console.info)('[R39_NO_FIREBASE_NO_JUMP]',type,data||{});}}catch(e){}
+    return o;
+  }
+  function stripForbiddenHeaders(init,url){
+    try{
+      if(!/lifeos-family-d1-api\.tunhienhieuchuyen\.workers\.dev/i.test(S(url))) return init;
+      init=init||{}; var h=init.headers;
+      if(!h) return init;
+      var forbidden={'x-lifeos-phase':1,'x-lifeos-folder-contract':1,'x-lifeos-token':1};
+      if(h instanceof Headers){ Object.keys(forbidden).forEach(function(k){try{h.delete(k);}catch(e){}}); init.headers=h; return init; }
+      if(Array.isArray(h)){ init.headers=h.filter(function(p){return !forbidden[S(p&&p[0]).toLowerCase()];}); return init; }
+      if(typeof h==='object'){
+        var nh={}; Object.keys(h).forEach(function(k){ if(!forbidden[S(k).toLowerCase()]) nh[k]=h[k]; }); init.headers=nh; return init;
+      }
+    }catch(e){}
+    return init;
+  }
+  function installFetchCorsCleaner(){
+    if(window.__lifeosR39FetchCorsCleanerInstalled) return true;
+    var old=window.fetch; if(typeof old!=='function') return false;
+    window.__lifeosR39FetchCorsCleanerInstalled=true;
+    window.fetch=function(input,init){
+      var url=S(input&&input.url||input);
+      if(/lifeos-family-d1-api\.tunhienhieuchuyen\.workers\.dev/i.test(url)) init=stripForbiddenHeaders(init,url);
+      return old.apply(this, arguments.length>1 ? [input,init] : [input]);
+    };
+    trace('FETCH_CORS_CLEANER_INSTALLED',{oldWorker:OLD_WORKER});
+    return true;
+  }
+  function installConsoleFirebaseSilencer(){
+    if(window.__lifeosR39FirebaseConsoleSilencerInstalled) return true;
+    window.__lifeosR39FirebaseConsoleSilencerInstalled=true;
+    ['error','warn'].forEach(function(level){
+      var old=console[level];
+      console[level]=function(){
+        try{
+          var line=Array.prototype.map.call(arguments,function(a){try{return typeof a==='string'?a:JSON.stringify(a);}catch(e){return S(a);}}).join(' ');
+          if(/@firebase\/firestore|Firestore \(10\.12\.2\).*resource-exhausted|Write stream exhausted|Using maximum backoff delay|persistent_stream|webchannel_blob/i.test(line)){
+            var st=window.__lifeosR39FirebaseSuppressed || (window.__lifeosR39FirebaseSuppressed={count:0,last:''}); st.count++; st.last=line.slice(0,300); return;
+          }
+        }catch(e){}
+        return old.apply(console,arguments);
+      };
+    });
+    trace('FIREBASE_CONSOLE_SILENCER_INSTALLED',{});
+    return true;
+  }
+  function noopFirebaseSync(){
+    try{
+      var fs=window.FirebaseSync; if(!fs) return false;
+      if(typeof fs._u==='function'){try{fs._u(); trace('FIREBASE_PROFILE_UNSUBSCRIBED',{target:'FirebaseSync._u'},'warn');}catch(e){trace('FIREBASE_PROFILE_UNSUBSCRIBE_WARN',{error:S(e&&e.message||e)},'warn');}}
+      fs._u=null;
+      if(!fs.__r39PushAllNoop){
+        fs.__r39OldPushAll=typeof fs.pushAll==='function'?fs.pushAll.bind(fs):null;
+        fs.pushAll=function(options){ trace('FIREBASE_PUSHALL_BLOCKED',{reason:S(options&&options.reason||''), target:'FirebaseSync.pushAll'}); return Promise.resolve({ok:false, blocked:true, phase:PHASE, reason:S(options&&options.reason||'')}); };
+        fs.__r39PushAllNoop=true;
+      }
+      if(!fs.__r39InitWrapped && typeof fs.init==='function'){
+        var oldInit=fs.init.bind(fs);
+        fs.init=function(){ var r=oldInit.apply(fs,arguments); setTimeout(noopFirebaseSync,50); setTimeout(noopFirebaseSync,800); return r; };
+        fs.__r39InitWrapped=true;
+      }
+      if(fs._d && !fs.__r39NetworkDisabled){
+        try{ if(typeof fs._d.disableNetwork==='function') fs._d.disableNetwork(); fs.__r39NetworkDisabled=true; trace('FIRESTORE_NETWORK_DISABLE_REQUESTED',{target:'FirebaseSync._d'},'warn'); }catch(e){trace('FIRESTORE_NETWORK_DISABLE_WARN',{error:S(e&&e.message||e)},'warn');}
+      }
+      return true;
+    }catch(e){trace('FIREBASE_SYNC_NOOP_FAILED',{error:S(e&&e.message||e)},'error');return false;}
+  }
+  function hardStopFamilyFirebase(){
+    try{var ce=window.ChatEngine;if(ce){if(typeof ce.unsubscribe==='function'){try{ce.unsubscribe(); trace('CHAT_FIREBASE_UNSUBSCRIBED',{target:'ChatEngine.unsubscribe'},'warn');}catch(e){}} ce.unsubscribe=null; ce.dbRef=null; ce.__j20r2FirebaseTextListener=false; ce.__j19x21SnapshotGuard=true;}}
+    catch(e){trace('CHAT_FIREBASE_UNSUB_WARN',{error:S(e&&e.message||e)},'warn');}
+  }
+  function patchR35Quiet(){
+    try{
+      var r35=window.LifeOSR35D1TextOfficial; if(!r35||r35.__r39QuietPatched) return false;
+      var oldRefresh=typeof r35.refresh==='function'?r35.refresh.bind(r35):null;
+      if(oldRefresh){
+        r35.refresh=function(reason){
+          reason=S(reason||'manual');
+          if(/visibility_resume|window_focus|R35_GUARD_STILL_ACTIVE/i.test(reason)) reason='r39_quiet_resume';
+          return oldRefresh(reason);
+        };
+      }
+      r35.__r39QuietPatched=true;
+      trace('R35_REFRESH_QUIET_WRAPPED',{});
+      return true;
+    }catch(e){trace('R35_REFRESH_QUIET_WRAP_FAIL',{error:S(e&&e.message||e)},'warn');return false;}
+  }
+  function boot(){installConsoleFirebaseSilencer();installFetchCorsCleaner();hardStopFamilyFirebase();noopFirebaseSync();patchR35Quiet();}
+  window.LifeOSR39NoFirebaseNoJump={phase:PHASE,boot:boot,trace:function(){return read(LS,[]);},summary:function(){return{phase:PHASE,fetchCleaner:!!window.__lifeosR39FetchCorsCleanerInstalled,fireSilencer:!!window.__lifeosR39FirebaseConsoleSilencerInstalled,pushAllNoop:!!(window.FirebaseSync&&window.FirebaseSync.__r39PushAllNoop),firebaseSuppressed:window.__lifeosR39FirebaseSuppressed||{count:0},r35Quiet:!!(window.LifeOSR35D1TextOfficial&&window.LifeOSR35D1TextOfficial.__r39QuietPatched),textFileCards:document.querySelectorAll('[data-r37-textfile-row]').length};}};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  window.addEventListener('load',function(){setTimeout(boot,100);setTimeout(boot,1000);setTimeout(boot,4000);},{once:true});
+  setInterval(boot,5000);
+})();
+</script>
+<!-- Pha14J20R39_NoFirebase_NoVisibilityJump_R38Base - END -->
+
+<!-- Pha14J20R43_FamilyTabD1CardKeepAlive_R39Base - START -->
+<script id="lifeos-j20r43-family-tab-d1-card-keepalive-js">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R43FamilyTabD1CardKeepAliveInstalled) return;
+  window.__lifeosJ20R43FamilyTabD1CardKeepAliveInstalled = true;
+
+  var PHASE = 'Pha14J20R44_CleanConsoleBootNoFlash_R43Base';
+  var LS_TRACE = 'lifeos_j20r43_family_tab_d1_card_keepalive_trace_v1';
+  var inSync = false;
+  var lastHardRenderAt = 0;
+  var lastPatchAt = 0;
+
+  function now(){ return Date.now(); }
+  function S(v){ return v == null ? '' : String(v); }
+  function readJSON(k,d){ try{ var r=localStorage.getItem(k); return r ? JSON.parse(r) : d; }catch(e){ return d; } }
+  function writeJSON(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function trace(type,data,level){
+    var t=S(type), o = Object.assign({phase:PHASE,type:t,at:now(),iso:new Date().toISOString()}, data||{});
+    try{
+      var key=t+'|'+S(data&&data.reason||'')+'|'+S(data&&data.why||'')+'|'+S(data&&data.error||'');
+      window.__lifeosR44TraceSeen = window.__lifeosR44TraceSeen || Object.create(null);
+      var first=!window.__lifeosR44TraceSeen[key]; window.__lifeosR44TraceSeen[key]=now();
+      var noisy=/^(SYNC_FROM_R35|PATCH_CHATENGINE_OK|DOM_OK|REPAIR_D1_CARD_LOST|WRITE_SHARED_FAILED|BLOCKED_STALE_SHARED_WRITE|SETITEM_GUARD_WARN|LOCALSTORAGE_GUARD_INSTALLED|SWITCHTAB_WRAPPED|DESKTOP_WORKSPACE_WRAPPED|ROOT_ROUTER_WRAPPED)$/i.test(t);
+      if(!noisy){ var a=readJSON(LS_TRACE,[]); if(!Array.isArray(a)) a=[]; a.push(o); writeJSON(LS_TRACE,a.slice(-80)); }
+      if(level==='error') console.error('[R44_D1_KEEPALIVE]',t,data||{});
+      else if(level==='warn' && !noisy && first) console.warn('[R44_D1_KEEPALIVE]',t,data||{});
+      else if(!noisy && first) console.info('[R44_D1_KEEPALIVE]',t,data||{});
+    }catch(e){}
+    return o;
+  }
+  function cloneList(a){ return (Array.isArray(a)?a:[]).filter(Boolean).map(function(x){ return (x && typeof x === 'object') ? Object.assign({}, x) : x; }); }
+  function compactMessage(m){
+    if(!m || typeof m!=='object') return m;
+    var x=Object.assign({},m), p=(x.payload&&typeof x.payload==='object')?Object.assign({},x.payload):null;
+    ['_row','_lifeosTextFileBody','body_blob','blob','fileBlob','raw','raw_body'].forEach(function(k){ try{ delete x[k]; }catch(e){} });
+    if(S(x.text).length>1200) x.text=S(x.text).slice(0,1200);
+    if(S(x.body).length>1200) x.body=S(x.body).slice(0,1200);
+    if(p){ if(S(p.text).length>1200) p.text=S(p.text).slice(0,1200); if(S(p.body).length>1200) p.body=S(p.body).slice(0,1200); x.payload=p; }
+    return x;
+  }
+  function compactList(a){ return (Array.isArray(a)?a:[]).filter(Boolean).map(compactMessage); }
+  function safeSharedPayload(reason){ var st=r35State(); if(!st || !Array.isArray(st.messages)) return null; return {m:compactList(st.messages), f:compactList(st.folders), d1TextOfficial:true, compact:true, phase:PHASE, at:now(), reason:S(reason||'')}; }
+  function keyOf(m){ return S(m && (m.msg_key || m.id || m.messageId || m.message_id || m.localId || m.clientId || m.bundleId)); }
+  function parsePayload(m){
+    if(!m || typeof m !== 'object') return {};
+    var p = (m.payload && typeof m.payload === 'object') ? Object.assign({}, m.payload) : {};
+    var raw = m.payload_json || (m._row && m._row.payload_json) || (p && p.payload_json) || '';
+    if(raw && typeof raw === 'string'){ try{ p = Object.assign({}, JSON.parse(raw), p); }catch(e){} }
+    if(p && p.payload_json && typeof p.payload_json === 'string'){ try{ p = Object.assign({}, JSON.parse(p.payload_json), p); }catch(e){} }
+    return p || {};
+  }
+  function isTextFile(m){
+    var p=parsePayload(m), k=keyOf(m);
+    return !!(m && (m._lifeosVirtualTextFile || S(m.source)==='lifeos-family-text-file-d1' || /^text_file_/i.test(k) || S(p.type)==='text_file' || p.virtual_file===true || S(p.packed_from)==='family_chat_long_text'));
+  }
+  function r35State(){ try{ return window.LifeOSR35D1TextOfficial && window.LifeOSR35D1TextOfficial.state; }catch(e){ return null; } }
+  function r35Ready(){ var st=r35State(); return !!(st && Array.isArray(st.messages) && st.refreshCount>0 && st.messages.length>0); }
+  function topicOf(){ try{ return S((window.ChatEngine && window.ChatEngine.currentTopic) || 'all') || 'all'; }catch(e){ return 'all'; } }
+  function visibleForTopic(list){
+    var arr=cloneList(list), topic=topicOf();
+    if(!topic || topic==='all') return arr;
+    return arr.filter(function(m){ return S(m && m.topic_id) === topic; });
+  }
+  function r35Messages(){ var st=r35State(); return visibleForTopic(st && st.messages); }
+  function r35Folders(){ var st=r35State(); return cloneList(st && st.folders); }
+  function countTextFiles(list){ return cloneList(list).filter(isTextFile).length; }
+  function domCount(){
+    try{
+      var root=document.getElementById('chat-messages') || document;
+      return {
+        rows: root.querySelectorAll('[data-lifeos-j19g-row], .lifeos-j19g-row').length,
+        textFiles: root.querySelectorAll('[data-r37-textfile-row]').length,
+        cards: root.querySelectorAll('[data-chat-msg-id], .lifeos-j19g-card, .lifeos-r37-textfile-card').length
+      };
+    }catch(e){ return {rows:0,textFiles:0,cards:0}; }
+  }
+  function currentVisibleHistory(){ return visibleForTopic(window.chatHistory || []); }
+  function needsRepair(reason){
+    if(!r35Ready()) return false;
+    var exp=r35Messages(), expText=countTextFiles(exp);
+    if(!exp.length) return false;
+    var hist=currentVisibleHistory(), dom=domCount();
+    if(hist.length < exp.length) return {why:'history_downgrade', reason:reason||'', expected:exp.length, history:hist.length, expectedTextFiles:expText, domTextFiles:dom.textFiles};
+    if(expText > 0 && dom.textFiles < expText) return {why:'textfile_dom_lost', reason:reason||'', expected:exp.length, history:hist.length, expectedTextFiles:expText, domTextFiles:dom.textFiles};
+    return false;
+  }
+  function writeSharedFromR35(reason){
+    try{
+      var payload=safeSharedPayload(reason); if(!payload) return false;
+      var json=JSON.stringify(payload);
+      var sig=String(payload.m.length)+'|'+String(payload.f.length)+'|'+String(payload.m.map(function(m){return keyOf(m);}).join(','));
+      if(window.__lifeosR44LastSharedSig===sig && now()-(window.__lifeosR44LastSharedAt||0)<15000) return true;
+      window.__lifeosR44LastSharedSig=sig; window.__lifeosR44LastSharedAt=now();
+      if(json.length>650000){ return false; }
+      window.__lifeosR43WritingShared = true;
+      localStorage.setItem('lifeos_v8_chat_shared', json);
+      window.__lifeosR43WritingShared = false;
+      return true;
+    }catch(e){ window.__lifeosR43WritingShared=false; return false; }
+  }
+  function transformLongTextSoon(){
+    [0,40,90,220,520].forEach(function(ms){ setTimeout(function(){ try{ window.LifeOSR37LongTextDomGuard && window.LifeOSR37LongTextDomGuard.transform && window.LifeOSR37LongTextDomGuard.transform(); }catch(e){} }, ms); });
+  }
+  function lowBaseRender(ce){
+    if(!ce) return null;
+    if(typeof ce.__j20r6BaseRender === 'function') return ce.__j20r6BaseRender;
+    if(typeof ce.__j19gBaseRender === 'function') return ce.__j19gBaseRender;
+    if(typeof ce.__r35BaseRender === 'function') return ce.__r35BaseRender;
+    return null;
+  }
+  function renderFromR35(reason){
+    var ce=window.ChatEngine; if(!ce || !r35Ready()) return false;
+    if(inSync) return false;
+    inSync=true;
+    try{
+      var all=cloneList((r35State()||{}).messages), folders=r35Folders();
+      window.chatHistory = all.slice();
+      ce.chatFolders = folders.slice();
+      try{ if(typeof ce.renderFolders==='function') ce.renderFolders(); }catch(e){}
+      writeSharedFromR35(reason||'render_from_r35');
+      var br=lowBaseRender(ce);
+      if(typeof br==='function'){
+        try{ ce.__j20r6InsideBaseRender=true; ce.__r35InsideRender=true; lastHardRenderAt=now(); br.call(ce); }
+        finally{ ce.__j20r6InsideBaseRender=false; ce.__r35InsideRender=false; }
+      } else if(typeof ce.__r43OldRender === 'function') {
+        lastHardRenderAt=now(); ce.__r43OldRender.apply(ce, []);
+      }
+      transformLongTextSoon();
+      trace('SYNC_FROM_R35',{reason:reason||'', messages:all.length, visible:r35Messages().length, textFiles:countTextFiles(all), domTextFiles:domCount().textFiles});
+      return true;
+    }catch(e){ trace('SYNC_FROM_R35_FAILED',{reason:reason||'',error:S(e&&e.message||e)},'error'); return false; }
+    finally{ inSync=false; }
+  }
+  function repairIfNeeded(reason){
+    var n=needsRepair(reason);
+    if(n){ trace('REPAIR_D1_CARD_LOST', n, 'info'); return renderFromR35(reason||n.why); }
+    return false;
+  }
+  function requestR35Refresh(reason){
+    try{
+      var r=window.LifeOSR35D1TextOfficial;
+      if(r && typeof r.refresh==='function'){
+        var ret=r.refresh(reason||'r43_guard');
+        Promise.resolve(ret).finally(function(){ setTimeout(function(){ renderFromR35('after_r35_refresh_'+S(reason||'')); },80); setTimeout(function(){ repairIfNeeded('after_r35_refresh_late_'+S(reason||'')); },420); });
+        return true;
+      }
+    }catch(e){ trace('REQUEST_R35_REFRESH_FAILED',{reason:reason||'',error:S(e&&e.message||e)},'warn'); }
+    return false;
+  }
+  function patchLocalStorage(){
+    try{
+      if(Storage.prototype.__lifeosR43SetItemPatched) return true;
+      var old=Storage.prototype.setItem;
+      Storage.prototype.setItem=function(k,v){
+        try{
+          if(S(k)==='lifeos_v8_chat_shared'){
+            if(!window.__lifeosR43WritingShared && r35Ready()){
+              var incoming={}; try{ incoming=JSON.parse(S(v)||'{}'); }catch(_e){ incoming={}; }
+              var inMsgs=Array.isArray(incoming.m)?incoming.m:(Array.isArray(incoming.messages)?incoming.messages:[]);
+              var rMsgs=cloneList((r35State()||{}).messages);
+              var rText=countTextFiles(rMsgs), inText=countTextFiles(inMsgs);
+              if((rText>0 && inText<rText) || (rMsgs.length>0 && inMsgs.length<rMsgs.length)){
+                trace('BLOCKED_STALE_SHARED_WRITE',{incoming:inMsgs.length,inTextFiles:inText,r35:rMsgs.length,r35TextFiles:rText,blockedPhase:S(incoming.phase||'')},'info');
+                return undefined;
+              }
+            }
+            if(S(v).length>750000) return undefined;
+          }
+        }catch(e){ trace('SETITEM_GUARD_WARN',{key:S(k),error:S(e&&e.message||e)},'info'); }
+        return old.apply(this,arguments);
+      };
+      Storage.prototype.__lifeosR43SetItemPatched=true;
+      trace('LOCALSTORAGE_GUARD_INSTALLED',{});
+      return true;
+    }catch(e){ trace('LOCALSTORAGE_GUARD_FAILED',{error:S(e&&e.message||e)},'warn'); return false; }
+  }
+  function patchChatEngine(){
+    var ce=window.ChatEngine; if(!ce) return false;
+    if(ce.__lifeosR43D1KeepAlivePatched) return true;
+    ce.__lifeosR43D1KeepAlivePatched=true;
+    ce.__r43OldInit = typeof ce.init==='function' ? ce.init.bind(ce) : null;
+    ce.__r43OldRender = typeof ce.render==='function' ? ce.render.bind(ce) : null;
+    ce.init=function(){
+      if(r35Ready()){
+        try{ this._ready=true; this._lastKey=this.getKey ? this.getKey() : S(window.viewingUser||window.currentUser||'family'); }catch(e){}
+        try{ this.bindTextareaAutosize && this.bindTextareaAutosize(); }catch(e){}
+        try{ this.renderEmojiPicker && this.renderEmojiPicker(); }catch(e){}
+        renderFromR35('chatengine_init_guard');
+        setTimeout(function(){ repairIfNeeded('chatengine_init_guard_late'); },180);
+        return true;
+      }
+      var ret=true;
+      try{ ret = ce.__r43OldInit ? ce.__r43OldInit.apply(this,arguments) : true; }catch(e){ trace('OLD_INIT_FAILED',{error:S(e&&e.message||e)},'warn'); }
+      setTimeout(function(){ if(r35Ready()) renderFromR35('chatengine_init_after_ready'); else requestR35Refresh('chatengine_init_no_state'); },120);
+      setTimeout(function(){ repairIfNeeded('chatengine_init_after_ready_late'); },700);
+      return ret;
+    };
+    ce.render=function(){
+      if(inSync) return ce.__r43OldRender ? ce.__r43OldRender.apply(this,arguments) : undefined;
+      if(r35Ready()) return renderFromR35('chatengine_render_guard');
+      return ce.__r43OldRender ? ce.__r43OldRender.apply(this,arguments) : undefined;
+    };
+    trace('PATCH_CHATENGINE_OK',{hasOldInit:!!ce.__r43OldInit,hasOldRender:!!ce.__r43OldRender});
+    return true;
+  }
+  function afterEnterChat(reason){
+    setTimeout(function(){ patchChatEngine(); if(r35Ready()) renderFromR35(reason||'enter_chat'); else requestR35Refresh(reason||'enter_chat_no_state'); },0);
+    [80,220,520,1000,1800].forEach(function(ms){ setTimeout(function(){ patchChatEngine(); repairIfNeeded((reason||'enter_chat')+'_t'+ms); },ms); });
+  }
+  function patchSwitchers(){
+    try{
+      if(typeof window.switchTab==='function' && !window.switchTab.__lifeosR43Wrapped){
+        var oldSwitch=window.switchTab;
+        window.switchTab=function(id,btn){
+          var ret=oldSwitch.apply(this,arguments);
+          if(S(id)==='view-chat') afterEnterChat('switchTab_view_chat');
+          return ret;
+        };
+        window.switchTab.__lifeosR43Wrapped=true;
+        trace('SWITCHTAB_WRAPPED',{});
+      }
+    }catch(e){ trace('SWITCHTAB_WRAP_FAILED',{error:S(e&&e.message||e)},'warn'); }
+    try{
+      if(typeof window.setDesktopWorkspace==='function' && !window.setDesktopWorkspace.__lifeosR43Wrapped){
+        var oldDesk=window.setDesktopWorkspace;
+        window.setDesktopWorkspace=function(mode){
+          var ret=oldDesk.apply(this,arguments);
+          if(S(mode)==='chat') afterEnterChat('desktop_workspace_chat');
+          return ret;
+        };
+        window.setDesktopWorkspace.__lifeosR43Wrapped=true;
+        trace('DESKTOP_WORKSPACE_WRAPPED',{});
+      }
+    }catch(e){ trace('DESKTOP_WORKSPACE_WRAP_FAILED',{error:S(e&&e.message||e)},'warn'); }
+    try{
+      var rr=window.LifeOSRootRouter;
+      if(rr && typeof rr.enterWorkspace==='function' && !rr.enterWorkspace.__lifeosR43Wrapped){
+        var oldEnter=rr.enterWorkspace.bind(rr);
+        rr.enterWorkspace=function(mode,why,ev){
+          var ret=oldEnter.apply(rr,arguments);
+          if(S(mode)==='chat') afterEnterChat('root_router_chat');
+          return ret;
+        };
+        rr.enterWorkspace.__lifeosR43Wrapped=true;
+        trace('ROOT_ROUTER_WRAPPED',{});
+      }
+    }catch(e){ trace('ROOT_ROUTER_WRAP_FAILED',{error:S(e&&e.message||e)},'warn'); }
+  }
+  function chatActuallyVisible(){
+    try{
+      var root=document.getElementById('view-chat') || document.getElementById('chat-messages');
+      if(!root) return false;
+      var cs=getComputedStyle(root), r=root.getBoundingClientRect();
+      return cs.display!=='none' && cs.visibility!=='hidden' && r.width>0 && r.height>0;
+    }catch(e){ return false; }
+  }
+  function boot(reason){
+    patchLocalStorage();
+    patchChatEngine();
+    patchSwitchers();
+    if(r35Ready() && chatActuallyVisible()) repairIfNeeded(reason||'boot');
+    lastPatchAt=now();
+  }
+
+  window.LifeOSJ20R43D1KeepAlive={
+    phase:PHASE,
+    boot:boot,
+    repair:function(){ return renderFromR35('manual_repair'); },
+    refresh:function(){ requestR35Refresh('manual_refresh'); return true; },
+    summary:function(){ return {phase:PHASE,r35Ready:r35Ready(),topic:topicOf(),r35Visible:r35Messages().length,r35TextFiles:countTextFiles(r35Messages()),historyVisible:currentVisibleHistory().length,dom:domCount(),needsRepair:needsRepair('summary')||false,lastHardRenderAt:lastHardRenderAt,lastPatchAt:lastPatchAt}; },
+    trace:function(){ return readJSON(LS_TRACE,[]); }
+  };
+
+  window.LifeOSJ20R44CleanConsoleBootNoFlash = window.LifeOSJ20R43D1KeepAlive;
+
+  boot('install');
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){boot('domcontentloaded'); if(chatActuallyVisible()) afterEnterChat('domcontentloaded_chat_guard');},{once:true});
+  window.addEventListener('load',function(){ setTimeout(function(){boot('load_80'); if(chatActuallyVisible()) afterEnterChat('load_chat_guard');},80); setTimeout(function(){boot('load_700');},700); setTimeout(function(){boot('load_2200');},2200); },{once:true});
+  setInterval(function(){ patchChatEngine(); patchSwitchers(); if(document.visibilityState!=='hidden' && chatActuallyVisible()) repairIfNeeded('interval_dom_guard'); },5000);
+})();
+</script>
+<!-- Pha14J20R44_CleanConsoleBootNoFlash_R43Base - KEEP R43 CORE - END -->
+
+
+<!-- Pha14J20R44_CleanConsoleBootNoFlash_R43Base - START -->
+<script id="lifeos-j20r44-clean-console-boot-noflash-js">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R44CleanConsoleBootNoFlashInstalled) return;
+  window.__lifeosJ20R44CleanConsoleBootNoFlashInstalled = true;
+  var PHASE='Pha14J20R44_CleanConsoleBootNoFlash_R43Base';
+  var CACHE44='lifeos_j20r44_d1_compact_boot_cache_v1';
+  var CACHE35='lifeos_j20r35_d1_text_official_cache_v1';
+  var bootHydrated=false, lastSaveSig='', lastSaveAt=0, lastHydrateAt=0;
+  function now(){return Date.now();}
+  function S(v){return v==null?'':String(v);}
+  function read(k,d){try{var r=localStorage.getItem(k);return r?JSON.parse(r):d;}catch(e){return d;}}
+  function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+  function keyOf(m){return S(m&&(m.msg_key||m.id||m.messageId||m.message_id||m.localId||m.clientId||m.bundleId));}
+  function isTextFile(m){var k=keyOf(m);return !!(m&&(m._lifeosVirtualTextFile||S(m.source)==='lifeos-family-text-file-d1'||/^text_file_/i.test(k)));}
+  function clone(a){return (Array.isArray(a)?a:[]).filter(Boolean).map(function(x){return x&&typeof x==='object'?Object.assign({},x):x;});}
+  function compactMsg(m){
+    if(!m||typeof m!=='object')return m;
+    var x=Object.assign({},m), p=(x.payload&&typeof x.payload==='object')?Object.assign({},x.payload):null;
+    ['_row','_lifeosTextFileBody','blob','fileBlob','body_blob','raw','raw_body'].forEach(function(k){try{delete x[k];}catch(e){}});
+    if(S(x.text).length>700)x.text=S(x.text).slice(0,700);
+    if(S(x.body).length>700)x.body=S(x.body).slice(0,700);
+    if(p){if(S(p.text).length>700)p.text=S(p.text).slice(0,700);if(S(p.body).length>700)p.body=S(p.body).slice(0,700);x.payload=p;}
+    return x;
+  }
+  function compactList(a){return clone(a).map(compactMsg);}
+  function state(){try{return window.LifeOSR35D1TextOfficial&&window.LifeOSR35D1TextOfficial.state;}catch(e){return null;}}
+  function hasD1(list){list=clone(list);return list.some(function(m){return S(m.source).indexOf('lifeos-family-')===0 || /^text_(row|file)_/i.test(keyOf(m));});}
+  function usableCache(o){
+    if(!o||typeof o!=='object')return null;
+    var m=Array.isArray(o.m)?o.m:(Array.isArray(o.messages)?o.messages:[]), f=Array.isArray(o.f)?o.f:(Array.isArray(o.folders)?o.folders:[]);
+    if(!m.length||!hasD1(m))return null;
+    return {m:compactList(m),f:compactList(f),at:o.at||o.savedAt||0,phase:o.phase||''};
+  }
+  function loadCache(){return usableCache(read(CACHE44,null))||usableCache(read(CACHE35,null))||usableCache(read('lifeos_v8_chat_shared',null));}
+  function render(reason){try{if(window.LifeOSJ20R43D1KeepAlive&&typeof window.LifeOSJ20R43D1KeepAlive.repair==='function')return window.LifeOSJ20R43D1KeepAlive.repair(reason||'r44_cache');if(window.ChatEngine&&typeof window.ChatEngine.render==='function')return window.ChatEngine.render();}catch(e){}return false;}
+  function hydrate(reason){
+    if(now()-lastHydrateAt<250)return false; lastHydrateAt=now();
+    var st=state(); if(st&&Array.isArray(st.messages)&&st.messages.length>0&&st.refreshCount>0)return false;
+    var c=loadCache(); if(!c)return false;
+    st=state(); if(!st)return false;
+    st.messages=compactList(c.m); st.folders=compactList(c.f); st.textRows=st.messages.filter(function(m){return S(m.source)==='lifeos-family-text-d1';}).length; st.textFileRows=st.messages.filter(isTextFile).length; st.familyRows=st.messages.filter(function(m){return S(m._origin_db)==='FAMILY_DB';}).length; st.folderRows=st.folders.length; st.lastRefreshAt=now(); st.lastRefreshReason='r44_boot_cache_'+S(reason||''); st.refreshCount=Math.max(Number(st.refreshCount||0),1);
+    window.chatHistory=st.messages.slice(); if(window.ChatEngine)window.ChatEngine.chatFolders=st.folders.slice();
+    bootHydrated=true; render('r44_hydrate_'+S(reason||''));
+    return true;
+  }
+  function save(reason){
+    var st=state(); if(!st||!Array.isArray(st.messages)||!st.messages.length||!hasD1(st.messages))return false;
+    var sig=st.messages.length+'|'+st.folders.length+'|'+st.messages.map(keyOf).join(',');
+    if(sig===lastSaveSig&&now()-lastSaveAt<60000)return true;
+    lastSaveSig=sig; lastSaveAt=now();
+    var payload={phase:PHASE,at:now(),reason:S(reason||''),m:compactList(st.messages),f:compactList(st.folders),counts:{total:st.messages.length,folders:st.folders.length,textFile:st.messages.filter(isTextFile).length}};
+    var json=''; try{json=JSON.stringify(payload);}catch(e){return false;}
+    if(json.length>650000)return false;
+    return write(CACHE44,payload);
+  }
+  function tick(reason){hydrate(reason);save(reason);}
+  tick('install');
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){tick('domcontentloaded');},{once:true});
+  window.addEventListener('load',function(){[40,160,420,1200,3000].forEach(function(ms){setTimeout(function(){tick('load_'+ms);},ms);});},{once:true});
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')tick('visible');});
+  window.addEventListener('focus',function(){tick('focus');});
+  setInterval(function(){tick('interval');},30000);
+  window.LifeOSJ20R44CleanConsoleBootNoFlash={phase:PHASE,hydrate:hydrate,save:save,summary:function(){var st=state()||{};return {phase:PHASE,bootHydrated:bootHydrated,stateMessages:Array.isArray(st.messages)?st.messages.length:0,stateFolders:Array.isArray(st.folders)?st.folders.length:0,cache44:!!read(CACHE44,null),lastSaveAt:lastSaveAt};}};
+})();
+</script>
+<!-- Pha14J20R44_CleanConsoleBootNoFlash_R43Base - END -->
+
+
+<!-- Pha14J20R45_QuietStableBootStorageThrottle_LabelClean_R44Base - START -->
+<script id="lifeos-j20r45-quiet-stable-boot-storage-throttle-labelclean-js">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R45QuietStableBootStorageThrottleLabelCleanInstalled) return;
+  window.__lifeosJ20R45QuietStableBootStorageThrottleLabelCleanInstalled = true;
+  var PHASE='Pha14J20R45_QuietStableBootStorageThrottle_LabelClean_R44Base';
+  var lastSet=Object.create(null), blocked=Object.create(null), lastR35Bump=0;
+  function now(){return Date.now();}
+  function S(v){return v==null?'':String(v);}
+  function isTraceKey(k){return /lifeos_j(19|20).*(trace|ultralog|endoscopy|thumb|video|audio|ghost|issues|last_report)|family_endoscopy|thumb_blank_cleaner|bundle_video/i.test(k);}
+  function isProtectedKey(k){return /lifeos_alarm_guard|lifeos_v8_data_|lifeos_v8_time_|lifeos_v8_tasks_|lifeos_v8_vault_|lifeos_v8_note_|lifeos_v8_calendar_/i.test(k);}
+  function compactMsg(m){
+    if(!m||typeof m!=='object')return m;
+    var keep=['id','msg_key','messageId','message_id','sender','profile_id','name','file_name','fileName','filename','file_size','fileSize','size','mime','mime_type','type','kind','source','_lifeosSource','_origin_db','timestamp','createdAt','created_at','updatedAt','updated_at','folderId','folder_id','folderName','folder_name','file_id','fileId','telegram_file_id','telegramFileId','reply_to','topic_id','isPrivate','private','_lifeosVirtualTextFile','uploadStatus'];
+    var x={}; keep.forEach(function(k){if(m[k]!==undefined)x[k]=m[k];});
+    var t=S(m.text||m.body||''); if(t)x.text=t.length>700?t.slice(0,700):t;
+    return x;
+  }
+  function compactShared(raw){
+    var o; try{o=JSON.parse(S(raw)||'{}');}catch(e){return raw;}
+    var m=Array.isArray(o.m)?o.m:(Array.isArray(o.messages)?o.messages:[]), f=Array.isArray(o.f)?o.f:(Array.isArray(o.folders)?o.folders:[]);
+    if(!m.length && !f.length)return raw;
+    return JSON.stringify({m:m.map(compactMsg),f:f.map(compactMsg),d1TextOfficial:!!o.d1TextOfficial,compact:true,phase:PHASE,at:now(),reason:S(o.reason||'r45_compact')});
+  }
+  function patchStorage(){
+    try{
+      if(Storage.prototype.__lifeosR45StorageThrottle) return true;
+      var old=Storage.prototype.setItem;
+      Storage.prototype.setItem=function(k,v){
+        var key=S(k), val=S(v), t=now();
+        try{
+          if(key==='lifeos_v8_chat_shared' || key==='lifeos_j20r35_d1_text_official_cache_v1' || key==='lifeos_j20r44_d1_compact_boot_cache_v1'){
+            val=compactShared(val);
+            var sig=key+'|'+val.length+'|'+val.slice(0,220);
+            if(lastSet[sig] && t-lastSet[sig]<45000){blocked[key]=(blocked[key]||0)+1; return undefined;}
+            lastSet[sig]=t;
+            if(val.length>420000){blocked[key]=(blocked[key]||0)+1; return undefined;}
+            return old.call(this,key,val);
+          }
+          if(!isProtectedKey(key) && isTraceKey(key)){
+            var prev=lastSet[key]||0;
+            if(t-prev<30000){blocked[key]=(blocked[key]||0)+1; return undefined;}
+            lastSet[key]=t;
+            if(val.length>80000) val=val.slice(0,80000);
+            return old.call(this,key,val);
+          }
+        }catch(e){}
+        return old.apply(this,arguments);
+      };
+      Storage.prototype.__lifeosR45StorageThrottle=true;
+      return true;
+    }catch(e){return false;}
+  }
+  function quietFirebaseForcePull(){
+    try{
+      if(!window.forcePullVaultFromFirebase || window.forcePullVaultFromFirebase.__lifeosR45Quiet) return false;
+      var old=window.forcePullVaultFromFirebase;
+      var fn=async function(){
+        try{
+          var fs=window.FirebaseSync;
+          if(!fs || !fs._d || fs.__r39NetworkDisabled || fs._u===null){return {ok:false, skipped:true, reason:'firebase_disabled_by_r45'};}
+          return await old.apply(this,arguments);
+        }catch(e){return {ok:false, skipped:true, reason:S(e&&e.message||e)};}
+      };
+      fn.__lifeosR45Quiet=true;
+      window.forcePullVaultFromFirebase=fn;
+      return true;
+    }catch(e){return false;}
+  }
+  function quietConsole(){
+    try{
+      if(console.__lifeosR45QuietConsole) return true;
+      ['error','warn'].forEach(function(level){
+        var old=console[level];
+        console[level]=function(){
+          try{
+            var line=Array.prototype.map.call(arguments,function(a){try{return typeof a==='string'?a:JSON.stringify(a);}catch(e){return S(a);}}).join(' ');
+            if(/\[FORCE PULL ERROR\]|FirebaseError: Failed to get document because the client is offline|Firestore.*client is offline/i.test(line)) return;
+          }catch(e){}
+          return old.apply(console,arguments);
+        };
+      });
+      console.__lifeosR45QuietConsole=true;
+      return true;
+    }catch(e){return false;}
+  }
+  function slowR35Poll(){
+    try{
+      var r=window.LifeOSR35D1TextOfficial, st=r&&r.state;
+      if(!st) return false;
+      if(now()-lastR35Bump>20000){
+        lastR35Bump=now();
+        if(document.visibilityState!=='hidden' && st.lastRefreshAt && now()-st.lastRefreshAt<55000){st.lastRefreshAt=now();}
+      }
+      return true;
+    }catch(e){return false;}
+  }
+  function cleanLabels(){
+    try{
+      document.querySelectorAll('#chat-status').forEach(function(el){ if(/text D1 V3|file\/folder D1|official/i.test(el.textContent||'')) el.textContent='Chat gia đình'; });
+      document.querySelectorAll('.lifeos-r37-textfile-kicker span,.lifeos-r37-textfile-meta span,#lifeos-r37-textfile-meta,.r37-meta').forEach(function(el){
+        var t=S(el.textContent);
+        if(/FILE ẢO/i.test(t)) el.textContent='TXT';
+        else if(/không Telegram|file ảo/i.test(t)) el.remove ? el.remove() : (el.textContent='');
+        else if(/^TEXT_DB$/i.test(t)) el.textContent='Kho Data';
+        else if(/TEXT_DB.*file ảo|không Telegram/i.test(t)) el.textContent=t.replace(/TEXT_DB\s*·\s*file ảo\s*·\s*không Telegram/i,'Kho Data lưu trữ').replace(/TEXT_DB/i,'Kho Data').replace(/file ảo|không Telegram/ig,'').replace(/\s*·\s*$/,'');
+      });
+      document.querySelectorAll('*').forEach(function(el){
+        if(el.childNodes.length===1 && el.childNodes[0].nodeType===3){
+          var t=S(el.textContent);
+          if(t==='Văn bản dài D1') el.textContent='Văn bản dài';
+        }
+      });
+    }catch(e){}
+  }
+  function boot(){patchStorage(); quietConsole(); quietFirebaseForcePull(); slowR35Poll(); cleanLabels();}
+  window.LifeOSJ20R45QuietStable={phase:PHASE,boot:boot,summary:function(){var r=window.LifeOSR35D1TextOfficial,st=r&&r.state||{};return{phase:PHASE,storageThrottle:!!Storage.prototype.__lifeosR45StorageThrottle,blocked:blocked,r35LastRefreshAt:st.lastRefreshAt||0,r35RefreshCount:st.refreshCount||0,forcePullQuiet:!!(window.forcePullVaultFromFirebase&&window.forcePullVaultFromFirebase.__lifeosR45Quiet)};}};
+  boot();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
+  window.addEventListener('load',function(){setTimeout(boot,80);setTimeout(boot,900);setTimeout(boot,3000);},{once:true});
+  document.addEventListener('click',function(){setTimeout(cleanLabels,80);},true);
+  setInterval(boot,15000);
+})();
+</script>
+<!-- Pha14J20R45_QuietStableBootStorageThrottle_LabelClean_R44Base - END -->
+
+
+<!-- Pha14J20R46_QuietBootR35Backoff_FileOriginClean_LabelClean_R45Base - START -->
+<script id="lifeos-j20r46-quiet-boot-r35-backoff-fileorigin-clean-js">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R46QuietBootInstalled) return;
+  window.__lifeosJ20R46QuietBootInstalled = true;
+  var PHASE='Pha14J20R46_QuietBootR35Backoff_FileOriginClean_LabelClean_R45Base';
+  function S(v){return v==null?'':String(v);} 
+  function cleanLabels(){try{ if(window.LifeOSJ20R45QuietStable&&window.LifeOSJ20R45QuietStable.boot) window.LifeOSJ20R45QuietStable.boot(); }catch(e){}}
+  function patchExtraConsole(){
+    try{
+      if(console.__lifeosR46ExtraQuiet) return true;
+      ['log','info','warn','error'].forEach(function(level){
+        var old=console[level]; if(!old) return;
+        console[level]=function(){
+          try{
+            var line=Array.prototype.map.call(arguments,function(a){try{return typeof a==='string'?a:JSON.stringify(a);}catch(e){return S(a);}}).join(' ');
+            if(/R35_RENDER_FAILED|CHAT_DELETE_ROUTE_PATCHED|SELECTED_DELETE_ROUTE_PATCHED|INIT_FIREBASE_PATCHED|SAVE_SPLIT_INSTALLED|D1_COMMIT_BRIDGE_INSTALLED|DELETE_PATCHED|CHATENGINE_D1_FOLDER_OFFICIAL_PATCHED|CHATENGINE_R35_D1_TEXT_PATCHED|PATCH_CHATENGINE_OK|DOM_ROW_REPLACED|FIREBASE_CONSOLE_SILENCER_INSTALLED|FETCH_CORS_CLEANER_INSTALLED|R35_REFRESH_QUIET_WRAPPED|D1_FOLDERS_APPLIED|D1_HEALTH_OK|D1_LIST_OK|HYBRID_TIMELINE_MERGED|FIREBASE_PUSHALL_BLOCKED|FIREBASE_PROFILE_UNSUBSCRIBED|FIRESTORE_NETWORK_DISABLE_REQUESTED|smartbox_channels\.json missing or failed|LifeOS SW\] registration failed/i.test(line)) return;
+          }catch(e){}
+          return old.apply(console, arguments);
+        };
+      });
+      console.__lifeosR46ExtraQuiet=true;
+      return true;
+    }catch(e){return false;}
+  }
+  function patchR35RefreshSingleFlight(){
+    try{
+      var r=window.LifeOSR35D1TextOfficial;
+      if(!r || typeof r.refresh!=='function' || r.refresh.__lifeosR46SingleFlight) return false;
+      var old=r.refresh.bind(r), inflight=null, lastAt=0, lastReason='';
+      var fn=function(reason, force){
+        var rn=S(reason||'manual'), now=Date.now();
+        if(inflight && !/after_send_text_|after_delete_text_|manual|user/i.test(rn)) return inflight;
+        if(now-lastAt<3500 && rn===lastReason && !/after_send_text_|after_delete_text_|manual|user/i.test(rn)) return Promise.resolve(false);
+        lastAt=now; lastReason=rn;
+        try{ inflight=Promise.resolve(old(reason, force)); }
+        catch(e){ inflight=Promise.resolve(false); }
+        inflight.finally(function(){ inflight=null; });
+        return inflight;
+      };
+      fn.__lifeosR46SingleFlight=true;
+      r.refresh=fn;
+      return true;
+    }catch(e){return false;}
+  }
+  function boot(){patchExtraConsole(); patchR35RefreshSingleFlight(); cleanLabels();}
+  window.LifeOSJ20R46QuietBoot={phase:PHASE,boot:boot,summary:function(){var r=window.LifeOSR35D1TextOfficial, st=r&&r.state||{}; return {phase:PHASE, r35RefreshCount:st.refreshCount||0, r35LastError:st.lastError||'', r35RenderFailCount:st.renderFailCount||0, r35RenderBackoffUntil:window.__lifeosR35RenderBackoffUntil||0, protocol:location.protocol};}};
+  boot();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
+  window.addEventListener('load',function(){setTimeout(boot,100);setTimeout(boot,1000);setTimeout(boot,3500);},{once:true});
+  setInterval(boot,20000);
+})();
+</script>
+<!-- Pha14J20R46_QuietBootR35Backoff_FileOriginClean_LabelClean_R45Base - END -->
 
 </body>
 </html>
