@@ -1,6 +1,6 @@
 {
   "version": "smartbox_channels_v10_11_ERGONOMIC_CLEAN",
-  "generated_at": "2026-07-03T17:30:36.304Z",
+  "generated_at": "2026-07-04T17:59:21.374Z",
   "note": "Xuất từ V10.9 Pro Manager: Dead/Deleted bị bỏ; CORS suspect giữ riêng; hỗ trợ source/import/move group.",
   "groups": [
     {
@@ -9,7 +9,7 @@
       "type": "tv",
       "priority": 1,
       "icon": "📰",
-      "count": 2
+      "count": 14
     },
     {
       "id": "tv_dia_phuong",
@@ -17,7 +17,7 @@
       "type": "tv",
       "priority": 3,
       "icon": "📍",
-      "count": 2
+      "count": 5
     },
     {
       "id": "tv_kham_pha",
@@ -49,7 +49,7 @@
       "type": "tv",
       "priority": 7,
       "icon": "🧒",
-      "count": 2
+      "count": 1
     },
     {
       "id": "tv_meo_vat_doi_song",
@@ -73,7 +73,7 @@
       "type": "tv",
       "priority": 99,
       "icon": "📺",
-      "count": 1
+      "count": 4
     },
     {
       "id": "radio_chinh_thong",
@@ -81,7 +81,15 @@
       "type": "radio",
       "priority": 1,
       "icon": "📻",
-      "count": 2
+      "count": 4
+    },
+    {
+      "id": "radio_tin_tuc_giao_thong",
+      "name": "Tin tức / Giao thông",
+      "type": "radio",
+      "priority": 2,
+      "icon": "🚦",
+      "count": 1
     },
     {
       "id": "radio_dia_phuong",
@@ -89,7 +97,15 @@
       "type": "radio",
       "priority": 3,
       "icon": "📍",
-      "count": 4
+      "count": 5
+    },
+    {
+      "id": "radio_nhac_viet",
+      "name": "Nhạc Việt",
+      "type": "radio",
+      "priority": 4,
+      "icon": "🎶",
+      "count": 8
     },
     {
       "id": "radio_nhac_vang_bolero",
@@ -97,7 +113,7 @@
       "type": "radio",
       "priority": 5,
       "icon": "🎙️",
-      "count": 1
+      "count": 5
     },
     {
       "id": "radio_nhac_tre",
@@ -105,7 +121,23 @@
       "type": "radio",
       "priority": 6,
       "icon": "🎧",
-      "count": 3
+      "count": 17
+    },
+    {
+      "id": "radio_khong_loi_thu_gian",
+      "name": "Không lời / Thư giãn",
+      "type": "radio",
+      "priority": 7,
+      "icon": "🌿",
+      "count": 5
+    },
+    {
+      "id": "radio_quoc_te_tieng_viet",
+      "name": "Quốc tế tiếng Việt",
+      "type": "radio",
+      "priority": 9,
+      "icon": "🌐",
+      "count": 4
     },
     {
       "id": "radio_quoc_te_gia_tri",
@@ -113,7 +145,7 @@
       "type": "radio",
       "priority": 10,
       "icon": "🌎",
-      "count": 2
+      "count": 16
     },
     {
       "id": "tv_dia_phuong_bac_trung",
@@ -121,7 +153,7 @@
       "type": "tv",
       "priority": 2,
       "icon": "📍",
-      "count": 9
+      "count": 11
     },
     {
       "id": "tv_dia_phuong_nam_tay_nguyen",
@@ -129,7 +161,7 @@
       "type": "tv",
       "priority": 3,
       "icon": "📍",
-      "count": 16
+      "count": 24
     },
     {
       "id": "tv_giai_tri_thieu_nhi_kham_pha",
@@ -161,15 +193,15 @@
       "group": "tv_thoi_su",
       "group_name": "Thời sự",
       "type": "tv",
-      "count": 2,
-      "status": "LOW"
+      "count": 14,
+      "status": "OK"
     },
     {
       "group": "tv_dia_phuong",
       "group_name": "TV địa phương",
       "type": "tv",
-      "count": 2,
-      "status": "LOW"
+      "count": 5,
+      "status": "OK"
     },
     {
       "group": "tv_kham_pha",
@@ -196,7 +228,7 @@
       "group": "tv_thieu_nhi_hoat_hinh",
       "group_name": "Thiếu nhi / Hoạt hình",
       "type": "tv",
-      "count": 2,
+      "count": 1,
       "status": "LOW"
     },
     {
@@ -217,56 +249,84 @@
       "group": "tv_review_them",
       "group_name": "TV khác",
       "type": "tv",
-      "count": 1,
-      "status": "LOW"
+      "count": 4,
+      "status": "OK"
     },
     {
       "group": "radio_chinh_thong",
       "group_name": "Radio chính thống",
       "type": "radio",
-      "count": 2,
+      "count": 4,
+      "status": "OK"
+    },
+    {
+      "group": "radio_tin_tuc_giao_thong",
+      "group_name": "Tin tức / Giao thông",
+      "type": "radio",
+      "count": 1,
       "status": "LOW"
     },
     {
       "group": "radio_dia_phuong",
       "group_name": "Radio địa phương",
       "type": "radio",
-      "count": 4,
+      "count": 5,
+      "status": "OK"
+    },
+    {
+      "group": "radio_nhac_viet",
+      "group_name": "Nhạc Việt",
+      "type": "radio",
+      "count": 8,
       "status": "OK"
     },
     {
       "group": "radio_nhac_vang_bolero",
       "group_name": "Nhạc vàng / Bolero",
       "type": "radio",
-      "count": 1,
-      "status": "LOW"
+      "count": 5,
+      "status": "OK"
     },
     {
       "group": "radio_nhac_tre",
       "group_name": "Nhạc trẻ",
       "type": "radio",
-      "count": 3,
+      "count": 17,
+      "status": "OK"
+    },
+    {
+      "group": "radio_khong_loi_thu_gian",
+      "group_name": "Không lời / Thư giãn",
+      "type": "radio",
+      "count": 5,
+      "status": "OK"
+    },
+    {
+      "group": "radio_quoc_te_tieng_viet",
+      "group_name": "Quốc tế tiếng Việt",
+      "type": "radio",
+      "count": 4,
       "status": "OK"
     },
     {
       "group": "radio_quoc_te_gia_tri",
       "group_name": "Radio quốc tế giá trị",
       "type": "radio",
-      "count": 2,
-      "status": "LOW"
+      "count": 16,
+      "status": "OK"
     },
     {
       "group": "tv_dia_phuong_bac_trung",
       "group_name": "TV địa phương Bắc / Trung",
       "type": "tv",
-      "count": 9,
+      "count": 11,
       "status": "OK"
     },
     {
       "group": "tv_dia_phuong_nam_tay_nguyen",
       "group_name": "TV địa phương Nam / Tây Nguyên",
       "type": "tv",
-      "count": 16,
+      "count": 24,
       "status": "OK"
     },
     {
@@ -3942,34 +4002,12 @@
         "badge": "Thiếu nhi / Hoạt hình",
         "icon": "🧒",
         "backup_count": 0
-      }
-    },
-    {
-      "id": "ch_mr55svbp_fw08m8",
-      "added_at": "2026-07-03T16:40:09.109Z",
-      "status_admin": "new",
-      "import_flag": "manual_new",
-      "display_name": "Da Nang TV-2",
-      "name": "Da Nang TV-2",
-      "type": "tv",
-      "group": "tv_dia_phuong_bac_trung",
-      "group_name": "TV địa phương Bắc / Trung",
-      "subtitle": "TV địa phương Bắc / Trung",
-      "url": "http://tv.ctvcamau.vn/live/tv/tv.m3u8",
-      "backup_urls": [],
-      "note": "",
-      "updated_at": "2026-07-03T16:40:11.926Z",
-      "play_url": "http://tv.ctvcamau.vn/live/tv/tv.m3u8",
-      "backup_play_urls": [],
-      "status": "ready",
-      "quality": "owner_added",
-      "ui": {
-        "title": "Da Nang TV-2",
-        "subtitle": "TV địa phương Bắc / Trung",
-        "badge": "TV địa phương Bắc / Trung",
-        "icon": "📍",
-        "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr55vv19_frocg7",
@@ -3996,7 +4034,12 @@
         "badge": "TV địa phương Nam / Tây Nguyên",
         "icon": "📍",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr55ys31_thnk0d",
@@ -4023,7 +4066,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr561rce_54u5ya",
@@ -4050,7 +4098,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr5657ke_ptmija",
@@ -4077,7 +4130,12 @@
         "badge": "Nhạc trẻ",
         "icon": "🎧",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr566w5h_g3gund",
@@ -4104,7 +4162,12 @@
         "badge": "Nhạc vàng / Bolero",
         "icon": "🎙️",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr568k9h_xv141r",
@@ -4131,7 +4194,12 @@
         "badge": "Radio địa phương",
         "icon": "📍",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr56fpnx_6g7j2a",
@@ -4158,7 +4226,12 @@
         "badge": "Thời sự",
         "icon": "📰",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr56nm19_dk81x6",
@@ -4185,34 +4258,12 @@
         "badge": "Quốc tế giá trị",
         "icon": "🌐",
         "backup_count": 0
-      }
-    },
-    {
-      "id": "ch_mr56phyd_y04060",
-      "added_at": "2026-07-03T17:05:31.429Z",
-      "status_admin": "new",
-      "import_flag": "manual_new",
-      "display_name": "HOAT HINH TQ",
-      "name": "HOAT HINH TQ",
-      "type": "tv",
-      "group": "tv_thieu_nhi_hoat_hinh",
-      "group_name": "Thiếu nhi / Hoạt hình",
-      "subtitle": "Thiếu nhi / Hoạt hình",
-      "url": "https://zoomoo-samsungau.amagi.tv/playlist.m3u8",
-      "backup_urls": [],
-      "note": "",
-      "updated_at": "2026-07-03T17:05:31.429Z",
-      "play_url": "https://zoomoo-samsungau.amagi.tv/playlist.m3u8",
-      "backup_play_urls": [],
-      "status": "ready",
-      "quality": "owner_added",
-      "ui": {
-        "title": "HOAT HINH TQ",
-        "subtitle": "Thiếu nhi / Hoạt hình",
-        "badge": "Thiếu nhi / Hoạt hình",
-        "icon": "🧒",
-        "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr56qvzi_8hidet",
@@ -4239,7 +4290,12 @@
         "badge": "Quốc tế giá trị",
         "icon": "🌐",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr56sl4d_mo22ox",
@@ -4266,7 +4322,12 @@
         "badge": "Thiên nhiên / Động vật",
         "icon": "🐾",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr56tug5_xm1j8u",
@@ -4293,7 +4354,12 @@
         "badge": "Khám phá",
         "icon": "🌍",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr56vhqm_bi6z2e",
@@ -4320,7 +4386,12 @@
         "badge": "Thiên nhiên / Động vật",
         "icon": "🐾",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr56wjzh_sn8k22",
@@ -4347,7 +4418,12 @@
         "badge": "Thiên nhiên / Động vật",
         "icon": "🐾",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr56yzxp_3lv4y9",
@@ -4374,7 +4450,12 @@
         "badge": "Khoa học / Vũ trụ",
         "icon": "🚀",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr56zyx9_ldn5lr",
@@ -4401,7 +4482,12 @@
         "badge": "Thiên nhiên / Động vật",
         "icon": "🐾",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr573i2t_h8wdzm",
@@ -4428,7 +4514,12 @@
         "badge": "Mẹo vặt / Đời sống",
         "icon": "💡",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr5755ja_vm1eav",
@@ -4455,7 +4546,12 @@
         "badge": "TV khác",
         "icon": "📺",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr576kut_r2sov9",
@@ -4482,7 +4578,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr57aa19_dayn0i",
@@ -4509,7 +4610,12 @@
         "badge": "TV địa phương",
         "icon": "📍",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr57c0qd_wcx8g0",
@@ -4536,7 +4642,12 @@
         "badge": "Radio quốc tế giá trị",
         "icon": "🌎",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr57ejn1_2d1hzo",
@@ -4563,34 +4674,12 @@
         "badge": "Quốc tế giá trị",
         "icon": "🌐",
         "backup_count": 0
-      }
-    },
-    {
-      "id": "ch_mr57g23p_ehukr6",
-      "added_at": "2026-07-03T17:26:10.597Z",
-      "status_admin": "new",
-      "import_flag": "manual_new",
-      "display_name": "HƯNG YÊN",
-      "name": "HƯNG YÊN",
-      "type": "tv",
-      "group": "tv_dia_phuong",
-      "group_name": "TV địa phương",
-      "subtitle": "TV địa phương",
-      "url": "https://live.mediatech.vn/live/285b6e443bc30734725a940da8b0629655b/playlist.m3u8",
-      "backup_urls": [],
-      "note": "",
-      "updated_at": "2026-07-03T17:26:10.597Z",
-      "play_url": "https://live.mediatech.vn/live/285b6e443bc30734725a940da8b0629655b/playlist.m3u8",
-      "backup_play_urls": [],
-      "status": "ready",
-      "quality": "owner_added",
-      "ui": {
-        "title": "HƯNG YÊN",
-        "subtitle": "TV địa phương",
-        "badge": "TV địa phương",
-        "icon": "📍",
-        "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
       "id": "ch_mr57hjx1_b2w65z",
@@ -4617,32 +4706,2423 @@
         "badge": "Radio chính thống",
         "icon": "📻",
         "backup_count": 0
-      }
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
     },
     {
-      "id": "ch_mr57iohp_n87qgx",
-      "added_at": "2026-07-03T17:28:12.925Z",
+      "id": "ch_mr6gnpki_cp5oc9",
+      "added_at": "2026-07-04T14:31:50.322Z",
       "status_admin": "new",
       "import_flag": "manual_new",
-      "display_name": "VOV GIAO THÔNG",
-      "name": "VOV GIAO THÔNG",
-      "type": "radio",
-      "group": "radio_chinh_thong",
-      "group_name": "Radio chính thống",
-      "subtitle": "Radio chính thống",
-      "url": "https://play.vovgiaothong.vn/live/duyenhai/playlist.m3u8",
+      "display_name": "VTV3",
+      "name": "VTV3",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\vtvgolive-vtv.vtvdigital.vn\\69gQP6z6i1xkDHh_YlWGkg\\1722773486\\vtvgo\\vtv3-manifest.m3u8",
       "backup_urls": [],
       "note": "",
-      "updated_at": "2026-07-03T17:28:12.925Z",
-      "play_url": "https://play.vovgiaothong.vn/live/duyenhai/playlist.m3u8",
+      "updated_at": "2026-07-04T14:31:50.322Z",
+      "play_url": "https:\\\\vtvgolive-vtv.vtvdigital.vn\\69gQP6z6i1xkDHh_YlWGkg\\1722773486\\vtvgo\\vtv3-manifest.m3u8",
       "backup_play_urls": [],
       "status": "ready",
       "quality": "owner_added",
       "ui": {
-        "title": "VOV GIAO THÔNG",
+        "title": "VTV3",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6h6kl5_zuwktg",
+      "added_at": "2026-07-04T14:46:30.329Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "QUẢNG NINH TV",
+      "name": "QUẢNG NINH TV",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "http:\\\\qtv.vncdn.vn\\qtvlive\\tv1live.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T14:46:30.329Z",
+      "play_url": "http:\\\\qtv.vncdn.vn\\qtvlive\\tv1live.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "QUẢNG NINH TV",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6h7swp_atgljz",
+      "added_at": "2026-07-04T14:47:27.769Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "QUẢNG NINH AN NINH",
+      "name": "QUẢNG NINH AN NINH",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "http:\\\\qtv.vncdn.vn\\qtvlive\\tv3live.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T14:47:27.769Z",
+      "play_url": "http:\\\\qtv.vncdn.vn\\qtvlive\\tv3live.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "QUẢNG NINH AN NINH",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6i7sgw_aeyc9b",
+      "added_at": "2026-07-04T15:15:26.816Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "AN NINH TV",
+      "name": "AN NINH TV",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\live.fptplay53.net\\fnxhd2\\anninhtv_vhls.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:15:26.816Z",
+      "play_url": "https:\\\\live.fptplay53.net\\fnxhd2\\anninhtv_vhls.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "AN NINH TV",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6i9gs0_v3sqjk",
+      "added_at": "2026-07-04T15:16:44.976Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "CAO BẰNG TV",
+      "name": "CAO BẰNG TV",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "https:\\\\stream.thingnet.vn\\live\\smil:CRTV.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:16:44.976Z",
+      "play_url": "https:\\\\stream.thingnet.vn\\live\\smil:CRTV.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "CAO BẰNG TV",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6iag1k_m6vzy4",
+      "added_at": "2026-07-04T15:17:30.680Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "ĐẮC LẮC TV",
+      "name": "ĐẮC LẮC TV",
+      "type": "tv",
+      "group": "tv_dia_phuong",
+      "group_name": "TV địa phương",
+      "subtitle": "TV địa phương",
+      "url": "https:\\\\cdn.drt.vn\\live\\285a27750861b964c27af22091662a74f2f\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:17:30.680Z",
+      "play_url": "https:\\\\cdn.drt.vn\\live\\285a27750861b964c27af22091662a74f2f\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "ĐẮC LẮC TV",
+        "subtitle": "TV địa phương",
+        "badge": "TV địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6ibp3c_43pivz",
+      "added_at": "2026-07-04T15:18:29.064Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "ĐỒNG NAI 1",
+      "name": "ĐỒNG NAI 1",
+      "type": "tv",
+      "group": "tv_dia_phuong_nam_tay_nguyen",
+      "group_name": "TV địa phương Nam / Tây Nguyên",
+      "subtitle": "TV địa phương Nam / Tây Nguyên",
+      "url": "http:\\\\118.107.85.4:1935\\live\\smil:DNTV1.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:18:29.064Z",
+      "play_url": "http:\\\\118.107.85.4:1935\\live\\smil:DNTV1.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "ĐỒNG NAI 1",
+        "subtitle": "TV địa phương Nam / Tây Nguyên",
+        "badge": "TV địa phương Nam / Tây Nguyên",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6icaui_t3mjwo",
+      "added_at": "2026-07-04T15:18:57.258Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "ĐỒNG NAI 2",
+      "name": "ĐỒNG NAI 2",
+      "type": "tv",
+      "group": "tv_dia_phuong_nam_tay_nguyen",
+      "group_name": "TV địa phương Nam / Tây Nguyên",
+      "subtitle": "TV địa phương Nam / Tây Nguyên",
+      "url": "http:\\\\118.107.85.4:1935\\live\\smil:DNTV2.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:18:57.258Z",
+      "play_url": "http:\\\\118.107.85.4:1935\\live\\smil:DNTV2.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "ĐỒNG NAI 2",
+        "subtitle": "TV địa phương Nam / Tây Nguyên",
+        "badge": "TV địa phương Nam / Tây Nguyên",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6idaqo_ln91s9",
+      "added_at": "2026-07-04T15:19:43.776Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "ĐỒNG THÁP 1",
+      "name": "ĐỒNG THÁP 1",
+      "type": "tv",
+      "group": "tv_dia_phuong_nam_tay_nguyen",
+      "group_name": "TV địa phương Nam / Tây Nguyên",
+      "subtitle": "TV địa phương Nam / Tây Nguyên",
+      "url": "https:\\\\liveh34.vtvprime.vn\\hls\\DONGTHAPTV\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:19:43.776Z",
+      "play_url": "https:\\\\liveh34.vtvprime.vn\\hls\\DONGTHAPTV\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "ĐỒNG THÁP 1",
+        "subtitle": "TV địa phương Nam / Tây Nguyên",
+        "badge": "TV địa phương Nam / Tây Nguyên",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6ids2f_t7911f",
+      "added_at": "2026-07-04T15:20:06.231Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "ĐỒNG THÁP 2",
+      "name": "ĐỒNG THÁP 2",
+      "type": "tv",
+      "group": "tv_review_them",
+      "group_name": "TV khác",
+      "subtitle": "TV khác",
+      "url": "https:\\\\618b88f69e53b.streamlock.net\\THDT2\\thdttv2\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:20:06.231Z",
+      "play_url": "https:\\\\618b88f69e53b.streamlock.net\\THDT2\\thdttv2\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "ĐỒNG THÁP 2",
+        "subtitle": "TV khác",
+        "badge": "TV khác",
+        "icon": "📺",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6if4i0_27h2q3",
+      "added_at": "2026-07-04T15:21:09.000Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HTV9",
+      "name": "HTV9",
+      "type": "tv",
+      "group": "tv_dia_phuong_nam_tay_nguyen",
+      "group_name": "TV địa phương Nam / Tây Nguyên",
+      "subtitle": "TV địa phương Nam / Tây Nguyên",
+      "url": "https:\\\\live.fptplay53.net\\epzhd1\\htv9hd_vhls.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:21:09.000Z",
+      "play_url": "https:\\\\live.fptplay53.net\\epzhd1\\htv9hd_vhls.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HTV9",
+        "subtitle": "TV địa phương Nam / Tây Nguyên",
+        "badge": "TV địa phương Nam / Tây Nguyên",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6ifrhc_u45285",
+      "added_at": "2026-07-04T15:21:38.784Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HTV 4",
+      "name": "HTV 4",
+      "type": "tv",
+      "group": "tv_dia_phuong_nam_tay_nguyen",
+      "group_name": "TV địa phương Nam / Tây Nguyên",
+      "subtitle": "TV địa phương Nam / Tây Nguyên",
+      "url": "https:\\\\liveh12.vtvprime.vn\\hls\\HTVKey\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:21:38.784Z",
+      "play_url": "https:\\\\liveh12.vtvprime.vn\\hls\\HTVKey\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HTV 4",
+        "subtitle": "TV địa phương Nam / Tây Nguyên",
+        "badge": "TV địa phương Nam / Tây Nguyên",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6iggu8_i6iagg",
+      "added_at": "2026-07-04T15:22:11.648Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HTV THỂ THAO",
+      "name": "HTV THỂ THAO",
+      "type": "tv",
+      "group": "tv_dia_phuong_nam_tay_nguyen",
+      "group_name": "TV địa phương Nam / Tây Nguyên",
+      "subtitle": "TV địa phương Nam / Tây Nguyên",
+      "url": "https:\\\\live.fptplay53.net\\epzhd1\\htvcthethao_vhls.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:22:11.648Z",
+      "play_url": "https:\\\\live.fptplay53.net\\epzhd1\\htvcthethao_vhls.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HTV THỂ THAO",
+        "subtitle": "TV địa phương Nam / Tây Nguyên",
+        "badge": "TV địa phương Nam / Tây Nguyên",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6ih3vc_zsbxq3",
+      "added_at": "2026-07-04T15:22:41.496Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HUẾ TV",
+      "name": "HUẾ TV",
+      "type": "tv",
+      "group": "tv_dia_phuong_bac_trung",
+      "group_name": "TV địa phương Bắc / Trung",
+      "subtitle": "TV địa phương Bắc / Trung",
+      "url": "https:\\\\live.fptplay53.net\\epzsd1\\hue_hls.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:22:41.496Z",
+      "play_url": "https:\\\\live.fptplay53.net\\epzsd1\\hue_hls.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HUẾ TV",
+        "subtitle": "TV địa phương Bắc / Trung",
+        "badge": "TV địa phương Bắc / Trung",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6ihttc_yxsov5",
+      "added_at": "2026-07-04T15:23:15.120Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "LÂM ĐỒNG",
+      "name": "LÂM ĐỒNG",
+      "type": "tv",
+      "group": "tv_dia_phuong_nam_tay_nguyen",
+      "group_name": "TV địa phương Nam / Tây Nguyên",
+      "subtitle": "TV địa phương Nam / Tây Nguyên",
+      "url": "http:\\\\118.107.85.5:1935\\live\\smil:LTV.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:23:15.120Z",
+      "play_url": "http:\\\\118.107.85.5:1935\\live\\smil:LTV.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "LÂM ĐỒNG",
+        "subtitle": "TV địa phương Nam / Tây Nguyên",
+        "badge": "TV địa phương Nam / Tây Nguyên",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6iijtr_8uw6vs",
+      "added_at": "2026-07-04T15:23:48.831Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "LÀO CAI TV",
+      "name": "LÀO CAI TV",
+      "type": "tv",
+      "group": "tv_dia_phuong_bac_trung",
+      "group_name": "TV địa phương Bắc / Trung",
+      "subtitle": "TV địa phương Bắc / Trung",
+      "url": "https:\\\\live.baolaocai.vn\\channel2\\stream.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:23:48.832Z",
+      "play_url": "https:\\\\live.baolaocai.vn\\channel2\\stream.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "LÀO CAI TV",
+        "subtitle": "TV địa phương Bắc / Trung",
+        "badge": "TV địa phương Bắc / Trung",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6ikk3r_y8oppr",
+      "added_at": "2026-07-04T15:25:22.503Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "QUỐC PHÒNG VN",
+      "name": "QUỐC PHÒNG VN",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\liveh12.vtvprime.vn\\hls\\QPTV\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:25:22.503Z",
+      "play_url": "https:\\\\liveh12.vtvprime.vn\\hls\\QPTV\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "QUỐC PHÒNG VN",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6ilnh3_ysxdqm",
+      "added_at": "2026-07-04T15:26:13.527Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "QUỐC PHÒNG VN HD",
+      "name": "QUỐC PHÒNG VN HD",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\qpvn.vn\\live\\qpvn\\master.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:26:13.527Z",
+      "play_url": "https:\\\\qpvn.vn\\live\\qpvn\\master.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "QUỐC PHÒNG VN HD",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6imndr_f8mbmz",
+      "added_at": "2026-07-04T15:27:00.063Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "SCTV2",
+      "name": "SCTV2",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\liveh12.vtvprime.vn\\hls\\SCTV2\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:27:00.063Z",
+      "play_url": "https:\\\\liveh12.vtvprime.vn\\hls\\SCTV2\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "SCTV2",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6inflb_qmfwqp",
+      "added_at": "2026-07-04T15:27:36.623Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "SCTV6",
+      "name": "SCTV6",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\live.fptplay53.net\\epzhd2\\film360_vhls.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:27:36.623Z",
+      "play_url": "https:\\\\live.fptplay53.net\\epzhd2\\film360_vhls.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "SCTV6",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6iqma7_nce867",
+      "added_at": "2026-07-04T15:30:05.263Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV10",
+      "name": "VTV10",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\live.fptplay53.net\\fnxhd1\\vtvcantho_vhls.smil\\chunklist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:30:05.263Z",
+      "play_url": "https:\\\\live.fptplay53.net\\fnxhd1\\vtvcantho_vhls.smil\\chunklist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV10",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6irrp3_6vzu4t",
+      "added_at": "2026-07-04T15:30:58.935Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV1",
+      "name": "VTV1",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\live.fptplay53.net\\live\\media\\vtv1\\live247-hls-avc\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:30:58.935Z",
+      "play_url": "https:\\\\live.fptplay53.net\\live\\media\\vtv1\\live247-hls-avc\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV1",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6isd87_pfrxgh",
+      "added_at": "2026-07-04T15:31:26.839Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV4 HD",
+      "name": "VTV4 HD",
+      "type": "tv",
+      "group": "tv_review_them",
+      "group_name": "TV khác",
+      "subtitle": "TV khác",
+      "url": "https:\\\\live.fptplay53.net\\live\\media\\vtv4\\live247-hls-avc\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:31:26.839Z",
+      "play_url": "https:\\\\live.fptplay53.net\\live\\media\\vtv4\\live247-hls-avc\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV4 HD",
+        "subtitle": "TV khác",
+        "badge": "TV khác",
+        "icon": "📺",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6it3in_voh56t",
+      "added_at": "2026-07-04T15:32:00.911Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV5",
+      "name": "VTV5",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\live.fptplay53.net\\live\\media\\vtv5\\live247-hls-avc\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:32:00.911Z",
+      "play_url": "https:\\\\live.fptplay53.net\\live\\media\\vtv5\\live247-hls-avc\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV5",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6itra7_qpimev",
+      "added_at": "2026-07-04T15:32:31.711Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV1 HD",
+      "name": "VTV1 HD",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\live-a.fptplay53.net\\live\\media\\vtv1\\live247-hls-avc\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:32:31.711Z",
+      "play_url": "https:\\\\live-a.fptplay53.net\\live\\media\\vtv1\\live247-hls-avc\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV1 HD",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6iuhjb_wgmwxa",
+      "added_at": "2026-07-04T15:33:05.735Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV4 HD",
+      "name": "VTV4 HD",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\live-a.fptplay53.net\\live\\media\\vtv4\\live247-hls-avc\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:33:05.735Z",
+      "play_url": "https:\\\\live-a.fptplay53.net\\live\\media\\vtv4\\live247-hls-avc\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV4 HD",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6iwcrz_5fd3yx",
+      "added_at": "2026-07-04T15:34:32.879Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV5 TÂY NAM BỘ",
+      "name": "VTV5 TÂY NAM BỘ",
+      "type": "tv",
+      "group": "tv_dia_phuong_nam_tay_nguyen",
+      "group_name": "TV địa phương Nam / Tây Nguyên",
+      "subtitle": "TV địa phương Nam / Tây Nguyên",
+      "url": "https:\\\\live-a.fptplay53.net\\live\\media\\vtv5tnb\\live-hls-avc\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:34:32.879Z",
+      "play_url": "https:\\\\live-a.fptplay53.net\\live\\media\\vtv5tnb\\live-hls-avc\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV5 TÂY NAM BỘ",
+        "subtitle": "TV địa phương Nam / Tây Nguyên",
+        "badge": "TV địa phương Nam / Tây Nguyên",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6ix2i7_2gvx1d",
+      "added_at": "2026-07-04T15:35:06.223Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VTV5 TÂY NGUYÊN",
+      "name": "VTV5 TÂY NGUYÊN",
+      "type": "tv",
+      "group": "tv_dia_phuong_bac_trung",
+      "group_name": "TV địa phương Bắc / Trung",
+      "subtitle": "TV địa phương Bắc / Trung",
+      "url": "https:\\\\vips-livecdn.fptplay.net\\live\\media\\vtv5tn\\live-hls-avc\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:35:06.223Z",
+      "play_url": "https:\\\\vips-livecdn.fptplay.net\\live\\media\\vtv5tn\\live-hls-avc\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VTV5 TÂY NGUYÊN",
+        "subtitle": "TV địa phương Bắc / Trung",
+        "badge": "TV địa phương Bắc / Trung",
+        "icon": "📍",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6iy19j_2plp0f",
+      "added_at": "2026-07-04T15:35:51.271Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VIETNAM TODAY",
+      "name": "VIETNAM TODAY",
+      "type": "tv",
+      "group": "tv_thoi_su",
+      "group_name": "Thời sự",
+      "subtitle": "Thời sự",
+      "url": "https:\\\\vips-livecdn.fptplay.net\\live\\media\\vietnamtoday\\live-hls-avc\\index.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:35:51.271Z",
+      "play_url": "https:\\\\vips-livecdn.fptplay.net\\live\\media\\vietnamtoday\\live-hls-avc\\index.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VIETNAM TODAY",
+        "subtitle": "Thời sự",
+        "badge": "Thời sự",
+        "icon": "📰",
+        "backup_count": 0
+      },
+      "source_files": [
+        "smartbox_channels.json"
+      ],
+      "source_label": "smartbox_channels.json",
+      "source_role": "base"
+    },
+    {
+      "id": "ch_mr6jefbj_x3k5sm",
+      "added_at": "2026-07-04T15:48:35.983Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VOV 1",
+      "name": "VOV 1",
+      "type": "radio",
+      "group": "radio_chinh_thong",
+      "group_name": "Radio chính thống",
+      "subtitle": "Radio chính thống",
+      "url": "https://str.vov.gov.vn/vovlive/vov1vov5Vietnamese.sdp_aac/playlist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:48:35.983Z",
+      "play_url": "https://str.vov.gov.vn/vovlive/vov1vov5Vietnamese.sdp_aac/playlist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VOV 1",
         "subtitle": "Radio chính thống",
         "badge": "Radio chính thống",
         "icon": "📻",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6jg9yv_54muyq",
+      "added_at": "2026-07-04T15:50:02.359Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VOV 3",
+      "name": "VOV 3",
+      "type": "radio",
+      "group": "radio_chinh_thong",
+      "group_name": "Radio chính thống",
+      "subtitle": "Radio chính thống",
+      "url": "https://str.vov.gov.vn/vovlive/vov3.sdp_aac/playlist.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:50:02.359Z",
+      "play_url": "https://str.vov.gov.vn/vovlive/vov3.sdp_aac/playlist.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VOV 3",
+        "subtitle": "Radio chính thống",
+        "badge": "Radio chính thống",
+        "icon": "📻",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6ji12e_7a8nis",
+      "added_at": "2026-07-04T15:51:24.134Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Gartenwelt Frey Listen live",
+      "name": "Gartenwelt Frey Listen live",
+      "type": "radio",
+      "group": "radio_quoc_te_tieng_viet",
+      "group_name": "Quốc tế tiếng Việt",
+      "subtitle": "Quốc tế tiếng Việt",
+      "url": "https://stream.laut.fm/gartenweltfrey",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:51:24.134Z",
+      "play_url": "https://stream.laut.fm/gartenweltfrey",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Gartenwelt Frey Listen live",
+        "subtitle": "Quốc tế tiếng Việt",
+        "badge": "Quốc tế tiếng Việt",
+        "icon": "🌐",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6jk5jy_hmktzu",
+      "added_at": "2026-07-04T15:53:03.262Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Dasliveradio2 Listen live",
+      "name": "Dasliveradio2 Listen live",
+      "type": "radio",
+      "group": "radio_quoc_te_tieng_viet",
+      "group_name": "Quốc tế tiếng Việt",
+      "subtitle": "Quốc tế tiếng Việt",
+      "url": "https://stream.laut.fm/dasliveradio2?ref=radiode",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:53:03.262Z",
+      "play_url": "https://stream.laut.fm/dasliveradio2?ref=radiode",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Dasliveradio2 Listen live",
+        "subtitle": "Quốc tế tiếng Việt",
+        "badge": "Quốc tế tiếng Việt",
+        "icon": "🌐",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6jlwcu_ul1ewo",
+      "added_at": "2026-07-04T15:54:24.654Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "TUAN VU Securenet Systems Cirrus(R)",
+      "name": "TUAN VU Securenet Systems Cirrus(R)",
+      "type": "radio",
+      "group": "radio_nhac_vang_bolero",
+      "group_name": "Nhạc vàng / Bolero",
+      "subtitle": "Nhạc vàng / Bolero",
+      "url": "http://ice3.securenetsystems.net/KALIM?playSessionID=B2EF8726-042D-601D-0DB377897A7EDF85",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:54:24.655Z",
+      "play_url": "http://ice3.securenetsystems.net/KALIM?playSessionID=B2EF8726-042D-601D-0DB377897A7EDF85",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "TUAN VU Securenet Systems Cirrus(R)",
+        "subtitle": "Nhạc vàng / Bolero",
+        "badge": "Nhạc vàng / Bolero",
+        "icon": "🎙️",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6js3eo_24xczj",
+      "added_at": "2026-07-04T15:59:13.728Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "RFI Vietnamese Radio",
+      "name": "RFI Vietnamese Radio",
+      "type": "radio",
+      "group": "radio_quoc_te_tieng_viet",
+      "group_name": "Quốc tế tiếng Việt",
+      "subtitle": "Quốc tế tiếng Việt",
+      "url": "https://rfivietnamien96k.ice.infomaniak.ch/rfivietnamien-96k.mp3",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T15:59:13.729Z",
+      "play_url": "https://rfivietnamien96k.ice.infomaniak.ch/rfivietnamien-96k.mp3",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "RFI Vietnamese Radio",
+        "subtitle": "Quốc tế tiếng Việt",
+        "badge": "Quốc tế tiếng Việt",
+        "icon": "🌐",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6juq5a_3337eo",
+      "added_at": "2026-07-04T16:01:16.510Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VOV GIAO THÔNG TP Hồ Chí Minh",
+      "name": "VOV GIAO THÔNG TP Hồ Chí Minh",
+      "type": "radio",
+      "group": "radio_tin_tuc_giao_thong",
+      "group_name": "Tin tức / Giao thông",
+      "subtitle": "Tin tức / Giao thông",
+      "url": "https://str.vov.gov.vn/vovlive/vovGTHCM.sdp_aac/chunklist_w1213978008.m3u8",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:01:16.510Z",
+      "play_url": "https://str.vov.gov.vn/vovlive/vovGTHCM.sdp_aac/chunklist_w1213978008.m3u8",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VOV GIAO THÔNG TP Hồ Chí Minh",
+        "subtitle": "Tin tức / Giao thông",
+        "badge": "Tin tức / Giao thông",
+        "icon": "🚦",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6jxerq_15oa49",
+      "added_at": "2026-07-04T16:03:21.734Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "M Radio NHẠC MIỀN Nam",
+      "name": "M Radio NHẠC MIỀN Nam",
+      "type": "radio",
+      "group": "radio_nhac_vang_bolero",
+      "group_name": "Nhạc vàng / Bolero",
+      "subtitle": "Nhạc vàng / Bolero",
+      "url": "https://stream.zeno.fm/4q7y9hvkp2zuv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:03:21.734Z",
+      "play_url": "https://stream.zeno.fm/4q7y9hvkp2zuv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "M Radio NHẠC MIỀN Nam",
+        "subtitle": "Nhạc vàng / Bolero",
+        "badge": "Nhạc vàng / Bolero",
+        "icon": "🎙️",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6jyoi6_u1uyva",
+      "added_at": "2026-07-04T16:04:21.006Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Cai Luong Viet Nam",
+      "name": "Cai Luong Viet Nam",
+      "type": "radio",
+      "group": "radio_nhac_viet",
+      "group_name": "Nhạc Việt",
+      "subtitle": "Nhạc Việt",
+      "url": "https://stream.zeno.fm/0trm6wrnga0uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:04:21.006Z",
+      "play_url": "https://stream.zeno.fm/0trm6wrnga0uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Cai Luong Viet Nam",
+        "subtitle": "Nhạc Việt",
+        "badge": "Nhạc Việt",
+        "icon": "🎶",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6jzs4u_kww4i6",
+      "added_at": "2026-07-04T16:05:12.366Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Saigoner",
+      "name": "Saigoner",
+      "type": "radio",
+      "group": "radio_nhac_viet",
+      "group_name": "Nhạc Việt",
+      "subtitle": "Nhạc Việt",
+      "url": "https://stream.zeno.fm/5cyfrgpebkhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:05:12.366Z",
+      "play_url": "https://stream.zeno.fm/5cyfrgpebkhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Saigoner",
+        "subtitle": "Nhạc Việt",
+        "badge": "Nhạc Việt",
+        "icon": "🎶",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6k18ji_kl9r7y",
+      "added_at": "2026-07-04T16:06:20.286Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "EngDance",
+      "name": "EngDance",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/qruutn4bashvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:06:20.286Z",
+      "play_url": "https://stream.zeno.fm/qruutn4bashvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "EngDance",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6k2iqu_5eosf0",
+      "added_at": "2026-07-04T16:07:20.166Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "EDM Music",
+      "name": "EDM Music",
+      "type": "radio",
+      "group": "radio_quoc_te_tieng_viet",
+      "group_name": "Quốc tế tiếng Việt",
+      "subtitle": "Quốc tế tiếng Việt",
+      "url": "https://stream.zeno.fm/hodws4vemawtv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:07:20.166Z",
+      "play_url": "https://stream.zeno.fm/hodws4vemawtv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "EDM Music",
+        "subtitle": "Quốc tế tiếng Việt",
+        "badge": "Quốc tế tiếng Việt",
+        "icon": "🌐",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6k3mn1_ad82zw",
+      "added_at": "2026-07-04T16:08:11.869Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Phát thanh Bảo Yên",
+      "name": "Phát thanh Bảo Yên",
+      "type": "radio",
+      "group": "radio_dia_phuong",
+      "group_name": "Radio địa phương",
+      "subtitle": "Radio địa phương",
+      "url": "https://stream.zeno.fm/kxbgx4w1098uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:08:11.869Z",
+      "play_url": "https://stream.zeno.fm/kxbgx4w1098uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Phát thanh Bảo Yên",
+        "subtitle": "Radio địa phương",
+        "badge": "Radio địa phương",
+        "icon": "📍",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6k4nau_70ifo0",
+      "added_at": "2026-07-04T16:08:59.382Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHUNG BAN ACOUSTIC COVER",
+      "name": "NHUNG BAN ACOUSTIC COVER",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/tk8atfbgtg8uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:08:59.382Z",
+      "play_url": "https://stream.zeno.fm/tk8atfbgtg8uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHUNG BAN ACOUSTIC COVER",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6k6259_dret92",
+      "added_at": "2026-07-04T16:10:05.277Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "China Music from A to Z",
+      "name": "China Music from A to Z",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/awktbdcs6x8uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:10:05.277Z",
+      "play_url": "https://stream.zeno.fm/awktbdcs6x8uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "China Music from A to Z",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6k7sz9_n84ia0",
+      "added_at": "2026-07-04T16:11:26.709Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "practice listening english",
+      "name": "practice listening english",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/qt9ewn60q98uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:11:26.710Z",
+      "play_url": "https://stream.zeno.fm/qt9ewn60q98uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "practice listening english",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6k9m51_f0bg12",
+      "added_at": "2026-07-04T16:12:51.157Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHAC KHONG LỜI",
+      "name": "NHAC KHONG LỜI",
+      "type": "radio",
+      "group": "radio_khong_loi_thu_gian",
+      "group_name": "Không lời / Thư giãn",
+      "subtitle": "Không lời / Thư giãn",
+      "url": "https://stream.zeno.fm/4y7tqte51xhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:12:51.157Z",
+      "play_url": "https://stream.zeno.fm/4y7tqte51xhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHAC KHONG LỜI",
+        "subtitle": "Không lời / Thư giãn",
+        "badge": "Không lời / Thư giãn",
+        "icon": "🌿",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kbswl_efvc6n",
+      "added_at": "2026-07-04T16:14:33.237Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHẠC TỰ CHẾ",
+      "name": "NHẠC TỰ CHẾ",
+      "type": "radio",
+      "group": "radio_nhac_viet",
+      "group_name": "Nhạc Việt",
+      "subtitle": "Nhạc Việt",
+      "url": "https://stream.zeno.fm/k1iam7ewfnauv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:14:33.237Z",
+      "play_url": "https://stream.zeno.fm/k1iam7ewfnauv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHẠC TỰ CHẾ",
+        "subtitle": "Nhạc Việt",
+        "badge": "Nhạc Việt",
+        "icon": "🎶",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kd2bx_uorljh",
+      "added_at": "2026-07-04T16:15:32.109Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "RAP",
+      "name": "RAP",
+      "type": "radio",
+      "group": "radio_nhac_viet",
+      "group_name": "Nhạc Việt",
+      "subtitle": "Nhạc Việt",
+      "url": "https://stream.zeno.fm/mihxyj3hvx9tv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:15:32.109Z",
+      "play_url": "https://stream.zeno.fm/mihxyj3hvx9tv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "RAP",
+        "subtitle": "Nhạc Việt",
+        "badge": "Nhạc Việt",
+        "icon": "🎶",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kevzh_xbv9ry",
+      "added_at": "2026-07-04T16:16:57.197Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "OPERA",
+      "name": "OPERA",
+      "type": "radio",
+      "group": "radio_nhac_viet",
+      "group_name": "Nhạc Việt",
+      "subtitle": "Nhạc Việt",
+      "url": "https://stream.zeno.fm/6cmbm5pmkkhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:16:57.197Z",
+      "play_url": "https://stream.zeno.fm/6cmbm5pmkkhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "OPERA",
+        "subtitle": "Nhạc Việt",
+        "badge": "Nhạc Việt",
+        "icon": "🎶",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kgpvh_a9v5vv",
+      "added_at": "2026-07-04T16:18:22.589Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHAC TRE",
+      "name": "NHAC TRE",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/ikv8zsphyqmuv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:18:22.589Z",
+      "play_url": "https://stream.zeno.fm/ikv8zsphyqmuv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHAC TRE",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6khsud_p3r8x4",
+      "added_at": "2026-07-04T16:19:13.093Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHAC CUTE",
+      "name": "NHAC CUTE",
+      "type": "radio",
+      "group": "radio_nhac_viet",
+      "group_name": "Nhạc Việt",
+      "subtitle": "Nhạc Việt",
+      "url": "https://stream.zeno.fm/rhcfe8rsq0hvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:19:13.093Z",
+      "play_url": "https://stream.zeno.fm/rhcfe8rsq0hvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHAC CUTE",
+        "subtitle": "Nhạc Việt",
+        "badge": "Nhạc Việt",
+        "icon": "🎶",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kj2yd_qi7gh5",
+      "added_at": "2026-07-04T16:20:12.853Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "KO LOI HAY",
+      "name": "KO LOI HAY",
+      "type": "radio",
+      "group": "radio_khong_loi_thu_gian",
+      "group_name": "Không lời / Thư giãn",
+      "subtitle": "Không lời / Thư giãn",
+      "url": "https://stream.zeno.fm/jxniabwipmhtv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:20:12.853Z",
+      "play_url": "https://stream.zeno.fm/jxniabwipmhtv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "KO LOI HAY",
+        "subtitle": "Không lời / Thư giãn",
+        "badge": "Không lời / Thư giãn",
+        "icon": "🌿",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kk25x_jza9i4",
+      "added_at": "2026-07-04T16:20:58.485Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHAC LOFII",
+      "name": "NHAC LOFII",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/4rk932xyyuhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:20:58.485Z",
+      "play_url": "https://stream.zeno.fm/4rk932xyyuhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHAC LOFII",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kl6f1_6uxntx",
+      "added_at": "2026-07-04T16:21:50.653Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHAC QT",
+      "name": "NHAC QT",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/zkuycku09ehvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:21:50.653Z",
+      "play_url": "https://stream.zeno.fm/zkuycku09ehvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHAC QT",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6km9gq_c9pn80",
+      "added_at": "2026-07-04T16:22:41.258Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "DJ TIKTOK",
+      "name": "DJ TIKTOK",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/cpgtp69bt0hvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:22:41.258Z",
+      "play_url": "https://stream.zeno.fm/cpgtp69bt0hvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "DJ TIKTOK",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kn959_43nmg8",
+      "added_at": "2026-07-04T16:23:27.501Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "CHILL",
+      "name": "CHILL",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/m3ayuv6nd0hvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:23:27.501Z",
+      "play_url": "https://stream.zeno.fm/m3ayuv6nd0hvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "CHILL",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kp4bh_997c5e",
+      "added_at": "2026-07-04T16:24:54.557Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHẠC XƯA",
+      "name": "NHẠC XƯA",
+      "type": "radio",
+      "group": "radio_nhac_vang_bolero",
+      "group_name": "Nhạc vàng / Bolero",
+      "subtitle": "Nhạc vàng / Bolero",
+      "url": "https://stream.zeno.fm/pfgd8v741xhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:24:54.557Z",
+      "play_url": "https://stream.zeno.fm/pfgd8v741xhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHẠC XƯA",
+        "subtitle": "Nhạc vàng / Bolero",
+        "badge": "Nhạc vàng / Bolero",
+        "icon": "🎙️",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kr24l_b6hyeg",
+      "added_at": "2026-07-04T16:26:25.029Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Sugar Daddy TM",
+      "name": "Sugar Daddy TM",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/n7wv822f4zhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:26:25.029Z",
+      "play_url": "https://stream.zeno.fm/n7wv822f4zhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Sugar Daddy TM",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6ksc38_66bn94",
+      "added_at": "2026-07-04T16:27:24.596Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "RELAX",
+      "name": "RELAX",
+      "type": "radio",
+      "group": "radio_khong_loi_thu_gian",
+      "group_name": "Không lời / Thư giãn",
+      "subtitle": "Không lời / Thư giãn",
+      "url": "https://stream.zeno.fm/pymr9blg3owtv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:27:24.597Z",
+      "play_url": "https://stream.zeno.fm/pymr9blg3owtv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "RELAX",
+        "subtitle": "Không lời / Thư giãn",
+        "badge": "Không lời / Thư giãn",
+        "icon": "🌿",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6ku6t9_oa6js1",
+      "added_at": "2026-07-04T16:28:51.069Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "ROCK",
+      "name": "ROCK",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/g91qxch7gv8uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:28:51.069Z",
+      "play_url": "https://stream.zeno.fm/g91qxch7gv8uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "ROCK",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6kvyfh_nvbgpw",
+      "added_at": "2026-07-04T16:30:13.517Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "DJ",
+      "name": "DJ",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/yb174dxkr0hvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:30:13.517Z",
+      "play_url": "https://stream.zeno.fm/yb174dxkr0hvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "DJ",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6l12y5_o185nu",
+      "added_at": "2026-07-04T16:34:12.653Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHẠC QT TEEN",
+      "name": "NHẠC QT TEEN",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/q9y89b4g4zhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:34:12.653Z",
+      "play_url": "https://stream.zeno.fm/q9y89b4g4zhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHẠC QT TEEN",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6l31c4_ngcrqu",
+      "added_at": "2026-07-04T16:35:43.876Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "VPOP QT",
+      "name": "VPOP QT",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/6n3vxe7d1hhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:35:43.876Z",
+      "play_url": "https://stream.zeno.fm/6n3vxe7d1hhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "VPOP QT",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6ldid0_fk61b6",
+      "added_at": "2026-07-04T16:43:52.500Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Lofi Radio Vietnam",
+      "name": "Lofi Radio Vietnam",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/hbf2d2dmh48uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:43:52.500Z",
+      "play_url": "https://stream.zeno.fm/hbf2d2dmh48uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Lofi Radio Vietnam",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6lg6pw_lw5gq1",
+      "added_at": "2026-07-04T16:45:57.380Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "USUK music",
+      "name": "USUK music",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/ahbl6m4fqdstv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:45:57.380Z",
+      "play_url": "https://stream.zeno.fm/ahbl6m4fqdstv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "USUK music",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6lhlws_vg9ax5",
+      "added_at": "2026-07-04T16:47:03.724Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "UK MS",
+      "name": "UK MS",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/kx5dkx5t968uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:47:03.724Z",
+      "play_url": "https://stream.zeno.fm/kx5dkx5t968uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "UK MS",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6liykk_u7ho5f",
+      "added_at": "2026-07-04T16:48:06.788Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Sleeping Time",
+      "name": "Sleeping Time",
+      "type": "radio",
+      "group": "radio_khong_loi_thu_gian",
+      "group_name": "Không lời / Thư giãn",
+      "subtitle": "Không lời / Thư giãn",
+      "url": "https://stream.zeno.fm/1wf6quxerrtuv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:48:06.788Z",
+      "play_url": "https://stream.zeno.fm/1wf6quxerrtuv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Sleeping Time",
+        "subtitle": "Không lời / Thư giãn",
+        "badge": "Không lời / Thư giãn",
+        "icon": "🌿",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6lw7hn_du46ry",
+      "added_at": "2026-07-04T16:58:24.875Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Radio Station BOLERO",
+      "name": "Radio Station BOLERO",
+      "type": "radio",
+      "group": "radio_nhac_vang_bolero",
+      "group_name": "Nhạc vàng / Bolero",
+      "subtitle": "Nhạc vàng / Bolero",
+      "url": "https://stream.zeno.fm/k7n6rmznx38uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T16:58:24.875Z",
+      "play_url": "https://stream.zeno.fm/k7n6rmznx38uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Radio Station BOLERO",
+        "subtitle": "Nhạc vàng / Bolero",
+        "badge": "Nhạc vàng / Bolero",
+        "icon": "🎙️",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6lyd04_8ygywm",
+      "added_at": "2026-07-04T17:00:05.332Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHẠC REMIX",
+      "name": "NHẠC REMIX",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/ju3p0pfidnouv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:00:05.332Z",
+      "play_url": "https://stream.zeno.fm/ju3p0pfidnouv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHẠC REMIX",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6lzx7n_hc84bo",
+      "added_at": "2026-07-04T17:01:18.179Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "TRẺ TRÂU",
+      "name": "TRẺ TRÂU",
+      "type": "radio",
+      "group": "radio_nhac_viet",
+      "group_name": "Nhạc Việt",
+      "subtitle": "Nhạc Việt",
+      "url": "https://stream.zeno.fm/dyk1kgf3568uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:01:18.179Z",
+      "play_url": "https://stream.zeno.fm/dyk1kgf3568uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "TRẺ TRÂU",
+        "subtitle": "Nhạc Việt",
+        "badge": "Nhạc Việt",
+        "icon": "🎶",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6m3x63_s145rn",
+      "added_at": "2026-07-04T17:04:24.747Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Phat thanh LSTV",
+      "name": "Phat thanh LSTV",
+      "type": "radio",
+      "group": "radio_chinh_thong",
+      "group_name": "Radio chính thống",
+      "subtitle": "Radio chính thống",
+      "url": "https://stream.zeno.fm/xsct365wra0uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:04:24.747Z",
+      "play_url": "https://stream.zeno.fm/xsct365wra0uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Phat thanh LSTV",
+        "subtitle": "Radio chính thống",
+        "badge": "Radio chính thống",
+        "icon": "📻",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6m7hvw_ble4bg",
+      "added_at": "2026-07-04T17:07:11.564Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "Bass Ori QUỐC TẾ",
+      "name": "Bass Ori QUỐC TẾ",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/4eq7byrfuuhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:07:11.564Z",
+      "play_url": "https://stream.zeno.fm/4eq7byrfuuhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "Bass Ori QUỐC TẾ",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6mcfoj_3b9uet",
+      "added_at": "2026-07-04T17:11:01.987Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHẠC TRẺ MỚI",
+      "name": "NHẠC TRẺ MỚI",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/2141ytrbn48uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:11:01.987Z",
+      "play_url": "https://stream.zeno.fm/2141ytrbn48uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHẠC TRẺ MỚI",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6me10r_0gnp3o",
+      "added_at": "2026-07-04T17:12:16.299Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "KO LOI VUI",
+      "name": "KO LOI VUI",
+      "type": "radio",
+      "group": "radio_khong_loi_thu_gian",
+      "group_name": "Không lời / Thư giãn",
+      "subtitle": "Không lời / Thư giãn",
+      "url": "https://stream.zeno.fm/evwcm889z38uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:12:16.299Z",
+      "play_url": "https://stream.zeno.fm/evwcm889z38uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "KO LOI VUI",
+        "subtitle": "Không lời / Thư giãn",
+        "badge": "Không lời / Thư giãn",
+        "icon": "🌿",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6mj2pf_uix4ek",
+      "added_at": "2026-07-04T17:16:11.763Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "NHẠC TV",
+      "name": "NHẠC TV",
+      "type": "radio",
+      "group": "radio_nhac_viet",
+      "group_name": "Nhạc Việt",
+      "subtitle": "Nhạc Việt",
+      "url": "https://stream.zeno.fm/ghgvkts4mfhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:16:11.763Z",
+      "play_url": "https://stream.zeno.fm/ghgvkts4mfhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "NHẠC TV",
+        "subtitle": "Nhạc Việt",
+        "badge": "Nhạc Việt",
+        "icon": "🎶",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6msnki_edojna",
+      "added_at": "2026-07-04T17:23:38.706Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "EDM NHAC",
+      "name": "EDM NHAC",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/htgbra9avuhvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:23:38.706Z",
+      "play_url": "https://stream.zeno.fm/htgbra9avuhvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "EDM NHAC",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6mvuz6_bb5tjt",
+      "added_at": "2026-07-04T17:26:08.274Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "selection of love (CN)",
+      "name": "selection of love (CN)",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/at7fmbra7ehvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:26:08.274Z",
+      "play_url": "https://stream.zeno.fm/at7fmbra7ehvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "selection of love (CN)",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6mxpki_j0hcnj",
+      "added_at": "2026-07-04T17:27:34.578Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "DJ CHẾ",
+      "name": "DJ CHẾ",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/0mh47znbn48uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:27:34.578Z",
+      "play_url": "https://stream.zeno.fm/0mh47znbn48uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "DJ CHẾ",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6mz3gi_v4anot",
+      "added_at": "2026-07-04T17:28:39.234Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "REMIX SÀN",
+      "name": "REMIX SÀN",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/38paz80m268uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:28:39.234Z",
+      "play_url": "https://stream.zeno.fm/38paz80m268uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "REMIX SÀN",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6n1c6i_6nd3gd",
+      "added_at": "2026-07-04T17:30:23.850Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "TRẺ TRÂU",
+      "name": "TRẺ TRÂU",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/0myqsf09dchvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:30:23.850Z",
+      "play_url": "https://stream.zeno.fm/0myqsf09dchvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "TRẺ TRÂU",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6n5ole_kgncxh",
+      "added_at": "2026-07-04T17:33:46.562Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "TRẺ REMIX",
+      "name": "TRẺ REMIX",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/sn4k1upsq0hvv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:33:46.562Z",
+      "play_url": "https://stream.zeno.fm/sn4k1upsq0hvv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "TRẺ REMIX",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6n7rhe_16dv8g",
+      "added_at": "2026-07-04T17:35:23.618Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "TRẺ MỚI",
+      "name": "TRẺ MỚI",
+      "type": "radio",
+      "group": "radio_nhac_tre",
+      "group_name": "Nhạc trẻ",
+      "subtitle": "Nhạc trẻ",
+      "url": "https://stream.zeno.fm/vres7epty7zuv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:35:23.618Z",
+      "play_url": "https://stream.zeno.fm/vres7epty7zuv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "TRẺ MỚI",
+        "subtitle": "Nhạc trẻ",
+        "badge": "Nhạc trẻ",
+        "icon": "🎧",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6ncuiy_8sgt8t",
+      "added_at": "2026-07-04T17:39:20.842Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "HÀN QUỐC",
+      "name": "HÀN QUỐC",
+      "type": "radio",
+      "group": "radio_quoc_te_gia_tri",
+      "group_name": "Radio quốc tế giá trị",
+      "subtitle": "Radio quốc tế giá trị",
+      "url": "https://stream.zeno.fm/1h407a52ss8uv",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:39:20.842Z",
+      "play_url": "https://stream.zeno.fm/1h407a52ss8uv",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "HÀN QUỐC",
+        "subtitle": "Radio quốc tế giá trị",
+        "badge": "Radio quốc tế giá trị",
+        "icon": "🌎",
+        "backup_count": 0
+      }
+    },
+    {
+      "id": "ch_mr6nplox_de5yh6",
+      "added_at": "2026-07-04T17:49:15.921Z",
+      "status_admin": "new",
+      "import_flag": "manual_new",
+      "display_name": "DIEU PHAP AM RADIO",
+      "name": "DIEU PHAP AM RADIO",
+      "type": "tv",
+      "group": "tv_review_them",
+      "group_name": "TV khác",
+      "subtitle": "TV khác",
+      "url": "http://streamingv2.shoutcast.com/dieuphapamradio",
+      "backup_urls": [],
+      "note": "",
+      "updated_at": "2026-07-04T17:49:15.921Z",
+      "play_url": "http://streamingv2.shoutcast.com/dieuphapamradio",
+      "backup_play_urls": [],
+      "status": "ready",
+      "quality": "owner_added",
+      "ui": {
+        "title": "DIEU PHAP AM RADIO",
+        "subtitle": "TV khác",
+        "badge": "TV khác",
+        "icon": "📺",
         "backup_count": 0
       }
     }
