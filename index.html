@@ -2,6 +2,157 @@
 
 <html lang="vi">
 <head>
+<!-- LIFEOS PHA14 J20 R55 MOBILE COOL LITE NO FAN - START -->
+<style id="lifeos-j20r55-mobile-cool-lite-css">
+/* R55: mobile/phone performance cooler. No D1/upload/card business logic changes. */
+html.lifeos-r55-mobile-cool-lite *,
+html.lifeos-r55-mobile-cool-lite *::before,
+html.lifeos-r55-mobile-cool-lite *::after{
+  animation:none !important;
+  transition:none !important;
+  scroll-behavior:auto !important;
+  will-change:auto !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  filter:none !important;
+}
+html.lifeos-r55-mobile-cool-lite .animate-spin,
+html.lifeos-r55-mobile-cool-lite .animate-pulse,
+html.lifeos-r55-mobile-cool-lite [class*="animate-"],
+html.lifeos-r55-mobile-cool-lite [class*="blur"],
+html.lifeos-r55-mobile-cool-lite [class*="backdrop"]{
+  animation:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  filter:none !important;
+}
+html.lifeos-r55-mobile-cool-lite .lifeos-r48-family-boot-lock,
+html.lifeos-r55-mobile-cool-lite body.lifeos-r48-family-boot-lock{
+  transition:none !important;
+}
+@media (max-width: 920px), (pointer: coarse){
+  html.lifeos-r55-mobile-cool-lite *,
+  html.lifeos-r55-mobile-cool-lite *::before,
+  html.lifeos-r55-mobile-cool-lite *::after{
+    box-shadow:none !important;
+    text-shadow:none !important;
+  }
+}
+</style>
+<script id="lifeos-j20r55-mobile-cool-lite-early-js">
+(function(){
+  if(window.__lifeosJ20R55MobileCoolLiteInstalled) return;
+  window.__lifeosJ20R55MobileCoolLiteInstalled = true;
+  window.__lifeosJ20R54PerformanceCoolerInstalled = true;
+  window.__lifeosJ20R53OrientationNoResizeStormInstalled = window.__lifeosJ20R53OrientationNoResizeStormInstalled || true;
+  var PHASE='Pha14J20R55_MobileCoolLiteNoFan_R54Base';
+  var nativeSetInterval = window.setInterval;
+  var nativeClearInterval = window.clearInterval;
+  var nativeRAF = window.requestAnimationFrame;
+  var nativeCAF = window.cancelAnimationFrame;
+  var registry = [];
+  var throttled = 0;
+  var startedAt = Date.now();
+  var rafLast = 0;
+  document.documentElement.classList.add('lifeos-r55-mobile-cool-lite');
+  document.documentElement.classList.add('lifeos-r54-cooler-enabled');
+
+  function srcOf(fn){ try{return Function.prototype.toString.call(fn||'');}catch(e){return '';} }
+  function isCriticalTimer(code){
+    return /checkAlarms|alarm|exactAlarm|firePhysicalBeep|ringtone|beep|snooze|recordSeconds|recorder|microphone|mediaRecorder|timerState|cdTime|swTime|pomodoro|TOTP|updateDateClock|dateClock|setClock|clock/i.test(code||'');
+  }
+  function isDiagnostic(code){
+    return /liveCounts|recentIssues|verdict\(|updateBadge|updateBadgeSoon|ensurePanel|lifeos-j19|j19o|j19s|mutation_storm|FAMILY_RENDER_STORM|analyze\('heartbeat'|issue\(|report\('badge'|currentBlockers/i.test(code||'');
+  }
+  function isInstaller(code){
+    return /patchMusicApp|syncBottomNavHeight|forceVisibility|normalizeButtons|VaultBulkDelete|polishVaultOnce|hideUltraOnly|transformAll|patchChatEngine|patchSwitchers|patchAuxModules|cleanLabels|scheduleMaster|repairIfNeeded|decorateCards|ensureToolbar|patchVaultRender|patchStorage|quietConsole|patchR35|patchToastNoise|patchConsoleNoise|patchFetchPostPromote|patchCommitBridge|installConsoleFirebaseSilencer|installFetchCorsCleaner|hardStopFamilyFirebase|noopFirebaseSync/i.test(code||'');
+  }
+  function isMediaInstaller(code){
+    return /wrapMediaHub|patchMediaHub|hookVideo|bindTabs|patchMusic\(|patchMusic\s*\(/i.test(code||'');
+  }
+  window.setInterval = function(fn, delay){
+    var d = Number(delay)||0;
+    var original = d;
+    var code = srcOf(fn);
+    if(isCriticalTimer(code)){
+      d = original;
+    }else if(isDiagnostic(code)){
+      d = Math.max(d, 60000);
+      throttled++;
+    }else if(isInstaller(code)){
+      d = Math.max(d, 30000);
+      throttled++;
+    }else if(isMediaInstaller(code)){
+      d = Math.max(d, 1000);
+      throttled++;
+    }else if(/_poll\s*\(/i.test(code||'')){
+      d = Math.max(d, 5000);
+      throttled++;
+    }else if(d > 0 && d < 500){
+      d = 1000;
+      throttled++;
+    }else if(d >= 500 && d < 1000){
+      d = 1500;
+      throttled++;
+    }
+    var id = nativeSetInterval.apply(this, [fn, d].concat([].slice.call(arguments,2)));
+    try{ registry.push({id:id, original:original, delay:d, throttled: original!==d, code:code.slice(0,220)}); if(registry.length>360) registry.shift(); }catch(e){}
+    return id;
+  };
+  window.clearInterval = function(id){ return nativeClearInterval.apply(this, arguments); };
+
+  // Keep requestAnimationFrame available, but cap non-critical idle fan loops on coarse/mobile screens.
+  window.requestAnimationFrame = function(cb){
+    var code = srcOf(cb);
+    if(!isCriticalTimer(code) && !/video|canvas|player|media/i.test(code||'')){
+      return nativeRAF.call(window, function(ts){
+        var coarse = false; try{ coarse = matchMedia('(pointer: coarse), (max-width: 920px)').matches; }catch(e){}
+        if(coarse && rafLast && ts - rafLast < 48){ return nativeRAF.call(window, function(ts2){ rafLast=ts2; cb(ts2); }); }
+        rafLast = ts; cb(ts);
+      });
+    }
+    return nativeRAF.apply(window, arguments);
+  };
+  window.cancelAnimationFrame = function(id){ return nativeCAF.apply(window, arguments); };
+
+  function clearBootLockIfStale(){
+    try{
+      var b=document.body; if(!b) return;
+      var owner=window.LifeOSJ20R48FamilyBootSingleRenderOwner||window.LifeOSJ20R48FamilyBootSingleOwner||window.LifeOSJ20R49FamilyBootQuietLock||window.LifeOSJ20R51DirectPatchR48BootNoSpam;
+      var s=owner&&typeof owner.summary==='function'?owner.summary():null;
+      if(!s || !s.lockActive) b.classList.remove('lifeos-r48-family-boot-lock');
+    }catch(e){}
+  }
+  function quietVisuals(){
+    try{
+      document.querySelectorAll('.animate-pulse,.animate-spin,[class*="animate-"],[class*="backdrop"],[class*="blur"]').forEach(function(el){
+        el.style.animation='none'; el.style.backdropFilter='none'; el.style.webkitBackdropFilter='none'; el.style.filter='none'; el.style.willChange='auto';
+      });
+    }catch(e){}
+  }
+  function boot(){ clearBootLockIfStale(); quietVisuals(); }
+  function summary(){
+    return {
+      phase:PHASE,
+      href:location.href,
+      ageMs:Date.now()-startedAt,
+      throttledIntervals:throttled,
+      intervalCount:registry.length,
+      intervalTail:registry.slice(-36),
+      bodyClass:String(document.body&&document.body.className||''),
+      htmlClass:String(document.documentElement&&document.documentElement.className||''),
+      markers:{r55:true,r54:true,r53:!!window.__lifeosJ20R53OrientationNoResizeStormInstalled,r52:!!window.__lifeosJ20R52OrientationAutoRotateInstalled,r51:!!window.__lifeosJ20R51DirectPatchR48BootNoSpamInstalled,r48:!!window.__lifeosJ20R48FamilyBootSingleRenderOwnerInstalled}
+    };
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  window.addEventListener('load', function(){ setTimeout(boot,80); setTimeout(boot,1000); setTimeout(boot,5000); }, {once:true});
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') boot(); });
+  window.LifeOSJ20R55MobileCoolLite = {phase:PHASE, summary:summary, boot:boot, registry:function(){return registry.slice();}, restoreTimers:function(){window.setInterval=nativeSetInterval;window.clearInterval=nativeClearInterval;window.requestAnimationFrame=nativeRAF;window.cancelAnimationFrame=nativeCAF;}};
+  window.LifeOSJ20R54PerformanceCooler = window.LifeOSJ20R55MobileCoolLite;
+})();
+</script>
+<!-- LIFEOS PHA14 J20 R55 MOBILE COOL LITE NO FAN - END -->
+
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="no-referrer" name="referrer"/>
@@ -13380,10 +13531,20 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
   const VIEW_BY_MODE = { tasks:'tasks', focus:'focus', vault:'vault', music:'music', chat:'chat', overview:'tasks' };
 
   function isMini(){
-    const w = window.innerWidth, h = window.innerHeight;
-    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    /* R52: orientation must follow the device viewport, not a hard portrait/height lock.
+       If the OS/browser rotates to landscape, mini-PC landscape is enabled.
+       If the OS is locked portrait, viewport stays portrait and this stays off. */
+    const vv = window.visualViewport;
+    const w = Math.round(vv ? vv.width : (window.innerWidth || document.documentElement.clientWidth || 0));
+    const h = Math.round(vv ? vv.height : (window.innerHeight || document.documentElement.clientHeight || 0));
+    const coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
     const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
-    return w > h && h <= 620 && (coarse || mobileUA);
+    const mmLandscape = !!(window.matchMedia && window.matchMedia('(orientation: landscape)').matches);
+    const screenType = String((screen.orientation && screen.orientation.type) || '');
+    const screenLandscape = /landscape/i.test(screenType);
+    const landscape = (w > h) || mmLandscape || screenLandscape;
+    const phoneLike = coarse || mobileUA || Math.min(w,h) <= 640;
+    return !!(landscape && phoneLike && w >= 480 && h >= 260);
   }
   function setImp(el,p,v){ if(el) el.style.setProperty(p,v,'important'); }
   function norm(v){ return String(v || '').trim(); }
@@ -28101,5 +28262,726 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
 </script>
 <!-- Pha14J20R46_QuietBootR35Backoff_FileOriginClean_LabelClean_R45Base - END -->
 
+<!-- Pha14J20R47_PostUploadD1ImmediateCard_FallbackNoSlow_R46Base - START -->
+<script id="lifeos-j20r47-post-upload-d1-immediate-card-js">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R47PostUploadD1ImmediateCardInstalled) return;
+  window.__lifeosJ20R47PostUploadD1ImmediateCardInstalled = true;
+
+  var PHASE = 'Pha14J20R47_PostUploadD1ImmediateCard_FallbackNoSlow_R46Base';
+  var LS_TRACE = 'lifeos_j20r47_post_upload_d1_immediate_card_trace_v1';
+  var lastPromoteAt = Object.create(null);
+  var pendingBodyByKey = Object.create(null);
+
+  function now(){ return Date.now(); }
+  function S(v){ return v == null ? '' : String(v); }
+  function N(v,d){ var n=Number(v); return Number.isFinite(n) ? Math.trunc(n) : (d||0); }
+  function readJSON(k,d){ try{ var r=localStorage.getItem(k); return r ? JSON.parse(r) : d; }catch(e){ return d; } }
+  function writeJSON(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function trace(type,data,level){
+    var o=Object.assign({phase:PHASE,type:S(type),at:now(),iso:new Date().toISOString()},data||{});
+    try{ var a=readJSON(LS_TRACE,[]); if(!Array.isArray(a)) a=[]; a.push(o); writeJSON(LS_TRACE,a.slice(-180)); }catch(e){}
+    try{
+      var noisy=/^(RENDER_DONE|PROMOTE_SKIPPED_DUP|FETCH_POST_OBSERVED)$/i.test(S(type));
+      if(!noisy || level==='error' || level==='warn') (level==='error'?console.error:level==='warn'?console.warn:console.info)('[J20R47_POST_UPLOAD]',type,data||{});
+    }catch(e){}
+    return o;
+  }
+  function parsePayload(x){
+    x=x||{}; var raw=x.payload_json||x.payloadJson||(x._row&&x._row.payload_json)||''; var p={};
+    if(raw && typeof raw==='string'){ try{ p=JSON.parse(raw); }catch(e){ p={}; } }
+    else if(raw && typeof raw==='object') p=raw;
+    if(p && typeof p.payload_json==='string'){ try{ p._nestedPayload=JSON.parse(p.payload_json); }catch(e){} }
+    return p||{};
+  }
+  function keyOf(m){ return S(m && (m.msg_key || m.id || m.messageId || m.message_id || m.localId || m.clientId || m.bundleId)); }
+  function timeOf(v, fallback){
+    if(v===null||v===undefined||v==='') return fallback||now();
+    if(typeof v==='number') return Math.trunc(v);
+    var n=Number(v); if(Number.isFinite(n)) return Math.trunc(n);
+    var d=Date.parse(S(v)); return Number.isFinite(d)?d:(fallback||now());
+  }
+  function isDeleted(m){ var v=m&&(m.deleted_at||m.deletedAt||m.tombstone_reason||m.tombstoneReason); if(v==null) return false; var s=S(v).trim().toLowerCase(); if(!s||s==='null'||s==='undefined'||s==='0') return false; var n=Number(s); return Number.isFinite(n)?n>0:true; }
+  function lower(v){ return S(v).toLowerCase(); }
+  function isMediaLike(m){
+    if(!m || isDeleted(m)) return false;
+    var p=parsePayload(m), n=p._nestedPayload||{};
+    var k=lower(m.kind||m.type||p.kind||p.type||n.kind||n.type);
+    var src=lower(m.source||p.source||n.source);
+    var mime=lower(m.mime||m.mime_type||p.mime||p.mime_type||n.mime||n.mime_type);
+    if(src==='lifeos-family-text-d1' || src==='lifeos-family-text-file-d1') return false;
+    if(/^text(_row)?$/i.test(k)) return false;
+    return /file|bundle|image|video|audio|document/.test(k) || /telegram_d1_official|d1/.test(src) || !!(m.telegram_file_id||m.telegramFileId||m.file_id||m.fileId||p.telegram_file_id||p.file_id) || /application\//.test(mime);
+  }
+  function normalizeMsg(input, reason){
+    var row = input && input.data ? input.data : (input || {});
+    var p=parsePayload(row), n=p._nestedPayload||{};
+    var k=keyOf(row)||keyOf(p)||keyOf(n);
+    if(!k) return null;
+    var mime=S(row.mime||row.mime_type||p.mime||p.mime_type||n.mime||n.mime_type||'application/octet-stream');
+    var name=S(row.file_name||row.fileName||row.name||p.file_name||p.fileName||p.name||n.file_name||n.fileName||n.name||(row.bundleManifest&&(row.bundleManifest.fileName||row.bundleManifest.originalName))||(p.bundleManifest&&(p.bundleManifest.fileName||p.bundleManifest.originalName))||'file');
+    var kind=S(row.kind||row.type||p.kind||p.type||n.kind||n.type||(/^image\//i.test(mime)?'image':/^video\//i.test(mime)?'video':/^audio\//i.test(mime)?'audio':'file'));
+    var type=S(row.type||p.type||kind||'file');
+    if(/bundle/i.test(kind)||/bundle/i.test(type)||row.bundleManifest||row.bundle_manifest||p.bundleManifest||p.bundle_manifest) type='file_bundle';
+    else if(/^image\//i.test(mime)) type='image';
+    else if(/^video\//i.test(mime)) type='video';
+    else if(/^audio\//i.test(mime)) type='audio';
+    else if(!type || type==='text') type='file';
+    var created=timeOf(row.created_at||row.createdAt||row.timestamp||p.created_at||p.createdAt||p.timestamp||n.createdAt, now());
+    var size=N(row.file_size||row.fileSize||row.size||p.file_size||p.fileSize||p.size||n.file_size||n.fileSize||n.size||(row.bundleManifest&&row.bundleManifest.totalSize)||(p.bundleManifest&&p.bundleManifest.totalSize),0);
+    var fid=S(row.telegram_file_id||row.telegramFileId||row.file_id||row.fileId||p.telegram_file_id||p.telegramFileId||p.file_id||p.fileId||n.telegram_file_id||n.file_id||'');
+    var tmid=S(row.telegram_message_id||row.telegramMessageId||row.telegram_msg_id||row.message_id||p.telegram_message_id||p.telegramMessageId||p.telegram_msg_id||p.message_id||'');
+    var sender=S(row.sender||p.sender||row.profile_id||p.profile_id||window.viewingUser||window.currentUser||((window.ChatEngine&&window.ChatEngine.getKey&&window.ChatEngine.getKey())||'family'));
+    var msg=Object.assign({}, p, row, {
+      id:k, msg_key:k, messageId:k,
+      type:type, kind:kind,
+      sender:sender, profile_id:S(row.profile_id||p.profile_id||sender),
+      timestamp:created, created_at:created, createdAt:created,
+      file_name:name, fileName:name, name:name,
+      file_size:size, fileSize:size, size:size,
+      mime:mime, mime_type:mime,
+      source:'telegram_d1_official', _lifeosSource:'d1', _origin_db:row._origin_db||'FAMILY_DB',
+      uploadStatus:'', _lifeosR47ImmediatePromote:true, _lifeosR47Reason:S(reason||'')
+    });
+    if(fid){ msg.file_id=fid; msg.fileId=fid; msg.telegram_file_id=fid; msg.telegramFileId=fid; }
+    if(tmid){ msg.telegram_message_id=tmid; msg.telegramMessageId=tmid; msg.telegram_msg_id=tmid; }
+    if(row.bundleManifest||row.bundle_manifest||p.bundleManifest||p.bundle_manifest){ msg.bundleManifest=row.bundleManifest||row.bundle_manifest||p.bundleManifest||p.bundle_manifest; msg.bundle_manifest=msg.bundleManifest; msg.totalParts=msg.totalParts||msg.bundleManifest.totalParts; }
+    var tcid=S(row.telegram_chat_id||row.telegramChatId||row.chatId||p.telegram_chat_id||p.telegramChatId||p.chatId||window.LIFEOS_FAMILY_TELEGRAM_CHAT_ID||'-1004299606539');
+    if(tcid){ msg.telegram_chat_id=tcid; msg.telegramChatId=tcid; msg.chatId=tcid; }
+    return isMediaLike(msg) ? msg : null;
+  }
+  function upsert(list,msg){
+    var k=keyOf(msg), out=[], done=false;
+    (Array.isArray(list)?list:[]).forEach(function(x){ var xk=keyOf(x); if(!xk || isDeleted(x)) return; if(xk===k){ out.push(Object.assign({},x,msg)); done=true; } else out.push(x); });
+    if(!done) out.push(msg);
+    return sort(out);
+  }
+  function sort(list){ return (Array.isArray(list)?list:[]).sort(function(a,b){ var ta=timeOf(a&&a.timestamp||a&&a.created_at,0), tb=timeOf(b&&b.timestamp||b&&b.created_at,0); return ta-tb || keyOf(a).localeCompare(keyOf(b)); }); }
+  function compact(m){
+    var keys=['id','msg_key','messageId','sender','profile_id','name','file_name','fileName','file_size','fileSize','size','mime','mime_type','type','kind','source','_lifeosSource','_origin_db','timestamp','createdAt','created_at','updatedAt','updated_at','file_id','fileId','telegram_file_id','telegramFileId','telegram_message_id','telegramMessageId','telegram_msg_id','telegram_chat_id','telegramChatId','chatId','bundleId','totalParts','uploadStatus'];
+    var o={}; keys.forEach(function(k){ if(m&&m[k]!==undefined) o[k]=m[k]; });
+    return o;
+  }
+  function persistShared(reason){
+    try{
+      var st=window.LifeOSR35D1TextOfficial&&window.LifeOSR35D1TextOfficial.state;
+      var msgs=(st&&Array.isArray(st.messages)?st.messages:window.chatHistory||[]).map(compact);
+      var folders=(st&&Array.isArray(st.folders)?st.folders:((window.ChatEngine&&window.ChatEngine.chatFolders)||[]));
+      localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify({m:msgs,f:folders,d1TextOfficial:true,compact:true,phase:PHASE,at:now(),reason:reason||'r47_post_upload'}));
+    }catch(e){}
+  }
+  function currentChatVisible(){
+    try{ var b=document.body.innerText||''; return /Gia đình|Chat gia đình|Nhắn cho gia đình/i.test(b) || !!document.getElementById('chat-messages'); }catch(e){ return true; }
+  }
+  function scrollNewCard(k){
+    try{
+      var esc=(window.CSS&&CSS.escape)?CSS.escape(k):S(k).replace(/[^a-zA-Z0-9_-]/g,'\\$&');
+      var el=document.querySelector('[data-lifeos-j19g-row="'+esc+'"],[data-chat-msg-id="'+esc+'"],[data-msg-key="'+esc+'"],[data-id="'+esc+'"]');
+      if(el && currentChatVisible()){ try{ el.scrollIntoView({block:'nearest',inline:'nearest'}); }catch(_e){ el.scrollIntoView(); } }
+      else { var c=document.getElementById('chat-messages')||document.querySelector('.chat-messages,.family-messages,#familyMessages,#familyChatList'); if(c) c.scrollTop=c.scrollHeight; }
+    }catch(e){}
+  }
+  function renderNow(k,reason){
+    function run(){
+      try{
+        var ce=window.ChatEngine;
+        if(ce){
+          try{ ce.chatFolders=(window.LifeOSR35D1TextOfficial&&window.LifeOSR35D1TextOfficial.state&&window.LifeOSR35D1TextOfficial.state.folders)||ce.chatFolders||[]; }catch(e){}
+          if(typeof ce.render==='function') ce.render();
+          else if(typeof ce.__r35BaseRender==='function') ce.__r35BaseRender();
+        }
+        try{ window.LifeOSR37LongTextDomGuard&&window.LifeOSR37LongTextDomGuard.transform&&window.LifeOSR37LongTextDomGuard.transform(); }catch(e){}
+        setTimeout(function(){scrollNewCard(k);},80);
+        trace('RENDER_DONE',{key:k,reason:reason||''});
+      }catch(e){ trace('RENDER_FAILED',{key:k,reason:reason||'',error:S(e&&e.message||e)},'warn'); }
+    }
+    try{ requestAnimationFrame(run); }catch(e){ setTimeout(run,0); }
+    setTimeout(run,350);
+  }
+  function promote(input,reason){
+    var msg=normalizeMsg(input,reason), k=keyOf(msg);
+    if(!msg||!k) return false;
+    var t=now();
+    if(lastPromoteAt[k] && t-lastPromoteAt[k]<900){ trace('PROMOTE_SKIPPED_DUP',{key:k,reason:reason||''}); return true; }
+    lastPromoteAt[k]=t;
+    try{
+      var st=window.LifeOSR35D1TextOfficial&&window.LifeOSR35D1TextOfficial.state;
+      if(st){
+        st.messages=upsert(st.messages||[],msg);
+        st.familyRows=st.messages.filter(function(m){return m&&m._origin_db==='FAMILY_DB';}).length;
+        st.lastPostUploadPromoteAt=t;
+        st.lastPostUploadPromoteKey=k;
+        st.lastError='';
+      }
+      window.chatHistory=upsert(window.chatHistory||[],msg);
+      if(window.ChatEngine && Array.isArray(window.ChatEngine.messages)) window.ChatEngine.messages=upsert(window.ChatEngine.messages,msg);
+      persistShared(reason);
+      renderNow(k,reason);
+      trace('POST_UPLOAD_CARD_PROMOTED',{key:k,fileName:msg.file_name,size:msg.file_size,kind:msg.kind,type:msg.type,reason:reason||''});
+      return true;
+    }catch(e){ trace('POST_UPLOAD_CARD_PROMOTE_FAILED',{key:k,error:S(e&&e.message||e),reason:reason||''},'error'); return false; }
+  }
+  function tryParseBody(body){
+    try{
+      if(!body) return null;
+      if(typeof body==='string') return JSON.parse(body);
+      if(body instanceof Blob || body instanceof FormData || body instanceof URLSearchParams) return null;
+      if(typeof body==='object') return body;
+    }catch(e){}
+    return null;
+  }
+  function patchFetchPostPromote(){
+    if(window.__lifeosR47FetchPostPromotePatched || typeof window.fetch!=='function') return true;
+    var old=window.fetch;
+    window.fetch=function(input,init){
+      var url=S(input&&input.url||input), method=S((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
+      var bodyObj=null, key='';
+      if(method==='POST' && /lifeos-family-d1-api\.tunhienhieuchuyen\.workers\.dev\/api\/family\/messages\/?(?:$|\?)/i.test(url)){
+        bodyObj=tryParseBody(init&&init.body);
+        key=keyOf(bodyObj);
+        if(bodyObj && key){ pendingBodyByKey[key]=bodyObj; trace('FETCH_POST_OBSERVED',{key:key,fileName:bodyObj.file_name||bodyObj.fileName||bodyObj.name||'',size:bodyObj.file_size||bodyObj.size||0}); }
+      }
+      var p=old.apply(this,arguments);
+      if(bodyObj && key){
+        return Promise.resolve(p).then(function(res){
+          try{ if(res && res.ok) setTimeout(function(){ promote(bodyObj,'fetch_post_d1_insert_ok'); },0); }catch(e){}
+          return res;
+        },function(e){ throw e; });
+      }
+      return p;
+    };
+    window.__lifeosR47FetchPostPromotePatched=true;
+    trace('FETCH_POST_PROMOTE_PATCHED',{});
+    return true;
+  }
+  function patchCommitBridge(){
+    try{
+      var x=window.LifeOSJ19X21; if(!x || typeof x.commitUploadedMessage!=='function') return false;
+      if(x.__r47ImmediateCardWrapped) return true;
+      var old=x.commitUploadedMessage.bind(x);
+      x.__r47OldCommitUploadedMessage=old;
+      x.commitUploadedMessage=async function(msg,ce,meta){
+        var key=keyOf(msg), nm=S(msg&&(msg.file_name||msg.fileName||msg.name));
+        try{
+          var res=await old.apply(x,arguments);
+          try{
+            var official=(res && (res.message||res.data||res.remoteMessage)) || pendingBodyByKey[key] || msg;
+            if(res && res.ok!==false && official) promote(official,'commit_uploaded_result');
+          }catch(e){ trace('COMMIT_RESULT_PROMOTE_WARN',{key:key,error:S(e&&e.message||e)},'warn'); }
+          return res;
+        }catch(e){
+          try{ if(pendingBodyByKey[key]) promote(pendingBodyByKey[key],'commit_throw_pending_body'); }catch(_e){}
+          throw e;
+        }
+      };
+      x.__r47ImmediateCardWrapped=true;
+      trace('COMMIT_BRIDGE_WRAPPED',{target:'LifeOSJ19X21.commitUploadedMessage'});
+      return true;
+    }catch(e){ trace('COMMIT_BRIDGE_WRAP_FAILED',{error:S(e&&e.message||e)},'warn'); return false; }
+  }
+  function patchToastNoise(){
+    if(window.__lifeosR47ToastNoisePatched) return true;
+    window.__lifeosR47ToastNoisePatched=true;
+    var oldToast=window.showToast;
+    window.showToast=function(msg,icon){
+      var s=S(msg);
+      if(/^Danh sách chat lỗi:/i.test(s) && /D1_ERROR|Internal error while starting up D1 DB storage|object to be reset|D1 DB storage/i.test(s)){
+        trace('SUPPRESSED_R35_REFRESH_ERROR_TOAST',{message:s.slice(0,240)},'warn');
+        return false;
+      }
+      return typeof oldToast==='function' ? oldToast.apply(this,arguments) : false;
+    };
+    return true;
+  }
+  function patchConsoleNoise(){
+    if(window.__lifeosR47ConsoleNoisePatched) return true;
+    window.__lifeosR47ConsoleNoisePatched=true;
+    ['error','warn'].forEach(function(level){
+      var old=console[level];
+      console[level]=function(){
+        try{
+          var line=Array.prototype.map.call(arguments,function(a){try{return typeof a==='string'?a:JSON.stringify(a);}catch(e){return S(a);}}).join(' ');
+          if(/D1_V3_TIMELINE_REFRESH_FAILED/i.test(line) && /Internal error while starting up D1 DB storage|object to be reset/i.test(line)){
+            trace('SUPPRESSED_R35_REFRESH_ERROR_CONSOLE',{level:level},'warn'); return;
+          }
+        }catch(e){}
+        return old.apply(console,arguments);
+      };
+    });
+    return true;
+  }
+  function boot(){ patchToastNoise(); patchConsoleNoise(); patchFetchPostPromote(); patchCommitBridge(); }
+  window.LifeOSJ20R47PostUploadImmediateCard={phase:PHASE,boot:boot,promote:promote,trace:function(){return readJSON(LS_TRACE,[]);},summary:function(){var st=window.LifeOSR35D1TextOfficial&&window.LifeOSR35D1TextOfficial.state||{}; return {phase:PHASE,wrapped:!!(window.LifeOSJ19X21&&window.LifeOSJ19X21.__r47ImmediateCardWrapped),fetchPatched:!!window.__lifeosR47FetchPostPromotePatched,lastPostUploadPromoteKey:st.lastPostUploadPromoteKey||'',messages:(st.messages||[]).length};}};
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
+  window.addEventListener('load',function(){setTimeout(boot,100);setTimeout(boot,1200);setTimeout(boot,3500);},{once:true});
+  setInterval(boot,5000);
+})();
+</script>
+<!-- Pha14J20R47_PostUploadD1ImmediateCard_FallbackNoSlow_R46Base - END -->
+
+
+
+<!-- Pha14J20R51_DirectPatchR48BootNoSpam_R48Base - START -->
+<style id="lifeos-j20r51-direct-patch-r48-boot-no-spam-style">
+  body.lifeos-r48-family-boot-lock #chat-messages,
+  body.lifeos-r48-family-boot-lock #view-chat{
+    transition:none!important;
+  }
+  body.lifeos-r48-family-boot-lock #chat-messages .lifeos-chat-loader,
+  body.lifeos-r48-family-boot-lock #chat-messages .chat-loader,
+  body.lifeos-r48-family-boot-lock #chat-messages .family-loader,
+  body.lifeos-r48-family-boot-lock #chat-messages [data-lifeos-loader="family"]{
+    display:none!important;
+  }
+</style>
+<script id="lifeos-j20r51-direct-patch-r48-boot-no-spam-js">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R51DirectPatchR48BootNoSpamInstalled) return;
+  window.__lifeosJ20R51DirectPatchR48BootNoSpamInstalled = true;
+  window.__lifeosJ20R48FamilyBootSingleOwnerInstalled = true;
+  window.__lifeosJ20R48FamilyBootSingleRenderOwnerInstalled = true;
+  window.__lifeosJ20R49FamilyBootQuietLockInstalled = true;
+
+  var PHASE='Pha14J20R51_DirectPatchR48BootNoSpam_R48Base';
+  var LS_TRACE='lifeos_j20r51_direct_patch_r48_boot_no_spam_trace_v1';
+  var lockUntil=0, lockReason='', inMaster=false, lastMasterAt=0, pendingMasterTimer=0;
+  var lastStableSig='', lastStableAt=0, bootSeq=0;
+  var lastBeginAt=0, lastBeginReason='', bootEndTimer=0, tickTimers=[];
+
+  function now(){return Date.now();}
+  function S(v){return v==null?'':String(v);}
+  function readJSON(k,d){try{var r=localStorage.getItem(k);return r?JSON.parse(r):d;}catch(e){return d;}}
+  function writeJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  function trace(type,data,level){
+    var t=S(type), o=Object.assign({phase:PHASE,type:t,at:now(),iso:new Date().toISOString()},data||{});
+    try{
+      var noisy=/^(BOOT_LOCK_HEARTBEAT|BOOT_LOCK_START|BOOT_LOCK_END|BOOT_LOCK_EXTEND|SUPPRESS_AUX_RENDER_DURING_BOOT|DOM_STABLE_SNAPSHOT|MASTER_RENDER_SCHEDULED|MASTER_RENDER_DONE|PATCH_OK)$/i.test(t);
+      var store=(level==='error'||level==='warn'||(!noisy&&/FAILED|ERROR|FATAL/i.test(t)));
+      if(store){var a=readJSON(LS_TRACE,[]); if(!Array.isArray(a)) a=[]; a.push(o); writeJSON(LS_TRACE,a.slice(-80));}
+      if(level==='error') console.error('[J20R51_FAMILY_BOOT]',t,data||{});
+      else if(level==='warn' && !noisy) console.warn('[J20R51_FAMILY_BOOT]',t,data||{});
+    }catch(e){}
+    return o;
+  }
+  function keyOf(m){return S(m&&(m.msg_key||m.id||m.messageId||m.message_id||m.localId||m.clientId||m.bundleId));}
+  function cloneList(a){return (Array.isArray(a)?a:[]).filter(Boolean).map(function(x){return x&&typeof x==='object'?Object.assign({},x):x;});}
+  function r35(){try{return window.LifeOSR35D1TextOfficial&&window.LifeOSR35D1TextOfficial.state;}catch(e){return null;}}
+  function r35Ready(){var st=r35();return !!(st&&Array.isArray(st.messages)&&st.messages.length>0);}
+  function r35Count(){var st=r35();return st&&Array.isArray(st.messages)?st.messages.length:0;}
+  function topicOf(){try{return S((window.ChatEngine&&window.ChatEngine.currentTopic)||'all')||'all';}catch(e){return 'all';}}
+  function chatRoot(){return document.getElementById('chat-messages')||document.querySelector('.family-messages,.family-timeline,#familyMessages,#familyTimeline');}
+  function chatVisible(){
+    try{
+      var v=document.getElementById('view-chat')||chatRoot(); if(!v) return false;
+      var cs=getComputedStyle(v), r=v.getBoundingClientRect();
+      return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0;
+    }catch(e){return false;}
+  }
+  function hasCards(root){
+    try{return !!(root&&root.querySelector('[data-chat-msg-id], [data-lifeos-j19g-row], .lifeos-j19g-card, .lifeos-r37-textfile-card, .lifeos-j19g-row'));}catch(e){return false;}
+  }
+  function domSig(){
+    try{var root=chatRoot(); if(!root) return ''; return [root.querySelectorAll('[data-chat-msg-id], [data-lifeos-j19g-row], .lifeos-j19g-card, .lifeos-r37-textfile-card, .lifeos-j19g-row').length, root.textContent.length, root.scrollHeight].join('|');}catch(e){return '';}
+  }
+  function snapshotStable(reason){
+    var root=chatRoot(); if(!root||!hasCards(root)) return false;
+    lastStableSig=domSig(); lastStableAt=now(); trace('DOM_STABLE_SNAPSHOT',{reason:S(reason||''),sig:lastStableSig,cards:root.querySelectorAll('[data-chat-msg-id], [data-lifeos-j19g-row], .lifeos-j19g-card, .lifeos-r37-textfile-card, .lifeos-j19g-row').length});
+    return true;
+  }
+  function setBodyLock(on){try{document.body&&document.body.classList.toggle('lifeos-r48-family-boot-lock',!!on);}catch(e){}}
+  function inLock(){return chatVisible()&&now()<lockUntil;}
+  function clearBootTimers(){
+    try{ if(bootEndTimer) clearTimeout(bootEndTimer); }catch(e){}
+    bootEndTimer=0;
+    try{ tickTimers.forEach(function(x){clearTimeout(x);}); }catch(e){}
+    tickTimers=[];
+  }
+  function beginBoot(reason,ms){
+    var dur=Math.max(900,Number(ms)||2200), r=S(reason||'family_boot'), t=now();
+    if(t<lockUntil && (t-lastBeginAt)<700){
+      lockUntil=Math.max(lockUntil,t+Math.min(dur,1800));
+      lastBeginAt=t; lastBeginReason=r;
+      if(!pendingMasterTimer) scheduleMaster('boot_lock_extend_'+r,120);
+      trace('BOOT_LOCK_EXTEND',{reason:r,durationMs:dur,seq:bootSeq,r35:r35Count()});
+      return true;
+    }
+    clearBootTimers();
+    lockUntil=Math.max(lockUntil,t+dur); lockReason=r; bootSeq++; lastBeginAt=t; lastBeginReason=r;
+    setBodyLock(true); snapshotStable('lock_start_'+lockReason);
+    trace('BOOT_LOCK_START',{reason:lockReason,durationMs:dur,seq:bootSeq,r35:r35Count()});
+    scheduleMaster('boot_lock_start_'+lockReason,0);
+    [120,420,950].forEach(function(tt){tickTimers.push(setTimeout(function(){ if(inLock()) scheduleMaster('boot_lock_tick_'+tt+'_'+lockReason,60); },tt));});
+    bootEndTimer=setTimeout(function(){ if(now()>=lockUntil){ setBodyLock(false); snapshotStable('lock_end_'+lockReason); trace('BOOT_LOCK_END',{reason:lockReason,seq:bootSeq,r35:r35Count(),sig:domSig()}); }},dur+120);
+    return true;
+  }
+  function lowBaseRender(ce){
+    if(!ce) return null;
+    if(typeof ce.__j20r6BaseRender==='function') return ce.__j20r6BaseRender;
+    if(typeof ce.__j19gBaseRender==='function') return ce.__j19gBaseRender;
+    if(typeof ce.__r35BaseRender==='function') return ce.__r35BaseRender;
+    if(typeof ce.__r43OldRender==='function') return ce.__r43OldRender;
+    if(typeof ce.__r48OldRender==='function') return ce.__r48OldRender;
+    return null;
+  }
+  function directMasterRender(reason){
+    var ce=window.ChatEngine, st=r35(); if(!ce||!st||!Array.isArray(st.messages)||!st.messages.length) return false;
+    if(inMaster) return false;
+    inMaster=true;
+    try{
+      window.chatHistory=cloneList(st.messages);
+      if(Array.isArray(st.folders)) ce.chatFolders=cloneList(st.folders);
+      try{ if(typeof ce.renderFolders==='function') ce.renderFolders(); }catch(_e){}
+      var br=lowBaseRender(ce);
+      if(typeof br==='function'){
+        try{ ce.__j20r6InsideBaseRender=true; ce.__r35InsideRender=true; ce.__r48InsideMasterRender=true; br.call(ce); }
+        finally{ ce.__j20r6InsideBaseRender=false; ce.__r35InsideRender=false; ce.__r48InsideMasterRender=false; }
+      }
+      try{ if(window.LifeOSR37LongTextDomGuard&&typeof window.LifeOSR37LongTextDomGuard.transform==='function') window.LifeOSR37LongTextDomGuard.transform(); }catch(_e){}
+      lastMasterAt=now(); snapshotStable('master_render_'+S(reason||''));
+      trace('MASTER_RENDER_DONE',{reason:S(reason||''),messages:st.messages.length,folders:(st.folders||[]).length,sig:domSig()});
+      return true;
+    }catch(e){trace('MASTER_RENDER_FAILED',{reason:S(reason||''),error:S(e&&e.message||e)},'warn');return false;}
+    finally{inMaster=false;}
+  }
+  function masterRender(reason){
+    if(!r35Ready()) return false;
+    if(window.LifeOSJ20R43D1KeepAlive&&typeof window.LifeOSJ20R43D1KeepAlive.repair==='function'){
+      try{ var ok=window.LifeOSJ20R43D1KeepAlive.repair('r48_'+S(reason||'')); if(ok){lastMasterAt=now(); snapshotStable('r43_repair_'+S(reason||'')); return true;} }catch(e){}
+    }
+    return directMasterRender(reason);
+  }
+  function scheduleMaster(reason,delay){
+    delay=Math.max(0,Number(delay)||0);
+    if(pendingMasterTimer) clearTimeout(pendingMasterTimer);
+    pendingMasterTimer=setTimeout(function(){pendingMasterTimer=0; if(!chatVisible()) return; if(r35Ready()) masterRender(reason);},delay);
+    trace('MASTER_RENDER_SCHEDULED',{reason:S(reason||''),delay:delay,r35:r35Count()});
+    return true;
+  }
+  function patchChatEngine(){
+    var ce=window.ChatEngine; if(!ce||ce.__r48FamilyBootSingleOwnerPatched) return !!ce;
+    ce.__r48FamilyBootSingleOwnerPatched=true;
+    ce.__r48OldInit=typeof ce.init==='function'?ce.init.bind(ce):null;
+    ce.__r48OldRender=typeof ce.render==='function'?ce.render.bind(ce):null;
+    ce.init=function(){
+      if(inLock()&&r35Ready()){
+        try{this._ready=true; this._lastKey=this.getKey?this.getKey():S(window.viewingUser||window.currentUser||'family');}catch(e){}
+        try{this.bindTextareaAutosize&&this.bindTextareaAutosize();}catch(e){}
+        try{this.renderEmojiPicker&&this.renderEmojiPicker();}catch(e){}
+        scheduleMaster('chatengine_init_boot_owner',0);
+        return true;
+      }
+      var ret=true; try{ret=ce.__r48OldInit?ce.__r48OldInit.apply(this,arguments):true;}catch(e){trace('OLD_INIT_FAILED',{error:S(e&&e.message||e)},'warn');}
+      if(chatVisible()) beginBoot('chatengine_init_after',1800);
+      return ret;
+    };
+    ce.render=function(){
+      if(inMaster) return ce.__r48OldRender?ce.__r48OldRender.apply(this,arguments):undefined;
+      if(inLock()&&r35Ready()) { scheduleMaster('chatengine_render_boot_owner',0); return true; }
+      return ce.__r48OldRender?ce.__r48OldRender.apply(this,arguments):undefined;
+    };
+    trace('PATCH_OK',{target:'ChatEngine',hasOldInit:!!ce.__r48OldInit,hasOldRender:!!ce.__r48OldRender});
+    return true;
+  }
+  function wrapSuppressedRefresh(obj,name,label){
+    try{
+      if(!obj||typeof obj[name]!=='function'||obj[name].__r48FamilyBootWrapped) return false;
+      var old=obj[name].bind(obj);
+      obj[name]=function(){
+        if(inLock()&&r35Ready()){
+          trace('SUPPRESS_AUX_RENDER_DURING_BOOT',{target:label+'.'+name,reason:lockReason,r35:r35Count()});
+          scheduleMaster('suppressed_'+label+'_'+name,40);
+          return Promise.resolve({ok:true,r48Suppressed:true,reason:lockReason});
+        }
+        return old.apply(obj,arguments);
+      };
+      obj[name].__r48FamilyBootWrapped=true;
+      trace('PATCH_OK',{target:label+'.'+name});
+      return true;
+    }catch(e){trace('PATCH_REFRESH_FAILED',{target:label+'.'+name,error:S(e&&e.message||e)},'warn');return false;}
+  }
+  function patchAuxModules(){
+    wrapSuppressedRefresh(window.LifeOSJ20R2HybridFamily,'refreshD1','J20R2HybridFamily');
+    wrapSuppressedRefresh(window.LifeOSJ20R6HybridTimeline,'refresh','J20R6HybridTimeline');
+    wrapSuppressedRefresh(window.LifeOSJ20R7DiagnosticTruth,'refresh','J20R7DiagnosticTruth');
+    wrapSuppressedRefresh(window.LifeOSJ20R7DiagnosticTruth,'run','J20R7DiagnosticTruth');
+    wrapSuppressedRefresh(window.LifeOSJ20R26D1Folders,'refresh','J20R26D1Folders');
+    wrapSuppressedRefresh(window.LifeOSD1FolderContract,'refresh','LifeOSD1FolderContract');
+  }
+  function patchSwitchers(){
+    try{
+      if(typeof window.switchTab==='function'&&!window.switchTab.__r48FamilyBootWrapped){
+        var oldSwitch=window.switchTab;
+        window.switchTab=function(id,btn){ if(S(id)==='view-chat') beginBoot('switchTab_view_chat',2600); var ret=oldSwitch.apply(this,arguments); if(S(id)==='view-chat') scheduleMaster('after_switchTab_view_chat',80); return ret; };
+        window.switchTab.__r48FamilyBootWrapped=true; trace('PATCH_OK',{target:'window.switchTab'});
+      }
+    }catch(e){trace('PATCH_SWITCHTAB_FAILED',{error:S(e&&e.message||e)},'warn');}
+    try{
+      if(typeof window.setDesktopWorkspace==='function'&&!window.setDesktopWorkspace.__r48FamilyBootWrapped){
+        var oldDesk=window.setDesktopWorkspace;
+        window.setDesktopWorkspace=function(mode){ if(S(mode)==='chat') beginBoot('desktop_workspace_chat',2600); var ret=oldDesk.apply(this,arguments); if(S(mode)==='chat') scheduleMaster('after_desktop_workspace_chat',80); return ret; };
+        window.setDesktopWorkspace.__r48FamilyBootWrapped=true; trace('PATCH_OK',{target:'window.setDesktopWorkspace'});
+      }
+    }catch(e){trace('PATCH_DESKTOP_FAILED',{error:S(e&&e.message||e)},'warn');}
+    try{
+      var rr=window.LifeOSRootRouter;
+      if(rr&&typeof rr.enterWorkspace==='function'&&!rr.enterWorkspace.__r48FamilyBootWrapped){
+        var oldEnter=rr.enterWorkspace.bind(rr);
+        rr.enterWorkspace=function(mode,why,ev){ if(S(mode)==='chat') beginBoot('root_router_chat',2600); var ret=oldEnter.apply(rr,arguments); if(S(mode)==='chat') scheduleMaster('after_root_router_chat',80); return ret; };
+        rr.enterWorkspace.__r48FamilyBootWrapped=true; trace('PATCH_OK',{target:'LifeOSRootRouter.enterWorkspace'});
+      }
+    }catch(e){trace('PATCH_ROUTER_FAILED',{error:S(e&&e.message||e)},'warn');}
+  }
+  function patchClicks(){
+    if(window.__lifeosR48FamilyClickBootInstalled) return;
+    window.__lifeosR48FamilyClickBootInstalled=true;
+    document.addEventListener('click',function(ev){
+      try{
+        var el=ev.target&&ev.target.closest&&ev.target.closest('button,a,[role="tab"],.tab,.nav-item,.menu-item,[data-tab]'); if(!el) return;
+        var txt=S(el.innerText||el.textContent||el.id||el.className);
+        if(/gia\s*đình|family|chat/i.test(txt+' '+S(el.id)+' '+S(el.className))) beginBoot('family_click',2400);
+      }catch(e){}
+    },true);
+  }
+  function observeChat(){
+    try{
+      if(window.__lifeosR48FamilyMo) return;
+      var mo=new MutationObserver(function(){
+        if(!inLock()||!r35Ready()) return;
+        var root=chatRoot(); if(!root) return;
+        var txt=S(root.textContent).toLowerCase();
+        var cards=hasCards(root);
+        if(!cards || /đang tải|loading|danh sách chat lỗi|chat lỗi|khởi tạo/i.test(txt)) scheduleMaster('mutation_loader_or_empty',25);
+        else snapshotStable('mutation_stable');
+      });
+      mo.observe(document.body,{subtree:true,childList:true,characterData:true});
+      window.__lifeosR48FamilyMo=mo;
+      trace('PATCH_OK',{target:'MutationObserver'});
+    }catch(e){trace('MUTATION_OBSERVER_FAILED',{error:S(e&&e.message||e)},'warn');}
+  }
+  function boot(reason){
+    patchChatEngine(); patchAuxModules(); patchSwitchers(); patchClicks(); observeChat();
+    if(chatVisible()){
+      if(!lockUntil||now()>lockUntil) beginBoot(reason||'boot_visible',1800);
+      else scheduleMaster(reason||'boot_repatch',60);
+    }
+  }
+  window.LifeOSJ20R48FamilyBootSingleOwner={
+    phase:PHASE,
+    boot:boot,
+    beginBoot:beginBoot,
+    masterRender:masterRender,
+    trace:function(){return readJSON(LS_TRACE,[]);},
+    summary:function(){return {phase:PHASE,lockActive:inLock(),lockUntil:lockUntil,lockReason:lockReason,r35Ready:r35Ready(),r35Messages:r35Count(),chatVisible:chatVisible(),lastMasterAt:lastMasterAt,lastStableAt:lastStableAt,domSig:domSig()};}
+  };
+  window.LifeOSJ20R48FamilyBootSingleRenderOwner=window.LifeOSJ20R48FamilyBootSingleOwner;
+  window.LifeOSJ20R49FamilyBootQuietLock=window.LifeOSJ20R48FamilyBootSingleOwner;
+  window.LifeOSJ20R51DirectPatchR48BootNoSpam=window.LifeOSJ20R48FamilyBootSingleOwner;
+  boot('install');
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){boot('domcontentloaded');}, {once:true});
+  window.addEventListener('load',function(){setTimeout(function(){boot('load_80');},80); setTimeout(function(){boot('load_600');},600); setTimeout(function(){boot('load_1800');},1800);}, {once:true});
+  setInterval(function(){patchChatEngine(); patchAuxModules(); patchSwitchers(); if(chatVisible()&&inLock()&&now()-lastMasterAt>900) scheduleMaster('interval_lock_owner',160);},3500);
+})();
+</script>
+<!-- Pha14J20R51_DirectPatchR48BootNoSpam_R48Base - END -->
+
+
+
+<!-- LIFEOS PHA14 J20 R53 ORIENTATION NO RESIZE STORM
+     Base: R52/R51. Fix: R52 was dispatching synthetic window.resize inside its own
+     resize handler, creating a resize/report loop and high CPU fan noise.
+     Contract unchanged:
+     - OS rotation lock ON: viewport remains locked -> LifeOS stays locked.
+     - Auto-rotate ON: viewport changes portrait/landscape -> LifeOS follows.
+     - No D1/upload/card/business logic changes. -->
+<style id="lifeos-j20r53-orientation-no-resize-storm-style">
+html.lifeos-r53-orient-portrait body:not(.lifeos-landscape-mini-pc) #lifeos-landscape-root,
+body.lifeos-r53-orient-portrait:not(.lifeos-landscape-mini-pc) #lifeos-landscape-root,
+html.lifeos-r52-orient-portrait body:not(.lifeos-landscape-mini-pc) #lifeos-landscape-root,
+body.lifeos-r52-orient-portrait:not(.lifeos-landscape-mini-pc) #lifeos-landscape-root{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+html.lifeos-r53-orient-landscape,
+body.lifeos-r53-orient-landscape,
+html.lifeos-r52-orient-landscape,
+body.lifeos-r52-orient-landscape{
+  min-width:0 !important;
+}
+body.lifeos-r53-orient-landscape.lifeos-landscape-mini-pc,
+body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
+  touch-action:pan-x pan-y !important;
+}
+</style>
+<script id="lifeos-j20r53-orientation-no-resize-storm-guard">
+(function(){
+  if(window.__lifeosJ20R53OrientationNoResizeStormInstalled) return;
+  window.__lifeosJ20R53OrientationNoResizeStormInstalled = true;
+  /* Keep R52 marker for existing audit/proof compatibility. */
+  window.__lifeosJ20R52OrientationAutoRotateInstalled = true;
+
+  var PHASE = 'Pha14J20R53_OrientationNoResizeStorm_R52Base';
+  var lastStateSig = '';
+  var scheduled = 0;
+  var lastApplyAt = 0;
+  var applyCount = 0;
+  var cleanupTimer = 0;
+
+  function now(){ return Date.now(); }
+  function vport(){
+    var v = window.visualViewport;
+    var w = Math.round(v ? v.width : (window.innerWidth || document.documentElement.clientWidth || 0));
+    var h = Math.round(v ? v.height : (window.innerHeight || document.documentElement.clientHeight || 0));
+    return { w:w, h:h, dpr: window.devicePixelRatio || 1 };
+  }
+  function media(q){ try { return !!(window.matchMedia && window.matchMedia(q).matches); } catch(e) { return false; } }
+  function mobileUA(){ return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || ''); }
+  function screenType(){ try { return String((screen.orientation && screen.orientation.type) || ''); } catch(e) { return ''; } }
+  function state(){
+    var b = vport();
+    var st = screenType();
+    var mmLandscape = media('(orientation: landscape)');
+    var landscape = (b.w > b.h) || mmLandscape || /landscape/i.test(st);
+    var phoneLike = media('(pointer: coarse)') || mobileUA() || Math.min(b.w,b.h) <= 640;
+    var miniExpected = !!(landscape && phoneLike && b.w >= 480 && b.h >= 260);
+    var body = document.body;
+    return {
+      phase: PHASE,
+      w: b.w,
+      h: b.h,
+      dpr: b.dpr,
+      orientation: landscape ? 'landscape' : 'portrait',
+      landscape: !!landscape,
+      portrait: !landscape,
+      phoneLike: !!phoneLike,
+      coarse: media('(pointer: coarse)'),
+      mobileUA: mobileUA(),
+      screenOrientation: st,
+      miniPcExpected: miniExpected,
+      miniPcActive: !!(body && body.classList.contains('lifeos-landscape-mini-pc')),
+      applyCount: applyCount,
+      lastApplyAt: lastApplyAt
+    };
+  }
+  function setOrientationClasses(st){
+    var html = document.documentElement;
+    var body = document.body;
+    if(!body || !html) return false;
+
+    html.classList.toggle('lifeos-r52-orient-landscape', st.landscape);
+    html.classList.toggle('lifeos-r52-orient-portrait', st.portrait);
+    body.classList.toggle('lifeos-r52-orient-landscape', st.landscape);
+    body.classList.toggle('lifeos-r52-orient-portrait', st.portrait);
+
+    html.classList.toggle('lifeos-r53-orient-landscape', st.landscape);
+    html.classList.toggle('lifeos-r53-orient-portrait', st.portrait);
+    body.classList.toggle('lifeos-r53-orient-landscape', st.landscape);
+    body.classList.toggle('lifeos-r53-orient-portrait', st.portrait);
+
+    body.dataset.lifeosR52Orientation = st.orientation;
+    body.dataset.lifeosR52MiniPcExpected = st.miniPcExpected ? '1' : '0';
+    body.dataset.lifeosR53Orientation = st.orientation;
+    body.dataset.lifeosR53MiniPcExpected = st.miniPcExpected ? '1' : '0';
+    return true;
+  }
+  function clearStaleR48BootLock(){
+    try{
+      var body = document.body;
+      if(!body || !body.classList.contains('lifeos-r48-family-boot-lock')) return;
+      var owner = window.LifeOSJ20R48FamilyBootSingleRenderOwner || window.LifeOSJ20R48FamilyBootSingleOwner || window.LifeOSJ20R49FamilyBootQuietLock || window.LifeOSJ20R51DirectPatchR48BootNoSpam;
+      var sum = owner && typeof owner.summary === 'function' ? owner.summary() : null;
+      if(!sum || !sum.lockActive) body.classList.remove('lifeos-r48-family-boot-lock');
+    }catch(e){}
+  }
+  function notifyChanged(st, reason){
+    try{
+      window.dispatchEvent(new CustomEvent('lifeos:r53-orientation-applied', {detail:{state:st, reason:String(reason||'')}}));
+    }catch(e){}
+  }
+  function apply(reason){
+    scheduled = 0;
+    var t = now();
+    /* Hard throttle: never run orientation DOM writes more than ~5 times/sec. */
+    if(t - lastApplyAt < 180){
+      schedule('throttle_' + (reason || 'apply'), 200);
+      return state();
+    }
+    var st = state();
+    var sig = st.orientation + '|' + st.w + 'x' + st.h + '|' + st.miniPcExpected + '|' + st.miniPcActive;
+    var changed = sig !== lastStateSig;
+    lastStateSig = sig;
+    lastApplyAt = t;
+    applyCount++;
+
+    setOrientationClasses(st);
+    clearStaleR48BootLock();
+
+    if(changed) notifyChanged(st, reason);
+    return st;
+  }
+  function schedule(reason, delay){
+    if(scheduled) return;
+    scheduled = setTimeout(function(){ requestAnimationFrame(function(){ apply(reason || 'schedule'); }); }, Math.max(0, Number(delay)||0));
+  }
+  function bind(){
+    if(window.__lifeosR53OrientationNoResizeStormBound) return;
+    window.__lifeosR53OrientationNoResizeStormBound = true;
+
+    /* Real events only. Do NOT dispatch synthetic resize here. */
+    window.addEventListener('resize', function(){ schedule('resize', 90); }, {passive:true});
+    window.addEventListener('orientationchange', function(){ schedule('orientationchange', 160); }, {passive:true});
+    window.addEventListener('pageshow', function(){ schedule('pageshow', 80); }, {passive:true});
+    if(window.visualViewport) window.visualViewport.addEventListener('resize', function(){ schedule('visualViewport', 120); }, {passive:true});
+    try{
+      if(screen.orientation && typeof screen.orientation.addEventListener === 'function'){
+        screen.orientation.addEventListener('change', function(){ schedule('screen.orientation', 140); });
+      }
+    }catch(e){}
+    cleanupTimer = setInterval(clearStaleR48BootLock, 1500);
+  }
+
+  bind();
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ schedule('dom', 0); }, {once:true});
+  else schedule('boot', 0);
+  window.addEventListener('load', function(){ schedule('load', 80); }, {once:true});
+
+  window.LifeOSJ20R53OrientationNoResizeStorm = {
+    phase: PHASE,
+    state: state,
+    apply: apply,
+    schedule: schedule,
+    stop: function(){ try{clearInterval(cleanupTimer);}catch(e){} },
+    proof: function(){
+      var st = apply('proof');
+      return {
+        phase: PHASE,
+        href: location.href,
+        title: document.title,
+        state: st,
+        bodyClass: String(document.body && document.body.className || ''),
+        htmlClass: String(document.documentElement && document.documentElement.className || ''),
+        markers: {
+          r53: !!window.__lifeosJ20R53OrientationNoResizeStormInstalled,
+          r52: !!window.__lifeosJ20R52OrientationAutoRotateInstalled,
+          r51: !!window.__lifeosJ20R51DirectPatchR48BootNoSpamInstalled,
+          r48: !!window.__lifeosJ20R48FamilyBootSingleRenderOwnerInstalled,
+          r47: !!window.__lifeosJ20R47PostUploadD1ImmediateCardInstalled
+        }
+      };
+    }
+  };
+  window.LifeOSJ20R52OrientationAutoRotate = window.LifeOSJ20R53OrientationNoResizeStorm;
+})();
+</script>
+
+
+<script id="lifeos-j20r54-performance-cooler-final-js">
+(function(){
+  window.__lifeosJ20R54PerformanceCoolerFinalInstalled = true;
+  window.LifeOSJ20R54 = window.LifeOSJ20R54PerformanceCooler;
+})();
+</script>
 </body>
 </html>
