@@ -28983,5 +28983,2059 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
   window.LifeOSJ20R54 = window.LifeOSJ20R54PerformanceCooler;
 })();
 </script>
+
+<script id="lifeos-j20r57-redo-safe-sync-no-firestore-assert-mic-stable">
+(function(){
+  'use strict';
+  if (window.__lifeosJ20R57RedoSafeSyncNoFirestoreAssertInstalled) return;
+  window.__lifeosJ20R57RedoSafeSyncNoFirestoreAssertInstalled = true;
+  var PHASE = 'Pha14J20R57_RedoSafeSyncNoFirestoreAssert_MicStable_R55Base';
+  var PROJECT = 'tool-mimishop';
+  var API_KEY = 'AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q';
+  var REST_DOC_BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/LifeOS_Profiles/';
+  var state = {profile:'', startedAt:Date.now(), inFlight:false, pendingAfter:false, lastPullAt:0, lastPushAt:0, lastError:'', lastOk:'', counters:{pull:0,push:0,skip:0,localMark:0}};
+  function S(v){ try{return String(v == null ? '' : v);}catch(e){return '';} }
+  function now(){ return Date.now(); }
+  function toast(msg, icon){ try{ window.showToast && window.showToast(msg, icon || 'ph-cloud'); }catch(e){} }
+  function log(type, data){
+    try{
+      var rec = Object.assign({phase:PHASE,type:type,at:now(),iso:new Date().toISOString(),profile:getProfile()}, data||{});
+      var key='lifeos_r57_safe_sync_trace';
+      var arr=[]; try{arr=JSON.parse(localStorage.getItem(key)||'[]'); if(!Array.isArray(arr)) arr=[];}catch(e){arr=[];}
+      arr.push(rec); if(arr.length>80) arr=arr.slice(-80); localStorage.setItem(key, JSON.stringify(arr));
+      if(/FAIL|ERROR|ASSERT|BLOCK/.test(type)) console.warn('[R57_SAFE_SYNC]', rec);
+      return rec;
+    }catch(e){}
+  }
+  function normalizeProfileId(v){
+    return S(v || 'tham').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'') || 'tham';
+  }
+  function getProfile(){
+    return normalizeProfileId(window.viewingUser || window.currentProfileId || window.activeProfileId || (window.currentProfile && (window.currentProfile.id || window.currentProfile.name)) || state.profile || localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || 'tham');
+  }
+  function taskKey(p){ return 'lifeos_v8_data_' + p; }
+  function timeKey(p){ return 'lifeos_v8_time_' + p; }
+  function vaultKey(p){ return 'lifeos_v8_vault_' + p; }
+  function pendingKey(p){ return 'lifeos_r57_pending_sync_' + p; }
+  function readJSON(k, fallback){ try{ var raw=localStorage.getItem(k); return raw ? JSON.parse(raw) : fallback; }catch(e){ return fallback; } }
+  function writeJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function getLocalTasks(p){
+    if(Array.isArray(window.todos)) return window.todos.map(function(x){return cleanPlain(x);});
+    var a = readJSON(taskKey(p), []); return Array.isArray(a) ? a : [];
+  }
+  function setLocalTasks(p, arr, remoteTime){
+    if(!Array.isArray(arr)) return false;
+    window.todos = arr.map(function(t){ t = cleanPlain(t); t.id = S(t.id || ('task_' + now() + '_' + Math.floor(Math.random()*99999))); return t; });
+    writeJSON(taskKey(p), window.todos);
+    localStorage.setItem(timeKey(p), S(remoteTime || now()));
+    try{ window.renderTasksOnly && window.renderTasksOnly(); }catch(e){}
+    try{ window.LifeOSTaskCoreRepair && window.LifeOSTaskCoreRepair.render && window.LifeOSTaskCoreRepair.render(); }catch(e){}
+    return true;
+  }
+  function getLocalVault(p){
+    try{ if(window.VaultStorageLayer && typeof window.VaultStorageLayer.getData === 'function') return (window.VaultStorageLayer.getData() || []).map(cleanPlain); }catch(e){}
+    var a = readJSON(vaultKey(p), []); return Array.isArray(a) ? a : [];
+  }
+  function setLocalVault(p, arr){
+    if(!Array.isArray(arr)) return false;
+    try{ if(window.VaultStorageLayer && typeof window.VaultStorageLayer.replaceAll === 'function'){ window.__lifeosR57ApplyingRemoteVault = true; try{ window.VaultStorageLayer.replaceAll(arr); } finally { window.__lifeosR57ApplyingRemoteVault = false; } } else writeJSON(vaultKey(p), arr); }catch(e){ window.__lifeosR57ApplyingRemoteVault = false; writeJSON(vaultKey(p), arr); }
+    try{ window.VaultUI && window.VaultUI.renderVaultCards && window.VaultUI.renderVaultCards(); }catch(e){}
+    return true;
+  }
+  function localTime(p){ return parseInt(localStorage.getItem(timeKey(p)) || '0', 10) || 0; }
+  function setPending(reason){ var p=getProfile(); state.counters.localMark++; try{ localStorage.setItem(pendingKey(p), JSON.stringify({at:now(), reason:S(reason||'local-change')})); }catch(e){} }
+  function clearPending(p){ try{ localStorage.removeItem(pendingKey(p || getProfile())); }catch(e){} }
+  function hasPending(p){ return !!readJSON(pendingKey(p || getProfile()), null); }
+  function cleanPlain(obj){
+    try{
+      var x = JSON.parse(JSON.stringify(obj == null ? null : obj));
+      (function walk(v){ if(!v || typeof v !== 'object') return; Object.keys(v).forEach(function(k){ if(v[k] === undefined || typeof v[k] === 'function') delete v[k]; else walk(v[k]); }); })(x);
+      return x;
+    }catch(e){ return obj; }
+  }
+  function toFsValue(v){
+    v = cleanPlain(v);
+    if(v === null || v === undefined) return {nullValue:null};
+    if(Array.isArray(v)) return {arrayValue:{values:v.map(toFsValue)}};
+    if(typeof v === 'boolean') return {booleanValue:v};
+    if(typeof v === 'number') return Number.isInteger(v) ? {integerValue:String(v)} : {doubleValue:v};
+    if(typeof v === 'object'){
+      var fields={}; Object.keys(v).forEach(function(k){ if(v[k] !== undefined) fields[k]=toFsValue(v[k]); });
+      return {mapValue:{fields:fields}};
+    }
+    return {stringValue:S(v)};
+  }
+  function fromFsValue(v){
+    if(!v || typeof v !== 'object') return undefined;
+    if('nullValue' in v) return null;
+    if('stringValue' in v) return v.stringValue;
+    if('booleanValue' in v) return !!v.booleanValue;
+    if('integerValue' in v) return parseInt(v.integerValue,10) || 0;
+    if('doubleValue' in v) return Number(v.doubleValue) || 0;
+    if('timestampValue' in v) return Date.parse(v.timestampValue) || 0;
+    if('arrayValue' in v) return ((v.arrayValue && v.arrayValue.values) || []).map(fromFsValue);
+    if('mapValue' in v){ var out={}; var f=(v.mapValue && v.mapValue.fields) || {}; Object.keys(f).forEach(function(k){ out[k]=fromFsValue(f[k]); }); return out; }
+    return undefined;
+  }
+  function docToPlain(doc){ var out={}; var f=(doc && doc.fields) || {}; Object.keys(f).forEach(function(k){ out[k]=fromFsValue(f[k]); }); return out; }
+  function plainToDoc(data){ var fields={}; Object.keys(data||{}).forEach(function(k){ fields[k]=toFsValue(data[k]); }); return {fields:fields}; }
+  async function getToken(){
+    try{
+      if(!window.firebase || !firebase.auth) return '';
+      if(firebase.apps && !firebase.apps.length && firebase.initializeApp){
+        firebase.initializeApp({apiKey:API_KEY,authDomain:'tool-mimishop.firebaseapp.com',projectId:PROJECT,storageBucket:'tool-mimishop.firebasestorage.app',messagingSenderId:'536814109954',appId:'1:536814109954:web:b1be76d22957de4b75ee1b'});
+      }
+      var auth=firebase.auth();
+      if(!auth.currentUser){ try{ await auth.signInAnonymously(); }catch(e){} }
+      return auth.currentUser && auth.currentUser.getIdToken ? await auth.currentUser.getIdToken() : '';
+    }catch(e){ state.lastError='auth:' + S(e.message||e); return ''; }
+  }
+  async function restFetch(method, p, body){
+    if(!navigator.onLine) throw new Error('offline');
+    var token = await getToken();
+    var url = REST_DOC_BASE + encodeURIComponent(p);
+    if(method === 'PATCH') url += '?updateMask.fieldPaths=data&updateMask.fieldPaths=vaultData&updateMask.fieldPaths=stats&updateMask.fieldPaths=updatedAt';
+    var headers = {'Accept':'application/json'};
+    if(method !== 'GET') headers['Content-Type']='application/json';
+    if(token) headers['Authorization']='Bearer ' + token;
+    var res = await fetch(url, {method:method, headers:headers, body:body ? JSON.stringify(body) : undefined, cache:'no-store'});
+    var txt = await res.text(); var json={}; try{ json = txt ? JSON.parse(txt) : {}; }catch(e){ json={raw:txt}; }
+    if(!res.ok){ var er = new Error((json && json.error && (json.error.message || json.error.status)) || ('HTTP_' + res.status)); er.status=res.status; er.data=json; throw er; }
+    return json;
+  }
+  async function pullOnce(reason){
+    var p = getProfile(); state.profile=p;
+    if(state.inFlight){ state.pendingAfter=true; return {ok:false, skipped:true, reason:'in_flight'}; }
+    if(!navigator.onLine){ setPending(reason||'pull_offline'); return {ok:false, offline:true}; }
+    state.inFlight=true;
+    try{
+      state.counters.pull++;
+      var doc = await restFetch('GET', p);
+      var cloud = docToPlain(doc);
+      var remoteTime = Number(cloud.updatedAt || 0) || 0;
+      var lt = localTime(p);
+      var pending = hasPending(p);
+      var localTasks = getLocalTasks(p), localVault = getLocalVault(p);
+      var remoteTasks = Array.isArray(cloud.data) ? cloud.data : null;
+      var remoteVault = Array.isArray(cloud.vaultData) ? cloud.vaultData : null;
+      if(!pending && remoteTime > lt){
+        if(remoteTasks && (remoteTasks.length || !localTasks.length)) setLocalTasks(p, remoteTasks, remoteTime);
+        if(remoteVault && (remoteVault.length || !localVault.length)) setLocalVault(p, remoteVault);
+        localStorage.setItem(timeKey(p), S(remoteTime || now()));
+        state.lastOk='pull'; log('PULL_OK',{reason:S(reason),remoteTime:remoteTime,localTime:lt,tasks:remoteTasks?remoteTasks.length:null,vault:remoteVault?remoteVault.length:null});
+      }else{
+        log('PULL_SKIP_KEEP_LOCAL',{reason:S(reason),pending:pending,remoteTime:remoteTime,localTime:lt});
+      }
+      if(pending && navigator.onLine){ setTimeout(function(){ SafeSync.pushAll({reason:'pending_after_pull', force:true}); }, 1200); }
+      return {ok:true, cloud:cloud};
+    }catch(e){ state.lastError=S(e.message||e); log('PULL_FAILED_SAFE',{reason:S(reason), error:state.lastError, status:e.status||0}); return {ok:false,error:state.lastError}; }
+    finally{ state.inFlight=false; if(state.pendingAfter){ state.pendingAfter=false; setTimeout(function(){ SafeSync.pushAll({reason:'queued_after_inflight'}); }, 1500); } }
+  }
+  async function pushAll(options){
+    options = options || {};
+    var p = getProfile(); state.profile=p;
+    var reason = S(options.reason || 'pushAll');
+    var force = !!options.force || /save|submit|manual|duplicate|vault|online|pending|force/i.test(reason);
+    if(!navigator.onLine){ setPending(reason); return {ok:false, offline:true, pending:true}; }
+    if(state.inFlight){ state.pendingAfter=true; setPending(reason); return {ok:false, skipped:true, reason:'in_flight'}; }
+    if(!force && now() - state.lastPushAt < 30000){ state.counters.skip++; return {ok:true, skipped:true, reason:'throttle'}; }
+    state.inFlight=true;
+    try{
+      state.counters.push++;
+      var payload = { data:getLocalTasks(p), vaultData:getLocalVault(p), stats:cleanPlain(window.stats || readJSON('lifeos_stats_v8_'+p, {})), updatedAt:now() };
+      await restFetch('PATCH', p, plainToDoc(payload));
+      state.lastPushAt=now(); state.lastOk='push'; clearPending(p); localStorage.setItem(timeKey(p), S(payload.updatedAt));
+      log('PUSH_OK_REST',{reason:reason,tasks:payload.data.length,vault:payload.vaultData.length});
+      return {ok:true, phase:PHASE, method:'REST', dataCount:payload.data.length, vaultCount:payload.vaultData.length};
+    }catch(e){ state.lastError=S(e.message||e); setPending(reason); log('PUSH_FAILED_SAFE',{reason:reason,error:state.lastError,status:e.status||0}); return {ok:false,error:state.lastError,pending:true}; }
+    finally{ state.inFlight=false; if(state.pendingAfter){ state.pendingAfter=false; setTimeout(function(){ SafeSync.pushAll({reason:'queued_after_push', force:true}); }, 2500); } }
+  }
+  var pushTimer=null;
+  function schedulePush(reason, ms){ setPending(reason); clearTimeout(pushTimer); pushTimer=setTimeout(function(){ pushAll({reason:reason||'scheduled_local', force:true}); }, ms == null ? 2500 : ms); }
+  function patchLocalWriters(){
+    if(!window.__lifeosR57LocalWritersPatched){
+      window.__lifeosR57LocalWritersPatched=true;
+      var oldSave = typeof window.saveLocalTodos === 'function' ? window.saveLocalTodos : null;
+      window.saveLocalTodos = function(){ var r; try{ r = oldSave ? oldSave.apply(this, arguments) : undefined; }finally{ schedulePush('saveLocalTodos', 3500); } return r; };
+    }
+    try{
+      var V = window.VaultStorageLayer;
+      if(V && !V.__r57SafeSyncPatched){
+        ['saveLocalOnly','add','update','remove','replaceAll'].forEach(function(name){
+          var old = V[name]; if(typeof old !== 'function') return;
+          V[name] = function(){ var r = old.apply(this, arguments); if(name !== 'replaceAll' || !window.__lifeosR57ApplyingRemoteVault) schedulePush('vault_' + name, 4000); return r; };
+        });
+        V.__r57SafeSyncPatched=true;
+      }
+    }catch(e){}
+  }
+  function patchFamilyNoFirebase(){
+    try{
+      var ce=window.ChatEngine;
+      if(ce){
+        if(typeof ce.unsubscribe==='function'){ try{ ce.unsubscribe(); }catch(e){} }
+        ce.unsubscribe=null; ce.dbRef=null; ce.__j20r2FirebaseTextListener=false; ce.__r57NoFirebaseFamily=true;
+        ce.initFirebase=function(){ return false; };
+      }
+    }catch(e){}
+  }
+  function installFirebaseFacade(){
+    var old = window.FirebaseSync || {};
+    try{ if(typeof old._u==='function') old._u(); }catch(e){}
+    old._u=null; old._d=null; old._i=true; old.__r39PushAllNoop=true; old.__r57SafeRestFacade=true;
+    old.init=function(k){ state.profile=normalizeProfileId(k || getProfile()); patchFamilyNoFirebase(); patchLocalWriters(); setTimeout(function(){ pullOnce('init'); }, 500); return true; };
+    old.pushAll=function(options){ return pushAll(options || {}); };
+    old.pullOnce=function(reason){ return pullOnce(reason || 'manual'); };
+    old.safeSyncStatus=function(){ return SafeSync.summary(); };
+    if(typeof old.requestPushPermission !== 'function') old.requestPushPermission=function(){ toast('Thông báo đẩy chưa cấu hình trong bản web này', 'ph-bell'); return Promise.resolve(false); };
+    window.FirebaseSync=old;
+    window.forcePullVaultFromFirebase=function(){ return pullOnce('forcePullVaultFromFirebase'); };
+    window.forcePullTasksVaultFromFirebase=function(){ return pullOnce('forcePullTasksVaultFromFirebase'); };
+  }
+  function patchDuplicateLocalFirst(){
+    function nextCopyTitle(sourceTitle, data){
+      var base=S(sourceTitle||'Nhiệm vụ').trim() || 'Nhiệm vụ';
+      var esc=base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var re=new RegExp('^' + esc + '_copy(\\d+)$','i'); var max=0;
+      (data||[]).forEach(function(t){ var m=S(t.title||t.text||'').trim().match(re); if(m) max=Math.max(max, Number(m[1]||0)); });
+      return base + '_copy' + (max+1);
+    }
+    async function duplicateTask(taskId){
+      try{
+        var p=getProfile();
+        var data=getLocalTasks(p);
+        var original=data.find(function(t){return S(t.id)===S(taskId);}) || (Array.isArray(window.todos)?window.todos.find(function(t){return S(t.id)===S(taskId);}):null);
+        if(!original){ toast('Không tìm thấy nhiệm vụ để nhân bản','ph-warning-circle'); return; }
+        var title=nextCopyTitle(original.title || original.text || original.name, data);
+        var d=new Date(), ms=now();
+        var clone=cleanPlain(Object.assign({}, original, {id:'task_'+ms+'_'+Math.floor(Math.random()*100000), title:title, text:title, name:title, completed:false, alerted:false, alarmStoppedAt:null, alarmEnabled:true, createdAt:ms, copiedFrom:original.id, alarmTime:ms, timestamp:ms, datetime:d.toISOString(), dueAt:d.toISOString(), dueDate:d.toISOString().slice(0,10), timeStr:String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}));
+        data.unshift(clone);
+        setLocalTasks(p, data, ms);
+        try{ window.notifiedTasks && window.notifiedTasks.add && window.notifiedTasks.add(S(clone.id)); }catch(e){}
+        schedulePush('duplicate-task-local-first', 1800);
+        toast('Đã nhân bản nhiệm vụ','ph-copy');
+        try{ if(window.lifeosSpeakNow) window.lifeosSpeakNow('Đã nhân bản nhiệm vụ',{force:true}); else if(window.playSpeechTTS) window.playSpeechTTS('Đã nhân bản nhiệm vụ'); }catch(e){}
+      }catch(e){ console.error('[R57_DuplicateLocalFirst]', e); toast('Nhân bản nhiệm vụ thất bại','ph-warning-circle'); }
+    }
+    window.LifeOSTaskDuplicateCore = Object.assign(window.LifeOSTaskDuplicateCore || {}, {duplicateTask:duplicateTask, r57LocalFirst:true});
+    window.lifeosDuplicateTask=function(taskId){ return duplicateTask(taskId); };
+  }
+  function patchMicStable(){
+    var active = {rec:null, btn:null, input:null, base:'', final:''};
+    function button(on){
+      var b=active.btn; if(!b) return;
+      b.dataset.micListening = on ? '1' : '0';
+      b.classList.toggle('text-rose-500', !!on); b.classList.toggle('ring-2', !!on); b.classList.toggle('ring-rose-300', !!on); b.classList.toggle('border-rose-500', !!on); b.classList.toggle('animate-pulse', !!on);
+      if(!on){ b.classList.add('text-slate-500','border-slate-200'); }
+    }
+    function stop(silent){ try{ active.rec && active.rec.stop(); }catch(e){} button(false); active.rec=null; active.btn=null; active.input=null; active.final=''; if(!silent) toast('Đã dừng nghe mic','ph-microphone-slash'); }
+    window.lifeosStartMicToInput=function(inputId, buttonEl){
+      var input=document.getElementById(inputId) || document.getElementById('input-mobile') || document.getElementById('input-pc');
+      if(!input){ toast('Không tìm thấy ô nhập nhiệm vụ','ph-warning-circle'); return; }
+      if(active.rec){ stop(false); return; }
+      var SR=window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SR){ toast('Trình duyệt này chưa hỗ trợ nhập giọng nói','ph-warning-circle'); try{input.focus();}catch(e){} return; }
+      try{
+        var rec=new SR(); rec.lang='vi-VN'; rec.continuous=true; rec.interimResults=true; active={rec:rec, btn:buttonEl, input:input, base:input.value||'', final:''}; button(true); input.focus(); toast('Đang nghe, hãy nói nhiệm vụ...','ph-microphone');
+        rec.onresult=function(ev){
+          var interim='';
+          for(var i=ev.resultIndex;i<ev.results.length;i++){ var tx=S(ev.results[i][0] && ev.results[i][0].transcript).trim(); if(!tx) continue; if(ev.results[i].isFinal) active.final=(active.final+' '+tx).trim(); else interim=(interim+' '+tx).trim(); }
+          var text=[active.base, active.final, interim].map(function(x){return S(x).trim();}).filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+          input.value=text; input.dispatchEvent(new Event('input',{bubbles:true})); input.dispatchEvent(new Event('change',{bubbles:true}));
+        };
+        rec.onerror=function(e){ console.warn('[R57_MIC]', e); toast('Mic lỗi hoặc chưa được cấp quyền','ph-warning-circle'); stop(true); };
+        rec.onend=function(){ button(false); active.rec=null; active.btn=null; active.input=null; active.final=''; };
+        rec.start();
+      }catch(e){ console.warn('[R57_MIC_START]', e); toast('Mic chưa chạy được trên trình duyệt này','ph-warning-circle'); stop(true); }
+    };
+    window.LifeOSMicDictationCore = Object.assign(window.LifeOSMicDictationCore || {}, {r57Stable:true, stop:stop});
+  }
+  var SafeSync = {
+    phase:PHASE,
+    start:function(profile){ state.profile=normalizeProfileId(profile || getProfile()); installFirebaseFacade(); patchFamilyNoFirebase(); patchLocalWriters(); patchDuplicateLocalFirst(); patchMicStable(); pullOnce('start'); return true; },
+    pullOnce:pullOnce,
+    pushAll:pushAll,
+    schedulePush:schedulePush,
+    summary:function(){ return {phase:PHASE, profile:getProfile(), online:navigator.onLine, state:cleanPlain(state), pending:hasPending(getProfile()), familyFirebaseBlocked:!!(window.ChatEngine && window.ChatEngine.__r57NoFirebaseFamily), firebaseFacade:!!(window.FirebaseSync && window.FirebaseSync.__r57SafeRestFacade), micStable:!!(window.LifeOSMicDictationCore && window.LifeOSMicDictationCore.r57Stable), markers:{r57:!!window.__lifeosJ20R57RedoSafeSyncNoFirestoreAssertInstalled,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled,r54:!!window.__lifeosJ20R54PerformanceCoolerInstalled,r53:!!window.__lifeosJ20R53OrientationNoResizeStormInstalled,r51:!!window.__lifeosJ20R51DirectPatchR48BootNoSpamInstalled,r48:!!window.__lifeosJ20R48FamilyBootSingleRenderOwnerInstalled} }; },
+    trace:function(){ return readJSON('lifeos_r57_safe_sync_trace', []); },
+    clearTrace:function(){ localStorage.removeItem('lifeos_r57_safe_sync_trace'); return true; }
+  };
+  window.LifeOSJ20R57RedoSafeSyncNoFirestoreAssert = SafeSync;
+  window.LifeOSJ20R57 = SafeSync;
+  function boot(){ SafeSync.start(getProfile()); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  window.addEventListener('online', function(){ setTimeout(function(){ pullOnce('online'); }, 800); setTimeout(function(){ pushAll({reason:'online_pending', force:true}); }, 2500); }, {passive:true});
+  window.addEventListener('visibilitychange', function(){ if(!document.hidden) setTimeout(function(){ pullOnce('visible'); }, 1500); }, {passive:true});
+  setInterval(function(){ if(navigator.onLine && hasPending(getProfile())) pushAll({reason:'pending_interval', force:true}); }, 60000);
+})();
+</script>
+
+<script id="lifeos-j20r58-copy-no-instant-alarm-safe-sync-stabilizer">
+(function(){
+  'use strict';
+  if (window.__lifeosJ20R58CopyNoInstantAlarmInstalled) return;
+  window.__lifeosJ20R58CopyNoInstantAlarmInstalled = true;
+  var PHASE = 'Pha14J20R58_CopyNoInstantAlarm_SafeSyncStabilizer_R57Base';
+  var state = { muted:0, duplicatePatched:false, checkPatched:false, triggerPatched:false, lastReason:'' };
+  function S(v){ try{return String(v == null ? '' : v);}catch(e){return '';} }
+  function N(v){ if(v == null || v === '') return 0; if(typeof v === 'number') return isFinite(v) ? v : 0; var n = Number(v); if(isFinite(n) && n > 1000000000) return n; var p = Date.parse(S(v)); return isFinite(p) ? p : 0; }
+  function now(){ return Date.now(); }
+  function normalizeProfileId(v){
+    return S(v || 'tham').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'') || 'tham';
+  }
+  function getProfile(){
+    return normalizeProfileId(window.viewingUser || window.currentProfileId || window.activeProfileId || (window.currentProfile && (window.currentProfile.id || window.currentProfile.name)) || localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || 'tham');
+  }
+  function taskKey(p){ return 'lifeos_v8_data_' + p; }
+  function timeKey(p){ return 'lifeos_v8_time_' + p; }
+  function readJSON(k, fb){ try{ var raw = localStorage.getItem(k); return raw ? JSON.parse(raw) : fb; }catch(e){ return fb; } }
+  function writeJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function plain(x){ try{return JSON.parse(JSON.stringify(x));}catch(e){return x;} }
+  function titleOf(t){ return S(t && (t.title || t.text || t.name || t.content)); }
+  function idOf(t){ return S(t && (t.id != null ? t.id : t.taskId)); }
+  function isCopyTitle(t){ return /_copy\d+$/i.test(titleOf(t).trim()); }
+  function isCopiedTask(t){ return !!(t && (t.copiedFrom || t.copyOf || t.sourceTaskId || isCopyTitle(t) || t.r57CopiedTask || t.r58CopiedTask)); }
+  function alarmMs(t){ return N(t && (t.alarmTime || t.dueAt || t.reminderAt || t.datetime || t.dateTime)); }
+  function createdMs(t){ return N(t && (t.createdAt || t.copiedAt || t.timestamp || t.updatedAt)); }
+  function shouldMuteCopiedAlarm(t){
+    if(!isCopiedTask(t)) return false;
+    if(t.r58ManualAlarmRearmed === true || t.r58CopyAlarmMuted === false) return false;
+    if(t.alarmEnabled === false && t.r58CopyAlarmMuted === true) return true;
+    var a = alarmMs(t), c = createdMs(t), n = now();
+    if(!a) return true;
+    if(c && Math.abs(a - c) <= 120000) return true;
+    if(a <= n + 2000) return true;
+    if(S(t.r58CopyAlarmMutedReason)) return true;
+    return false;
+  }
+  function muteCopyAlarm(t, reason){
+    if(!t || typeof t !== 'object') return false;
+    if(t.r58ManualAlarmRearmed === true || t.r58CopyAlarmMuted === false) return false;
+    if(t.alarmTime && !t.r58OriginalAlarmTime) t.r58OriginalAlarmTime = t.alarmTime;
+    if(t.dueAt && !t.r58OriginalDueAt) t.r58OriginalDueAt = t.dueAt;
+    if(t.datetime && !t.r58OriginalDatetime) t.r58OriginalDatetime = t.datetime;
+    t.alarmEnabled = false;
+    t.alerted = true;
+    t.missed = false;
+    t.alarmMissed = false;
+    t.alarmSilenced = true;
+    t.r58CopyAlarmMuted = true;
+    t.r58CopyAlarmMutedReason = reason || 'copied-task-no-instant-alarm';
+    t.r58CopyAlarmMutedAt = now();
+    t.alarmTime = null;
+    t.dueAt = null;
+    return true;
+  }
+  function persistTodos(list){
+    try{
+      if(!Array.isArray(list)) return;
+      var p = getProfile();
+      window.todos = list;
+      writeJSON(taskKey(p), list);
+      localStorage.setItem(timeKey(p), S(now()));
+    }catch(e){}
+  }
+  function sanitizeCopiedAlarms(reason){
+    var list = Array.isArray(window.todos) ? window.todos : null;
+    if(!list || !list.length){
+      var p = getProfile(); var local = readJSON(taskKey(p), []); if(Array.isArray(local) && local.length) list = local;
+    }
+    if(!Array.isArray(list) || !list.length) return 0;
+    var changed = 0;
+    list.forEach(function(t){ if(shouldMuteCopiedAlarm(t) && muteCopyAlarm(t, reason)){ changed++; } });
+    if(changed){
+      state.muted += changed; state.lastReason = reason || '';
+      persistTodos(list);
+      try{ window.renderTasksOnly && window.renderTasksOnly(); }catch(e){}
+      try{ window.LifeOSTaskCoreRepair && window.LifeOSTaskCoreRepair.render && window.LifeOSTaskCoreRepair.render(); }catch(e){}
+      try{ if(window.FirebaseSync && typeof window.FirebaseSync.pushAll === 'function') setTimeout(function(){ window.FirebaseSync.pushAll({reason:'r58-muted-copied-alarm', force:true}); }, 2500); }catch(e){}
+      try{ console.warn('[R58_COPY_NO_INSTANT_ALARM] muted copied alarm(s)', {changed:changed, reason:reason, phase:PHASE}); }catch(e){}
+    }
+    return changed;
+  }
+  function activeIds(){ return Array.isArray(window.activeAlarmTaskIds) ? window.activeAlarmTaskIds.map(S).filter(Boolean) : []; }
+  function findTask(id){
+    var sid = S(id);
+    return (Array.isArray(window.todos) ? window.todos : []).find(function(t){ return idOf(t) === sid; }) || null;
+  }
+  function stopCopiedAlarmIfActive(reason){
+    try{
+      var ids = activeIds(); if(!ids.length) return false;
+      var copied = ids.filter(function(id){ var t=findTask(id); return t && isCopiedTask(t) && shouldMuteCopiedAlarm(t); });
+      if(copied.length && copied.length === ids.length){
+        sanitizeCopiedAlarms(reason || 'active-copy-alarm-blocked');
+        try{ if(typeof window.stopGlobalAlarm === 'function') window.stopGlobalAlarm('dismiss'); }catch(e){}
+        try{ window.isAlarmRinging = false; window.activeAlarmTaskIds = []; }catch(e){}
+        ['lifeos-task-alarm-overlay','lifeos-task-alarm-modal','alarm-overlay'].forEach(function(id){ var el=document.getElementById(id); if(el){ el.classList.add('hidden'); el.style.display='none'; } });
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  function getLocalTasks(){
+    var p=getProfile();
+    var data = Array.isArray(window.todos) ? window.todos.map(plain) : readJSON(taskKey(p), []);
+    return Array.isArray(data) ? data : [];
+  }
+  function nextCopyTitle(sourceTitle, data){
+    var base = S(sourceTitle || 'Nhiệm vụ').trim() || 'Nhiệm vụ';
+    var esc = base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var re; try{ re = new RegExp('^' + esc + '_copy(\\d+)$','i'); }catch(e){ re = /_copy(\d+)$/i; }
+    var max = 0;
+    (data || []).forEach(function(t){ var m = titleOf(t).trim().match(re); if(m) max = Math.max(max, Number(m[1] || 0)); });
+    return base + '_copy' + (max + 1);
+  }
+  function patchDuplicate(){
+    async function duplicateTask(taskId){
+      try{
+        var data = getLocalTasks();
+        var original = data.find(function(t){ return idOf(t) === S(taskId); }) || (Array.isArray(window.todos) ? window.todos.find(function(t){ return idOf(t) === S(taskId); }) : null);
+        if(!original){ try{ window.showToast && window.showToast('Không tìm thấy nhiệm vụ để nhân bản','ph-warning-circle'); }catch(e){} return false; }
+        var ms = now();
+        var title = nextCopyTitle(titleOf(original), data);
+        var srcDue = alarmMs(original);
+        var keepFutureAlarm = !!(srcDue && srcDue > ms + 60000 && original.alarmEnabled !== false);
+        var clone = plain(Object.assign({}, original));
+        clone.id = 'task_' + ms + '_' + Math.floor(Math.random()*100000);
+        clone.title = title; clone.text = title; clone.name = title;
+        clone.completed = false; clone.done = false;
+        clone.copiedFrom = idOf(original); clone.copiedAt = ms; clone.createdAt = ms; clone.updatedAt = ms; clone.r58CopiedTask = true;
+        clone.missed = false; clone.alarmMissed = false; clone.alarmSilenced = false; clone.alarmStoppedAt = null;
+        if(keepFutureAlarm){
+          clone.alarmEnabled = true; clone.alerted = false; clone.alarmTime = srcDue; clone.r58CopyAlarmMuted = false; clone.r58ManualAlarmRearmed = true;
+        }else{
+          if(srcDue && !clone.r58OriginalAlarmTime) clone.r58OriginalAlarmTime = srcDue;
+          clone.alarmEnabled = false; clone.alerted = true; clone.alarmTime = null; clone.dueAt = null; clone.r58CopyAlarmMuted = true; clone.r58CopyAlarmMutedReason = 'duplicate-created-muted'; clone.r58CopyAlarmMutedAt = ms;
+        }
+        data.unshift(clone);
+        persistTodos(data);
+        try{ window.notifiedTasks && window.notifiedTasks.add && window.notifiedTasks.add(S(clone.id)); }catch(e){}
+        try{ window.renderTasksOnly && window.renderTasksOnly(); }catch(e){}
+        try{ window.LifeOSTaskCoreRepair && window.LifeOSTaskCoreRepair.render && window.LifeOSTaskCoreRepair.render(); }catch(e){}
+        try{ if(window.FirebaseSync && typeof window.FirebaseSync.pushAll === 'function') window.FirebaseSync.pushAll({reason:'duplicate-task-r58-local-first', force:true}); }catch(e){}
+        try{ window.showToast && window.showToast(keepFutureAlarm ? 'Đã nhân bản nhiệm vụ, giữ báo thức tương lai' : 'Đã nhân bản nhiệm vụ, không bật báo thức cũ','ph-copy'); }catch(e){}
+        return clone;
+      }catch(e){ console.error('[R58_DUPLICATE_LOCAL_FIRST]', e); try{ window.showToast && window.showToast('Nhân bản nhiệm vụ thất bại','ph-warning-circle'); }catch(_){} return false; }
+    }
+    window.LifeOSTaskDuplicateCore = Object.assign(window.LifeOSTaskDuplicateCore || {}, { duplicateTask:duplicateTask, r58CopyNoInstantAlarm:true });
+    window.lifeosDuplicateTask = function(taskId){ return duplicateTask(taskId); };
+    state.duplicatePatched = true;
+  }
+  function patchAlarms(){
+    if(typeof window.checkAlarms === 'function' && !window.checkAlarms.__lifeosR58CopyNoInstantAlarm){
+      var oldCheck = window.checkAlarms;
+      window.checkAlarms = function(){
+        sanitizeCopiedAlarms('before-checkAlarms');
+        stopCopiedAlarmIfActive('before-checkAlarms-active');
+        return oldCheck.apply(this, arguments);
+      };
+      window.checkAlarms.__lifeosR58CopyNoInstantAlarm = true;
+      state.checkPatched = true;
+    }
+    if(typeof window.triggerGlobalAlarm === 'function' && !window.triggerGlobalAlarm.__lifeosR58CopyNoInstantAlarm){
+      var oldTrigger = window.triggerGlobalAlarm;
+      window.triggerGlobalAlarm = function(taskIds, taskText){
+        sanitizeCopiedAlarms('before-triggerGlobalAlarm');
+        var arr = Array.isArray(taskIds) ? taskIds.map(S).filter(Boolean) : (S(taskIds) ? [S(taskIds)] : []);
+        if(arr.length){
+          var filtered = arr.filter(function(id){ var t=findTask(id); return !(t && isCopiedTask(t) && shouldMuteCopiedAlarm(t)); });
+          if(!filtered.length){ stopCopiedAlarmIfActive('trigger-filtered-copy'); return false; }
+          if(filtered.length !== arr.length) taskIds = filtered;
+        }
+        return oldTrigger.apply(this, arguments);
+      };
+      window.triggerGlobalAlarm.__lifeosR58CopyNoInstantAlarm = true;
+      state.triggerPatched = true;
+    }
+  }
+  function boot(){
+    patchDuplicate();
+    patchAlarms();
+    sanitizeCopiedAlarms('boot');
+    stopCopiedAlarmIfActive('boot');
+    setTimeout(function(){ sanitizeCopiedAlarms('boot-800ms'); stopCopiedAlarmIfActive('boot-800ms'); }, 800);
+    setTimeout(function(){ patchAlarms(); }, 1500);
+  }
+  window.LifeOSJ20R58 = window.LifeOSJ20R58CopyNoInstantAlarm = {
+    phase: PHASE,
+    sanitizeCopiedAlarms: sanitizeCopiedAlarms,
+    stopCopiedAlarmIfActive: stopCopiedAlarmIfActive,
+    summary: function(){ return { phase:PHASE, installed:true, state:plain(state), r58:true, r57:!!window.__lifeosJ20R57RedoSafeSyncNoFirestoreAssertInstalled, r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled, familyFirebaseBlocked:!!(window.ChatEngine && (window.ChatEngine.__r57NoFirebaseFamily || window.ChatEngine.__r58NoFirebaseFamily)), activeIds:activeIds(), copiedMuted:(Array.isArray(window.todos)?window.todos:[]).filter(function(t){return t && t.r58CopyAlarmMuted;}).length }; }
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+})();
+</script>
+
+
+<script id="lifeos-j20r59-quiet-copy-alarm-two-way-sync">
+(function(){
+  'use strict';
+  if (window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled) return;
+  window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled = true;
+  var PHASE = 'Pha14J20R59_QuietNoSpam_TwoWaySyncProof_R58Base';
+  var PROJECT = 'tool-mimishop';
+  var API_KEY = 'AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q';
+  var REST_DOC_BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/LifeOS_Profiles/';
+  var state = { startedAt:Date.now(), profile:'', inFlight:false, queued:false, quietedWarn:0, finalizedCopies:0, pull:0, push:0, merge:0, skip:0, lastPullAt:0, lastPushAt:0, lastError:'', lastOk:'', remote:{tasks:null,vault:null,updatedAt:0}, lastReason:'' };
+  function S(v){ try{return String(v == null ? '' : v);}catch(e){return '';} }
+  function now(){ return Date.now(); }
+  function normalizeProfileId(v){ return S(v || 'tham').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'') || 'tham'; }
+  function getProfile(){ return normalizeProfileId(window.viewingUser || window.currentProfileId || window.activeProfileId || (window.currentProfile && (window.currentProfile.id || window.currentProfile.name)) || state.profile || localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || 'tham'); }
+  function taskKey(p){ return 'lifeos_v8_data_' + p; }
+  function timeKey(p){ return 'lifeos_v8_time_' + p; }
+  function vaultKey(p){ return 'lifeos_v8_vault_' + p; }
+  function pendingKey(p){ return 'lifeos_r59_pending_sync_' + p; }
+  function r57PendingKey(p){ return 'lifeos_r57_pending_sync_' + p; }
+  function readJSON(k, fb){ try{ var raw=localStorage.getItem(k); return raw ? JSON.parse(raw) : fb; }catch(e){ return fb; } }
+  function writeJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+  function cleanPlain(obj){ try{ var x=JSON.parse(JSON.stringify(obj == null ? null : obj)); (function walk(v){ if(!v || typeof v !== 'object') return; Object.keys(v).forEach(function(k){ if(v[k] === undefined || typeof v[k] === 'function') delete v[k]; else walk(v[k]); }); })(x); return x; }catch(e){ return obj; } }
+  function localTime(p){ return parseInt(localStorage.getItem(timeKey(p)) || '0', 10) || 0; }
+  function setLocalTime(p, t){ try{ localStorage.setItem(timeKey(p), S(t || now())); }catch(e){} }
+  function hasPending(p){ p=p||getProfile(); return !!(readJSON(pendingKey(p), null) || readJSON(r57PendingKey(p), null)); }
+  function setPending(reason){ var p=getProfile(); state.lastReason=S(reason||'local'); writeJSON(pendingKey(p), {at:now(), reason:state.lastReason}); }
+  function clearPending(p){ p=p||getProfile(); try{ localStorage.removeItem(pendingKey(p)); localStorage.removeItem(r57PendingKey(p)); }catch(e){} }
+  function trace(type, data){ try{ var rec=Object.assign({phase:PHASE,type:type,at:now(),iso:new Date().toISOString(),profile:getProfile()}, data||{}); var key='lifeos_r59_sync_trace'; var a=readJSON(key,[]); if(!Array.isArray(a)) a=[]; a.push(rec); if(a.length>100) a=a.slice(-100); writeJSON(key,a); return rec; }catch(e){} }
+  function getLocalTasks(p){ var a = Array.isArray(window.todos) ? window.todos.map(cleanPlain) : readJSON(taskKey(p), []); return Array.isArray(a) ? a : []; }
+  function setLocalTasks(p, arr, remoteTime){ if(!Array.isArray(arr)) return false; var out=arr.map(function(t){ t=cleanPlain(t)||{}; t.id=S(t.id || t.taskId || ('task_'+now()+'_'+Math.floor(Math.random()*99999))); return t; }); window.todos=out; writeJSON(taskKey(p), out); setLocalTime(p, remoteTime || now()); try{ window.renderTasksOnly && window.renderTasksOnly(); }catch(e){} try{ window.LifeOSTaskCoreRepair && window.LifeOSTaskCoreRepair.render && window.LifeOSTaskCoreRepair.render(); }catch(e){} return true; }
+  function getLocalVault(p){ try{ if(window.VaultStorageLayer && typeof window.VaultStorageLayer.getData === 'function'){ var d=window.VaultStorageLayer.getData(); if(Array.isArray(d)) return d.map(cleanPlain); } }catch(e){} var a=readJSON(vaultKey(p), []); return Array.isArray(a) ? a : []; }
+  function setLocalVault(p, arr){ if(!Array.isArray(arr)) return false; var out=arr.map(cleanPlain); try{ if(window.VaultStorageLayer && typeof window.VaultStorageLayer.replaceAll === 'function'){ window.__lifeosR59ApplyingRemoteVault = true; try{ window.VaultStorageLayer.replaceAll(out); } finally { window.__lifeosR59ApplyingRemoteVault = false; } } else { writeJSON(vaultKey(p), out); } }catch(e){ window.__lifeosR59ApplyingRemoteVault=false; writeJSON(vaultKey(p), out); } try{ window.VaultUI && window.VaultUI.renderVaultCards && window.VaultUI.renderVaultCards(); }catch(e){} return true; }
+  function itemId(x, i){ return S(x && (x.id || x.taskId || x.uuid || x.key || x.fileId || x.name || x.title || ('idx_'+i))); }
+  function itemTime(x){ var c=x||{}; var vals=[c.updatedAt,c.modifiedAt,c.savedAt,c.createdAt,c.timestamp,c.copiedAt,c.r58CopyAlarmMutedAt]; for(var i=0;i<vals.length;i++){ var n=Number(vals[i]); if(isFinite(n) && n>1000000000) return n; var p=Date.parse(S(vals[i])); if(isFinite(p)) return p; } return 0; }
+  function mergeList(local, remote, preferLocal){ local=Array.isArray(local)?local:[]; remote=Array.isArray(remote)?remote:[]; var map={}, order=[]; function put(x, source, idx){ if(!x || typeof x !== 'object') return; var id=itemId(x, idx); if(!id) return; var cur=map[id]; var nx=cleanPlain(x); if(!cur){ map[id]={item:nx, source:source, time:itemTime(nx)}; order.push(id); return; } var nt=itemTime(nx), ct=cur.time; var take = preferLocal ? source==='local' : (nt >= ct || source==='local' && nt===ct); if(take){ map[id]={item:nx, source:source, time:nt}; } }
+    remote.forEach(function(x,i){ put(x,'remote',i); }); local.forEach(function(x,i){ put(x,'local',i); }); return order.map(function(id){ return map[id].item; }); }
+  function toFsValue(v){ v=cleanPlain(v); if(v===null || v===undefined) return {nullValue:null}; if(Array.isArray(v)) return {arrayValue:{values:v.map(toFsValue)}}; if(typeof v==='boolean') return {booleanValue:!!v}; if(typeof v==='number') return Number.isInteger(v) ? {integerValue:S(v)} : {doubleValue:v}; if(typeof v==='object'){ var fields={}; Object.keys(v).forEach(function(k){ if(v[k]!==undefined) fields[k]=toFsValue(v[k]); }); return {mapValue:{fields:fields}}; } return {stringValue:S(v)}; }
+  function fromFsValue(v){ if(!v || typeof v !== 'object') return undefined; if('nullValue' in v) return null; if('stringValue' in v) return v.stringValue; if('booleanValue' in v) return !!v.booleanValue; if('integerValue' in v) return parseInt(v.integerValue,10)||0; if('doubleValue' in v) return Number(v.doubleValue)||0; if('timestampValue' in v) return Date.parse(v.timestampValue)||0; if('arrayValue' in v) return ((v.arrayValue && v.arrayValue.values)||[]).map(fromFsValue); if('mapValue' in v){ var out={}; var f=(v.mapValue && v.mapValue.fields)||{}; Object.keys(f).forEach(function(k){ out[k]=fromFsValue(f[k]); }); return out; } return undefined; }
+  function docToPlain(doc){ var out={}; var f=(doc && doc.fields)||{}; Object.keys(f).forEach(function(k){ out[k]=fromFsValue(f[k]); }); return out; }
+  function plainToDoc(data){ var fields={}; Object.keys(data||{}).forEach(function(k){ fields[k]=toFsValue(data[k]); }); return {fields:fields}; }
+  async function getToken(){ try{ if(!window.firebase || !firebase.auth) return ''; if(firebase.apps && !firebase.apps.length && firebase.initializeApp){ firebase.initializeApp({apiKey:API_KEY,authDomain:'tool-mimishop.firebaseapp.com',projectId:PROJECT,storageBucket:'tool-mimishop.firebasestorage.app',messagingSenderId:'536814109954',appId:'1:536814109954:web:b1be76d22957de4b75ee1b'}); } var auth=firebase.auth(); if(!auth.currentUser){ try{ await auth.signInAnonymously(); }catch(e){} } return auth.currentUser && auth.currentUser.getIdToken ? await auth.currentUser.getIdToken() : ''; }catch(e){ state.lastError='auth:'+S(e.message||e); return ''; } }
+  async function restFetch(method, p, body){ if(!navigator.onLine) throw new Error('offline'); var token=await getToken(); var url=REST_DOC_BASE + encodeURIComponent(p) + '?key=' + encodeURIComponent(API_KEY); if(method==='PATCH') url += '&updateMask.fieldPaths=data&updateMask.fieldPaths=vaultData&updateMask.fieldPaths=tasks&updateMask.fieldPaths=vault&updateMask.fieldPaths=stats&updateMask.fieldPaths=updatedAt&updateMask.fieldPaths=r59Meta'; var headers={'Accept':'application/json'}; if(method!=='GET') headers['Content-Type']='application/json'; if(token) headers['Authorization']='Bearer '+token; var res=await fetch(url,{method:method,headers:headers,body:body?JSON.stringify(body):undefined,cache:'no-store'}); var txt=await res.text(); var json={}; try{ json=txt?JSON.parse(txt):{}; }catch(e){ json={raw:txt}; } if(!res.ok){ var er=new Error((json && json.error && (json.error.message || json.error.status)) || ('HTTP_'+res.status)); er.status=res.status; er.data=json; throw er; } return json; }
+  function remoteArrays(cloud){ cloud=cloud||{}; return { tasks:Array.isArray(cloud.data)?cloud.data:(Array.isArray(cloud.tasks)?cloud.tasks:(Array.isArray(cloud.todos)?cloud.todos:null)), vault:Array.isArray(cloud.vaultData)?cloud.vaultData:(Array.isArray(cloud.vault)?cloud.vault:(Array.isArray(cloud.files)?cloud.files:null)), updatedAt:Number(cloud.updatedAt||0)||0 }; }
+  async function pullOnce(reason, opts){ opts=opts||{}; var p=getProfile(); state.profile=p; if(state.inFlight){ state.queued=true; return {ok:false, queued:true}; } if(!navigator.onLine){ setPending(reason||'pull_offline'); return {ok:false, offline:true}; } state.inFlight=true; try{ state.pull++; var doc=await restFetch('GET',p); var cloud=docToPlain(doc); var r=remoteArrays(cloud); state.remote={tasks:r.tasks?r.tasks.length:null,vault:r.vault?r.vault.length:null,updatedAt:r.updatedAt}; var lt=localTime(p), pending=hasPending(p); var localTasks=getLocalTasks(p), localVault=getLocalVault(p); var changed=false, preferLocal=!!pending && !opts.forceRemote; if(r.tasks && (opts.force || opts.forceRemote || !localTasks.length || r.updatedAt>lt || pending)){ var mt=mergeList(localTasks,r.tasks,preferLocal); if(JSON.stringify(mt)!==JSON.stringify(localTasks)){ setLocalTasks(p,mt,Math.max(r.updatedAt,lt)); changed=true; } }
+      if(r.vault && (opts.force || opts.forceRemote || !localVault.length || r.updatedAt>lt || pending)){ var mv=mergeList(localVault,r.vault,preferLocal); if(JSON.stringify(mv)!==JSON.stringify(localVault)){ setLocalVault(p,mv); changed=true; } }
+      if(r.updatedAt>lt) setLocalTime(p,r.updatedAt); state.lastPullAt=now(); state.lastOk='pull'; if(changed) state.merge++; trace('PULL_OK',{reason:S(reason),changed:changed,pending:pending,remoteTasks:r.tasks?r.tasks.length:null,remoteVault:r.vault?r.vault.length:null,remoteTime:r.updatedAt,localTime:lt}); if(pending && navigator.onLine) setTimeout(function(){ pushAll({reason:'after_pull_pending', force:true}); }, 1500); return {ok:true, changed:changed, remote:r}; }
+    catch(e){ state.lastError=S(e.message||e); trace('PULL_FAIL',{reason:S(reason),error:state.lastError,status:e.status||0}); return {ok:false,error:state.lastError}; }
+    finally{ state.inFlight=false; if(state.queued){ state.queued=false; setTimeout(function(){ pullOnce('queued_after_pull',{force:true}); }, 1800); } } }
+  async function pushAll(options){ options=options||{}; var p=getProfile(); state.profile=p; var reason=S(options.reason||'pushAll'); var pending=hasPending(p); var force=!!options.force || /save|submit|manual|duplicate|vault|online|pending|force|sync/i.test(reason); if(!navigator.onLine){ setPending(reason); return {ok:false,offline:true,pending:true}; } if(!force && !pending){ state.skip++; return {ok:true,skipped:true,reason:'no_pending'}; } if(!force && now()-state.lastPushAt<45000){ state.skip++; return {ok:true,skipped:true,reason:'throttle'}; } if(state.inFlight){ state.queued=true; setPending(reason); return {ok:false,queued:true}; } state.inFlight=true; try{ state.push++; var tasks=getLocalTasks(p), vault=getLocalVault(p); if(!pending && !force && !tasks.length && !vault.length){ state.skip++; return {ok:true,skipped:true,reason:'empty_no_pending'}; } var payload={data:tasks,tasks:tasks,vaultData:vault,vault:vault,stats:cleanPlain(window.stats || readJSON('lifeos_stats_v8_'+p,{})),updatedAt:now(),r59Meta:{phase:PHASE,profile:p,pushedAt:now(),reason:reason}}; await restFetch('PATCH',p,plainToDoc(payload)); state.lastPushAt=now(); state.lastOk='push'; clearPending(p); setLocalTime(p,payload.updatedAt); trace('PUSH_OK',{reason:reason,tasks:tasks.length,vault:vault.length}); return {ok:true,method:'REST_R59',tasks:tasks.length,vault:vault.length}; } catch(e){ state.lastError=S(e.message||e); setPending(reason); trace('PUSH_FAIL',{reason:reason,error:state.lastError,status:e.status||0}); return {ok:false,error:state.lastError,pending:true}; } finally{ state.inFlight=false; if(state.queued){ state.queued=false; setTimeout(function(){ syncNow('queued_after_push'); }, 2200); } } }
+  function syncNow(reason){ return pullOnce(reason||'syncNow',{force:true}).then(function(){ return pushAll({reason:reason||'syncNow', force:hasPending(getProfile())}); }); }
+  function titleOf(t){ return S(t && (t.title || t.text || t.name || t.content)); }
+  function idOf(t){ return S(t && (t.id != null ? t.id : t.taskId)); }
+  function isCopyTitle(t){ return /_copy\d+$/i.test(titleOf(t).trim()); }
+  function isCopiedTask(t){ return !!(t && (t.copiedFrom || t.copyOf || t.sourceTaskId || isCopyTitle(t) || t.r57CopiedTask || t.r58CopiedTask)); }
+  function alarmMs(t){ var vals=[t&&t.alarmTime,t&&t.dueAt,t&&t.reminderAt,t&&t.datetime,t&&t.dateTime]; for(var i=0;i<vals.length;i++){ var n=Number(vals[i]); if(isFinite(n)&&n>1000000000) return n; var p=Date.parse(S(vals[i])); if(isFinite(p)) return p; } return 0; }
+  function finalizeCopyAlarmQuiet(reason){ var p=getProfile(), list=Array.isArray(window.todos)?window.todos:readJSON(taskKey(p),[]); if(!Array.isArray(list)) return 0; var changed=0, n=now(); list.forEach(function(t){ if(!isCopiedTask(t) || t.r59CopyAlarmFinalized) return; var a=alarmMs(t); var should = t.r58CopyAlarmMuted===true || t.alarmEnabled===false || !a || a<=n+60000; if(!should) return; if(a && !t.r59OriginalAlarmTime) t.r59OriginalAlarmTime=a; t.alarmEnabled=false; t.alerted=true; t.missed=false; t.alarmMissed=false; t.alarmSilenced=true; t.r58CopyAlarmMuted=true; t.r58ManualAlarmRearmed=true; t.r59CopyAlarmFinalized=true; t.r59CopyAlarmQuietReason=reason||'quiet-finalize'; t.r59CopyAlarmFinalizedAt=n; t.alarmTime=null; t.dueAt=null; changed++; }); if(changed){ state.finalizedCopies+=changed; window.todos=list; writeJSON(taskKey(p),list); setLocalTime(p,now()); setPending('r59_finalize_copy_alarm'); try{ window.renderTasksOnly && window.renderTasksOnly(); }catch(e){} } return changed; }
+  function patchConsoleQuiet(){ if(window.__lifeosR59ConsoleQuietPatched) return; window.__lifeosR59ConsoleQuietPatched=true; var ow=console.warn; console.warn=function(){ try{ if(arguments && S(arguments[0])==='[R58_COPY_NO_INSTANT_ALARM]'){ state.quietedWarn++; return; } }catch(e){} return ow.apply(console, arguments); }; }
+  function patchAlarmsQuiet(){ if(window.__lifeosR59AlarmQuietPatched) return; window.__lifeosR59AlarmQuietPatched=true; var oldCheck=window.checkAlarms; if(typeof oldCheck==='function'){ window.checkAlarms=function(){ finalizeCopyAlarmQuiet('pre-checkAlarms'); return oldCheck.apply(this, arguments); }; window.checkAlarms.__lifeosR59Quiet=true; } var oldDup=window.lifeosDuplicateTask; if(typeof oldDup==='function'){ window.lifeosDuplicateTask=function(){ var r=oldDup.apply(this, arguments); Promise.resolve(r).then(function(){ finalizeCopyAlarmQuiet('after-duplicate'); setTimeout(function(){ pushAll({reason:'duplicate_r59', force:true}); }, 1200); }); return r; }; window.lifeosDuplicateTask.__lifeosR59Quiet=true; } }
+  function patchLocalWriters(){ if(window.__lifeosR59LocalWritersPatched) return; window.__lifeosR59LocalWritersPatched=true; var oldSave=typeof window.saveLocalTodos==='function'?window.saveLocalTodos:null; if(oldSave){ window.saveLocalTodos=function(){ var r=oldSave.apply(this, arguments); setPending('saveLocalTodos_r59'); setTimeout(function(){ pushAll({reason:'saveLocalTodos_r59', force:true}); }, 2500); return r; }; } try{ var V=window.VaultStorageLayer; if(V && !V.__r59TwoWayPatched){ ['saveLocalOnly','add','update','remove','replaceAll'].forEach(function(name){ var old=V[name]; if(typeof old!=='function') return; V[name]=function(){ var r=old.apply(this,arguments); if(name!=='replaceAll' || !window.__lifeosR59ApplyingRemoteVault){ setPending('vault_'+name+'_r59'); setTimeout(function(){ pushAll({reason:'vault_'+name+'_r59', force:true}); }, 3000); } return r; }; }); V.__r59TwoWayPatched=true; } }catch(e){} }
+  function patchFamilyNoFirebase(){ try{ var ce=window.ChatEngine; if(ce){ if(typeof ce.unsubscribe==='function'){ try{ ce.unsubscribe(); }catch(e){} } ce.unsubscribe=null; ce.dbRef=null; ce.__j20r2FirebaseTextListener=false; ce.__r59NoFirebaseFamily=true; ce.initFirebase=function(){ return false; }; } }catch(e){} }
+  function installFacade(){ var F=window.FirebaseSync || {}; try{ if(typeof F._u==='function') F._u(); }catch(e){} F._u=null; F._d=null; F._i=true; F.__r57SafeRestFacade=true; F.__r59TwoWayRestFacade=true; F.init=function(profile){ state.profile=normalizeProfileId(profile||getProfile()); patchFamilyNoFirebase(); patchLocalWriters(); setTimeout(function(){ pullOnce('init_r59',{force:true}); }, 600); return true; }; F.pullOnce=function(reason){ return pullOnce(reason||'manual_r59',{force:true}); }; F.pushAll=function(options){ return pushAll(options||{}); }; F.syncNow=function(reason){ return syncNow(reason||'manual_sync_r59'); }; F.safeSyncStatus=function(){ return api.summary(); }; window.FirebaseSync=F; window.forcePullVaultFromFirebase=function(){ return pullOnce('forcePullVaultFromFirebase_r59',{force:true,forceRemote:true}); }; window.forcePullTasksVaultFromFirebase=function(){ return pullOnce('forcePullTasksVaultFromFirebase_r59',{force:true,forceRemote:true}); }; try{ if(window.LifeOSJ20R57){ window.LifeOSJ20R57.pushAll=pushAll; window.LifeOSJ20R57.pullOnce=function(reason){ return pullOnce(reason||'r57_alias_pull',{force:true}); }; window.LifeOSJ20R57.schedulePush=function(reason,ms){ setPending(reason||'r57_alias_schedule'); setTimeout(function(){ pushAll({reason:reason||'r57_alias_schedule', force:true}); }, ms||2500); }; } if(window.LifeOSJ20R57RedoSafeSyncNoFirestoreAssert){ window.LifeOSJ20R57RedoSafeSyncNoFirestoreAssert.pushAll=pushAll; window.LifeOSJ20R57RedoSafeSyncNoFirestoreAssert.pullOnce=function(reason){ return pullOnce(reason||'r57_alias_pull',{force:true}); }; } }catch(e){} }
+  var api={ phase:PHASE, pullOnce:function(reason){ return pullOnce(reason||'api_pull',{force:true}); }, pushAll:function(reason){ return pushAll({reason:reason||'api_push',force:true}); }, syncNow:syncNow, finalizeCopyAlarmQuiet:finalizeCopyAlarmQuiet, trace:function(){ return readJSON('lifeos_r59_sync_trace',[]); }, clearTrace:function(){ localStorage.removeItem('lifeos_r59_sync_trace'); return true; }, summary:function(){ var p=getProfile(); return {phase:PHASE,installed:true,profile:p,online:navigator.onLine,pending:hasPending(p),state:cleanPlain(state),remote:cleanPlain(state.remote),local:{tasks:getLocalTasks(p).length,vault:getLocalVault(p).length,localTime:localTime(p)},firebaseFacade:!!(window.FirebaseSync&&window.FirebaseSync.__r59TwoWayRestFacade),familyFirebaseBlocked:!!(window.ChatEngine&&(window.ChatEngine.__r59NoFirebaseFamily||window.ChatEngine.__r57NoFirebaseFamily)),markers:{r59:true,r58:!!window.__lifeosJ20R58CopyNoInstantAlarmInstalled,r57:!!window.__lifeosJ20R57RedoSafeSyncNoFirestoreAssertInstalled,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled,r54:!!window.__lifeosJ20R54PerformanceCoolerInstalled,r53:!!window.__lifeosJ20R53OrientationNoResizeStormInstalled,r51:!!window.__lifeosJ20R51DirectPatchR48BootNoSpamInstalled,r48:!!window.__lifeosJ20R48FamilyBootSingleRenderOwnerInstalled}}; } };
+  window.LifeOSJ20R59 = window.LifeOSJ20R59QuietNoSpamTwoWaySync = api;
+  function boot(){ patchConsoleQuiet(); patchFamilyNoFirebase(); installFacade(); patchAlarmsQuiet(); patchLocalWriters(); finalizeCopyAlarmQuiet('boot'); setTimeout(function(){ patchAlarmsQuiet(); finalizeCopyAlarmQuiet('boot_1500'); },1500); setTimeout(function(){ pullOnce('boot_r59',{force:true}); },1800); setTimeout(function(){ if(hasPending(getProfile())) pushAll({reason:'boot_pending_r59', force:true}); },5500); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  window.addEventListener('online', function(){ setTimeout(function(){ syncNow('online_r59'); }, 1000); }, {passive:true});
+  window.addEventListener('visibilitychange', function(){ if(!document.hidden) setTimeout(function(){ pullOnce('visible_r59',{force:true}); }, 1800); }, {passive:true});
+  setInterval(function(){ if(navigator.onLine && hasPending(getProfile())) syncNow('pending_interval_r59'); }, 60000);
+})();
+</script>
+
+<script id="lifeos-j20r60-task-alarm-storage-core-fix">
+(function(){
+  'use strict';
+  if (window.__lifeosJ20R60TaskAlarmStorageCoreFixInstalled) return;
+  window.__lifeosJ20R60TaskAlarmStorageCoreFixInstalled = true;
+  var PHASE = 'Pha14J20R60_TaskAlarmSaveQuotaCoreFix_R59Base';
+  var state = { startedAt: Date.now(), saveOk:0, saveFail:0, pruned:0, compacted:0, editSaved:0, editFailed:0, alarmFired:0, syncQueued:0, syncRun:0, lastError:'', lastSaveAt:0, lastEditAt:0, lastAlarmAt:0, lastSyncAt:0 };
+  function S(v){ try { return String(v == null ? '' : v); } catch(e){ return ''; } }
+  function now(){ return Date.now(); }
+  function normalizeProfileId(v){ return S(v || 'tham').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'') || 'tham'; }
+  function getProfile(){ return normalizeProfileId(window.viewingUser || window.currentProfileId || window.activeProfileId || (window.currentProfile && (window.currentProfile.id || window.currentProfile.name)) || localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || 'tham'); }
+  function taskKey(p){ return 'lifeos_v8_data_' + (p || getProfile()); }
+  function timeKey(p){ return 'lifeos_v8_time_' + (p || getProfile()); }
+  function pendingKey(p){ return 'lifeos_r59_pending_sync_' + (p || getProfile()); }
+  function readJSON(k, fb){ try{ var raw=localStorage.getItem(k); return raw ? JSON.parse(raw) : fb; }catch(e){ return fb; } }
+  function smallTrace(type, data){ try{ var key='lifeos_r60_core_trace'; var arr=readJSON(key, []); if(!Array.isArray(arr)) arr=[]; arr.push(Object.assign({phase:PHASE,type:type,at:now(),iso:new Date().toISOString(),profile:getProfile()}, data||{})); if(arr.length>30) arr=arr.slice(-30); localStorage.setItem(key, JSON.stringify(arr)); }catch(e){} }
+  function pruneDiagnosticStorage(){
+    var removed=0, freed=0;
+    try{
+      var keep=/^(lifeos_v8_data_|lifeos_v8_time_|lifeos_v8_vault_|lifeos_v8_chat_|lifeos_profile|lifeos_stats|lifeos_alarm_architecture_lock|lifeos_native_alarm_bridge_last_log|lifeos_alarm_guard_r8final_snap_|lifeos_alarm_guard_r8final_last_log)/i;
+      var noisy=/(autoproof|proof|console|debug|diagnostic|trace|last_report|endoscopy|issues|family_boot_single_render_owner|hybrid_family_trace|r35|r39|r48|r49|r50|r56|r57|r58|r59_sync_trace|r60_core_trace)/i;
+      var keys=[]; for(var i=0;i<localStorage.length;i++) keys.push(localStorage.key(i));
+      keys.forEach(function(k){
+        if(!k) return;
+        if(keep.test(k) && !/(trace|last_report|endoscopy|issues|family_boot_single_render_owner|hybrid_family_trace|sync_trace|core_trace)/i.test(k)) return;
+        if(noisy.test(k)){
+          try{ var v=localStorage.getItem(k)||''; freed += S(v).length; localStorage.removeItem(k); removed++; }catch(e){}
+        }
+      });
+    }catch(e){}
+    if(removed){ state.pruned += removed; smallTrace('PRUNE_DIAGNOSTIC_STORAGE',{removed:removed,freed:freed}); }
+    return removed;
+  }
+  function cleanTagArray(v){ if(!Array.isArray(v)) return []; return v.map(function(x){ return S(x).trim(); }).filter(Boolean).slice(0,12); }
+  function compactTask(t){
+    t = t && typeof t === 'object' ? t : {};
+    var id = S(t.id || t.taskId || ('task_' + now() + '_' + Math.floor(Math.random()*99999)));
+    var text = S(t.text || t.title || t.name || t.content || '').replace(/\s+/g,' ').trim();
+    var out = {
+      id:id,
+      text:text,
+      completed: !!t.completed,
+      priority: !!t.priority,
+      tags: cleanTagArray(t.tags),
+      isDaily: !!t.isDaily,
+      dueDate: S(t.dueDate || t.date || ''),
+      timeStr: S(t.timeStr || ''),
+      alarmTime: (function(v){ var n=Number(v); return isFinite(n) && n>1000000000 ? n : null; })(t.alarmTime || t.dueAt || t.reminderAt),
+      alarmEnabled: t.alarmEnabled === false ? false : true,
+      alerted: !!t.alerted,
+      createdAt: Number(t.createdAt || t.timestamp || now()) || now(),
+      updatedAt: Number(t.updatedAt || t.modifiedAt || t.savedAt || now()) || now()
+    };
+    ['copiedFrom','copyOf','sourceTaskId','r57CopiedTask','r58CopiedTask','r58CopyAlarmMuted','r58ManualAlarmRearmed','r59CopyAlarmFinalized','r59OriginalAlarmTime','r59CopyAlarmQuietReason','r59CopyAlarmFinalizedAt','r60LastEditAt'].forEach(function(k){ if(t[k] !== undefined && t[k] !== null && t[k] !== '') out[k]=t[k]; });
+    if(!out.dueDate && typeof window.getIsoDate === 'function') out.dueDate = window.getIsoDate();
+    if(!out.text) out.text = 'Nhiệm vụ';
+    return out;
+  }
+  function compactTasks(list){
+    var arr = Array.isArray(list) ? list : [];
+    var seen = Object.create(null), out=[];
+    arr.forEach(function(x){ var t=compactTask(x); if(seen[t.id]) t.id = t.id + '_' + Math.floor(Math.random()*9999); seen[t.id]=true; out.push(t); });
+    state.compacted++;
+    return out;
+  }
+  function safeSetJSON(key, obj){
+    var raw;
+    try{ raw=JSON.stringify(obj); }catch(e){ state.lastError='json:'+S(e.message||e); return false; }
+    try{ localStorage.setItem(key, raw); return true; }
+    catch(e1){
+      pruneDiagnosticStorage();
+      try{ localStorage.setItem(key, raw); return true; }
+      catch(e2){ state.lastError=S(e2.message||e2); return false; }
+    }
+  }
+  function markPending(reason){ try{ localStorage.setItem(pendingKey(getProfile()), JSON.stringify({at:now(),reason:S(reason||'r60_local_change')})); }catch(e){} }
+  var syncTimer=0;
+  function scheduleSync(reason, delay){
+    markPending(reason); state.syncQueued++; clearTimeout(syncTimer);
+    if(!navigator.onLine) return;
+    syncTimer=setTimeout(function(){
+      state.syncRun++; state.lastSyncAt=now();
+      try{
+        if(window.LifeOSJ20R59 && typeof window.LifeOSJ20R59.syncNow==='function') return window.LifeOSJ20R59.syncNow('r60_'+S(reason||'save'));
+        if(window.FirebaseSync && typeof window.FirebaseSync.syncNow==='function') return window.FirebaseSync.syncNow('r60_'+S(reason||'save'));
+        if(window.FirebaseSync && typeof window.FirebaseSync.pushAll==='function') return window.FirebaseSync.pushAll({reason:'r60_'+S(reason||'save'),force:true});
+      }catch(e){ state.lastError='sync:'+S(e.message||e); }
+    }, Math.max(2500, delay || 8000));
+  }
+  function saveTasksNow(reason){
+    var p=getProfile(); var arr=compactTasks(window.todos || readJSON(taskKey(p), []));
+    window.todos = arr;
+    pruneDiagnosticStorage();
+    var ok = safeSetJSON(taskKey(p), arr);
+    try{ localStorage.setItem(timeKey(p), S(now())); }catch(e){}
+    if(ok){ state.saveOk++; state.lastSaveAt=now(); scheduleSync(reason||'saveLocalTodos', 9000); }
+    else { state.saveFail++; markPending('save_failed_'+S(reason||'')); smallTrace('SAVE_FAILED',{key:taskKey(p),error:state.lastError}); }
+    return ok;
+  }
+  function patchStorageSetItem(){
+    if(window.__lifeosR60StorageSetItemPatched) return;
+    window.__lifeosR60StorageSetItemPatched=true;
+    try{
+      var rawSet = Storage.prototype.setItem;
+      Storage.prototype.setItem = function(k,v){
+        if(/^lifeos_v8_data_/i.test(S(k))){
+          try{ var a=JSON.parse(S(v)); if(Array.isArray(a)) v=JSON.stringify(compactTasks(a)); }catch(e){}
+          try{ return rawSet.call(this,k,v); }
+          catch(e1){ pruneDiagnosticStorage(); try{ return rawSet.call(this,k,v); }catch(e2){ state.lastError=S(e2.message||e2); return; } }
+        }
+        try{ return rawSet.call(this,k,v); }
+        catch(e3){ if(/quota/i.test(S(e3 && e3.name)+' '+S(e3 && e3.message))){ pruneDiagnosticStorage(); try{ return rawSet.call(this,k,v); }catch(e4){} } throw e3; }
+      };
+    }catch(e){}
+  }
+  function patchSaveLocalTodos(){
+    window.saveLocalTodos = function(){ return saveTasksNow('saveLocalTodos_r60'); };
+    window.saveLocalTodos.__lifeosR60SafeCompact = true;
+  }
+  function patchFirebasePushDebounce(){
+    try{
+      var F=window.FirebaseSync; if(!F || F.__lifeosR60Debounced) return;
+      var origPush = typeof F.pushAll==='function' ? F.pushAll.bind(F) : null;
+      var origSync = typeof F.syncNow==='function' ? F.syncNow.bind(F) : null;
+      F.pushAll=function(options){ var r=(options&&options.reason)||'legacy_push'; scheduleSync(r, 10000); return Promise.resolve({ok:true,queued:true,method:'R60_DEBOUNCE'}); };
+      F.syncNow=function(reason){ if(origSync) return origSync(reason||'manual_r60'); if(origPush) return origPush({reason:reason||'manual_r60',force:true}); return Promise.resolve({ok:false,noSync:true}); };
+      F.__lifeosR60Debounced=true;
+    }catch(e){}
+  }
+  function parseWithFallback(v){
+    var parsed = {};
+    try{ parsed = typeof window.parseTaskNLP==='function' ? window.parseTaskNLP(v) : {text:v}; }catch(e){ parsed={text:v}; }
+    parsed = parsed || {text:v};
+    if(!parsed.text) parsed.text = S(v).replace(/\s+/g,' ').trim();
+    return parsed;
+  }
+  function patchSaveEditTask(){
+    window.saveEditTask = function(id){
+      var modal=document.getElementById('editTaskModal');
+      try{
+        var input=document.getElementById('editTaskInput');
+        var v=input ? input.value.trim() : '';
+        if(!v){ try{ window.showToast('Không được để trống!','ph-warning'); }catch(e){} return false; }
+        var list=Array.isArray(window.todos)?window.todos:[];
+        var idx=list.findIndex(function(x){ return String(x && x.id)===String(id); });
+        if(idx<0){ try{ window.showToast('Không tìm thấy nhiệm vụ','ph-warning'); }catch(e){} return false; }
+        var old=list[idx]||{}; var parsed=parseWithFallback(v); var n=now();
+        var next=Object.assign({}, old, parsed, { id: old.id || id, updatedAt:n, r60LastEditAt:n });
+        var a=Number(next.alarmTime)||0;
+        if(a>1000000000){
+          next.alarmEnabled = true;
+          if(a >= n-120000){ next.alerted=false; try{ window.notifiedTasks && window.notifiedTasks.delete(String(next.id)); }catch(e){} }
+          else { next.alerted=true; }
+        }
+        list[idx]=compactTask(next); window.todos=list;
+        var ok=saveTasksNow('saveEditTask_r60');
+        try{ window.renderTasksOnly && window.renderTasksOnly(); }catch(e){}
+        try{ window.vibrate && window.vibrate([20,30]); }catch(e){}
+        try{ window.showToast(ok ? 'Đã lưu chỉnh sửa' : 'Đã lưu bộ nhớ tạm, chờ đồng bộ','ph-check-circle'); }catch(e){}
+        state.editSaved++; state.lastEditAt=n;
+        scheduleSync('saveEditTask_r60', 5000);
+        return true;
+      }catch(err){
+        state.editFailed++; state.lastError='saveEditTask:'+S(err.message||err); smallTrace('SAVE_EDIT_FAILED',{error:state.lastError});
+        try{ window.showToast('Lỗi lưu nhiệm vụ đã được chặn, thử lại','ph-warning'); }catch(e){}
+        return false;
+      }finally{
+        try{ if(modal) modal.remove(); }catch(e){}
+      }
+    };
+    window.saveEditTask.__lifeosR60SaveEditSafe = true;
+  }
+  function taskDueForR60(t,n){
+    if(!t || t.completed || t.alarmEnabled===false || t.alerted) return false;
+    var a=Number(t.alarmTime)||0; if(!(a>1000000000)) return false;
+    var diff=a-n;
+    if(diff<=0 && diff>-300000) return true;
+    return false;
+  }
+  function patchCheckAlarms(){
+    if(window.__lifeosR60CheckAlarmsPatched) return;
+    window.__lifeosR60CheckAlarmsPatched=true;
+    var oldCheck=typeof window.checkAlarms==='function'?window.checkAlarms:null;
+    window.checkAlarms=function(){
+      try{
+        var n=now(), ids=[], texts=[];
+        (window.todos||[]).forEach(function(t){
+          if(taskDueForR60(t,n)){
+            var id=S(t.id); if(window.notifiedTasks && window.notifiedTasks.has(id)) return;
+            try{ window.notifiedTasks && window.notifiedTasks.add(id); }catch(e){}
+            ids.push(id); texts.push(S(t.text||t.title||'Báo thức'));
+          }
+        });
+        if(ids.length){ state.alarmFired+=ids.length; state.lastAlarmAt=n; try{ window.triggerGlobalAlarm(ids, texts.join(' + ')); }catch(e){ state.lastError='alarm:'+S(e.message||e); } return true; }
+      }catch(e){}
+      return oldCheck ? oldCheck.apply(this,arguments) : undefined;
+    };
+    window.checkAlarms.__lifeosR60AlarmGrace = true;
+  }
+  function boot(){
+    patchStorageSetItem(); pruneDiagnosticStorage(); patchSaveLocalTodos(); patchSaveEditTask(); patchCheckAlarms(); patchFirebasePushDebounce();
+    try{ saveTasksNow('boot_compact_r60'); }catch(e){}
+    setTimeout(function(){ patchSaveLocalTodos(); patchSaveEditTask(); patchCheckAlarms(); patchFirebasePushDebounce(); },1500);
+  }
+  var api={
+    phase:PHASE, installed:true,
+    saveNow:function(reason){ return saveTasksNow(reason||'manual'); },
+    prune:pruneDiagnosticStorage,
+    compact:function(){ window.todos=compactTasks(window.todos||[]); return saveTasksNow('manual_compact'); },
+    syncNow:function(reason){ try{ if(window.LifeOSJ20R59 && window.LifeOSJ20R59.syncNow) return window.LifeOSJ20R59.syncNow(reason||'manual_r60'); }catch(e){} return Promise.resolve({ok:false}); },
+    summary:function(){ var p=getProfile(); return {phase:PHASE,installed:true,profile:p,online:navigator.onLine,state:JSON.parse(JSON.stringify(state)),local:{tasks:Array.isArray(window.todos)?window.todos.length:0,bytes:S(localStorage.getItem(taskKey(p))||'').length},markers:{r60:true,r59:!!window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled,r58:!!window.__lifeosJ20R58CopyNoInstantAlarmInstalled,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled},saveLocalPatched:!!(window.saveLocalTodos&&window.saveLocalTodos.__lifeosR60SafeCompact),saveEditPatched:!!(window.saveEditTask&&window.saveEditTask.__lifeosR60SaveEditSafe),checkPatched:!!(window.checkAlarms&&window.checkAlarms.__lifeosR60AlarmGrace)}; }
+  };
+  window.LifeOSJ20R60 = window.LifeOSJ20R60TaskAlarmStorageCoreFix = api;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+})();
+</script>
+
+
+
+<script id="lifeos-j20r61-task-edit-alarm-core">
+(function(){
+  'use strict';
+  if (window.__lifeosJ20R61TaskEditAlarmCoreInstalled) return;
+  window.__lifeosJ20R61TaskEditAlarmCoreInstalled = true;
+  var PHASE = 'Pha14J20R61_TaskEditSaveAlarmFireCore_R60Base';
+  var state = {
+    startedAt: Date.now(), saveOk:0, saveFail:0, clickSave:0, modalClosed:0,
+    alarmScan:0, alarmFire:0, fallbackFire:0, lastSaveAt:0, lastAlarmAt:0,
+    lastEditId:'', lastError:'', lastParsed:null, activeIds:[], mutedConsole:0
+  };
+  function S(v){ try{return String(v==null?'':v);}catch(e){return '';} }
+  function now(){ return Date.now(); }
+  function normProfile(v){ return S(v||'tham').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'') || 'tham'; }
+  function profile(){ return normProfile(window.viewingUser || window.currentProfileId || window.activeProfileId || (window.currentProfile&&(window.currentProfile.id||window.currentProfile.name)) || localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || 'tham'); }
+  function taskKey(p){ return 'lifeos_v8_data_' + (p||profile()); }
+  function timeKey(p){ return 'lifeos_v8_time_' + (p||profile()); }
+  function readJSON(k, fb){ try{ var raw=localStorage.getItem(k); return raw?JSON.parse(raw):fb; }catch(e){ return fb; } }
+  function toast(msg, icon){ try{ window.showToast && window.showToast(msg, icon||'ph-check-circle'); }catch(e){} }
+  function trace(type, data){
+    try{
+      var key='lifeos_r61_task_alarm_trace';
+      var arr=readJSON(key, []);
+      if(!Array.isArray(arr)) arr=[];
+      arr.push(Object.assign({phase:PHASE,type:type,at:now(),iso:new Date().toISOString(),profile:profile()}, data||{}));
+      if(arr.length>50) arr=arr.slice(-50);
+      localStorage.setItem(key, JSON.stringify(arr));
+    }catch(e){}
+  }
+  function getIsoDate(d){
+    try{ if(typeof window.getIsoDate==='function') return window.getIsoDate(d); }catch(e){}
+    var x=d?new Date(d):new Date();
+    return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+  }
+  function tasks(){
+    if(Array.isArray(window.todos)) return window.todos;
+    var a=readJSON(taskKey(profile()), []);
+    if(!Array.isArray(a)) a=[];
+    window.todos=a;
+    return a;
+  }
+  function safeSaveTasks(reason){
+    var p=profile(), arr=tasks();
+    try{
+      localStorage.setItem(taskKey(p), JSON.stringify(arr));
+      localStorage.setItem(timeKey(p), S(now()));
+      state.saveOk++; state.lastSaveAt=now();
+      try{ window.LifeOSJ20R59 && window.LifeOSJ20R59.markPending && window.LifeOSJ20R59.markPending('r61_'+S(reason||'save')); }catch(e){}
+      setTimeout(function(){
+        try{
+          if(window.LifeOSJ20R59 && window.LifeOSJ20R59.syncNow) window.LifeOSJ20R59.syncNow('r61_'+S(reason||'save'));
+          else if(window.FirebaseSync && window.FirebaseSync.pushAll) window.FirebaseSync.pushAll({reason:'r61_'+S(reason||'save'), force:true});
+        }catch(e){}
+      }, 5000);
+      return true;
+    }catch(e){
+      state.saveFail++; state.lastError='safeSaveTasks:'+S(e.name||'')+':'+S(e.message||e);
+      try{ if(window.LifeOSJ20R60 && window.LifeOSJ20R60.prune) window.LifeOSJ20R60.prune(); }catch(_){}
+      try{ localStorage.setItem(taskKey(p), JSON.stringify(arr)); localStorage.setItem(timeKey(p), S(now())); return true; }catch(e2){ state.lastError+=' | retry:'+S(e2.message||e2); return false; }
+    }
+  }
+  function cleanText(raw){
+    var text=S(raw);
+    text=text.replace(/\b(hằng ngày|hàng ngày|mỗi ngày|ngày ngày|ngay ngay)\b/ig,' ');
+    text=text.replace(/\b(hôm nay|hom nay|ngày mai|ngay mai|mai|nay)\b/ig,' ');
+    text=text.replace(/\b\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{4})?\b/g,' ');
+    text=text.replace(/(?:lúc|luc|vào lúc|vao luc|vào|vao|@)?\s*[0-2]?\d(?:h|:|\s*giờ|\s*gio)\s*[0-5]\d?\s*(?:sáng|sang|chiều|chieu|tối|toi)?/ig,' ');
+    text=text.replace(/!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/ig,' ');
+    text=text.replace(/#[\w_]+/g,' ');
+    return text.replace(/\s+/g,' ').trim() || S(raw).replace(/\s+/g,' ').trim();
+  }
+  function strictParse(raw){
+    var rawText=S(raw).trim(), parsed={};
+    try{ if(typeof window.parseTaskNLP==='function') parsed=window.parseTaskNLP(rawText)||{}; }catch(e){ parsed={}; }
+    var text=cleanText(rawText);
+    var lower=rawText.toLowerCase();
+    var isDaily=!!(parsed.isDaily || /(hằng ngày|hàng ngày|mỗi ngày|ngày ngày|ngay ngay)/i.test(rawText));
+    var priority=!!(parsed.priority || /!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/i.test(rawText));
+    var tags=Array.isArray(parsed.tags)?parsed.tags.slice():[];
+    var foundTags=rawText.match(/#[\w_]+/g); if(foundTags) tags=Array.from(new Set(tags.concat(foundTags))).slice(0,12);
+    var n=new Date(), y=n.getFullYear(), mo=n.getMonth(), da=n.getDate();
+    var explicitDate=false, forceToday=false, isTomorrow=false;
+    var dm=rawText.match(/\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{4}))?\b/);
+    if(dm){
+      da=parseInt(dm[1],10); mo=parseInt(dm[2],10)-1; y=dm[3]?parseInt(dm[3],10):n.getFullYear();
+      explicitDate=true; forceToday=true;
+    } else if(/ngày mai|ngay mai|\bmai\b/i.test(rawText) && !isDaily){
+      var tmr=new Date(n.getFullYear(), n.getMonth(), n.getDate()+1); y=tmr.getFullYear(); mo=tmr.getMonth(); da=tmr.getDate(); isTomorrow=true;
+    } else if(/\bnay\b|hôm nay|hom nay/i.test(rawText)){
+      forceToday=true;
+    }
+    var timeStr=parsed.timeStr || '';
+    var alarmTime=Number(parsed.alarmTime)||0;
+    var tm=rawText.match(/(?:lúc|luc|vào lúc|vao luc|vào|vao|@)?\s*([0-2]?\d)(?:h|:|\s*giờ|\s*gio)\s*([0-5]\d)?\s*(sáng|sang|chiều|chieu|tối|toi)?/i);
+    if(tm){
+      var h=parseInt(tm[1],10), m=tm[2]?parseInt(tm[2],10):0, ap=S(tm[3]).toLowerCase();
+      if((ap==='chiều'||ap==='chieu'||ap==='tối'||ap==='toi') && h<12) h+=12;
+      if((ap==='sáng'||ap==='sang') && h===12) h=0;
+      h=Math.max(0,Math.min(23,h)); m=Math.max(0,Math.min(59,m));
+      timeStr=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+      var target=new Date(y,mo,da,h,m,0,0);
+      var diff=target.getTime()-Date.now();
+      if(isDaily && diff < -300000){ target.setDate(target.getDate()+1); }
+      else if(!explicitDate && !forceToday && !isTomorrow && diff < -300000){ target.setDate(target.getDate()+1); }
+      alarmTime=target.getTime();
+      y=target.getFullYear(); mo=target.getMonth(); da=target.getDate();
+    }
+    var dueDate = parsed.dueDate || getIsoDate(new Date(y,mo,da));
+    if(tm) dueDate=getIsoDate(new Date(y,mo,da));
+    var out=Object.assign({}, parsed, {
+      text:text || parsed.text || rawText,
+      isDaily:isDaily,
+      priority:priority,
+      tags:tags,
+      dueDate:dueDate,
+      date:dueDate,
+      timeStr:timeStr || '',
+      alarmTime: alarmTime>1000000000 ? alarmTime : null,
+      alarmEnabled: alarmTime>1000000000 ? true : (parsed.alarmEnabled!==false),
+      alerted: alarmTime>1000000000 ? false : !!parsed.alerted
+    });
+    if(out.alarmTime){
+      out.r61SavedAt=Date.now();
+      out.r61ArmedUntil=Date.now()+15*60000;
+      try{ window.notifiedTasks && window.notifiedTasks.delete(String(out.id||'')); }catch(e){}
+    }
+    state.lastParsed={text:out.text,dueDate:out.dueDate,timeStr:out.timeStr,alarmTime:out.alarmTime,isDaily:out.isDaily};
+    return out;
+  }
+  function closeEditModal(){
+    try{ var m=document.getElementById('editTaskModal'); if(m){ m.remove(); state.modalClosed++; } }catch(e){}
+  }
+  function renderTasks(){
+    setTimeout(function(){
+      try{ if(typeof window.renderTasksOnly==='function') window.renderTasksOnly(); else if(typeof window.renderTasks==='function') window.renderTasks(); else if(typeof window.renderAll==='function') window.renderAll(); }catch(e){}
+    }, 0);
+  }
+  function saveEditCore(id, raw){
+    state.clickSave++; state.lastEditId=S(id||state.lastEditId||'');
+    try{
+      var input=document.getElementById('editTaskInput');
+      var value=S(raw!=null?raw:(input?input.value:'')).trim();
+      if(!value){ toast('Không được để trống!','ph-warning'); return false; }
+      var arr=tasks();
+      var idx=arr.findIndex(function(x){ return String(x&&x.id)===String(id); });
+      if(idx<0){ toast('Không tìm thấy nhiệm vụ','ph-warning'); return false; }
+      var old=arr[idx]||{};
+      var parsed=strictParse(value);
+      var next=Object.assign({}, old, parsed, {id:old.id||id, updatedAt:Date.now(), r61EditedAt:Date.now()});
+      if(next.alarmTime){ next.alarmEnabled=true; next.alerted=false; try{ window.notifiedTasks && window.notifiedTasks.delete(String(next.id)); }catch(e){} }
+      arr[idx]=next;
+      window.todos=arr;
+      var ok=safeSaveTasks('edit_save');
+      trace('EDIT_SAVE',{id:String(next.id), ok:ok, dueDate:next.dueDate, timeStr:next.timeStr, alarmTime:next.alarmTime, text:next.text});
+      renderTasks();
+      closeEditModal();
+      toast(ok?'Đã lưu nhiệm vụ':'Đã lưu tạm nhiệm vụ','ph-check-circle');
+      return true;
+    }catch(e){
+      state.lastError='saveEditCore:'+S(e.message||e); trace('EDIT_SAVE_ERROR',{error:state.lastError});
+      toast('Lỗi lưu nhiệm vụ đã được chặn','ph-warning');
+      closeEditModal();
+      return false;
+    }
+  }
+  function installEditCapture(){
+    if(window.__lifeosR61EditCaptureInstalled) return;
+    window.__lifeosR61EditCaptureInstalled=true;
+    var rawOpen=typeof window.openEditTask==='function'?window.openEditTask:null;
+    if(rawOpen && !rawOpen.__lifeosR61Wrapped){
+      var wrapped=function(id){
+        state.lastEditId=S(id); window.__lifeosR61LastEditTaskId=S(id);
+        var ret=rawOpen.apply(this,arguments);
+        setTimeout(function(){ var m=document.getElementById('editTaskModal'); if(m) m.setAttribute('data-r61-task-id', S(id)); },0);
+        return ret;
+      };
+      wrapped.__lifeosR61Wrapped=true; window.openEditTask=wrapped;
+    }
+    window.saveEditTask=function(id){ return saveEditCore(id || window.__lifeosR61LastEditTaskId || state.lastEditId); };
+    window.saveEditTask.__lifeosR61Core=true;
+    document.addEventListener('click', function(ev){
+      try{
+        var btn=ev.target && ev.target.closest ? ev.target.closest('button') : null;
+        if(!btn) return;
+        var modal=btn.closest && btn.closest('#editTaskModal');
+        if(!modal) return;
+        var txt=S(btn.textContent).replace(/\s+/g,' ').trim();
+        var oc=S(btn.getAttribute('onclick'));
+        if(/Lưu\s*Lại/i.test(txt) || /saveEditTask/i.test(oc)){
+          ev.preventDefault(); ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+          var id=(oc.match(/saveEditTask\(['"]([^'"]+)['"]\)/)||[])[1] || modal.getAttribute('data-r61-task-id') || window.__lifeosR61LastEditTaskId || state.lastEditId;
+          saveEditCore(id);
+        }
+      }catch(e){ state.lastError='editCapture:'+S(e.message||e); }
+    }, true);
+  }
+  function isDue(t,n){
+    if(!t || t.completed || t.alarmEnabled===false || t.alerted) return false;
+    var a=Number(t.alarmTime)||0; if(!(a>1000000000)) return false;
+    var id=S(t.id); if(window.notifiedTasks && window.notifiedTasks.has(id)) return false;
+    var late=n-a;
+    if(late>=0 && late<=15*60000) return true;
+    if(t.r61SavedAt && n<=Number(t.r61ArmedUntil||0) && late>=-2000 && late<=15*60000) return true;
+    return false;
+  }
+  function stopFallbackAlarm(action){
+    try{ clearInterval(window.__lifeosR61BeepTimer); window.__lifeosR61BeepTimer=null; }catch(e){}
+    try{ if(window.__lifeosR61AudioCtx && window.__lifeosR61AudioCtx.state==='running'){} }catch(e){}
+    try{ var m=document.getElementById('lifeos-r61-alarm-modal'); if(m) m.remove(); }catch(e){}
+    try{ window.stopGlobalAlarm && window.stopGlobalAlarm(action||'dismiss'); }catch(e){}
+  }
+  function beepOnce(){
+    try{
+      var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+      var ctx=window.__lifeosR61AudioCtx || (window.__lifeosR61AudioCtx=new AC());
+      if(ctx.state==='suspended') ctx.resume().catch(function(){});
+      var osc=ctx.createOscillator(), gain=ctx.createGain();
+      osc.type='sine'; osc.frequency.value=880; gain.gain.value=0.08;
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); setTimeout(function(){ try{osc.stop(); osc.disconnect(); gain.disconnect();}catch(e){} }, 280);
+    }catch(e){}
+  }
+  function fallbackModal(ids,text){
+    if(document.getElementById('lifeos-r61-alarm-modal')) return;
+    var html='<div id="lifeos-r61-alarm-modal" style="position:fixed;inset:0;z-index:999999;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:18px">'+
+      '<div style="width:min(92vw,460px);background:#fffdf5;border:1px solid #facc15;border-radius:28px;padding:26px;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,.35);font-family:system-ui">'+
+      '<div style="font-size:44px">🔔</div><div style="font-weight:900;font-size:22px;color:#9f1239;margin-top:8px">LifeOS báo thức nhiệm vụ</div>'+
+      '<div style="margin:18px 0;padding:16px;background:#fff3bf;border:1px solid #fbbf24;border-radius:18px;color:#9f1239;font-weight:800;line-height:1.45">'+S(text||'Đến giờ làm việc')+'</div>'+
+      '<button id="lifeos-r61-stop-alarm" style="width:100%;padding:16px;border-radius:18px;border:0;background:#172033;color:white;font-weight:900;font-size:18px">Dừng báo thức</button>'+
+      '</div></div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    try{ document.getElementById('lifeos-r61-stop-alarm').onclick=function(){ stopFallbackAlarm('dismiss'); }; }catch(e){}
+    beepOnce(); clearInterval(window.__lifeosR61BeepTimer); window.__lifeosR61BeepTimer=setInterval(beepOnce, 1000);
+    state.fallbackFire++;
+  }
+  function triggerAlarm(ids,text){
+    state.alarmFire++; state.lastAlarmAt=now(); state.activeIds=ids.slice();
+    try{ window.activeAlarmTaskIds=ids.slice(); }catch(e){}
+    var before=!!document.getElementById('alarm-overlay') && !document.getElementById('alarm-overlay').classList.contains('hidden');
+    try{ if(typeof window.triggerGlobalAlarm==='function') window.triggerGlobalAlarm(ids,text); }catch(e){ state.lastError='triggerGlobalAlarm:'+S(e.message||e); }
+    setTimeout(function(){
+      var overlay=document.getElementById('alarm-overlay');
+      var visible=overlay && !overlay.classList.contains('hidden') && overlay.offsetParent!==null;
+      if(!visible && !before) fallbackModal(ids,text);
+    }, 450);
+    trace('ALARM_FIRE',{ids:ids,text:text});
+  }
+  function scanAlarms(){
+    state.alarmScan++;
+    try{
+      var n=Date.now(), due=[], names=[];
+      tasks().forEach(function(t){
+        if(isDue(t,n)){
+          var id=S(t.id); try{ window.notifiedTasks && window.notifiedTasks.add(id); }catch(e){}
+          due.push(id); names.push(S(t.text||t.title||'Báo thức'));
+        }
+      });
+      if(due.length) triggerAlarm(due, names.join(' + '));
+    }catch(e){ state.lastError='scanAlarms:'+S(e.message||e); }
+  }
+  function installAlarmScan(){
+    if(window.__lifeosR61AlarmScanInstalled) return;
+    window.__lifeosR61AlarmScanInstalled=true;
+    var old=typeof window.checkAlarms==='function'?window.checkAlarms:null;
+    window.checkAlarms=function(){
+      scanAlarms();
+      try{ return old?old.apply(this,arguments):undefined; }catch(e){ state.lastError='oldCheck:'+S(e.message||e); }
+    };
+    clearInterval(window.__lifeosR61AlarmTimer);
+    window.__lifeosR61AlarmTimer=setInterval(scanAlarms, 3000);
+    setTimeout(scanAlarms, 1000);
+  }
+  function boot(){
+    installEditCapture();
+    installAlarmScan();
+    setTimeout(function(){ installEditCapture(); installAlarmScan(); }, 1500);
+    setTimeout(function(){ installEditCapture(); installAlarmScan(); }, 5000);
+  }
+  window.LifeOSJ20R61={
+    phase:PHASE, installed:true,
+    saveEdit:saveEditCore, scan:scanAlarms, stopAlarm:stopFallbackAlarm,
+    summary:function(){
+      return {phase:PHASE,installed:true,profile:profile(),state:JSON.parse(JSON.stringify(state)),
+        modalOpen:!!document.getElementById('editTaskModal'),
+        fallbackOpen:!!document.getElementById('lifeos-r61-alarm-modal'),
+        todos:Array.isArray(window.todos)?window.todos.map(function(t){return {id:t.id,text:t.text,dueDate:t.dueDate,timeStr:t.timeStr,alarmTime:t.alarmTime,alarmEnabled:t.alarmEnabled,alerted:t.alerted,completed:t.completed,r61SavedAt:t.r61SavedAt};}).slice(-8):[],
+        saveEditPatched:!!(window.saveEditTask&&window.saveEditTask.__lifeosR61Core),
+        alarmScanInstalled:!!window.__lifeosR61AlarmScanInstalled,
+        markers:{r61:true,r60:!!window.__lifeosJ20R60TaskAlarmStorageCoreFixInstalled,r59:!!window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled}
+      };
+    }
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+})();
+</script>
+
+
+<!-- LIFEOS PHA14 J20 R62 STOP COMPLETE + DATE BADGE + LOUD ALARM - START -->
+<script id="lifeos-j20r62-stop-complete-date-loud-alarm">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R62StopCompleteDateLoudAlarmInstalled) return;
+  window.__lifeosJ20R62StopCompleteDateLoudAlarmInstalled = true;
+  var PHASE='Pha14J20R62_StopCompleteDateBadgeLoudAlarm_R61Base';
+  var state={startedAt:Date.now(), saveOk:0, saveFail:0, stopComplete:0, dateBadges:0, sirenStart:0, sirenStop:0, lastError:'', lastSave:null, lastStopIds:[]};
+  function S(v){try{return String(v==null?'':v);}catch(e){return '';}}
+  function normProfile(v){return S(v||'tham').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'')||'tham';}
+  function profile(){return normProfile(window.viewingUser||window.currentProfileId||window.activeProfileId||(window.currentProfile&&(window.currentProfile.id||window.currentProfile.name))||localStorage.getItem('lifeos_v8_viewing')||localStorage.getItem('lifeos_v8_session')||'tham');}
+  function taskKey(p){return 'lifeos_v8_data_'+(p||profile());}
+  function timeKey(p){return 'lifeos_v8_time_'+(p||profile());}
+  function readJSON(k,fb){try{var raw=localStorage.getItem(k);return raw?JSON.parse(raw):fb;}catch(e){return fb;}}
+  function getIsoDate(d){try{if(typeof window.getIsoDate==='function')return window.getIsoDate(d);}catch(e){} var x=d?new Date(d):new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+  function tasks(){if(Array.isArray(window.todos)) return window.todos; var a=readJSON(taskKey(profile()),[]); if(!Array.isArray(a)) a=[]; window.todos=a; return a;}
+  function toast(m,ic){try{window.showToast&&window.showToast(m,ic||'ph-check-circle');}catch(e){}}
+  function saveTasks(reason){
+    try{
+      var arr=tasks();
+      localStorage.setItem(taskKey(profile()), JSON.stringify(arr));
+      localStorage.setItem(timeKey(profile()), S(Date.now()));
+      state.saveOk++;
+      try{window.LifeOSJ20R59&&window.LifeOSJ20R59.markPending&&window.LifeOSJ20R59.markPending('r62_'+S(reason||'save'));}catch(e){}
+      setTimeout(function(){try{window.LifeOSJ20R59&&window.LifeOSJ20R59.syncNow&&window.LifeOSJ20R59.syncNow('r62_'+S(reason||'save'));}catch(e){}},4000);
+      return true;
+    }catch(e){state.saveFail++;state.lastError='saveTasks:'+S(e.name||'')+':'+S(e.message||e);return false;}
+  }
+  function cleanText(raw){
+    var text=S(raw);
+    text=text.replace(/\b(hằng ngày|hàng ngày|mỗi ngày|ngày ngày|ngay ngay)\b/ig,' ');
+    text=text.replace(/\b(hôm nay|hom nay|ngày mai|ngay mai|mai|nay)\b/ig,' ');
+    text=text.replace(/\b\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{4})?\b/g,' ');
+    text=text.replace(/(?:lúc|luc|vào lúc|vao luc|vào|vao|@)?\s*[0-2]?\d(?:h|:|\s*giờ|\s*gio)\s*[0-5]?\d?\s*(?:sáng|sang|chiều|chieu|tối|toi)?/ig,' ');
+    text=text.replace(/!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/ig,' ');
+    text=text.replace(/#[\w_]+/g,' ');
+    return text.replace(/\s+/g,' ').trim() || S(raw).replace(/\s+/g,' ').trim();
+  }
+  function parseStrong(raw){
+    var rawText=S(raw).trim(), parsed={};
+    try{if(typeof window.parseTaskNLP==='function') parsed=window.parseTaskNLP(rawText)||{};}catch(e){parsed={};}
+    var n=new Date(), y=n.getFullYear(), mo=n.getMonth(), da=n.getDate();
+    var explicitDate=false, forceToday=false, isTomorrow=false;
+    var dm=rawText.match(/\b(?:ngày\s+|ngay\s+)?(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{4}))?\b/i);
+    if(dm){ da=parseInt(dm[1],10); mo=parseInt(dm[2],10)-1; y=dm[3]?parseInt(dm[3],10):n.getFullYear(); explicitDate=true; forceToday=true; }
+    else if(/ngày mai|ngay mai|\bmai\b/i.test(rawText)){ var tmr=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1); y=tmr.getFullYear(); mo=tmr.getMonth(); da=tmr.getDate(); isTomorrow=true; explicitDate=true; }
+    else if(/\bnay\b|hôm nay|hom nay/i.test(rawText)){ forceToday=true; explicitDate=true; }
+    var timeStr=S(parsed.timeStr||''), alarmTime=Number(parsed.alarmTime)||0;
+    var tm=rawText.match(/(?:lúc|luc|vào lúc|vao luc|vào|vao|@)?\s*([0-2]?\d)(?:h|:|\s*giờ|\s*gio)\s*([0-5]?\d)?\s*(sáng|sang|chiều|chieu|tối|toi)?/i);
+    if(tm){
+      var h=parseInt(tm[1],10), m=tm[2]?parseInt(tm[2],10):0, ap=S(tm[3]).toLowerCase();
+      if((ap==='chiều'||ap==='chieu'||ap==='tối'||ap==='toi')&&h<12)h+=12;
+      if((ap==='sáng'||ap==='sang')&&h===12)h=0;
+      h=Math.max(0,Math.min(23,h)); m=Math.max(0,Math.min(59,m));
+      timeStr=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+      var target=new Date(y,mo,da,h,m,0,0);
+      var isDaily=!!(parsed.isDaily||/(hằng ngày|hàng ngày|mỗi ngày|ngày ngày|ngay ngay)/i.test(rawText));
+      var diff=target.getTime()-Date.now();
+      if(!explicitDate && !forceToday && !isTomorrow && diff < -300000) target.setDate(target.getDate()+1);
+      if(isDaily && !explicitDate && diff < -300000) target.setDate(target.getDate()+1);
+      y=target.getFullYear(); mo=target.getMonth(); da=target.getDate(); alarmTime=target.getTime();
+    }
+    var dueDate=(tm||explicitDate)?getIsoDate(new Date(y,mo,da)):(parsed.dueDate||parsed.date||getIsoDate());
+    var tags=Array.isArray(parsed.tags)?parsed.tags.slice():[]; var mt=rawText.match(/#[\w_]+/g); if(mt) tags=Array.from(new Set(tags.concat(mt))).slice(0,12);
+    var priority=!!(parsed.priority || /!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/i.test(rawText));
+    var isDaily2=!!(parsed.isDaily||/(hằng ngày|hàng ngày|mỗi ngày|ngày ngày|ngay ngay)/i.test(rawText));
+    var out=Object.assign({}, parsed, {
+      text: cleanText(rawText), isDaily:isDaily2, priority:priority, tags:tags,
+      dueDate:dueDate, date:dueDate, displayDate:dueDate, startDate:dueDate,
+      r62ExplicitDate: !!(explicitDate || dm), r62DisplayDate: dueDate,
+      timeStr:timeStr||'', alarmTime:alarmTime>1000000000?alarmTime:null,
+      alarmEnabled: alarmTime>1000000000 ? true : (parsed.alarmEnabled!==false),
+      alerted: alarmTime>1000000000 ? false : !!parsed.alerted
+    });
+    return out;
+  }
+  function closeEdit(){try{var m=document.getElementById('editTaskModal'); if(m)m.remove();}catch(e){}}
+  function render(){try{if(typeof window.renderTasksOnly==='function') window.renderTasksOnly();}catch(e){} setTimeout(augmentTaskCards,0);}
+  function saveEditCore(id){
+    try{
+      var input=document.getElementById('editTaskInput'); var raw=S(input&&input.value).trim();
+      if(!raw){toast('Không được để trống!','ph-warning');return false;}
+      var modal=document.getElementById('editTaskModal');
+      id=S(id|| (modal&&modal.getAttribute('data-r61-task-id')) || window.__lifeosR61LastEditTaskId || '');
+      var arr=tasks(); var idx=arr.findIndex(function(x){return String(x&&x.id)===id;});
+      if(idx<0){toast('Không tìm thấy nhiệm vụ','ph-warning');closeEdit();return false;}
+      var old=arr[idx]||{}; var p=parseStrong(raw);
+      var next=Object.assign({}, old, p, {id:old.id||id, completed:false, done:false, isDone:false, status:'active', updatedAt:Date.now(), r62EditedAt:Date.now()});
+      if(next.alarmTime){ next.alarmEnabled=true; next.alerted=false; next.r62ArmedAt=Date.now(); try{window.notifiedTasks&&window.notifiedTasks.delete(String(next.id));}catch(e){} }
+      arr[idx]=next; window.todos=arr;
+      var ok=saveTasks('edit_save');
+      state.lastSave={id:String(next.id), text:next.text, dueDate:next.dueDate, timeStr:next.timeStr, alarmTime:next.alarmTime, ok:ok};
+      closeEdit(); render(); toast('Đã lưu nhiệm vụ','ph-check-circle');
+      return true;
+    }catch(e){state.lastError='saveEditCore:'+S(e.message||e);closeEdit();toast('Đã chặn lỗi lưu nhiệm vụ','ph-warning');return false;}
+  }
+  function installSaveCapture(){
+    window.saveEditTask=function(id){return saveEditCore(id);}; window.saveEditTask.__lifeosR62Core=true;
+    window.addEventListener('click', function(ev){
+      try{
+        var btn=ev.target&&ev.target.closest?ev.target.closest('button'):null; if(!btn) return;
+        var modal=btn.closest&&btn.closest('#editTaskModal'); if(!modal) return;
+        var txt=S(btn.textContent).replace(/\s+/g,' ').trim(); var oc=S(btn.getAttribute('onclick'));
+        if(/Lưu\s*Lại/i.test(txt)||/saveEditTask/i.test(oc)){
+          ev.preventDefault(); ev.stopPropagation(); if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
+          var id=(oc.match(/saveEditTask\(['"]([^'"]+)['"]\)/)||[])[1] || modal.getAttribute('data-r61-task-id') || window.__lifeosR61LastEditTaskId;
+          saveEditCore(id);
+        }
+      }catch(e){state.lastError='saveCapture:'+S(e.message||e);}
+    }, true);
+  }
+  function fmtDate(iso){var p=S(iso).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:S(iso);}
+  function augmentTaskCards(){
+    try{
+      var today=getIsoDate(); var changed=0;
+      tasks().forEach(function(t){
+        var li=document.querySelector('li[data-task-id="'+String(t.id).replace(/"/g,'\\"')+'"]'); if(!li) return;
+        var title=li.querySelector('.flex-grow .font-bold, .flex-grow div[onclick*="openEditTask"]');
+        if(t.completed||t.done||t.isDone||t.status==='done'){
+          li.classList.add('opacity-60','bg-slate-50');
+          if(title){title.classList.add('line-through','text-slate-400');title.classList.remove('text-rose-600','text-slate-800');}
+        }
+        var d=t.r62DisplayDate||t.displayDate||t.dueDate||t.date||t.startDate;
+        if(!d) return;
+        if(!(t.r62ExplicitDate||t.isDaily||d!==today)) return;
+        var body=li.querySelector('.flex-grow'); if(!body) return;
+        var badge=li.querySelector('.lifeos-r62-date-badge');
+        if(!badge){
+          var wrap=body.querySelector('.flex.flex-wrap.gap-1\.5, .flex.flex-wrap');
+          if(!wrap){wrap=document.createElement('div');wrap.className='flex flex-wrap gap-1.5 mt-1.5';body.appendChild(wrap);}
+          badge=document.createElement('span'); badge.className='lifeos-r62-date-badge bg-slate-50 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold border border-slate-200 flex items-center gap-1 shadow-sm pointer-events-none';
+          wrap.appendChild(badge); changed++;
+        }
+        badge.innerHTML='<i class="ph-bold ph-calendar"></i> '+fmtDate(d);
+      });
+      state.dateBadges+=changed;
+    }catch(e){state.lastError='augment:'+S(e.message||e);}
+  }
+  function installRenderPatch(){
+    if(window.__lifeosR62RenderPatched) return; window.__lifeosR62RenderPatched=true;
+    var old=typeof window.renderTasksOnly==='function'?window.renderTasksOnly:null;
+    if(old&&!old.__lifeosR62Wrapped){
+      var w=function(){var r=old.apply(this,arguments);setTimeout(augmentTaskCards,0);return r;}; w.__lifeosR62Wrapped=true; window.renderTasksOnly=w;
+    }
+    setInterval(augmentTaskCards, 5000);
+    setTimeout(augmentTaskCards,500);
+  }
+  function activeIds(){
+    var out=[];
+    try{if(Array.isArray(window.activeAlarmTaskIds)) out=out.concat(window.activeAlarmTaskIds);}catch(e){}
+    try{var s=window.LifeOSJ20R61&&window.LifeOSJ20R61.summary&&window.LifeOSJ20R61.summary(); if(s&&s.state&&Array.isArray(s.state.activeIds)) out=out.concat(s.state.activeIds);}catch(e){}
+    try{if(window.__lifeosR62ActiveIds) out=out.concat(window.__lifeosR62ActiveIds);}catch(e){}
+    return Array.from(new Set(out.map(String).filter(Boolean)));
+  }
+  function completeActive(reason){
+    var ids=activeIds(); if(!ids.length) return false;
+    var arr=tasks(), changed=0, today=getIsoDate();
+    arr.forEach(function(t){
+      if(ids.indexOf(String(t.id))<0) return;
+      t.completed=true; t.done=true; t.isDone=true; t.status='done';
+      t.alerted=true; t.completedAt=Date.now(); t.stoppedAt=Date.now(); t.stopReason=reason||'alarm_stop';
+      if(t.isDaily){ t.lastCompletedDate=today; }
+      else { t.alarmEnabled=false; }
+      changed++;
+    });
+    if(changed){state.stopComplete+=changed; state.lastStopIds=ids; saveTasks('alarm_stop_complete'); render();}
+    return !!changed;
+  }
+  function startSiren(){
+    try{
+      if(window.__lifeosR62SirenTimer) return;
+      state.sirenStart++;
+      var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+      var ctx=window.__lifeosR62AudioCtx||(window.__lifeosR62AudioCtx=new AC());
+      if(ctx.state==='suspended') ctx.resume().catch(function(){});
+      var tick=0;
+      function burst(){
+        try{
+          if(ctx.state==='suspended') ctx.resume().catch(function(){});
+          var osc=ctx.createOscillator(), gain=ctx.createGain();
+          osc.type='square'; osc.frequency.value=(tick++%2)?1680:1040;
+          gain.gain.setValueAtTime(0.0001,ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.28,ctx.currentTime+0.025);
+          gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.42);
+          osc.connect(gain); gain.connect(ctx.destination); osc.start();
+          setTimeout(function(){try{osc.stop();osc.disconnect();gain.disconnect();}catch(e){}},470);
+        }catch(e){}
+      }
+      burst(); window.__lifeosR62SirenTimer=setInterval(burst,650);
+    }catch(e){state.lastError='startSiren:'+S(e.message||e);}
+  }
+  function stopSiren(){try{clearInterval(window.__lifeosR62SirenTimer);window.__lifeosR62SirenTimer=null;state.sirenStop++;}catch(e){} try{clearInterval(window.__lifeosR61BeepTimer);window.__lifeosR61BeepTimer=null;}catch(e){} }
+  function installAlarmPatch(){
+    if(window.__lifeosR62AlarmPatched) return; window.__lifeosR62AlarmPatched=true;
+    var oldTrig=typeof window.triggerGlobalAlarm==='function'?window.triggerGlobalAlarm:null;
+    if(oldTrig&&!oldTrig.__lifeosR62Wrapped){
+      var tr=function(ids,text){try{window.__lifeosR62ActiveIds=Array.isArray(ids)?ids.slice():[ids];}catch(e){} var r=oldTrig.apply(this,arguments); setTimeout(startSiren,120); return r;};
+      tr.__lifeosR62Wrapped=true; window.triggerGlobalAlarm=tr;
+    }
+    var oldStop=typeof window.stopGlobalAlarm==='function'?window.stopGlobalAlarm:null;
+    if(oldStop&&!oldStop.__lifeosR62Wrapped){
+      var st=function(action){ if(S(action).toLowerCase()!=='snooze') completeActive('stopGlobalAlarm_'+S(action||'stop')); stopSiren(); return oldStop.apply(this,arguments); };
+      st.__lifeosR62Wrapped=true; window.stopGlobalAlarm=st;
+    }
+    window.addEventListener('click', function(ev){
+      try{var b=ev.target&&ev.target.closest?ev.target.closest('button'):null;if(!b)return;var id=S(b.id),txt=S(b.textContent).replace(/\s+/g,' ').trim(); if(id==='lifeos-r61-stop-alarm'||id==='btn-alarm-complete'||/Dừng báo thức|XÁC NHẬN HOÀN THÀNH|DUNG BAO THUC/i.test(txt)){completeActive('button_stop');stopSiren();}}
+      catch(e){}
+    }, true);
+    setInterval(function(){try{if(document.getElementById('alarm-overlay')&&!document.getElementById('alarm-overlay').classList.contains('hidden')) startSiren(); if(document.getElementById('lifeos-r61-alarm-modal')) startSiren();}catch(e){}},2000);
+  }
+  function boot(){installSaveCapture();installRenderPatch();installAlarmPatch();setTimeout(function(){installSaveCapture();installRenderPatch();installAlarmPatch();augmentTaskCards();},1500);}
+  window.LifeOSJ20R62={phase:PHASE,installed:true,saveEdit:saveEditCore,completeActive:completeActive,startSiren:startSiren,stopSiren:stopSiren,summary:function(){return {phase:PHASE,installed:true,profile:profile(),state:JSON.parse(JSON.stringify(state)),saveEditPatched:!!(window.saveEditTask&&window.saveEditTask.__lifeosR62Core),renderPatched:!!window.__lifeosR62RenderPatched,alarmPatched:!!window.__lifeosR62AlarmPatched,activeIds:activeIds(),fallbackOpen:!!document.getElementById('lifeos-r61-alarm-modal'),overlayOpen:!!document.getElementById('alarm-overlay')&&!document.getElementById('alarm-overlay').classList.contains('hidden'),todos:Array.isArray(window.todos)?window.todos.map(function(t){return {id:t.id,text:t.text,dueDate:t.dueDate,date:t.date,displayDate:t.displayDate,timeStr:t.timeStr,alarmTime:t.alarmTime,alarmEnabled:t.alarmEnabled,alerted:t.alerted,completed:t.completed,done:t.done,isDaily:t.isDaily,r62ExplicitDate:t.r62ExplicitDate};}).slice(-10):[],markers:{r62:true,r61:!!window.__lifeosJ20R61TaskEditAlarmCoreInstalled,r60:!!window.__lifeosJ20R60TaskAlarmStorageCoreFixInstalled,r59:!!window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled}};}};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+<!-- LIFEOS PHA14 J20 R62 STOP COMPLETE + DATE BADGE + LOUD ALARM - END -->
+
+
+<!-- LIFEOS PHA14 J20 R63 LOUD SIREN + DATE BADGE + TOUCH HITBOX - START -->
+<script id="lifeos-j20r63-loud-siren-date-badge-touch-hitbox">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R63LoudSirenDateBadgeTouchHitboxInstalled) return;
+  window.__lifeosJ20R63LoudSirenDateBadgeTouchHitboxInstalled = true;
+  var PHASE='Pha14J20R63_LoudSirenDateBadgeTouchHitbox_R62Base';
+  var state={startedAt:Date.now(), dateBadges:0, saveOk:0, saveFail:0, sirenStart:0, sirenStop:0, hitboxPatched:false, lastSave:null, lastError:''};
+  function S(v){try{return String(v==null?'':v);}catch(e){return '';}}
+  function normProfile(v){return S(v||'phuc').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'')||'phuc';}
+  function profile(){return normProfile(window.viewingUser||window.currentProfileId||window.activeProfileId||(window.currentProfile&&(window.currentProfile.id||window.currentProfile.name))||localStorage.getItem('lifeos_v8_viewing')||localStorage.getItem('lifeos_v8_session')||'phuc');}
+  function taskKey(p){return 'lifeos_v8_data_'+(p||profile());}
+  function timeKey(p){return 'lifeos_v8_time_'+(p||profile());}
+  function readJSON(k,fb){try{var raw=localStorage.getItem(k);return raw?JSON.parse(raw):fb;}catch(e){return fb;}}
+  function tasks(){if(Array.isArray(window.todos)) return window.todos; var a=readJSON(taskKey(profile()),[]); if(!Array.isArray(a)) a=[]; window.todos=a; return a;}
+  function isoDate(d){var x=d?new Date(d):new Date(); if(isNaN(x.getTime())) x=new Date(); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+  function fmtDate(iso){var p=S(iso).split('-'); return p.length===3 ? (p[2]+'/'+p[1]+'/'+p[0]) : S(iso);}
+  function toast(m,ic){try{window.showToast&&window.showToast(m,ic||'ph-check-circle');}catch(e){}}
+  function saveTasks(reason){
+    try{
+      var arr=tasks();
+      try{ if(typeof window.__lifeosR60CompactTasks==='function') arr=window.__lifeosR60CompactTasks(arr); }catch(e){}
+      window.todos=arr;
+      localStorage.setItem(taskKey(profile()), JSON.stringify(arr));
+      localStorage.setItem(timeKey(profile()), S(Date.now()));
+      state.saveOk++;
+      try{window.LifeOSJ20R59&&window.LifeOSJ20R59.markPending&&window.LifeOSJ20R59.markPending('r63_'+S(reason||'save'));}catch(e){}
+      setTimeout(function(){try{window.LifeOSJ20R59&&window.LifeOSJ20R59.syncNow&&window.LifeOSJ20R59.syncNow('r63_'+S(reason||'save'));}catch(e){}},5000);
+      return true;
+    }catch(e){state.saveFail++; state.lastError='saveTasks:'+S(e.name||'')+':'+S(e.message||e); return false;}
+  }
+  function stripMeta(raw){
+    var text=S(raw);
+    text=text.replace(/\b(hằng ngày|hàng ngày|mỗi ngày|ngày ngày|ngay ngay)\b/ig,' ');
+    text=text.replace(/\b(hôm nay|hom nay|ngày mai|ngay mai|mai|nay)\b/ig,' ');
+    text=text.replace(/\b(?:ngày\s+|ngay\s+)?\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{4})?\b/ig,' ');
+    text=text.replace(/(?:lúc|luc|vào lúc|vao luc|vào|vao|@)?\s*[0-2]?\d(?:h|:|\s*giờ|\s*gio)\s*[0-5]?\d?\s*(?:sáng|sang|chiều|chieu|tối|toi)?/ig,' ');
+    text=text.replace(/!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/ig,' ');
+    text=text.replace(/#[\w_\-]+/g,' ');
+    return text.replace(/\s+/g,' ').trim() || S(raw).replace(/\s+/g,' ').trim();
+  }
+  function parseDateTime(raw, manualValue){
+    var rawText=S(raw).trim();
+    var parsed={}; try{ if(typeof window.parseTaskNLP==='function') parsed=window.parseTaskNLP(rawText)||{}; }catch(e){ parsed={}; }
+    var now=new Date(), y=now.getFullYear(), mo=now.getMonth(), da=now.getDate();
+    var explicitDate=false, manualDate=false;
+    var timeStr=S(parsed.timeStr||''), alarmTime=Number(parsed.alarmTime)||0;
+    if(manualValue){
+      var md=new Date(manualValue); if(!isNaN(md.getTime())){ y=md.getFullYear(); mo=md.getMonth(); da=md.getDate(); timeStr=String(md.getHours()).padStart(2,'0')+':'+String(md.getMinutes()).padStart(2,'0'); alarmTime=md.getTime(); explicitDate=true; manualDate=true; }
+    }
+    if(!manualDate){
+      var dm=rawText.match(/\b(?:ngày\s+|ngay\s+)?(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{4}))?\b/i);
+      if(dm){ da=parseInt(dm[1],10); mo=parseInt(dm[2],10)-1; y=dm[3]?parseInt(dm[3],10):now.getFullYear(); explicitDate=true; }
+      else if(/ngày mai|ngay mai|\bmai\b/i.test(rawText)){ var tmr=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1); y=tmr.getFullYear(); mo=tmr.getMonth(); da=tmr.getDate(); explicitDate=true; }
+      else if(/hôm nay|hom nay|\bnay\b/i.test(rawText)){ explicitDate=true; }
+      var tm=rawText.match(/(?:lúc|luc|vào lúc|vao luc|vào|vao|@)?\s*([0-2]?\d)(?:h|:|\s*giờ|\s*gio)\s*([0-5]?\d)?\s*(sáng|sang|chiều|chieu|tối|toi)?/i);
+      if(tm){
+        var h=parseInt(tm[1],10), m=tm[2]?parseInt(tm[2],10):0, ap=S(tm[3]).toLowerCase();
+        if((ap==='chiều'||ap==='chieu'||ap==='tối'||ap==='toi')&&h<12) h+=12;
+        if((ap==='sáng'||ap==='sang')&&h===12) h=0;
+        h=Math.max(0,Math.min(23,h)); m=Math.max(0,Math.min(59,m));
+        var target=new Date(y,mo,da,h,m,0,0);
+        var daily=/hằng ngày|hàng ngày|mỗi ngày|ngày ngày|ngay ngay/i.test(rawText) || !!parsed.isDaily;
+        if(!explicitDate && target.getTime() < Date.now()-300000) target.setDate(target.getDate()+1);
+        if(daily && !explicitDate && target.getTime() < Date.now()-300000) target.setDate(target.getDate()+1);
+        y=target.getFullYear(); mo=target.getMonth(); da=target.getDate(); timeStr=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); alarmTime=target.getTime();
+      }
+    }
+    var dueDate=(alarmTime>1000000000 || explicitDate) ? isoDate(new Date(y,mo,da)) : (parsed.dueDate||parsed.date||isoDate());
+    var tags=Array.isArray(parsed.tags)?parsed.tags.slice():[]; var mt=rawText.match(/#[\w_\-]+/g); if(mt) tags=Array.from(new Set(tags.concat(mt))).slice(0,12);
+    var dailyFlag=!!(parsed.isDaily || /hằng ngày|hàng ngày|mỗi ngày|ngày ngày|ngay ngay/i.test(rawText));
+    var priority=!!(parsed.priority || /!g[aâáàảãạ]p|!kh[aâáàảãạ]n|kh[aâáàảãạ]n c[aâáàảãạ]p/i.test(rawText));
+    return Object.assign({}, parsed, {
+      text: stripMeta(rawText), isDaily: dailyFlag, priority: priority, tags: tags,
+      dueDate: dueDate, date: dueDate, displayDate: dueDate, startDate: dueDate,
+      r63Date: dueDate, r63ExplicitDate: true, r63DisplayDate: dueDate,
+      r62ExplicitDate: true, r62DisplayDate: dueDate,
+      timeStr: timeStr || '', alarmTime: alarmTime>1000000000 ? alarmTime : null,
+      alarmEnabled: alarmTime>1000000000 ? true : (parsed.alarmEnabled!==false),
+      alerted: alarmTime>1000000000 ? false : !!parsed.alerted
+    });
+  }
+  function currentManualValue(){try{var x=document.getElementById('editTaskDateManual'); return x&&x.value?x.value:'';}catch(e){return '';}}
+  function closeEdit(){try{var m=document.getElementById('editTaskModal'); if(m)m.remove();}catch(e){}}
+  function render(){try{ if(typeof window.renderTasksOnly==='function') window.renderTasksOnly(); }catch(e){} setTimeout(augmentTaskCards,0);}
+  function saveEditCore(id){
+    try{
+      var input=document.getElementById('editTaskInput'); var raw=S(input&&input.value).trim();
+      if(!raw){toast('Không được để trống!','ph-warning');return false;}
+      var modal=document.getElementById('editTaskModal');
+      id=S(id || (modal&&modal.getAttribute('data-r61-task-id')) || (modal&&modal.getAttribute('data-task-id')) || window.__lifeosR61LastEditTaskId || window.__lifeosR63LastEditTaskId || '');
+      var arr=tasks(); var idx=-1;
+      for(var i=0;i<arr.length;i++){ if(String(arr[i]&&arr[i].id)===String(id)){idx=i;break;} }
+      if(idx<0){toast('Không tìm thấy nhiệm vụ','ph-warning'); closeEdit(); return false;}
+      var old=arr[idx]||{}, p=parseDateTime(raw, currentManualValue());
+      var next=Object.assign({}, old, p, {id:old.id||id, completed:false, done:false, isDone:false, status:'active', updatedAt:Date.now(), r63EditedAt:Date.now()});
+      if(next.alarmTime){ next.alarmEnabled=true; next.alerted=false; next.r63ArmedAt=Date.now(); try{window.notifiedTasks&&window.notifiedTasks.delete(String(next.id));}catch(e){} }
+      arr[idx]=next; window.todos=arr;
+      var ok=saveTasks('edit_save');
+      state.lastSave={id:String(next.id),text:next.text,dueDate:next.dueDate,date:next.date,displayDate:next.displayDate,timeStr:next.timeStr,alarmTime:next.alarmTime,ok:ok};
+      closeEdit(); render(); toast('Đã lưu nhiệm vụ','ph-check-circle');
+      return true;
+    }catch(e){state.lastError='saveEditCore:'+S(e.message||e); closeEdit(); toast('Đã chặn lỗi lưu nhiệm vụ','ph-warning'); return false;}
+  }
+  function installSavePatch(){
+    window.saveEditTask=function(id){return saveEditCore(id);}; window.saveEditTask.__lifeosR63Core=true;
+    window.addEventListener('click',function(ev){
+      try{
+        var btn=ev.target&&ev.target.closest?ev.target.closest('button'):null; if(!btn) return;
+        var modal=btn.closest&&btn.closest('#editTaskModal'); if(!modal) return;
+        var txt=S(btn.textContent).replace(/\s+/g,' ').trim(); var oc=S(btn.getAttribute('onclick'));
+        if(/Lưu\s*Lại/i.test(txt)||/saveEditTask/i.test(oc)){
+          ev.preventDefault(); ev.stopPropagation(); if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
+          var id=(oc.match(/saveEditTask\(['"]([^'"]+)['"]\)/)||[])[1] || modal.getAttribute('data-r61-task-id') || modal.getAttribute('data-task-id') || window.__lifeosR61LastEditTaskId || window.__lifeosR63LastEditTaskId;
+          saveEditCore(id);
+        }
+      }catch(e){state.lastError='saveCapture:'+S(e.message||e);}
+    },true);
+    window.addEventListener('change',function(ev){try{ if(ev.target&&ev.target.id==='editTaskDateManual'){var v=ev.target.value; var input=document.getElementById('editTaskInput'); if(input&&v){var d=new Date(v); if(!isNaN(d.getTime())){var ds=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); var ts=String(d.getHours()).padStart(2,'0')+'h'+String(d.getMinutes()).padStart(2,'0'); var base=S(input.value).replace(/\s*ngày\s+\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{4})?/ig,'').replace(/\s*lúc\s*\d{1,2}(?:h|:)\d{0,2}/ig,''); input.value=(base+' ngày '+ds+' lúc '+ts).replace(/\s+/g,' ').trim(); input.dispatchEvent(new Event('input',{bubbles:true}));}} }}catch(e){}},true);
+  }
+  function taskDate(t){
+    var d=t&&(t.r63DisplayDate||t.r62DisplayDate||t.displayDate||t.dueDate||t.date||t.startDate||t.r63Date);
+    if(!d && t && Number(t.alarmTime)>1000000000) d=isoDate(new Date(Number(t.alarmTime)));
+    return S(d);
+  }
+  function findCardById(id){
+    var list=document.querySelectorAll('#todo-list [data-task-id], li[data-task-id], .swipe-item[data-task-id]');
+    for(var i=0;i<list.length;i++){ if(String(list[i].getAttribute('data-task-id'))===String(id)) return list[i]; }
+    return null;
+  }
+  function ensureBadgeContainer(card){
+    var body=card.querySelector('.flex-grow.min-w-0, .flex-grow'); if(!body) body=card.querySelector('.swipe-front')||card;
+    var wrap=body.querySelector('.flex.flex-wrap');
+    if(!wrap){ wrap=document.createElement('div'); wrap.className='flex flex-wrap gap-1.5 mt-1.5 lifeos-r63-badge-wrap'; body.appendChild(wrap); }
+    return wrap;
+  }
+  function augmentTaskCards(){
+    try{
+      var arr=tasks(), changed=0;
+      arr.forEach(function(t){
+        if(!t||!t.id) return;
+        var card=findCardById(t.id); if(!card) return;
+        var title=card.querySelector('.font-bold.cursor-pointer, div[onclick*="openEditTask"]');
+        if(t.completed||t.done||t.isDone||t.status==='done'){
+          card.classList.add('opacity-60','bg-slate-50');
+          if(title){ title.classList.add('line-through','text-slate-400'); title.classList.remove('text-rose-600','text-slate-800'); }
+        }
+        var d=taskDate(t); if(!d) return;
+        var wrap=ensureBadgeContainer(card); var badge=card.querySelector('.lifeos-r63-date-badge')||card.querySelector('.lifeos-r62-date-badge');
+        if(!badge){ badge=document.createElement('span'); badge.className='lifeos-r63-date-badge bg-slate-50 text-slate-700 px-2 py-0.5 rounded text-[10px] font-bold border border-slate-200 flex items-center gap-1 shadow-sm pointer-events-none'; wrap.appendChild(badge); changed++; }
+        badge.className='lifeos-r63-date-badge bg-slate-50 text-slate-700 px-2 py-0.5 rounded text-[10px] font-bold border border-slate-200 flex items-center gap-1 shadow-sm pointer-events-none';
+        badge.innerHTML='<i class="ph-bold ph-calendar"></i> '+fmtDate(d);
+      });
+      state.dateBadges+=changed;
+    }catch(e){state.lastError='augment:'+S(e.message||e);}
+  }
+  function installRenderPatch(){
+    if(window.__lifeosR63RenderPatched) return; window.__lifeosR63RenderPatched=true;
+    var old=typeof window.renderTasksOnly==='function'?window.renderTasksOnly:null;
+    if(old&&!old.__lifeosR63Wrapped){ var w=function(){var r=old.apply(this,arguments); setTimeout(augmentTaskCards,0); return r;}; w.__lifeosR63Wrapped=true; window.renderTasksOnly=w; }
+    setTimeout(augmentTaskCards,300); setInterval(augmentTaskCards,7000);
+  }
+  function installTouchHitbox(){
+    if(state.hitboxPatched) return; state.hitboxPatched=true;
+    var css='\nhtml.lifeos-r63-hitbox #todo-list .swipe-front{position:relative!important;z-index:5!important;transform:none!important;touch-action:manipulation!important;}\nhtml.lifeos-r63-hitbox #todo-list .swipe-bg-left,html.lifeos-r63-hitbox #todo-list .swipe-bg-right{pointer-events:none!important;}\nhtml.lifeos-r63-hitbox #todo-list button,html.lifeos-r63-hitbox .lifeos-task-card-btn{min-width:44px!important;min-height:44px!important;pointer-events:auto!important;touch-action:manipulation!important;position:relative!important;z-index:20!important;}\nhtml.lifeos-r63-hitbox #todo-list button i{pointer-events:none!important;}\nhtml.lifeos-r63-hitbox #todo-list [onclick*="openEditTask"]{pointer-events:auto!important;touch-action:manipulation!important;}\n@media(max-width:640px){html.lifeos-r63-hitbox #todo-list .swipe-front{gap:.55rem!important;padding:.85rem!important;}html.lifeos-r63-hitbox #todo-list .flex-shrink-0.ml-auto{gap:.35rem!important;padding-left:.25rem!important;}html.lifeos-r63-hitbox #todo-list button{border-radius:14px!important;}}\n';
+    try{document.documentElement.classList.add('lifeos-r63-hitbox'); var st=document.createElement('style'); st.id='lifeos-r63-hitbox-style'; st.textContent=css; document.head.appendChild(st);}catch(e){}
+    window.addEventListener('click',function(ev){
+      try{ var btn=ev.target&&ev.target.closest?ev.target.closest('#todo-list button, #todo-list [onclick]'):null; if(!btn) return; ev.stopPropagation(); }
+      catch(e){}
+    },true);
+  }
+  function stopSiren(){
+    try{clearInterval(window.__lifeosR63SirenTimer);window.__lifeosR63SirenTimer=null;}catch(e){}
+    try{clearInterval(window.__lifeosR62SirenTimer);window.__lifeosR62SirenTimer=null;}catch(e){}
+    try{clearInterval(window.__lifeosR61BeepTimer);window.__lifeosR61BeepTimer=null;}catch(e){}
+    try{ if(window.__lifeosR63Nodes){window.__lifeosR63Nodes.forEach(function(n){try{n.stop&&n.stop();}catch(e){} try{n.disconnect&&n.disconnect();}catch(e){}}); window.__lifeosR63Nodes=[]; } }catch(e){}
+    try{ if(navigator.vibrate) navigator.vibrate(0); }catch(e){}
+    state.sirenStop++;
+  }
+  function burst(ctx,tick){
+    var nodes=[];
+    try{
+      var master=ctx.createGain(); master.gain.setValueAtTime(0.001,ctx.currentTime); master.gain.exponentialRampToValueAtTime(0.88,ctx.currentTime+0.018); master.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.58);
+      var comp=ctx.createDynamicsCompressor(); try{comp.threshold.value=-18;comp.knee.value=6;comp.ratio.value=12;comp.attack.value=0.002;comp.release.value=0.08;}catch(e){}
+      master.connect(comp); comp.connect(ctx.destination); nodes.push(master); nodes.push(comp);
+      var base=(tick%2)?1320:880; var freqs=[base, base*2, 2360+(tick%3)*180];
+      freqs.forEach(function(f,i){ var o=ctx.createOscillator(); var g=ctx.createGain(); o.type=i===0?'square':(i===1?'sawtooth':'square'); o.frequency.setValueAtTime(f,ctx.currentTime); if(i===0){try{o.frequency.exponentialRampToValueAtTime(f*1.35,ctx.currentTime+0.28);}catch(e){}} g.gain.value=i===0?0.75:(i===1?0.38:0.18); o.connect(g); g.connect(master); o.start(); setTimeout(function(){try{o.stop();}catch(e){} try{o.disconnect();g.disconnect();}catch(e){}},650); nodes.push(o); nodes.push(g); });
+      var len=ctx.sampleRate*0.18, buffer=ctx.createBuffer(1,len,ctx.sampleRate), data=buffer.getChannelData(0); for(var j=0;j<len;j++){data[j]=(Math.random()*2-1)*0.55;}
+      var noise=ctx.createBufferSource(); noise.buffer=buffer; var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2600; bp.Q.value=4.2; var ng=ctx.createGain(); ng.gain.value=0.28; noise.connect(bp); bp.connect(ng); ng.connect(master); noise.start(); setTimeout(function(){try{noise.stop();}catch(e){} try{noise.disconnect();bp.disconnect();ng.disconnect();}catch(e){}},240); nodes.push(noise);nodes.push(bp);nodes.push(ng);
+      window.__lifeosR63Nodes=(window.__lifeosR63Nodes||[]).concat(nodes);
+      setTimeout(function(){try{master.disconnect();comp.disconnect();}catch(e){}},800);
+    }catch(e){}
+  }
+  function startSiren(){
+    try{
+      if(window.__lifeosR63SirenTimer) return;
+      stopSiren(); state.sirenStart++;
+      var AC=window.AudioContext||window.webkitAudioContext; if(!AC){return;}
+      var ctx=window.__lifeosR63AudioCtx||(window.__lifeosR63AudioCtx=new AC());
+      if(ctx.state==='suspended') ctx.resume().catch(function(){});
+      var tick=0; burst(ctx,tick++); try{ if(navigator.vibrate) navigator.vibrate([900,120,900,120,900]); }catch(e){}
+      window.__lifeosR63SirenTimer=setInterval(function(){try{ if(ctx.state==='suspended') ctx.resume().catch(function(){}); burst(ctx,tick++); if(navigator.vibrate) navigator.vibrate([650,90,650]); }catch(e){}},520);
+    }catch(e){state.lastError='startSiren:'+S(e.message||e);}
+  }
+  function activeIds(){
+    var out=[];
+    try{ if(Array.isArray(window.activeAlarmTaskIds)) out=out.concat(window.activeAlarmTaskIds); }catch(e){}
+    try{ var s=window.LifeOSJ20R62&&window.LifeOSJ20R62.summary&&window.LifeOSJ20R62.summary(); if(s&&Array.isArray(s.activeIds)) out=out.concat(s.activeIds); }catch(e){}
+    try{ var s2=window.LifeOSJ20R61&&window.LifeOSJ20R61.summary&&window.LifeOSJ20R61.summary(); if(s2&&s2.state&&Array.isArray(s2.state.activeIds)) out=out.concat(s2.state.activeIds); }catch(e){}
+    try{ if(window.__lifeosR63ActiveIds) out=out.concat(window.__lifeosR63ActiveIds); }catch(e){}
+    return Array.from(new Set(out.map(String).filter(Boolean)));
+  }
+  function completeActive(reason){
+    var ids=activeIds(); if(!ids.length) return false;
+    var arr=tasks(), changed=0, today=isoDate();
+    arr.forEach(function(t){ if(ids.indexOf(String(t&&t.id))<0) return; t.completed=true; t.done=true; t.isDone=true; t.status='done'; t.alerted=true; t.completedAt=Date.now(); t.stoppedAt=Date.now(); t.stopReason=reason||'alarm_stop'; if(t.isDaily){t.lastCompletedDate=today;}else{t.alarmEnabled=false;} changed++; });
+    if(changed){ saveTasks('alarm_stop_complete'); render(); }
+    return !!changed;
+  }
+  function installAlarmPatch(){
+    if(window.__lifeosR63AlarmPatched) return; window.__lifeosR63AlarmPatched=true;
+    var oldTrig=typeof window.triggerGlobalAlarm==='function'?window.triggerGlobalAlarm:null;
+    if(oldTrig&&!oldTrig.__lifeosR63Wrapped){ var tr=function(ids,text){try{window.__lifeosR63ActiveIds=Array.isArray(ids)?ids.slice():[ids];}catch(e){} var r=oldTrig.apply(this,arguments); setTimeout(startSiren,80); return r;}; tr.__lifeosR63Wrapped=true; window.triggerGlobalAlarm=tr; }
+    var oldStop=typeof window.stopGlobalAlarm==='function'?window.stopGlobalAlarm:null;
+    if(oldStop&&!oldStop.__lifeosR63Wrapped){ var st=function(action){ if(S(action).toLowerCase()!=='snooze') completeActive('stopGlobalAlarm_'+S(action||'stop')); stopSiren(); return oldStop.apply(this,arguments); }; st.__lifeosR63Wrapped=true; window.stopGlobalAlarm=st; }
+    window.addEventListener('click',function(ev){try{var b=ev.target&&ev.target.closest?ev.target.closest('button'):null;if(!b)return;var id=S(b.id),txt=S(b.textContent).replace(/\s+/g,' ').trim(); if(id==='lifeos-r61-stop-alarm'||id==='btn-alarm-complete'||/Dừng báo thức|XÁC NHẬN HOÀN THÀNH|DUNG BAO THUC/i.test(txt)){completeActive('button_stop');stopSiren();} if(/Nhắc lại|Snooze/i.test(txt)){stopSiren();}}catch(e){}},true);
+    setInterval(function(){try{if(document.getElementById('alarm-overlay')&&!document.getElementById('alarm-overlay').classList.contains('hidden')) startSiren(); if(document.getElementById('lifeos-r61-alarm-modal')) startSiren();}catch(e){}},1600);
+  }
+  function boot(){ installTouchHitbox(); installSavePatch(); installRenderPatch(); installAlarmPatch(); setTimeout(function(){installTouchHitbox();installSavePatch();installRenderPatch();installAlarmPatch();augmentTaskCards();},1500); }
+  window.LifeOSJ20R63={phase:PHASE,installed:true,saveEdit:saveEditCore,startSiren:startSiren,stopSiren:stopSiren,completeActive:completeActive,augmentTaskCards:augmentTaskCards,summary:function(){return {phase:PHASE,installed:true,profile:profile(),state:JSON.parse(JSON.stringify(state)),saveEditPatched:!!(window.saveEditTask&&window.saveEditTask.__lifeosR63Core),renderPatched:!!window.__lifeosR63RenderPatched,alarmPatched:!!window.__lifeosR63AlarmPatched,hitboxPatched:state.hitboxPatched,activeIds:activeIds(),todos:Array.isArray(window.todos)?window.todos.map(function(t){return {id:t.id,text:t.text,dueDate:t.dueDate,date:t.date,displayDate:t.displayDate,r63Date:t.r63Date,timeStr:t.timeStr,alarmTime:t.alarmTime,alarmEnabled:t.alarmEnabled,alerted:t.alerted,completed:t.completed,done:t.done,isDaily:t.isDaily};}).slice(-12):[],markers:{r63:true,r62:!!window.__lifeosJ20R62StopCompleteDateLoudAlarmInstalled,r61:!!window.__lifeosJ20R61TaskEditAlarmCoreInstalled,r60:!!window.__lifeosJ20R60TaskAlarmStorageCoreFixInstalled,r59:!!window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled}};}};
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
+})();
+</script>
+<!-- LIFEOS PHA14 J20 R63 LOUD SIREN + DATE BADGE + TOUCH HITBOX - END -->
+
+
+<!-- LIFEOS PHA14 J20 R64 HARD SIREN + NO CARD SCALE + TOUCH FIX - START -->
+<script id="lifeos-j20r64-hard-siren-no-card-scale-touch-fix">
+(function(){
+  'use strict';
+  if(window.__lifeosJ20R64HardSirenNoCardScaleTouchFixInstalled) return;
+  window.__lifeosJ20R64HardSirenNoCardScaleTouchFixInstalled = true;
+  var PHASE='Pha14J20R64_HardSirenNoCardScaleTouchFix_R63Base';
+  var state={startedAt:Date.now(), hardSirenStart:0, hardSirenStop:0, manualActions:0, ignoredDup:0, classCleanups:0, lastAction:null, lastError:''};
+  function S(v){try{return String(v==null?'':v);}catch(e){return '';}}
+  function now(){return Date.now();}
+  function near(x,y){return Math.abs(x-y)<900;}
+  function cssInstall(){
+    if(document.getElementById('lifeos-r64-touch-no-scale-style')) return;
+    var css=[
+      'html.lifeos-r64-touchfix #todo-list .swipe-item,',
+      'html.lifeos-r64-touchfix #todo-list .swipe-front,',
+      'html.lifeos-r64-touchfix #todo-list .swipe-item button,',
+      'html.lifeos-r64-touchfix #todo-list .swipe-item [onclick],',
+      'html.lifeos-r64-touchfix #todo-list .lifeos-task-card-btn{',
+      '  transform:none!important; scale:1!important; transition-property:background-color,border-color,color,box-shadow,opacity!important;',
+      '  animation:none!important; -webkit-tap-highlight-color:transparent!important;',
+      '  touch-action:manipulation!important; will-change:auto!important;',
+      '}',
+      'html.lifeos-r64-touchfix #todo-list .swipe-item:active,',
+      'html.lifeos-r64-touchfix #todo-list .swipe-front:active,',
+      'html.lifeos-r64-touchfix #todo-list .swipe-item button:active,',
+      'html.lifeos-r64-touchfix #todo-list .swipe-item [onclick]:active,',
+      'html.lifeos-r64-touchfix #todo-list [class*="active:scale"]:active{',
+      '  transform:none!important; scale:1!important;',
+      '}',
+      'html.lifeos-r64-touchfix #todo-list .swipe-bg-left,',
+      'html.lifeos-r64-touchfix #todo-list .swipe-bg-right{pointer-events:none!important;display:none!important;}',
+      'html.lifeos-r64-touchfix #todo-list .swipe-front{position:relative!important;z-index:8!important;left:0!important;right:auto!important;}',
+      'html.lifeos-r64-touchfix #todo-list button{min-width:48px!important;min-height:48px!important;padding:0!important;position:relative!important;z-index:50!important;pointer-events:auto!important;}',
+      'html.lifeos-r64-touchfix #todo-list button i{pointer-events:none!important;}',
+      'html.lifeos-r64-touchfix #todo-list .flex-shrink-0.ml-auto,',
+      'html.lifeos-r64-touchfix #todo-list .flex.flex-col.sm\\:flex-row.items-center{position:relative!important;z-index:45!important;pointer-events:auto!important;}',
+      '@media(max-width:640px){',
+      ' html.lifeos-r64-touchfix #todo-list .swipe-front{padding:.8rem!important;gap:.55rem!important;align-items:center!important;}',
+      ' html.lifeos-r64-touchfix #todo-list .flex-shrink-0.ml-auto,',
+      ' html.lifeos-r64-touchfix #todo-list .flex.flex-col.sm\\:flex-row.items-center{gap:.4rem!important;display:grid!important;grid-template-columns:repeat(2,48px)!important;margin-left:.25rem!important;padding-left:0!important;}',
+      ' html.lifeos-r64-touchfix #todo-list .font-bold.cursor-pointer{padding:.35rem 0!important;min-height:42px!important;display:flex!important;align-items:center!important;}',
+      '}'
+    ].join('\n');
+    try{document.documentElement.classList.add('lifeos-r64-touchfix'); var st=document.createElement('style'); st.id='lifeos-r64-touch-no-scale-style'; st.textContent=css; document.head.appendChild(st);}catch(e){}
+  }
+  function cleanupClasses(){
+    try{
+      document.documentElement.classList.add('lifeos-r64-touchfix');
+      document.querySelectorAll('#todo-list .swipe-item, #todo-list .swipe-front, #todo-list button, #todo-list [onclick]').forEach(function(el){
+        var c=S(el.className);
+        if(c.indexOf('active:scale')>=0 || c.indexOf('transition-all')>=0){
+          el.className=c.replace(/\bactive:scale-\d+\b/g,'').replace(/\btransition-all\b/g,'transition-colors').replace(/\s+/g,' ').trim();
+          state.classCleanups++;
+        }
+        try{el.style.transform='none'; el.style.scale='1';}catch(e){}
+      });
+    }catch(e){state.lastError='cleanupClasses:'+S(e.message||e);}
+  }
+  function taskIdOf(el){
+    try{
+      var host=el&&el.closest&&el.closest('[data-task-id]');
+      if(host) return S(host.getAttribute('data-task-id'));
+      var oc=S(el&&el.getAttribute&&el.getAttribute('onclick'));
+      var m=oc.match(/['"]([^'"]{3,})['"]/); if(m) return m[1];
+    }catch(e){}
+    return '';
+  }
+  function actionOf(el){
+    var a=S(el&&el.getAttribute&&el.getAttribute('data-task-action')).toLowerCase();
+    var title=S(el&&el.getAttribute&&el.getAttribute('title')).toLowerCase();
+    var aria=S(el&&el.getAttribute&&el.getAttribute('aria-label')).toLowerCase();
+    var txt=S(el&&el.textContent).toLowerCase();
+    var oc=S(el&&el.getAttribute&&el.getAttribute('onclick'));
+    var cls=S(el&&el.className);
+    var all=[a,title,aria,txt,oc,cls].join(' ');
+    if(/lifeosDuplicateTask|nhân bản|nhan ban|copy|ph-copy/i.test(all)) return 'copy';
+    if(/openEditTask|sửa|sua|edit|pencil|ph-pencil/i.test(all)) return 'edit';
+    if(/confirmDeleteTask|execDeleteTask|xóa|xoa|delete|trash|ph-trash/i.test(all)) return 'delete';
+    if(/pinToFocus|tập trung|tap trung|target|ph-target/i.test(all)) return 'focus';
+    if(/toggleTask|check|hoàn thành|hoan thanh/i.test(all)) return 'toggle';
+    return '';
+  }
+  function runAction(action,id){
+    if(!id || !action) return false;
+    try{
+      if(action==='toggle' && typeof window.toggleTask==='function'){window.toggleTask(id);return true;}
+      if(action==='copy' && typeof window.lifeosDuplicateTask==='function'){window.lifeosDuplicateTask(id);return true;}
+      if(action==='edit' && typeof window.openEditTask==='function'){window.openEditTask(id);return true;}
+      if(action==='delete' && typeof window.confirmDeleteTask==='function'){window.confirmDeleteTask(id);return true;}
+      if(action==='focus' && typeof window.pinToFocus==='function'){window.pinToFocus(id);return true;}
+    }catch(e){state.lastError='runAction:'+action+':'+S(e.message||e);}
+    return false;
+  }
+  function installTouchBypass(){
+    if(window.__lifeosR64TouchBypassInstalled) return;
+    window.__lifeosR64TouchBypassInstalled=true;
+    var handler=function(ev){
+      try{
+        var target=ev.target&&ev.target.closest?ev.target.closest('#todo-list button, #todo-list [onclick]'):null;
+        if(!target) return;
+        var id=taskIdOf(target), action=actionOf(target);
+        if(!id || !action) return;
+        var key=action+'|'+id, t=now();
+        if(state.lastAction && state.lastAction.key===key && near(state.lastAction.at,t)){ state.ignoredDup++; try{ev.preventDefault(); if(ev.stopImmediatePropagation)ev.stopImmediatePropagation(); else ev.stopPropagation();}catch(e){} return; }
+        state.lastAction={key:key,at:t,event:ev.type};
+        var ok=runAction(action,id);
+        if(ok){
+          state.manualActions++;
+          try{ev.preventDefault(); if(ev.stopImmediatePropagation)ev.stopImmediatePropagation(); else ev.stopPropagation();}catch(e){}
+          setTimeout(cleanupClasses,30);
+        }
+      }catch(e){state.lastError='touchBypass:'+S(e.message||e);}
+    };
+    window.addEventListener('click',handler,true);
+    window.addEventListener('pointerup',handler,true);
+    window.addEventListener('touchend',handler,true);
+  }
+  function hardStopSiren(){
+    try{clearInterval(window.__lifeosR64HardSirenTimer);window.__lifeosR64HardSirenTimer=null;}catch(e){}
+    try{clearInterval(window.__lifeosR63SirenTimer);window.__lifeosR63SirenTimer=null;}catch(e){}
+    try{clearInterval(window.__lifeosR62SirenTimer);window.__lifeosR62SirenTimer=null;}catch(e){}
+    try{clearInterval(window.__lifeosR61BeepTimer);window.__lifeosR61BeepTimer=null;}catch(e){}
+    try{if(window.__lifeosR64Nodes){window.__lifeosR64Nodes.forEach(function(n){try{n.stop&&n.stop();}catch(e){} try{n.disconnect&&n.disconnect();}catch(e){}});window.__lifeosR64Nodes=[];}}catch(e){}
+    try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
+    state.hardSirenStop++;
+  }
+  function makeDistortion(ctx,amount){
+    var k=typeof amount==='number'?amount:900, n=44100, curve=new Float32Array(n), deg=Math.PI/180;
+    for(var i=0;i<n;i++){var x=i*2/n-1; curve[i]=(3+k)*x*20*deg/(Math.PI+k*Math.abs(x));}
+    var ws=ctx.createWaveShaper(); ws.curve=curve; ws.oversample='4x'; return ws;
+  }
+  function hardBurst(ctx,tick){
+    var nodes=[];
+    try{
+      var master=ctx.createGain();
+      master.gain.setValueAtTime(0.001,ctx.currentTime);
+      master.gain.linearRampToValueAtTime(1.0,ctx.currentTime+0.01);
+      master.gain.setValueAtTime(1.0,ctx.currentTime+0.34);
+      master.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.46);
+      var shaper=makeDistortion(ctx,1200);
+      var comp=ctx.createDynamicsCompressor();
+      try{comp.threshold.value=-28;comp.knee.value=0;comp.ratio.value=20;comp.attack.value=0.001;comp.release.value=0.035;}catch(e){}
+      master.connect(shaper); shaper.connect(comp); comp.connect(ctx.destination);
+      nodes.push(master,shaper,comp);
+      var base=(tick%2)?1480:980;
+      var freqs=[base,base*1.5,base*2.12,2650+(tick%4)*160,3600-(tick%3)*210];
+      freqs.forEach(function(f,i){
+        var o=ctx.createOscillator(), g=ctx.createGain();
+        o.type=i===0?'square':(i<3?'sawtooth':'square');
+        o.frequency.setValueAtTime(f,ctx.currentTime);
+        try{o.frequency.linearRampToValueAtTime(f*(i%2?0.72:1.42),ctx.currentTime+0.20);}catch(e){}
+        g.gain.value=i===0?0.92:(i===1?0.58:(i===2?0.38:0.18));
+        o.connect(g); g.connect(master); o.start();
+        setTimeout(function(){try{o.stop();}catch(e){} try{o.disconnect();g.disconnect();}catch(e){}},520);
+        nodes.push(o,g);
+      });
+      var len=Math.floor(ctx.sampleRate*0.12), buffer=ctx.createBuffer(1,len,ctx.sampleRate), data=buffer.getChannelData(0);
+      for(var j=0;j<len;j++){data[j]=(Math.random()*2-1)*0.9;}
+      var noise=ctx.createBufferSource(); noise.buffer=buffer;
+      var hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=1800;
+      var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=3100; bp.Q.value=8;
+      var ng=ctx.createGain(); ng.gain.value=0.48;
+      noise.connect(hp); hp.connect(bp); bp.connect(ng); ng.connect(master); noise.start();
+      setTimeout(function(){try{noise.stop();}catch(e){} try{noise.disconnect();hp.disconnect();bp.disconnect();ng.disconnect();}catch(e){}},180);
+      nodes.push(noise,hp,bp,ng);
+      window.__lifeosR64Nodes=(window.__lifeosR64Nodes||[]).concat(nodes);
+      setTimeout(function(){try{master.disconnect();shaper.disconnect();comp.disconnect();}catch(e){}},650);
+    }catch(e){state.lastError='hardBurst:'+S(e.message||e);}
+  }
+  function hardStartSiren(){
+    try{
+      if(window.__lifeosR64HardSirenTimer) return;
+      hardStopSiren(); state.hardSirenStart++;
+      var AC=window.AudioContext||window.webkitAudioContext; if(!AC)return;
+      var ctx=window.__lifeosR64AudioCtx||(window.__lifeosR64AudioCtx=new AC({latencyHint:'interactive'}));
+      if(ctx.state==='suspended') ctx.resume().catch(function(){});
+      var tick=0; hardBurst(ctx,tick++); try{if(navigator.vibrate)navigator.vibrate([1200,60,1200,60,1200]);}catch(e){}
+      window.__lifeosR64HardSirenTimer=setInterval(function(){
+        try{if(ctx.state==='suspended')ctx.resume().catch(function(){}); hardBurst(ctx,tick++); if(navigator.vibrate)navigator.vibrate([760,45,760,45]);}catch(e){}
+      },260);
+    }catch(e){state.lastError='hardStartSiren:'+S(e.message||e);}
+  }
+  function installAlarmOverride(){
+    if(window.__lifeosR64AlarmOverrideInstalled) return; window.__lifeosR64AlarmOverrideInstalled=true;
+    try{if(window.LifeOSJ20R63){window.LifeOSJ20R63.startSiren=hardStartSiren;window.LifeOSJ20R63.stopSiren=hardStopSiren;}}catch(e){}
+    try{if(window.LifeOSJ20R62){window.LifeOSJ20R62.startSiren=hardStartSiren;window.LifeOSJ20R62.stopSiren=hardStopSiren;}}catch(e){}
+    var oldTrig=typeof window.triggerGlobalAlarm==='function'?window.triggerGlobalAlarm:null;
+    if(oldTrig&&!oldTrig.__lifeosR64Wrapped){var tr=function(){var r=oldTrig.apply(this,arguments);setTimeout(hardStartSiren,30);return r;};tr.__lifeosR64Wrapped=true;window.triggerGlobalAlarm=tr;}
+    var oldStop=typeof window.stopGlobalAlarm==='function'?window.stopGlobalAlarm:null;
+    if(oldStop&&!oldStop.__lifeosR64Wrapped){var st=function(){hardStopSiren();return oldStop.apply(this,arguments);};st.__lifeosR64Wrapped=true;window.stopGlobalAlarm=st;}
+    window.addEventListener('click',function(ev){try{var b=ev.target&&ev.target.closest?ev.target.closest('button'):null;if(!b)return;var txt=S(b.textContent);var id=S(b.id);if(/Dừng báo thức|Nhắc lại|Snooze|Stop|XÁC NHẬN HOÀN THÀNH/i.test(txt)||/alarm.*(stop|snooze)|lifeos-r61-stop-alarm/i.test(id)){hardStopSiren();}}catch(e){}},true);
+    setInterval(function(){try{var a=document.getElementById('alarm-overlay'),b=document.getElementById('lifeos-r61-alarm-modal'); if((a&&!a.classList.contains('hidden'))||b) hardStartSiren();}catch(e){}},1200);
+  }
+  function boot(){
+    cssInstall(); cleanupClasses(); installTouchBypass(); installAlarmOverride();
+    setTimeout(function(){cssInstall();cleanupClasses();installTouchBypass();installAlarmOverride();},800);
+    setInterval(cleanupClasses,5000);
+  }
+  window.LifeOSJ20R64={phase:PHASE,installed:true,startSiren:hardStartSiren,stopSiren:hardStopSiren,cleanupClasses:cleanupClasses,summary:function(){return {phase:PHASE,installed:true,state:JSON.parse(JSON.stringify(state)),touchBypass:!!window.__lifeosR64TouchBypassInstalled,alarmOverride:!!window.__lifeosR64AlarmOverrideInstalled,markers:{r64:true,r63:!!window.__lifeosJ20R63LoudSirenDateBadgeTouchHitboxInstalled,r62:!!window.__lifeosJ20R62StopCompleteDateLoudAlarmInstalled,r61:!!window.__lifeosJ20R61TaskEditAlarmCoreInstalled,r59:!!window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled}};}};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+<!-- LIFEOS PHA14 J20 R64 HARD SIREN + NO CARD SCALE + TOUCH FIX - END -->
+
+
+<script id="lifeos-j20r65-cloud-first-delete-tombstone-sync">
+(function(){
+  'use strict';
+  if (window.__lifeosJ20R65CloudFirstDeleteTombstoneSyncInstalled) return;
+  window.__lifeosJ20R65CloudFirstDeleteTombstoneSyncInstalled = true;
+  var PHASE = 'Pha14J20R65_CloudFirstDeleteTombstoneSync_R64Base';
+  var PROJECT = 'tool-mimishop';
+  var API_KEY = 'AIzaSyB0yab1ujJturjri9E8HXaknqY4zUwrd3Q';
+  var REST_DOC_BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/LifeOS_Profiles/';
+  var TOMBSTONE_TTL = 1000 * 60 * 60 * 24 * 21;
+  var state = {
+    startedAt: Date.now(), profile:'', cloudFirst:true, onlineAtBoot:navigator.onLine,
+    pull:0, push:0, deletePush:0, tombstones:0, blockedResurrect:0, localFiltered:0,
+    lastPullAt:0, lastPushAt:0, lastDeleteAt:0, lastCloudTime:0, lastLocalTime:0,
+    lastOk:'', lastError:'', pending:false, inFlight:false, queued:false, lastReason:''
+  };
+  function S(v){ try{return String(v == null ? '' : v);}catch(e){return '';} }
+  function N(v){ v=Number(v); return isFinite(v)?v:0; }
+  function now(){ return Date.now(); }
+  function normalizeProfileId(v){ return S(v || 'tham').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'') || 'tham'; }
+  function getProfile(){ return normalizeProfileId(window.viewingUser || window.currentProfileId || window.activeProfileId || (window.currentProfile && (window.currentProfile.id || window.currentProfile.name)) || localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || state.profile || 'tham'); }
+  function taskKey(p){ return 'lifeos_v8_data_' + (p || getProfile()); }
+  function timeKey(p){ return 'lifeos_v8_time_' + (p || getProfile()); }
+  function vaultKey(p){ return 'lifeos_v8_vault_' + (p || getProfile()); }
+  function pendingKey(p){ return 'lifeos_r65_pending_sync_' + (p || getProfile()); }
+  function tombKey(p){ return 'lifeos_r65_task_tombstones_' + (p || getProfile()); }
+  function r59PendingKey(p){ return 'lifeos_r59_pending_sync_' + (p || getProfile()); }
+  function readJSON(k, fb){ try{ var raw=localStorage.getItem(k); return raw ? JSON.parse(raw) : fb; }catch(e){ return fb; } }
+  function writeJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+  function cleanPlain(obj){ try{ return JSON.parse(JSON.stringify(obj == null ? null : obj)); }catch(e){ return obj; } }
+  function isTaskKey(k){ return /^lifeos_v8_data_[\w-]+$/.test(S(k)); }
+  function getLocalTasks(p){ var v=readJSON(taskKey(p), []); if(Array.isArray(v)) return v; if(v && Array.isArray(v.data)) return v.data; if(Array.isArray(window.todos)) return window.todos; return []; }
+  function setLocalTasks(p, arr, ts){ arr = filterTombstonedTasks(arr || [], p, 'setLocalTasks'); try{ localStorage.setItem(taskKey(p), JSON.stringify(arr)); }catch(e){} try{ if(normalizeProfileId(p)===getProfile()) window.todos = arr; }catch(e){} try{ localStorage.setItem(timeKey(p), S(ts || now())); }catch(e){} try{ if(typeof window.renderTasksOnly==='function') window.renderTasksOnly(); }catch(e){} return arr; }
+  function getLocalVault(p){ var v=readJSON(vaultKey(p), []); if(Array.isArray(v)) return v; if(v && Array.isArray(v.vaultData)) return v.vaultData; if(window.VaultStorageLayer && typeof window.VaultStorageLayer.read==='function'){ try{ var r=window.VaultStorageLayer.read(); if(Array.isArray(r)) return r; }catch(e){} } return []; }
+  function setPending(reason){ var p=getProfile(); state.pending=true; state.lastReason=S(reason||'pending'); writeJSON(pendingKey(p), {at:now(), reason:state.lastReason}); }
+  function clearPending(p){ p=p||getProfile(); state.pending=false; try{ localStorage.removeItem(pendingKey(p)); localStorage.removeItem(r59PendingKey(p)); localStorage.removeItem('lifeos_r57_pending_sync_'+p); }catch(e){} }
+  function hasPending(p){ p=p||getProfile(); return !!(readJSON(pendingKey(p),null) || readJSON(r59PendingKey(p),null) || readJSON('lifeos_r57_pending_sync_'+p,null)); }
+  function trace(type, data){ try{ var key='lifeos_r65_cloud_first_trace'; var a=readJSON(key,[]); if(!Array.isArray(a)) a=[]; a.push(Object.assign({phase:PHASE,type:type,at:now(),iso:new Date().toISOString(),profile:getProfile()}, data||{})); if(a.length>80) a=a.slice(-80); writeJSON(key,a); }catch(e){} }
+  function getTombs(p){ p=p||getProfile(); var t=readJSON(tombKey(p), {}); if(!t || typeof t!=='object' || Array.isArray(t)) t={}; var cutoff=now()-TOMBSTONE_TTL, changed=false; Object.keys(t).forEach(function(id){ var r=t[id], at=N((r&&r.at)||r); if(!at || at<cutoff){ delete t[id]; changed=true; } }); if(changed) writeJSON(tombKey(p), t); state.tombstones=Object.keys(t).length; return t; }
+  function saveTombs(p,t){ p=p||getProfile(); t=t||{}; writeJSON(tombKey(p), t); state.tombstones=Object.keys(t).length; return t; }
+  function markDeleted(id, reason){ id=S(id); if(!id) return; var p=getProfile(); var t=getTombs(p); t[id]={at:now(), reason:S(reason||'delete'), phase:PHASE}; saveTombs(p,t); state.lastDeleteAt=now(); state.deletePush++; setPending('delete_'+reason); trace('DELETE_TOMBSTONE',{id:id,reason:S(reason)}); return t[id]; }
+  function mergeTombs(p, remote){ var local=getTombs(p), changed=false; remote = remote && typeof remote==='object' ? remote : {}; Object.keys(remote).forEach(function(id){ var rr=remote[id], rat=N((rr&&rr.at)||rr); var lr=local[id], lat=N((lr&&lr.at)||lr); if(rat && rat>lat){ local[id]= typeof rr==='object'?rr:{at:rat,reason:'remote'}; changed=true; } }); if(changed) saveTombs(p,local); return local; }
+  function filterTombstonedTasks(arr, p, reason){ p=p||getProfile(); var t=getTombs(p); var before=Array.isArray(arr)?arr.length:0; arr=Array.isArray(arr)?arr:[]; var out=arr.filter(function(x){ return !(x && x.id != null && t[S(x.id)]); }); var diff=before-out.length; if(diff>0){ state.blockedResurrect += diff; state.localFiltered += diff; trace('FILTER_TOMBSTONED_TASKS',{reason:S(reason),removed:diff}); }
+    return out;
+  }
+  function compactTask(t){ if(!t || typeof t!=='object') return t; var keep=['id','text','title','completed','done','isDone','status','priority','tags','createdAt','updatedAt','completedAt','stoppedAt','dueDate','date','displayDate','startDate','r62DisplayDate','r62ExplicitDate','timeStr','alarmTime','alarmEnabled','alerted','isDaily','repeat','repeatType','r58CopyAlarmMuted','r65CloudTouched']; var o={}; keep.forEach(function(k){ if(t[k]!==undefined) o[k]=t[k]; }); if(o.text==null && t.name!=null) o.text=t.name; return o; }
+  function cleanTasks(arr,p,reason){ return filterTombstonedTasks((Array.isArray(arr)?arr:[]).map(compactTask),p,reason); }
+  function fromFsValue(v){ if(!v || typeof v!=='object') return undefined; if('nullValue' in v) return null; if('stringValue' in v) return v.stringValue; if('booleanValue' in v) return !!v.booleanValue; if('integerValue' in v) return parseInt(v.integerValue,10)||0; if('doubleValue' in v) return Number(v.doubleValue)||0; if('timestampValue' in v) return Date.parse(v.timestampValue)||0; if('arrayValue' in v) return ((v.arrayValue&&v.arrayValue.values)||[]).map(fromFsValue); if('mapValue' in v){ var out={}, f=(v.mapValue&&v.mapValue.fields)||{}; Object.keys(f).forEach(function(k){ out[k]=fromFsValue(f[k]); }); return out; } return undefined; }
+  function toFsValue(v){ if(v===undefined) return {nullValue:null}; if(v===null) return {nullValue:null}; if(Array.isArray(v)) return {arrayValue:{values:v.map(toFsValue)}}; if(typeof v==='boolean') return {booleanValue:v}; if(typeof v==='number') return Number.isInteger(v)?{integerValue:S(v)}:{doubleValue:v}; if(typeof v==='object'){ var f={}; Object.keys(v).forEach(function(k){ if(v[k]!==undefined && typeof v[k]!=='function') f[k]=toFsValue(v[k]); }); return {mapValue:{fields:f}}; } return {stringValue:S(v)}; }
+  function docToPlain(doc){ var out={}, f=(doc&&doc.fields)||{}; Object.keys(f).forEach(function(k){ out[k]=fromFsValue(f[k]); }); return out; }
+  function plainToDoc(data){ var f={}; Object.keys(data||{}).forEach(function(k){ f[k]=toFsValue(data[k]); }); return {fields:f}; }
+  async function getToken(){ try{ if(!window.firebase || !firebase.auth) return ''; if(firebase.apps && !firebase.apps.length && firebase.initializeApp){ firebase.initializeApp({apiKey:API_KEY,authDomain:'tool-mimishop.firebaseapp.com',projectId:PROJECT,storageBucket:'tool-mimishop.firebasestorage.app',messagingSenderId:'536814109954',appId:'1:536814109954:web:b1be76d22957de4b75ee1b'}); } var auth=firebase.auth(); if(!auth.currentUser){ try{ await auth.signInAnonymously(); }catch(e){} } return auth.currentUser && auth.currentUser.getIdToken ? await auth.currentUser.getIdToken() : ''; }catch(e){ return ''; } }
+  async function restFetch(method, p, body){ if(!navigator.onLine) throw new Error('offline'); var token=await getToken(); var url=REST_DOC_BASE+encodeURIComponent(p)+'?key='+encodeURIComponent(API_KEY); if(method==='PATCH') url += '&updateMask.fieldPaths=data&updateMask.fieldPaths=tasks&updateMask.fieldPaths=vaultData&updateMask.fieldPaths=vault&updateMask.fieldPaths=stats&updateMask.fieldPaths=updatedAt&updateMask.fieldPaths=r65DeletedTasks&updateMask.fieldPaths=deletedTaskTombstones'; var headers={'Accept':'application/json'}; if(method!=='GET') headers['Content-Type']='application/json'; if(token) headers['Authorization']='Bearer '+token; var res=await fetch(url,{method:method,headers:headers,body:body?JSON.stringify(body):undefined,cache:'no-store'}); var txt=await res.text(), json={}; try{ json=txt?JSON.parse(txt):{}; }catch(e){ json={raw:txt}; } if(!res.ok){ var er=new Error((json&&json.error&&(json.error.message||json.error.status))||('HTTP_'+res.status)); er.status=res.status; er.data=json; throw er; } return json; }
+  async function pullCloud(reason, opt){ opt=opt||{}; var p=getProfile(); state.profile=p; if(!navigator.onLine){ setPending('pull_offline_'+reason); return {ok:false, offline:true}; } if(state.inFlight && !opt.parallel){ state.queued=true; return {ok:false, skipped:true, reason:'in_flight'}; } state.inFlight=true; try{ state.pull++; var doc=await restFetch('GET',p); var cloud=docToPlain(doc); var remoteTombs=cloud.r65DeletedTasks || cloud.deletedTaskTombstones || {}; var tombs=mergeTombs(p, remoteTombs); var remoteTasks=Array.isArray(cloud.data)?cloud.data:(Array.isArray(cloud.tasks)?cloud.tasks:null); var remoteVault=Array.isArray(cloud.vaultData)?cloud.vaultData:(Array.isArray(cloud.vault)?cloud.vault:null); var remoteTime=N(cloud.updatedAt); var pending=hasPending(p); var shouldApply = !!opt.forceCloud || (!pending && navigator.onLine); if(remoteTasks){ remoteTasks=filterTombstonedTasks(remoteTasks,p,'pullCloud_'+reason); }
+      if(shouldApply){ if(remoteTasks) setLocalTasks(p,remoteTasks,remoteTime||now()); if(remoteVault){ try{ localStorage.setItem(vaultKey(p), JSON.stringify(remoteVault)); }catch(e){} } state.lastOk='pull_cloud_first'; state.lastPullAt=now(); state.lastCloudTime=remoteTime; trace('PULL_CLOUD_APPLIED',{reason:S(reason),remoteTasks:remoteTasks?remoteTasks.length:null,remoteVault:remoteVault?remoteVault.length:null,remoteTime:remoteTime,tombstones:Object.keys(tombs).length}); }
+      else { trace('PULL_CLOUD_DEFER_LOCAL_PENDING',{reason:S(reason),remoteTime:remoteTime}); }
+      if(Object.keys(tombs).length && remoteTasks){ setTimeout(function(){ pushCloud('push_tombstone_after_pull_'+reason); },700); }
+      return {ok:true, applied:shouldApply, remote:{tasks:remoteTasks?remoteTasks.length:null,vault:remoteVault?remoteVault.length:null,updatedAt:remoteTime}, tombstones:Object.keys(tombs).length};
+    }catch(e){ state.lastError=S(e.message||e); trace('PULL_CLOUD_FAILED',{reason:S(reason),error:state.lastError,status:e.status||0}); return {ok:false,error:state.lastError}; }
+    finally{ state.inFlight=false; if(state.queued){ state.queued=false; setTimeout(function(){ syncNow('queued_after_pull'); },1200); } }
+  }
+  async function pushCloud(reason){ var p=getProfile(); state.profile=p; if(!navigator.onLine){ setPending('push_offline_'+reason); return {ok:false,offline:true,pending:true}; } if(state.inFlight){ setPending('push_queued_'+reason); state.queued=true; return {ok:false,skipped:true,reason:'in_flight'}; } state.inFlight=true; try{ state.push++; var tasks=cleanTasks(Array.isArray(window.todos)?window.todos:getLocalTasks(p),p,'pushCloud_'+reason); try{ window.todos=tasks; }catch(e){} try{ localStorage.setItem(taskKey(p), JSON.stringify(tasks)); }catch(e){} var vault=getLocalVault(p); var tombs=getTombs(p); var payload={ data:tasks, tasks:tasks, vaultData:vault, vault:vault, stats:cleanPlain(window.stats || readJSON('lifeos_stats_v8_'+p,{})), updatedAt:now(), r65DeletedTasks:tombs, deletedTaskTombstones:tombs };
+      await restFetch('PATCH',p,plainToDoc(payload)); clearPending(p); state.lastPushAt=now(); state.lastOk='push_cloud_first'; state.lastLocalTime=payload.updatedAt; try{ localStorage.setItem(timeKey(p),S(payload.updatedAt)); }catch(e){} trace('PUSH_CLOUD_OK',{reason:S(reason),tasks:tasks.length,vault:vault.length,tombstones:Object.keys(tombs).length}); return {ok:true,tasks:tasks.length,vault:vault.length,tombstones:Object.keys(tombs).length};
+    }catch(e){ state.lastError=S(e.message||e); setPending('push_failed_'+reason); trace('PUSH_CLOUD_FAILED',{reason:S(reason),error:state.lastError,status:e.status||0}); return {ok:false,error:state.lastError,pending:true}; }
+    finally{ state.inFlight=false; if(state.queued){ state.queued=false; setTimeout(function(){ pushCloud('queued_after_push'); },1600); } }
+  }
+  async function syncNow(reason){ reason=S(reason||'syncNow'); if(!navigator.onLine){ setPending(reason); return {ok:false,offline:true}; } if(hasPending(getProfile())){ var pr=await pushCloud(reason+'_push_pending'); await pullCloud(reason+'_pull_after_push',{forceCloud:true}); return pr; } var r=await pullCloud(reason+'_cloud_first',{forceCloud:true}); return r; }
+  var originalSetItem = Storage.prototype.setItem;
+  if(!Storage.prototype.__lifeosR65CloudFirstSetItemPatched){
+    Storage.prototype.__lifeosR65CloudFirstSetItemPatched = true;
+    Storage.prototype.setItem = function(k,v){
+      try{
+        if(this===localStorage && isTaskKey(k)){
+          var p=S(k).replace(/^lifeos_v8_data_/,'');
+          var arr=JSON.parse(S(v));
+          if(Array.isArray(arr)){
+            var f=filterTombstonedTasks(arr,p,'localStorage.setItem');
+            if(f.length!==arr.length) v=JSON.stringify(f);
+          }
+        }
+      }catch(e){}
+      return originalSetItem.call(this,k,v);
+    };
+  }
+  function patchWriters(){
+    if(window.__lifeosR65WritersPatched) return; window.__lifeosR65WritersPatched=true;
+    var oldSave=typeof window.saveLocalTodos==='function'?window.saveLocalTodos:null;
+    if(oldSave){ window.saveLocalTodos=function(){ var p=getProfile(); try{ if(Array.isArray(window.todos)) window.todos=cleanTasks(window.todos,p,'saveLocalTodos_pre'); }catch(e){} var r=oldSave.apply(this,arguments); try{ if(Array.isArray(window.todos)) window.todos=cleanTasks(window.todos,p,'saveLocalTodos_post'); }catch(e){} if(navigator.onLine) setTimeout(function(){ pushCloud('saveLocalTodos_r65'); },350); else setPending('saveLocalTodos_offline_r65'); return r; }; }
+    var oldExec=typeof window.execDeleteTask==='function'?window.execDeleteTask:null;
+    if(oldExec){ window.execDeleteTask=function(id){ markDeleted(id,'execDeleteTask'); var r=oldExec.apply(this,arguments); try{ if(Array.isArray(window.todos)) window.todos=cleanTasks(window.todos,getProfile(),'execDeleteTask_after'); if(typeof window.renderTasksOnly==='function') window.renderTasksOnly(); }catch(e){} [250,1500,4500,10000].forEach(function(ms){ setTimeout(function(){ pushCloud('delete_exec_r65_'+ms); },ms); }); return r; }; }
+    var oldClean=typeof window.cleanupTasks==='function'?window.cleanupTasks:null;
+    if(oldClean){ window.cleanupTasks=function(){ try{ (window.todos||[]).forEach(function(t){ if(t && t.id!=null && (t.completed||t.done||t.isDone||t.status==='done')) markDeleted(t.id,'cleanupTasks'); }); }catch(e){} var r=oldClean.apply(this,arguments); setTimeout(function(){ pushCloud('cleanupTasks_r65'); },600); return r; }; }
+    var oldToggle=typeof window.toggleTask==='function'?window.toggleTask:null;
+    if(oldToggle){ window.toggleTask=function(){ var r=oldToggle.apply(this,arguments); if(navigator.onLine) setTimeout(function(){ pushCloud('toggleTask_r65'); },800); return r; }; }
+    var oldEdit=typeof window.saveEditTask==='function'?window.saveEditTask:null;
+    if(oldEdit){ window.saveEditTask=function(){ var r=oldEdit.apply(this,arguments); if(navigator.onLine) setTimeout(function(){ pushCloud('saveEditTask_r65'); },800); return r; }; }
+  }
+  function patchSyncFacade(){ try{ var F=window.FirebaseSync || {}; var oldPull=F.pullOnce, oldPush=F.pushAll, oldSync=F.syncNow; F.pullOnce=function(reason){ try{ if(oldPull) Promise.resolve(oldPull.apply(this,arguments)).catch(function(){}); }catch(e){} return pullCloud(reason||'firebase_pull_r65',{forceCloud:true}); }; F.pushAll=function(options){ var reason=(options&&options.reason)||options||'firebase_push_r65'; try{ if(oldPush && !/delete|save|edit|toggle|cleanup/i.test(S(reason))) Promise.resolve(oldPush.apply(this,arguments)).catch(function(){}); }catch(e){} return pushCloud(S(reason)); }; F.syncNow=function(reason){ try{ if(oldSync) Promise.resolve(oldSync.apply(this,arguments)).catch(function(){}); }catch(e){} return syncNow(reason||'firebase_sync_r65'); }; F.safeSyncStatus=function(){ return api.summary(); }; F.__r65CloudFirst=true; window.FirebaseSync=F; }catch(e){} }
+  var api={ phase:PHASE, installed:true, markDeleted:markDeleted, pullCloud:function(reason){ return pullCloud(reason||'api_pull',{forceCloud:true}); }, pushCloud:function(reason){ return pushCloud(reason||'api_push'); }, syncNow:syncNow, trace:function(){return readJSON('lifeos_r65_cloud_first_trace',[]);}, tombstones:function(){return getTombs(getProfile());}, clearTrace:function(){ try{ localStorage.removeItem('lifeos_r65_cloud_first_trace'); return true; }catch(e){return false;} }, summary:function(){ var p=getProfile(); var tombs=getTombs(p); return {phase:PHASE,installed:true,profile:p,online:navigator.onLine,cloudFirst:true,localOnlyOffline:true,pending:hasPending(p),state:cleanPlain(state),local:{tasks:getLocalTasks(p).length,vault:getLocalVault(p).length,localTime:N(localStorage.getItem(timeKey(p)))},tombstones:Object.keys(tombs).length,firebaseFacade:!!(window.FirebaseSync&&window.FirebaseSync.__r65CloudFirst),familyFirebaseBlocked:!!(window.ChatEngine&&(window.ChatEngine.__r59NoFirebaseFamily||window.ChatEngine.__r57NoFirebaseFamily)),markers:{r65:true,r64:!!window.__lifeosJ20R64HardSirenNoCardScaleTouchFixInstalled,r63:!!window.__lifeosJ20R63LoudSirenDateBadgeTouchHitboxInstalled,r62:!!window.__lifeosJ20R62StopCompleteDateBadgeLoudAlarmInstalled,r61:!!window.__lifeosJ20R61TaskEditSaveAlarmFireCoreInstalled,r59:!!window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled}}; } };
+  window.LifeOSJ20R65 = window.LifeOSJ20R65CloudFirstDeleteTombstoneSync = api;
+  function boot(){ patchWriters(); patchSyncFacade(); setTimeout(function(){ patchWriters(); patchSyncFacade(); },1200); setTimeout(function(){ if(navigator.onLine){ if(hasPending(getProfile())) syncNow('boot_pending_r65'); else pullCloud('boot_cloud_first_r65',{forceCloud:true}); } },2200); setTimeout(function(){ if(navigator.onLine) pushCloud('boot_tombstone_guard_r65'); },6500); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  window.addEventListener('online', function(){ setTimeout(function(){ syncNow('online_r65'); },900); }, {passive:true});
+  window.addEventListener('visibilitychange', function(){ if(!document.hidden && navigator.onLine) setTimeout(function(){ pullCloud('visible_cloud_first_r65',{forceCloud:true}); },1200); }, {passive:true});
+  setInterval(function(){ if(navigator.onLine && hasPending(getProfile())) pushCloud('pending_interval_r65'); }, 60000);
+})();
+</script>
+
+
+
+<!-- LifeOS Pha14J20R66 Landscape Mobile Task Composer Fix - R65 Base -->
+<script>
+(function(){
+  'use strict';
+  if (window.LifeOSJ20R66LandscapeTaskComposerFix && window.LifeOSJ20R66LandscapeTaskComposerFix.installed) return;
+  var PHASE = 'Pha14J20R66_LandscapeMobileTaskComposerFullUI_R65Base';
+  var state = { installedAt: Date.now(), landscape: false, patched: false, pcForm:false, mobileForm:false };
+
+  function addCss(){
+    if (document.getElementById('lifeos-r66-landscape-task-composer-css')) return;
+    var css = document.createElement('style');
+    css.id = 'lifeos-r66-landscape-task-composer-css';
+    css.textContent = `
+/* R66: landscape phone / mini-PC task composer must expose all creation controls compactly. */
+html.lifeos-r66-landscape-task-composer #view-tasks{ overflow: visible !important; }
+html.lifeos-r66-landscape-task-composer .lifeos-r66-pc-composer-wrap{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  position: sticky !important;
+  top: calc(env(safe-area-inset-top,0px) + 0px) !important;
+  z-index: 55 !important;
+  margin: 0 0 8px 0 !important;
+  padding: 8px 10px !important;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,.94) !important;
+  border: 1px solid rgba(251,191,36,.70) !important;
+  box-shadow: 0 8px 20px rgba(15,23,42,.08) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.lifeos-r66-landscape-task-composer #form-pc{
+  display:grid !important;
+  grid-template-columns: 52px minmax(0, 1fr) 60px 78px !important;
+  align-items:center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+html.lifeos-r66-landscape-task-composer #form-pc .btn-voice,
+html.lifeos-r66-landscape-task-composer #form-mobile .btn-voice{
+  width:52px !important;
+  min-width:52px !important;
+  height:52px !important;
+  min-height:52px !important;
+  padding:0 !important;
+  border-radius:14px !important;
+  touch-action: manipulation !important;
+}
+html.lifeos-r66-landscape-task-composer #form-pc > .relative.flex-grow{
+  min-width:0 !important;
+  width:100% !important;
+}
+html.lifeos-r66-landscape-task-composer #form-pc input#input-pc{
+  height:52px !important;
+  min-height:52px !important;
+  padding-top:0 !important;
+  padding-bottom:0 !important;
+  padding-left:42px !important;
+  padding-right:10px !important;
+  font-size:16px !important;
+  line-height:52px !important;
+  border-radius:14px !important;
+}
+html.lifeos-r66-landscape-task-composer #form-pc > div[title*="Chọn"],
+html.lifeos-r66-landscape-task-composer #form-pc > div:has(> input[type="datetime-local"]){
+  width:60px !important;
+  min-width:60px !important;
+  height:52px !important;
+  min-height:52px !important;
+  padding:0 !important;
+  border-radius:14px !important;
+  overflow:hidden !important;
+  touch-action: manipulation !important;
+}
+html.lifeos-r66-landscape-task-composer #form-pc input[type="datetime-local"]{
+  width:100% !important;
+  height:100% !important;
+  min-width:60px !important;
+  min-height:52px !important;
+  cursor:pointer !important;
+}
+html.lifeos-r66-landscape-task-composer #form-pc button[type="submit"]{
+  width:78px !important;
+  min-width:78px !important;
+  height:52px !important;
+  min-height:52px !important;
+  padding:0 8px !important;
+  border-radius:14px !important;
+  font-size:16px !important;
+  font-weight:900 !important;
+  touch-action: manipulation !important;
+}
+html.lifeos-r66-landscape-task-composer #form-pc button[type="submit"] i{ display:none !important; }
+html.lifeos-r66-landscape-task-composer #form-pc .active\\:scale-95:active,
+html.lifeos-r66-landscape-task-composer #form-pc .active\\:scale-90:active{
+  transform:none !important;
+}
+html.lifeos-r66-landscape-task-composer #view-tasks .filter-btn{
+  min-height:40px !important;
+  touch-action: manipulation !important;
+}
+html.lifeos-r66-landscape-task-composer #mobile-input{
+  display:none !important;
+}
+/* If viewport is landscape but below lg, still show a compact top composer instead of a bottom-only composer. */
+@media (orientation: landscape) and (max-height: 560px){
+  #view-tasks .lifeos-r66-pc-composer-wrap{ display:block !important; }
+  #view-tasks{ padding-bottom: 12px !important; }
+  .view-section{ scroll-padding-top: 76px !important; }
+}
+@media (orientation: landscape) and (max-height: 520px){
+  html.lifeos-r66-landscape-task-composer #form-pc{
+    grid-template-columns: 48px minmax(0, 1fr) 56px 72px !important;
+    gap:6px !important;
+  }
+  html.lifeos-r66-landscape-task-composer #form-pc .btn-voice,
+  html.lifeos-r66-landscape-task-composer #form-pc > div[title*="Chọn"],
+  html.lifeos-r66-landscape-task-composer #form-pc > div:has(> input[type="datetime-local"]),
+  html.lifeos-r66-landscape-task-composer #form-pc button[type="submit"]{
+    height:48px !important;
+    min-height:48px !important;
+  }
+  html.lifeos-r66-landscape-task-composer #form-pc input#input-pc{
+    height:48px !important;
+    min-height:48px !important;
+    line-height:48px !important;
+    font-size:15px !important;
+  }
+}
+`;
+    document.head.appendChild(css);
+  }
+
+  function isLandscapePhone(){
+    var w = window.innerWidth || document.documentElement.clientWidth || 0;
+    var h = window.innerHeight || document.documentElement.clientHeight || 0;
+    var coarse = false;
+    try { coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches; } catch(e){}
+    var landscape = w > h;
+    // DevTools phone landscape often reports width > 900 and height ~400; physical mobile may be coarse.
+    return landscape && (h <= 620 || coarse || w <= 1180);
+  }
+
+  function tagComposer(){
+    var pc = document.getElementById('form-pc');
+    if (pc) {
+      state.pcForm = true;
+      var wrap = pc.parentElement;
+      if (wrap) wrap.classList.add('lifeos-r66-pc-composer-wrap');
+      pc.classList.add('lifeos-r66-pc-composer');
+      var mic = pc.querySelector('.btn-voice');
+      if (mic) { mic.setAttribute('aria-label','Nói nhiệm vụ'); mic.title = 'Nói nhiệm vụ'; }
+      var input = document.getElementById('input-pc');
+      if (input) {
+        input.placeholder = 'Gõ nhiệm vụ, ví dụ: hằng ngày lúc 14h30 đọc sách';
+        input.autocomplete = 'off';
+      }
+      var dt = document.getElementById('dt-pc');
+      if (dt) { dt.setAttribute('aria-label','Chọn ngày giờ'); dt.title = 'Chọn ngày giờ'; }
+      var submit = pc.querySelector('button[type="submit"]');
+      if (submit) { submit.textContent = 'Thêm'; submit.setAttribute('aria-label','Thêm nhiệm vụ'); }
+    }
+    var mb = document.getElementById('form-mobile');
+    if (mb) { state.mobileForm = true; mb.classList.add('lifeos-r66-mobile-composer'); }
+  }
+
+  function applyMode(){
+    var on = isLandscapePhone();
+    state.landscape = on;
+    document.documentElement.classList.toggle('lifeos-r66-landscape-task-composer', on);
+    document.documentElement.classList.add('lifeos-r66-task-composer-ready');
+  }
+
+  function installSubmitGuard(){
+    ['form-pc','form-mobile'].forEach(function(id){
+      var f = document.getElementById(id);
+      if (!f || f.__lifeosR66SubmitGuard) return;
+      f.__lifeosR66SubmitGuard = true;
+      f.addEventListener('submit', function(){
+        // Keep controls enabled after submit; older transforms/disabled states sometimes make landscape buttons look dead.
+        setTimeout(function(){
+          try { Array.prototype.forEach.call(f.querySelectorAll('button,input'), function(el){ el.disabled = false; }); } catch(e){}
+        }, 250);
+      }, true);
+    });
+  }
+
+  function patch(){
+    addCss();
+    tagComposer();
+    applyMode();
+    installSubmitGuard();
+    state.patched = true;
+  }
+
+  var raf = 0;
+  function schedule(){ if (raf) return; raf = setTimeout(function(){ raf=0; patch(); }, 80); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', patch, {once:true}); else patch();
+  window.addEventListener('resize', schedule, {passive:true});
+  window.addEventListener('orientationchange', schedule, {passive:true});
+  try { new MutationObserver(schedule).observe(document.documentElement, {childList:true, subtree:true}); } catch(e){}
+
+  window.LifeOSJ20R66LandscapeTaskComposerFix = {
+    phase: PHASE,
+    installed: true,
+    state: state,
+    apply: patch,
+    summary: function(){ patch(); return { phase: PHASE, installed:true, landscape: state.landscape, pcForm: state.pcForm, mobileForm: state.mobileForm, patched: state.patched, viewport:{w:innerWidth,h:innerHeight} }; }
+  };
+})();
+</script>
+<!-- /LifeOS Pha14J20R66 -->
 </body>
 </html>
