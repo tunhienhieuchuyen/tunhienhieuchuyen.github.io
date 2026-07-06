@@ -31116,5 +31116,164 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
 })();
 </script>
 
+
+
+<!-- LifeOS Pha14J20R68 Compact Tombstone Canonical Schema - R67 Base -->
+<script id="lifeos-j20r68-compact-tombstone-canonical-schema">
+(function(){
+  'use strict';
+  if (window.LifeOSJ20R68CompactTombstone && window.LifeOSJ20R68CompactTombstone.installed) return;
+  var PHASE = 'Pha14J20R68_CompactTombstoneCanonicalSchema_R67Base';
+  var PROJECT = 'tool-mimishop';
+  var API_KEY = 'AIzaSyBsDNZyUS5dBr1t3QTtoMmjFy0Dv2dBKvI';
+  var REST_DOC_BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/LifeOS_Profiles/';
+  var rawFetch = window.fetch ? window.fetch.bind(window) : null;
+  var CANONICAL_FIELDS = ['tasks','vault','deletedTaskTombstones','stats','updatedAt'];
+  var LEGACY_FIELDS = ['data','vaultData','r65DeletedTasks','r59Meta'];
+  var state = {startedAt:Date.now(), profile:'', compactLocal:0, compactRemote:0, pushOk:0, pushFail:0, lastOk:'', lastError:'', lastAt:0, lastCounts:null, setItemPatched:false, facadePatched:false};
+  function S(v){ try{return String(v == null ? '' : v);}catch(e){return '';} }
+  function N(v){ var n=Number(v); return isFinite(n)?n:0; }
+  function now(){ return Date.now(); }
+  function normalizeProfileId(v){ return S(v || 'tham').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^\w-]+/g,'_').replace(/^_+|_+$/g,'') || 'tham'; }
+  function getProfile(){ return normalizeProfileId(window.viewingUser || window.currentProfileId || window.activeProfileId || (window.currentProfile && (window.currentProfile.id || window.currentProfile.name)) || localStorage.getItem('lifeos_v8_viewing') || localStorage.getItem('lifeos_v8_session') || state.profile || 'tham'); }
+  function taskKey(p){ return 'lifeos_v8_data_' + (p || getProfile()); }
+  function vaultKey(p){ return 'lifeos_v8_vault_' + (p || getProfile()); }
+  function tombKeys(p){ p=p||getProfile(); return ['lifeos_r65_task_tombstones_'+p, 'lifeos_r65_deleted_tasks_'+p]; }
+  function isTombKey(k){ return /^lifeos_r65_(task_tombstones|deleted_tasks)_[\w-]+$/.test(S(k)); }
+  function readJSON(k,fb){ try{ var raw=localStorage.getItem(k); return raw ? JSON.parse(raw) : fb; }catch(e){ return fb; } }
+  function writeJSON(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+  function cleanPlain(v){ try{return JSON.parse(JSON.stringify(v));}catch(e){return v;} }
+  function trace(type,data){ try{ var key='lifeos_r68_compact_tombstone_trace'; var a=readJSON(key,[]); if(!Array.isArray(a)) a=[]; a.push(Object.assign({phase:PHASE,type:type,at:now(),iso:new Date().toISOString(),profile:getProfile()},data||{})); if(a.length>80) a=a.slice(-80); localStorage.setItem(key, JSON.stringify(a)); }catch(e){} }
+  function idOf(x,i){ if(!x || typeof x!=='object') return 'idx_'+i; return S(x.id || x.uid || x.taskId || x.key || x.name || x.title || ('idx_'+i)); }
+  function valueAt(v){
+    if(v == null) return now();
+    if(typeof v === 'number') return N(v) || now();
+    if(typeof v === 'string'){
+      var n=N(v); if(n) return n;
+      var d=Date.parse(v); return isFinite(d)?d:now();
+    }
+    if(typeof v === 'object'){
+      return N(v.at || v.deletedAt || v.timestamp || v.time || v.ts || v.updatedAt || v.createdAt) || now();
+    }
+    return now();
+  }
+  function compactTombs(input){
+    var out={};
+    if(input && typeof input === 'object' && !Array.isArray(input)){
+      Object.keys(input).forEach(function(id){
+        id=S(id).trim(); if(!id) return;
+        out[id]=valueAt(input[id]);
+      });
+    }
+    return out;
+  }
+  function mergeTombs(){
+    var out={};
+    for(var i=0;i<arguments.length;i++){
+      var c=compactTombs(arguments[i]);
+      Object.keys(c).forEach(function(id){ out[id]=Math.max(N(out[id]),N(c[id])); });
+    }
+    return out;
+  }
+  function compactLocalTombs(p,reason){
+    p=p||getProfile();
+    var keys=tombKeys(p), before=0, out={};
+    keys.forEach(function(k){ var v=readJSON(k,{}); var c=compactTombs(v); before += Object.keys(v&&typeof v==='object'?v:{}).length; out=mergeTombs(out,c); });
+    keys.forEach(function(k){ try{ localStorage.setItem(k, JSON.stringify(out)); }catch(e){} });
+    state.compactLocal++;
+    state.lastCounts=Object.assign({},state.lastCounts||{}, {tombstones:Object.keys(out).length});
+    trace('COMPACT_LOCAL_TOMBSTONES',{reason:S(reason),tombstones:Object.keys(out).length,before:before});
+    return out;
+  }
+  function getLocalTasks(p){ var arr=readJSON(taskKey(p),[]); if(!Array.isArray(arr) && Array.isArray(window.todos)) arr=window.todos; return Array.isArray(arr)?arr:[]; }
+  function getLocalVault(p){ var arr=readJSON(vaultKey(p),[]); return Array.isArray(arr)?arr:[]; }
+  function compactTask(t){
+    if(!t || typeof t!=='object') return t;
+    var keep=['id','text','title','completed','done','isDone','status','priority','tags','createdAt','updatedAt','completedAt','stoppedAt','dueDate','date','displayDate','startDate','r62DisplayDate','r62ExplicitDate','timeStr','alarmTime','alarmEnabled','alerted','isDaily','repeat','repeatType','r58CopyAlarmMuted','r65CloudTouched'];
+    var o={}; keep.forEach(function(k){ if(t[k]!==undefined) o[k]=t[k]; }); if(o.text==null && t.name!=null) o.text=t.name; return o;
+  }
+  function filterTasks(tasks,tombs){
+    tombs=tombs||{}; if(!Array.isArray(tasks)) return [];
+    return tasks.filter(function(t,i){ var id=idOf(t,i); return !tombs[id] && !tombs[S(t&&t.originalId)] && !tombs[S(t&&t.sourceId)]; }).map(compactTask);
+  }
+  function fromFsValue(v){ if(!v || typeof v!=='object') return undefined; if('stringValue' in v) return v.stringValue; if('integerValue' in v) return Number(v.integerValue); if('doubleValue' in v) return Number(v.doubleValue); if('booleanValue' in v) return !!v.booleanValue; if('nullValue' in v) return null; if('timestampValue' in v) return Date.parse(v.timestampValue)||0; if('arrayValue' in v) return ((v.arrayValue&&v.arrayValue.values)||[]).map(fromFsValue); if('mapValue' in v){ var out={}, f=(v.mapValue&&v.mapValue.fields)||{}; Object.keys(f).forEach(function(k){ out[k]=fromFsValue(f[k]); }); return out; } return undefined; }
+  function toFsValue(v){ if(v===undefined || typeof v==='function') return {nullValue:null}; if(v===null) return {nullValue:null}; if(Array.isArray(v)) return {arrayValue:{values:v.map(toFsValue)}}; if(typeof v==='boolean') return {booleanValue:v}; if(typeof v==='number') return Number.isInteger(v)?{integerValue:S(v)}:{doubleValue:v}; if(typeof v==='object'){ var f={}; Object.keys(v).forEach(function(k){ if(v[k]!==undefined && typeof v[k] !== 'function') f[k]=toFsValue(v[k]); }); return {mapValue:{fields:f}}; } return {stringValue:S(v)}; }
+  function docToPlain(doc){ var out={}, f=(doc&&doc.fields)||{}; Object.keys(f).forEach(function(k){ out[k]=fromFsValue(f[k]); }); return out; }
+  function plainToDoc(data){ var f={}; Object.keys(data||{}).forEach(function(k){ if(data[k]!==undefined) f[k]=toFsValue(data[k]); }); return {fields:f}; }
+  async function getToken(){ try{ if(!window.firebase || !firebase.auth) return ''; if(firebase.apps && !firebase.apps.length && firebase.initializeApp){ firebase.initializeApp({apiKey:API_KEY,authDomain:'tool-mimishop.firebaseapp.com',projectId:PROJECT,storageBucket:'tool-mimishop.firebasestorage.app',messagingSenderId:'536814109954',appId:'1:536814109954:web:b1be76d22957de4b75ee1b'}); } var auth=firebase.auth(); if(!auth.currentUser){ try{ await auth.signInAnonymously(); }catch(e){} } return auth.currentUser && auth.currentUser.getIdToken ? await auth.currentUser.getIdToken() : ''; }catch(e){ return ''; } }
+  function maskUrl(p, fields){ var url=REST_DOC_BASE+encodeURIComponent(p)+'?key='+encodeURIComponent(API_KEY); fields.forEach(function(f){ url += '&updateMask.fieldPaths=' + encodeURIComponent(f); }); return url; }
+  async function restGet(p){ var token=await getToken(); var url=REST_DOC_BASE+encodeURIComponent(p)+'?key='+encodeURIComponent(API_KEY); var headers={'Accept':'application/json'}; if(token) headers.Authorization='Bearer '+token; var res=await rawFetch(url,{method:'GET',headers:headers,cache:'no-store'}); var txt=await res.text(), json={}; try{json=txt?JSON.parse(txt):{};}catch(e){json={raw:txt};} if(!res.ok){ var er=new Error((json.error&&(json.error.message||json.error.status))||('HTTP_'+res.status)); er.status=res.status; throw er; } return docToPlain(json); }
+  async function restPatch(p,payload,reason){ var token=await getToken(); var fields=CANONICAL_FIELDS.concat(LEGACY_FIELDS); var headers={'Accept':'application/json','Content-Type':'application/json'}; if(token) headers.Authorization='Bearer '+token; var res=await rawFetch(maskUrl(p,fields),{method:'PATCH',headers:headers,body:JSON.stringify(plainToDoc(payload)),cache:'no-store'}); var txt=await res.text(), json={}; try{json=txt?JSON.parse(txt):{};}catch(e){json={raw:txt};} if(!res.ok){ var er=new Error((json.error&&(json.error.message||json.error.status))||('HTTP_'+res.status)); er.status=res.status; er.data=json; throw er; } return json; }
+  function mergeArrays(a,b){ var map={}; function add(arr){ if(!Array.isArray(arr)) return; arr.forEach(function(x,i){ if(!x||typeof x!=='object')return; var id=idOf(x,i); var old=map[id]; var tx=Math.max(N(x.updatedAt),N(x.createdAt),N(x.alarmTime),N(x.completedAt)); var to=old?Math.max(N(old.updatedAt),N(old.createdAt),N(old.alarmTime),N(old.completedAt)):0; if(!old || tx>=to) map[id]=x; }); } add(a); add(b); return Object.keys(map).map(function(k){return map[k];}); }
+  async function compactRemote(reason){
+    var p=getProfile(); state.profile=p;
+    if(!navigator.onLine || !rawFetch){ trace('COMPACT_REMOTE_SKIP',{reason:S(reason),offline:!navigator.onLine}); return {ok:false,offline:true}; }
+    try{
+      var cloud=await restGet(p);
+      var tombs=mergeTombs(cloud.deletedTaskTombstones || {}, cloud.r65DeletedTasks || {}, compactLocalTombs(p,'before_remote_'+reason));
+      compactLocalTombs(p,'after_merge_remote_'+reason);
+      var tasks=filterTasks(Array.isArray(cloud.tasks)?cloud.tasks:mergeArrays(cloud.tasks,cloud.data),tombs);
+      if(!tasks.length && Array.isArray(cloud.data)) tasks=filterTasks(cloud.data,tombs);
+      if(!tasks.length && getLocalTasks(p).length) tasks=filterTasks(getLocalTasks(p),tombs);
+      var vault=Array.isArray(cloud.vault)?cloud.vault:(Array.isArray(cloud.vaultData)?cloud.vaultData:getLocalVault(p));
+      var payload={tasks:tasks, vault:Array.isArray(vault)?vault:[], deletedTaskTombstones:tombs, stats:(cloud.stats&&typeof cloud.stats==='object')?cloud.stats:cleanPlain(window.stats||{}), updatedAt:now()};
+      await restPatch(p,payload,reason||'compact_tombstone_r68');
+      state.compactRemote++; state.pushOk++; state.lastOk='compact_remote'; state.lastAt=now(); state.lastCounts={tasks:payload.tasks.length,vault:payload.vault.length,tombstones:Object.keys(tombs).length,updatedAt:payload.updatedAt};
+      trace('COMPACT_REMOTE_OK',{reason:S(reason),counts:state.lastCounts,format:'deletedTaskTombstones[id]=timestamp_int64'});
+      return {ok:true,counts:state.lastCounts};
+    }catch(e){ state.pushFail++; state.lastError=S(e.message||e); trace('COMPACT_REMOTE_FAIL',{reason:S(reason),error:state.lastError,status:e.status||0}); return {ok:false,error:state.lastError,status:e.status||0}; }
+  }
+  function patchStorage(){
+    try{
+      if(Storage.prototype.setItem.__lifeosR68CompactTombstonePatched) return;
+      var old=Storage.prototype.setItem;
+      Storage.prototype.setItem=function(k,v){
+        try{
+          if(isTombKey(k)){
+            var obj={}; try{ obj=JSON.parse(S(v)); }catch(e){ obj={}; }
+            v=JSON.stringify(compactTombs(obj));
+          }
+        }catch(e){}
+        return old.call(this,k,v);
+      };
+      Storage.prototype.setItem.__lifeosR68CompactTombstonePatched=true;
+      state.setItemPatched=true;
+    }catch(e){}
+  }
+  function patchFacade(){
+    try{
+      var F=window.FirebaseSync||{}, oldSync=F.syncNow, oldPush=F.pushAll, oldPull=F.pullOnce;
+      F.__r68CompactTombstone=true;
+      F.syncNow=function(reason){ try{ if(oldSync) Promise.resolve(oldSync.apply(this,arguments)).catch(function(){}); }catch(e){} return compactRemote(reason||'firebase_sync_r68'); };
+      F.pushAll=function(reason){ try{ if(oldPush) Promise.resolve(oldPush.apply(this,arguments)).catch(function(){}); }catch(e){} return compactRemote(reason||'firebase_push_r68'); };
+      F.pullOnce=function(reason){ try{ if(oldPull) Promise.resolve(oldPull.apply(this,arguments)).catch(function(){}); }catch(e){} return compactRemote(reason||'firebase_pull_r68'); };
+      window.FirebaseSync=F; state.facadePatched=true;
+    }catch(e){}
+    try{
+      ['LifeOSJ20R67','LifeOSJ20R67SingleSchema','LifeOSJ20R65','LifeOSJ20R59'].forEach(function(name){
+        var A=window[name]; if(!A) return;
+        if(typeof A.syncNow==='function') A.syncNow=function(r){ return compactRemote(r||name+'_sync_r68'); };
+        if(typeof A.push==='function') A.push=function(r){ return compactRemote(r||name+'_push_r68'); };
+        if(typeof A.pushCloud==='function') A.pushCloud=function(r){ return compactRemote(r||name+'_pushCloud_r68'); };
+        if(typeof A.pushAll==='function') A.pushAll=function(r){ return compactRemote(r||name+'_pushAll_r68'); };
+        if(typeof A.forceCleanup==='function') A.forceCleanup=function(){ return compactRemote(name+'_force_cleanup_r68'); };
+      });
+    }catch(e){}
+  }
+  function boot(){
+    patchStorage(); patchFacade(); compactLocalTombs(getProfile(),'boot');
+    setTimeout(function(){ patchStorage(); patchFacade(); compactLocalTombs(getProfile(),'boot_1200'); },1200);
+    setTimeout(function(){ if(navigator.onLine) compactRemote('boot_compact_schema_r68'); },3200);
+    setTimeout(function(){ if(navigator.onLine) compactRemote('boot_compact_verify_r68'); },9000);
+  }
+  var api={phase:PHASE,installed:true,canonicalFields:CANONICAL_FIELDS.slice(),tombstoneFormat:'deletedTaskTombstones[id] = timestamp int64 only',compactLocal:function(){return compactLocalTombs(getProfile(),'manual');},compactRemote:function(r){return compactRemote(r||'manual_compact_r68');},syncNow:function(r){return compactRemote(r||'manual_sync_r68');},trace:function(){return readJSON('lifeos_r68_compact_tombstone_trace',[]);},summary:function(){var p=getProfile(), t=compactLocalTombs(p,'summary');return {phase:PHASE,installed:true,profile:p,online:navigator.onLine,singleSchema:true,canonicalFields:CANONICAL_FIELDS.slice(),tombstoneFieldRequired:true,tombstoneFormat:'compact timestamp map; no phase/reason payload',state:cleanPlain(state),local:{tasks:getLocalTasks(p).length,vault:getLocalVault(p).length,tombstones:Object.keys(t).length},markers:{r68:true,r67:!!(window.LifeOSJ20R67SingleSchema&&window.LifeOSJ20R67SingleSchema.installed),r66:!!(window.LifeOSJ20R66LandscapeTaskComposerFix&&window.LifeOSJ20R66LandscapeTaskComposerFix.installed),r65:!!(window.LifeOSJ20R65&&window.LifeOSJ20R65.installed),r64:!!window.__lifeosJ20R64HardSirenNoCardScaleTouchFixInstalled,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled}};}};
+  window.LifeOSJ20R68 = window.LifeOSJ20R68CompactTombstone = api;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
+  window.addEventListener('online',function(){ setTimeout(function(){ compactRemote('online_r68'); },1000); },{passive:true});
+  window.addEventListener('visibilitychange',function(){ if(!document.hidden && navigator.onLine) setTimeout(function(){ compactRemote('visible_r68'); },1500); },{passive:true});
+})();
+</script>
+<!-- LifeOS Pha14J20R68 Compact Tombstone Canonical Schema - R67 Base END -->
+
 </body>
 </html>
