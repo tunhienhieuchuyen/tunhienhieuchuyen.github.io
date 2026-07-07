@@ -32094,152 +32094,358 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
 <!-- /LifeOS Pha14J20R72 -->
 
 
-
-<!-- Pha14J20R74_LiveMediaStabilizerNoLegacyFirestorePatch_R73Base -->
-<script>
+<!-- LIFEOS J20 R75 SAFE ROUTER + MEDIA NO AUTOPLAY + CLEAN GATE - START
+Base: R73 accepted sync quota gate.
+Do NOT include R74 media/layout patch.
+Goals:
+- Portrait/landscape: inactive tabs must not stay in scroll flow.
+- Radio/Tivi subtab click must NOT auto-play default channel.
+- Channel click can play, but duplicate/double-touch is debounced.
+- Strip legacy Firestore updateMask fields if old code tries once.
+- Strip x-lifeos-phase header for D1 family worker to avoid CORS preflight reject.
+-->
+<style id="lifeos-j20-r75-safe-router-media-style">
+@media (max-width: 1023px) {
+  body:not([data-desktop-workspace="overview"]) .view-section:not(.active) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    left: -99999px !important;
+    top: auto !important;
+  }
+  body:not([data-desktop-workspace="overview"]) .view-section.active {
+    visibility: visible !important;
+    pointer-events: auto !important;
+    min-height: 0 !important;
+  }
+  body:not(.media-live-scroll-mode) #view-music:not(.active) {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
+body.lifeos-landscape-mini-pc .l64f-panel:not(.is-active) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc .l64f-panel.is-active {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+body.lifeos-r75-not-music.media-live-scroll-mode {
+  padding-bottom: initial !important;
+}
+</style>
+<script id="lifeos-j20-r75-safe-router-media-gate-js">
 (function(){
   'use strict';
-  var PHASE='Pha14J20R74_LiveMediaStabilizerNoLegacyFirestorePatch_R73Base';
-  if(window.LifeOSJ20R74LiveMediaStabilizer){ return; }
-  var S={phase:PHASE, startedAt:Date.now(), legacyPatchCleaned:0, legacyPatchBlocked:0, listenBlocked:0, mediaTabAutoplayBlocked:0, mediaDuplicatePlayBlocked:0, mediaOtherPaused:0, mediaClassCleaned:0, mediaClickDebounced:0, fetchErrors:0, xhrListenBlocked:0, lastClickTs:0, lastClickText:'', lastMediaPlay:{src:'',ts:0}, lastMediaChannelClick:{text:'',ts:0}};
-  function now(){return Date.now();}
-  function txt(x){try{return String(x||'').replace(/\s+/g,' ').trim();}catch(e){return '';}}
-  function isGitFs(u){u=String(u||'');return /firestore\.googleapis\.com\/v1\/projects\/tool-mimishop\/databases\/\(default\)\/documents\/LifeOS_Profiles\/live/i.test(u);}
-  function isListen(u){u=String(u||'');return /firestore\.googleapis\.com\/google\.firestore\.v1\.Firestore\/Listen\/channel/i.test(u);}
-  function hasLegacyMask(u){u=String(u||'');return /updateMask\.fieldPaths=(data|vaultData|r65DeletedTasks|r59Meta)(?:&|$)/.test(u);}
-  function cleanMaskUrl(u){
-    try{
-      var url=new URL(String(u), location.href);
-      if(!isGitFs(url.href)) return String(u);
-      var keep=['tasks','vault','deletedTaskTombstones','stats','updatedAt'];
-      var keys=[]; url.searchParams.forEach(function(v,k){ if(k==='updateMask.fieldPaths') keys.push(v); });
-      if(!keys.length) return url.href;
-      url.searchParams.delete('updateMask.fieldPaths');
-      keep.forEach(function(k){ url.searchParams.append('updateMask.fieldPaths',k); });
-      return url.href;
-    }catch(e){ return String(u||''); }
+  if (window.LifeOSJ20R75SafeGate && window.LifeOSJ20R75SafeGate.installed) return;
+
+  var PHASE = 'Pha14J20R75_SafeRouterMediaNoAutoplayCleanGate_R73Base';
+  var BAD_FIELDS = { data:1, vaultData:1, r65DeletedTasks:1, r59Meta:1 };
+  var stats = {
+    installedAt: Date.now(),
+    fireLegacyMaskStripped: 0,
+    familyHeaderStripped: 0,
+    mediaTabNoAutoplay: 0,
+    mediaDuplicatePlayBlocked: 0,
+    routeCleanups: 0,
+    inactiveHidden: 0,
+    lastWorkspace: '',
+    lastMediaTab: '',
+    lastPlayKey: '',
+    lastPlayAt: 0
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function qs(sel){ try { return document.querySelector(sel); } catch(e){ return null; } }
+  function qsa(sel){ try { return Array.prototype.slice.call(document.querySelectorAll(sel)); } catch(e){ return []; } }
+  function body(){ return document.body || document.documentElement; }
+  function txt(el){ return String((el && el.textContent) || '').trim(); }
+  function cls(el, add, remove){
+    if (!el || !el.classList) return;
+    (remove||[]).forEach(function(c){ try{ el.classList.remove(c); }catch(e){} });
+    (add||[]).forEach(function(c){ try{ el.classList.add(c); }catch(e){} });
   }
-  function cleanFirestoreBody(body){
-    try{
-      if(!body || typeof body!=='string') return body;
-      var obj=JSON.parse(body);
-      if(!obj || !obj.fields) return body;
-      var f=obj.fields;
-      if(!f.tasks && f.data) f.tasks=f.data;
-      if(!f.vault && f.vaultData) f.vault=f.vaultData;
-      if(!f.deletedTaskTombstones && f.r65DeletedTasks) f.deletedTaskTombstones=f.r65DeletedTasks;
-      delete f.data; delete f.vaultData; delete f.r65DeletedTasks; delete f.r59Meta;
-      obj.fields={};
-      ['tasks','vault','deletedTaskTombstones','stats','updatedAt'].forEach(function(k){ if(f[k]!==undefined) obj.fields[k]=f[k]; });
-      return JSON.stringify(obj);
-    }catch(e){ return body; }
+  function activeMobileView(){
+    var v = qs('.view-section.active');
+    return v ? v.id : '';
   }
-  function fakeOk(json){
-    try{return new Response(JSON.stringify(json||{ok:true,phase:PHASE,skipped:true}),{status:200,headers:{'content-type':'application/json','x-lifeos-r74':'fake-ok'}});}catch(e){return null;}
+  function activeMiniPanel(){
+    var p = qs('.l64f-panel.is-active');
+    return p ? p.id : '';
   }
-  var nativeFetch=window.fetch;
-  if(nativeFetch && !nativeFetch.__lifeosR74){
-    var wrapped=function(input, init){
-      var url='';
-      try{ url=typeof input==='string'?input:(input&&input.url)||''; }catch(e){}
-      try{
-        if(isListen(url)){ S.listenBlocked++; var r=fakeOk({ok:true,listenBlocked:true,phase:PHASE}); if(r) return Promise.resolve(r); }
-        var method=(init&&init.method)||((input&&input.method)||'GET');
-        if(isGitFs(url) && String(method).toUpperCase()==='PATCH'){
-          var dirty=hasLegacyMask(url);
-          var newUrl=cleanMaskUrl(url);
-          var newInit=Object.assign({}, init||{});
-          if(newInit.body) newInit.body=cleanFirestoreBody(newInit.body);
-          if(typeof input==='string') input=newUrl;
-          else if(input && input.url) input=new Request(newUrl, input);
-          if(dirty){ S.legacyPatchCleaned++; }
-          return nativeFetch.call(this,input,newInit).then(function(resp){return resp;}).catch(function(err){S.fetchErrors++; throw err;});
-        }
-      }catch(e){}
-      return nativeFetch.apply(this,arguments);
-    };
-    wrapped.__lifeosR74=true;
-    window.fetch=wrapped;
-  }
-  // XHR guard for Firestore Listen channel and legacy REST masks.
-  if(window.XMLHttpRequest && !window.XMLHttpRequest.prototype.__lifeosR74){
-    var XO=XMLHttpRequest.prototype.open, XS=XMLHttpRequest.prototype.send;
-    XMLHttpRequest.prototype.open=function(method,url){
-      try{ this.__lifeosR74_url=String(url||''); this.__lifeosR74_method=String(method||'GET').toUpperCase(); if(isGitFs(this.__lifeosR74_url)&&this.__lifeosR74_method==='PATCH'&&hasLegacyMask(this.__lifeosR74_url)){ arguments[1]=cleanMaskUrl(this.__lifeosR74_url); this.__lifeosR74_url=String(arguments[1]); S.legacyPatchCleaned++; } }catch(e){}
-      return XO.apply(this,arguments);
-    };
-    XMLHttpRequest.prototype.send=function(body){
-      try{
-        if(isListen(this.__lifeosR74_url)){ S.xhrListenBlocked++; try{this.abort();}catch(e){} return; }
-        if(isGitFs(this.__lifeosR74_url)&&this.__lifeosR74_method==='PATCH') body=cleanFirestoreBody(body);
-      }catch(e){}
-      return XS.call(this,body);
-    };
-    XMLHttpRequest.prototype.__lifeosR74=true;
-  }
-  function activeMainTabText(){
-    try{
-      var btns=[].slice.call(document.querySelectorAll('button,.l64f-tab,[role="tab"]'));
-      var names=['Nhiệm vụ','Tập trung','Kho lưu trữ','Nghe nhạc','Gia đình'];
-      for(var i=0;i<btns.length;i++){
-        var t=txt(btns[i].innerText||btns[i].textContent);
-        if(names.indexOf(t)>=0 && (btns[i].classList.contains('is-active')||btns[i].classList.contains('l64f-active')||btns[i].getAttribute('aria-selected')==='true')) return t;
-      }
-    }catch(e){}
+  function activeWorkspace(){
+    var b = document.body;
+    var p = activeMiniPanel();
+    if (p === 'l64f-panel-music') return 'music';
+    if (p === 'l64f-panel-tasks') return 'tasks';
+    if (p === 'l64f-panel-focus') return 'focus';
+    if (p === 'l64f-panel-vault') return 'vault';
+    if (p === 'l64f-panel-chat') return 'chat';
+    var v = activeMobileView();
+    if (v === 'view-music') return 'music';
+    if (v === 'view-tasks') return 'tasks';
+    if (v === 'view-focus') return 'focus';
+    if (v === 'view-vault') return 'vault';
+    if (v === 'view-chat' || v === 'view-family') return 'chat';
+    if (b && b.dataset) return b.dataset.desktopWorkspace || b.dataset.lifeosActiveWorkspace || '';
     return '';
   }
-  function inMusic(){return activeMainTabText()==='Nghe nhạc' || !!document.querySelector('#l64f-panel-music.is-active,.l64f-panel.is-active #tab-media-radio,.l64f-panel.is-active #tab-media-tv');}
-  function mediaRootContains(el){try{return !!(el&&el.closest&&el.closest('#l64f-panel-music,[id*="media"],section'));}catch(e){return false;}}
-  document.addEventListener('pointerdown',function(ev){
-    var t=txt(ev.target&&ev.target.innerText || ev.target&&ev.target.textContent);
-    S.lastClickTs=now(); S.lastClickText=t;
-    if(mediaRootContains(ev.target)){
-      if(t) S.lastMediaChannelClick={text:t,ts:now()};
-      if(t && t===S.__lastMediaPointerText && now()-(S.__lastMediaPointerTs||0)<900){ S.mediaClickDebounced++; try{ev.preventDefault();ev.stopImmediatePropagation();}catch(e){} return false; }
-      S.__lastMediaPointerText=t; S.__lastMediaPointerTs=now();
+  function isMusicActive(){
+    return activeWorkspace() === 'music';
+  }
+  function setMediaLiveAllowed(){
+    var b = document.body;
+    if (!b) return;
+    var ok = isMusicActive();
+    stats.lastWorkspace = activeWorkspace();
+    if (!ok) {
+      if (b.classList.contains('media-live-scroll-mode')) stats.routeCleanups++;
+      b.classList.remove('media-live-scroll-mode');
+      b.classList.add('lifeos-r75-not-music');
+    } else {
+      b.classList.remove('lifeos-r75-not-music');
     }
-  },true);
-  document.addEventListener('click',function(ev){
-    var t=txt(ev.target&&ev.target.innerText || ev.target&&ev.target.textContent);
-    S.lastClickTs=now(); S.lastClickText=t;
-    if(mediaRootContains(ev.target)){
-      if(t) S.lastMediaChannelClick={text:t,ts:now()};
-      if(t && t===S.__lastMediaClickText && now()-(S.__lastMediaClickTs||0)<1200){ S.mediaClickDebounced++; try{ev.preventDefault();ev.stopImmediatePropagation();}catch(e){} return false; }
-      S.__lastMediaClickText=t; S.__lastMediaClickTs=now();
+  }
+  function hideInactiveSections(){
+    var activeCount = 0;
+    qsa('.view-section').forEach(function(v){
+      var isActive = v.classList && v.classList.contains('active');
+      if (isActive) activeCount++;
+      if (!isActive) {
+        try { v.setAttribute('aria-hidden','true'); } catch(e){}
+      } else {
+        try { v.removeAttribute('aria-hidden'); } catch(e){}
+      }
+    });
+    qsa('.l64f-panel').forEach(function(p){
+      var isActive = p.classList && p.classList.contains('is-active');
+      if (!isActive) {
+        try { p.setAttribute('aria-hidden','true'); } catch(e){}
+      } else {
+        try { p.removeAttribute('aria-hidden'); } catch(e){}
+      }
+    });
+    stats.inactiveHidden++;
+  }
+
+  function stripLegacyMaskUrl(url){
+    if (!/firestore\.googleapis\.com/.test(url || '') || !/updateMask\.fieldPaths=/.test(url || '')) return url;
+    var u;
+    try { u = new URL(url, location.href); } catch(e){ return url; }
+    var changed = false;
+    var next = new URLSearchParams();
+    u.searchParams.forEach(function(v,k){
+      if (k === 'updateMask.fieldPaths' && BAD_FIELDS[v]) { changed = true; return; }
+      next.append(k,v);
+    });
+    if (!changed) return url;
+    u.search = next.toString();
+    stats.fireLegacyMaskStripped++;
+    try { console.warn('[R75_FIRESTORE_LEGACY_MASK_STRIPPED]', PHASE); } catch(e){}
+    return u.toString();
+  }
+  function stripFamilyHeaders(input, init){
+    var url = '';
+    try { url = typeof input === 'string' ? input : (input && input.url) || ''; } catch(e){}
+    if (!/lifeos-family-d1-(text-)?api\.tunhienhieuchuyen\.workers\.dev/.test(url)) return {input:input, init:init};
+    init = init || {};
+    var headers = new Headers(init.headers || (input && input.headers) || {});
+    if (headers.has('x-lifeos-phase')) {
+      headers.delete('x-lifeos-phase');
+      stats.familyHeaderStripped++;
     }
-  },true);
-  var nativePlay=HTMLMediaElement.prototype.play;
-  if(nativePlay && !nativePlay.__lifeosR74){
-    var playWrap=function(){
-      var src=''; try{src=this.currentSrc||this.src||'';}catch(e){}
-      var t=now();
-      var ct=txt(S.lastClickText);
-      if(/^(📻\s*)?Radio Live$|^(📺\s*)?Tivi Live$/i.test(ct) && t-S.lastClickTs<1500){ S.mediaTabAutoplayBlocked++; return Promise.resolve(); }
-      if(src && S.lastMediaPlay.src===src && t-S.lastMediaPlay.ts<2500){ S.mediaDuplicatePlayBlocked++; return Promise.resolve(); }
-      S.lastMediaPlay={src:src,ts:t};
-      try{
-        var self=this;
-        setTimeout(function(){
-          try{[].slice.call(document.querySelectorAll('audio,video')).forEach(function(m){ if(m!==self && !m.paused){ var ms=m.currentSrc||m.src||''; if(ms && ms!==src && !/silence_30min\.mp3/.test(ms)){ m.pause(); S.mediaOtherPaused++; } } });}catch(e){}
-        },0);
-      }catch(e){}
-      return nativePlay.apply(this,arguments);
+    init.headers = headers;
+    return {input:input, init:init};
+  }
+  function installFetchGate(){
+    if (window.__lifeosR75FetchGateInstalled) return;
+    window.__lifeosR75FetchGateInstalled = true;
+    var oldFetch = window.fetch;
+    if (typeof oldFetch !== 'function') return;
+    window.fetch = function(input, init){
+      try {
+        var url = typeof input === 'string' ? input : (input && input.url) || '';
+        var clean = stripLegacyMaskUrl(url);
+        if (clean !== url) {
+          if (typeof input === 'string') input = clean;
+          else input = new Request(clean, input);
+        }
+        var out = stripFamilyHeaders(input, init);
+        input = out.input; init = out.init;
+      } catch(e){}
+      return oldFetch.call(this, input, init);
     };
-    playWrap.__lifeosR74=true;
-    HTMLMediaElement.prototype.play=playWrap;
   }
-  function cleanMediaClass(){
-    try{
-      var tab=activeMainTabText();
-      if(tab && tab!=='Nghe nhạc' && document.body && document.body.classList.contains('media-live-scroll-mode')){document.body.classList.remove('media-live-scroll-mode'); S.mediaClassCleaned++;}
-    }catch(e){}
+
+  function baseUnselected(){
+    return 'px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100';
   }
-  setInterval(cleanMediaClass,1200);
-  ['visibilitychange','pageshow','focus','blur','resize','orientationchange'].forEach(function(n){window.addEventListener(n,cleanMediaClass,true);});
-  try{localStorage.setItem('LifeOS_J20_R74_LiveMediaStabilizer',JSON.stringify({phase:PHASE,ts:Date.now()}));}catch(e){}
-  window.LifeOSJ20R74LiveMediaStabilizer={state:S, cleanMaskUrl:cleanMaskUrl, summary:function(){cleanMediaClass(); return Object.assign({},S,{activeMainTab:activeMainTabText(), inMusic:inMusic(), bodyClass:document.body&&document.body.className, markers:{r74:true,r73:!!window.LifeOSJ20R73}});}};
+  function selectedClass(tab){
+    if (tab === 'music') return 'px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap bg-primary text-white shadow-sm border-primary';
+    if (tab === 'radio') return 'px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap bg-emerald-500 text-white shadow-sm border-emerald-500';
+    return 'px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap bg-rose-500 text-white shadow-sm border-rose-500';
+  }
+  function setClassName(id, cn){ var e=$(id); if(e) e.className = cn; }
+  function syncMediaDom(tab){
+    tab = (tab === 'radio' || tab === 'tv') ? tab : 'music';
+    stats.lastMediaTab = tab;
+    setClassName('tab-media-music', tab === 'music' ? selectedClass('music') : baseUnselected());
+    setClassName('tab-media-radio', tab === 'radio' ? selectedClass('radio') : baseUnselected());
+    setClassName('tab-media-tv', tab === 'tv' ? selectedClass('tv') : baseUnselected());
+
+    var mp3=$('mp3-list-container'), radio=$('radio-list-container'), tv=$('tv-list-container');
+    if (mp3) mp3.classList.toggle('hidden', tab !== 'music');
+    if (radio) radio.classList.toggle('hidden', tab !== 'radio');
+    if (tv) tv.classList.toggle('hidden', tab !== 'tv');
+
+    var tvp=$('tv-player-container'), rp=$('radio-player-container');
+    if (tvp) tvp.style.display = tab === 'tv' ? '' : 'none';
+    if (rp) rp.style.display = tab === 'radio' ? '' : 'none';
+
+    try { document.body.dataset.lifeosMediaTab = tab; document.body.dataset.l64fMediaTab = tab; } catch(e){}
+  }
+  function stopOpposite(tab){
+    try { if (tab !== 'tv') { var v=$('tv-video-element'); if (v) v.pause(); } } catch(e){}
+    try { if (tab !== 'radio') { var a=$('radio-audio-element'); if (a) a.pause(); } } catch(e){}
+    try {
+      var m = window.MediaHub;
+      if (tab !== 'tv' && m && m.hlsTv && typeof m.hlsTv.stopLoad === 'function') m.hlsTv.stopLoad();
+      if (tab !== 'radio' && m && m.hlsRadio && typeof m.hlsRadio.stopLoad === 'function') m.hlsRadio.stopLoad();
+    } catch(e){}
+  }
+  function safeSwitchMediaTab(tab, opt){
+    tab = (tab === 'radio' || tab === 'tv') ? tab : 'music';
+    var m = window.MediaHub;
+    if (!m) return false;
+    try { m.currentTab = tab; } catch(e){}
+    stopOpposite(tab);
+    syncMediaDom(tab);
+    try { if (tab === 'music' && window.MusicApp && typeof window.MusicApp.renderList === 'function') window.MusicApp.renderList(); } catch(e){}
+    try { if (tab !== 'music' && typeof m.renderGroupMenus === 'function') m.renderGroupMenus(); } catch(e){}
+    try { if (tab !== 'music' && typeof m.renderLists === 'function') m.renderLists(); } catch(e){}
+    try { localStorage.setItem('lifeos_media_memory', JSON.stringify({tab:tab, group:m.currentGroup || 'all', tvIdx:m.currentTvIdx, radioIdx:m.currentRadioIdx, source:'r75-no-autoplay'})); } catch(e){}
+    stats.mediaTabNoAutoplay++;
+    setMediaLiveAllowed();
+    return false;
+  }
+  function installMediaNoAutoplay(){
+    var m = window.MediaHub;
+    if (!m) return false;
+    if (!m.__lifeosR75OriginalSwitch && typeof m.switchTab === 'function') m.__lifeosR75OriginalSwitch = m.switchTab;
+    if (!m.__lifeosR75OriginalPlay && typeof m.playStream === 'function') m.__lifeosR75OriginalPlay = m.playStream;
+
+    m.switchTab = function(tab, skip, opt){
+      if (tab === 'music' || tab === 'radio' || tab === 'tv') return safeSwitchMediaTab(tab, opt || {});
+      if (typeof m.__lifeosR75OriginalSwitch === 'function') return m.__lifeosR75OriginalSwitch.apply(this, arguments);
+      return false;
+    };
+
+    if (typeof m.__lifeosR75OriginalPlay === 'function') {
+      m.playStream = function(idx, type){
+        type = (type === 'radio' || type === 'tv') ? type : (this.currentTab || 'music');
+        var key = String(type) + ':' + String(idx);
+        var now = Date.now();
+        if (key === stats.lastPlayKey && now - stats.lastPlayAt < 1600) {
+          stats.mediaDuplicatePlayBlocked++;
+          try { console.warn('[R75_MEDIA_DUPLICATE_PLAY_BLOCKED]', key); } catch(e){}
+          return false;
+        }
+        stats.lastPlayKey = key; stats.lastPlayAt = now;
+        setMediaLiveAllowed();
+        return m.__lifeosR75OriginalPlay.apply(this, arguments);
+      };
+    }
+
+    ['music','radio','tv'].forEach(function(tab){
+      var id = 'tab-media-' + tab;
+      var b = $(id);
+      if (!b || b.__lifeosR75SafeBound) return;
+      var clone = b.cloneNode(true);
+      clone.__lifeosR43Bound = true;
+      clone.__lifeosR75SafeBound = true;
+      try { clone.removeAttribute('onclick'); } catch(e){}
+      clone.addEventListener('click', function(ev){
+        try { ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); } catch(e){}
+        return safeSwitchMediaTab(tab, {event:ev,userIntent:true});
+      }, true);
+      clone.addEventListener('touchend', function(ev){
+        try { ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); } catch(e){}
+        return safeSwitchMediaTab(tab, {event:ev,userIntent:true});
+      }, {capture:true, passive:false});
+      try { b.parentNode.replaceChild(clone, b); } catch(e){}
+    });
+    return true;
+  }
+
+  function installRouterPolice(){
+    if (window.__lifeosR75RouterPoliceInstalled) return;
+    window.__lifeosR75RouterPoliceInstalled = true;
+    ['click','touchend','pointerup','resize','orientationchange','pageshow','focus'].forEach(function(name){
+      window.addEventListener(name, function(){ setTimeout(function(){ hideInactiveSections(); setMediaLiveAllowed(); installMediaNoAutoplay(); }, 60); }, true);
+    });
+    var n = 0;
+    var timer = setInterval(function(){
+      n++;
+      hideInactiveSections();
+      setMediaLiveAllowed();
+      installMediaNoAutoplay();
+      if (n > 120) clearInterval(timer);
+    }, 500);
+  }
+
+  installFetchGate();
+  installRouterPolice();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ hideInactiveSections(); setMediaLiveAllowed(); installMediaNoAutoplay(); }, {once:true});
+  } else {
+    hideInactiveSections(); setMediaLiveAllowed(); installMediaNoAutoplay();
+  }
+
+  window.LifeOSJ20R75SafeGate = {
+    installed: true,
+    phase: PHASE,
+    base: 'R73',
+    rejectedBase: 'R74 not used',
+    stats: stats,
+    summary: function(){
+      try { stats.lastWorkspace = activeWorkspace(); stats.lastMediaTab = (window.MediaHub && window.MediaHub.currentTab) || document.body.dataset.lifeosMediaTab || ''; } catch(e){}
+      return {
+        phase: PHASE,
+        base: 'R73',
+        r74Used: false,
+        workspace: stats.lastWorkspace,
+        mediaTab: stats.lastMediaTab,
+        mediaLiveScrollMode: !!(document.body && document.body.classList.contains('media-live-scroll-mode')),
+        fireLegacyMaskStripped: stats.fireLegacyMaskStripped,
+        familyHeaderStripped: stats.familyHeaderStripped,
+        mediaTabNoAutoplay: stats.mediaTabNoAutoplay,
+        mediaDuplicatePlayBlocked: stats.mediaDuplicatePlayBlocked,
+        routeCleanups: stats.routeCleanups,
+        inactiveHidden: stats.inactiveHidden,
+        markers: {
+          r75: true,
+          r73: !!window.LifeOSJ20R73,
+          r74: !!window.LifeOSJ20R74
+        }
+      };
+    }
+  };
+  try { console.log('[R75_READY]', PHASE); } catch(e){}
 })();
 </script>
+<!-- LIFEOS J20 R75 SAFE ROUTER + MEDIA NO AUTOPLAY + CLEAN GATE - END -->
 
 </body>
 </html>
