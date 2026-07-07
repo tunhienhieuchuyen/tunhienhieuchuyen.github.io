@@ -2,6 +2,230 @@
 
 <html lang="vi">
 <head>
+<!-- LifeOS Pha14J20R76 Final GitHub Runtime Hard Clean - R75 Base -->
+<script id="lifeos-j20r76-final-github-runtime-hard-clean">
+(function(){
+  'use strict';
+  if (window.LifeOSJ20R76FinalHardClean && window.LifeOSJ20R76FinalHardClean.installed) return;
+  var PHASE='Pha14J20R76_FinalGitHubRuntimeHardClean_R75Base';
+  var bootAt=Date.now();
+  var stats={
+    installedAt:bootAt,
+    fetchProfileWrites:0,
+    fetchCanonicalRewrites:0,
+    fetchLegacyBlocked:0,
+    fetchListenBlocked:0,
+    xhrListenBlocked:0,
+    xhrLegacyBlocked:0,
+    familyHeaderStripped:0,
+    audioBootBlocked:0,
+    audioAllowed:0,
+    lastFirestoreUrl:'',
+    lastRewriteKeys:[],
+    recent:[]
+  };
+  var BAD={data:1,vaultData:1,r65DeletedTasks:1,r59Meta:1};
+  var CAN={tasks:1,vault:1,deletedTaskTombstones:1,stats:1,updatedAt:1};
+  var FORBIDDEN_HEADERS={'x-lifeos-phase':1};
+  var nativeFetch=typeof window.fetch==='function'?window.fetch.bind(window):null;
+  var NativeXHR=window.XMLHttpRequest;
+  var nativePlay=(window.HTMLMediaElement&&window.HTMLMediaElement.prototype&&window.HTMLMediaElement.prototype.play)?window.HTMLMediaElement.prototype.play:null;
+  var nativePause=(window.HTMLMediaElement&&window.HTMLMediaElement.prototype&&window.HTMLMediaElement.prototype.pause)?window.HTMLMediaElement.prototype.pause:null;
+  var lastGestureAt=0;
+  function S(v){try{return String(v==null?'':v);}catch(e){return '';}}
+  function N(v){var n=Number(v);return isFinite(n)?n:0;}
+  function rec(kind,info){try{stats.recent.push(Object.assign({t:Date.now(),kind:kind},info||{}));if(stats.recent.length>40)stats.recent.shift();}catch(e){}}
+  function urlOf(input){try{return typeof input==='string'?input:(input&&input.url)||'';}catch(e){return '';}}
+  function methodOf(input,init){try{return S((init&&init.method)||(input&&input.method)||'GET').toUpperCase();}catch(e){return 'GET';}}
+  function isFirestoreProfileUrl(url){url=S(url);return /firestore\.googleapis\.com\/v1\/projects\/tool-mimishop\/databases\/\(default\)\/documents\/LifeOS_Profiles\//i.test(url);}
+  function isFirestoreListenUrl(url){url=S(url);return /google\.firestore\.v1\.Firestore\/Listen\/channel|\/Listen\/channel/i.test(url);}
+  function isFamilyWorkerUrl(url){url=S(url);return /lifeos-family-d1-(text-)?api\.tunhienhieuchuyen\.workers\.dev/i.test(url);}
+  function fakeResponse(reason){
+    try{return Promise.resolve(new Response(JSON.stringify({ok:true,r76:true,skipped:true,reason:reason||'blocked'}),{status:200,headers:{'Content-Type':'application/json','X-LifeOS-R76':reason||'blocked'}}));}
+    catch(e){return Promise.resolve({ok:true,status:200,json:function(){return Promise.resolve({ok:true,r76:true,reason:reason});},text:function(){return Promise.resolve('{}');},headers:{get:function(k){return k==='X-LifeOS-R76'?reason:null;}}});}
+  }
+  function valToPlain(f){
+    if(!f||typeof f!=='object') return undefined;
+    if('stringValue' in f) return f.stringValue;
+    if('integerValue' in f) return N(f.integerValue);
+    if('doubleValue' in f) return N(f.doubleValue);
+    if('booleanValue' in f) return !!f.booleanValue;
+    if('nullValue' in f) return null;
+    if(f.arrayValue) return (f.arrayValue.values||[]).map(valToPlain);
+    if(f.mapValue){var o={},fs=(f.mapValue&&f.mapValue.fields)||{};Object.keys(fs).forEach(function(k){o[k]=valToPlain(fs[k]);});return o;}
+    return undefined;
+  }
+  function plainToVal(v){
+    if(v===null||v===undefined) return {nullValue:null};
+    if(typeof v==='boolean') return {booleanValue:v};
+    if(typeof v==='number') return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};
+    if(typeof v==='string') return {stringValue:v};
+    if(Array.isArray(v)) return {arrayValue:{values:v.map(plainToVal)}};
+    if(typeof v==='object'){var fs={};Object.keys(v).forEach(function(k){fs[k]=plainToVal(v[k]);});return {mapValue:{fields:fs}};}
+    return {stringValue:S(v)};
+  }
+  function docToPlain(j){
+    var fs=j&&j.fields;if(!fs||typeof fs!=='object')return null;
+    var o={};Object.keys(fs).forEach(function(k){o[k]=valToPlain(fs[k]);});return o;
+  }
+  function plainToDoc(p){var fs={};Object.keys(p||{}).forEach(function(k){fs[k]=plainToVal(p[k]);});return {fields:fs};}
+  function compactTombs(x){
+    var o={};x=x&&typeof x==='object'?x:{};
+    Object.keys(x).forEach(function(k){var v=x[k];if(v&&typeof v==='object')v=N(v.at||v.updatedAt||v.deletedAt||0);o[k]=N(v);});
+    return o;
+  }
+  function parseBody(body){try{return typeof body==='string'?JSON.parse(body):null;}catch(e){return null;}}
+  function bodyText(body){
+    if(body==null) return '';
+    if(typeof body==='string') return body;
+    try{ if(body instanceof URLSearchParams) return body.toString(); }catch(e){}
+    return '';
+  }
+  function normalizeFirestoreBodyAndMask(url,body){
+    var text=bodyText(body), j=parseBody(text), plain=docToPlain(j)||j||null;
+    var u;try{u=new URL(S(url),location.href);}catch(e){u=null;}
+    var hasBad=false, keys=[];
+    if(u){u.searchParams.forEach(function(v,k){if(k==='updateMask.fieldPaths'){keys.push(v);if(BAD[v])hasBad=true;}});}
+    if(plain&&typeof plain==='object') Object.keys(plain).forEach(function(k){if(BAD[k])hasBad=true;});
+    if(!hasBad) return null;
+    var out={};
+    if(plain&&typeof plain==='object'){
+      if(Array.isArray(plain.tasks)||Array.isArray(plain.data)) out.tasks=Array.isArray(plain.tasks)?plain.tasks:plain.data;
+      if(Array.isArray(plain.vault)||Array.isArray(plain.vaultData)) out.vault=Array.isArray(plain.vault)?plain.vault:plain.vaultData;
+      if(plain.deletedTaskTombstones!==undefined||plain.r65DeletedTasks!==undefined) out.deletedTaskTombstones=compactTombs(plain.deletedTaskTombstones||plain.r65DeletedTasks||{});
+      if(plain.stats!==undefined) out.stats=plain.stats&&typeof plain.stats==='object'?plain.stats:{};
+      if(plain.updatedAt!==undefined) out.updatedAt=N(plain.updatedAt)||Date.now();
+    }
+    if(Object.keys(out).length && out.updatedAt===undefined) out.updatedAt=Date.now();
+    if(!Object.keys(out).length) return {block:true,reason:'legacy_only_no_canonical'};
+    var nextUrl=S(url);
+    if(u){
+      var keep=[];
+      Object.keys(out).forEach(function(k){if(CAN[k])keep.push(k);});
+      Array.from(u.searchParams.keys()).forEach(function(k){if(k==='updateMask.fieldPaths')u.searchParams.delete(k);});
+      keep.forEach(function(k){u.searchParams.append('updateMask.fieldPaths',k);});
+      nextUrl=u.toString();
+    }
+    return {url:nextUrl,body:JSON.stringify(plainToDoc(out)),keys:Object.keys(out)};
+  }
+  function stripForbiddenHeaders(input,init){
+    init=init?Object.assign({},init):{};
+    var url=urlOf(input);
+    if(!isFamilyWorkerUrl(url)) return {input:input,init:init};
+    var headers;
+    try{headers=new Headers(init.headers||(input&&input.headers)||{});}catch(e){headers=new Headers();}
+    Object.keys(FORBIDDEN_HEADERS).forEach(function(k){if(headers.has(k)){headers.delete(k);stats.familyHeaderStripped++;rec('strip_family_header',{header:k});}});
+    init.headers=headers;
+    return {input:input,init:init};
+  }
+  function installFetch(){
+    if(!nativeFetch||window.fetch.__lifeosR76FinalGate)return;
+    window.fetch=function(input,init){
+      var url=urlOf(input), method=methodOf(input,init);
+      try{
+        if(isFirestoreListenUrl(url)){
+          stats.fetchListenBlocked++;rec('block_listen_fetch',{url:url.slice(0,180)});
+          return fakeResponse('firestore_listen_blocked');
+        }
+        var out=stripForbiddenHeaders(input,init);input=out.input;init=out.init;url=urlOf(input);method=methodOf(input,init);
+        if(isFirestoreProfileUrl(url)&&method==='PATCH'){
+          stats.fetchProfileWrites++;stats.lastFirestoreUrl=url;
+          var nb=normalizeFirestoreBodyAndMask(url,init&&init.body);
+          if(nb){
+            if(nb.block){stats.fetchLegacyBlocked++;rec('block_legacy_fetch',{reason:nb.reason,url:url.slice(0,160)});return fakeResponse(nb.reason);}
+            stats.fetchCanonicalRewrites++;stats.lastRewriteKeys=nb.keys||[];rec('rewrite_firestore_fetch',{keys:nb.keys,url:url.slice(0,160)});
+            if(typeof input==='string') input=nb.url; else input=new Request(nb.url,input);
+            init=Object.assign({},init,{body:nb.body,method:'PATCH'});
+            var h;try{h=new Headers(init.headers||{});}catch(e){h=new Headers();}
+            h.set('Content-Type','application/json');init.headers=h;
+          }
+        }
+      }catch(e){rec('fetch_gate_error',{msg:S(e&&e.message)});}
+      return nativeFetch(input,init);
+    };
+    window.fetch.__lifeosR76FinalGate=true;
+  }
+  function installXHR(){
+    if(!NativeXHR||NativeXHR.prototype.__lifeosR76FinalGate)return;
+    var p=NativeXHR.prototype;
+    var oldOpen=p.open, oldSend=p.send, oldSet=p.setRequestHeader;
+    p.open=function(method,url,async,user,password){
+      this.__lifeosR76Method=S(method||'GET').toUpperCase();
+      this.__lifeosR76Url=S(url||'');
+      this.__lifeosR76BlockedListen=isFirestoreListenUrl(this.__lifeosR76Url);
+      return oldOpen.apply(this,arguments);
+    };
+    p.setRequestHeader=function(name,value){
+      try{
+        if(isFamilyWorkerUrl(this.__lifeosR76Url)&&FORBIDDEN_HEADERS[S(name).toLowerCase()]){stats.familyHeaderStripped++;rec('strip_family_xhr_header',{header:S(name)});return;}
+      }catch(e){}
+      return oldSet.apply(this,arguments);
+    };
+    function fakeXHRDone(xhr,reason){
+      try{
+        Object.defineProperty(xhr,'readyState',{configurable:true,get:function(){return 4;}});
+        Object.defineProperty(xhr,'status',{configurable:true,get:function(){return 200;}});
+        Object.defineProperty(xhr,'statusText',{configurable:true,get:function(){return 'OK';}});
+        Object.defineProperty(xhr,'responseText',{configurable:true,get:function(){return '{"ok":true,"r76":true,"reason":"'+reason+'"}';}});
+        Object.defineProperty(xhr,'response',{configurable:true,get:function(){return xhr.responseText;}});
+      }catch(e){}
+      setTimeout(function(){
+        try{if(typeof xhr.onreadystatechange==='function')xhr.onreadystatechange();}catch(e){}
+        try{if(typeof xhr.onload==='function')xhr.onload();}catch(e){}
+        try{xhr.dispatchEvent&&xhr.dispatchEvent(new Event('readystatechange'));xhr.dispatchEvent&&xhr.dispatchEvent(new Event('load'));xhr.dispatchEvent&&xhr.dispatchEvent(new Event('loadend'));}catch(e){}
+      },0);
+    }
+    p.send=function(body){
+      try{
+        if(this.__lifeosR76BlockedListen){stats.xhrListenBlocked++;rec('block_listen_xhr',{url:S(this.__lifeosR76Url).slice(0,180)});fakeXHRDone(this,'firestore_listen_blocked');return;}
+        if(isFirestoreProfileUrl(this.__lifeosR76Url)&&this.__lifeosR76Method==='PATCH'){
+          var nb=normalizeFirestoreBodyAndMask(this.__lifeosR76Url,body);
+          if(nb){stats.xhrLegacyBlocked++;rec('block_or_rewrite_legacy_xhr',{keys:nb.keys||[],url:S(this.__lifeosR76Url).slice(0,160)});fakeXHRDone(this,'legacy_firestore_xhr_blocked');return;}
+        }
+      }catch(e){rec('xhr_gate_error',{msg:S(e&&e.message)});}
+      return oldSend.apply(this,arguments);
+    };
+    p.__lifeosR76FinalGate=true;
+  }
+  function markGesture(){lastGestureAt=Date.now();}
+  ['pointerdown','touchstart','touchend','click','keydown'].forEach(function(ev){try{document.addEventListener(ev,markGesture,{capture:true,passive:true});}catch(e){}});
+  function visible(el){try{if(!el)return false;var st=getComputedStyle(el);var r=el.getBoundingClientRect();return st.display!=='none'&&st.visibility!=='hidden'&&st.opacity!=='0'&&r.width>0&&r.height>0;}catch(e){return false;}}
+  function alarmVisible(){
+    try{return ['alarm-overlay','lifeos-task-alarm-modal','lifeos-r61-alarm-modal','lifeos-task-alarm-card'].some(function(id){return visible(document.getElementById(id));});}catch(e){return false;}
+  }
+  function isBootAudioId(id){return /^(mstq-silence|mstq-alarm|tts-audio|lifeos-bg-anchor|lifeos-anchor-audio|lifeos-tts-audio|lifeos-tts-anchor)$/i.test(S(id));}
+  function installAudioGate(){
+    if(!nativePlay||window.HTMLMediaElement.prototype.play.__lifeosR76AudioGate)return;
+    window.HTMLMediaElement.prototype.play=function(){
+      var el=this, id=S(el&&el.id), since=Date.now()-bootAt, recentGesture=(Date.now()-lastGestureAt)<3500;
+      try{
+        if(isBootAudioId(id)&&since<45000&&!recentGesture&&!alarmVisible()){
+          stats.audioBootBlocked++;rec('audio_boot_blocked',{id:id,since:since});
+          try{if(nativePause)nativePause.call(el);el.muted=true;}catch(e){}
+          return Promise.resolve();
+        }
+      }catch(e){}
+      stats.audioAllowed++;
+      return nativePlay.apply(this,arguments);
+    };
+    window.HTMLMediaElement.prototype.play.__lifeosR76AudioGate=true;
+  }
+  function muteBootAnchors(){
+    ['mstq-silence','mstq-alarm','tts-audio','lifeos-bg-anchor','lifeos-anchor-audio','lifeos-tts-audio','lifeos-tts-anchor'].forEach(function(id){
+      try{var a=document.getElementById(id);if(a&&!alarmVisible()&&(Date.now()-bootAt)<45000){a.pause();a.muted=true;}}catch(e){}
+    });
+  }
+  function install(){installFetch();installXHR();installAudioGate();muteBootAnchors();}
+  install();
+  try{document.addEventListener('DOMContentLoaded',function(){install();muteBootAnchors();setTimeout(muteBootAnchors,1000);setTimeout(muteBootAnchors,5000);},true);}catch(e){}
+  setTimeout(install,500);setTimeout(install,2000);setTimeout(install,8000);
+  window.LifeOSJ20R76FinalHardClean={installed:true,phase:PHASE,stats:stats,summary:function(){return {phase:PHASE,installed:true,stats:stats,markers:{r76:true,r75:!!window.LifeOSJ20R75SafeGate,r74:!!window.LifeOSJ20R74LiveMediaStabilizer,r73:!!window.LifeOSJ20R73},fetchGate:!!(window.fetch&&window.fetch.__lifeosR76FinalGate),xhrGate:!!(window.XMLHttpRequest&&window.XMLHttpRequest.prototype.__lifeosR76FinalGate),audioGate:!!(window.HTMLMediaElement&&window.HTMLMediaElement.prototype.play&&window.HTMLMediaElement.prototype.play.__lifeosR76AudioGate)};}};
+  try{console.warn('[R76_READY]',PHASE);}catch(e){}
+})();
+</script>
+<!-- /LifeOS Pha14J20R76 Final GitHub Runtime Hard Clean -->
+
+
 <!-- LIFEOS PHA14 J20 R55 MOBILE COOL LITE NO FAN - START -->
 <style id="lifeos-j20r55-mobile-cool-lite-css">
 /* R55: mobile/phone performance cooler. No D1/upload/card business logic changes. */
