@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     
-    <title>Archive Manager V40.1 - BULK DELETE + PWA FIX</title>
+    <title>Archive Manager V40.4 - RENAME PENDING CONTROL + ULTRA LOG</title>
     
     <style>
         :root { --primary: #2563eb; --danger: #dc2626; --success: #10b981; --warning: #f59e0b; --dark: #0f172a; --bg: #f8fafc; }
@@ -112,6 +112,23 @@
         .file-select-wrap { padding-top: 2px; }
         .file-info-main { min-width: 0; flex: 1; }
 
+
+        /* V40.4: rename pending control */
+        .rename-pending-panel { display: none; margin: 10px 0 12px; padding: 12px; border-radius: 12px; border: 1px solid #f59e0b; background: #fffbeb; box-shadow: inset 4px 0 0 #f59e0b; }
+        .rename-pending-panel.active { display: block; }
+        .rename-pending-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .rename-pending-title { font-weight: 900; color: #92400e; font-size: 14px; }
+        .rename-pending-hint { color: #78350f; font-size: 12px; margin-top: 3px; line-height: 1.35; }
+        .rename-pending-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .rename-pending-job { background: rgba(255,255,255,0.88); border: 1px dashed #f59e0b; border-radius: 10px; padding: 10px; font-size: 12px; color: #334155; }
+        .rename-pending-job strong { color: #0f172a; }
+        .rename-pending-file { word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+        .rename-pending-meta { margin-top: 4px; color: #64748b; }
+        .pending-check-btn { background: #f59e0b; color: #111827; }
+        .pending-check-btn:disabled { opacity: 0.65; cursor: wait; }
+        .file-item.is-rename-pending { background: #fffbeb; box-shadow: inset 4px 0 0 #f59e0b; }
+        .rename-badge { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 4px 8px; border-radius: 999px; background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 900; }
+
         /* V40: compact draggable PWA floating button */
         .install-fab { bottom: calc(16px + env(safe-area-inset-bottom)); right: 16px; padding: 9px 12px; border-radius: 999px; font-size: 13px; border: 1px solid rgba(255,255,255,0.7); background: rgba(37, 99, 235, 0.78); box-shadow: 0 10px 28px rgba(37, 99, 235, 0.28); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); gap: 6px; touch-action: none; user-select: none; cursor: grab; }
         .install-fab:active { cursor: grabbing; transform: scale(0.98); }
@@ -153,7 +170,7 @@
     </div>
 
     <div class="card">
-        <h2>🚀 Tải lên Dữ liệu - V39 LOGIC MASTER</h2>
+        <h2>🚀 Tải lên Dữ liệu - V40.3 RENAME IA-LAG SAFE</h2>
         
         <label class="tts-toggle">
             <input type="checkbox" id="ttsToggle" checked>
@@ -162,11 +179,12 @@
 
         <label>Thư mục đích: <span id="scanStatus" style="font-weight:normal; color:#2563eb; font-size:12px;">Đang quét...</span></label>
         <div class="identifier-group">
-            <select id="idSelect" onchange="toggleCustomInput(); window.isCacheLoaded = false;">
+            <select id="idSelect" onchange="toggleCustomInput(); window.isCacheLoaded = false; renderPendingRenamePanel && renderPendingRenamePanel();">
                 <option value="">-- Đang nạp danh sách... --</option>
             </select>
             <input type="text" id="idInput" placeholder="Nhập mã Identifier mới...">
             <button class="btn btn-primary" onclick="loadServerFiles()" id="btnSync">🔄 Nạp Dữ Liệu</button>
+                <button class="btn pending-check-btn" onclick="checkPendingRenameNow()" id="btnPendingRenameCheck" type="button">🔎 Kiểm tra rename đang chờ</button>
         </div>
 
         <label style="margin-top: 10px;">Chọn file để tải lên (Hỗ trợ file siêu lớn):</label>
@@ -188,6 +206,17 @@
 
     <div class="card">
         <h2>🗂️ Server Storage</h2>
+
+        <div id="renamePendingPanel" class="rename-pending-panel">
+            <div class="rename-pending-head">
+                <div>
+                    <div class="rename-pending-title" id="renamePendingTitle">⏳ Rename đang chờ server</div>
+                    <div class="rename-pending-hint" id="renamePendingHint">Archive đã nhận lệnh copy nhưng metadata/download chưa hiện file mới. File cũ được giữ an toàn.</div>
+                </div>
+                <button class="btn btn-mini pending-check-btn" onclick="checkPendingRenameNow()" id="btnPendingRenameCheck2" type="button">🔎 Kiểm tra ngay</button>
+            </div>
+            <div id="renamePendingList" class="rename-pending-list"></div>
+        </div>
         <div id="serverToolbar" class="server-toolbar">
             <label class="select-all-wrap" title="Chọn hoặc bỏ chọn toàn bộ file đang hiển thị">
                 <input type="checkbox" id="selectAllFiles" onchange="toggleSelectAllFiles(this.checked)">
@@ -210,7 +239,7 @@
             <span id="xray-icon" style="font-size: 14px; background: #1e293b; padding: 4px 8px; border-radius: 4px;">🔽 Đóng</span>
         </h2>
         <div id="log-panel">
-            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống V39 khởi động. Đã tích hợp Định Danh Bất Biến (Hash) & Watchdog 180s.</span></div>
+            <div><span class="log-time">[System]</span><span class="log-hardware">Hệ thống V40.4 khởi động. Đã tích hợp Rename Pending Control: server copy 200 thì chuyển hàng chờ an toàn, có nút kiểm tra pending, tự hoàn tất khi metadata Archive cập nhật.</span></div>
         </div>
     </div>
 
@@ -321,7 +350,7 @@
             }
         };
         
-        document.addEventListener('DOMContentLoaded', () => { logicCore.init(); initDraggableInstallFab(); setTimeout(() => { const fab = document.getElementById('btnInstall'); if (fab && !logicCore.state.isStandalone && !logicCore.state.isInApp) fab.style.display = 'flex'; }, 50); });
+        document.addEventListener('DOMContentLoaded', () => { logicCore.init(); initDraggableInstallFab(); setTimeout(() => { try { renderPendingRenamePanel(); } catch(e){} const fab = document.getElementById('btnInstall'); if (fab && !logicCore.state.isStandalone && !logicCore.state.isInApp) fab.style.display = 'flex'; }, 50); });
 
         const ACCESS_KEY = "B1uLx9t5R3sPMrEJ";
         const SECRET_KEY = "4mXmgt0qKjZOi2g2";
@@ -396,7 +425,7 @@
             }
         }
 
-        const MAX_LOG_LINES = 100;
+        const MAX_LOG_LINES = 300;
 
         function addLog(msg, type = 'info', speak = false) {
             const time = new Date().toLocaleTimeString('vi-VN', { hour12: false });
@@ -415,7 +444,7 @@
             if (type === 'event') colorClass = 'log-event';
             if (type === 'hardware') colorClass = 'log-hardware';
 
-            div.innerHTML = `<span class="log-time">[${time}]</span><span class="${colorClass}">${msg}</span>`;
+            div.innerHTML = `<span class="log-time">[${time}]</span><span class="${colorClass}">${escapeHtml(msg)}</span>`;
             logPanel.appendChild(div);
             
             while (logPanel.children.length > MAX_LOG_LINES + 1) { 
@@ -522,6 +551,7 @@
 
                 document.getElementById('scanStatus').innerText = `Đã tìm thấy ${docs.length} mục.`;
                 toggleCustomInput();
+                try { renderPendingRenamePanel(); schedulePendingRenameAutoCheck(getActiveIdentifier(), 120000); } catch(e) {}
             } catch (error) {
                 document.getElementById('scanStatus').innerText = `Lỗi mạng chặn quét API.`;
                 document.getElementById('idSelect').innerHTML = `<option value="CUSTOM">➕ Nhập tay Identifier...</option>`;
@@ -607,10 +637,520 @@
             showToast('Đã bỏ chọn file', 'info', 1500);
         }
 
-        async function deleteFileRequest(identifier, filename) {
-            const url = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(filename)}`;
-            const res = await fetch(url, { method: 'DELETE', headers: { 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}` } });
-            return res.ok || res.status === 204;
+        
+        // ==========================================
+        // V40.4: RENAME PENDING CONTROL + PRE-FLIGHT + ULTRA LOG
+        // ==========================================
+        const ARCHIVE_WRITE_SERVERS = [
+            { name: "IA-S3-US", base: "https://s3.us.archive.org" }
+        ];
+        window.archivePreferredS3 = ARCHIVE_WRITE_SERVERS[0];
+
+        function makeTraceId(prefix = "XR") {
+            return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+        }
+
+        function sleep(ms) {
+            return new Promise(r => setTimeout(r, ms));
+        }
+
+        function authHeaders(extra = {}) {
+            return Object.assign({ 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}` }, extra);
+        }
+
+        function archiveObjectUrl(server, identifier, filename) {
+            return `${server.base}/${encodeURIComponent(identifier)}/${encodeURIComponent(filename)}`;
+        }
+
+        function archiveDownloadUrl(identifier, filename) {
+            return `https://archive.org/download/${encodeURIComponent(identifier)}/${encodeURIComponent(filename)}`;
+        }
+
+        function archiveCopySource(identifier, filename) {
+            // S3 copy-source phải là /bucket/object đã URL-encode object.
+            return `/${encodeURIComponent(identifier)}/${encodeURIComponent(filename)}`;
+        }
+
+        function extractXmlTag(xml, tag) {
+            const m = String(xml || '').match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+            return m ? m[1].replace(/<!\\[CDATA\\[|\\]\\]>/g, '').trim() : '';
+        }
+
+        function parseServerPayload(text) {
+            const raw = String(text || '').trim();
+            const code = extractXmlTag(raw, 'Code');
+            const message = extractXmlTag(raw, 'Message');
+            const requestId = extractXmlTag(raw, 'RequestId') || extractXmlTag(raw, 'RequestID');
+            const resource = extractXmlTag(raw, 'Resource');
+            const copyOk = /<CopyObjectResult[\s>]/i.test(raw) || /<ETag>/i.test(raw);
+            const hasError = /<Error[\s>]/i.test(raw) || !!code;
+            return {
+                raw,
+                code,
+                message,
+                requestId,
+                resource,
+                copyOk,
+                hasError,
+                summary: [code, message, requestId ? `request=${requestId}` : '', resource ? `resource=${resource}` : ''].filter(Boolean).join(' | ')
+            };
+        }
+
+        function explainHttpStatus(status, payloadSummary = '') {
+            if (status === 0) return 'Không nhận được HTTP status: thường là CORS, mất mạng, hoặc trình duyệt chặn request.';
+            if (status === 400) return `400 Bad Request: tên file/header copy-source có thể sai hoặc server không chấp nhận lệnh copy. ${payloadSummary}`;
+            if (status === 401 || status === 403) return `${status}: khóa Archive/S3 không có quyền đọc nguồn hoặc ghi/xóa đích. ${payloadSummary}`;
+            if (status === 404) return `404: không tìm thấy identifier hoặc file nguồn trên server. ${payloadSummary}`;
+            if (status === 409) return `409 Conflict: file đích đã tồn tại hoặc server đang khóa item. ${payloadSummary}`;
+            if (status >= 500) return `${status}: server Archive đang lỗi/tải cao, nên thử lại sau. ${payloadSummary}`;
+            return `${status}: ${payloadSummary || 'server trả về lỗi không xác định.'}`;
+        }
+
+        async function readResponseTextSafe(res) {
+            try { return await res.text(); } catch (e) { return ''; }
+        }
+
+        async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            const started = performance.now();
+            try {
+                const res = await fetch(url, Object.assign({}, options, { signal: controller.signal, cache: 'no-store' }));
+                res.elapsedMs = Math.round(performance.now() - started);
+                return res;
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+
+        async function fetchArchiveMetadata(identifier, traceId = 'META') {
+            const url = `https://archive.org/metadata/${encodeURIComponent(identifier)}?t=${Date.now()}`;
+            const res = await fetchWithTimeout(url, { method: 'GET' }, 25000);
+            const body = await readResponseTextSafe(res);
+            if (!res.ok) {
+                const payload = parseServerPayload(body);
+                throw new Error(`[${traceId}] Metadata HTTP ${res.status} ${explainHttpStatus(res.status, payload.summary)}`);
+            }
+            try {
+                const data = JSON.parse(body);
+                if (!data || !Array.isArray(data.files)) throw new Error('metadata thiếu files[]');
+                return data;
+            } catch (e) {
+                throw new Error(`[${traceId}] Metadata JSON lỗi: ${e.message}`);
+            }
+        }
+
+        function findMetadataFile(files, filename) {
+            return (files || []).find(f => f && f.name === filename) || null;
+        }
+
+        function getFileExt(name) {
+            const m = String(name || '').trim().match(/(\.[a-zA-Z0-9]{1,8})$/);
+            return m ? m[1].toLowerCase() : '';
+        }
+
+        function sanitizeRenameName(rawName, oldName) {
+            const original = String(rawName || '').trim();
+            const oldExt = getFileExt(oldName) || '.mp3';
+            if (!original) throw new Error('Tên mới đang rỗng.');
+
+            let cleaned = original.replace(/[\\\/:*?"<>|#%{}^~\[\]`]+/g, '_').replace(/\s+/g, ' ').trim();
+            let newExt = getFileExt(cleaned);
+            let base = cleaned;
+
+            const allowedExt = /\.(mp3|mp4|m4a|wav|aac|flac|ogg|webm)$/i;
+            if (newExt && allowedExt.test(newExt)) {
+                base = cleaned.slice(0, -newExt.length);
+            } else {
+                newExt = oldExt;
+                base = cleaned;
+            }
+
+            base = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            base = base.replace(/đ/g, "d").replace(/Đ/g, "D");
+            base = base.replace(/[^a-zA-Z0-9.\-_ ]/g, "_");
+            base = base.replace(/\s+/g, "_").replace(/_+/g, "_").replace(/^\.+|\.+$/g, '').replace(/^_+|_+$/g, '');
+
+            if (base.length < 2 || !/[a-zA-Z0-9]/.test(base)) {
+                base = `Renamed_${generateFixedHash(original || oldName)}`;
+            }
+
+            if (base.length > 150) {
+                base = base.slice(0, 120).replace(/[_\-.]+$/g, '') + `_${generateFixedHash(original || oldName)}`;
+            }
+
+            const finalName = `${base}${newExt.toLowerCase()}`;
+            if (finalName.length > 190) throw new Error(`Tên sau chuẩn hóa vẫn quá dài (${finalName.length} ký tự).`);
+            return finalName;
+        }
+
+        function findFileItem(filename) {
+            return Array.from(document.querySelectorAll('.file-item')).find(item => item.getAttribute('data-filename') === filename) || null;
+        }
+
+        async function pickHealthyWriteServer(identifier, oldName, traceId) {
+            addLog(`[${traceId}] PREFLIGHT_SERVER start identifier=${identifier}`, 'api');
+            for (const server of ARCHIVE_WRITE_SERVERS) {
+                const url = archiveObjectUrl(server, identifier, oldName);
+                try {
+                    const res = await fetchWithTimeout(url, { method: 'HEAD' }, 12000);
+                    if (res.ok || res.status === 200 || res.status === 206 || res.status === 403 || res.status === 405) {
+                        window.archivePreferredS3 = server;
+                        addLog(`[${traceId}] SERVER_OK ${server.name} HEAD=${res.status} time=${res.elapsedMs}ms`, 'success');
+                        return server;
+                    }
+                    addLog(`[${traceId}] SERVER_WARN ${server.name} HEAD=${res.status} ${explainHttpStatus(res.status)}`, 'warn');
+                } catch (e) {
+                    addLog(`[${traceId}] SERVER_HEAD_BLOCKED ${server.name}: ${e.name || 'Error'} ${e.message || e}`, 'warn');
+                }
+            }
+
+            addLog(`[${traceId}] SERVER_FALLBACK dùng ${ARCHIVE_WRITE_SERVERS[0].name}; metadata đã được kiểm tra nên tiếp tục an toàn.`, 'warn');
+            window.archivePreferredS3 = ARCHIVE_WRITE_SERVERS[0];
+            return ARCHIVE_WRITE_SERVERS[0];
+        }
+
+        const RENAME_VERIFY_MAX_WAIT_MS = 90000; // V40.4: xác minh nhanh 90s; nếu Archive vẫn chậm thì đưa vào pending, không khóa UI 4 phút.
+        const RENAME_PENDING_STORAGE_KEY = 'archive_manager_v40_3_pending_renames'; // V40.4 giữ key V40.3 để không mất các lệnh đang chờ.
+
+        async function verifyViaReadableUrl(identifier, filename, traceId, attempt) {
+            const server = window.archivePreferredS3 || ARCHIVE_WRITE_SERVERS[0];
+            const urls = [
+                { name: 'DOWNLOAD', url: `${archiveDownloadUrl(identifier, filename)}?t=${Date.now()}` },
+                { name: server.name, url: `${archiveObjectUrl(server, identifier, filename)}?t=${Date.now()}` }
+            ];
+
+            for (const item of urls) {
+                try {
+                    // HEAD thường bị CORS chặn khi chạy file:// hoặc GitHub Pages, nên dùng GET và hủy body ngay sau khi nhận header.
+                    const res = await fetchWithTimeout(item.url, { method: 'GET' }, 14000);
+                    try { if (res.body && res.body.cancel) await res.body.cancel(); } catch (_) {}
+                    if (res.ok || res.status === 200 || res.status === 206) {
+                        const size = res.headers.get('content-length') || '';
+                        addLog(`[${traceId}] VERIFY_OK ${item.name} GET thấy file mới HTTP=${res.status} size=${size || 'unknown'} attempt=${attempt}`, 'success');
+                        return { name: filename, size };
+                    }
+                    addLog(`[${traceId}] VERIFY_${item.name}_MISS HTTP=${res.status} attempt=${attempt}`, 'warn');
+                } catch (e) {
+                    addLog(`[${traceId}] VERIFY_${item.name}_BLOCKED ${e.name || 'Error'} ${e.message || e} attempt=${attempt}`, 'warn');
+                }
+            }
+            return null;
+        }
+
+        async function verifyObjectOnServer(identifier, filename, traceId, maxWaitMs = RENAME_VERIFY_MAX_WAIT_MS) {
+            const started = Date.now();
+            let attempt = 0;
+            let waitPlan = [1500, 2500, 4000, 6000, 9000, 13000, 18000, 26000, 36000, 50000, 65000];
+
+            while (Date.now() - started < maxWaitMs) {
+                attempt++;
+                const elapsed = Math.round((Date.now() - started) / 1000);
+                try {
+                    const meta = await fetchArchiveMetadata(identifier, traceId);
+                    const record = findMetadataFile(meta.files, filename);
+                    if (record) {
+                        addLog(`[${traceId}] VERIFY_OK metadata thấy file mới attempt=${attempt} wait=${elapsed}s size=${record.size || 'unknown'}`, 'success');
+                        return record;
+                    }
+                    addLog(`[${traceId}] VERIFY_WAIT metadata chưa thấy file mới attempt=${attempt} wait=${elapsed}s`, 'warn');
+                } catch (e) {
+                    addLog(`[${traceId}] VERIFY_META_WARN ${e.message}`, 'warn');
+                }
+
+                // Sau vài lần metadata chưa cập nhật, thử thêm kênh download/S3. Nếu browser chặn CORS thì log rõ, không coi là lỗi rename.
+                if (attempt >= 2 || elapsed >= 8) {
+                    const readable = await verifyViaReadableUrl(identifier, filename, traceId, attempt);
+                    if (readable) return readable;
+                }
+
+                const remaining = Math.max(0, maxWaitMs - (Date.now() - started));
+                const delay = Math.min(waitPlan[Math.min(attempt - 1, waitPlan.length - 1)], remaining, 65000);
+                if (delay <= 0) break;
+                await sleep(delay);
+            }
+            addLog(`[${traceId}] VERIFY_LAG_TIMEOUT metadata/download chưa xác nhận sau ${Math.round((Date.now() - started)/1000)}s. Đây thường là độ trễ cập nhật của Archive; chuyển sang pending an toàn, không tự kết luận copy hỏng.`, 'warn', true);
+            return null;
+        }
+
+        function getPendingRenameJobs() {
+            try {
+                const raw = localStorage.getItem(RENAME_PENDING_STORAGE_KEY);
+                const arr = raw ? JSON.parse(raw) : [];
+                return Array.isArray(arr) ? arr.filter(j => j && j.identifier && j.oldName && j.newName) : [];
+            } catch (e) { return []; }
+        }
+
+        function savePendingRenameJobs(jobs) {
+            try { localStorage.setItem(RENAME_PENDING_STORAGE_KEY, JSON.stringify(jobs || [])); } catch (e) {}
+        }
+
+        function addPendingRenameJob(job) {
+            const jobs = getPendingRenameJobs().filter(j => !(j.identifier === job.identifier && j.oldName === job.oldName && j.newName === job.newName));
+            jobs.push(Object.assign({ createdAt: Date.now(), status: 'copy_accepted_waiting_metadata' }, job));
+            savePendingRenameJobs(jobs.slice(-30));
+            renderPendingRenamePanel(job.identifier);
+            schedulePendingRenameAutoCheck(job.identifier, 90000);
+            addLog(`[${job.traceId}] PENDING_SAVED server đã nhận copy/upload, chờ metadata hiện file mới rồi tự xóa file cũ khi bấm Nạp Dữ Liệu hoặc nút Kiểm tra rename đang chờ.`, 'warn', true);
+        }
+
+        function removePendingRenameJob(traceId) {
+            const jobs = getPendingRenameJobs().filter(j => j.traceId !== traceId);
+            savePendingRenameJobs(jobs);
+            renderPendingRenamePanel();
+        }
+
+
+        function getPendingJobsForIdentifier(identifier = getActiveIdentifier()) {
+            return getPendingRenameJobs().filter(j => !identifier || j.identifier === identifier);
+        }
+
+        function formatPendingAge(job) {
+            const ms = Math.max(0, Date.now() - (job.createdAt || job.copyAcceptedAt || Date.now()));
+            const min = Math.floor(ms / 60000);
+            const sec = Math.floor((ms % 60000) / 1000);
+            if (min >= 60) return `${Math.floor(min / 60)}h ${min % 60}m`;
+            if (min > 0) return `${min}m ${sec}s`;
+            return `${sec}s`;
+        }
+
+        function renderPendingRenamePanel(identifier = getActiveIdentifier()) {
+            const panel = document.getElementById('renamePendingPanel');
+            const title = document.getElementById('renamePendingTitle');
+            const hint = document.getElementById('renamePendingHint');
+            const list = document.getElementById('renamePendingList');
+            const jobs = getPendingJobsForIdentifier(identifier);
+            const btn1 = document.getElementById('btnPendingRenameCheck');
+            const btn2 = document.getElementById('btnPendingRenameCheck2');
+            if (btn1) btn1.style.display = jobs.length ? 'inline-flex' : 'none';
+            if (!panel || !title || !hint || !list) return;
+
+            panel.classList.toggle('active', jobs.length > 0);
+            if (!jobs.length) {
+                list.innerHTML = '';
+                title.innerText = '⏳ Rename đang chờ server';
+                hint.innerText = 'Không có lệnh rename đang chờ cho thư mục hiện tại.';
+                if (btn2) btn2.disabled = true;
+                return;
+            }
+
+            title.innerText = `⏳ Có ${jobs.length} lệnh rename đang chờ server`;
+            hint.innerText = 'Archive đã nhận copy nhưng metadata/download chưa hiện file mới. Tool giữ file cũ, không báo lỗi giả, và sẽ tự xóa file cũ khi file mới xuất hiện.';
+            if (btn2) btn2.disabled = false;
+            list.innerHTML = jobs.map(job => `
+                <div class="rename-pending-job">
+                    <div><strong>Cũ:</strong> <span class="rename-pending-file">${escapeHtml(job.oldName)}</span></div>
+                    <div><strong>Mới:</strong> <span class="rename-pending-file">${escapeHtml(job.newName)}</span></div>
+                    <div class="rename-pending-meta">trace=${escapeHtml(job.traceId || '')} · tuổi=${formatPendingAge(job)} · trạng thái=chờ metadata Archive</div>
+                </div>
+            `).join('');
+        }
+
+        function schedulePendingRenameAutoCheck(identifier = getActiveIdentifier(), delayMs = 90000) {
+            if (!identifier) return;
+            clearTimeout(window.__pendingRenameAutoTimer);
+            const jobs = getPendingJobsForIdentifier(identifier);
+            if (!jobs.length) return;
+            addLog(`[PENDING-AUTO] Đặt lịch tự kiểm tra lại ${jobs.length} rename sau ${Math.round(delayMs/1000)}s.`, 'info');
+            window.__pendingRenameAutoTimer = setTimeout(async () => {
+                try {
+                    await checkPendingRenameNow({ silent: true, reloadAfter: true, source: 'AUTO' });
+                    const still = getPendingJobsForIdentifier(identifier);
+                    if (still.length) schedulePendingRenameAutoCheck(identifier, Math.min(Math.round(delayMs * 1.6), 300000));
+                } catch (_) {}
+            }, delayMs);
+        }
+
+        async function checkPendingRenameNow(options = {}) {
+            const identifier = getActiveIdentifier();
+            if (!identifier) { showToast('Chưa chọn thư mục đích để kiểm tra pending rename', 'error'); return { changed: false }; }
+            const jobs = getPendingJobsForIdentifier(identifier);
+            renderPendingRenamePanel(identifier);
+            if (!jobs.length) {
+                if (!options.silent) showToast('Không có lệnh rename đang chờ cho thư mục này', 'info', 2500);
+                return { changed: false };
+            }
+            if (window.__pendingRenameChecking) {
+                if (!options.silent) showToast('Đang kiểm tra pending rename, chờ chút...', 'warning', 2500);
+                return { changed: false };
+            }
+
+            await waitForNetwork();
+            window.__pendingRenameChecking = true;
+            const btn1 = document.getElementById('btnPendingRenameCheck');
+            const btn2 = document.getElementById('btnPendingRenameCheck2');
+            if (btn1) btn1.disabled = true;
+            if (btn2) btn2.disabled = true;
+            const traceId = makeTraceId(options.source === 'AUTO' ? 'PEND-AUTO' : 'PEND-CHECK');
+            if (!options.silent) showToast(`Đang kiểm tra ${jobs.length} rename đang chờ...`, 'info', 2500);
+            addLog(`[${traceId}] PENDING_CHECK_START jobs=${jobs.length} identifier=${identifier}`, 'api', !options.silent);
+
+            try {
+                const data = await fetchArchiveMetadata(identifier, traceId);
+                const result = await reconcilePendingRenameJobs(identifier, data.files || []);
+                renderPendingRenamePanel(identifier);
+                const remain = getPendingJobsForIdentifier(identifier).length;
+                addLog(`[${traceId}] PENDING_CHECK_DONE changed=${!!result.changed} remain=${remain}`, remain ? 'warn' : 'success', !options.silent && remain === 0);
+                if (result.changed) {
+                    showToast(`Đã hoàn tất ${jobs.length - remain} rename đang chờ. Đang nạp lại dữ liệu...`, 'success', 5500);
+                    if (options.reloadAfter !== false) setTimeout(loadServerFiles, 1000);
+                } else if (!options.silent) {
+                    showToast(`Archive vẫn chưa cập nhật file mới. File cũ vẫn được giữ an toàn.`, 'warning', 6500);
+                }
+                if (remain) schedulePendingRenameAutoCheck(identifier, 120000);
+                return result;
+            } catch (e) {
+                const msg = e && e.message ? e.message : String(e);
+                addLog(`[${traceId}] PENDING_CHECK_FAIL ${msg}`, 'error', !options.silent);
+                if (!options.silent) showToast(`Kiểm tra pending lỗi: ${msg}`, 'error', 8000);
+                return { changed: false, error: msg };
+            } finally {
+                window.__pendingRenameChecking = false;
+                if (btn1) btn1.disabled = false;
+                if (btn2) btn2.disabled = false;
+                renderPendingRenamePanel(identifier);
+            }
+        }
+
+        async function reconcilePendingRenameJobs(identifier, files) {
+            const jobs = getPendingRenameJobs().filter(j => j.identifier === identifier);
+            if (!jobs.length) return { changed: false, removedOldNames: [] };
+
+            const removedOldNames = [];
+            let changed = false;
+            addLog(`[PENDING] Kiểm tra ${jobs.length} lệnh đổi tên đang chờ metadata...`, 'api');
+
+            for (const job of jobs) {
+                const traceId = job.traceId || makeTraceId('REN-PENDING');
+                const target = findMetadataFile(files, job.newName);
+                const old = findMetadataFile(files, job.oldName);
+
+                if (target && old) {
+                    addLog(`[${traceId}] PENDING_TARGET_OK metadata đã thấy file mới. Bắt đầu xóa file cũ an toàn.`, 'success', true);
+                    try {
+                        const deleted = await deleteFileRequest(identifier, job.oldName, traceId);
+                        if (deleted) {
+                            removePendingRenameJob(job.traceId);
+                            removedOldNames.push(job.oldName);
+                            changed = true;
+                            addLog(`[${traceId}] PENDING_RENAME_DONE "${job.oldName}" -> "${job.newName}"`, 'success', true);
+                            showToast(`Đổi tên đã hoàn tất sau khi server cập nhật: ${job.newName}`, 'success', 6500);
+                        } else {
+                            addLog(`[${traceId}] PENDING_DELETE_FAIL file mới đã có nhưng xóa file cũ chưa xong.`, 'error', true);
+                        }
+                    } catch (e) {
+                        addLog(`[${traceId}] PENDING_DELETE_EXCEPTION ${e.message || e}`, 'error', true);
+                    }
+                } else if (target && !old) {
+                    removePendingRenameJob(job.traceId);
+                    changed = true;
+                    addLog(`[${traceId}] PENDING_ALREADY_DONE file mới đã có và file cũ không còn.`, 'success');
+                } else if (!target && old) {
+                    const ageSec = Math.round((Date.now() - (job.createdAt || Date.now())) / 1000);
+                    addLog(`[${traceId}] PENDING_STILL_WAIT target chưa hiện trên metadata age=${ageSec}s old_still_exists=true`, 'warn');
+                } else {
+                    addLog(`[${traceId}] PENDING_AMBIGUOUS cả file cũ và mới đều chưa thấy trong metadata hiện tại; giữ pending để kiểm tra lại lần sau.`, 'warn');
+                }
+            }
+
+            return { changed, removedOldNames };
+        }
+
+        async function copyServerSide(identifier, oldName, newName, traceId) {
+            const server = window.archivePreferredS3 || ARCHIVE_WRITE_SERVERS[0];
+            const targetUrl = archiveObjectUrl(server, identifier, newName);
+            const headers = authHeaders({
+                'x-amz-copy-source': archiveCopySource(identifier, oldName)
+            });
+
+            addLog(`[${traceId}] COPY_SERVER_START ${server.name}: ${oldName} -> ${newName}`, 'api', true);
+            const res = await fetchWithTimeout(targetUrl, { method: 'PUT', headers }, 60000);
+            const body = await readResponseTextSafe(res);
+            const payload = parseServerPayload(body);
+            addLog(`[${traceId}] COPY_SERVER_HTTP status=${res.status} time=${res.elapsedMs}ms ${payload.summary || ''}`, res.ok && !payload.hasError ? 'success' : 'error');
+
+            if (!res.ok || payload.hasError) {
+                throw new Error(explainHttpStatus(res.status, payload.summary || body.slice(0, 220)));
+            }
+
+            return true;
+        }
+
+        function uploadBlobViaXHR(identifier, newName, blob, traceId) {
+            return new Promise((resolve, reject) => {
+                const server = window.archivePreferredS3 || ARCHIVE_WRITE_SERVERS[0];
+                const url = archiveObjectUrl(server, identifier, newName);
+                const xhr = new XMLHttpRequest();
+                let lastPct = -1;
+                let idleWatchdog;
+
+                const clearAll = () => {
+                    clearTimeout(idleWatchdog);
+                    window.activeXHRs.delete(xhr);
+                };
+                const resetWatchdog = () => {
+                    clearTimeout(idleWatchdog);
+                    idleWatchdog = setTimeout(() => {
+                        addLog(`[${traceId}] FALLBACK_UPLOAD_IDLE 180s không có tiến độ, hủy luồng.`, 'error');
+                        xhr.abort();
+                    }, 180000);
+                };
+
+                window.activeXHRs.add(xhr);
+                resetWatchdog();
+
+                xhr.upload.addEventListener('progress', (e) => {
+                    resetWatchdog();
+                    if (e.lengthComputable) {
+                        const pct = Math.floor((e.loaded / e.total) * 100);
+                        if (pct >= lastPct + 10 || pct === 100) {
+                            lastPct = pct;
+                            addLog(`[${traceId}] FALLBACK_UPLOAD_PROGRESS ${pct}%`, 'info');
+                        }
+                    }
+                });
+
+                xhr.open('PUT', url, true);
+                xhr.setRequestHeader('Authorization', `LOW ${ACCESS_KEY}:${SECRET_KEY}`);
+                xhr.setRequestHeader('x-amz-auto-make-bucket', '1');
+                xhr.onload = () => {
+                    clearAll();
+                    const payload = parseServerPayload(xhr.responseText || '');
+                    addLog(`[${traceId}] FALLBACK_UPLOAD_HTTP status=${xhr.status} ${payload.summary || ''}`, (xhr.status >= 200 && xhr.status < 300 && !payload.hasError) ? 'success' : 'error');
+                    if (xhr.status >= 200 && xhr.status < 300 && !payload.hasError) resolve(true);
+                    else reject(new Error(explainHttpStatus(xhr.status, payload.summary || (xhr.responseText || '').slice(0, 220))));
+                };
+                xhr.onerror = () => { clearAll(); reject(new Error('XHR network error khi upload file copy dự phòng.')); };
+                xhr.onabort = () => { clearAll(); reject(new Error('Đã hủy upload file copy dự phòng.')); };
+
+                try { xhr.send(blob); } catch (e) { clearAll(); reject(e); }
+            });
+        }
+
+        async function copyByBrowserFallback(identifier, oldName, newName, traceId) {
+            const url = archiveDownloadUrl(identifier, oldName);
+            addLog(`[${traceId}] FALLBACK_CLIENT_COPY_START tải file cũ từ download rồi PUT tên mới.`, 'warn', true);
+            const res = await fetchWithTimeout(url, { method: 'GET' }, 120000);
+            if (!res.ok) {
+                const body = await readResponseTextSafe(res);
+                const payload = parseServerPayload(body);
+                throw new Error(`Fallback download lỗi: ${explainHttpStatus(res.status, payload.summary || body.slice(0, 220))}`);
+            }
+            const blob = await res.blob();
+            addLog(`[${traceId}] FALLBACK_DOWNLOAD_OK size=${(blob.size / 1024 / 1024).toFixed(2)}MB`, 'success');
+            await uploadBlobViaXHR(identifier, newName, blob, traceId);
+            return true;
+        }
+
+        async function deleteFileRequest(identifier, filename, traceId = makeTraceId('DEL')) {
+            const server = window.archivePreferredS3 || ARCHIVE_WRITE_SERVERS[0];
+            const url = archiveObjectUrl(server, identifier, filename);
+            const res = await fetchWithTimeout(url, { method: 'DELETE', headers: authHeaders() }, 45000);
+            const body = await readResponseTextSafe(res);
+            const payload = parseServerPayload(body);
+            const ok = res.ok || res.status === 204 || res.status === 404;
+            addLog(`[${traceId}] DELETE_HTTP file=${filename} status=${res.status} time=${res.elapsedMs}ms ${payload.summary || ''}`, ok ? 'success' : 'error');
+            return ok;
         }
 
         async function deleteSelectedFiles() {
@@ -625,7 +1165,8 @@
 
             await waitForNetwork();
             fireHaptic('warn');
-            addLog(`Bắt đầu xóa hàng loạt ${files.length} file...`, 'warn', true);
+            const traceId = makeTraceId('BULKDEL');
+            addLog(`[${traceId}] Bắt đầu xóa hàng loạt ${files.length} file...`, 'warn', true);
             showToast(`Đang xóa ${files.length} file...`, 'warning', 2500);
 
             const bulkBtn = document.getElementById('bulkDeleteBtn');
@@ -633,26 +1174,26 @@
             let ok = 0, fail = 0;
 
             for (const filename of files) {
-                const item = document.getElementById(`item-${filename}`);
+                const item = findFileItem(filename);
                 if (item) item.classList.add('is-deleting');
                 try {
-                    const success = await deleteFileRequest(identifier, filename);
+                    const success = await deleteFileRequest(identifier, filename, traceId);
                     if (success) {
                         ok++;
                         window.serverCache.delete(filename);
                         window.selectedFiles.delete(filename);
                         window.visibleServerFiles = window.visibleServerFiles.filter(n => n !== filename);
                         if (item) item.remove();
-                        addLog(`Đã xóa: ${filename}`, 'success');
+                        addLog(`[${traceId}] Đã xóa: ${filename}`, 'success');
                     } else {
                         fail++;
                         if (item) item.classList.remove('is-deleting');
-                        addLog(`Xóa thất bại: ${filename}`, 'error');
+                        addLog(`[${traceId}] Xóa thất bại: ${filename}`, 'error');
                     }
                 } catch (e) {
                     fail++;
                     if (item) item.classList.remove('is-deleting');
-                    addLog(`Lỗi mạng khi xóa: ${filename}`, 'error');
+                    addLog(`[${traceId}] Lỗi khi xóa ${filename}: ${e.message || e}`, 'error');
                 }
                 updateBulkToolbar();
             }
@@ -664,14 +1205,15 @@
             if (fail === 0) {
                 fireHaptic('success');
                 showToast(`Đã xóa ${ok}/${files.length} file`, 'success', 4000);
-                addLog(`Xóa hàng loạt hoàn tất: ${ok}/${files.length} file.`, 'success', true);
+                addLog(`[${traceId}] Xóa hàng loạt hoàn tất: ${ok}/${files.length} file.`, 'success', true);
             } else {
                 fireHaptic('error');
                 showToast(`Xóa xong ${ok}, lỗi ${fail} file`, 'error', 5000);
-                addLog(`Xóa hàng loạt có lỗi: thành công ${ok}, lỗi ${fail}.`, 'error', true);
+                addLog(`[${traceId}] Xóa hàng loạt có lỗi: thành công ${ok}, lỗi ${fail}.`, 'error', true);
             }
             updateBulkToolbar();
         }
+
 
         function initDraggableInstallFab() {
             const fab = document.getElementById('btnInstall');
@@ -771,9 +1313,14 @@
             listEl.innerHTML = `<div class="empty-state">⏳ Đang lấy dữ liệu...</div>`;
 
             try {
-                const url = `https://archive.org/metadata/${identifier}?t=${Date.now()}`;
-                const res = await fetch(url);
-                const data = await res.json();
+                const data = await fetchArchiveMetadata(identifier, makeTraceId('LOAD'));
+                const pendingResult = await reconcilePendingRenameJobs(identifier, data.files || []);
+                renderPendingRenamePanel(identifier);
+                schedulePendingRenameAutoCheck(identifier, 120000);
+                if (pendingResult.removedOldNames && pendingResult.removedOldNames.length) {
+                    data.files = (data.files || []).filter(f => !pendingResult.removedOldNames.includes(f.name));
+                    setTimeout(loadServerFiles, 1500);
+                }
 
                 window.serverCache.clear();
                 window.isCacheLoaded = true; 
@@ -792,15 +1339,24 @@
 
                 audioFiles.sort((a, b) => a.name.localeCompare(b.name));
 
+                const pendingJobsForCurrent = getPendingJobsForIdentifier(identifier);
+                const pendingOldNames = new Set(pendingJobsForCurrent.map(j => j.oldName));
+                const pendingByOldName = new Map(pendingJobsForCurrent.map(j => [j.oldName, j]));
+
                 let html = '';
                 audioFiles.forEach((file, index) => {
                     window.serverCache.add(file.name);
                     const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-                    const fileUrl = `https://archive.org/download/${identifier}/${encodeURIComponent(file.name)}`;
+                    const fileUrl = `https://archive.org/download/${encodeURIComponent(identifier)}/${encodeURIComponent(file.name)}`;
                     const cleanTitle = file.title || file.name.replace(/\.[^/.]+$/, "");
-                    
+                    const safeItemId = `file-row-${index + 1}-${generateFixedHash(file.name)}`;
+                    const pendingJob = pendingByOldName.get(file.name);
+                    const pendingClass = pendingOldNames.has(file.name) ? ' is-rename-pending' : '';
+                    const pendingBadge = pendingJob ? `<div class="rename-badge">⏳ Đang chờ Archive hiện file mới: ${escapeHtml(pendingJob.newName)}</div>` : '';
+                    const renameDisabled = pendingJob ? 'disabled title="File này đang chờ rename hoàn tất, không đổi/xóa tiếp để tránh mất dữ liệu"' : '';
+
                     html += `
-                        <div class="file-item" id="item-${file.name}" data-filename="${escapeHtml(file.name)}">
+                        <div class="file-item${pendingClass}" id="${safeItemId}" data-filename="${escapeHtml(file.name)}">
                             <div class="file-header">
                                 <div class="file-info">
                                     <label class="file-select-wrap" title="Chọn file này">
@@ -810,14 +1366,15 @@
                                     <div class="file-info-main">
                                         <div class="file-name">${escapeHtml(cleanTitle)}</div>
                                         <div class="file-meta">${sizeMB} MB</div>
+                                        ${pendingBadge}
                                     </div>
                                 </div>
                                 <div class="file-actions">
-                                    <button class="btn btn-warning" onclick='renameFile(${JSON.stringify(file.name)})'>✏️ Đổi tên</button>
-                                    <button class="btn btn-danger" onclick='deleteFile(${JSON.stringify(file.name)})'>🗑️ Xóa</button>
+                                    <button class="btn btn-warning" ${renameDisabled} onclick='renameFile(${JSON.stringify(file.name)})'>✏️ Đổi tên</button>
+                                    <button class="btn btn-danger" ${renameDisabled} onclick='deleteFile(${JSON.stringify(file.name)})'>🗑️ Xóa</button>
                                 </div>
                             </div>
-                            <audio class="audio-player" controls preload="none" src="${fileUrl}"></audio>
+                            <audio class="audio-player" controls preload="none" src="${escapeHtml(fileUrl)}"></audio>
                         </div>
                     `;
                 });
@@ -832,56 +1389,148 @@
             }
         }
 
+        
         async function deleteFile(filename) {
             const identifier = getActiveIdentifier();
+            if (!identifier) { showToast('Chưa chọn thư mục đích', 'error'); return; }
             if (!confirm(`⚠️ XÓA VĨNH VIỄN: ${filename} ?`)) return;
 
             await waitForNetwork();
 
-            addLog(`Đang xóa file`, "warn", true);
+            const traceId = makeTraceId('DEL');
+            addLog(`[${traceId}] Đang xóa file ${filename}`, 'warn', true);
             try {
-                const ok = await deleteFileRequest(identifier, filename);
+                const ok = await deleteFileRequest(identifier, filename, traceId);
                 if (ok) {
-                    showToast("Đã xóa vĩnh viễn", "success");
-                    const item = document.getElementById(`item-${filename}`);
+                    showToast('Đã xóa vĩnh viễn', 'success');
+                    const item = findFileItem(filename);
                     if (item) item.remove();
                     window.serverCache.delete(filename);
                     window.selectedFiles.delete(filename);
                     window.visibleServerFiles = window.visibleServerFiles.filter(n => n !== filename);
                     updateBulkToolbar();
                 } else {
-                    showToast("Xóa thất bại", "error");
+                    showToast('Xóa thất bại - xem Ultra Log', 'error');
                 }
-            } catch (e) { showToast("Lỗi mạng", "error"); }
+            } catch (e) {
+                addLog(`[${traceId}] DELETE_EXCEPTION ${e.message || e}`, 'error', true);
+                showToast('Lỗi xóa - xem Ultra Log', 'error');
+            }
         }
 
         async function renameFile(oldName) {
             const identifier = getActiveIdentifier();
-            const newName = prompt(`Nhập tên file mới (Bao gồm đuôi):`, oldName);
-            if (!newName || newName === oldName) return;
+            if (!identifier) { showToast('Chưa chọn thư mục đích', 'error'); return; }
+
+            const suggested = oldName;
+            const newNameRaw = prompt(`Nhập tên file mới. Có thể bỏ đuôi, hệ thống sẽ giữ đuôi cũ:`, suggested);
+            if (!newNameRaw || newNameRaw.trim() === oldName) return;
+
+            const traceId = makeTraceId('REN');
+            let safeNewName = '';
+            try {
+                safeNewName = sanitizeRenameName(newNameRaw, oldName);
+            } catch (e) {
+                addLog(`[${traceId}] RENAME_NAME_INVALID ${e.message || e}`, 'error', true);
+                showToast(`Tên mới không hợp lệ: ${e.message || e}`, 'error', 6000);
+                return;
+            }
+
+            if (safeNewName === oldName) {
+                showToast(`Tên sau chuẩn hóa không thay đổi: ${safeNewName}`, 'warning', 5000);
+                addLog(`[${traceId}] RENAME_NO_CHANGE old=${oldName} safe=${safeNewName}`, 'warn');
+                return;
+            }
+
+            if (window.serverCache.has(safeNewName)) {
+                showToast(`File đích đã có trong cache: ${safeNewName}`, 'error', 6000);
+                addLog(`[${traceId}] RENAME_TARGET_CACHE_CONFLICT ${safeNewName}`, 'error', true);
+                return;
+            }
+
+            const pendingConflict = getPendingRenameJobs().find(j => j.identifier === identifier && (j.oldName === oldName || j.newName === safeNewName));
+            if (pendingConflict) {
+                showToast('File này đang có lệnh rename chờ server. Bấm Kiểm tra rename đang chờ, không gửi lệnh đổi tên lặp lại.', 'warning', 9000);
+                addLog(`[${traceId}] RENAME_BLOCKED_PENDING_CONFLICT old="${pendingConflict.oldName}" new="${pendingConflict.newName}"`, 'warn', true);
+                renderPendingRenamePanel(identifier);
+                return;
+            }
 
             await waitForNetwork();
+            fireHaptic('tap');
+            addLog(`[${traceId}] RENAME_START old="${oldName}" input="${newNameRaw}" safe="${safeNewName}"`, 'api', true);
 
-            // Vẫn dùng Hash để đảm bảo tên an toàn
-            const safeNewName = toAscii(newName, newName.substring(newName.lastIndexOf('.')), newName);
-            addLog(`Đang đổi tên file`, "api", true);
-
-            const sourcePath = `/${identifier}/${encodeURIComponent(oldName)}`;
-            const targetUrl = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(safeNewName)}`;
-            const oldUrl = `https://s3.us.archive.org/${identifier}/${encodeURIComponent(oldName)}`;
+            const row = findFileItem(oldName);
+            if (row) row.classList.add('is-deleting');
 
             try {
-                addLog("Đang sao chép...", "info");
-                const copyRes = await fetch(targetUrl, { method: 'PUT', headers: { 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}`, 'x-amz-copy-source': sourcePath } });
-                if (!copyRes.ok) throw new Error();
-                await fetch(oldUrl, { method: 'DELETE', headers: { 'Authorization': `LOW ${ACCESS_KEY}:${SECRET_KEY}` } });
+                // 1) Metadata preflight: không đụng server ghi nếu nguồn chưa rõ hoặc đích đã tồn tại.
+                const meta = await fetchArchiveMetadata(identifier, traceId);
+                const oldRecord = findMetadataFile(meta.files, oldName);
+                const targetRecord = findMetadataFile(meta.files, safeNewName);
 
-                showToast("Đổi tên hoàn tất.", "success");
-                setTimeout(loadServerFiles, 1000); 
-            } catch (e) { showToast(`Lỗi đổi tên.`, "error"); }
+                if (!oldRecord) {
+                    throw new Error(`Preflight fail: server metadata không thấy file nguồn "${oldName}". Dừng để tránh xóa nhầm.`);
+                }
+                if (targetRecord) {
+                    throw new Error(`Preflight fail: file đích "${safeNewName}" đã tồn tại trên server. Đổi tên khác để tránh ghi đè.`);
+                }
+
+                addLog(`[${traceId}] PREFLIGHT_OK source_size=${oldRecord.size || 'unknown'} target_clear=true`, 'success');
+                await pickHealthyWriteServer(identifier, oldName, traceId);
+
+                let copied = false;
+                try {
+                    await copyServerSide(identifier, oldName, safeNewName, traceId);
+                    copied = true;
+                } catch (serverCopyError) {
+                    addLog(`[${traceId}] COPY_SERVER_FAIL ${serverCopyError.message || serverCopyError}`, 'error', true);
+                    addLog(`[${traceId}] Chuyển sang fallback an toàn: browser download -> upload tên mới.`, 'warn', true);
+                    await copyByBrowserFallback(identifier, oldName, safeNewName, traceId);
+                    copied = true;
+                }
+
+                if (!copied) throw new Error('Copy không hoàn tất.');
+
+                const verified = await verifyObjectOnServer(identifier, safeNewName, traceId, RENAME_VERIFY_MAX_WAIT_MS);
+                if (!verified) {
+                    addPendingRenameJob({
+                        traceId,
+                        identifier,
+                        oldName,
+                        newName: safeNewName,
+                        sourceSize: oldRecord.size || '',
+                        copyAcceptedAt: Date.now()
+                    });
+                    if (row) row.classList.remove('is-deleting');
+                    showToast(`Server đã nhận lệnh copy nhưng Archive đang cập nhật chậm. Đã đưa vào hàng chờ; bấm “Kiểm tra rename đang chờ” hoặc “Nạp Dữ Liệu” để tool tự hoàn tất khi file mới hiện.`, 'warning', 10000);
+                    addLog(`[${traceId}] RENAME_PENDING_COPY_ACCEPTED không báo lỗi giả; file cũ được giữ cho đến khi metadata xác nhận file mới.`, 'warn', true);
+                    return;
+                }
+
+                const deleted = await deleteFileRequest(identifier, oldName, traceId);
+                if (!deleted) {
+                    throw new Error(`File mới đã tồn tại nhưng xóa file cũ thất bại. Giữ cả 2 file; có thể xóa file cũ thủ công sau.`);
+                }
+
+                window.serverCache.delete(oldName);
+                window.serverCache.add(safeNewName);
+                window.selectedFiles.delete(oldName);
+                window.visibleServerFiles = window.visibleServerFiles.map(n => n === oldName ? safeNewName : n);
+
+                showToast(`Đổi tên thành công: ${safeNewName}`, 'success', 6500);
+                addLog(`[${traceId}] RENAME_DONE "${oldName}" -> "${safeNewName}"`, 'success', true);
+                setTimeout(loadServerFiles, 1200);
+            } catch (e) {
+                if (row) row.classList.remove('is-deleting');
+                const msg = e && e.message ? e.message : String(e);
+                showToast(`Lỗi đổi tên: ${msg}`, 'error', 9000);
+                addLog(`[${traceId}] RENAME_FAIL ${msg}`, 'error', true);
+            }
         }
 
-        const elProgressUI = document.getElementById('progressUI');
+
+const elProgressUI = document.getElementById('progressUI');
         const elProgressName = document.getElementById('progressName');
         const elProgressPercent = document.getElementById('progressPercent');
         const elProgressBar = document.getElementById('progressBar');
