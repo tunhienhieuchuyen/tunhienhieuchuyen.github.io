@@ -153,6 +153,247 @@ html.lifeos-r55-mobile-cool-lite body.lifeos-r48-family-boot-lock{
 </script>
 <!-- LIFEOS PHA14 J20 R55 MOBILE COOL LITE NO FAN - END -->
 
+<!-- LifeOS Pha14J20R73 Early Sync Fuse + No Firebase Write Spam - R72 Base -->
+<script id="lifeos-j20r73-early-sync-fuse-no-write-spam">
+(function(){
+  'use strict';
+  if(window.LifeOSJ20R73 && window.LifeOSJ20R73.installed) return;
+  var PHASE='Pha14J20R73_EarlySyncFuseNoFirebaseWriteSpam_R72Base';
+  var nativeSetTimeout = window.setTimeout.bind(window);
+  var nativeSetInterval = window.setInterval.bind(window);
+  var nativeFetch = window.fetch ? window.fetch.bind(window) : null;
+  var state={
+    installedAt:Date.now(),
+    bgAllowed:0,
+    bgSkipped:0,
+    fsAllowed:0,
+    fsSkippedDuplicate:0,
+    fsSkippedTooSoon:0,
+    facadeAllowed:0,
+    facadeSkipped:0,
+    passFetch:0,
+    lastMaterialHash:'',
+    lastBgRunAt:0,
+    lastFsHash:'',
+    lastFsAt:0,
+    minBgMs:90000,
+    minFsDuplicateMs:180000,
+    lastReason:'',
+    recent:[]
+  };
+  function now(){return Date.now();}
+  function S(v){try{return String(v==null?'':v);}catch(e){return '';}}
+  function profile(){
+    try{
+      return S(window.viewingUser || window.currentUser || (document.querySelector('[data-profile].active')&&document.querySelector('[data-profile].active').getAttribute('data-profile')) || localStorage.getItem('lifeos_active_profile') || 'live').replace(/^"|"$/g,'') || 'live';
+    }catch(e){return 'live';}
+  }
+  function readJSON(k,fb){try{var v=localStorage.getItem(k); if(!v)return fb; return JSON.parse(v);}catch(e){return fb;}}
+  function taskKey(p){return 'lifeos_v8_data_'+p;}
+  function vaultKey(p){return 'lifeos_v8_vault_'+p;}
+  function tombKeyA(p){return 'lifeos_r65_task_tombstones_'+p;}
+  function tombKeyB(p){return 'lifeos_r65_deleted_tasks_'+p;}
+  function cleanValue(k,v){
+    if(k==='updatedAt'||k==='lastSyncAt'||k==='lastPullAt'||k==='lastPushAt'||k==='phase'||k==='reason'||k==='iso'||k==='trace'||k==='logs'||k==='diagnostics'||k==='__debug') return undefined;
+    return v;
+  }
+  function stable(v){
+    if(v==null) return 'null';
+    if(typeof v!=='object') return JSON.stringify(v);
+    if(Array.isArray(v)) return '['+v.map(stable).join(',')+']';
+    var keys=Object.keys(v).sort();
+    var parts=[];
+    for(var i=0;i<keys.length;i++){
+      var k=keys[i], val=cleanValue(k,v[k]);
+      if(val!==undefined) parts.push(JSON.stringify(k)+':'+stable(val));
+    }
+    return '{'+parts.join(',')+'}';
+  }
+  function fnv(str){
+    var h=2166136261;
+    str=S(str);
+    for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h+=(h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24);}
+    return (h>>>0).toString(16);
+  }
+  function compactTombs(x){
+    var o={}; x=x&&typeof x==='object'?x:{};
+    Object.keys(x).sort().forEach(function(k){
+      var v=x[k]; if(v&&typeof v==='object') v=Number(v.at||v.updatedAt||v.deletedAt||0)||0;
+      o[k]=Number(v)||0;
+    });
+    return o;
+  }
+  function material(){
+    var p=profile();
+    var tasks=readJSON(taskKey(p),[]);
+    var vault=readJSON(vaultKey(p),[]);
+    var tombs=Object.assign({}, compactTombs(readJSON(tombKeyA(p),{})), compactTombs(readJSON(tombKeyB(p),{})));
+    return {profile:p,tasks:Array.isArray(tasks)?tasks:[],vault:Array.isArray(vault)?vault:[],deletedTaskTombstones:tombs};
+  }
+  function materialHash(){ return fnv(stable(material())); }
+  function record(kind,info){
+    try{state.recent.push(Object.assign({t:now(),kind:kind},info||{})); if(state.recent.length>30)state.recent.shift();}catch(e){}
+  }
+  function isBgSyncSource(code){
+    code=S(code);
+    if(/checkAlarms|triggerGlobalAlarm|firePhysicalBeep|alarm|snooze|mediaRecorder|recordSeconds|updateDateClock/i.test(code)) return false;
+    return /pushCanonical|pullCanonical|syncNow|pushCloud|pullCloud|pushAll|pullOnce|compactRemote|cleanup_after_pull|boot_r67_cleanup|pending_interval_r(57|59|65|67|68|71|72)|LifeOSJ20R(57|59|65|67|68|71|72)|FirebaseSync\.(push|pull|sync)/i.test(code);
+  }
+  function allowBg(code, label){
+    var h=materialHash(), t=now();
+    var changed=h!==state.lastMaterialHash;
+    var enough=!state.lastBgRunAt || (t-state.lastBgRunAt)>state.minBgMs;
+    if(changed || enough){
+      state.bgAllowed++; state.lastBgRunAt=t; state.lastMaterialHash=h; state.lastReason='allow_bg_'+(label||'timer'); record('allow_bg',{label:label,hash:h,changed:changed,age:t-(state.lastBgRunAt||t)});
+      return true;
+    }
+    state.bgSkipped++; state.lastReason='skip_bg_duplicate_'+(label||'timer'); record('skip_bg',{label:label,hash:h,age:t-state.lastBgRunAt,code:S(code).slice(0,140)});
+    return false;
+  }
+  function wrapTimerFn(fn, label){
+    if(typeof fn!=='function') return fn;
+    var code=''; try{code=Function.prototype.toString.call(fn);}catch(e){}
+    if(!isBgSyncSource(code)) return fn;
+    return function(){
+      if(!allowBg(code,label)) return undefined;
+      return fn.apply(this, arguments);
+    };
+  }
+  window.setTimeout=function(fn, delay){
+    var args=[wrapTimerFn(fn,'timeout'), delay].concat([].slice.call(arguments,2));
+    return nativeSetTimeout.apply(window,args);
+  };
+  window.setInterval=function(fn, delay){
+    var args=[wrapTimerFn(fn,'interval'), delay].concat([].slice.call(arguments,2));
+    return nativeSetInterval.apply(window,args);
+  };
+  function safeJsonParse(x){try{return typeof x==='string'?JSON.parse(x):null;}catch(e){return null;}}
+  function fieldToPlain(f){
+    if(!f||typeof f!=='object')return undefined;
+    if('stringValue'in f)return f.stringValue;
+    if('integerValue'in f)return Number(f.integerValue)||0;
+    if('doubleValue'in f)return Number(f.doubleValue)||0;
+    if('booleanValue'in f)return !!f.booleanValue;
+    if('nullValue'in f)return null;
+    if(f.arrayValue)return (f.arrayValue.values||[]).map(fieldToPlain);
+    if(f.mapValue){var o={},fs=f.mapValue.fields||{};Object.keys(fs).forEach(function(k){o[k]=fieldToPlain(fs[k]);});return o;}
+    return undefined;
+  }
+  function fieldsToPlain(body){
+    var fs=body&&body.fields;if(!fs||typeof fs!=='object')return null;
+    var o={};Object.keys(fs).forEach(function(k){o[k]=fieldToPlain(fs[k]);});return o;
+  }
+  function canonicalFromBody(bodyText){
+    var j=safeJsonParse(bodyText), plain=fieldsToPlain(j)||j||{};
+    return {
+      tasks:Array.isArray(plain.tasks)?plain.tasks:(Array.isArray(plain.data)?plain.data:[]),
+      vault:Array.isArray(plain.vault)?plain.vault:(Array.isArray(plain.vaultData)?plain.vaultData:[]),
+      deletedTaskTombstones:compactTombs(plain.deletedTaskTombstones||plain.r65DeletedTasks||{}),
+      stats:plain.stats||{}
+    };
+  }
+  function urlOf(input){try{return typeof input==='string'?input:(input&&input.url)||'';}catch(e){return '';}}
+  function methodOf(input,init){try{return S((init&&init.method)||(input&&input.method)||'GET').toUpperCase();}catch(e){return 'GET';}}
+  function bodyOf(input,init){try{return init&&init.body!=null?init.body:(input&&input.body!=null?input.body:null);}catch(e){return null;}}
+  function isFsWrite(url,method){
+    url=S(url);
+    return /firestore\.googleapis\.com\/v1\/projects\/tool-mimishop\/databases\/\(default\)\/documents\/LifeOS_Profiles\//i.test(url) &&
+      (method==='PATCH'||url.indexOf('updateMask.fieldPaths=')>-1);
+  }
+  function fakeOk(reason){
+    try{return Promise.resolve(new Response(JSON.stringify({ok:true,r73Skipped:true,reason:reason||'duplicate'}),{status:200,headers:{'Content-Type':'application/json','X-LifeOS-R73-Skipped':reason||'duplicate'}}));}
+    catch(e){return Promise.resolve({ok:true,status:200,json:function(){return Promise.resolve({ok:true,r73Skipped:true,reason:reason});},text:function(){return Promise.resolve('{}');},headers:{get:function(k){return k==='X-LifeOS-R73-Skipped'?reason:null;}}});}
+  }
+  function gateFetch(input,init){
+    if(!nativeFetch) return Promise.reject(new Error('fetch unavailable'));
+    var url=urlOf(input), method=methodOf(input,init);
+    if(!isFsWrite(url,method)){state.passFetch++; return nativeFetch(input,init);}
+    var body=S(bodyOf(input,init));
+    var h=fnv(stable(canonicalFromBody(body)));
+    var t=now();
+    if(h===state.lastFsHash && state.lastFsAt && (t-state.lastFsAt)<state.minFsDuplicateMs){
+      state.fsSkippedDuplicate++; state.lastReason='skip_firestore_duplicate'; record('skip_fs',{hash:h,age:t-state.lastFsAt});
+      return fakeOk('duplicate_material');
+    }
+    if(state.lastFsAt && (t-state.lastFsAt)<2500){
+      state.fsSkippedTooSoon++; state.lastReason='skip_firestore_too_soon'; record('skip_fs_too_soon',{hash:h,age:t-state.lastFsAt});
+      return fakeOk('too_soon');
+    }
+    state.fsAllowed++; state.lastFsHash=h; state.lastFsAt=t; state.lastReason='allow_firestore_changed'; record('allow_fs',{hash:h});
+    return nativeFetch(input,init);
+  }
+  function patchFetch(){
+    if(!nativeFetch || window.fetch.__lifeosR73Gate) return;
+    var f=function(input,init){return gateFetch(input,init);};
+    f.__lifeosR73Gate=true;
+    window.fetch=f;
+  }
+  function isManualReason(r){return /manual|user|click|save|edit|delete|create|add|exec|force/i.test(S(r));}
+  function patchFacades(){
+    try{
+      ['FirebaseSync','LifeOSJ20R57','LifeOSJ20R59','LifeOSJ20R65','LifeOSJ20R67','LifeOSJ20R67SingleSchema','LifeOSJ20R68','LifeOSJ20R68CompactTombstone','LifeOSJ20R71','LifeOSJ20R72'].forEach(function(name){
+        var A=window[name]; if(!A||A.__lifeosR73FacadeQuiet)return;
+        ['push','pushAll','pushCloud','pushCanonical','syncNow','compactRemote'].forEach(function(fn){
+          if(typeof A[fn]!=='function')return;
+          var old=A[fn].bind(A);
+          A[fn]=function(reason){
+            reason=S(reason||fn);
+            if(!isManualReason(reason) && !allowBg(reason,'facade_'+name+'.'+fn)){
+              state.facadeSkipped++;
+              return Promise.resolve({ok:true,skipped:true,r73:true,reason:'duplicate_background'});
+            }
+            state.facadeAllowed++;
+            return Promise.resolve(old('r73_'+reason));
+          };
+        });
+        try{
+          var oldSummary=typeof A.summary==='function'?A.summary.bind(A):null;
+          if(oldSummary && !A.__lifeosR73SummaryWrapped){
+            A.summary=function(){var s=oldSummary()||{};s.r73=api.summary();return s;};
+            A.__lifeosR73SummaryWrapped=true;
+          }
+        }catch(e){}
+        A.__lifeosR73FacadeQuiet=true;
+      });
+    }catch(e){}
+  }
+  function boot(){
+    patchFetch();
+    patchFacades();
+    state.lastMaterialHash=state.lastMaterialHash||materialHash();
+    nativeSetTimeout(patchFacades,500);
+    nativeSetTimeout(patchFacades,1800);
+    nativeSetTimeout(patchFacades,5000);
+  }
+  var api={
+    phase:PHASE,installed:true,state:state,
+    patch:function(){patchFetch();patchFacades();return api.summary();},
+    summary:function(){
+      var m=material();
+      return {
+        phase:PHASE,installed:true,
+        earlyTimerFuse:true,
+        firestoreWriteGate:true,
+        profile:m.profile,
+        local:{tasks:m.tasks.length,vault:m.vault.length,tombstones:Object.keys(m.deletedTaskTombstones||{}).length},
+        bgAllowed:state.bgAllowed,bgSkipped:state.bgSkipped,
+        fsAllowed:state.fsAllowed,fsSkippedDuplicate:state.fsSkippedDuplicate,fsSkippedTooSoon:state.fsSkippedTooSoon,
+        facadeAllowed:state.facadeAllowed,facadeSkipped:state.facadeSkipped,
+        passFetch:state.passFetch,lastReason:state.lastReason,
+        recent:state.recent.slice(-10),
+        markers:{r73:true,r72:!!window.LifeOSJ20R72,r71:!!window.LifeOSJ20R71,r70:!!window.LifeOSJ20R70,r69:false,r68:!!window.LifeOSJ20R68,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled}
+      };
+    }
+  };
+  window.LifeOSJ20R73=api;
+  boot();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+  window.addEventListener('load',function(){nativeSetTimeout(boot,250);nativeSetTimeout(boot,1500);},{once:true});
+})();
+</script>
+<!-- /LifeOS Pha14J20R73 -->
+
+
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="no-referrer" name="referrer"/>
@@ -31101,7 +31342,7 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
   function syncNow(reason){ reason=reason||'manual'; if(!navigator.onLine) return pushCanonical('offline_queue_'+reason); return pullCanonical('sync_pull_'+reason,{forceCloud:false}).then(function(){ return pushCanonical('sync_push_'+reason,{force:true}); }); }
   function schedulePush(reason,delay){ setPending(reason); clearTimeout(schedulePush.t); schedulePush.t=setTimeout(function(){ pushCanonical(reason||'scheduled',{force:true}); }, delay||1600); }
   function isFirestoreProfilePatch(url,init){ try{ var u=S(url); var m=S((init&&init.method)||'GET').toUpperCase(); return m==='PATCH' && u.indexOf('firestore.googleapis.com/v1/projects/'+PROJECT+'/databases/(default)/documents/LifeOS_Profiles/')>=0; }catch(e){ return false; } }
-  function rewriteLegacyFirestorePatch(input,init){ try{ if(!init || !init.body) return {input:input,init:init}; var body=typeof init.body==='string'?JSON.parse(init.body):init.body; if(!body || !body.fields) return {input:input,init:init}; var f=body.fields; if(f.tasks===undefined && f.data!==undefined) f.tasks=f.data; if(f.vault===undefined && f.vaultData!==undefined) f.vault=f.vaultData; if(f.deletedTaskTombstones===undefined && f.r65DeletedTasks!==undefined) f.deletedTaskTombstones=f.r65DeletedTasks; delete f.data; delete f.vaultData; delete f.r65DeletedTasks; delete f.r59Meta; var present=CANONICAL_FIELDS.filter(function(k){ return f[k]!==undefined; }); if(!present.length) present=['updatedAt']; var u=new URL(S(input), location.href); u.searchParams.delete('updateMask.fieldPaths'); present.forEach(function(k){ u.searchParams.append('updateMask.fieldPaths',k); }); var ni=Object.assign({},init,{body:JSON.stringify(body)}); state.fetchRewrites += 1; trace('REWRITE_LEGACY_PATCH',{fields:present}); setTimeout(function(){ pushCanonical('after_legacy_patch_rewrite',{force:true}); },1800); return {input:u.toString(),init:ni}; }catch(e){ trace('REWRITE_LEGACY_PATCH_FAIL',{error:S(e.message||e)}); return {input:input,init:init}; } }
+  function rewriteLegacyFirestorePatch(input,init){ try{ if(!init || !init.body) return {input:input,init:init}; var body=typeof init.body==='string'?JSON.parse(init.body):init.body; if(!body || !body.fields) return {input:input,init:init}; var f=body.fields; if(f.tasks===undefined && f.data!==undefined) f.tasks=f.data; if(f.vault===undefined && f.vaultData!==undefined) f.vault=f.vaultData; if(f.deletedTaskTombstones===undefined && f.r65DeletedTasks!==undefined) f.deletedTaskTombstones=f.r65DeletedTasks; delete f.data; delete f.vaultData; delete f.r65DeletedTasks; delete f.r59Meta; var present=CANONICAL_FIELDS.filter(function(k){ return f[k]!==undefined; }); if(!present.length) present=['updatedAt']; var u=new URL(S(input), location.href); u.searchParams.delete('updateMask.fieldPaths'); present.forEach(function(k){ u.searchParams.append('updateMask.fieldPaths',k); }); var ni=Object.assign({},init,{body:JSON.stringify(body)}); state.fetchRewrites += 1; trace('REWRITE_LEGACY_PATCH',{fields:present, noFollowupPush:true}); return {input:u.toString(),init:ni}; }catch(e){ trace('REWRITE_LEGACY_PATCH_FAIL',{error:S(e.message||e)}); return {input:input,init:init}; } }
   function patchFetch(){ if(!rawFetch || window.fetch.__lifeosR67SingleSchemaPatched) return; var wrapped=function(input,init){ try{ var url=(input&&input.url)||input; if(isFirestoreProfilePatch(url,init)){ var r=rewriteLegacyFirestorePatch(url,init||{}); input=r.input; init=r.init; } }catch(e){} return rawFetch(input,init); }; wrapped.__lifeosR67SingleSchemaPatched=true; window.fetch=wrapped; }
   function patchLocalStorage(){ try{ if(Storage.prototype.setItem.__lifeosR67SingleSchemaPatched) return; var old=Storage.prototype.setItem; Storage.prototype.setItem=function(k,v){ var r=old.apply(this,arguments); try{ var p=getProfile(); if(S(k)===taskKey(p) || S(k)===vaultKey(p)){ if(navigator.onLine) schedulePush('local_write_'+S(k).slice(0,28),2200); else setPending('local_offline_'+S(k)); } }catch(e){} return r; }; Storage.prototype.setItem.__lifeosR67SingleSchemaPatched=true; }catch(e){} }
   function patchDeletion(){ try{ var fns=['deleteTask','removeTask','lifeosDeleteTask','deleteTodo','removeTodo']; fns.forEach(function(name){ var old=window[name]; if(typeof old==='function' && !old.__lifeosR67DeletePatched){ var wrapped=function(){ var id=S(arguments[0] && (arguments[0].id||arguments[0].taskId) || arguments[0]); if(id){ var p=getProfile(), t=getTombs(p); t[id]=now(); setTombs(p,t); } var ret=old.apply(this,arguments); setTimeout(function(){ schedulePush('delete_fn_'+name,600); },200); return ret; }; wrapped.__lifeosR67DeletePatched=true; window[name]=wrapped; } }); }catch(e){} }
@@ -31123,7 +31364,7 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
 (function(){
   'use strict';
   if (window.LifeOSJ20R68CompactTombstone && window.LifeOSJ20R68CompactTombstone.installed) return;
-  var PHASE = 'Pha14J20R68_CompactTombstoneCanonicalSchema_R67Base';
+  var PHASE = 'Pha14J20R70_MediaUserIntentRouteNoTabHijack_R68Base';
   var PROJECT = 'tool-mimishop';
   var API_KEY = 'AIzaSyBsDNZyUS5dBr1t3QTtoMmjFy0Dv2dBKvI';
   var REST_DOC_BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/LifeOS_Profiles/';
@@ -31242,11 +31483,11 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
   }
   function patchFacade(){
     try{
-      var F=window.FirebaseSync||{}, oldSync=F.syncNow, oldPush=F.pushAll, oldPull=F.pullOnce;
+      var F=window.FirebaseSync||{};
       F.__r68CompactTombstone=true;
-      F.syncNow=function(reason){ try{ if(oldSync) Promise.resolve(oldSync.apply(this,arguments)).catch(function(){}); }catch(e){} return compactRemote(reason||'firebase_sync_r68'); };
-      F.pushAll=function(reason){ try{ if(oldPush) Promise.resolve(oldPush.apply(this,arguments)).catch(function(){}); }catch(e){} return compactRemote(reason||'firebase_push_r68'); };
-      F.pullOnce=function(reason){ try{ if(oldPull) Promise.resolve(oldPull.apply(this,arguments)).catch(function(){}); }catch(e){} return compactRemote(reason||'firebase_pull_r68'); };
+      F.syncNow=function(reason){ return compactRemote(reason||'firebase_sync_r68_quiet'); };
+      F.pushAll=function(reason){ return compactRemote(reason||'firebase_push_r68_quiet'); };
+      F.pullOnce=function(reason){ return compactRemote(reason||'firebase_pull_r68_quiet'); };
       window.FirebaseSync=F; state.facadePatched=true;
     }catch(e){}
     try{
@@ -31274,6 +31515,583 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
 })();
 </script>
 <!-- LifeOS Pha14J20R68 Compact Tombstone Canonical Schema - R67 Base END -->
+
+
+
+<!-- Pha14J20R70: Media user intent route only, no global tab hijack -->
+<script id="lifeos-j20r70-media-user-intent-route-fix">
+(function(){
+  if (window.__LifeOSJ20R70MediaUserIntentRouteFixInstalled) return;
+  window.__LifeOSJ20R70MediaUserIntentRouteFixInstalled = true;
+  var PHASE = 'Pha14J20R70_MediaUserIntentRouteNoTabHijack_R68Base';
+  var STATE = {
+    mode: '',
+    lastMode: '',
+    recentMediaAt: 0,
+    recentNavAt: 0,
+    blocked: 0,
+    allowed: 0,
+    mediaCalls: 0,
+    hideCount: 0,
+    lastBlock: '',
+    lastAllow: '',
+    startedAt: Date.now()
+  };
+  var MODES = {overview:1,tasks:1,focus:1,vault:1,music:1,chat:1,family:1};
+  var VIEW_TO_MODE = {
+    'view-overview':'overview','overview':'overview',
+    'view-tasks':'tasks','tasks':'tasks',
+    'view-focus':'focus','focus':'focus',
+    'view-vault':'vault','vault':'vault',
+    'view-music':'music','music':'music',
+    'view-chat':'chat','chat':'chat','family':'chat'
+  };
+  function now(){ return Date.now(); }
+  function body(){ return document.body || document.querySelector('body'); }
+  function clean(x){
+    x = String(x || '').trim();
+    x = VIEW_TO_MODE[x] || x.replace(/^l64f-panel-/,'').replace(/^view-/,'');
+    return MODES[x] ? x : '';
+  }
+  function isMini(){ var b=body(); return !!(b && b.classList && b.classList.contains('lifeos-landscape-mini-pc')); }
+  function visible(el){
+    if (!el) return false;
+    try {
+      var cs = getComputedStyle(el);
+      return cs.display !== 'none' && cs.visibility !== 'hidden' && el.offsetParent !== null;
+    } catch(e){ return false; }
+  }
+  function activeViewMode(){
+    var a = document.querySelector('.view-section.active');
+    if (a && a.id) return clean(a.id);
+    var ids = ['view-music','view-tasks','view-focus','view-vault','view-chat'];
+    for (var i=0;i<ids.length;i++) { var el=document.getElementById(ids[i]); if (visible(el)) return clean(ids[i]); }
+    return '';
+  }
+  function panelMode(){
+    var active = document.querySelector('#lifeos-landscape-root .l64f-panel.is-active');
+    return clean(active && active.id);
+  }
+  function currentMode(){
+    var b = body();
+    var m = '';
+    if (isMini()) m = clean(panelMode() || (b && b.dataset && (b.dataset.lifeosLandscapeRootMode || b.dataset.lifeosActiveWorkspace)) || '');
+    else m = clean(activeViewMode() || (b && b.dataset && b.dataset.lifeosActiveWorkspace) || '');
+    return m || STATE.mode || 'tasks';
+  }
+  function isMediaNode(t){
+    return !!(t && t.closest && t.closest('#view-music,#l64f-panel-music,#mini-player,#media-subtabs,#media-group-sidebar,#media-group-mobile-bar,#music-list-container,#radio-list-container,#tv-list-container,#radio-player-container,#tv-player-container,[id^="tab-media-"]'));
+  }
+  function isMediaWorkspace(){ return currentMode() === 'music' || STATE.mode === 'music'; }
+  function recentMedia(){ return now() - STATE.recentMediaAt < 1800; }
+  function hideMediaSurface(reason){
+    var b = body();
+    if (!b) return;
+    if (b.classList.contains('media-live-scroll-mode')) STATE.hideCount += 1;
+    b.classList.remove('media-live-scroll-mode');
+    b.removeAttribute('data-l64f-media-tab');
+    try {
+      var mini = document.getElementById('mini-player');
+      if (mini && currentMode() !== 'music') {
+        mini.style.pointerEvents = 'none';
+      }
+    } catch(e){}
+    STATE.lastBlock = reason || STATE.lastBlock;
+  }
+  function setMode(mode, reason){
+    mode = clean(mode) || STATE.mode || currentMode();
+    var b = body();
+    if (!b) return mode;
+    STATE.lastMode = STATE.mode || '';
+    STATE.mode = mode;
+    STATE.recentNavAt = now();
+    b.dataset.lifeosActiveWorkspace = mode;
+    if (isMini()) b.dataset.lifeosLandscapeRootMode = mode;
+    if (window.innerWidth >= 1024 && !isMini()) b.dataset.desktopWorkspace = mode;
+    if (mode !== 'music') hideMediaSurface(reason || 'leave-media');
+    window.__LifeOSJ20R70RouteState = {phase:PHASE, mode:mode, reason:reason||'', at:now(), mediaWorkspaceActive:isMediaWorkspace()};
+    return mode;
+  }
+  function inferNavMode(t){
+    if (!t || !t.closest) return '';
+    if (isMediaNode(t)) return 'music';
+    var desk = t.closest('[data-desktop-view]');
+    if (desk) return clean(desk.dataset.desktopView || '');
+    var ids = ['view-tasks','view-focus','view-vault','view-music','view-chat'];
+    for (var i=0;i<ids.length;i++) {
+      var node = t.closest('[onclick*="'+ids[i]+'"]');
+      if (node) return clean(ids[i]);
+    }
+    var href = t.closest('a[href^="#view-"]');
+    if (href) return clean(String(href.getAttribute('href')||'').replace(/^#/,''));
+    var role = t.closest('[data-view],[data-tab],[data-target]');
+    if (role) return clean(role.dataset.view || role.dataset.tab || role.dataset.target || '');
+    return '';
+  }
+  ['pointerdown','touchstart','click'].forEach(function(type){
+    document.addEventListener(type, function(e){
+      var t = e.target;
+      if (isMediaNode(t)) {
+        STATE.recentMediaAt = now();
+        setMode('music', type + ':media-user');
+        return;
+      }
+      var m = inferNavMode(t);
+      if (m) setMode(m, type + ':nav');
+    }, true);
+  });
+
+  var oldRouter = window.LifeOSRootRouter || {};
+  window.LifeOSRootRouter = Object.assign({}, oldRouter, {
+    phase: PHASE,
+    enterWorkspace: function(mode, source, ev){
+      var ret;
+      try { if (oldRouter.enterWorkspace) ret = oldRouter.enterWorkspace.apply(oldRouter, arguments); } catch(e){}
+      var m = setMode(mode, source || 'router');
+      return ret || m;
+    },
+    activeWorkspace: function(){ return currentMode(); },
+    isMediaWorkspaceActive: function(){ return isMediaWorkspace(); },
+    isMediaActionAllowed: function(ev){
+      return isMediaWorkspace() || recentMedia() || isMediaNode(ev && ev.target);
+    },
+    isInMediaDom: function(ev){ return isMediaNode(ev && ev.target); }
+  });
+
+  var oldSwitchTab = window.switchTab;
+  if (typeof oldSwitchTab === 'function' && !oldSwitchTab.__lifeosR70Wrapped) {
+    var wrapped = function(id, btn){
+      var m = clean(id) || (btn && inferNavMode(btn)) || '';
+      if (m) setMode(m, 'switchTab:pre');
+      var ret = oldSwitchTab.apply(this, arguments);
+      if (m) setTimeout(function(){ setMode(m, 'switchTab:post'); }, 40);
+      return ret;
+    };
+    wrapped.__lifeosR70Wrapped = true;
+    window.switchTab = wrapped;
+  }
+  var oldDesktop = window.setDesktopWorkspace;
+  if (typeof oldDesktop === 'function' && !oldDesktop.__lifeosR70Wrapped) {
+    var wd = function(mode){
+      var m = clean(mode);
+      if (m) setMode(m, 'desktop:pre');
+      var ret = oldDesktop.apply(this, arguments);
+      if (m) setTimeout(function(){ setMode(m, 'desktop:post'); }, 60);
+      return ret;
+    };
+    wd.__lifeosR70Wrapped = true;
+    window.setDesktopWorkspace = wd;
+  }
+  function argHasUserIntent(args){
+    for (var i=0;i<args.length;i++) {
+      var a = args[i];
+      if (!a) continue;
+      if (a === true) continue;
+      if (a && typeof a === 'object') {
+        if (a.userIntent || a.event || (a.target && isMediaNode(a.target))) return true;
+      }
+    }
+    return false;
+  }
+  function allowMediaCall(name, args){
+    STATE.mediaCalls += 1;
+    var user = argHasUserIntent(args);
+    if (user || recentMedia() || isMediaWorkspace()) {
+      STATE.allowed += 1;
+      STATE.lastAllow = name + ':' + (user ? 'user' : (recentMedia() ? 'recent' : 'workspace'));
+      setMode('music', 'media-call:' + name);
+      return true;
+    }
+    STATE.blocked += 1;
+    hideMediaSurface('blocked-media-call:' + name);
+    return false;
+  }
+  function patchMediaHub(){
+    var mh = window.MediaHub;
+    if (!mh || mh.__lifeosR70MediaGuard) return !!mh;
+    mh.__lifeosR70MediaGuard = true;
+    ['init','switchTab','setGroup','playChannel','playRadio','playTv'].forEach(function(name){
+      var old = mh[name];
+      if (typeof old !== 'function') return;
+      mh[name] = function(){
+        if (!allowMediaCall(name, arguments)) return false;
+        return old.apply(this, arguments);
+      };
+    });
+    ['renderLists','renderGroupMenus','renderGroupMenu','renderMediaLists'].forEach(function(name){
+      var old = mh[name];
+      if (typeof old !== 'function') return;
+      mh[name] = function(){
+        if (!isMediaWorkspace() && !recentMedia()) { STATE.blocked += 1; hideMediaSurface('blocked-render:'+name); return false; }
+        return old.apply(this, arguments);
+      };
+    });
+    return true;
+  }
+  function boot(){
+    patchMediaHub();
+    var b = body();
+    var m = currentMode();
+    if (b) {
+      STATE.mode = m;
+      b.dataset.lifeosActiveWorkspace = m;
+      if (m !== 'music') hideMediaSurface('boot-non-media');
+    }
+    setTimeout(patchMediaHub, 250);
+    setTimeout(patchMediaHub, 1500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  window.addEventListener('pageshow', function(){ setTimeout(patchMediaHub, 80); }, {passive:true});
+  window.addEventListener('focus', function(){ setTimeout(patchMediaHub, 120); }, {passive:true});
+  window.LifeOSJ20R70 = {
+    phase: PHASE,
+    setMode: setMode,
+    patchMediaHub: patchMediaHub,
+    summary: function(){
+      var b = body();
+      return {
+        phase: PHASE,
+        installed: true,
+        mode: currentMode(),
+        state: Object.assign({}, STATE),
+        mediaWorkspaceActive: isMediaWorkspace(),
+        recentMedia: recentMedia(),
+        mediaScrollMode: !!(b && b.classList.contains('media-live-scroll-mode')),
+        bodyMode: b && b.dataset.lifeosActiveWorkspace,
+        landscapeMode: b && b.dataset.lifeosLandscapeRootMode,
+        mediaGuard: !!(window.MediaHub && window.MediaHub.__lifeosR70MediaGuard),
+        markers: {r70:true, r69:false, r68:!!window.LifeOSJ20R68, r66:!!window.LifeOSJ20R66}
+      };
+    }
+  };
+})();
+</script>
+
+
+<!-- LifeOS Pha14J20R71 Sync Quiet Guard - R70 Base -->
+<script id="lifeos-j20r71-sync-quiet-guard">
+(function(){
+  'use strict';
+  if (window.LifeOSJ20R71SyncQuietGuard && window.LifeOSJ20R71SyncQuietGuard.installed) return;
+  var PHASE='Pha14J20R71_SyncQuietNoDuplicateFirestorePush_R70Base';
+  var state={installedAt:Date.now(), pushCalls:0, pullCalls:0, skipped:0, lastPushAt:0, lastPullAt:0, lastReason:'', minPushGap:15000, minPullGap:10000};
+  function now(){ return Date.now(); }
+  function S(v){ try{return String(v==null?'':v);}catch(e){return '';} }
+  function callR68(reason){
+    try{
+      var A=window.LifeOSJ20R68CompactTombstone||window.LifeOSJ20R68;
+      if(A && typeof A.compactRemote==='function') return A.compactRemote(reason||'r71_compact');
+      if(A && typeof A.syncNow==='function') return A.syncNow(reason||'r71_sync');
+    }catch(e){}
+    return Promise.resolve({ok:false,missing:true});
+  }
+  function quietPush(reason,force){
+    reason=reason||'push';
+    var t=now();
+    if(!force && t-state.lastPushAt<state.minPushGap){
+      state.skipped++; state.lastReason='skip_push_'+reason;
+      return Promise.resolve({ok:true,skipped:'r71_push_gap',age:t-state.lastPushAt});
+    }
+    state.lastPushAt=t; state.pushCalls++; state.lastReason=reason;
+    return Promise.resolve(callR68('r71_'+reason));
+  }
+  function quietPull(reason,force){
+    reason=reason||'pull';
+    var t=now();
+    if(!force && t-state.lastPullAt<state.minPullGap){
+      state.skipped++; state.lastReason='skip_pull_'+reason;
+      return Promise.resolve({ok:true,skipped:'r71_pull_gap',age:t-state.lastPullAt});
+    }
+    state.lastPullAt=t; state.pullCalls++; state.lastReason=reason;
+    return Promise.resolve(callR68('r71_'+reason));
+  }
+  function patchFacades(){
+    try{
+      var F=window.FirebaseSync||{};
+      F.__r71SyncQuietGuard=true;
+      F.pushAll=function(reason){ return quietPush(reason||'firebase_push', false); };
+      F.push=function(reason){ return quietPush(reason||'firebase_push', false); };
+      F.pullOnce=function(reason){ return quietPull(reason||'firebase_pull', false); };
+      F.pull=function(reason){ return quietPull(reason||'firebase_pull', false); };
+      F.syncNow=function(reason){ return quietPull(reason||'firebase_sync_pull', true).then(function(){ return quietPush(reason||'firebase_sync_push', true); }); };
+      F.safeSyncStatus=function(){ return api.summary(); };
+      window.FirebaseSync=F;
+    }catch(e){}
+    try{
+      ['LifeOSJ20R59','LifeOSJ20R57','LifeOSJ20R65','LifeOSJ20R67','LifeOSJ20R67SingleSchema','LifeOSJ20R68','LifeOSJ20R68CompactTombstone'].forEach(function(name){
+        var A=window[name]; if(!A || A.__r71Patched) return;
+        if(typeof A.pushAll==='function') A.pushAll=function(r){ return quietPush(r||name+'_pushAll', false); };
+        if(typeof A.push==='function') A.push=function(r){ return quietPush(r||name+'_push', false); };
+        if(typeof A.pushCloud==='function') A.pushCloud=function(r){ return quietPush(r||name+'_pushCloud', false); };
+        if(typeof A.pullOnce==='function') A.pullOnce=function(r){ return quietPull(r||name+'_pullOnce', false); };
+        if(typeof A.pullCloud==='function') A.pullCloud=function(r){ return quietPull(r||name+'_pullCloud', false); };
+        if(typeof A.syncNow==='function') A.syncNow=function(r){ return quietPull(r||name+'_syncPull', true).then(function(){ return quietPush(r||name+'_syncPush', true); }); };
+        A.__r71Patched=true;
+      });
+    }catch(e){}
+  }
+  function boot(){
+    patchFacades();
+    setTimeout(patchFacades,800);
+    setTimeout(patchFacades,2500);
+  }
+  var api={
+    phase:PHASE,
+    installed:true,
+    state:state,
+    patch:patchFacades,
+    syncNow:function(reason){ return quietPull(reason||'manual_sync_pull', true).then(function(){ return quietPush(reason||'manual_sync_push', true); }); },
+    summary:function(){
+      return {
+        phase:PHASE, installed:true, state:JSON.parse(JSON.stringify(state)),
+        markers:{r71:true,r70:!!window.LifeOSJ20R70,r69:false,r68:!!window.LifeOSJ20R68,r67:!!window.LifeOSJ20R67,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled},
+        firebaseFacade:!!(window.FirebaseSync&&window.FirebaseSync.__r71SyncQuietGuard)
+      };
+    }
+  };
+  window.LifeOSJ20R71SyncQuietGuard=window.LifeOSJ20R71=api;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
+  window.addEventListener('online',function(){ setTimeout(function(){ quietPull('online_r71',true).then(function(){return quietPush('online_r71',true);}); },1200); },{passive:true});
+})();
+</script>
+<!-- /LifeOS Pha14J20R71 -->
+
+
+<!-- LifeOS Pha14J20R72 Firestore Write Gate + Mobile Perf ISO Clean - R71 Base -->
+<script id="lifeos-j20r72-firestore-write-gate">
+(function(){
+  'use strict';
+  if (window.LifeOSJ20R72 && window.LifeOSJ20R72.installed) return;
+  var PHASE='Pha14J20R72_FirestoreWriteGateMobilePerfClean_R71Base';
+  var rawFetch = window.fetch ? window.fetch.bind(window) : null;
+  var state={
+    installedAt:Date.now(),
+    guarded:true,
+    allowedWrites:0,
+    skippedDuplicateWrites:0,
+    skippedTooSoonWrites:0,
+    passthrough:0,
+    lastAllowedAt:0,
+    lastWriteAt:0,
+    lastHash:'',
+    lastStableHash:'',
+    lastUrl:'',
+    lastReason:'',
+    lastResponse:null,
+    minDuplicateMs:90000,
+    minAnyWriteMs:3500,
+    recent:[]
+  };
+  function now(){ return Date.now(); }
+  function S(v){ try{return String(v==null?'':v);}catch(e){return '';} }
+  function isFsProfileUrl(u){
+    u=S(u);
+    return u.indexOf('https://firestore.googleapis.com/')===0 &&
+           u.indexOf('/documents/LifeOS_Profiles/')>-1;
+  }
+  function methodOf(init, input){
+    try{
+      if(init && init.method) return S(init.method).toUpperCase();
+      if(input && input.method) return S(input.method).toUpperCase();
+    }catch(e){}
+    return 'GET';
+  }
+  function bodyOf(init, input){
+    try{
+      if(init && init.body!=null) return init.body;
+      if(input && input.body!=null) return input.body;
+    }catch(e){}
+    return null;
+  }
+  function urlOf(input){
+    try{
+      if(typeof input==='string') return input;
+      if(input && input.url) return input.url;
+    }catch(e){}
+    return '';
+  }
+  function safeJsonParse(x){
+    try{
+      if(typeof x==='string') return JSON.parse(x);
+      return null;
+    }catch(e){ return null; }
+  }
+  function stripNoise(k,v){
+    if(k==='updatedAt' || k==='lastSyncAt' || k==='lastPullAt' || k==='lastPushAt' || k==='r59Meta') return undefined;
+    if(k==='phase' || k==='reason' || k==='iso' || k==='atText') return undefined;
+    if(k==='__debug' || k==='debug' || k==='trace' || k==='logs' || k==='diagnostics') return undefined;
+    return v;
+  }
+  function stable(v){
+    if(v==null) return 'null';
+    if(typeof v!=='object') return JSON.stringify(v);
+    if(Array.isArray(v)) return '['+v.map(stable).join(',')+']';
+    var keys=Object.keys(v).sort();
+    return '{'+keys.map(function(k){ var val=stripNoise(k,v[k]); if(val===undefined) return ''; return JSON.stringify(k)+':'+stable(val); }).filter(Boolean).join(',')+'}';
+  }
+  function fnv1a(str){
+    var h=2166136261;
+    for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h+=(h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24); }
+    return (h>>>0).toString(16);
+  }
+  function fieldToPlain(f){
+    if(!f || typeof f!=='object') return undefined;
+    if('stringValue' in f) return f.stringValue;
+    if('integerValue' in f) return Number(f.integerValue)||0;
+    if('doubleValue' in f) return Number(f.doubleValue)||0;
+    if('booleanValue' in f) return !!f.booleanValue;
+    if('nullValue' in f) return null;
+    if(f.arrayValue) return (f.arrayValue.values||[]).map(fieldToPlain);
+    if(f.mapValue){
+      var o={}; var fs=f.mapValue.fields||{};
+      Object.keys(fs).forEach(function(k){ o[k]=fieldToPlain(fs[k]); });
+      return o;
+    }
+    return undefined;
+  }
+  function fieldsToPlain(body){
+    try{
+      var fs=body && body.fields;
+      if(!fs || typeof fs!=='object') return null;
+      var o={};
+      Object.keys(fs).forEach(function(k){ o[k]=fieldToPlain(fs[k]); });
+      return o;
+    }catch(e){ return null; }
+  }
+  function canonicalPayload(bodyText){
+    var j=safeJsonParse(bodyText);
+    var plain=fieldsToPlain(j) || j || {};
+    var tasks = Array.isArray(plain.tasks) ? plain.tasks : (Array.isArray(plain.data) ? plain.data : []);
+    var vault = Array.isArray(plain.vault) ? plain.vault : (Array.isArray(plain.vaultData) ? plain.vaultData : []);
+    var tombs = plain.deletedTaskTombstones || plain.r65DeletedTasks || {};
+    var stats = plain.stats || {};
+    // Tombstone canonical must stay compact id->timestamp, no phase/reason.
+    var compactTombs={};
+    if(tombs && typeof tombs==='object'){
+      Object.keys(tombs).sort().forEach(function(k){
+        var v=tombs[k];
+        if(v && typeof v==='object') v = Number(v.at || v.updatedAt || v.deletedAt || 0)||0;
+        compactTombs[k]=Number(v)||0;
+      });
+    }
+    return {tasks:tasks, vault:vault, deletedTaskTombstones:compactTombs, stats:stats};
+  }
+  function record(kind, info){
+    try{
+      state.recent.push(Object.assign({t:now(),kind:kind}, info||{}));
+      if(state.recent.length>20) state.recent.shift();
+    }catch(e){}
+  }
+  function fakeOk(url, reason){
+    var payload = state.lastResponse || {name:'LifeOS_Profiles', fields:{}, r72Skipped:true, reason:reason||'duplicate'};
+    try{
+      return Promise.resolve(new Response(JSON.stringify(payload), {status:200, headers:{'Content-Type':'application/json','X-LifeOS-R72-Skipped':reason||'duplicate'}}));
+    }catch(e){
+      return Promise.resolve({
+        ok:true,status:200,
+        text:function(){return Promise.resolve(JSON.stringify(payload));},
+        json:function(){return Promise.resolve(payload);},
+        headers:{get:function(){return null;}}
+      });
+    }
+  }
+  function guardFetch(input, init){
+    if(!rawFetch) return Promise.reject(new Error('fetch_unavailable'));
+    var u=urlOf(input), m=methodOf(init,input), b=bodyOf(init,input);
+    var isWrite = isFsProfileUrl(u) && (m==='PATCH' || u.indexOf('updateMask.fieldPaths=')>-1);
+    if(!isWrite){ state.passthrough++; return rawFetch(input, init); }
+    var bodyText = S(b);
+    var canonical = canonicalPayload(bodyText);
+    var stableText = stable(canonical);
+    var hash = fnv1a(stableText);
+    var t=now();
+    var tooSoon = state.lastWriteAt && (t-state.lastWriteAt < state.minAnyWriteMs);
+    var duplicate = hash && hash===state.lastStableHash && state.lastAllowedAt && (t-state.lastAllowedAt < state.minDuplicateMs);
+    state.lastWriteAt=t;
+    if(duplicate){
+      state.skippedDuplicateWrites++;
+      state.lastReason='skip_duplicate_canonical';
+      record('skip_duplicate',{hash:hash,age:t-state.lastAllowedAt});
+      return fakeOk(u,'duplicate_canonical');
+    }
+    if(tooSoon && hash===state.lastStableHash){
+      state.skippedTooSoonWrites++;
+      state.lastReason='skip_too_soon_same';
+      record('skip_too_soon',{hash:hash,age:t-state.lastWriteAt});
+      return fakeOk(u,'too_soon_same');
+    }
+    state.allowedWrites++;
+    state.lastAllowedAt=t;
+    state.lastHash=fnv1a(bodyText);
+    state.lastStableHash=hash;
+    state.lastUrl=u.slice(0,180);
+    state.lastReason='allow_changed_or_first';
+    record('allow',{hash:hash, counts:{tasks:(canonical.tasks||[]).length, vault:(canonical.vault||[]).length, tombstones:Object.keys(canonical.deletedTaskTombstones||{}).length}});
+    return rawFetch(input, init).then(function(res){
+      try{
+        var clone=res.clone();
+        clone.json().then(function(j){ state.lastResponse=j; }).catch(function(){});
+      }catch(e){}
+      return res;
+    });
+  }
+  function patchFetch(){
+    if(!rawFetch || window.fetch.__lifeosR72WriteGate) return;
+    var f=function(input, init){ return guardFetch(input, init); };
+    f.__lifeosR72WriteGate=true;
+    window.fetch=f;
+  }
+  function patchSyncFacades(){
+    try{
+      var names=['FirebaseSync','LifeOSJ20R59','LifeOSJ20R57','LifeOSJ20R65','LifeOSJ20R67','LifeOSJ20R67SingleSchema','LifeOSJ20R68','LifeOSJ20R68CompactTombstone','LifeOSJ20R71'];
+      names.forEach(function(name){
+        var A=window[name]; if(!A || A.__lifeosR72QuietFacade) return;
+        ['push','pushAll','pushCloud','pull','pullOnce','pullCloud','syncNow','compactRemote'].forEach(function(fn){
+          if(typeof A[fn] !== 'function') return;
+          var old=A[fn].bind(A);
+          A[fn]=function(reason){
+            // Let the original run; Firestore writes are deduped at fetch layer.
+            return Promise.resolve(old('r72_'+(reason||fn))).catch(function(e){ state.lastReason='facade_error_'+fn+':'+S(e&&e.message||e); return {ok:false,error:S(e&&e.message||e)}; });
+          };
+        });
+        A.__lifeosR72QuietFacade=true;
+      });
+    }catch(e){}
+  }
+  function cleanBootLock(){
+    try{ document.body && document.body.classList.remove('lifeos-r48-family-boot-lock'); }catch(e){}
+  }
+  function boot(){
+    patchFetch();
+    patchSyncFacades();
+    cleanBootLock();
+    setTimeout(patchSyncFacades,800);
+    setTimeout(function(){ patchSyncFacades(); cleanBootLock(); },2500);
+  }
+  var api={
+    phase:PHASE,
+    installed:true,
+    state:state,
+    patch:function(){ patchFetch(); patchSyncFacades(); cleanBootLock(); return api.summary(); },
+    summary:function(){
+      return {
+        phase:PHASE, installed:true,
+        firestoreWriteGate:true,
+        allowedWrites:state.allowedWrites,
+        skippedDuplicateWrites:state.skippedDuplicateWrites,
+        skippedTooSoonWrites:state.skippedTooSoonWrites,
+        passthrough:state.passthrough,
+        lastReason:state.lastReason,
+        recent:state.recent.slice(-8),
+        markers:{r72:true,r71:!!window.LifeOSJ20R71,r70:!!window.LifeOSJ20R70,r69:false,r68:!!window.LifeOSJ20R68,r55:!!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled}
+      };
+    }
+  };
+  window.LifeOSJ20R72=api;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
+})();
+</script>
+<!-- /LifeOS Pha14J20R72 -->
 
 </body>
 </html>
