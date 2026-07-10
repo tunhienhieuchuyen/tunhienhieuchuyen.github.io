@@ -12146,17 +12146,105 @@ window.lifeosAttachMediaAutoFallback = lifeosAttachMediaAutoFallback;
 
 <script id="lifeos-r9-1-smartbox-builtin-fallback">
 (function(){
+  'use strict';
+  var PHASE = 'Pha14J20R88_CleanMediaFixFromR83Base';
   window.LIFEOS_BUILTIN_CHANNEL_PACK = {"groups":[{"id":"radio_vn","name":"Radio Việt Nam","type":"radio"},{"id":"tv_vn","name":"Tivi Việt Nam","type":"tv"}],"radio":[{"id":"radio_vov1","name":"VOV1","type":"radio","group":"radio_vn","url":"https://str.vov.gov.vn/vovlive/vov1vov5Vietnamese.sdp_aac/playlist.m3u8"},{"id":"radio_vov2","name":"VOV2","type":"radio","group":"radio_vn","url":"https://str.vov.gov.vn/vovlive/vov2.sdp_aac/playlist.m3u8"},{"id":"radio_vov3","name":"VOV3","type":"radio","group":"radio_vn","url":"https://str.vov.gov.vn/vovlive/vov3.sdp_aac/playlist.m3u8"}],"tv":[{"id":"tv_vtv1","name":"VTV1","type":"tv","group":"tv_vn","url":"https://live-vtv1.vtvdigital.vn/hls/0.m3u8"},{"id":"tv_vtv3","name":"VTV3","type":"tv","group":"tv_vn","url":"https://live-vtv3.vtvdigital.vn/hls/0.m3u8"}]};
+
+  function S(v){ return v == null ? '' : String(v).trim(); }
+  function A(v){ return Array.isArray(v) ? v : []; }
+  function human(id){
+    id = S(id).replace(/[_\-]+/g,' ').replace(/\s+/g,' ').trim();
+    return id ? id.replace(/\b\w/g, function(c){return c.toUpperCase();}) : '';
+  }
+  function detectType(ch, bucket){
+    var mix = [bucket, ch && ch.type, ch && ch.kind, ch && ch.media_type, ch && ch.category_type, ch && ch.url, ch && ch.src, ch && ch.streamUrl, ch && ch.stream_url, ch && ch.m3u8].map(function(x){return S(x).toLowerCase();}).join(' ');
+    if (mix.indexOf('radio') >= 0 || mix.indexOf('fm') >= 0) return 'radio';
+    if (mix.indexOf('tivi') >= 0 || mix.indexOf('tv') >= 0 || mix.indexOf('television') >= 0 || mix.indexOf('m3u8') >= 0) return 'tv';
+    return '';
+  }
+  function urlOf(ch){ return S(ch && (ch.url || ch.src || ch.streamUrl || ch.stream_url || ch.stream || ch.link || ch.m3u8 || ch.backupUrl || ch.proxyUrl)); }
+  function addGroup(groups, seen, id, name, type){
+    id = S(id); type = S(type);
+    if (!id || (type !== 'radio' && type !== 'tv')) return;
+    var key = type + ':' + id;
+    if (seen[key]) return;
+    seen[key] = true;
+    groups.push({id:id, name:S(name) || human(id) || (type === 'radio' ? 'Radio' : 'Tivi'), type:type});
+  }
+  function normChannel(raw, type, bucket, idx){
+    var ch = Object.assign({}, raw || {});
+    var url = urlOf(ch);
+    if (!url) return null;
+    type = type || detectType(ch, bucket);
+    if (type !== 'radio' && type !== 'tv') return null;
+
+    ch.type = type;
+    ch.url = S(ch.url) || url;
+    ch.src = S(ch.src) || ch.url;
+
+    var gid = S(ch.group || ch.group_id || ch.groupId || ch.folder || ch.folder_id || ch.folderId || ch.category || ch.category_id || ch.categoryId || ch.station_group || ch.channel_group);
+    var gname = S(ch.group_name || ch.groupName || ch.folder_name || ch.folderName || ch.category_name || ch.categoryName || ch.station_group_name || ch.channel_group_name);
+    if (!gid) {
+      gid = type + '_' + S(bucket || 'all').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'').toLowerCase();
+      if (!gid || gid === type + '_') gid = type + '_main';
+    }
+    if (!gname) gname = human(gid) || (type === 'radio' ? 'Radio' : 'Tivi');
+
+    ch.group = gid;
+    ch.group_name = gname;
+    if (!ch.name) ch.name = S(ch.title || ch.label || ch.id || (type === 'radio' ? 'Radio' : 'Tivi'));
+    if (!ch.id) {
+      var slug = S(ch.name || ch.url).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'') || 'channel';
+      ch.id = type + '_' + S(bucket || 'pack').replace(/[^a-z0-9]+/gi,'_') + '_' + idx + '_' + slug;
+    }
+    return ch;
+  }
+  function normalizePack(pack){
+    pack = pack && typeof pack === 'object' ? pack : {};
+    var out = Object.assign({}, pack);
+    var groups = [];
+    var seenGroups = Object.create(null);
+    var seenChannels = Object.create(null);
+    out.radio = [];
+    out.tv = [];
+
+    A(pack.groups).forEach(function(g){
+      var type = S(g && g.type) || detectType(g,'');
+      var id = S(g && (g.id || g.group || g.key || g.slug || g.value));
+      if (id && (type === 'radio' || type === 'tv')) addGroup(groups, seenGroups, id, g.name || g.title || id, type);
+    });
+
+    Object.keys(pack).forEach(function(bucket){
+      if (bucket === 'groups') return;
+      A(pack[bucket]).forEach(function(raw, idx){
+        var type = bucket === 'radio' || bucket === 'tv' ? bucket : detectType(raw, bucket);
+        var ch = normChannel(raw, type, bucket, idx);
+        if (!ch) return;
+        var k = ch.type + ':' + (ch.id || ch.url);
+        if (seenChannels[k]) return;
+        seenChannels[k] = true;
+        out[ch.type].push(ch);
+        addGroup(groups, seenGroups, ch.group, ch.group_name, ch.type);
+      });
+    });
+
+    out.groups = groups;
+    try { console.info('[R88_SMARTBOX_PACK_NORMALIZED]', {phase:PHASE, groups:groups.length, radio:out.radio.length, tv:out.tv.length}); } catch(e){}
+    return out;
+  }
+
+  window.__lifeosR88NormalizeSmartboxPack = normalizePack;
+
   window.__lifeosLoadSmartboxChannelsPack = async function(force){
     try {
-      if (location.protocol === 'file:') return window.LIFEOS_BUILTIN_CHANNEL_PACK;
+      if (location.protocol === 'file:') return normalizePack(window.LIFEOS_BUILTIN_CHANNEL_PACK);
       const stamp = force ? '?t=' + Date.now() : '';
       const res = await fetch('smartbox_channels.json' + stamp, { cache: force ? 'no-store' : 'default' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      return await res.json();
+      return normalizePack(await res.json());
     } catch(e) {
-      if (window.LIFEOS_DEBUG) console.warn('[LifeOS R9.1] smartbox_channels.json missing or failed; using built-in pack', e && e.message ? e.message : e);
-      return window.LIFEOS_BUILTIN_CHANNEL_PACK;
+      if (window.LIFEOS_DEBUG) console.warn('[LifeOS R88] smartbox_channels.json missing or failed; using built-in pack', e && e.message ? e.message : e);
+      return normalizePack(window.LIFEOS_BUILTIN_CHANNEL_PACK);
     }
   };
 })();
@@ -12424,7 +12512,8 @@ window.MediaHub = {
         const activeColor = this.currentTab === 'tv' ? 'bg-rose-500 text-white border-rose-500' : 'bg-emerald-500 text-white border-emerald-500';
         const idleColor = 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50';
 
-        let htmlItems = `<button onclick="window.MediaHub.setGroup('all')" class="px-3 py-2 text-xs font-black rounded-xl border transition text-left shrink-0 active:scale-95 ${this.currentGroup === 'all' ? activeColor : idleColor}">📺 Tất cả kênh</button>`;
+        let allLabel = this.currentTab === 'radio' ? '📻 Tất cả Radio' : '📺 Tất cả Tivi';
+        let htmlItems = `<button onclick="window.MediaHub.setGroup('all')" class="px-3 py-2 text-xs font-black rounded-xl border transition text-left shrink-0 active:scale-95 ${this.currentGroup === 'all' ? activeColor : idleColor}">${allLabel}</button>`;
         htmlItems += filteredGroups.map(g => `
             <button onclick="window.MediaHub.setGroup('${g.id}')" class="px-3 py-2 text-xs font-black rounded-xl border transition text-left shrink-0 active:scale-95 ${this.currentGroup === g.id ? activeColor : idleColor}">📁 ${g.name}</button>
         `).join('');
@@ -32530,13 +32619,41 @@ body.lifeos-r75-not-music.media-live-scroll-mode {
     setClassName('tab-media-tv', tab === 'tv' ? selectedClass('tv') : baseUnselected());
 
     var mp3=$('mp3-list-container'), radio=$('radio-list-container'), tv=$('tv-list-container');
-    if (mp3) mp3.classList.toggle('hidden', tab !== 'music');
-    if (radio) radio.classList.toggle('hidden', tab !== 'radio');
-    if (tv) tv.classList.toggle('hidden', tab !== 'tv');
+    if (mp3) {
+      mp3.classList.toggle('hidden', tab !== 'music');
+      mp3.style.display = tab === 'music' ? 'block' : 'none';
+      try { mp3.setAttribute('aria-hidden', tab === 'music' ? 'false' : 'true'); } catch(e){}
+    }
+    if (radio) {
+      radio.classList.toggle('hidden', tab !== 'radio');
+      radio.style.display = tab === 'radio' ? 'block' : 'none';
+      try { radio.setAttribute('aria-hidden', tab === 'radio' ? 'false' : 'true'); } catch(e){}
+    }
+    if (tv) {
+      tv.classList.toggle('hidden', tab !== 'tv');
+      tv.style.display = tab === 'tv' ? 'grid' : 'none';
+      try { tv.setAttribute('aria-hidden', tab === 'tv' ? 'false' : 'true'); } catch(e){}
+    }
 
     var tvp=$('tv-player-container'), rp=$('radio-player-container');
     if (tvp) tvp.style.display = tab === 'tv' ? '' : 'none';
     if (rp) rp.style.display = tab === 'radio' ? '' : 'none';
+
+    var sidebar=$('media-group-sidebar'), mobBar=$('media-group-mobile-bar');
+    if (tab === 'music') {
+      if (sidebar) { sidebar.className = 'hidden'; sidebar.style.display = 'none'; }
+      if (mobBar) { mobBar.className = 'hidden'; mobBar.style.display = 'none'; }
+      try { document.body && document.body.classList && document.body.classList.remove('lifeos-r75-not-music'); } catch(e){}
+    } else {
+      if (sidebar) {
+        sidebar.className = 'hidden lg:flex lg:col-span-3 flex-col gap-1.5 overflow-y-auto pr-1';
+        sidebar.style.display = '';
+      }
+      if (mobBar) {
+        mobBar.className = 'flex lg:hidden w-full gap-2 px-2 pb-2 overflow-x-auto custom-scroll-area shrink-0';
+        mobBar.style.display = '';
+      }
+    }
 
     try { document.body.dataset.lifeosMediaTab = tab; document.body.dataset.l64fMediaTab = tab; } catch(e){}
   }
@@ -32553,15 +32670,44 @@ body.lifeos-r75-not-music.media-live-scroll-mode {
     tab = (tab === 'radio' || tab === 'tv') ? tab : 'music';
     var m = window.MediaHub;
     if (!m) return false;
-    try { m.currentTab = tab; } catch(e){}
+    try {
+      m.currentTab = tab;
+      if (tab === 'music') {
+        m.currentGroup = 'all';
+      } else {
+        var validGroups = (Array.isArray(m.rawGroups) ? m.rawGroups : []).filter(function(g){ return g && g.type === tab; }).map(function(g){ return g.id; });
+        if (m.currentGroup !== 'all' && validGroups.indexOf(m.currentGroup) < 0) m.currentGroup = 'all';
+      }
+      m.focusIdx = -1;
+    } catch(e){}
     stopOpposite(tab);
     syncMediaDom(tab);
-    try { if (tab === 'music' && window.MusicApp && typeof window.MusicApp.renderList === 'function') window.MusicApp.renderList(); } catch(e){}
-    try { if (tab !== 'music' && typeof m.renderGroupMenus === 'function') m.renderGroupMenus(); } catch(e){}
-    try { if (tab !== 'music' && typeof m.renderLists === 'function') m.renderLists(); } catch(e){}
-    try { localStorage.setItem('lifeos_media_memory', JSON.stringify({tab:tab, group:m.currentGroup || 'all', tvIdx:m.currentTvIdx, radioIdx:m.currentRadioIdx, source:'r75-no-autoplay'})); } catch(e){}
+    if (tab === 'music') {
+      try {
+        var app = window.MusicApp;
+        var loading = $('music-loading');
+        if (app && Array.isArray(app.playlist) && app.playlist.length && typeof app.renderList === 'function') {
+          app.renderList();
+          if (loading) loading.style.display = 'none';
+        } else if (app && typeof app.refetch === 'function' && !app.__r88Mp3Refetching) {
+          if (loading) { loading.style.display = 'block'; loading.textContent = 'Đang đồng bộ danh sách Nhạc MP3...'; }
+          app.__r88Mp3Refetching = true;
+          Promise.resolve(app.refetch()).catch(function(err){
+            if (loading) { loading.style.display = 'block'; loading.textContent = 'Chưa tải được danh sách Nhạc MP3. Bấm lại Nhạc MP3 để thử lại.'; }
+            try { console.warn('[R88_MP3_REFETCH_FAIL]', err && err.message ? err.message : err); } catch(e){}
+          }).finally(function(){ app.__r88Mp3Refetching = false; });
+        } else if (app && typeof app.renderList === 'function') {
+          app.renderList();
+        }
+      } catch(e){}
+    } else {
+      try { if (typeof m.renderGroupMenus === 'function') m.renderGroupMenus(); } catch(e){}
+      try { if (typeof m.renderLists === 'function') m.renderLists(); } catch(e){}
+    }
+    try { localStorage.setItem('lifeos_media_memory', JSON.stringify({tab:tab, group:m.currentGroup || 'all', tvIdx:m.currentTvIdx, radioIdx:m.currentRadioIdx, source:'r88-clean-media'})); } catch(e){}
     stats.mediaTabNoAutoplay++;
     setMediaLiveAllowed();
+    try { console.info('[R88_MEDIA_TAB_OK]', {tab:tab, group:m.currentGroup, radio:(m.radioData||[]).length, tv:(m.tvData||[]).length, mp3: (window.MusicApp && window.MusicApp.playlist || []).length}); } catch(e){}
     return false;
   }
   function installMediaNoAutoplay(){
@@ -32672,318 +32818,297 @@ body.lifeos-r75-not-music.media-live-scroll-mode {
 <!-- LIFEOS J20 R75 SAFE ROUTER + MEDIA NO AUTOPLAY + CLEAN GATE - END -->
 
 
-<!-- LIFEOS PHA14J20R80 FAMILY DOWNLOAD PART HUD SYNC - START
-     R80 fixes R79 stale yellow legacy status bar after download completes.
-     Base: R76 final + R79 real part/chunk progress. Scope: Family download UI only.
-     Contract: one source of truth; HUD owns download status, legacy #chat-upload-status is suppressed during/after download. -->
-<style id="lifeos-r80-family-download-part-hud-sync-css">
-#lifeos-r80-download-hud{position:fixed!important;z-index:2147483000!important;left:max(10px,env(safe-area-inset-left))!important;right:max(10px,env(safe-area-inset-right))!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;pointer-events:none!important;opacity:0!important;transform:translateY(120%)!important;transition:opacity .14s ease,transform .14s ease!important;font-family:inherit!important}
-@media(min-width:760px){#lifeos-r80-download-hud{left:auto!important;width:min(460px,calc(100vw - 22px))!important}}
-#lifeos-r80-download-hud.r80-visible{opacity:1!important;transform:translateY(0)!important}
-#lifeos-r80-download-hud .r80-card{pointer-events:auto!important;border-radius:19px!important;padding:12px!important;color:#f8fafc!important;background:rgba(15,23,42,.97)!important;border:1px solid rgba(255,255,255,.13)!important;box-shadow:0 18px 46px rgba(15,23,42,.31)!important;overflow:hidden!important}
-#lifeos-r80-download-hud .r80-top{display:flex!important;align-items:flex-start!important;gap:10px!important;min-width:0!important}
-#lifeos-r80-download-hud .r80-icon{width:36px!important;height:36px!important;border-radius:15px!important;background:rgba(56,189,248,.14)!important;color:#7dd3fc!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;margin-top:1px!important}
-#lifeos-r80-download-hud.r80-info .r80-icon i{animation:r80spin .85s linear infinite!important}@keyframes r80spin{to{transform:rotate(360deg)}}
-#lifeos-r80-download-hud .r80-main{min-width:0!important;flex:1 1 auto!important}.r80-title{font-size:13px!important;line-height:1.25!important;font-weight:1000!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.r80-detail{font-size:11px!important;line-height:1.32!important;color:rgba(226,232,240,.84)!important;margin-top:2px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.r80-meta{font-size:10px!important;line-height:1.2!important;color:rgba(203,213,225,.78)!important;margin-top:4px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-#lifeos-r80-download-hud .r80-actions{display:flex!important;gap:6px!important;flex:0 0 auto!important}.r80-btn{height:30px!important;min-width:30px!important;border-radius:999px!important;border:1px solid rgba(255,255,255,.16)!important;background:rgba(255,255,255,.1)!important;color:#fff!important;font-size:12px!important;font-weight:1000!important;padding:0 10px!important;display:flex!important;align-items:center!important;justify-content:center!important}.r80-close{width:30px!important;padding:0!important;font-size:18px!important}.r80-cancel{display:none!important}#lifeos-r80-download-hud.r80-info .r80-cancel{display:flex!important}
-.r80-progress{height:7px!important;margin-top:10px!important;background:rgba(148,163,184,.28)!important;border-radius:999px!important;overflow:hidden!important}.r80-bar{height:100%!important;width:0%!important;border-radius:999px!important;background:#38bdf8!important;transition:width .12s linear!important}.r80-subbar-wrap{height:3px!important;margin-top:5px!important;background:rgba(148,163,184,.2)!important;border-radius:999px!important;overflow:hidden!important}.r80-subbar{height:100%!important;width:0%!important;background:rgba(125,211,252,.72)!important;transition:width .12s linear!important}.r80-foot{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;margin-top:7px!important;font-size:10px!important;line-height:1!important;color:rgba(226,232,240,.72)!important}.r80-pct{font-weight:1000!important;color:#f8fafc!important}.r80-part{font-weight:1000!important;color:#bae6fd!important}
-#lifeos-r80-download-hud.r80-done .r80-icon{background:rgba(16,185,129,.18)!important;color:#86efac!important}#lifeos-r80-download-hud.r80-done .r80-bar{background:#34d399!important;width:100%!important}#lifeos-r80-download-hud.r80-error .r80-icon{background:rgba(244,63,94,.2)!important;color:#fda4af!important}#lifeos-r80-download-hud.r80-error .r80-bar{background:#fb7185!important;width:100%!important}#lifeos-r80-download-hud.r80-warn .r80-icon{background:rgba(245,158,11,.2)!important;color:#fde68a!important}#lifeos-r80-download-hud.r80-warn .r80-bar{background:#fbbf24!important;width:100%!important}
-
-body.lifeos-r80-download-owned #chat-upload-status.lifeos-r80-hide-legacy-download,
-body.lifeos-r80-download-settling #chat-upload-status.lifeos-r80-hide-legacy-download{display:none!important;opacity:0!important;pointer-events:none!important;visibility:hidden!important;}
-</style>
-<script id="lifeos-r80-family-download-part-hud-sync-js">
+<!-- Pha14J20R83_FamilyDeleteTombstoneGuard_R76Base - START -->
+<script id="lifeos-j20r83-family-delete-tombstone-guard-js">
 (function(){
   'use strict';
-  var PHASE='Pha14J20R80_FamilyDownloadPartHUDSync_R76Base';
-  if(window.__LifeOSR80FamilyDownloadPartHUDSync)return; window.__LifeOSR80FamilyDownloadPartHUDSync=true;
-  var MB=1024*1024, RELAY_DEFAULT='https://telegram-upload-relay.tunhienhieuchuyen.workers.dev';
-  var active=null, hideTimer=0, patchTimer=0, lastUiSig='', lastUiAt=0;
-  var legacyGuardTimer=0, legacyGuardUntil=0;
-  function isDownloadLegacyText(txt){txt=S(txt);return /(?:Đang tải|Dang tai|tải file|tai file|SaveAs|chọn nơi lưu|chon noi luu|đã chọn nơi lưu|da chon noi luu|đang ghi|dang ghi|part\s+\d+|download)/i.test(txt)&&!/(Đang gửi|Dang gui|Gửi lỗi|Gui loi|upload|Clipboard|tin nhắn|tin nhan)/i.test(txt)}
-  function legacyBar(){return document.getElementById('chat-upload-status')}
-  function hideLegacyDownloadStatus(reason){try{var bar=legacyBar();if(!bar)return;var txt=bar.textContent||'';if(isDownloadLegacyText(txt)){bar.classList.add('lifeos-r80-hide-legacy-download','hidden');bar.setAttribute('data-lifeos-r80-hidden-download',reason||'download');bar.style.setProperty('display','none','important');bar.style.setProperty('visibility','hidden','important');bar.style.setProperty('opacity','0','important')}else{bar.classList.remove('lifeos-r80-hide-legacy-download');if(bar.getAttribute('data-lifeos-r80-hidden-download')){bar.removeAttribute('data-lifeos-r80-hidden-download');bar.style.removeProperty('display');bar.style.removeProperty('visibility');bar.style.removeProperty('opacity')}}}catch(e){}}
-  function legacyGuardTick(){hideLegacyDownloadStatus(active?'active':'settling');if(legacyGuardUntil&&now()>legacyGuardUntil){try{document.body&&document.body.classList.remove('lifeos-r80-download-owned','lifeos-r80-download-settling')}catch(e){};try{var bar=legacyBar();if(bar){bar.classList.remove('lifeos-r80-hide-legacy-download');if(bar.getAttribute('data-lifeos-r80-hidden-download')){bar.removeAttribute('data-lifeos-r80-hidden-download');bar.style.removeProperty('display');bar.style.removeProperty('visibility');bar.style.removeProperty('opacity')}}}catch(e){};clearInterval(legacyGuardTimer);legacyGuardTimer=0;legacyGuardUntil=0}}
-  function startLegacyGuard(){try{document.body&&document.body.classList.add('lifeos-r80-download-owned')}catch(e){};legacyGuardUntil=now()+10*60*1000;if(!legacyGuardTimer)legacyGuardTimer=setInterval(legacyGuardTick,180);legacyGuardTick()}
-  function settleLegacyGuard(){try{document.body&&document.body.classList.remove('lifeos-r80-download-owned');document.body&&document.body.classList.add('lifeos-r80-download-settling')}catch(e){};legacyGuardUntil=now()+8000;if(!legacyGuardTimer)legacyGuardTimer=setInterval(legacyGuardTick,160);legacyGuardTick();setTimeout(legacyGuardTick,60);setTimeout(legacyGuardTick,240);setTimeout(legacyGuardTick,700);setTimeout(legacyGuardTick,1600);setTimeout(legacyGuardTick,3600)}
+  if(window.__lifeosJ20R83FamilyDeleteTombstoneGuard) return;
+  window.__lifeosJ20R83FamilyDeleteTombstoneGuard = true;
 
-  function S(v){return v==null?'':String(v)} function N(v){v=Number(v);return isFinite(v)?v:0} function now(){return Date.now()}
-  function fmt(n){n=N(n);if(n>=MB)return (n/MB).toFixed(n>=10*MB?1:2).replace(/\.0$/,'')+' MB';if(n>=1024)return (n/1024).toFixed(n>=102400?0:1).replace(/\.0$/,'')+' KB';return Math.max(0,Math.round(n))+' B'}
-  function pct(v){v=N(v);return Math.max(0,Math.min(100,v))}
-  function short(s,max){s=S(s).replace(/\s+/g,' ').trim();max=max||96;return s.length>max?s.slice(0,Math.max(20,Math.floor(max*.48)))+'…'+s.slice(-Math.max(18,Math.floor(max*.38))):s}
-  function esc(s){return S(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-  function log(type,data,sev){try{if(window.LifeOSJ20R11Obs&&typeof window.LifeOSJ20R11Obs.trace==='function')window.LifeOSJ20R11Obs.trace(type,Object.assign({phase:PHASE,source:'R80_DOWNLOAD_PART_HUD_SYNC'},data||{}),sev||'info')}catch(e){}}
-  function relay(){return S(window.LIFEOS_UPLOAD_RELAY_URL||window.LIFEOS_RELAY_BASE||window.LIFEOS_TELEGRAM_RELAY_BASE||RELAY_DEFAULT).replace(/\/+$/,'')}
-  function downloadUrl(fid,name){var u=new URL(relay()+'/download');u.searchParams.set('file_id',S(fid));if(name)u.searchParams.set('name',S(name));return u.toString()}
-  function ensureHud(){var h=document.getElementById('lifeos-r80-download-hud');if(h)return h;h=document.createElement('div');h.id='lifeos-r80-download-hud';h.setAttribute('role','status');h.setAttribute('aria-live','polite');h.innerHTML='<div class="r80-card"><div class="r80-top"><div class="r80-icon"><i class="ph-bold ph-spinner-gap"></i></div><div class="r80-main"><div class="r80-title">Đang chuẩn bị tải xuống</div><div class="r80-detail">Family download</div><div class="r80-meta">Đang chờ...</div></div><div class="r80-actions"><button type="button" class="r80-btn r80-cancel">Hủy</button><button type="button" class="r80-btn r80-close">×</button></div></div><div class="r80-progress"><div class="r80-bar"></div></div><div class="r80-subbar-wrap"><div class="r80-subbar"></div></div><div class="r80-foot"><span class="r80-part">Family SaveAs</span><span class="r80-pct"></span></div></div>';(document.body||document.documentElement).appendChild(h);var c=h.querySelector('.r80-close');if(c)c.onclick=function(){hide(false)};var x=h.querySelector('.r80-cancel');if(x)x.onclick=function(){cancelActive('user_cancel')};return h}
-  function icon(state){return state==='done'?'ph-check-circle':state==='error'?'ph-warning-circle':state==='warn'?'ph-hand-palm':'ph-spinner-gap'}
-  function show(state,title,detail,opt){opt=opt||{};state=state||'info';if(state==='info')startLegacyGuard();else if(state==='done'||state==='warn'||state==='error')settleLegacyGuard();var g=pct(opt.globalPct), p=pct(opt.partPct);var sig=[state,title,detail,Math.round(g),Math.round(p),opt.partText,opt.meta].join('|');var t=now();if(sig===lastUiSig&&t-lastUiAt<180)return;lastUiSig=sig;lastUiAt=t;clearTimeout(hideTimer);var h=ensureHud();h.className='r80-visible r80-'+state;var i=h.querySelector('.r80-icon i');if(i)i.className='ph-bold '+icon(state);var tt=h.querySelector('.r80-title');if(tt)tt.textContent=short(title||'Đang tải xuống',72);var dd=h.querySelector('.r80-detail');if(dd)dd.textContent=short(detail||'',112);var mm=h.querySelector('.r80-meta');if(mm)mm.textContent=short(opt.meta||'',118);var b=h.querySelector('.r80-bar');if(b)b.style.width=(state==='info'?g:100)+'%';var sb=h.querySelector('.r80-subbar');if(sb)sb.style.width=(state==='info'?p:100)+'%';var fp=h.querySelector('.r80-pct');if(fp)fp.textContent=state==='info'?Math.round(g)+'%':'';var ft=h.querySelector('.r80-part');if(ft)ft.textContent=short(opt.partText||PHASE.replace('Pha14J20','J20'),60);try{h.dataset.phase=PHASE;h.dataset.state=state;h.dataset.name=opt.fileName||'';h.dataset.part=opt.partText||''}catch(e){} if(opt.autoHide||state==='done'||state==='warn'){hideTimer=setTimeout(function(){hide(true)},opt.hideMs||(state==='done'?3800:5200))}}
-  function hide(soft){var h=document.getElementById('lifeos-r80-download-hud');if(h)h.classList.remove('r80-visible');if(!soft)active=null}
-  function chatStatus(text,state,autoHide,pctv,stage,canCancel){try{state=state||'info';if(state==='info'){startLegacyGuard();return}if(state==='done'||state==='warn'||state==='error'){settleLegacyGuard();return}}catch(e){}}
-  function report(state,title,detail,opt){show(state,title,detail,opt||{});chatStatus(title+(detail?' · '+detail:''),state,state!=='info',opt&&typeof opt.globalPct==='number'?opt.globalPct:undefined,opt&&opt.meta,true)}
-  function cancelActive(reason){try{if(active&&active.controller)active.controller.abort(reason||'user')}catch(e){} try{if(window.LifeOSTransferGate&&window.LifeOSTransferGate.cancelActive)window.LifeOSTransferGate.cancelActive(reason||'user')}catch(e){} show('warn','Đã yêu cầu hủy tải xuống','Đang đóng kết nối tải/lưu hiện tại',{autoHide:true,hideMs:4200})}
-  function guessExt(name){var m=S(name).match(/\.([a-zA-Z0-9]{1,12})$/);return m?'.'+m[1].toLowerCase():''}
-  async function openTarget(name,mime,ctx){if(typeof window.showSaveFilePicker!=='function')return null;show('info','Đang mở chọn nơi lưu',name,{globalPct:0,partPct:0,partText:'SaveAs',meta:'Chọn thư mục / đổi tên rồi bấm Save',fileName:name});try{var ext=guessExt(name),opts={suggestedName:name||'file.bin'};if(ext)opts.types=[{description:'LifeOS file',accept:{[mime||'application/octet-stream']:[ext]}}];var handle=await window.showSaveFilePicker(opts);show('info','Đã chọn nơi lưu','Bắt đầu tải và ghi file trực tiếp',{globalPct:1,partPct:0,partText:'SaveAs OK',meta:'Không chờ ghép xong mới báo',fileName:name});var writable=await handle.createWritable();return{mode:'picker',writable:writable,name:name}}catch(e){if(e&&(e.name==='AbortError'||/abort|cancel|hủy|huỷ/i.test(S(e.message))))throw Object.assign(new Error('abort'),{aborted:true});log('SAVE_PICKER_FALLBACK',{fileName:name,error:S(e&&e.message||e)},'warn');return null}}
-  async function closeTarget(target,err){if(!target||!target.writable)return;try{if(err&&target.writable.abort)await target.writable.abort(err);else await target.writable.close()}catch(e){}}
-  async function saveBlob(blob,name){var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=name||'file.bin';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){try{URL.revokeObjectURL(url);a.remove()}catch(e){}},15000);return true}
-  function msgKey(m){return S(m&&(m.id||m.msg_key||m.messageId||m.localId||m.key))}
-  function findMsg(id){id=S(id);var a=Array.isArray(window.chatHistory)?window.chatHistory:[];for(var i=0;i<a.length;i++){var m=a[i]||{};if(S(m.id)===id||S(m.msg_key)===id||S(m.messageId)===id||S(m.localId)===id||S(m.key)===id)return m}return null}
-  function manifestOf(m){return (m&&typeof m==='object')?(m.bundleManifest||m.bundle_manifest||m.manifest||{}):{}}
-  function partsOf(m){var mf=manifestOf(m),p=Array.isArray(mf.parts)?mf.parts:(Array.isArray(m&&m.parts)?m.parts:[]);return p.slice().sort(function(a,b){return N(a&&a.index||a&&a.partIndex)-N(b&&b.index||b&&b.partIndex)})}
-  function isBundle(m){var ps=partsOf(m);return !!(m&&(m.isBundle||m.type==='file_bundle'||/bundle/i.test(S(m.kind||m.uploadMode||''))||ps.length))}
-  function fileIdOf(m){return S(m&&(m.file_id||m.fileId||m.telegramFileId||m.telegram_file_id||m.id_file))}
-  function partFileId(p){return S(p&&(p.fileId||p.file_id||p.telegramFileId||p.telegram_file_id||p.id_file||p.id))}
-  function nameOf(m){var mf=manifestOf(m);return S(mf.originalName||mf.fileName||mf.safeName||m.file_name||m.fileName||m.name||m.title||'LifeOS_file.bin')}
-  function mimeOf(m){var mf=manifestOf(m);return S(mf.mime||m.mime_type||m.mime||'application/octet-stream')}
-  function totalOf(m,parts){var mf=manifestOf(m),t=N(mf.totalSize||mf.originalSize||mf.size||mf.fileSize||m.totalSize||m.file_size||m.size);if(t>0)return t;var s=0;(parts||[]).forEach(function(p,i){s+=expectedPart(mf,parts,i,p)});return s}
-  function expectedPart(mf,parts,i,p){var v=N(p&&(p.size||p.bytes||p.file_size||p.fileSize||p.partSizeBytes));if(v>0)return v;var total=N(mf&&(mf.totalSize||mf.originalSize||mf.size||mf.fileSize));var ps=N(mf&&(mf.partSize||mf.PART_SIZE||mf.part_size));var count=N(mf&&(mf.totalParts||mf.partCount||mf.part_count))||((parts&&parts.length)||0);var idx=N(p&&(p.index||p.partIndex))||i+1;if(total>0&&ps>0&&count>0)return idx<count?ps:Math.max(0,total-ps*(count-1));return 0}
-  function globalPct(done,total,idx,totalParts,partPct){if(total>0)return pct(done/total*100);if(totalParts>0)return pct(((idx-1)+pct(partPct)/100)/totalParts*100);return 0}
-  function isAbort(e){return !!(e&&(e.aborted||e.name==='AbortError'||/abort|cancel|hủy|huỷ/i.test(S(e.message||e))))}
-  function activeOk(ctx){return !!(ctx&&ctx.controller&&!ctx.controller.signal.aborted)}
-  async function fetchPart(url,label,ctx,info,writer){var started=now(),chunks=writer?null:[],loaded=0,len=0,type='application/octet-stream';info=info||{};var idx=N(info.idx)||1,totalParts=N(info.totalParts)||1,doneBefore=N(info.doneBefore),totalBytes=N(info.totalBytes),expected=N(info.expected),fileName=info.fileName||label;var partText=totalParts>1?('part '+idx+'/'+totalParts):'1 file';show('info',totalParts>1?'Đang tải '+partText:'Đang tải file',fileName,{globalPct:globalPct(doneBefore,totalBytes,idx,totalParts,0),partPct:0,partText:partText,meta:(expected?('part này '+fmt(expected)):'đang chờ server trả dữ liệu'),fileName:fileName});log('DOWNLOAD_PART_FETCH_START',{fileName:fileName,label:label,partIndex:idx,totalParts:totalParts,expected:expected,url:url});var heartbeat=0;try{var res=await fetch(url,{cache:'no-store',signal:ctx.controller.signal});if(!res.ok)throw new Error('download_http_'+res.status);len=N(res.headers.get('Content-Length'));type=S(res.headers.get('Content-Type')||'application/octet-stream');var denom=expected||len||0;log('DOWNLOAD_PART_HEADERS',{fileName:fileName,label:label,partIndex:idx,totalParts:totalParts,status:res.status,contentLength:len,expected:expected,contentType:type});if(!res.body){heartbeat=setInterval(function(){if(!activeOk(ctx)){clearInterval(heartbeat);return}show('info',totalParts>1?'Đang tải '+partText:'Đang tải file',fileName,{globalPct:globalPct(doneBefore,totalBytes,idx,totalParts,loaded&&denom?loaded/denom*100:2),partPct:loaded&&denom?loaded/denom*100:2,partText:partText,meta:'Server chưa cho đọc chunk, vẫn đang tải...',fileName:fileName})},1000);var b=await res.blob();clearInterval(heartbeat);loaded=N(b.size);if(writer)await writer.write(b);else chunks.push(b);}
-      else{var reader=res.body.getReader(),last=0;while(true){if(!activeOk(ctx))throw Object.assign(new Error('abort'),{aborted:true});var r=await reader.read();if(r.done)break;var val=r.value;if(writer)await writer.write(val);else chunks.push(val);loaded+=N(val&&val.byteLength||val&&val.length);var t=now();if(t-last>180||loaded>=denom){last=t;var pp=denom?loaded/denom*100:(loaded>0?8:1);var gp=globalPct(doneBefore+loaded,totalBytes,idx,totalParts,pp);show('info',totalParts>1?'Đang tải '+partText:'Đang tải file',fileName,{globalPct:gp,partPct:pp,partText:partText,meta:(totalBytes?fmt(doneBefore+loaded)+' / '+fmt(totalBytes)+' · ':'')+'part '+fmt(loaded)+(denom?' / '+fmt(denom):'')+' · '+Math.round((t-started)/1000)+'s',fileName:fileName});chatStatus((totalParts>1?'Đang tải '+partText:'Đang tải')+': '+fileName,'info',false,gp,(totalBytes?fmt(doneBefore+loaded)+'/'+fmt(totalBytes):fmt(loaded))+' · có thể hủy',true)}}}
-      if(expected>0&&loaded!==expected){var er=new Error('bundle_part_size_mismatch part '+idx+' expected '+expected+' actual '+loaded);er.expected=expected;er.actual=loaded;er.partIndex=idx;throw er}log('DOWNLOAD_PART_FETCH_DONE',{fileName:fileName,label:label,partIndex:idx,totalParts:totalParts,loaded:loaded,expected:expected,duration:now()-started});return{blob:writer?null:new Blob(chunks,{type:type}),loaded:loaded,type:type}}
-    catch(e){try{if(heartbeat)clearInterval(heartbeat)}catch(_e){}log('DOWNLOAD_PART_FETCH_FAIL',{fileName:fileName,label:label,partIndex:idx,totalParts:totalParts,loaded:loaded,error:S(e&&e.message||e),aborted:isAbort(e)},isAbort(e)?'warn':'error');throw e}}
-  async function prepareGate(kind,label){var gate=window.LifeOSTransferGate;if(gate&&typeof gate.prepare==='function'){var tk=await gate.prepare(kind,label);return{gate:gate,token:tk,controller:tk.controller,finish:function(){try{gate.finish(tk)}catch(e){}}}}var c=new AbortController();return{controller:c,finish:function(){}}}
-  async function downloadSingleSmart(ce,m){var name=nameOf(m),mime=mimeOf(m),fid=fileIdOf(m),expected=N(m.file_size||m.fileSize||m.size);if(!fid)throw new Error('Thiếu file_id');var ctx=await prepareGate('download','download '+name);active=ctx;try{show('info','Đang gom file',name,{globalPct:0,partPct:0,partText:'chuẩn bị',meta:expected?('Dung lượng '+fmt(expected)):'Đang đọc thông tin file',fileName:name});var target=null;try{target=await openTarget(name,mime,ctx)}catch(e){if(isAbort(e))throw e}var out=await fetchPart(downloadUrl(fid,name),name,ctx,{idx:1,totalParts:1,doneBefore:0,totalBytes:expected,expected:expected,fileName:name},target&&target.writable);if(target){await closeTarget(target);show('done','Đã lưu xong',name,{globalPct:100,partPct:100,partText:'xong',meta:fmt(out.loaded)+' · ghi trực tiếp vào nơi lưu',autoHide:true,fileName:name})}else{await saveBlob(out.blob,name);show('done','Đã tạo file tải về',name,{globalPct:100,partPct:100,partText:'xong',meta:fmt(out.loaded)+' · trình duyệt tải xuống mặc định',autoHide:true,fileName:name})}log('DOWNLOAD_SINGLE_SMART_DONE',{fileName:name,size:out.loaded,saveMode:target?'file_picker':'browser_download'});return true}finally{try{ctx.finish()}catch(e){}active=null}}
-  async function downloadBundleSmart(ce,m){var mf=manifestOf(m),parts=partsOf(m);if(!parts.length)throw new Error('Bundle thiếu part');var name=nameOf(m),mime=mimeOf(m),total=totalOf(m,parts),ctx=await prepareGate('download','download bundle '+name),target=null,blobs=[],done=0;active=ctx;try{show('info','Đang gom danh sách part',name,{globalPct:0,partPct:0,partText:'0/'+parts.length,meta:(total?fmt(total)+' · ':'')+'chuẩn bị tải '+parts.length+' phần',fileName:name});try{target=await openTarget(name,mime,ctx)}catch(e){if(isAbort(e))throw e}show('info','Bắt đầu tải file lớn',name,{globalPct:0,partPct:0,partText:'0/'+parts.length,meta:(target?'Ghi thẳng vào file đích':'Sẽ ghép blob rồi tải xuống')+' · '+parts.length+' part',fileName:name});for(var i=0;i<parts.length;i++){if(!activeOk(ctx))throw Object.assign(new Error('abort'),{aborted:true});var p=parts[i],fid=partFileId(p),idx=N(p.index||p.partIndex)||i+1,expected=expectedPart(mf,parts,i,p),partName=S(p.name||p.fileName||('part_'+idx));if(!fid)throw new Error('Thiếu file_id part '+idx);show('info','Đang tải part '+idx+'/'+parts.length,name,{globalPct:globalPct(done,total,idx,parts.length,0),partPct:0,partText:'part '+idx+'/'+parts.length,meta:'Chuẩn bị gọi server · '+(expected?fmt(expected):'chưa biết dung lượng part'),fileName:name});var out=await fetchPart(downloadUrl(fid,partName),partName,ctx,{idx:idx,totalParts:parts.length,doneBefore:done,totalBytes:total,expected:expected,fileName:name},target&&target.writable);done+=N(out.loaded);if(!target)blobs.push(out.blob);show('info','Đã xong part '+idx+'/'+parts.length,name,{globalPct:globalPct(done,total,idx,parts.length,100),partPct:100,partText:'part '+idx+'/'+parts.length,meta:fmt(done)+(total?' / '+fmt(total):'')+' · kiểm byte OK',fileName:name});await new Promise(function(r){setTimeout(r,40)})}
-      if(target){show('info','Đang đóng file đã lưu',name,{globalPct:99,partPct:100,partText:'đóng file',meta:'Đợi hệ thống flush dữ liệu xuống ổ lưu',fileName:name});await closeTarget(target);show('done','Đã lưu xong file lớn',name,{globalPct:100,partPct:100,partText:'xong',meta:fmt(done)+(total?' / '+fmt(total):'')+' · '+parts.length+' part OK',autoHide:true,fileName:name})}
-      else{show('info','Đang ghép file để tải xuống',name,{globalPct:99,partPct:100,partText:'ghép file',meta:parts.length+' part · '+fmt(done),fileName:name});var blob=new Blob(blobs,{type:mime});await saveBlob(blob,name);show('done','Đã ghép và tạo file tải về',name,{globalPct:100,partPct:100,partText:'xong',meta:fmt(blob.size)+' · '+parts.length+' part OK',autoHide:true,fileName:name})}log('DOWNLOAD_BUNDLE_SMART_DONE',{fileName:name,bundleId:S(mf.bundleId||m.bundleId),parts:parts.length,size:done,saveMode:target?'file_picker':'browser_download'});return true}
-    catch(e){if(target)await closeTarget(target,S(e&&e.message||e));throw e}finally{try{ctx.finish()}catch(e){}active=null}}
-  function patch(){try{var ce=window.ChatEngine;if(!ce||typeof ce.downloadChatFile!=='function')return false;if(ce.downloadChatFile.__lifeosR80PartHud)return true;var base=ce.downloadChatFile.bind(ce);var wrapped=async function(mid){var m=findMsg(mid);if(!m)return base.apply(ce,arguments);if(m._lifeosVirtualTextFile)return base.apply(ce,arguments);lastUiSig='';show('info','Đang gom file',nameOf(m),{globalPct:0,partPct:0,partText:'bắt đầu',meta:'Bấm tải là báo ngay, không chờ ghép xong',fileName:nameOf(m)});log('DOWNLOAD_ROUTE_START',{mid:S(mid),fileName:nameOf(m),isBundle:isBundle(m),parts:partsOf(m).length});try{return isBundle(m)?await downloadBundleSmart(ce,m):await downloadSingleSmart(ce,m)}catch(e){if(isAbort(e)){show('warn','Đã hủy tải xuống',nameOf(m),{globalPct:100,partPct:100,partText:'hủy',meta:S(e&&e.message||e),autoHide:true,fileName:nameOf(m)});chatStatus('Đã hủy tải xuống','warn',true,undefined,'Người dùng hủy hoặc SaveAs bị đóng',false);return false}show('error','Tải/lưu thất bại',nameOf(m),{globalPct:100,partPct:100,partText:'lỗi',meta:S(e&&e.message||e),fileName:nameOf(m)});chatStatus('Tải lỗi: '+S(e&&e.message||e),'error',false,undefined,'Có thể thử tải lại',false);return false}};wrapped.__lifeosR80PartHud=true;wrapped.__lifeosR80BaseDownload=base;ce.downloadChatFile=wrapped;return true}catch(e){log('PATCH_FAIL',{error:S(e&&e.message||e)},'error');return false}}
-  function boot(){ensureHud();patch()}
-  window.LifeOSFamilyDownloadHUD={phase:PHASE,boot:boot,patch:patch,show:show,cancel:cancelActive,summary:function(){return{phase:PHASE,patched:!!(window.ChatEngine&&window.ChatEngine.downloadChatFile&&window.ChatEngine.downloadChatFile.__lifeosR80PartHud),active:!!active,relay:relay(),rule:'real part/chunk progress, no silent large download',base:'R76'}}};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-  window.addEventListener('load',function(){boot();setTimeout(boot,300);setTimeout(boot,1300);setTimeout(boot,4200)},{once:true});
-  patchTimer=setInterval(function(){if(patch()&&now()-(window.__lifeosR80Start||now())>12000){clearInterval(patchTimer);patchTimer=0}},500);window.__lifeosR80Start=now();
-  try{console.info('[R80_DOWNLOAD_PART_HUD_SYNC_READY]',{phase:PHASE,base:'R76',realPartProgress:true,noSchemaRouterCacheChange:true})}catch(e){}
-})();
-</script>
-<!-- LIFEOS PHA14J20R80 FAMILY DOWNLOAD PART HUD SYNC - END -->
+  var PHASE = 'Pha14J20R83_FamilyDeleteTombstoneGuard_R76Base';
+  var LS = 'lifeos_j20r83_family_delete_tombstones_v1';
+  var LS_TRACE = 'lifeos_j20r83_family_delete_guard_trace_v1';
+  var CACHE_KEYS = [
+    'lifeos_v8_chat_shared',
+    'lifeos_j20r2_hybrid_cache_v1'
+  ];
 
-<!-- LIFEOS PHA14J20R81 GLOBAL DOWNLOAD HUD ALL FILES - START
-     Purpose: one global download HUD for every LifeOS download route, not only Family bundle route.
-     Base: R76 final line + R79/R80 part HUD behavior. Scope: UI feedback only.
-     Contract: all file types/sizes get immediate feedback; File Picker/write/anchor/blob/fetch download paths are mirrored into the same HUD. -->
-<style id="lifeos-r81-global-download-hud-css">
-#chat-upload-status.lifeos-r81-download-legacy-hidden{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;max-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}
-#lifeos-r81-download-fallback{position:fixed!important;z-index:2147483100!important;left:max(10px,env(safe-area-inset-left))!important;right:max(10px,env(safe-area-inset-right))!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;pointer-events:none!important;opacity:0!important;transform:translateY(120%)!important;transition:opacity .14s ease,transform .14s ease!important;font-family:inherit!important}
-@media(min-width:760px){#lifeos-r81-download-fallback{left:auto!important;width:min(480px,calc(100vw - 22px))!important}}
-#lifeos-r81-download-fallback.r81-visible{opacity:1!important;transform:translateY(0)!important}
-#lifeos-r81-download-fallback .r81-card{pointer-events:auto!important;border-radius:19px!important;padding:12px!important;color:#f8fafc!important;background:rgba(15,23,42,.97)!important;border:1px solid rgba(255,255,255,.13)!important;box-shadow:0 18px 46px rgba(15,23,42,.31)!important;overflow:hidden!important}
-#lifeos-r81-download-fallback .r81-title{font-size:13px!important;line-height:1.25!important;font-weight:900!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-#lifeos-r81-download-fallback .r81-name{margin-top:2px!important;font-size:12px!important;line-height:1.25!important;color:#cbd5e1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-#lifeos-r81-download-fallback .r81-meta{margin-top:5px!important;font-size:11px!important;line-height:1.3!important;color:#94a3b8!important;white-space:normal!important;word-break:break-word!important}
-#lifeos-r81-download-fallback .r81-bar{height:8px!important;border-radius:999px!important;background:rgba(148,163,184,.23)!important;overflow:hidden!important;margin-top:9px!important}
-#lifeos-r81-download-fallback .r81-fill{height:100%!important;width:0%;border-radius:inherit!important;background:linear-gradient(90deg,#38bdf8,#22c55e)!important;transition:width .13s ease!important}
-#lifeos-r81-download-fallback.r81-done .r81-card{background:linear-gradient(135deg,rgba(6,95,70,.98),rgba(22,101,52,.98))!important;border-color:rgba(187,247,208,.4)!important}
-#lifeos-r81-download-fallback.r81-error .r81-card{background:linear-gradient(135deg,rgba(127,29,29,.98),rgba(153,27,27,.98))!important;border-color:rgba(254,202,202,.45)!important}
-#lifeos-r81-download-fallback.r81-warn .r81-card{background:linear-gradient(135deg,rgba(120,53,15,.98),rgba(146,64,14,.98))!important;border-color:rgba(253,230,138,.45)!important}
-#lifeos-r81-download-fallback .r81-row{display:flex!important;align-items:flex-start!important;gap:10px!important}.r81-ico{width:36px!important;height:36px!important;border-radius:15px!important;background:rgba(56,189,248,.14)!important;color:#7dd3fc!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important}.r81-main{min-width:0!important;flex:1 1 auto!important}.r81-x{width:34px!important;height:34px!important;border-radius:999px!important;background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.12)!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important}
-</style>
-<script id="lifeos-r81-global-download-hud-js">
-(function(){
-  'use strict';
-  if(window.__lifeosR81GlobalDownloadHudInstalled) return;
-  window.__lifeosR81GlobalDownloadHudInstalled = true;
-  var PHASE='Pha14J20R81_GlobalDownloadHUDAllFiles_R76Base';
-  var nativeFetch=window.fetch&&window.fetch.bind(window);
-  var nativePicker=window.showSaveFilePicker&&window.showSaveFilePicker.bind(window);
-  var nativeAnchorClick=window.HTMLAnchorElement&&window.HTMLAnchorElement.prototype&&window.HTMLAnchorElement.prototype.click;
-  var active=false, tokenSeq=0, activeToken=0, guardUntil=0, intentUntil=0, intentName='', intentLabel='', byteLoaded=0, byteTotal=0, fallbackTimer=0, patchTimer=0;
-  function now(){return Date.now()}
-  function S(v){return String(v==null?'':v)}
-  function N(v){v=Number(v||0);return isFinite(v)&&v>0?v:0}
-  function clamp(n){n=Number(n||0);if(!isFinite(n))n=0;return Math.max(0,Math.min(100,n))}
-  function fmt(bytes){bytes=N(bytes); if(!bytes)return '0 B'; var u=['B','KB','MB','GB','TB']; var i=0,n=bytes; while(n>=1024&&i<u.length-1){n/=1024;i++;} return (i===0?Math.round(n):n>=100?n.toFixed(0):n>=10?n.toFixed(1):n.toFixed(2))+' '+u[i];}
-  function guessName(v){
-    v=S(v||intentName||'file');
-    try{ if(/^https?:|^blob:|^data:/i.test(v)){ var u=new URL(v,location.href); var p=decodeURIComponent((u.pathname||'').split('/').filter(Boolean).pop()||''); var q=u.searchParams.get('name')||u.searchParams.get('filename')||u.searchParams.get('file')||''; v=q||p||intentName||'file'; } }catch(e){}
-    return S(v||'file').slice(0,220);
+  function now(){ return Date.now(); }
+  function S(v){ return v == null ? '' : String(v); }
+  function readJSON(k,d){ try{ var raw = localStorage.getItem(k); return raw ? JSON.parse(raw) : d; }catch(e){ return d; } }
+  function writeJSON(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function A(v){ return Array.isArray(v) ? v : []; }
+  function parseMaybe(v){ if(!v) return {}; if(typeof v === 'object') return v; try{ return JSON.parse(v); }catch(e){ return {}; } }
+  function trace(type,data,level){
+    var o = Object.assign({phase:PHASE,type:type,at:now(),time:new Date().toLocaleTimeString('vi-VN',{hour12:false})}, data || {});
+    try{ var a = readJSON(LS_TRACE, []); if(!Array.isArray(a)) a = []; a.push(o); writeJSON(LS_TRACE, a.slice(-240)); }catch(e){}
+    try{ (level === 'error' ? console.error : level === 'warn' ? console.warn : console.info)('[R83_DELETE_GUARD]', type, data || {}); }catch(e){}
+    return o;
   }
-  function isAbort(e){return !!(e&&(e.name==='AbortError'||e.aborted||/abort|cancel|hủy|huỷ/i.test(S(e.message||e))))}
-  function dataBytes(x){
+  function mergeSources(m){
+    m = m || {};
+    var row = m._row || m.row || {};
+    var p1 = parseMaybe(m.payload_json || m.payloadJson);
+    var p2 = parseMaybe(row.payload_json || row.payloadJson);
+    return Object.assign({}, p2, p1, row, m);
+  }
+  function pick(){ for(var i=0;i<arguments.length;i++){ var v = arguments[i]; if(v !== undefined && v !== null && S(v) !== '') return S(v); } return ''; }
+  function keyOf(m){ var p = mergeSources(m); return pick(p.msg_key, p.messageKey, p.id, p.messageId, p.clientId, p.localId); }
+  function bundleIdOf(m){ var p = mergeSources(m); return pick(p.bundle_id, p.bundleId); }
+  function fileIdOf(m){ var p = mergeSources(m); return pick(p.telegram_file_id, p.telegramFileId, p.file_id, p.fileId); }
+  function msgIdOf(m){
+    var p = mergeSources(m);
+    var vals = [p.telegram_message_id, p.telegramMessageId, p.telegram_msg_id, p.message_id, p.messageId];
+    for(var i=0;i<vals.length;i++){ var s = S(vals[i]); if(/^\d+$/.test(s)) return s; }
+    return '';
+  }
+  function getManifest(m){
+    var p = mergeSources(m);
+    var mf = parseMaybe(p.bundleManifest || p.bundle_manifest || p.manifest || {});
+    if(!Array.isArray(mf.parts) && Array.isArray(p.parts)) mf.parts = p.parts;
+    return mf || {};
+  }
+  function partValue(part,names){
+    for(var i=0;i<names.length;i++){
+      var k = names[i];
+      if(part && part[k] !== undefined && part[k] !== null && S(part[k]) !== '') return S(part[k]);
+    }
+    return '';
+  }
+  function collect(m){
+    var c = {keys:{}, bundles:{}, tmsgs:{}, files:{}};
+    var key = keyOf(m), bid = bundleIdOf(m), fid = fileIdOf(m), mid = msgIdOf(m);
+    if(key) c.keys[key] = 1;
+    if(bid) c.bundles[bid] = 1;
+    if(fid) c.files[fid] = 1;
+    if(mid) c.tmsgs[mid] = 1;
+    var mf = getManifest(m);
+    A(mf.parts).forEach(function(p){
+      var pmid = partValue(p, ['telegram_message_id','telegramMessageId','telegram_msg_id','message_id','messageId']);
+      var pfid = partValue(p, ['telegram_file_id','telegramFileId','file_id','fileId']);
+      if(/^\d+$/.test(pmid)) c.tmsgs[pmid] = 1;
+      if(pfid) c.files[pfid] = 1;
+    });
+    return c;
+  }
+  function tombs(){ return readJSON(LS, {keys:{}, bundles:{}, tmsgs:{}, files:{}, items:{}, at:0, phase:PHASE}); }
+  function saveTombs(t){
+    t = t || {};
+    t.keys = t.keys || {};
+    t.bundles = t.bundles || {};
+    t.tmsgs = t.tmsgs || {};
+    t.files = t.files || {};
+    t.items = t.items || {};
+    t.at = now();
+    t.phase = PHASE;
+    writeJSON(LS, t);
+  }
+  function addTombstoneFromMessage(m, reason){
+    if(!m) return false;
+    var c = collect(m);
+    var t = tombs();
+    var added = 0;
+    Object.keys(c.keys).forEach(function(k){ if(!t.keys[k]) added++; t.keys[k] = now(); });
+    Object.keys(c.bundles).forEach(function(k){ if(!t.bundles[k]) added++; t.bundles[k] = now(); });
+    Object.keys(c.tmsgs).forEach(function(k){ if(!t.tmsgs[k]) added++; t.tmsgs[k] = now(); });
+    Object.keys(c.files).forEach(function(k){ if(!t.files[k]) added++; t.files[k] = now(); });
+    var main = keyOf(m) || bundleIdOf(m) || msgIdOf(m) || fileIdOf(m);
+    if(main) t.items[main] = {at:now(), reason:reason || 'delete_ok', key:keyOf(m), bundleId:bundleIdOf(m), telegramMessageId:msgIdOf(m), fileId:fileIdOf(m), fileName:S((mergeSources(m).file_name || mergeSources(m).fileName || mergeSources(m).name || '')).slice(0,160)};
+    saveTombs(t);
+    if(added || main) trace('TOMBSTONE_LOCAL_RECORDED', {reason:reason || '', added:added, key:keyOf(m), bundleId:bundleIdOf(m), telegramMessageId:msgIdOf(m), fileId:fileIdOf(m)});
+    return true;
+  }
+  function isTombstoned(m){
+    if(!m) return false;
+    var t = tombs(), c = collect(m);
+    var hit = '';
+    Object.keys(c.keys).some(function(k){ if(t.keys && t.keys[k]){ hit = 'key:' + k; return true; } return false; });
+    if(hit) return hit;
+    Object.keys(c.bundles).some(function(k){ if(t.bundles && t.bundles[k]){ hit = 'bundle:' + k; return true; } return false; });
+    if(hit) return hit;
+    Object.keys(c.tmsgs).some(function(k){ if(t.tmsgs && t.tmsgs[k]){ hit = 'telegram_msg:' + k; return true; } return false; });
+    if(hit) return hit;
+    Object.keys(c.files).some(function(k){ if(t.files && t.files[k]){ hit = 'file:' + k; return true; } return false; });
+    return hit || false;
+  }
+  function filterList(list, reason){
+    var removed = [];
+    var out = A(list).filter(function(m){
+      var hit = isTombstoned(m);
+      if(hit){ removed.push({hit:hit,key:keyOf(m),bundleId:bundleIdOf(m),telegramMessageId:msgIdOf(m),fileId:fileIdOf(m)}); return false; }
+      return true;
+    });
+    if(removed.length) trace('TOMBSTONE_FILTER_APPLIED', {reason:reason || '', removed:removed.slice(0,12), count:removed.length});
+    return out;
+  }
+  function saveCacheKey(k, obj){
+    try{ localStorage.setItem(k, JSON.stringify(obj)); }catch(e){}
+  }
+  function filterCacheObject(obj, reason){
+    if(Array.isArray(obj)) return filterList(obj, reason);
+    if(obj && typeof obj === 'object'){
+      if(Array.isArray(obj.m)) obj.m = filterList(obj.m, reason + ':m');
+      if(Array.isArray(obj.messages)) obj.messages = filterList(obj.messages, reason + ':messages');
+      if(Array.isArray(obj.data)) obj.data = filterList(obj.data, reason + ':data');
+      obj.r83DeleteGuard = PHASE;
+      obj.r83DeleteGuardAt = now();
+    }
+    return obj;
+  }
+  var purging = false;
+  function purge(reason){
+    if(purging) return 0;
+    purging = true;
+    var before = Array.isArray(window.chatHistory) ? window.chatHistory.length : 0;
     try{
-      if(!x)return 0;
-      if(x.data && (x.type==='write'||x.type==='truncate'||x.type==='seek')) return dataBytes(x.data);
-      if(typeof Blob!=='undefined' && x instanceof Blob) return N(x.size);
-      if(typeof ArrayBuffer!=='undefined' && x instanceof ArrayBuffer) return N(x.byteLength);
-      if(ArrayBuffer.isView && ArrayBuffer.isView(x)) return N(x.byteLength);
-      if(typeof x==='string') return N(new Blob([x]).size);
-    }catch(e){}
-    return 0;
-  }
-  function fallbackHud(){
-    var h=document.getElementById('lifeos-r81-download-fallback');
-    if(h)return h;
-    h=document.createElement('div'); h.id='lifeos-r81-download-fallback';
-    h.innerHTML='<div class="r81-card"><div class="r81-row"><div class="r81-ico"><i class="ph-bold ph-download-simple"></i></div><div class="r81-main"><div class="r81-title"></div><div class="r81-name"></div><div class="r81-meta"></div><div class="r81-bar"><div class="r81-fill"></div></div></div><button class="r81-x" type="button" aria-label="Đóng"><i class="ph-bold ph-x"></i></button></div></div>';
-    document.body.appendChild(h);
-    var b=h.querySelector('.r81-x'); if(b)b.onclick=function(){h.classList.remove('r81-visible')};
-    return h;
-  }
-  function fallbackShow(kind,title,name,opt){
-    opt=opt||{}; var h=fallbackHud(); h.className='r81-visible r81-'+(kind||'info');
-    var pct=clamp(opt.globalPct!=null?opt.globalPct:opt.pct); var titleEl=h.querySelector('.r81-title'), nameEl=h.querySelector('.r81-name'), metaEl=h.querySelector('.r81-meta'), fill=h.querySelector('.r81-fill');
-    if(titleEl)titleEl.textContent=title||'Đang tải'; if(nameEl)nameEl.textContent=name||''; if(metaEl)metaEl.textContent=opt.meta||''; if(fill)fill.style.width=pct+'%';
-    if(fallbackTimer)clearTimeout(fallbackTimer);
-    if(opt.autoHide||kind==='done'||kind==='warn') fallbackTimer=setTimeout(function(){h.classList.remove('r81-visible')}, kind==='done'?3600:5200);
-  }
-  function r80Show(kind,title,name,opt){
-    opt=opt||{};
-    try{ if(window.LifeOSFamilyDownloadHUD&&typeof window.LifeOSFamilyDownloadHUD.show==='function'){ window.LifeOSFamilyDownloadHUD.show(kind,title,name,opt); return true; } }catch(e){}
-    return false;
-  }
-  function show(kind,title,name,opt){
-    opt=opt||{}; name=guessName(name||opt.fileName||intentName);
-    if(kind==='info') {active=true; guardUntil=now()+1800;} else {active=false; guardUntil=now()+9000;}
-    try{document.body.dataset.lifeosR81Downloading = (kind==='info')?'1':'0';document.body.dataset.lifeosR81DownloadName=name;}catch(e){}
-    hideLegacyDownloadStatus();
-    if(!r80Show(kind,title,name,opt)) fallbackShow(kind,title,name,opt);
-    try{ if(window.LIFEOS_DEBUG) console.info('[R81_DOWNLOAD_HUD]',{phase:PHASE,state:kind,title:title,name:name,opt:opt}); }catch(e){}
-  }
-  function start(title,name,total){
-    tokenSeq++; activeToken=tokenSeq; byteLoaded=0; byteTotal=N(total); intentUntil=now()+120000; intentName=guessName(name); intentLabel=title||'download'; show('info',title||'Đang chuẩn bị tải',intentName,{globalPct:0,partPct:0,partText:'bắt đầu',meta:byteTotal?('Dung lượng '+fmt(byteTotal)):'Đang gom dữ liệu',fileName:intentName}); return activeToken;
-  }
-  function progress(title,name,loaded,total,meta){
-    loaded=N(loaded); total=N(total)||byteTotal; if(loaded>byteLoaded) byteLoaded=loaded; if(total>byteTotal) byteTotal=total;
-    var pct=byteTotal?clamp(byteLoaded/byteTotal*100):(byteLoaded?8:2);
-    show('info',title||'Đang tải',guessName(name),{globalPct:pct,partPct:pct,partText:byteTotal?Math.round(pct)+'%':'đang tải',meta:meta||((byteTotal?fmt(byteLoaded)+' / '+fmt(byteTotal):fmt(byteLoaded))+' · đang xử lý'),fileName:guessName(name)});
-  }
-  function finish(kind,title,name,meta){
-    kind=kind||'done'; var pct=kind==='done'?100:0;
-    show(kind,title||((kind==='done')?'Đã tải/lưu xong':(kind==='warn'?'Đã hủy tải xuống':'Tải/lưu thất bại')),guessName(name),{globalPct:pct,partPct:pct,partText:kind==='done'?'xong':kind,meta:meta||'',autoHide:kind!=='error',fileName:guessName(name)});
-    active=false; intentUntil=now()+9000; guardUntil=now()+9000; setTimeout(hideLegacyDownloadStatus,30); setTimeout(hideLegacyDownloadStatus,300); setTimeout(hideLegacyDownloadStatus,1200); setTimeout(hideLegacyDownloadStatus,3600);
-  }
-  function isDownloadishText(t){t=S(t).toLowerCase();return /(đang\s*tải|dang\s*tai|tải\s*xuống|tai\s*xuong|đang\s*gom|dang\s*gom|đang\s*lưu|dang\s*luu|download|saving|downloading)/i.test(t) && !/(đang\s*gửi|dang\s*gui|upload|gửi\s*file|gui\s*file)/i.test(t)}
-  function hideLegacyDownloadStatus(){
-    try{
-      var bar=document.getElementById('chat-upload-status'); if(!bar)return;
-      var txt=bar.textContent||''; var should=(active||now()<guardUntil||now()<intentUntil)&&isDownloadishText(txt);
-      if(should) bar.classList.add('lifeos-r81-download-legacy-hidden'); else bar.classList.remove('lifeos-r81-download-legacy-hidden');
-    }catch(e){}
-  }
-  function markIntent(label,name,total){ intentUntil=now()+120000; intentLabel=label||'download'; intentName=guessName(name||intentName); if(total)byteTotal=N(total); }
-  function shouldTrackUrl(url){
-    if(now()<intentUntil||active)return true;
-    url=S(url); return /\/download\b|[?&](file_id|fileId|downloadFileId|telegramFileId)=|download=1|attachment/i.test(url);
-  }
-  function wrapResponseBlob(res,url,name){
-    try{
-      if(!res||res.__lifeosR81BlobWrapped)return res; res.__lifeosR81BlobWrapped=true;
-      var origBlob=res.blob&&res.blob.bind(res); if(typeof origBlob!=='function')return res;
-      res.blob=async function(){
-        var nm=guessName(name||url||intentName); var len=N(res.headers&&res.headers.get&&res.headers.get('Content-Length')); var type=S(res.headers&&res.headers.get&&res.headers.get('Content-Type'))||'application/octet-stream';
-        markIntent('fetch_blob',nm,len); show('info','Đang tải file',nm,{globalPct:len?1:0,partPct:0,partText:'fetch',meta:len?('0 / '+fmt(len)):'Đang đọc stream từ server',fileName:nm});
-        if(!res.body){ var b=await origBlob(); progress('Đã nhận dữ liệu',nm,b&&b.size,len||b&&b.size,'Đã nhận '+fmt(b&&b.size)); return b; }
-        var reader=res.body.getReader(),chunks=[],loaded=0,last=0;
-        try{
-          while(true){ var r=await reader.read(); if(r.done)break; var v=r.value; chunks.push(v); loaded+=N(v&&v.byteLength||v&&v.length); var t=now(); if(t-last>160||loaded>=len){ last=t; progress('Đang tải file',nm,loaded,len,(len?fmt(loaded)+' / '+fmt(len):fmt(loaded))+' · đang tải stream'); } }
-          var blob=new Blob(chunks,{type:type}); progress('Đã nhận đủ dữ liệu',nm,blob.size,len||blob.size,'Đang chuyển sang bước lưu/tải xuống'); return blob;
-        }catch(e){ try{reader.cancel(e)}catch(_e){} finish(isAbort(e)?'warn':'error',isAbort(e)?'Đã hủy tải xuống':'Tải stream lỗi',nm,S(e&&e.message||e)); throw e; }
-      };
-    }catch(e){}
-    return res;
-  }
-  function installFetchPatch(){
-    if(!nativeFetch||window.fetch.__lifeosR81GlobalHud)return;
-    var patched=async function(input,init){
-      var url=''; try{url=typeof input==='string'?input:(input&&input.url)||'';}catch(e){}
-      var track=shouldTrackUrl(url), nm=guessName(url||intentName);
-      if(track){ markIntent('fetch',nm); show('info','Đang kết nối tải file',nm,{globalPct:0,partPct:0,partText:'kết nối',meta:'Đang gọi server tải dữ liệu',fileName:nm}); }
-      try{ var res=await nativeFetch(input,init); if(track)wrapResponseBlob(res,url,nm); return res; }
-      catch(e){ if(track)finish(isAbort(e)?'warn':'error',isAbort(e)?'Đã hủy tải xuống':'Không kết nối được server tải',nm,S(e&&e.message||e)); throw e; }
-    };
-    patched.__lifeosR81GlobalHud=true; patched.__lifeosR81Native=nativeFetch; window.fetch=patched;
-  }
-  function wrapWritable(writable,name){
-    if(!writable||writable.__lifeosR81Wrapped)return writable;
-    var w=writable, written=0;
-    var origWrite=w.write&&w.write.bind(w), origClose=w.close&&w.close.bind(w), origAbort=w.abort&&w.abort.bind(w);
-    try{
-      if(typeof origWrite==='function') w.write=async function(data){ var bytes=dataBytes(data); if(bytes){ written+=bytes; markIntent('file_write',name); progress('Đang lưu file',name,written,byteTotal||0,(byteTotal?fmt(written)+' / '+fmt(byteTotal):fmt(written))+' · đang ghi xuống nơi lưu'); } return origWrite(data); };
-      if(typeof origClose==='function') w.close=async function(){ show('info','Đang hoàn tất file',name,{globalPct:99,partPct:100,partText:'đóng file',meta:'Đợi hệ thống flush dữ liệu xuống ổ lưu',fileName:name}); var r=await origClose(); finish('done','Đã lưu xong',name,(written?fmt(written)+' · ':'')+'File đã đóng thành công'); return r; };
-      if(typeof origAbort==='function') w.abort=async function(reason){ var r=await origAbort(reason); finish('warn','Đã hủy lưu file',name,S(reason||'Người dùng hủy')); return r; };
-      w.__lifeosR81Wrapped=true;
-    }catch(e){}
-    return w;
-  }
-  function installPickerPatch(){
-    if(!nativePicker||window.showSaveFilePicker.__lifeosR81GlobalHud)return;
-    var patched=async function(opts){
-      var name=guessName(opts&&opts.suggestedName || intentName || 'file'); start('Đang mở chọn nơi lưu',name,byteTotal); show('info','Đang chờ chọn nơi lưu',name,{globalPct:0,partPct:0,partText:'SaveAs',meta:'Chọn thư mục/tên file để bắt đầu lưu',fileName:name});
-      try{
-        var handle=await nativePicker.apply(this,arguments); show('info','Đã chọn nơi lưu',name,{globalPct:0,partPct:0,partText:'đã chọn',meta:'Đang chuẩn bị ghi dữ liệu vào file đích',fileName:name});
-        try{
-          var origCreate=handle.createWritable&&handle.createWritable.bind(handle);
-          if(typeof origCreate==='function'&&!handle.__lifeosR81CreateWrapped){
-            handle.createWritable=async function(){ var w=await origCreate.apply(handle,arguments); return wrapWritable(w,name); };
-            handle.__lifeosR81CreateWrapped=true;
-            return handle;
-          }
-        }catch(_e){}
-        try{return new Proxy(handle,{get:function(t,p,r){ if(p==='createWritable'&&typeof t.createWritable==='function'){ return async function(){ var w=await t.createWritable.apply(t,arguments); return wrapWritable(w,name); }; } return Reflect.get(t,p,r); }});}catch(_e2){return handle;}
-      }catch(e){ finish(isAbort(e)?'warn':'error',isAbort(e)?'Đã hủy chọn nơi lưu':'Không mở được chọn nơi lưu',name,S(e&&e.message||e)); throw e; }
-    };
-    patched.__lifeosR81GlobalHud=true; patched.__lifeosR81Native=nativePicker; window.showSaveFilePicker=patched;
-  }
-  function installAnchorPatch(){
-    if(!nativeAnchorClick||!window.HTMLAnchorElement||window.HTMLAnchorElement.prototype.click.__lifeosR81GlobalHud)return;
-    var patched=function(){
-      var href=''; try{href=this.href||this.getAttribute('href')||'';}catch(e){}
-      var dl=''; try{dl=this.download||this.getAttribute('download')||'';}catch(e){}
-      var isDl=!!(dl||/^blob:|^data:/i.test(href)||/\/download\b|download=1/i.test(href));
-      var nm=guessName(dl||href||intentName||'file');
-      if(isDl){ markIntent('anchor',nm); show('info','Đang chuyển file cho trình duyệt',nm,{globalPct:96,partPct:100,partText:'browser',meta:'Trình duyệt đang nhận lệnh tải xuống',fileName:nm}); setTimeout(function(){finish('done','Đã mở tải xuống',nm,'Nếu là tải mặc định, xem tiến trình ở thanh tải xuống của trình duyệt')},650); }
-      return nativeAnchorClick.apply(this,arguments);
-    };
-    patched.__lifeosR81GlobalHud=true; patched.__lifeosR81Native=nativeAnchorClick; window.HTMLAnchorElement.prototype.click=patched;
-  }
-  function withHud(fn,label,nameFn){
-    if(typeof fn!=='function'||fn.__lifeosR81Wrapped)return fn;
-    var wrapped=function(){
-      var name='file'; try{name=guessName(typeof nameFn==='function'?nameFn.apply(this,arguments):nameFn||intentName||label||'file');}catch(e){}
-      start(label||'Đang tải',name,byteTotal);
-      var ret;
-      try{ ret=fn.apply(this,arguments); }
-      catch(e){ finish(isAbort(e)?'warn':'error',isAbort(e)?'Đã hủy tải xuống':'Tải/lưu thất bại',name,S(e&&e.message||e)); throw e; }
-      if(ret&&typeof ret.then==='function'){
-        return ret.then(function(v){ if(v!==false) finish('done','Đã hoàn tất tải/lưu',name,'Luồng tải đã kết thúc'); else finish('warn','Không có file được tải',name,'Luồng tải trả về false/hủy'); return v; },function(e){ finish(isAbort(e)?'warn':'error',isAbort(e)?'Đã hủy tải xuống':'Tải/lưu thất bại',name,S(e&&e.message||e)); throw e; });
+      if(Array.isArray(window.chatHistory)) window.chatHistory = filterList(window.chatHistory, reason || 'purge');
+      if(window.ChatEngine){
+        if(Array.isArray(window.ChatEngine.messages)) window.ChatEngine.messages = filterList(window.ChatEngine.messages, reason || 'ce.messages');
+        if(Array.isArray(window.ChatEngine.chatHistory)) window.ChatEngine.chatHistory = filterList(window.ChatEngine.chatHistory, reason || 'ce.chatHistory');
       }
-      setTimeout(function(){finish('done','Đã hoàn tất lệnh tải',name,'Lệnh tải đã được xử lý')},700); return ret;
+      CACHE_KEYS.forEach(function(k){
+        var raw = localStorage.getItem(k);
+        if(!raw) return;
+        var obj = parseMaybe(raw);
+        var filtered = filterCacheObject(obj, reason || k);
+        saveCacheKey(k, filtered);
+      });
+    }catch(e){ trace('PURGE_ERROR', {reason:reason || '', error:S(e && e.message || e)}, 'error'); }
+    finally{ purging = false; }
+    var after = Array.isArray(window.chatHistory) ? window.chatHistory.length : 0;
+    if(before !== after) trace('CHAT_HISTORY_PURGED', {reason:reason || '', before:before, after:after});
+    return before - after;
+  }
+  function findActiveMessage(){
+    var id = S((document.getElementById('chat-msg-active-id') || {}).value);
+    var list = A(window.chatHistory);
+    for(var i=0;i<list.length;i++){
+      var m = list[i];
+      if(keyOf(m) === id || S(m.id) === id || S(m.messageId) === id || msgIdOf(m) === id || bundleIdOf(m) === id) return m;
+    }
+    return null;
+  }
+  function patchChatEngine(){
+    var ce = window.ChatEngine;
+    if(!ce) return false;
+
+    if(typeof ce.render === 'function' && !ce.render.__r83DeleteGuard){
+      var oldRender = ce.render.bind(ce);
+      ce.render = function(){
+        purge('before_render');
+        return oldRender.apply(ce, arguments);
+      };
+      ce.render.__r83DeleteGuard = true;
+      trace('PATCH_RENDER_OK');
+    }
+
+    if(typeof ce.saveAndSync === 'function' && !ce.saveAndSync.__r83DeleteGuard){
+      var oldSave = ce.saveAndSync.bind(ce);
+      ce.saveAndSync = function(){
+        purge('before_saveAndSync');
+        return oldSave.apply(ce, arguments);
+      };
+      ce.saveAndSync.__r83DeleteGuard = true;
+      trace('PATCH_SAVE_SYNC_OK');
+    }
+
+    if(typeof ce.deleteMsg === 'function' && !ce.deleteMsg.__r83DeleteGuard){
+      var oldDelete = ce.deleteMsg.bind(ce);
+      ce.deleteMsg = async function(){
+        var msg = findActiveMessage();
+        var res = await oldDelete.apply(ce, arguments);
+        if(res){
+          addTombstoneFromMessage(msg || findActiveMessage(), 'deleteMsg_success');
+          purge('after_deleteMsg_success');
+          try{ if(ce.render) ce.render(); }catch(e){}
+        } else {
+          purge('after_deleteMsg_no_success');
+        }
+        return res;
+      };
+      ce.deleteMsg.__r83DeleteGuard = true;
+      ce.deleteMsg.__phase = PHASE;
+      trace('PATCH_DELETE_MSG_OK');
+    }
+
+    return true;
+  }
+  function patchSelectedDelete(){
+    var api = window.FamilySelectR3 || window.FamilySelectR4 || window.FamilyMobileTouchSelectR4;
+    if(!api || typeof api.deleteSelected !== 'function' || api.deleteSelected.__r83DeleteGuard) return false;
+    var old = api.deleteSelected.bind(api);
+    api.deleteSelected = async function(){
+      var before = [];
+      try{
+        var ids = typeof api.selectedIds === 'function' ? Array.from(api.selectedIds() || []).map(String) : [];
+        before = ids.map(function(id){
+          return A(window.chatHistory).find(function(m){ return keyOf(m) === id || S(m.id) === id || S(m.messageId) === id || msgIdOf(m) === id || bundleIdOf(m) === id; });
+        }).filter(Boolean);
+      }catch(e){}
+      var res = await old.apply(api, arguments);
+      if(res){
+        before.forEach(function(m){ addTombstoneFromMessage(m, 'selected_delete_success'); });
+        purge('after_selected_delete_success');
+        try{ if(window.ChatEngine && window.ChatEngine.render) window.ChatEngine.render(); }catch(e){}
+      }
+      return res;
     };
-    wrapped.__lifeosR81Wrapped=true; wrapped.__lifeosR81Base=fn; return wrapped;
+    api.deleteSelected.__r83DeleteGuard = true;
+    if(window.FamilySelectR3) window.FamilySelectR3.deleteSelected = api.deleteSelected;
+    if(window.FamilySelectR4) window.FamilySelectR4.deleteSelected = api.deleteSelected;
+    if(window.FamilyMobileTouchSelectR4) window.FamilyMobileTouchSelectR4.deleteSelected = api.deleteSelected;
+    trace('PATCH_SELECTED_DELETE_OK');
+    return true;
   }
-  function findMsgName(id){
-    try{ var a=Array.isArray(window.chatHistory)?window.chatHistory:[]; var m=a.find(function(x){return String(x&&x.id||x&&x.msg_key||'')===String(id||'')}); if(m){ var mf=m.bundleManifest||m.manifest||{}; return mf.originalName||mf.safeName||m.file_name||m.fileName||m.name||m.title||'file'; } }catch(e){} return intentName||'file';
+  function install(){
+    patchChatEngine();
+    patchSelectedDelete();
+    purge('install');
   }
-  function patchObjectMethods(){
-    try{ var ce=window.ChatEngine; if(ce){ if(typeof ce.downloadChatFile==='function'&&!ce.downloadChatFile.__lifeosR81Wrapped)ce.downloadChatFile=withHud(ce.downloadChatFile,'Đang tải file',function(id){return findMsgName(id)}); if(typeof ce.downloadActiveFile==='function'&&!ce.downloadActiveFile.__lifeosR81Wrapped)ce.downloadActiveFile=withHud(ce.downloadActiveFile,'Đang tải file đang chọn',function(){try{return findMsgName(document.getElementById('chat-msg-active-id')&&document.getElementById('chat-msg-active-id').value)}catch(e){return 'file'}}); if(typeof ce.downloadCurrentLightboxImage==='function'&&!ce.downloadCurrentLightboxImage.__lifeosR81Wrapped)ce.downloadCurrentLightboxImage=withHud(ce.downloadCurrentLightboxImage,'Đang tải ảnh đang xem','ảnh'); } }catch(e){}
-    try{ if(window.VaultApp&&typeof window.VaultApp.exportBackup==='function'&&!window.VaultApp.exportBackup.__lifeosR81Wrapped)window.VaultApp.exportBackup=withHud(window.VaultApp.exportBackup,'Đang xuất backup Vault','lifeos_vault_backup.json'); }catch(e){}
-    try{ if(window.VaultBulkDelete&&typeof window.VaultBulkDelete.exportSelected==='function'&&!window.VaultBulkDelete.exportSelected.__lifeosR81Wrapped)window.VaultBulkDelete.exportSelected=withHud(window.VaultBulkDelete.exportSelected,'Đang xuất JSON đã chọn','lifeos_vault_selected.json'); }catch(e){}
-    try{ if(window.FamilySelectR3&&typeof window.FamilySelectR3.downloadSelected==='function'&&!window.FamilySelectR3.downloadSelected.__lifeosR81Wrapped)window.FamilySelectR3.downloadSelected=withHud(window.FamilySelectR3.downloadSelected,'Đang tải các file đã chọn','nhiều file'); }catch(e){}
-    try{ if(window.FamilySelectR4&&typeof window.FamilySelectR4.downloadSelected==='function'&&!window.FamilySelectR4.downloadSelected.__lifeosR81Wrapped)window.FamilySelectR4.downloadSelected=withHud(window.FamilySelectR4.downloadSelected,'Đang tải các file đã chọn','nhiều file'); }catch(e){}
-  }
-  function bindClickIntent(){
-    if(window.__lifeosR81ClickIntentBound)return; window.__lifeosR81ClickIntentBound=true;
-    document.addEventListener('click',function(ev){
-      try{ var el=ev.target&&ev.target.closest&&ev.target.closest('button,a,[onclick]'); if(!el)return; var txt=(el.textContent||'')+' '+(el.getAttribute('title')||'')+' '+(el.getAttribute('aria-label')||'')+' '+(el.getAttribute('onclick')||'')+' '+(el.id||'')+' '+(el.className||''); if(/download|tải|tai|xuất|xuat|backup|sao\s*lưu|sao\s*luu|ph-download/i.test(txt)){ markIntent('click',txt.slice(0,80)); show('info','Đang nhận lệnh tải',intentName||'file',{globalPct:0,partPct:0,partText:'click',meta:'Đã bấm tải, LifeOS đang gom dữ liệu',fileName:intentName||'file'}); } }catch(e){}
-    },true);
-  }
-  function observeLegacy(){
-    if(window.__lifeosR81LegacyObserver)return; window.__lifeosR81LegacyObserver=true;
-    try{ var mo=new MutationObserver(hideLegacyDownloadStatus); mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style']}); }catch(e){}
-    setInterval(hideLegacyDownloadStatus,450);
-  }
-  function boot(){ installFetchPatch(); installPickerPatch(); installAnchorPatch(); bindClickIntent(); observeLegacy(); patchObjectMethods(); hideLegacyDownloadStatus(); }
-  window.LifeOSGlobalDownloadHUD={phase:PHASE,start:start,progress:progress,finish:finish,show:show,markIntent:markIntent,patch:boot,summary:function(){return{phase:PHASE,active:active,intentActive:now()<intentUntil,guardActive:now()<guardUntil,usingR80Hud:!!(window.LifeOSFamilyDownloadHUD&&window.LifeOSFamilyDownloadHUD.show),fetchPatched:!!(window.fetch&&window.fetch.__lifeosR81GlobalHud),pickerPatched:!!(window.showSaveFilePicker&&window.showSaveFilePicker.__lifeosR81GlobalHud),anchorPatched:!!(window.HTMLAnchorElement&&window.HTMLAnchorElement.prototype.click&&window.HTMLAnchorElement.prototype.click.__lifeosR81GlobalHud)}}};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-  window.addEventListener('load',function(){boot();setTimeout(boot,300);setTimeout(boot,1200);setTimeout(boot,4200)},{once:true});
-  patchTimer=setInterval(function(){boot();},1000); setTimeout(function(){try{clearInterval(patchTimer)}catch(e){}},18000);
-  try{console.info('[R81_GLOBAL_DOWNLOAD_HUD_ALL_FILES_READY]',{phase:PHASE,base:'R76',scope:'all download routes: Family/Vault/anchor/blob/fetch/FilePicker',noSchemaRouterCacheChange:true});}catch(e){}
+
+  window.LifeOSJ20R83FamilyDeleteGuard = {
+    phase: PHASE,
+    install: install,
+    purge: purge,
+    add: addTombstoneFromMessage,
+    isTombstoned: isTombstoned,
+    tombstones: tombs,
+    trace: function(){ return readJSON(LS_TRACE, []); },
+    clear: function(){ localStorage.removeItem(LS); purge('clear'); trace('TOMBSTONE_CLEARED', {}, 'warn'); }
+  };
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, {once:true}); else install();
+  window.addEventListener('load', function(){ [150,700,1600,3500,6500,10000,14000].forEach(function(ms){ setTimeout(install, ms); }); }, {once:true});
+  [300,1200,2600,5200,9000,13000].forEach(function(ms){ setTimeout(install, ms); });
+  try{ console.warn('[R83_READY]', PHASE); }catch(e){}
 })();
 </script>
-<!-- LIFEOS PHA14J20R81 GLOBAL DOWNLOAD HUD ALL FILES - END -->
+<!-- Pha14J20R83_FamilyDeleteTombstoneGuard_R76Base - END -->
+
+
+<!-- Pha14J20R88_CleanMediaFixFromR83Base - CLEAN DIRECT SOURCE EDIT MARKER -->
+<script id="lifeos-j20r88-clean-media-marker">
+(function(){
+  window.LifeOSJ20R88CleanMediaFix = {
+    phase: 'Pha14J20R88_CleanMediaFixFromR83Base',
+    source: 'R83 accepted family base; direct edits to smartbox loader and R75 media gate only',
+    summary: function(){
+      var h = window.MediaHub || {};
+      return {
+        phase: 'Pha14J20R88_CleanMediaFixFromR83Base',
+        r83FamilyGuard: !!window.LifeOSJ20R83FamilyDeleteGuard,
+        tab: h.currentTab || '',
+        group: h.currentGroup || '',
+        groups: Array.isArray(h.rawGroups) ? h.rawGroups.length : 0,
+        radio: Array.isArray(h.radioData) ? h.radioData.length : 0,
+        tv: Array.isArray(h.tvData) ? h.tvData.length : 0,
+        mp3: Array.isArray(window.MusicApp && window.MusicApp.playlist) ? window.MusicApp.playlist.length : 0
+      };
+    }
+  };
+  try{ console.warn('[R88_READY]', 'Pha14J20R88_CleanMediaFixFromR83Base'); }catch(e){}
+})();
+</script>
 
 </body>
 </html>
