@@ -627,7 +627,19 @@ html.lifeos-r55-mobile-cool-lite body.lifeos-r48-family-boot-lock{
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="LifeOS" name="application-name"/>
 <title>LifeOS Master Pha40 - Push Trigger</title>
-<!-- R46: manifest disabled to avoid file:// CORS boot noise during local acceptance -->
+<link href="./manifest.json" id="manifest-link" rel="manifest"/>
+<script id="lifeos-pwa-install-prompt-capture">
+(function(){
+  if (window.__lifeosPwaPromptCaptureInstalled) return;
+  window.__lifeosPwaPromptCaptureInstalled = true;
+  window.__lifeosPwaInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', function(event){
+    event.preventDefault();
+    window.__lifeosPwaInstallPrompt = event;
+    try { window.dispatchEvent(new CustomEvent('lifeos:pwa-install-ready')); } catch(e) {}
+  });
+})();
+</script>
 <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236366f1'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='34' fill='white'%3EL%3C/text%3E%3C/svg%3E" rel="icon" type="image/svg+xml"/>
 <script id="lifeos-r36-startup-console-guard">
 (function(){
@@ -8716,7 +8728,7 @@ document.addEventListener('DOMContentLoaded', () => {
         touch-action: none;
         user-select: none;
         -webkit-user-select: none;
-        display: flex;
+        display: none;
     }
     .install-fab[data-positioned="1"] { transform: none; }
     .install-fab.is-dragging { cursor: grabbing; }
@@ -8784,7 +8796,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.initDraggableInstallFab = function(){
         const fab = document.getElementById('btnInstall');
-        if (fab) fab.style.display = 'flex';
         if (!fab || fab.dataset.dragReady === '1') return;
         fab.dataset.dragReady = '1';
 
@@ -8888,101 +8899,156 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 })();
 
+window.LifeOSPWAInstallRestore = {base:'R76_FamilyDeleteOK', manifest:'./manifest.json', serviceWorker:'./sw.js', singleOwner:true};
 window.pwaEngine = {
-    deferredPrompt: null,
-    state: {
-        isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()),
-        isAndroid: /android/.test(navigator.userAgent.toLowerCase()),
-        isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent),
-        isInApp: /FBAN|FBAV|Instagram|Zalo/i.test(navigator.userAgent),
-        isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
-    },
-    init: function() {
-        // R46: service worker chỉ chạy trên http/https để tránh file:// boot error.
-        if ('serviceWorker' in navigator && /^(https?:)$/i.test(location.protocol)) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js', {
-                    scope: './'
-                }).then((registration) => {
-                    window.LIFEOS_DEBUG&&console.log('[LifeOS SW] registered:', registration.scope);
-                }).catch((err) => {
-                    if(window.LIFEOS_DEBUG) console.warn('[LifeOS SW] registration failed:', err);
-                });
-            }, { once: true });
-        }
+    deferredPrompt: null,
+    _initialized: false,
+    _clickHandler: null,
+    state: {
+        isIOS: /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()),
+        isAndroid: /android/.test(navigator.userAgent.toLowerCase()),
+        isPC: !/iphone|ipad|ipod|android/i.test(navigator.userAgent),
+        isInApp: /FBAN|FBAV|Instagram|Zalo/i.test(navigator.userAgent),
+        isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone,
+    },
+    getFab: function(){ return document.getElementById('btnInstall'); },
+    showFab: function(){
+        const fab = this.getFab();
+        if (!fab) return;
+        fab.classList.remove('lifeos67g-pwa-hidden');
+        fab.style.setProperty('display', 'flex', 'important');
+        fab.style.setProperty('visibility', 'visible', 'important');
+        fab.style.setProperty('pointer-events', 'auto', 'important');
+        fab.setAttribute('aria-disabled', 'false');
+        fab.dataset.pwaReady = '1';
+    },
+    hideFab: function(){
+        const fab = this.getFab();
+        if (!fab) return;
+        fab.style.setProperty('display', 'none', 'important');
+        fab.style.setProperty('visibility', 'hidden', 'important');
+        fab.style.setProperty('pointer-events', 'none', 'important');
+        fab.setAttribute('aria-disabled', 'true');
+        delete fab.dataset.pwaReady;
+    },
+    acceptPrompt: function(promptEvent){
+        if (!promptEvent || typeof promptEvent.prompt !== 'function') return false;
+        this.deferredPrompt = promptEvent;
+        window.__lifeosPwaInstallPrompt = promptEvent;
+        this.showFab();
+        return true;
+    },
+    registerServiceWorker: function(){
+        if (!('serviceWorker' in navigator) || !/^(https?:)$/i.test(location.protocol)) return;
+        navigator.serviceWorker.register('./sw.js', {
+            scope: './',
+            updateViaCache: 'none'
+        }).then((registration) => {
+            try { registration.update(); } catch(e) {}
+            window.LIFEOS_DEBUG && console.log('[LifeOS SW] registered:', registration.scope);
+        }).catch((err) => {
+            if(window.LIFEOS_DEBUG) console.warn('[LifeOS SW] registration failed:', err);
+        });
+    },
+    init: function() {
+        if (this._initialized) return;
+        this._initialized = true;
 
-        const fab = document.getElementById('btnInstall');
+        // Restore the repository's existing manifest.json. Do not create or replace it.
+        let manifestLink = document.getElementById('manifest-link') || document.querySelector('link[rel="manifest"]');
+        if (!manifestLink) {
+            manifestLink = document.createElement('link');
+            manifestLink.id = 'manifest-link';
+            manifestLink.rel = 'manifest';
+            document.head.appendChild(manifestLink);
+        }
+        manifestLink.setAttribute('href', './manifest.json');
+
+        if (document.readyState === 'complete') this.registerServiceWorker();
+        else window.addEventListener('load', () => this.registerServiceWorker(), { once: true });
+
+        const fab = this.getFab();
         try { window.initDraggableInstallFab?.(); } catch(e) {}
-        
-        // ẨN NÚT NẾU ĐÃ MỞ BẰNG APP (STANDALONE)
-        if (this.state.isStandalone) {
-            if(fab) fab.style.display = 'none';
-            return;
-        }
+        if (!fab) return;
 
-        // LẮNG NGHE SỰ KIỆN CÀI ĐẶT XONG ĐỂ TÀNG HÌNH NÚT NGAY LẬP TỨC
-        window.addEventListener('appinstalled', () => {
-            this.deferredPrompt = null;
-            if(fab) fab.style.display = 'none';
-            window.showToast('Cài đặt LifeOS thành công!', 'ph-check-circle');
-        });
+        if (!this._clickHandler) {
+            this._clickHandler = (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.handleInstallClick();
+            };
+            fab.addEventListener('click', this._clickHandler, false);
+        }
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            this.deferredPrompt = e;
-            if(fab) {
-                fab.style.display = 'flex';
-                fab.onclick = () => this.handleInstallClick();
-            }
-        });
-        
-        // XỬ LÝ NÚT CÀI ĐẶT CHO IOS HOẶC TRÌNH DUYỆT IN-APP (ZALO/FB)
-        if((this.state.isIOS || this.state.isInApp) && !this.state.isStandalone) {
-             if(fab) {
-                 fab.style.display = 'flex';
-                 fab.onclick = () => this.handleInstallClick();
-             }
-        }
-    },
-    handleInstallClick: async function() {
-        const modal = document.getElementById('pwaHealthModal');
-        const content = document.getElementById('smartGuideContent');
-        if(!modal || !content) return;
-        
-        modal.classList.remove('hidden');
-        
-        if (this.state.isStandalone) {
-            content.innerHTML = `<div class="text-center"><div class="text-emerald-500 text-5xl mb-3">🎉</div><h3 class="text-xl font-bold text-slate-800 mb-2">Đã cài đặt thành công!</h3><p class="text-slate-600 text-sm font-medium">Bạn đang sử dụng phiên bản Ứng dụng.<br>Chúc bạn có trải nghiệm tuyệt vời.</p></div>`;
-            return;
-        }
-        if (this.deferredPrompt) {
-            modal.classList.add('hidden');
-            this.deferredPrompt.prompt();
-            const { outcome } = await this.deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                this.deferredPrompt = null;
-                const fab = document.getElementById('btnInstall');
-                if(fab) fab.style.display = 'none';
-            }
-            return;
-        }
-        if (this.state.isInApp) {
-            content.innerHTML = `<div class="text-center text-rose-600 font-bold mb-3">⚠️ Cảnh Báo Trình Duyệt</div><p class="mb-3 text-sm text-slate-600 font-medium">Bạn đang mở bằng Zalo/Facebook nên hệ thống bị chặn.</p><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">1</div><div class="text-sm font-medium">Bấm dấu <b>3 chấm</b> <span class="text-xl">⋯</span> ở góc trên phải.</div></div><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">2</div><div class="text-sm font-medium">Chọn <b>Mở bằng trình duyệt</b> (Chrome/Safari).</div></div>`;
-            return;
-        }
-        if (this.state.isIOS) {
-            content.innerHTML = `<div class="text-center font-bold mb-4 text-blue-600 text-lg">Dành cho iPhone/iPad</div><div class="guide-step"><div class="step-num">1</div><div class="text-sm font-medium text-slate-700">Bấm nút <b>Chia sẻ</b> <i class="text-blue-500 text-xl font-serif">⎋</i> ở dưới cùng màn hình.</div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm font-medium text-slate-700">Kéo lên chọn <b>Thêm vào MH chính</b> (Add to Home Screen).</div></div><div class="guide-step"><div class="step-num">3</div><div class="text-sm font-medium text-slate-700">Bấm nút <b>Thêm</b> (Add) ở góc trên cùng.</div></div>`;
-            return;
-        }
-        if (this.state.isAndroid) {
-            content.innerHTML = `<div class="text-center font-bold mb-4 text-emerald-600 text-lg">Dành cho Android</div><div class="guide-step"><div class="step-num bg-emerald-500">1</div><div class="text-sm font-medium text-slate-700">Bấm dấu <b>3 chấm</b> <span class="text-xl">⋮</span> ở góc trên bên phải màn hình.</div></div><div class="guide-step"><div class="step-num bg-emerald-500">2</div><div class="text-sm font-medium text-slate-700">Chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b>.</div></div>`;
-            return;
-        }
-        if (this.state.isPC) {
-            content.innerHTML = `<div class="text-center"><p class="mb-4 font-bold text-lg text-primary">Cài đặt trên Máy tính</p><div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 inline-block mb-3 text-left w-full"><div class="flex items-start gap-3 mb-2"><span class="text-xl text-primary mt-0.5">💻</span> <span class="text-sm font-medium text-slate-700 leading-relaxed">Bấm biểu tượng <b>Tải xuống (Cài đặt)</b> ở góc phải của thanh nhập địa chỉ web.</span></div><div class="text-xs text-slate-500 italic mt-3 pt-3 border-t border-indigo-200">Hoặc bấm menu 3 chấm > "Cài đặt LifeOS..."</div></div></div>`;
-            return;
-        }
-    }
+        if (this.state.isStandalone) {
+            this.hideFab();
+            return;
+        }
+
+        window.addEventListener('appinstalled', () => {
+            this.deferredPrompt = null;
+            window.__lifeosPwaInstallPrompt = null;
+            this.hideFab();
+            window.showToast?.('Cài đặt LifeOS thành công!', 'ph-check-circle');
+        });
+
+        // The early head listener owns beforeinstallprompt so the event cannot be lost
+        // while the very large LifeOS HTML is still parsing.
+        window.addEventListener('lifeos:pwa-install-ready', () => {
+            this.acceptPrompt(window.__lifeosPwaInstallPrompt);
+        });
+
+        if (!this.acceptPrompt(window.__lifeosPwaInstallPrompt)) {
+            // iOS/in-app browsers need manual guidance. Chromium button remains hidden
+            // until its real native install prompt is ready, so a visible button is never dead.
+            if (this.state.isIOS || this.state.isInApp) this.showFab();
+            else this.hideFab();
+        }
+    },
+    handleInstallClick: async function() {
+        if (this.state.isStandalone) {
+            this.hideFab();
+            return;
+        }
+
+        const promptEvent = this.deferredPrompt || window.__lifeosPwaInstallPrompt;
+        if (promptEvent && typeof promptEvent.prompt === 'function') {
+            // Must run directly inside the user's click activation.
+            this.deferredPrompt = null;
+            window.__lifeosPwaInstallPrompt = null;
+            this.hideFab();
+            try {
+                await promptEvent.prompt();
+                const choice = await promptEvent.userChoice;
+                if (choice && choice.outcome === 'accepted') {
+                    window.showToast?.('Đang cài LifeOS...', 'ph-download-simple');
+                }
+            } catch(err) {
+                // A consumed/invalid prompt cannot be reused. Wait for a new browser event.
+                if(window.LIFEOS_DEBUG) console.warn('[LifeOS PWA] prompt failed:', err);
+            }
+            return;
+        }
+
+        const modal = document.getElementById('pwaHealthModal');
+        const content = document.getElementById('smartGuideContent');
+        if(!modal || !content) return;
+        modal.classList.remove('hidden');
+
+        if (this.state.isInApp) {
+            content.innerHTML = `<div class="text-center text-rose-600 font-bold mb-3">⚠️ Cảnh Báo Trình Duyệt</div><p class="mb-3 text-sm text-slate-600 font-medium">Bạn đang mở bằng Zalo/Facebook nên hệ thống bị chặn.</p><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">1</div><div class="text-sm font-medium">Bấm dấu <b>3 chấm</b> <span class="text-xl">⋯</span> ở góc trên phải.</div></div><div class="guide-step bg-amber-50 p-2 rounded border border-amber-200"><div class="step-num bg-amber-500">2</div><div class="text-sm font-medium">Chọn <b>Mở bằng trình duyệt</b> (Chrome/Safari).</div></div>`;
+            return;
+        }
+        if (this.state.isIOS) {
+            content.innerHTML = `<div class="text-center font-bold mb-4 text-blue-600 text-lg">Dành cho iPhone/iPad</div><div class="guide-step"><div class="step-num">1</div><div class="text-sm font-medium text-slate-700">Bấm nút <b>Chia sẻ</b> <i class="text-blue-500 text-xl font-serif">⎋</i> ở dưới cùng màn hình.</div></div><div class="guide-step"><div class="step-num">2</div><div class="text-sm font-medium text-slate-700">Kéo lên chọn <b>Thêm vào MH chính</b> (Add to Home Screen).</div></div><div class="guide-step"><div class="step-num">3</div><div class="text-sm font-medium text-slate-700">Bấm nút <b>Thêm</b> (Add) ở góc trên cùng.</div></div>`;
+            return;
+        }
+
+        // Chromium/Android/PC never expose a dead button: if the native prompt is not
+        // available, the button is hidden immediately and waits for the next real event.
+        this.hideFab();
+        modal.classList.add('hidden');
+    }
 };
 
 setTimeout(()=>{try{if(el('view-focus')) window.switchTimerMode?.('dateclock')}catch(e){console.warn('DateClock initial start failed:',e)}},0);
@@ -12146,105 +12212,17 @@ window.lifeosAttachMediaAutoFallback = lifeosAttachMediaAutoFallback;
 
 <script id="lifeos-r9-1-smartbox-builtin-fallback">
 (function(){
-  'use strict';
-  var PHASE = 'Pha14J20R88_CleanMediaFixFromR83Base';
   window.LIFEOS_BUILTIN_CHANNEL_PACK = {"groups":[{"id":"radio_vn","name":"Radio Việt Nam","type":"radio"},{"id":"tv_vn","name":"Tivi Việt Nam","type":"tv"}],"radio":[{"id":"radio_vov1","name":"VOV1","type":"radio","group":"radio_vn","url":"https://str.vov.gov.vn/vovlive/vov1vov5Vietnamese.sdp_aac/playlist.m3u8"},{"id":"radio_vov2","name":"VOV2","type":"radio","group":"radio_vn","url":"https://str.vov.gov.vn/vovlive/vov2.sdp_aac/playlist.m3u8"},{"id":"radio_vov3","name":"VOV3","type":"radio","group":"radio_vn","url":"https://str.vov.gov.vn/vovlive/vov3.sdp_aac/playlist.m3u8"}],"tv":[{"id":"tv_vtv1","name":"VTV1","type":"tv","group":"tv_vn","url":"https://live-vtv1.vtvdigital.vn/hls/0.m3u8"},{"id":"tv_vtv3","name":"VTV3","type":"tv","group":"tv_vn","url":"https://live-vtv3.vtvdigital.vn/hls/0.m3u8"}]};
-
-  function S(v){ return v == null ? '' : String(v).trim(); }
-  function A(v){ return Array.isArray(v) ? v : []; }
-  function human(id){
-    id = S(id).replace(/[_\-]+/g,' ').replace(/\s+/g,' ').trim();
-    return id ? id.replace(/\b\w/g, function(c){return c.toUpperCase();}) : '';
-  }
-  function detectType(ch, bucket){
-    var mix = [bucket, ch && ch.type, ch && ch.kind, ch && ch.media_type, ch && ch.category_type, ch && ch.url, ch && ch.src, ch && ch.streamUrl, ch && ch.stream_url, ch && ch.m3u8].map(function(x){return S(x).toLowerCase();}).join(' ');
-    if (mix.indexOf('radio') >= 0 || mix.indexOf('fm') >= 0) return 'radio';
-    if (mix.indexOf('tivi') >= 0 || mix.indexOf('tv') >= 0 || mix.indexOf('television') >= 0 || mix.indexOf('m3u8') >= 0) return 'tv';
-    return '';
-  }
-  function urlOf(ch){ return S(ch && (ch.url || ch.src || ch.streamUrl || ch.stream_url || ch.stream || ch.link || ch.m3u8 || ch.backupUrl || ch.proxyUrl)); }
-  function addGroup(groups, seen, id, name, type){
-    id = S(id); type = S(type);
-    if (!id || (type !== 'radio' && type !== 'tv')) return;
-    var key = type + ':' + id;
-    if (seen[key]) return;
-    seen[key] = true;
-    groups.push({id:id, name:S(name) || human(id) || (type === 'radio' ? 'Radio' : 'Tivi'), type:type});
-  }
-  function normChannel(raw, type, bucket, idx){
-    var ch = Object.assign({}, raw || {});
-    var url = urlOf(ch);
-    if (!url) return null;
-    type = type || detectType(ch, bucket);
-    if (type !== 'radio' && type !== 'tv') return null;
-
-    ch.type = type;
-    ch.url = S(ch.url) || url;
-    ch.src = S(ch.src) || ch.url;
-
-    var gid = S(ch.group || ch.group_id || ch.groupId || ch.folder || ch.folder_id || ch.folderId || ch.category || ch.category_id || ch.categoryId || ch.station_group || ch.channel_group);
-    var gname = S(ch.group_name || ch.groupName || ch.folder_name || ch.folderName || ch.category_name || ch.categoryName || ch.station_group_name || ch.channel_group_name);
-    if (!gid) {
-      gid = type + '_' + S(bucket || 'all').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'').toLowerCase();
-      if (!gid || gid === type + '_') gid = type + '_main';
-    }
-    if (!gname) gname = human(gid) || (type === 'radio' ? 'Radio' : 'Tivi');
-
-    ch.group = gid;
-    ch.group_name = gname;
-    if (!ch.name) ch.name = S(ch.title || ch.label || ch.id || (type === 'radio' ? 'Radio' : 'Tivi'));
-    if (!ch.id) {
-      var slug = S(ch.name || ch.url).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'') || 'channel';
-      ch.id = type + '_' + S(bucket || 'pack').replace(/[^a-z0-9]+/gi,'_') + '_' + idx + '_' + slug;
-    }
-    return ch;
-  }
-  function normalizePack(pack){
-    pack = pack && typeof pack === 'object' ? pack : {};
-    var out = Object.assign({}, pack);
-    var groups = [];
-    var seenGroups = Object.create(null);
-    var seenChannels = Object.create(null);
-    out.radio = [];
-    out.tv = [];
-
-    A(pack.groups).forEach(function(g){
-      var type = S(g && g.type) || detectType(g,'');
-      var id = S(g && (g.id || g.group || g.key || g.slug || g.value));
-      if (id && (type === 'radio' || type === 'tv')) addGroup(groups, seenGroups, id, g.name || g.title || id, type);
-    });
-
-    Object.keys(pack).forEach(function(bucket){
-      if (bucket === 'groups') return;
-      A(pack[bucket]).forEach(function(raw, idx){
-        var type = bucket === 'radio' || bucket === 'tv' ? bucket : detectType(raw, bucket);
-        var ch = normChannel(raw, type, bucket, idx);
-        if (!ch) return;
-        var k = ch.type + ':' + (ch.id || ch.url);
-        if (seenChannels[k]) return;
-        seenChannels[k] = true;
-        out[ch.type].push(ch);
-        addGroup(groups, seenGroups, ch.group, ch.group_name, ch.type);
-      });
-    });
-
-    out.groups = groups;
-    try { console.info('[R88_SMARTBOX_PACK_NORMALIZED]', {phase:PHASE, groups:groups.length, radio:out.radio.length, tv:out.tv.length}); } catch(e){}
-    return out;
-  }
-
-  window.__lifeosR88NormalizeSmartboxPack = normalizePack;
-
   window.__lifeosLoadSmartboxChannelsPack = async function(force){
     try {
-      if (location.protocol === 'file:') return normalizePack(window.LIFEOS_BUILTIN_CHANNEL_PACK);
+      if (location.protocol === 'file:') return window.LIFEOS_BUILTIN_CHANNEL_PACK;
       const stamp = force ? '?t=' + Date.now() : '';
       const res = await fetch('smartbox_channels.json' + stamp, { cache: force ? 'no-store' : 'default' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      return normalizePack(await res.json());
+      return await res.json();
     } catch(e) {
-      if (window.LIFEOS_DEBUG) console.warn('[LifeOS R88] smartbox_channels.json missing or failed; using built-in pack', e && e.message ? e.message : e);
-      return normalizePack(window.LIFEOS_BUILTIN_CHANNEL_PACK);
+      if (window.LIFEOS_DEBUG) console.warn('[LifeOS R9.1] smartbox_channels.json missing or failed; using built-in pack', e && e.message ? e.message : e);
+      return window.LIFEOS_BUILTIN_CHANNEL_PACK;
     }
   };
 })();
@@ -12512,8 +12490,7 @@ window.MediaHub = {
         const activeColor = this.currentTab === 'tv' ? 'bg-rose-500 text-white border-rose-500' : 'bg-emerald-500 text-white border-emerald-500';
         const idleColor = 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50';
 
-        let allLabel = this.currentTab === 'radio' ? '📻 Tất cả Radio' : '📺 Tất cả Tivi';
-        let htmlItems = `<button onclick="window.MediaHub.setGroup('all')" class="px-3 py-2 text-xs font-black rounded-xl border transition text-left shrink-0 active:scale-95 ${this.currentGroup === 'all' ? activeColor : idleColor}">${allLabel}</button>`;
+        let htmlItems = `<button onclick="window.MediaHub.setGroup('all')" class="px-3 py-2 text-xs font-black rounded-xl border transition text-left shrink-0 active:scale-95 ${this.currentGroup === 'all' ? activeColor : idleColor}">📺 Tất cả kênh</button>`;
         htmlItems += filteredGroups.map(g => `
             <button onclick="window.MediaHub.setGroup('${g.id}')" class="px-3 py-2 text-xs font-black rounded-xl border transition text-left shrink-0 active:scale-95 ${this.currentGroup === g.id ? activeColor : idleColor}">📁 ${g.name}</button>
         `).join('');
@@ -14972,12 +14949,6 @@ body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-music-right:empty:
 <style id="lifeos-pha64f3-family-chat-landscape-fix-style">
 /* PHA 64F.3: Family tab Mini-PC fix + upload forensic visibility.
    Keeps Music 64F2 intact. Scope only landscape mini-PC. */
-body.lifeos-landscape-mini-pc #btnInstall {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
 /* Family tab must look like a PC split workspace, not zoomed mobile. */
 body.lifeos-landscape-mini-pc #l64f-chat-card {
   grid-template-columns: minmax(210px, 27%) minmax(0, 73%) !important;
@@ -15268,13 +15239,6 @@ body.lifeos-landscape-mini-pc #family-upload-error-text {
     form.style.setProperty('height', '48px', 'important');
     form.style.setProperty('min-height', '48px', 'important');
     form.style.setProperty('max-height', '48px', 'important');
-
-    const install = document.getElementById('btnInstall');
-    if (install) {
-      install.style.setProperty('display', 'none', 'important');
-      install.style.setProperty('visibility', 'hidden', 'important');
-      install.style.setProperty('pointer-events', 'none', 'important');
-    }
 
     // Force upload errors to remain readable in landscape; never truncate the mobile filename/error.
     const bar = document.getElementById('chat-upload-status');
@@ -22802,6 +22766,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
 </script>
 <!-- LIFEOS R43 MEDIA SUBTAB STRONG REOPEN + SAFE SWITCH - END -->
 
+<!-- R76 DELETE CORE REBUILD: source-integrated, PWA untouched -->
 <script id="lifeos-pha14j19b-clean-rebase-ultralog-sync-delete48h-js">
 (function(){
   'use strict';
@@ -22811,6 +22776,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
   var RELAY = String(window.LIFEOS_UPLOAD_RELAY_URL || 'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev').replace(/\/+$/,'');
   var LS_PENDING = 'lifeos_j19a_pending_bundle_manifests_v1';
   var LS_TOMBSTONE = 'lifeos_j19a_bundle_tombstones_v1';
+  var LS_DELETE_QUEUE = 'lifeos_j20_family_delete_queue_v2';
   var LS_TRACE = 'lifeos_j19b_ultralog_compact_v1';
   var LS_OLD_TRACE = 'lifeos_j19a_transaction_trace_v1';
   function S(v){ return v == null ? '' : String(v); }
@@ -22887,9 +22853,113 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     }).sort(function(a,b){ return a.index - b.index; });
   }
   function bundleKey(m){ return bundleIdOf(m) || idOf(m) || (nameOf(m) + '|' + sizeOf(m)); }
+  function tombIdentity(m){
+    return {id:idOf(m), bundleId:bundleIdOf(m), messageId:msgIdOf(m), fileId:fileIdOf(m), name:nameOf(m)};
+  }
+  function sameTomb(t, x){
+    return !!((x.bundleId && S(t.bundleId)===x.bundleId) || (x.id && S(t.id)===x.id) || (x.messageId && S(t.messageId)===x.messageId) || (x.fileId && S(t.fileId)===x.fileId));
+  }
+  function recordTombstone(m, reason){
+    if(!m) return null;
+    var x=tombIdentity(m), tomb=readJSON(LS_TOMBSTONE, []);
+    if(!Array.isArray(tomb)) tomb=[];
+    tomb=tomb.filter(function(t){ return !sameTomb(t||{},x); });
+    var row={id:x.id,bundleId:x.bundleId,messageId:x.messageId,fileId:x.fileId,name:x.name,deletedAt:now(),reason:reason||'optimistic_local_delete'};
+    tomb.push(row); writeJSON(LS_TOMBSTONE,tomb.slice(-800));
+    log('TX_LOCAL_TOMBSTONE_RECORDED',row);
+    return row;
+  }
   function isTombed(m){
-    var tomb = readJSON(LS_TOMBSTONE, []), bid = bundleIdOf(m), id = idOf(m);
-    return tomb.some(function(t){ return (bid && S(t.bundleId) === bid) || (id && S(t.id) === id); });
+    var tomb=readJSON(LS_TOMBSTONE, []), x=tombIdentity(m);
+    return Array.isArray(tomb) && tomb.some(function(t){ return sameTomb(t||{},x); });
+  }
+  function compactDeleteMessage(m){
+    var x=tombIdentity(m), mf=mfOf(m)||{}, parts=partsOf(m);
+    return {id:x.id,bundleId:x.bundleId,messageId:x.messageId,fileId:x.fileId,name:x.name,fileName:x.name,fileSize:sizeOf(m),mime:mimeOf(m),chatId:(window.ChatEngine&&window.ChatEngine.chatId)||'',isBundle:isBundle(m),parts:parts,bundleManifest:parts.length?{bundleId:x.bundleId,parts:parts,originalName:x.name,originalSize:sizeOf(m),mime:mimeOf(m)}:undefined,msg_key:S(m&&(m.msg_key||m.id)),source:S(m&&m.source)};
+  }
+  function readDeleteQueue(){ var a=readJSON(LS_DELETE_QUEUE,[]); return Array.isArray(a)?a:[]; }
+  function writeDeleteQueue(a){ writeJSON(LS_DELETE_QUEUE,(Array.isArray(a)?a:[]).slice(-300)); }
+  function deleteJobKey(job){ var m=job&&job.message||{}; return S(job&&job.kind)+'|'+S(m.bundleId||m.msg_key||m.id||m.messageId||m.fileId); }
+  function queueDelete(m, kind, reason){
+    if(!m) return false;
+    kind=kind||(isBundle(m)?'telegram_bundle':isTelegramBacked(m)?'telegram_single':'local_only');
+    if(kind==='local_only') return false;
+    var job={kind:kind,message:compactDeleteMessage(m),reason:reason||'user_delete',createdAt:now(),attempts:0,nextAt:now(),lastError:''};
+    job.key=deleteJobKey(job);
+    var q=readDeleteQueue().filter(function(x){return deleteJobKey(x)!==job.key;}); q.push(job); writeDeleteQueue(q);
+    log('TX_DELETE_BACKGROUND_QUEUED',{kind:kind,key:job.key,id:job.message.id,bundleId:job.message.bundleId,messageId:job.message.messageId,fileName:job.message.name});
+    scheduleDeleteDrain(25); return true;
+  }
+  function withTimeout(p,ms){
+    return new Promise(function(resolve,reject){ var done=false,t=setTimeout(function(){if(done)return;done=true;reject(new Error('delete_timeout_'+ms));},ms); Promise.resolve(p).then(function(v){if(done)return;done=true;clearTimeout(t);resolve(v);},function(e){if(done)return;done=true;clearTimeout(t);reject(e);}); });
+  }
+  function classifyQueueFailure(out){ return /network|timeout|http_5|fetch|offline/i.test(S(out)); }
+  async function deleteD1MediaRow(job){
+    var m=job.message||{},key=S(m.msg_key||m.id); if(!key)return {ok:true,outcome:'no_d1_key'};
+    var base=String(window.LIFEOS_FAMILY_D1_API_BASE||'https://lifeos-family-d1-api.tunhienhieuchuyen.workers.dev').replace(/\/+$/,'');
+    try{
+      var res=await withTimeout(fetch(base+'/api/family/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:key,msg_key:key,messageId:key,reason:job.reason||'background_delete',telegramMessageId:m.messageId||'',telegramFileId:m.fileId||'',bundleId:m.bundleId||'',phase:'LifeOS_R76_DeleteCore_Rebuild'}),cache:'no-store'}),9000);
+      var txt=await res.text(),data={};try{data=txt?JSON.parse(txt):{};}catch(e){data={};}
+      if(res.ok&&data.ok!==false)return {ok:true,outcome:'d1_deleted'};
+      if(res.status===404)return {ok:true,outcome:'d1_already_gone'};
+      return {ok:false,retry:res.status>=500||res.status===0,outcome:'d1_http_'+res.status,error:S(data.error||data.message||txt).slice(0,240)};
+    }catch(e){return {ok:false,retry:true,outcome:'d1_network_error',error:S(e&&e.message||e)};}
+  }
+  async function performDeleteJob(job){
+    var m=job.message||{};
+    if(job.kind==='d1_text'){
+      var base=String(window.LIFEOS_FAMILY_TEXT_D1_V3_BASE||'https://lifeos-family-d1-text-api.tunhienhieuchuyen.workers.dev').replace(/\/+$/,'');
+      var res=await withTimeout(fetch(base+'/api/family/text/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({msg_key:m.msg_key||m.id,reason:job.reason||'background_delete'}),cache:'no-store'}),9000);
+      var txt=await res.text(),data={}; try{data=txt?JSON.parse(txt):{};}catch(e){data={};}
+      if(res.ok&&data.ok!==false) return {ok:true,outcome:'deleted'};
+      if(res.status===404) return {ok:true,outcome:'already_gone'};
+      return {ok:false,retry:res.status>=500||res.status===0,outcome:'http_'+res.status,error:S(data.error||data.message||txt).slice(0,240)};
+    }
+    if(job.kind==='telegram_single'){
+      var res1=await withTimeout(deleteSingleMessageOnTelegram(m),9000),out1=classifyDelete(res1),d1=await deleteD1MediaRow(job);
+      var tgOk=out1==='deleted'||out1==='already_gone',tgRetry=classifyQueueFailure(out1);
+      return {ok:tgOk&&d1.ok,retry:tgRetry||!d1.ok&&d1.retry,outcome:tgOk?d1.outcome:out1,error:S((!tgOk&&res1&&res1.data&&(res1.data.description||res1.data.message))||d1.error||'').slice(0,240)};
+    }
+    if(job.kind==='telegram_bundle'){
+      var ps=Array.isArray(m.parts)?m.parts:[], bad=[];
+      for(var i=0;i<ps.length;i++){
+        var r=null,o='missing_message_id';
+        try{ if(ps[i].messageId) { r=await withTimeout(deletePart(ps[i],m),9000); o=classifyDelete(r); } }catch(e){o='network_keep_card';r={data:{description:S(e&&e.message||e)}};}
+        if(o!=='deleted'&&o!=='already_gone') bad.push({outcome:o,error:S(r&&r.data&&(r.data.description||r.data.message)||'')});
+        await new Promise(function(ok){setTimeout(ok,120);});
+      }
+      var d1b=await deleteD1MediaRow(job);
+      if(!bad.length&&d1b.ok)return {ok:true,outcome:d1b.outcome};
+      var retryBad=bad.some(function(x){return classifyQueueFailure(x.outcome)||classifyQueueFailure(x.error);});
+      return {ok:false,retry:retryBad||!d1b.ok&&d1b.retry,outcome:bad.length?bad[0].outcome:d1b.outcome,error:bad.length?bad[0].error:d1b.error};
+    }
+    return {ok:true,outcome:'local_only'};
+  }
+  var deleteQueueBusy=false, deleteQueueTimer=0;
+  function scheduleDeleteDrain(ms){ clearTimeout(deleteQueueTimer); deleteQueueTimer=setTimeout(drainDeleteQueue,Math.max(0,Number(ms)||0)); }
+  async function drainDeleteQueue(){
+    if(deleteQueueBusy) return false;
+    if(typeof navigator!=='undefined'&&navigator.onLine===false){scheduleDeleteDrain(30000);return false;}
+    var q=readDeleteQueue(), t=now(), idx=q.findIndex(function(x){return Number(x.nextAt||0)<=t;});
+    if(idx<0){ if(q.length) scheduleDeleteDrain(Math.min(60000,Math.max(1000,Number(q[0].nextAt||t)-t))); return false; }
+    deleteQueueBusy=true; var job=q[idx], result;
+    try{ result=await performDeleteJob(job); }catch(e){ result={ok:false,retry:true,outcome:'network_error',error:S(e&&e.message||e)}; }
+    q=readDeleteQueue(); idx=q.findIndex(function(x){return deleteJobKey(x)===deleteJobKey(job);});
+    if(idx>=0){
+      if(result.ok){ q.splice(idx,1); writeDeleteQueue(q); log('TX_DELETE_BACKGROUND_DONE',{kind:job.kind,key:job.key,outcome:result.outcome,fileName:job.message&&job.message.name}); }
+      else if(!result.retry||Number(job.attempts||0)>=11){ q.splice(idx,1); writeDeleteQueue(q); log('TX_DELETE_BACKGROUND_MANUAL_REQUIRED',{kind:job.kind,key:job.key,outcome:result.outcome,error:result.error,fileName:job.message&&job.message.name},'warn'); try{toast('Đã xóa khỏi LifeOS. Dữ liệu máy chủ không xóa tự động được; xem nhật ký nếu cần.','ph-warning-circle');}catch(e){} }
+      else { job.attempts=Number(job.attempts||0)+1; job.lastError=S(result.error||result.outcome); job.nextAt=now()+Math.min(60000,1500*Math.pow(2,Math.min(job.attempts,5))); q[idx]=job; writeDeleteQueue(q); log('TX_DELETE_BACKGROUND_RETRY',{kind:job.kind,key:job.key,attempts:job.attempts,nextAt:job.nextAt,error:job.lastError},'warn'); }
+    }
+    deleteQueueBusy=false; if(readDeleteQueue().length) scheduleDeleteDrain(600); return result;
+  }
+  function removeMessageDom(m){
+    var ids=[idOf(m),bundleIdOf(m),msgIdOf(m)].filter(Boolean), seen=[];
+    ids.forEach(function(id){
+      var safe=''; try{safe=CSS.escape(S(id));}catch(e){safe=S(id).replace(/[^a-zA-Z0-9_-]/g,'\\$&');}
+      ['[data-chat-msg-id="'+safe+'"]','[data-lifeos-j19g-row="'+safe+'"]','[data-r37-textfile-row="'+safe+'"]'].forEach(function(sel){
+        try{Array.prototype.forEach.call(document.querySelectorAll(sel),function(el){var row=el.closest('.lifeos-j19g-row,[data-lifeos-j19g-row],[data-r37-textfile-row]')||el;if(seen.indexOf(row)<0){seen.push(row);row.remove();}});}catch(e){}
+      });
+    });
   }
   function cleanMsg(m){
     var out = Object.assign({}, m || {});
@@ -23063,11 +23133,14 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     });
   }
   function removeLocalMessage(msg, reason){
-    var id = idOf(msg), mid = msgIdOf(msg), ce = window.ChatEngine;
-    window.chatHistory = (window.chatHistory || []).filter(function(x){ return idOf(x) !== id && (!mid || msgIdOf(x) !== mid); });
-    try{ if(ce && ce.saveAndSync) ce.saveAndSync(); }catch(e){}
-    try{ if(ce && ce.render) ce.render(); }catch(e){}
-    log('TX_LOCAL_CHAT_DELETE_OK', {reason:reason || '', id:id, messageId:mid, fileName:nameOf(msg), count:(window.chatHistory||[]).length});
+    var id=idOf(msg),mid=msgIdOf(msg),ce=window.ChatEngine,handled=false;
+    recordTombstone(msg,reason||'optimistic_local_delete');removeMessageDom(msg);
+    try{if(window.LifeOSJ20R2HybridFamily&&typeof window.LifeOSJ20R2HybridFamily.optimisticRemove==='function')window.LifeOSJ20R2HybridFamily.optimisticRemove(msg);}catch(e){}
+    try{if(window.LifeOSJ20R6HybridTimeline&&typeof window.LifeOSJ20R6HybridTimeline.optimisticRemove==='function')window.LifeOSJ20R6HybridTimeline.optimisticRemove(msg);}catch(e){}
+    try{if(window.LifeOSR35D1TextOfficial&&typeof window.LifeOSR35D1TextOfficial.optimisticRemove==='function')handled=!!window.LifeOSR35D1TextOfficial.optimisticRemove(msg,reason||'j19b_local_delete');}catch(e){}
+    window.chatHistory=(window.chatHistory||[]).filter(function(x){return idOf(x)!==id&&(!mid||msgIdOf(x)!==mid)&&!isTombed(x);});
+    if(!handled)setTimeout(function(){try{if(ce&&ce.saveAndSync)ce.saveAndSync();}catch(e){}try{if(ce&&ce.render)ce.render();}catch(e){}},0);
+    log('TX_LOCAL_CHAT_DELETE_OK',{reason:reason||'',id:id,messageId:mid,fileName:nameOf(msg),count:(window.chatHistory||[]).length,optimistic:true});return true;
   }
   function markDeleteBlocked(msg, outcome, res){
     var ce = window.ChatEngine, desc = S(res && res.data && (res.data.description || res.data.telegramDescription || res.data.message) || 'Telegram chưa cho xóa');
@@ -23080,74 +23153,26 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     status('Không xóa khỏi khung chat: Telegram data vẫn còn hoặc quá 48h. Hãy xóa trong group Telegram trước rồi thử lại.', 'warn', false);
     toast('Telegram vẫn còn file/tin nhắn hoặc quá 48h; giữ card để tránh mất đồng bộ.', 'ph-warning-circle');
   }
-  async function deleteSingleAtomic(input){
-    var ce = window.ChatEngine, msg = findMsgById(input);
-    if(!msg) return false;
-    if(!isTelegramBacked(msg)){
-      if(!confirm('Xóa tin này khỏi khung chat?')) return false;
-      removeLocalMessage(msg, 'local_only_no_telegram');
-      try{ ce && ce.closeMsgMenu && ce.closeMsgMenu(); }catch(e){}
-      toast('Đã xóa khỏi khung chat', 'ph-trash');
-      return true;
-    }
-    var nm = nameOf(msg), mid = msgIdOf(msg);
-    if(!confirm('Xóa đồng bộ khỏi Telegram data và khung chat?\n\n' + nm + '\n\nNếu Telegram báo quá 48h, card sẽ được giữ lại để không mất đồng bộ.')) return false;
-    log('TX_SINGLE_DELETE_START', {id:idOf(msg), messageId:mid, fileName:nm});
-    status('Đang kiểm tra/xóa bên Telegram trước: ' + nm, 'info', false);
-    var out = 'network_keep_card', res = null;
-    try{ res = await deleteSingleMessageOnTelegram(msg); out = classifyDelete(res); }
-    catch(e){ res = {status:0, data:{description:S(e && e.message || e)}}; out = 'network_keep_card'; }
-    log('TX_SINGLE_DELETE_RESULT', {id:idOf(msg), messageId:mid, fileName:nm, outcome:out, status:res && res.status, description:S(res && res.data && (res.data.description || res.data.telegramDescription || '')).slice(0,180)}, (out === 'deleted' || out === 'already_gone') ? 'info' : 'error');
-    if(out === 'deleted' || out === 'already_gone'){
-      if(out === 'already_gone') log('TX_SYNC_ALREADY_GONE_ALLOW_CHAT_DELETE', {id:idOf(msg), messageId:mid, fileName:nm});
-      removeLocalMessage(msg, out === 'deleted' ? 'telegram_deleted_first' : 'telegram_already_gone');
-      try{ ce && ce.closeMsgMenu && ce.closeMsgMenu(); }catch(e){}
-      status(out === 'deleted' ? 'Đã xóa Telegram + khung chat: ' + nm : 'Telegram đã không còn file, đã xóa khỏi khung chat: ' + nm, 'done', true);
-      log('TX_SINGLE_DELETE_OK', {id:idOf(msg), messageId:mid, fileName:nm, outcome:out, count:(window.chatHistory||[]).length});
-      return true;
-    }
-    markDeleteBlocked(msg, out, res);
-    try{ ce && ce.closeMsgMenu && ce.closeMsgMenu(); }catch(e){}
-    return false;
+  function deleteSingleAtomic(input){
+    var ce=window.ChatEngine,msg=findMsgById(input); if(!msg)return false;
+    var backed=isTelegramBacked(msg), nm=nameOf(msg);
+    if(!confirm(backed?'Xóa tin này khỏi LifeOS? Dữ liệu Telegram sẽ được xử lý nền.':'Xóa tin này khỏi LifeOS?'))return false;
+    try{ce&&ce.closeMsgMenu&&ce.closeMsgMenu();}catch(e){}
+    removeLocalMessage(msg,backed?'optimistic_telegram_single':'optimistic_local_only');
+    if(backed)queueDelete(msg,'telegram_single','user_delete_single');
+    status(backed?'Đã xóa khỏi LifeOS · đang đồng bộ xóa nền: '+nm:'Đã xóa khỏi LifeOS: '+nm,'done',true);
+    toast('Đã xóa khỏi LifeOS','ph-trash');
+    return true;
   }
-  async function deleteBundle(input){
-    var ce = window.ChatEngine, m = findBundle(input);
-    if(!m){ toast('Không tìm thấy file lớn để xóa', 'ph-warning-circle'); return false; }
-    var ps = partsOf(m), nm = nameOf(m);
-    if(!ps.length){ toast('File lớn thiếu danh sách part', 'ph-warning-circle'); return false; }
-    if(!confirm('Xóa đồng bộ file lớn khỏi Telegram data và khung chat?\n\n' + nm + '\n' + ps.length + ' phần\n\nNếu Telegram báo quá 48h, card sẽ được giữ lại để không mất đồng bộ.')) return false;
-    log('TX_BUNDLE_DELETE_START', {id:idOf(m), bundleId:bundleIdOf(m), fileName:nm, parts:ps.length});
-    status('Đang xóa file lớn 0/' + ps.length + ': ' + nm, 'info', false);
-    var bad = [], ok = 0, gone = 0;
-    for(var i=0;i<ps.length;i++){
-      var p = ps[i], out = 'missing_message_id', res = null;
-      if(p.messageId){
-        try{ res = await deletePart(p, m); out = classifyDelete(res); }catch(e){ out = 'network_keep_card'; res = {status:0,data:{description:S(e && e.message || e)}}; }
-      }
-      if(out === 'deleted') ok++;
-      else if(out === 'already_gone') gone++;
-      else bad.push({index:p.index, messageId:p.messageId, outcome:out, status:res && res.status, description:S(res && res.data && (res.data.description || res.data.telegramDescription) || '')});
-      log('TX_BUNDLE_PART_DELETE_RESULT', {bundleId:bundleIdOf(m), partIndex:p.index, messageId:p.messageId, outcome:out, status:res && res.status});
-      status('Đang xóa file lớn ' + (i+1) + '/' + ps.length + ': ' + nm, 'info', false);
-      await new Promise(function(r){ setTimeout(r, 160); });
-    }
-    if(!bad.length){
-      var key = bundleKey(m);
-      window.chatHistory = (window.chatHistory || []).filter(function(x){ return bundleKey(x) !== key && idOf(x) !== idOf(m); });
-      forgetPending(m);
-      var tomb = readJSON(LS_TOMBSTONE, []); tomb.push({id:idOf(m), bundleId:bundleIdOf(m), name:nm, deletedAt:now(), reason:'TELEGRAM_ATOMIC_DELETE_OK_OR_ALREADY_GONE'}); writeJSON(LS_TOMBSTONE, tomb.slice(-500));
-      if(ce && ce.saveAndSync) ce.saveAndSync();
-      if(ce && ce.render) ce.render();
-      status('Đã xóa file lớn khỏi Telegram + chat: ' + nm, 'done', true);
-      log('TX_BUNDLE_DELETE_OK', {id:idOf(m), bundleId:bundleIdOf(m), fileName:nm, parts:ps.length, ok:ok, alreadyGone:gone});
-      return true;
-    }
-    m.uploadStatus = 'Telegram data vẫn còn part chưa xóa được. Nếu file/tin nhắn quá 48h, hãy xóa thủ công trong group data Telegram trước, rồi quay lại xóa trong khung chat.';
-    if(ce && ce.saveAndSync) ce.saveAndSync();
-    if(ce && ce.render) ce.render();
-    status('Không xóa khỏi khung chat: Telegram còn part hoặc quá 48h. Hãy xóa trong group Telegram trước rồi thử lại: ' + nm, 'warn', false);
-    log('TX_BUNDLE_DELETE_KEEP_CARD', {id:idOf(m), bundleId:bundleIdOf(m), fileName:nm, parts:ps.length, locked:bad.filter(function(x){return /too_old|denied|keep_card/.test(S(x.outcome));}).length, bad:bad, action:'KEEP_CHAT_CARD_REQUIRE_TELEGRAM_MANUAL_DELETE'}, 'error');
-    return false;
+  function deleteBundle(input){
+    var ce=window.ChatEngine,m=findBundle(input); if(!m){toast('Không tìm thấy file lớn để xóa','ph-warning-circle');return false;}
+    var ps=partsOf(m),nm=nameOf(m);
+    if(!confirm('Xóa file lớn này khỏi LifeOS?\n\n'+nm+'\n'+ps.length+' phần\n\nCác phần Telegram sẽ được xử lý nền.'))return false;
+    try{ce&&ce.closeMsgMenu&&ce.closeMsgMenu();}catch(e){}
+    removeLocalMessage(m,'optimistic_telegram_bundle'); forgetPending(m); queueDelete(m,'telegram_bundle','user_delete_bundle');
+    status('Đã xóa khỏi LifeOS · đang đồng bộ xóa '+ps.length+' phần nền: '+nm,'done',true);
+    toast('Đã xóa file lớn khỏi LifeOS','ph-trash');
+    return true;
   }
   function installDeleteRoute(){
     var ce = window.ChatEngine; if(!ce || ce.__j19bDeleteRouteInstalled) return false;
@@ -23167,7 +23192,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
       if(m && isFn(this.downloadChatFile)){ this.closeMsgMenu && this.closeMsgMenu(); return this.downloadChatFile(id); }
       return oldDownloadActive && oldDownloadActive.apply(this, arguments);
     };
-    log('TX_DELETE_ROUTE_INSTALLED', {relay:RELAY, policy:'telegram_first_then_chat; 48h_keep_card; already_gone_allow_chat_delete'});
+    log('TX_DELETE_ROUTE_INSTALLED', {relay:RELAY, policy:'local_tombstone_first; remote_background_queue; no_ui_block'});
     return true;
   }
   function oldDirtyKeys(){
@@ -23188,7 +23213,8 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
       phase:PHASE,
       at:new Date().toISOString(),
       counts:{messages:msgs.length, bundles:bundles.length, pending:readPending().length, tombstones:readJSON(LS_TOMBSTONE,[]).length, telegramBacked:backed.length},
-      syncPolicy:{deleteOrder:'Telegram first, then chat', alreadyGone:'allow chat delete', tooOld48h:'keep card and require manual delete in Telegram data group', networkDenied:'keep card'},
+      syncPolicy:{deleteOrder:'LifeOS local+tombstone first', remote:'background queue', alreadyGone:'complete silently', tooOld48h:'keep LifeOS deleted; log manual remote cleanup', networkDenied:'retry without blocking UI'},
+      deleteQueue:readDeleteQueue(),
       lastErrors:compactTrace('errors'),
       trace:compactTrace(mode || 'important'),
       dirtyLegacyKeys:oldDirtyKeys()
@@ -23225,13 +23251,26 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
       deleteBundle:deleteBundle,
       deleteSingle:deleteSingleAtomic,
       rememberPending:rememberPending,
+      deleteQueue:readDeleteQueue,
+      drainDeleteQueue:drainDeleteQueue,
       verify:function(){ return publishVerify(window.ChatEngine, 'manual_verify'); }
     };
     window.copyJ19BUltra = function(mode){ return window.LifeOSJ19B.copyUltra(mode || 'important'); };
     window.LifeOSJ19A = window.LifeOSJ19B;
     installUltraExportPatch();
   }
-  function boot(){ installSummary(); installCloudMerge(); installDeleteRoute(); }
+  window.LifeOSFamilyDeleteCore={
+    phase:'LifeOS_R76_DeleteCore_Rebuild',
+    isTombed:isTombed,
+    recordTombstone:recordTombstone,
+    removeLocalMessage:removeLocalMessage,
+    enqueue:function(m,reason){return queueDelete(m,null,reason||'user_delete');},
+    enqueueD1Text:function(m,reason){return queueDelete(m,'d1_text',reason||'user_delete_d1_text');},
+    drain:drainDeleteQueue,
+    queue:readDeleteQueue,
+    summary:function(){return{phase:this.phase,tombstones:readJSON(LS_TOMBSTONE,[]),queue:readDeleteQueue()};}
+  };
+  function boot(){ installSummary(); installCloudMerge(); installDeleteRoute(); scheduleDeleteDrain(250); }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
   setTimeout(boot, 300); setTimeout(boot, 1200); setTimeout(boot, 3200);
 })();
@@ -25147,10 +25186,17 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     m.source='telegram_d1_official'; m._lifeosSource='d1'; m._lifeosCloudTruthPhase=PHASE; m.uploadStatus='';
     return isMediaMessage(m) ? cleanObj(m) : null;
   }
-  function currentTextFromTimeline(){ return cleanList(window.chatHistory).filter(isTextMessage); }
+  function locallyTombed(m){return !!(window.LifeOSFamilyDeleteCore&&window.LifeOSFamilyDeleteCore.isTombed&&window.LifeOSFamilyDeleteCore.isTombed(m));}
+  function optimisticRemoveState(msg){
+    STATE.firebaseText=cleanList(STATE.firebaseText).filter(function(x){return keyOf(x)!==keyOf(msg)&&!locallyTombed(x);});
+    STATE.d1Media=cleanList(STATE.d1Media).filter(function(x){return keyOf(x)!==keyOf(msg)&&!locallyTombed(x);});
+    return true;
+  }
+  function currentTextFromTimeline(){return cleanList(window.chatHistory).filter(isTextMessage).filter(function(m){return !locallyTombed(m);});}
   function mergeTimeline(reason){
-    var texts=cleanList(STATE.firebaseText && STATE.firebaseText.length ? STATE.firebaseText : currentTextFromTimeline()).filter(isTextMessage);
-    var media=cleanList(STATE.d1Media).map(normalizeD1).filter(Boolean);
+    var texts=cleanList(STATE.firebaseText&&STATE.firebaseText.length?STATE.firebaseText:currentTextFromTimeline()).filter(isTextMessage).filter(function(m){return !locallyTombed(m);});
+    var media=cleanList(STATE.d1Media).map(normalizeD1).filter(Boolean).filter(function(m){return !locallyTombed(m);});
+    STATE.firebaseText=texts;STATE.d1Media=media;
     var merged=sortTimeline(uniqueByKey(texts.concat(media)));
     window.chatHistory=merged;
     try{ localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify({m:merged,f:STATE.folders||[],hybridCache:true,phase:PHASE,at:now()})); }catch(e){}
@@ -25160,7 +25206,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     return merged;
   }
   async function d1Health(){ var d=await api('/api/family/health'); STATE.d1HealthOk=true; trace('D1_HEALTH_OK',{backend:d.backend||'',schema:d.schema||''}); return d; }
-  async function d1List(limit){ var d=await api('/api/family/messages?since=0&limit='+(limit||100)); var arr=Array.isArray(d.data)?d.data:[]; STATE.d1Media=sortTimeline(arr.map(normalizeD1).filter(Boolean)); STATE.d1LastLoadAt=now(); trace('D1_LIST_OK',{count:STATE.d1Media.length,limit:limit||100}); mergeTimeline('d1_list'); return STATE.d1Media; }
+  async function d1List(limit){var d=await api('/api/family/messages?since=0&limit='+(limit||100));var arr=Array.isArray(d.data)?d.data:[];STATE.d1Media=sortTimeline(arr.map(normalizeD1).filter(Boolean).filter(function(m){return !locallyTombed(m);}));STATE.d1LastLoadAt=now();trace('D1_LIST_OK',{count:STATE.d1Media.length,limit:limit||100,tombstonesFiltered:arr.length-STATE.d1Media.length});mergeTimeline('d1_list');return STATE.d1Media;}
   async function d1Read(key){ var d=await api('/api/family/messages/'+encodeURIComponent(key)); var m=normalizeD1(d.data); if(!m) throw new Error('d1_readback_not_media_or_deleted'); trace('D1_READBACK_OK',{key:key,fileName:fileNameOf(m)}); return m; }
   async function d1Commit(msg,meta){ var body=d1Payload(msg,meta); var key=body.msg_key; await api('/api/family/messages',{method:'POST',body:body}); STATE.d1InsertOk++; trace('D1_INSERT_OK',{key:key,fileName:body.file_name,size:body.file_size,kind:body.kind}); var rb=await d1Read(key); STATE.d1ReadbackOk++; var list=await api('/api/family/messages?since=0&limit=100'); var ok=Array.isArray(list.data) && list.data.some(function(x){ return S(x && (x.msg_key || x.id || x.messageId))===key; }); if(!ok) throw new Error('d1_refresh_proof_missing'); trace('D1_REFRESH_PROOF_OK',{key:key,listCount:Array.isArray(list.data)?list.data.length:0}); return rb; }
   async function d1Delete(msg,reason){ var key=keyOf(msg); if(!key) throw new Error('missing_d1_key'); var d=await api('/api/family/delete',{method:'POST',body:{id:key,msg_key:key,messageId:key,reason:reason||'user_delete_media_tombstone',telegramFileId:fileIdOf(msg),telegramMessageId:telegramMessageIdOf(msg),bundleId:S(msg.bundleId||'')}}); STATE.d1TombstoneOk++; trace('D1_TOMBSTONE_OK',{key:key,deleted_at:d.deleted_at||((d.message||{}).deleted_at)||''}); try{ await api('/api/family/tombstones?messageId='+encodeURIComponent(key)); trace('D1_TOMBSTONE_READBACK_OK',{key:key}); }catch(e){ trace('D1_TOMBSTONE_READBACK_WARN',{key:key,error:S(e.message||e)},'warn'); } STATE.d1Media=STATE.d1Media.filter(function(x){ return keyOf(x)!==key; }); mergeTimeline('d1_tombstone_'+key); return d; }
@@ -25198,7 +25244,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
       var official=await d1Commit(msg,meta||{});
       pendingRemove(key);
       STATE.d1LastCommitKey=key;
-      STATE.d1Media=sortTimeline(uniqueByKey(STATE.d1Media.concat([official])));
+      if(!locallyTombed(official))STATE.d1Media=sortTimeline(uniqueByKey(STATE.d1Media.concat([official])).filter(function(m){return !locallyTombed(m);}));
       mergeTimeline('d1_commit_readback_'+key);
       setTimeout(function(){ setStatus('Đã lưu thật D1 metadata: '+nm+'. Refresh/profile khác không mất.','done',true,100,'D1 readback OK · Firebase không giữ card file'); },80);
       trace('OFFICIAL_CARD_RENDERED',{key:key,fileName:nm,source:'d1'});
@@ -25216,9 +25262,9 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     ce.__j20r2SaveSplit=true;
     ce.saveAndSync=function(){
       var timeline=cleanList(window.chatHistory);
-      var textOnly=timeline.filter(isTextMessage).map(function(m){ var c=cleanObj(m); c.id=S(c.id||c.messageId||('text_'+now())); c.type='text'; delete c._lifeosSource; delete c._lifeosCloudTruthPhase; return c; });
+      var textOnly=timeline.filter(isTextMessage).filter(function(m){return !locallyTombed(m);}).map(function(m){var c=cleanObj(m);c.id=S(c.id||c.messageId||('text_'+now()));c.type='text';delete c._lifeosSource;delete c._lifeosCloudTruthPhase;return c;});
       var safeFolders=cleanList(this.chatFolders||STATE.folders).map(function(f){ return {id:S(f.id||('folder_'+now())),name:S(f.name||'Thư mục'),icon:S(f.icon||'📁'),color:S(f.color||'bg-blue-500'),createdAt:N(f.createdAt,now())}; });
-      STATE.firebaseText=textOnly; STATE.folders=safeFolders; window.chatHistory=sortTimeline(uniqueByKey(textOnly.concat(STATE.d1Media)));
+      STATE.firebaseText=textOnly;STATE.d1Media=cleanList(STATE.d1Media).filter(function(m){return !locallyTombed(m);});STATE.folders=safeFolders;window.chatHistory=sortTimeline(uniqueByKey(textOnly.concat(STATE.d1Media))).filter(function(m){return !locallyTombed(m);});
       try{ localStorage.setItem('lifeos_v8_chat_shared', JSON.stringify({m:window.chatHistory,f:safeFolders,hybridCache:true,phase:PHASE,at:now()})); }catch(e){}
       if(this.dbRef){
         this.dbRef.set({messages:textOnly,folders:safeFolders,updatedAt:now(),hybridBackend:{phase:PHASE,textSource:'firebase',mediaSource:'d1',telegramStorage:true,updatedAt:now()}},{merge:true})
@@ -25240,7 +25286,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     ce.unsubscribe = ce.dbRef.onSnapshot({includeMetadataChanges:true}, function(doc){
       var data=doc && doc.exists ? (doc.data()||{}) : {};
       var all=cleanList(data.messages);
-      var text=all.filter(isTextMessage);
+      var text=all.filter(isTextMessage).filter(function(m){return !locallyTombed(m);});
       var mediaBlocked=all.filter(isMediaMessage).length;
       STATE.firebaseText=text;
       STATE.folders=cleanList(data.folders).map(function(f){ return {id:S(f.id||('folder_'+now())),name:S(f.name||'Thư mục'),icon:S(f.icon||'📁'),color:S(f.color||'bg-blue-500'),createdAt:N(f.createdAt,now())}; });
@@ -25318,7 +25364,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     refreshD1('install');
     return true;
   }
-  window.LifeOSJ20R2HybridFamily={phase:PHASE,install:install,refreshD1:function(){return refreshD1('force');},summary:summary,trace:function(){return readJSON(LS_TRACE,[]);},copy:function(){var txt=JSON.stringify(summary(),null,2); try{navigator.clipboard&&navigator.clipboard.writeText(txt);}catch(e){} return txt;},isMediaMessage:isMediaMessage,isTextMessage:isTextMessage};
+  window.LifeOSJ20R2HybridFamily={phase:PHASE,install:install,refreshD1:function(){return refreshD1('force');},optimisticRemove:optimisticRemoveState,summary:summary,trace:function(){return readJSON(LS_TRACE,[]);},copy:function(){var txt=JSON.stringify(summary(),null,2);try{navigator.clipboard&&navigator.clipboard.writeText(txt);}catch(e){}return txt;},isMediaMessage:isMediaMessage,isTextMessage:isTextMessage};
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install,{once:true}); else install();
   window.addEventListener('load',function(){ setTimeout(install,300); setTimeout(install,1500); setTimeout(install,3500); setTimeout(install,7000); },{once:true});
 })();
@@ -25455,11 +25501,18 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
   function headers(){var h={'Content-Type':'application/json'};var tk=token();if(tk){h.Authorization='Bearer '+tk;h['X-LifeOS-Token']=tk;}return h;}
   async function api(path,opt){opt=opt||{};var res=await fetch(base()+path,{method:opt.method||'GET',headers:headers(),body:opt.body!==undefined?JSON.stringify(opt.body):undefined});var txt=await res.text();var data={};try{data=txt?JSON.parse(txt):{};}catch(e){data={ok:false,error:'invalid_json',text:txt};}if(!res.ok||!data.ok){var er=new Error(data.error||data.message||('HTTP '+res.status));er.status=res.status;er.data=data;throw er;}return data;}
 
-  function currentTextFallback(){return list(window.chatHistory).filter(isText);}
-  function currentD1Fallback(){return list(window.chatHistory).filter(isD1Media).map(normalizeD1).filter(Boolean);}
+  function locallyTombed(m){return !!(window.LifeOSFamilyDeleteCore&&window.LifeOSFamilyDeleteCore.isTombed&&window.LifeOSFamilyDeleteCore.isTombed(m));}
+  function optimisticRemoveState(msg){
+    var k=keyOf(msg);STATE.firebaseText=list(STATE.firebaseText).filter(function(x){return keyOf(x)!==k&&!locallyTombed(x);});
+    STATE.d1Media=list(STATE.d1Media).filter(function(x){return keyOf(x)!==k&&!locallyTombed(x);});return true;
+  }
+  function currentTextFallback(){return list(window.chatHistory).filter(isText).filter(function(m){return !locallyTombed(m);});}
+  function currentD1Fallback(){return list(window.chatHistory).filter(isD1Media).map(normalizeD1).filter(Boolean).filter(function(m){return !locallyTombed(m);});}
   function buildMerged(reason){
-    var texts=STATE.firebaseReady?list(STATE.firebaseText).filter(isText):currentTextFallback();
-    var media=sort((STATE.d1Media||[]).concat(currentD1Fallback()).map(normalizeD1).filter(Boolean));
+    STATE.firebaseText=list(STATE.firebaseText).filter(function(m){return !locallyTombed(m);});
+    STATE.d1Media=list(STATE.d1Media).filter(function(m){return !locallyTombed(m);});
+    var texts=(STATE.firebaseReady?list(STATE.firebaseText).filter(isText):currentTextFallback()).filter(function(m){return !locallyTombed(m);});
+    var media=sort((STATE.d1Media||[]).concat(currentD1Fallback()).map(normalizeD1).filter(Boolean).filter(function(m){return !locallyTombed(m);}));
     var merged=sort(texts.concat(media));
     var oldMedia=currentD1Fallback().length;
     if(oldMedia&&media.length>=oldMedia&&texts.length>=0)STATE.overwrittenBlocked++;
@@ -25489,7 +25542,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
       await api('/api/family/health');
       var d=await api('/api/family/messages?since=0&limit=200');
       var arr=Array.isArray(d.data)?d.data:[];
-      STATE.d1Media=sort(arr.map(normalizeD1).filter(Boolean));
+      STATE.d1Media=sort(arr.map(normalizeD1).filter(Boolean).filter(function(m){return !locallyTombed(m);}));
       STATE.d1Ready=true;STATE.lastD1At=now();
       pushTrace('D1_LIST_OK',{reason:reason||'',rows:arr.length,d1Media:STATE.d1Media.length});
       draw('d1_list_'+(reason||''));
@@ -25515,7 +25568,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     ce.__j20r6SaveGuard=true;
     ce.saveAndSync=function(){
       var timeline=list(window.chatHistory);
-      var textOnly=timeline.filter(isText).map(function(m){var c=cleanObj(m);c.id=S(c.id||c.messageId||('text_'+now()));c.type='text';delete c._lifeosSource;delete c._lifeosCloudTruthPhase;return c;});
+      var textOnly=timeline.filter(isText).filter(function(m){return !locallyTombed(m);}).map(function(m){var c=cleanObj(m);c.id=S(c.id||c.messageId||('text_'+now()));c.type='text';delete c._lifeosSource;delete c._lifeosCloudTruthPhase;return c;});
       var folders=list(this.chatFolders||STATE.folders).map(function(f){return {id:S(f.id||('folder_'+now())),name:S(f.name||'Thư mục'),icon:S(f.icon||'📁'),color:S(f.color||'bg-blue-500'),createdAt:N(f.createdAt,now())};});
       STATE.firebaseText=textOnly;STATE.firebaseReady=true;STATE.folders=folders;buildMerged('save_text_only');
       try{localStorage.setItem('lifeos_v8_chat_shared',JSON.stringify({m:window.chatHistory,f:folders,hybridCache:true,phase:PHASE,at:now()}));}catch(e){}
@@ -25535,7 +25588,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     ce.dbRef=ref;
     STATE.unsubscribe=ref.onSnapshot({includeMetadataChanges:true},function(doc){
       var data=doc&&doc.exists?(doc.data()||{}):{};
-      var all=list(data.messages),texts=all.filter(isText),blocked=all.filter(isMedia).length;
+      var all=list(data.messages),texts=all.filter(isText).filter(function(m){return !locallyTombed(m);}),blocked=all.filter(isMedia).length;
       STATE.firebaseSnapshots++;STATE.lastFirebaseAt=now();STATE.firebaseReady=true;STATE.firebaseText=texts;
       STATE.folders=list(data.folders).map(function(f){return {id:S(f.id||('folder_'+now())),name:S(f.name||'Thư mục'),icon:S(f.icon||'📁'),color:S(f.color||'bg-blue-500'),createdAt:N(f.createdAt,now())};});
       if(ce){ce.chatFolders=STATE.folders;try{ce.__j19x21SnapshotGuard=true;}catch(e){}}
@@ -25589,7 +25642,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     pushTrace('J20R6_INSTALLED',{installCount:STATE.installCount});
     return true;
   }
-  window.LifeOSJ20R6HybridTimeline={phase:PHASE,install:install,refresh:function(){return loadD1('manual_refresh',true);},summary:summary,trace:function(){return read(LS_TRACE,[]);}};
+  window.LifeOSJ20R6HybridTimeline={phase:PHASE,install:install,refresh:function(){return loadD1('manual_refresh',true);},optimisticRemove:optimisticRemoveState,summary:summary,trace:function(){return read(LS_TRACE,[]);}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
   window.addEventListener('load',function(){setTimeout(install,60);setTimeout(install,350);setTimeout(install,900);setTimeout(install,1900);setTimeout(install,4200);}, {once:true});
   var t=setInterval(function(){
@@ -26128,65 +26181,22 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     }
     return null;
   }
-  async function hardDeleteMessage(input,opt){
-    opt = opt || {};
-    var ce = window.ChatEngine;
-    var msg = findMsgById(input);
-    if(!msg){ toast('Không tìm thấy card để xóa', 'ph-warning-circle'); return false; }
-    if(!isD1Media(msg)){
-      return opt.oldDelete && typeof opt.oldDelete === 'function' ? opt.oldDelete() : false;
-    }
-    var nm = fileNameOf(msg), targets = deleteTargets(msg);
-    if(!targets.length){
-      markKeepCard(msg, [], 'missing_telegram_delete_targets');
-      try{ ce && ce.closeMsgMenu && ce.closeMsgMenu(); }catch(e){}
-      return false;
-    }
-    if(!opt.skipConfirm){
-      var detail = targets.map(function(t){ return (t.partIndex ? ('part ' + t.partIndex + ': ') : '') + 'msg ' + (t.messageId || '?') + ' · ' + tme(t.chatId,t.messageId); }).join('\n');
-      var q = 'XÓA THẬT khỏi Telegram rồi mới xóa LifeOS/D1?\n\n' + nm + '\n' + targets.length + ' message Telegram\n\n' + detail + '\n\nNếu Telegram báo quá hạn/quyền lỗi, card sẽ được giữ lại.';
-      if(!window.confirm(q)){ try{ ce && ce.closeMsgMenu && ce.closeMsgMenu(); }catch(e){} return false; }
-    }
-    trace('HARD_DELETE_START',{key:keyOf(msg),fileName:nm,targets:targets.map(function(t){return {type:t.targetType,part:t.partIndex,messageId:t.messageId,chatId:t.chatId,link:tme(t.chatId,t.messageId)};})});
-    status('Đang xóa Telegram thật trước: ' + nm, 'info', false, '0/' + targets.length + ' message');
-    var results = [];
-    for(var i=0;i<targets.length;i++){
-      var t = targets[i], res = null, outcome = 'failed_keep_card', description = '';
-      try{ res = await relayDelete(t, msg); outcome = classifyDelete(res); description = S(res && res.data && (res.data.description || res.data.telegramDescription || res.data.message || res.data.error) || ''); }
-      catch(e){ res = {status:0,data:{description:S(e && e.message || e)}}; outcome = 'failed_keep_card'; description = S(e && e.message || e); }
-      results.push({target:t,outcome:outcome,status:res && res.status,description:description,ok:(outcome === 'deleted' || outcome === 'already_gone'),link:tme(t.chatId,t.messageId)});
-      trace('HARD_DELETE_TELEGRAM_RESULT',{key:keyOf(msg),fileName:nm,part:t.partIndex || 0,messageId:t.messageId,chatId:t.chatId,outcome:outcome,status:res && res.status,description:description.slice(0,220),link:tme(t.chatId,t.messageId)}, (outcome === 'deleted' || outcome === 'already_gone') ? 'info' : 'error');
-      status('Đang xóa Telegram thật: ' + (i+1) + '/' + targets.length + ' — ' + nm, 'info', false, (outcome === 'deleted' ? 'OK' : outcome));
-      await new Promise(function(r){ setTimeout(r, 140); });
-    }
-    var bad = results.filter(function(r){ return !r.ok; });
-    if(bad.length){
-      markKeepCard(msg, results, 'telegram_delete_failed_before_d1');
-      try{ ce && ce.closeMsgMenu && ce.closeMsgMenu(); }catch(e){}
-      return false;
-    }
-    try{
-      status('Telegram đã xóa. Đang ghi D1 tombstone: ' + nm, 'warn', false, 'Telegram OK/already-gone → D1 tombstone');
-      await d1Tombstone(msg, targets, 'telegram_hard_delete_ok_before_d1_tombstone');
-      updateLocalAfterDelete(msg);
-      try{ ce && ce.closeMsgMenu && ce.closeMsgMenu(); }catch(e){}
-      status('Đã xóa thật Telegram + D1 tombstone: ' + nm, 'done', true, 'Không còn ghost LifeOS');
-      toast('Đã xóa thật Telegram + LifeOS', 'ph-trash');
-      trace('HARD_DELETE_D1_TOMBSTONE_OK',{key:keyOf(msg),fileName:nm,targets:targets.length,results:results.map(function(r){return r.outcome;})});
-      return true;
-    }catch(e){
-      trace('HARD_DELETE_D1_TOMBSTONE_FAILED',{key:keyOf(msg),fileName:nm,error:S(e.message||e),status:e.status||0,data:e.data || null},'error');
-      status('Telegram đã xóa nhưng D1 tombstone lỗi: ' + S(e.message || e), 'error', false, 'Cần chạy lại xóa/refresh để dọn card');
-      toast('Telegram đã xóa nhưng D1 lỗi; card chưa dọn sạch.', 'ph-warning-circle');
-      try{ ce && ce.closeMsgMenu && ce.closeMsgMenu(); }catch(_e){}
-      return false;
-    }
+  function hardDeleteMessage(input,opt){
+    opt=opt||{};var ce=window.ChatEngine,msg=findMsgById(input);if(!msg){toast('Không tìm thấy card để xóa','ph-warning-circle');return false;}
+    if(!isD1Media(msg))return opt.oldDelete&&typeof opt.oldDelete==='function'?opt.oldDelete():false;
+    var nm=fileNameOf(msg),targets=deleteTargets(msg);
+    if(!opt.skipConfirm&& !window.confirm('Xóa card này khỏi LifeOS?\n\n'+nm+'\n\nTelegram và D1 sẽ được xử lý nền; giao diện không chờ mạng.')){try{ce&&ce.closeMsgMenu&&ce.closeMsgMenu();}catch(e){}return false;}
+    try{ce&&ce.closeMsgMenu&&ce.closeMsgMenu();}catch(e){}
+    trace('OPTIMISTIC_DELETE_ACCEPTED',{key:keyOf(msg),fileName:nm,targets:targets.length,policy:'local_first_background_remote'});
+    if(ce&&typeof ce.optimisticDeleteMessage==='function')return ce.optimisticDeleteMessage(msg,'j20r9_user_delete_media',{d1Text:false});
+    var core=window.LifeOSFamilyDeleteCore;if(core){core.recordTombstone(msg,'j20r9_user_delete_media');core.removeLocalMessage(msg,'j20r9_user_delete_media');core.enqueue(msg,'j20r9_user_delete_media');}
+    status('Đã xóa khỏi LifeOS · đang đồng bộ nền: '+nm,'done',true,'Không chờ Telegram/D1');toast('Đã xóa khỏi LifeOS','ph-trash');return true;
   }
   function installChatDelete(){
     var ce = window.ChatEngine;
     if(!ce) return false;
     if(ce.deleteMsg && ce.deleteMsg !== ce.__j20r9HardDeleteHandler && ce.deleteMsg.__phase !== PHASE) oldDeleteMsg = ce.deleteMsg.bind(ce);
-    var handler = async function(){
+    var handler=function(){
       var id = (document.getElementById('chat-msg-active-id') || {}).value;
       var msg = findMsgById(id);
       if(msg && isD1Media(msg)) return hardDeleteMessage(msg, {oldDelete:oldDeleteMsg});
@@ -26197,7 +26207,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     ce.deleteMsg = handler;
     ce.deleteMsgHardTelegramFirst = function(input){ return hardDeleteMessage(input); };
     lastInstallAt = now();
-    trace('CHAT_DELETE_ROUTE_PATCHED',{rule:'telegram_delete_first_then_d1_tombstone', oldPresent:!!oldDeleteMsg});
+    trace('CHAT_DELETE_ROUTE_PATCHED',{rule:'local_tombstone_first_background_telegram_d1',oldPresent:!!oldDeleteMsg});
     return true;
   }
   function installSelectedDelete(){
@@ -26209,10 +26219,10 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
       if(!ids.length) return false;
       var msgs = ids.map(findMsgById).filter(Boolean).filter(isD1Media);
       if(!msgs.length) return oldSelectedDelete ? oldSelectedDelete() : false;
-      if(!window.confirm('Xóa thật ' + msgs.length + ' mục khỏi Telegram rồi mới tombstone D1?\n\nNếu mục nào Telegram không cho xóa, mục đó sẽ được giữ lại.')) return false;
+      if(!window.confirm('Xóa '+msgs.length+' mục khỏi LifeOS? Telegram/D1 sẽ được xử lý nền.'))return false;
       var ok = 0, fail = 0;
       for(var i=0;i<msgs.length;i++){
-        var r = await hardDeleteMessage(msgs[i], {skipConfirm:true, source:'selected'});
+        var r=hardDeleteMessage(msgs[i],{skipConfirm:true,source:'selected'});
         if(r) ok++; else fail++;
       }
       try{ if(api.clear) api.clear(); }catch(e){}
@@ -26225,7 +26235,7 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     if(window.FamilySelectR3) window.FamilySelectR3.deleteSelected = fn;
     if(window.FamilySelectR4) window.FamilySelectR4.deleteSelected = fn;
     if(window.FamilyMobileTouchSelectR4) window.FamilyMobileTouchSelectR4.deleteSelected = fn;
-    trace('SELECTED_DELETE_ROUTE_PATCHED',{rule:'bulk_telegram_delete_first_then_d1_tombstone'});
+    trace('SELECTED_DELETE_ROUTE_PATCHED',{rule:'bulk_local_first_background_remote'});
     return true;
   }
   function installReportPatch(){
@@ -26249,9 +26259,9 @@ window.LIFEOS_R42_SCOPE = 'html_only_media_subtabs_autoreload_transfer_stable';
     try{ rows = Array.isArray(list.data) ? list.data : Array.isArray(list.items) ? list.items : Array.isArray(list.messages) ? list.messages : []; }catch(e){}
     var live = rows.filter(function(r){ return !(r.deleted_at || r.deletedAt); });
     var media = live.filter(isD1Media);
-    return {phase:PHASE,at:new Date().toISOString(),installedAt:lastInstallAt,relay:relayBase(),d1:d1Base(),contract:{deleteOrder:'Telegram deleteMessage/deleteMessages first; D1 tombstone second',fail:'keep card, no fake tombstone',manual:'if too old/no permission, delete manually in Telegram then retry LifeOS tombstone'},counts:{d1Rows:rows.length,liveRows:live.length,liveMedia:media.length,domCards:document.querySelectorAll('.lifeos-j19g-card,[data-lifeos-j19g-card]').length},liveMedia:media.map(function(m){var targets=deleteTargets(m);return {key:keyOf(m),fileName:fileNameOf(m),kind:kindOf(m),bundleId:bundleIdOf(m),targets:targets.map(function(t){return {part:t.partIndex||0,chatId:t.chatId,messageId:t.messageId,link:tme(t.chatId,t.messageId)}})};}),trace:readJSON(LS_TRACE,[]).slice(-120)};
+    return {phase:PHASE,at:new Date().toISOString(),installedAt:lastInstallAt,relay:relayBase(),d1:d1Base(),contract:{deleteOrder:'LifeOS local+tombstone first; Telegram/D1 background',fail:'card remains deleted; queue retry/log',manual:'only remote Telegram cleanup may require manual action'},counts:{d1Rows:rows.length,liveRows:live.length,liveMedia:media.length,domCards:document.querySelectorAll('.lifeos-j19g-card,[data-lifeos-j19g-card]').length},liveMedia:media.map(function(m){var targets=deleteTargets(m);return {key:keyOf(m),fileName:fileNameOf(m),kind:kindOf(m),bundleId:bundleIdOf(m),targets:targets.map(function(t){return {part:t.partIndex||0,chatId:t.chatId,messageId:t.messageId,link:tme(t.chatId,t.messageId)}})};}),trace:readJSON(LS_TRACE,[]).slice(-120)};
   }
-  function summary(){ return {phase:PHASE,installedAt:lastInstallAt,relay:relayBase(),d1:d1Base(),trace:readJSON(LS_TRACE,[]).slice(-120),contract:{mediaDelete:'telegram_hard_delete_before_d1_tombstone',textDelete:'firebase_text_original',noFakeDelete:true,manualWhenBlocked:true}}; }
+  function summary(){ return {phase:PHASE,installedAt:lastInstallAt,relay:relayBase(),d1:d1Base(),trace:readJSON(LS_TRACE,[]).slice(-120),contract:{mediaDelete:'local_first_background_telegram_d1',textDelete:'d1_background_queue',noUiBlock:true,manualRemoteWhenBlocked:true}}; }
   function install(){ installChatDelete(); installSelectedDelete(); installReportPatch(); return true; }
   window.LifeOSJ20R9HardDelete = {phase:PHASE,install:install,summary:summary,audit:audit,hardDelete:hardDeleteMessage,targets:deleteTargets,trace:function(){ return readJSON(LS_TRACE,[]); }};
   window.copyJ20R9HardDeleteAudit = function(){ return audit().then(function(data){ var txt = JSON.stringify(data,null,2); try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){} console.log(data); toast('Đã copy J20R9 hard-delete audit','ph-check-circle'); return txt; }); };
@@ -27773,7 +27783,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     rows.forEach(function(row){
       if (rowLooksDeleted(row)) return;
       if (isFolderRow(row)) { folders.push(normalizeFolder(row)); return; }
-      var m = normalizeMessageRow(row); if (m) messages.push(m);
+      var m=normalizeMessageRow(row); if(m&&!(window.LifeOSFamilyDeleteCore&&window.LifeOSFamilyDeleteCore.isTombed(m)))messages.push(m);
     });
     var folderMap=Object.create(null); folders.forEach(function(f){ folderMap[S(f.id)] = f; });
     folders = Object.keys(folderMap).map(function(k){ return folderMap[k]; }).sort(function(a,b){ return timeOf(a.createdAt,0)-timeOf(b.createdAt,0) || S(a.name).localeCompare(S(b.name)); });
@@ -27809,7 +27819,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
   }
   function timelineSig(rows){
     rows = Array.isArray(rows) ? rows : [];
-    var live = rows.filter(function(r){ return !rowLooksDeleted(r); }).map(function(r){
+    var live=rows.filter(function(r){return !rowLooksDeleted(r)&&!(window.LifeOSFamilyDeleteCore&&window.LifeOSFamilyDeleteCore.isTombed(r));}).map(function(r){
       var p = parsePayload(r);
       return [
         keyOf(r) || keyOf(p),
@@ -27834,7 +27844,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
       STATE.lastRefreshAt = now();
       STATE.lastRefreshReason = reason || 'refresh';
       var forceReason = S(reason || '');
-      var mustRender = !!force && /^(after_send_text_|after_delete_text_|install|load_|initFirebase_d1_text|manual|r37_|r38_|r39_)/i.test(forceReason);
+      var mustRender=!!force&&/^(after_send_text_|after_delete_text_|delete_local_|install|load_|initFirebase_d1_text|manual|r37_|r38_|r39_)/i.test(forceReason);
       if (unchanged && !mustRender) {
         STATE.skippedRenders = (STATE.skippedRenders || 0) + 1;
         STATE.lastError = '';
@@ -27902,6 +27912,28 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     if (ce) { ce.unsubscribe = null; ce.dbRef = null; ce.__j20r6ListenerOwner = 'R35_DISABLED'; ce.__j19x21SnapshotGuard = true; }
     STATE.firebaseTextDisabled = true;
   }
+  function sameMessage(a,b){
+    var ka=keyOf(a),kb=keyOf(b); if(ka&&kb&&ka===kb)return true;
+    var aa=S(a&&(a.telegram_message_id||a.telegramMessageId||a.telegram_msg_id||a.message_id)),bb=S(b&&(b.telegram_message_id||b.telegramMessageId||b.telegram_msg_id||b.message_id));
+    return !!(aa&&bb&&aa===bb);
+  }
+  function removeDomFast(msg){
+    try{var ids=[keyOf(msg),S(msg&&msg.id),S(msg&&msg.bundleId)].filter(Boolean);ids.forEach(function(id){var e='';try{e=CSS.escape(id);}catch(x){e=id.replace(/[^a-zA-Z0-9_-]/g,'\\$&');}Array.prototype.forEach.call(document.querySelectorAll('[data-chat-msg-id="'+e+'"],[data-lifeos-j19g-row="'+e+'"],[data-r37-textfile-row="'+e+'"]'),function(el){var row=el.closest('.lifeos-j19g-row,[data-lifeos-j19g-row],[data-r37-textfile-row]')||el;try{row.remove();}catch(x){}});});}catch(e){}
+  }
+  function optimisticRemove(msg,reason){
+    if(!msg)return false;
+    removeDomFast(msg);
+    STATE.messages=(STATE.messages||[]).filter(function(x){return !sameMessage(x,msg)&&!(window.LifeOSFamilyDeleteCore&&window.LifeOSFamilyDeleteCore.isTombed(x));});
+    window.chatHistory=(window.chatHistory||[]).filter(function(x){return !sameMessage(x,msg)&&!(window.LifeOSFamilyDeleteCore&&window.LifeOSFamilyDeleteCore.isTombed(x));});
+    var compactMessages=compactCacheList(STATE.messages),compactFolders=compactCacheList(STATE.folders);
+    setTimeout(function(){
+      writeJSON(LS_CACHE,{phase:PHASE,at:now(),reason:reason||'optimistic_delete',compact:true,m:compactMessages,f:compactFolders,counts:{text:STATE.messages.filter(function(m){return m.source==='lifeos-family-text-d1';}).length,textFile:STATE.messages.filter(function(m){return m.source==='lifeos-family-text-file-d1';}).length,family:STATE.messages.filter(function(m){return m._origin_db==='FAMILY_DB';}).length,folders:STATE.folders.length,total:STATE.messages.length}});
+      try{localStorage.setItem(LS_SHARED,JSON.stringify({m:compactMessages,f:compactFolders,d1TextOfficial:true,compact:true,phase:PHASE,at:now(),reason:reason||'optimistic_delete'}));}catch(e){}
+      try{renderOfficial('delete_local_'+S(reason||'user'));}catch(e){}
+    },0);
+    trace('OPTIMISTIC_LOCAL_DELETE',{reason:reason||'',msg_key:keyOf(msg),remaining:STATE.messages.length});
+    return true;
+  }
   function patchChatEngine(){
     var ce=window.ChatEngine; if(!ce || ce.__r35D1TextOfficialPatched) return false;
     ce.__r35D1TextOfficialPatched = true;
@@ -27949,28 +27981,25 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         return false;
       }
     };
-    ce.deleteMsg = async function(){
-      var id = document.getElementById('chat-msg-active-id')?.value;
-      var msg = (window.chatHistory || []).find(function(m){ return S(m.id)===S(id) || S(m.msg_key)===S(id); });
-      if(!msg) return false;
-      var k=keyOf(msg);
-      var isD1Text = msg.source === 'lifeos-family-text-d1' || msg.source === 'lifeos-family-text-file-d1' || /^text_(row|file)_/i.test(k);
-      if(!isD1Text) return ce.__r35OldDeleteMsg ? ce.__r35OldDeleteMsg() : false;
-      if(!window.confirm('Xóa tin nhắn này khỏi mọi máy/profile?')) { this.closeMsgMenu && this.closeMsgMenu(); return false; }
-      try{
-        var del = await api('/api/family/text/delete', {method:'POST', body:{msg_key:k, reason:'r35_user_delete_text'}});
-        STATE.lastDelete = del;
-        this.closeMsgMenu && this.closeMsgMenu();
-        await refresh('after_delete_text_'+k, true);
-        try{ window.showToast && window.showToast('Đã xóa tin nhắn', 'ph-trash'); }catch(_e){}
-        trace('D1_TEXT_DELETE_OK', {msg_key:k, deleted_at:del.deleted_at, wrote_db:del.wrote_db||'TEXT_DB'});
-        return del;
-      }catch(e){
-        STATE.lastError=S(e&&e.message||e);
-        trace('D1_TEXT_DELETE_FAILED', {msg_key:k, error:STATE.lastError, status:e.status||0}, 'error');
-        try{ window.showToast && window.showToast('Xóa tin nhắn lỗi: '+STATE.lastError, 'ph-warning-circle'); }catch(_e){}
-        return false;
-      }
+    ce.optimisticDeleteMessage=function(msg,reason,options){
+      options=options||{}; if(!msg)return false;
+      var core=window.LifeOSFamilyDeleteCore;
+      try{this.closeMsgMenu&&this.closeMsgMenu();}catch(e){}
+      if(core&&core.recordTombstone)core.recordTombstone(msg,reason||'r35_user_delete');
+      if(core&&core.removeLocalMessage)core.removeLocalMessage(msg,reason||'r35_user_delete');else optimisticRemove(msg,reason||'r35_user_delete');
+      var k=keyOf(msg),isD1Text=options.d1Text===true||msg.source==='lifeos-family-text-d1'||msg.source==='lifeos-family-text-file-d1'||/^text_(row|file)_/i.test(k);
+      if(core){if(isD1Text&&core.enqueueD1Text)core.enqueueD1Text(msg,reason||'r35_user_delete_text');else if(core.enqueue)core.enqueue(msg,reason||'r35_user_delete_media');}
+      try{window.showToast&&window.showToast('Đã xóa khỏi LifeOS','ph-trash');}catch(e){}
+      trace('DELETE_ACCEPTED_NONBLOCKING',{msg_key:k,d1Text:isD1Text,reason:reason||'',queue:core&&core.queue?core.queue().length:0});
+      return true;
+    };
+    ce.deleteMsg=function(){
+      var id=document.getElementById('chat-msg-active-id')?.value;
+      var msg=(window.chatHistory||[]).find(function(m){return S(m.id)===S(id)||S(m.msg_key)===S(id)||S(m.messageId)===S(id)||S(m.bundleId)===S(id);});
+      if(!msg)return false;
+      var k=keyOf(msg),isD1Text=msg.source==='lifeos-family-text-d1'||msg.source==='lifeos-family-text-file-d1'||/^text_(row|file)_/i.test(k);
+      if(!window.confirm(isD1Text?'Xóa tin này khỏi LifeOS và đồng bộ máy chủ ở chế độ nền?':'Xóa card này khỏi LifeOS? Dữ liệu Telegram (nếu có) sẽ được xử lý nền.')){this.closeMsgMenu&&this.closeMsgMenu();return false;}
+      return this.optimisticDeleteMessage(msg,isD1Text?'r35_user_delete_text':'r35_user_delete_media',{d1Text:isD1Text});
     };
     ce.renderFileCard = function(m){
       if (m && m._lifeosVirtualTextFile) {
@@ -28040,8 +28069,9 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     state: STATE,
     refresh: function(){ return refresh('manual', true); },
     install: install,
-    killFirebaseText: killChatFirebaseListener,
-    trace: function(){ return readJSON(LS_TRACE,[]); },
+    killFirebaseText:killChatFirebaseListener,
+    optimisticRemove:optimisticRemove,
+    trace:function(){return readJSON(LS_TRACE,[]);},
     summary: function(){ return {phase:PHASE, state:STATE, textWorker:TEXT_V3_BASE, familyMediaWorker:window.LIFEOS_FAMILY_D1_API_BASE, firebaseTextDisabled:true, cache:readJSON(LS_CACHE,{})}; },
     copy: function(){ var txt=JSON.stringify(this.summary(),null,2); try{navigator.clipboard&&navigator.clipboard.writeText(txt);}catch(e){} console.log('=== R35 D1 TEXT OFFICIAL ===', this.summary()); return txt; }
   };
@@ -28141,7 +28171,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
   function findInput(){return document.getElementById('chat-input-text')||document.getElementById('chat-input')||document.querySelector('#view-chat textarea,#view-chat input[type="text"],textarea');}
   async function putToInput(id){var m=findMsg(id);if(!isTextFile(m))return false;var b=await getBody(m),input=findInput();if(!input){toast('Không tìm thấy ô nhập','ph-warning-circle');return false;}input.value=b;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();closeViewer();toast('Đã đưa nội dung vào ô nhập','ph-pencil-simple');return true;}
   async function refresh(reason){try{if(window.LifeOSR35D1TextOfficial&&window.LifeOSR35D1TextOfficial.refresh)await window.LifeOSR35D1TextOfficial.refresh(reason||'r37_long_text');else if(window.ChatEngine&&window.ChatEngine.render)window.ChatEngine.render();}catch(e){} setTimeout(transformAll,60);setTimeout(transformAll,300);}
-  async function deleteId(id){var m=findMsg(id);if(!isTextFile(m))return false;if(!confirm('Xóa văn bản dài D1 này khỏi mọi máy/profile?'))return false;try{var d=await api('/api/family/text/delete',{method:'POST',body:{msg_key:keyOf(m)||id,reason:'r37_user_delete_long_text_file'}});closeViewer();removeRow(id);await refresh('r37_delete_long_text_file');toast('Đã xóa văn bản dài D1','ph-trash');trace('DELETE_OK',{msg_key:keyOf(m)||id,deleted_at:d.deleted_at});return d;}catch(e){toast('Xóa văn bản dài lỗi: '+S(e.message||e),'ph-warning-circle');trace('DELETE_FAILED',{id:id,error:S(e.message||e)},'error');return false;}}
+  function deleteId(id){var m=findMsg(id);if(!isTextFile(m))return false;if(!confirm('Xóa văn bản dài này khỏi LifeOS và đồng bộ D1 ở chế độ nền?'))return false;closeViewer();removeRow(id);if(window.ChatEngine&&typeof window.ChatEngine.optimisticDeleteMessage==='function')return window.ChatEngine.optimisticDeleteMessage(m,'r37_user_delete_long_text_file',{d1Text:true});var core=window.LifeOSFamilyDeleteCore;if(core){core.recordTombstone(m,'r37_user_delete_long_text_file');core.removeLocalMessage(m,'r37_user_delete_long_text_file');core.enqueueD1Text(m,'r37_user_delete_long_text_file');}toast('Đã xóa khỏi LifeOS','ph-trash');return true;}
   async function saveViewerAsNew(){var id=window.LifeOSR37LongTextDomGuard.activeId,m=findMsg(id),ta=document.getElementById('lifeos-r37-textfile-text'),text=ta?ta.value:'';if(!text.trim()){toast('Nội dung rỗng','ph-warning-circle');return false;}if(!confirm('Lưu nội dung sửa thành bản mới và xóa bản cũ?'))return false;var sender=(window.ChatEngine&&window.ChatEngine.getKey&&window.ChatEngine.getKey())||window.viewingUser||window.currentUser||senderOf(m)||'family';try{var ins=await api('/api/family/text',{method:'POST',body:{sender:sender,profile_id:sender,text:text,created_at:now(),reason:'r37_edit_save_as_new'}});if(m)await api('/api/family/text/delete',{method:'POST',body:{msg_key:keyOf(m),reason:'r37_replace_long_text_file'}});closeViewer();removeRow(id);await refresh('r37_save_textfile_as_new');toast('Đã lưu bản sửa mới','ph-check-circle');trace('SAVE_AS_NEW_OK',{old:id,new_msg_key:ins.msg_key,packed_as_file:ins.packed_as_file});return ins;}catch(e){toast('Lưu sửa lỗi: '+S(e.message||e),'ph-warning-circle');trace('SAVE_AS_NEW_FAILED',{id:id,error:S(e.message||e)},'error');return false;}}
   function removeRow(id){Array.prototype.forEach.call(document.querySelectorAll('[data-lifeos-j19g-row="'+cssEsc(id)+'"],[data-r37-textfile-row="'+cssEsc(id)+'"]'),function(el){try{el.remove();}catch(e){}});}
   function cssEsc(s){try{return CSS.escape(S(s));}catch(e){return S(s).replace(/[^a-zA-Z0-9_-]/g,'\\$&');}}
@@ -32619,41 +32649,13 @@ body.lifeos-r75-not-music.media-live-scroll-mode {
     setClassName('tab-media-tv', tab === 'tv' ? selectedClass('tv') : baseUnselected());
 
     var mp3=$('mp3-list-container'), radio=$('radio-list-container'), tv=$('tv-list-container');
-    if (mp3) {
-      mp3.classList.toggle('hidden', tab !== 'music');
-      mp3.style.display = tab === 'music' ? 'block' : 'none';
-      try { mp3.setAttribute('aria-hidden', tab === 'music' ? 'false' : 'true'); } catch(e){}
-    }
-    if (radio) {
-      radio.classList.toggle('hidden', tab !== 'radio');
-      radio.style.display = tab === 'radio' ? 'block' : 'none';
-      try { radio.setAttribute('aria-hidden', tab === 'radio' ? 'false' : 'true'); } catch(e){}
-    }
-    if (tv) {
-      tv.classList.toggle('hidden', tab !== 'tv');
-      tv.style.display = tab === 'tv' ? 'grid' : 'none';
-      try { tv.setAttribute('aria-hidden', tab === 'tv' ? 'false' : 'true'); } catch(e){}
-    }
+    if (mp3) mp3.classList.toggle('hidden', tab !== 'music');
+    if (radio) radio.classList.toggle('hidden', tab !== 'radio');
+    if (tv) tv.classList.toggle('hidden', tab !== 'tv');
 
     var tvp=$('tv-player-container'), rp=$('radio-player-container');
     if (tvp) tvp.style.display = tab === 'tv' ? '' : 'none';
     if (rp) rp.style.display = tab === 'radio' ? '' : 'none';
-
-    var sidebar=$('media-group-sidebar'), mobBar=$('media-group-mobile-bar');
-    if (tab === 'music') {
-      if (sidebar) { sidebar.className = 'hidden'; sidebar.style.display = 'none'; }
-      if (mobBar) { mobBar.className = 'hidden'; mobBar.style.display = 'none'; }
-      try { document.body && document.body.classList && document.body.classList.remove('lifeos-r75-not-music'); } catch(e){}
-    } else {
-      if (sidebar) {
-        sidebar.className = 'hidden lg:flex lg:col-span-3 flex-col gap-1.5 overflow-y-auto pr-1';
-        sidebar.style.display = '';
-      }
-      if (mobBar) {
-        mobBar.className = 'flex lg:hidden w-full gap-2 px-2 pb-2 overflow-x-auto custom-scroll-area shrink-0';
-        mobBar.style.display = '';
-      }
-    }
 
     try { document.body.dataset.lifeosMediaTab = tab; document.body.dataset.l64fMediaTab = tab; } catch(e){}
   }
@@ -32670,44 +32672,15 @@ body.lifeos-r75-not-music.media-live-scroll-mode {
     tab = (tab === 'radio' || tab === 'tv') ? tab : 'music';
     var m = window.MediaHub;
     if (!m) return false;
-    try {
-      m.currentTab = tab;
-      if (tab === 'music') {
-        m.currentGroup = 'all';
-      } else {
-        var validGroups = (Array.isArray(m.rawGroups) ? m.rawGroups : []).filter(function(g){ return g && g.type === tab; }).map(function(g){ return g.id; });
-        if (m.currentGroup !== 'all' && validGroups.indexOf(m.currentGroup) < 0) m.currentGroup = 'all';
-      }
-      m.focusIdx = -1;
-    } catch(e){}
+    try { m.currentTab = tab; } catch(e){}
     stopOpposite(tab);
     syncMediaDom(tab);
-    if (tab === 'music') {
-      try {
-        var app = window.MusicApp;
-        var loading = $('music-loading');
-        if (app && Array.isArray(app.playlist) && app.playlist.length && typeof app.renderList === 'function') {
-          app.renderList();
-          if (loading) loading.style.display = 'none';
-        } else if (app && typeof app.refetch === 'function' && !app.__r88Mp3Refetching) {
-          if (loading) { loading.style.display = 'block'; loading.textContent = 'Đang đồng bộ danh sách Nhạc MP3...'; }
-          app.__r88Mp3Refetching = true;
-          Promise.resolve(app.refetch()).catch(function(err){
-            if (loading) { loading.style.display = 'block'; loading.textContent = 'Chưa tải được danh sách Nhạc MP3. Bấm lại Nhạc MP3 để thử lại.'; }
-            try { console.warn('[R88_MP3_REFETCH_FAIL]', err && err.message ? err.message : err); } catch(e){}
-          }).finally(function(){ app.__r88Mp3Refetching = false; });
-        } else if (app && typeof app.renderList === 'function') {
-          app.renderList();
-        }
-      } catch(e){}
-    } else {
-      try { if (typeof m.renderGroupMenus === 'function') m.renderGroupMenus(); } catch(e){}
-      try { if (typeof m.renderLists === 'function') m.renderLists(); } catch(e){}
-    }
-    try { localStorage.setItem('lifeos_media_memory', JSON.stringify({tab:tab, group:m.currentGroup || 'all', tvIdx:m.currentTvIdx, radioIdx:m.currentRadioIdx, source:'r88-clean-media'})); } catch(e){}
+    try { if (tab === 'music' && window.MusicApp && typeof window.MusicApp.renderList === 'function') window.MusicApp.renderList(); } catch(e){}
+    try { if (tab !== 'music' && typeof m.renderGroupMenus === 'function') m.renderGroupMenus(); } catch(e){}
+    try { if (tab !== 'music' && typeof m.renderLists === 'function') m.renderLists(); } catch(e){}
+    try { localStorage.setItem('lifeos_media_memory', JSON.stringify({tab:tab, group:m.currentGroup || 'all', tvIdx:m.currentTvIdx, radioIdx:m.currentRadioIdx, source:'r75-no-autoplay'})); } catch(e){}
     stats.mediaTabNoAutoplay++;
     setMediaLiveAllowed();
-    try { console.info('[R88_MEDIA_TAB_OK]', {tab:tab, group:m.currentGroup, radio:(m.radioData||[]).length, tv:(m.tvData||[]).length, mp3: (window.MusicApp && window.MusicApp.playlist || []).length}); } catch(e){}
     return false;
   }
   function installMediaNoAutoplay(){
@@ -32816,299 +32789,6 @@ body.lifeos-r75-not-music.media-live-scroll-mode {
 })();
 </script>
 <!-- LIFEOS J20 R75 SAFE ROUTER + MEDIA NO AUTOPLAY + CLEAN GATE - END -->
-
-
-<!-- Pha14J20R83_FamilyDeleteTombstoneGuard_R76Base - START -->
-<script id="lifeos-j20r83-family-delete-tombstone-guard-js">
-(function(){
-  'use strict';
-  if(window.__lifeosJ20R83FamilyDeleteTombstoneGuard) return;
-  window.__lifeosJ20R83FamilyDeleteTombstoneGuard = true;
-
-  var PHASE = 'Pha14J20R83_FamilyDeleteTombstoneGuard_R76Base';
-  var LS = 'lifeos_j20r83_family_delete_tombstones_v1';
-  var LS_TRACE = 'lifeos_j20r83_family_delete_guard_trace_v1';
-  var CACHE_KEYS = [
-    'lifeos_v8_chat_shared',
-    'lifeos_j20r2_hybrid_cache_v1'
-  ];
-
-  function now(){ return Date.now(); }
-  function S(v){ return v == null ? '' : String(v); }
-  function readJSON(k,d){ try{ var raw = localStorage.getItem(k); return raw ? JSON.parse(raw) : d; }catch(e){ return d; } }
-  function writeJSON(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
-  function A(v){ return Array.isArray(v) ? v : []; }
-  function parseMaybe(v){ if(!v) return {}; if(typeof v === 'object') return v; try{ return JSON.parse(v); }catch(e){ return {}; } }
-  function trace(type,data,level){
-    var o = Object.assign({phase:PHASE,type:type,at:now(),time:new Date().toLocaleTimeString('vi-VN',{hour12:false})}, data || {});
-    try{ var a = readJSON(LS_TRACE, []); if(!Array.isArray(a)) a = []; a.push(o); writeJSON(LS_TRACE, a.slice(-240)); }catch(e){}
-    try{ (level === 'error' ? console.error : level === 'warn' ? console.warn : console.info)('[R83_DELETE_GUARD]', type, data || {}); }catch(e){}
-    return o;
-  }
-  function mergeSources(m){
-    m = m || {};
-    var row = m._row || m.row || {};
-    var p1 = parseMaybe(m.payload_json || m.payloadJson);
-    var p2 = parseMaybe(row.payload_json || row.payloadJson);
-    return Object.assign({}, p2, p1, row, m);
-  }
-  function pick(){ for(var i=0;i<arguments.length;i++){ var v = arguments[i]; if(v !== undefined && v !== null && S(v) !== '') return S(v); } return ''; }
-  function keyOf(m){ var p = mergeSources(m); return pick(p.msg_key, p.messageKey, p.id, p.messageId, p.clientId, p.localId); }
-  function bundleIdOf(m){ var p = mergeSources(m); return pick(p.bundle_id, p.bundleId); }
-  function fileIdOf(m){ var p = mergeSources(m); return pick(p.telegram_file_id, p.telegramFileId, p.file_id, p.fileId); }
-  function msgIdOf(m){
-    var p = mergeSources(m);
-    var vals = [p.telegram_message_id, p.telegramMessageId, p.telegram_msg_id, p.message_id, p.messageId];
-    for(var i=0;i<vals.length;i++){ var s = S(vals[i]); if(/^\d+$/.test(s)) return s; }
-    return '';
-  }
-  function getManifest(m){
-    var p = mergeSources(m);
-    var mf = parseMaybe(p.bundleManifest || p.bundle_manifest || p.manifest || {});
-    if(!Array.isArray(mf.parts) && Array.isArray(p.parts)) mf.parts = p.parts;
-    return mf || {};
-  }
-  function partValue(part,names){
-    for(var i=0;i<names.length;i++){
-      var k = names[i];
-      if(part && part[k] !== undefined && part[k] !== null && S(part[k]) !== '') return S(part[k]);
-    }
-    return '';
-  }
-  function collect(m){
-    var c = {keys:{}, bundles:{}, tmsgs:{}, files:{}};
-    var key = keyOf(m), bid = bundleIdOf(m), fid = fileIdOf(m), mid = msgIdOf(m);
-    if(key) c.keys[key] = 1;
-    if(bid) c.bundles[bid] = 1;
-    if(fid) c.files[fid] = 1;
-    if(mid) c.tmsgs[mid] = 1;
-    var mf = getManifest(m);
-    A(mf.parts).forEach(function(p){
-      var pmid = partValue(p, ['telegram_message_id','telegramMessageId','telegram_msg_id','message_id','messageId']);
-      var pfid = partValue(p, ['telegram_file_id','telegramFileId','file_id','fileId']);
-      if(/^\d+$/.test(pmid)) c.tmsgs[pmid] = 1;
-      if(pfid) c.files[pfid] = 1;
-    });
-    return c;
-  }
-  function tombs(){ return readJSON(LS, {keys:{}, bundles:{}, tmsgs:{}, files:{}, items:{}, at:0, phase:PHASE}); }
-  function saveTombs(t){
-    t = t || {};
-    t.keys = t.keys || {};
-    t.bundles = t.bundles || {};
-    t.tmsgs = t.tmsgs || {};
-    t.files = t.files || {};
-    t.items = t.items || {};
-    t.at = now();
-    t.phase = PHASE;
-    writeJSON(LS, t);
-  }
-  function addTombstoneFromMessage(m, reason){
-    if(!m) return false;
-    var c = collect(m);
-    var t = tombs();
-    var added = 0;
-    Object.keys(c.keys).forEach(function(k){ if(!t.keys[k]) added++; t.keys[k] = now(); });
-    Object.keys(c.bundles).forEach(function(k){ if(!t.bundles[k]) added++; t.bundles[k] = now(); });
-    Object.keys(c.tmsgs).forEach(function(k){ if(!t.tmsgs[k]) added++; t.tmsgs[k] = now(); });
-    Object.keys(c.files).forEach(function(k){ if(!t.files[k]) added++; t.files[k] = now(); });
-    var main = keyOf(m) || bundleIdOf(m) || msgIdOf(m) || fileIdOf(m);
-    if(main) t.items[main] = {at:now(), reason:reason || 'delete_ok', key:keyOf(m), bundleId:bundleIdOf(m), telegramMessageId:msgIdOf(m), fileId:fileIdOf(m), fileName:S((mergeSources(m).file_name || mergeSources(m).fileName || mergeSources(m).name || '')).slice(0,160)};
-    saveTombs(t);
-    if(added || main) trace('TOMBSTONE_LOCAL_RECORDED', {reason:reason || '', added:added, key:keyOf(m), bundleId:bundleIdOf(m), telegramMessageId:msgIdOf(m), fileId:fileIdOf(m)});
-    return true;
-  }
-  function isTombstoned(m){
-    if(!m) return false;
-    var t = tombs(), c = collect(m);
-    var hit = '';
-    Object.keys(c.keys).some(function(k){ if(t.keys && t.keys[k]){ hit = 'key:' + k; return true; } return false; });
-    if(hit) return hit;
-    Object.keys(c.bundles).some(function(k){ if(t.bundles && t.bundles[k]){ hit = 'bundle:' + k; return true; } return false; });
-    if(hit) return hit;
-    Object.keys(c.tmsgs).some(function(k){ if(t.tmsgs && t.tmsgs[k]){ hit = 'telegram_msg:' + k; return true; } return false; });
-    if(hit) return hit;
-    Object.keys(c.files).some(function(k){ if(t.files && t.files[k]){ hit = 'file:' + k; return true; } return false; });
-    return hit || false;
-  }
-  function filterList(list, reason){
-    var removed = [];
-    var out = A(list).filter(function(m){
-      var hit = isTombstoned(m);
-      if(hit){ removed.push({hit:hit,key:keyOf(m),bundleId:bundleIdOf(m),telegramMessageId:msgIdOf(m),fileId:fileIdOf(m)}); return false; }
-      return true;
-    });
-    if(removed.length) trace('TOMBSTONE_FILTER_APPLIED', {reason:reason || '', removed:removed.slice(0,12), count:removed.length});
-    return out;
-  }
-  function saveCacheKey(k, obj){
-    try{ localStorage.setItem(k, JSON.stringify(obj)); }catch(e){}
-  }
-  function filterCacheObject(obj, reason){
-    if(Array.isArray(obj)) return filterList(obj, reason);
-    if(obj && typeof obj === 'object'){
-      if(Array.isArray(obj.m)) obj.m = filterList(obj.m, reason + ':m');
-      if(Array.isArray(obj.messages)) obj.messages = filterList(obj.messages, reason + ':messages');
-      if(Array.isArray(obj.data)) obj.data = filterList(obj.data, reason + ':data');
-      obj.r83DeleteGuard = PHASE;
-      obj.r83DeleteGuardAt = now();
-    }
-    return obj;
-  }
-  var purging = false;
-  function purge(reason){
-    if(purging) return 0;
-    purging = true;
-    var before = Array.isArray(window.chatHistory) ? window.chatHistory.length : 0;
-    try{
-      if(Array.isArray(window.chatHistory)) window.chatHistory = filterList(window.chatHistory, reason || 'purge');
-      if(window.ChatEngine){
-        if(Array.isArray(window.ChatEngine.messages)) window.ChatEngine.messages = filterList(window.ChatEngine.messages, reason || 'ce.messages');
-        if(Array.isArray(window.ChatEngine.chatHistory)) window.ChatEngine.chatHistory = filterList(window.ChatEngine.chatHistory, reason || 'ce.chatHistory');
-      }
-      CACHE_KEYS.forEach(function(k){
-        var raw = localStorage.getItem(k);
-        if(!raw) return;
-        var obj = parseMaybe(raw);
-        var filtered = filterCacheObject(obj, reason || k);
-        saveCacheKey(k, filtered);
-      });
-    }catch(e){ trace('PURGE_ERROR', {reason:reason || '', error:S(e && e.message || e)}, 'error'); }
-    finally{ purging = false; }
-    var after = Array.isArray(window.chatHistory) ? window.chatHistory.length : 0;
-    if(before !== after) trace('CHAT_HISTORY_PURGED', {reason:reason || '', before:before, after:after});
-    return before - after;
-  }
-  function findActiveMessage(){
-    var id = S((document.getElementById('chat-msg-active-id') || {}).value);
-    var list = A(window.chatHistory);
-    for(var i=0;i<list.length;i++){
-      var m = list[i];
-      if(keyOf(m) === id || S(m.id) === id || S(m.messageId) === id || msgIdOf(m) === id || bundleIdOf(m) === id) return m;
-    }
-    return null;
-  }
-  function patchChatEngine(){
-    var ce = window.ChatEngine;
-    if(!ce) return false;
-
-    if(typeof ce.render === 'function' && !ce.render.__r83DeleteGuard){
-      var oldRender = ce.render.bind(ce);
-      ce.render = function(){
-        purge('before_render');
-        return oldRender.apply(ce, arguments);
-      };
-      ce.render.__r83DeleteGuard = true;
-      trace('PATCH_RENDER_OK');
-    }
-
-    if(typeof ce.saveAndSync === 'function' && !ce.saveAndSync.__r83DeleteGuard){
-      var oldSave = ce.saveAndSync.bind(ce);
-      ce.saveAndSync = function(){
-        purge('before_saveAndSync');
-        return oldSave.apply(ce, arguments);
-      };
-      ce.saveAndSync.__r83DeleteGuard = true;
-      trace('PATCH_SAVE_SYNC_OK');
-    }
-
-    if(typeof ce.deleteMsg === 'function' && !ce.deleteMsg.__r83DeleteGuard){
-      var oldDelete = ce.deleteMsg.bind(ce);
-      ce.deleteMsg = async function(){
-        var msg = findActiveMessage();
-        var res = await oldDelete.apply(ce, arguments);
-        if(res){
-          addTombstoneFromMessage(msg || findActiveMessage(), 'deleteMsg_success');
-          purge('after_deleteMsg_success');
-          try{ if(ce.render) ce.render(); }catch(e){}
-        } else {
-          purge('after_deleteMsg_no_success');
-        }
-        return res;
-      };
-      ce.deleteMsg.__r83DeleteGuard = true;
-      ce.deleteMsg.__phase = PHASE;
-      trace('PATCH_DELETE_MSG_OK');
-    }
-
-    return true;
-  }
-  function patchSelectedDelete(){
-    var api = window.FamilySelectR3 || window.FamilySelectR4 || window.FamilyMobileTouchSelectR4;
-    if(!api || typeof api.deleteSelected !== 'function' || api.deleteSelected.__r83DeleteGuard) return false;
-    var old = api.deleteSelected.bind(api);
-    api.deleteSelected = async function(){
-      var before = [];
-      try{
-        var ids = typeof api.selectedIds === 'function' ? Array.from(api.selectedIds() || []).map(String) : [];
-        before = ids.map(function(id){
-          return A(window.chatHistory).find(function(m){ return keyOf(m) === id || S(m.id) === id || S(m.messageId) === id || msgIdOf(m) === id || bundleIdOf(m) === id; });
-        }).filter(Boolean);
-      }catch(e){}
-      var res = await old.apply(api, arguments);
-      if(res){
-        before.forEach(function(m){ addTombstoneFromMessage(m, 'selected_delete_success'); });
-        purge('after_selected_delete_success');
-        try{ if(window.ChatEngine && window.ChatEngine.render) window.ChatEngine.render(); }catch(e){}
-      }
-      return res;
-    };
-    api.deleteSelected.__r83DeleteGuard = true;
-    if(window.FamilySelectR3) window.FamilySelectR3.deleteSelected = api.deleteSelected;
-    if(window.FamilySelectR4) window.FamilySelectR4.deleteSelected = api.deleteSelected;
-    if(window.FamilyMobileTouchSelectR4) window.FamilyMobileTouchSelectR4.deleteSelected = api.deleteSelected;
-    trace('PATCH_SELECTED_DELETE_OK');
-    return true;
-  }
-  function install(){
-    patchChatEngine();
-    patchSelectedDelete();
-    purge('install');
-  }
-
-  window.LifeOSJ20R83FamilyDeleteGuard = {
-    phase: PHASE,
-    install: install,
-    purge: purge,
-    add: addTombstoneFromMessage,
-    isTombstoned: isTombstoned,
-    tombstones: tombs,
-    trace: function(){ return readJSON(LS_TRACE, []); },
-    clear: function(){ localStorage.removeItem(LS); purge('clear'); trace('TOMBSTONE_CLEARED', {}, 'warn'); }
-  };
-
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, {once:true}); else install();
-  window.addEventListener('load', function(){ [150,700,1600,3500,6500,10000,14000].forEach(function(ms){ setTimeout(install, ms); }); }, {once:true});
-  [300,1200,2600,5200,9000,13000].forEach(function(ms){ setTimeout(install, ms); });
-  try{ console.warn('[R83_READY]', PHASE); }catch(e){}
-})();
-</script>
-<!-- Pha14J20R83_FamilyDeleteTombstoneGuard_R76Base - END -->
-
-
-<!-- Pha14J20R88_CleanMediaFixFromR83Base - CLEAN DIRECT SOURCE EDIT MARKER -->
-<script id="lifeos-j20r88-clean-media-marker">
-(function(){
-  window.LifeOSJ20R88CleanMediaFix = {
-    phase: 'Pha14J20R88_CleanMediaFixFromR83Base',
-    source: 'R83 accepted family base; direct edits to smartbox loader and R75 media gate only',
-    summary: function(){
-      var h = window.MediaHub || {};
-      return {
-        phase: 'Pha14J20R88_CleanMediaFixFromR83Base',
-        r83FamilyGuard: !!window.LifeOSJ20R83FamilyDeleteGuard,
-        tab: h.currentTab || '',
-        group: h.currentGroup || '',
-        groups: Array.isArray(h.rawGroups) ? h.rawGroups.length : 0,
-        radio: Array.isArray(h.radioData) ? h.radioData.length : 0,
-        tv: Array.isArray(h.tvData) ? h.tvData.length : 0,
-        mp3: Array.isArray(window.MusicApp && window.MusicApp.playlist) ? window.MusicApp.playlist.length : 0
-      };
-    }
-  };
-  try{ console.warn('[R88_READY]', 'Pha14J20R88_CleanMediaFixFromR83Base'); }catch(e){}
-})();
-</script>
 
 </body>
 </html>
