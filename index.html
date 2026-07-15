@@ -56,7 +56,7 @@
   w.LifeOSVendor={cleanCore:true,state:state,loadFirebase:loadFirebase,loadMessaging:loadMessaging,loadHls:loadHls,loadConfetti:loadConfetti};
 })(window,document);
 </script><script data-lifeos-no-transpile="1" id="lifeos-lock4-smartbox-clean-core-marker">
-window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-15',revision:'R6.3',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true};
+window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-15',revision:'R6.4',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvGridNativeRemote:true,doubleEdgeZoneExit:true,smartboxNativeHlsFirst:true,tvStatusDedup:true,viewportRefreshStormFixed:true};
 </script><script id="lifeos-lock4-inline-handler-compat-source">
 window.LifeOSCompatHandlers = window.LifeOSCompatHandlers || {};
 window.LifeOSCompatHandlers.h001 = function (event) {var _window$LifeOSRootRou, _window$LifeOSRootRou2, _window$setDesktopWor, _window;event.preventDefault();event.stopPropagation();(_window$LifeOSRootRou = window.LifeOSRootRouter) === null || _window$LifeOSRootRou === void 0 || (_window$LifeOSRootRou2 = _window$LifeOSRootRou.enterWorkspace) === null || _window$LifeOSRootRou2 === void 0 || _window$LifeOSRootRou2.call(_window$LifeOSRootRou, 'overview', 'desktop-click', event);(_window$setDesktopWor = (_window = window).setDesktopWorkspace) === null || _window$setDesktopWor === void 0 || _window$setDesktopWor.call(_window, 'overview');};
@@ -16265,6 +16265,9 @@ window.MediaHub = {
     lastSidebarIdx: 0,
     lastListIdx: 0,
     lastPlayerIdx: 1,
+    remoteEdgeKey: '',
+    remoteEdgeAt: 0,
+    remoteEdgeWindow: 700,
     owner: 'LIFEOS_MEDIAHUB_CORE_REBUILD_20260714',
     cleanOwner: 'LIFEOS_MEDIAHUB_CORE_REBUILD_20260714',
     groupByTab: { radio: 'all', tv: 'all' },
@@ -16591,6 +16594,8 @@ window.MediaHub = {
             const container = document.getElementById('tv-list-container');
             if (!container)
                 return;
+            const keepTop = container.scrollTop || 0;
+            const keepLeft = container.scrollLeft || 0;
             let list = this.tvData.filter(c => this.currentGroup === 'all' || c.group === this.currentGroup);
             if (query)
                 list = list.filter(c => c.name.toLowerCase().includes(query));
@@ -16600,7 +16605,7 @@ window.MediaHub = {
                 const borderCls = isPlaying ? 'border-rose-500 shadow-md ring-2 ring-rose-200' : 'border-slate-200 hover:border-rose-500';
                 const stt = String(idxInList + 1).padStart(3, '0');
                 return `
-                    <div tabindex="0" role="button" onclick="window.MediaHub.playStream(${actualIdx}, 'tv')" class="media-item bg-white border rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition text-center ${borderCls}">
+                    <div tabindex="0" role="button" aria-label="Kênh ${stt} ${c.name}" data-lifeos-list-index="${idxInList}" data-lifeos-actual-index="${actualIdx}" onclick="window.MediaHub.playStream(${actualIdx}, 'tv')" class="media-item bg-white border rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition text-center ${borderCls}">
                         <div class="flex items-center gap-1 w-full justify-center">
                             <span class="text-xs font-black text-rose-500 bg-rose-50 px-1 rounded">[${stt}]</span>
                         </div>
@@ -16608,11 +16613,18 @@ window.MediaHub = {
                         <span class="text-[11px] font-bold ${isPlaying ? 'text-rose-600' : 'text-slate-800'} w-full truncate">${c.name}</span>
                     </div>`;
             }).join('');
+            try {
+                container.scrollTop = keepTop;
+                container.scrollLeft = keepLeft;
+            }
+            catch (e) { }
         }
         else if (this.currentTab === 'radio') {
             const container = document.getElementById('radio-list-container');
             if (!container)
                 return;
+            const keepTop = container.scrollTop || 0;
+            const keepLeft = container.scrollLeft || 0;
             let list = this.radioData.filter(c => this.currentGroup === 'all' || c.group === this.currentGroup);
             if (query)
                 list = list.filter(c => c.name.toLowerCase().includes(query));
@@ -16622,7 +16634,7 @@ window.MediaHub = {
                 const borderCls = isPlaying ? 'border-emerald-500 shadow-md bg-emerald-50' : 'border-slate-200 bg-white hover:border-emerald-500';
                 const stt = String(idxInList + 1).padStart(3, '0');
                 return `
-                    <div tabindex="0" role="button" onclick="window.MediaHub.playStream(${actualIdx}, 'radio')" class="media-item song-row border cursor-pointer active:scale-95 transition ${borderCls}">
+                    <div tabindex="0" role="button" aria-label="Đài ${stt} ${c.name}" data-lifeos-list-index="${idxInList}" data-lifeos-actual-index="${actualIdx}" onclick="window.MediaHub.playStream(${actualIdx}, 'radio')" class="media-item song-row border cursor-pointer active:scale-95 transition ${borderCls}">
                         <div class="song-left ${isPlaying ? 'text-emerald-600 animate-pulse' : 'text-emerald-500'} font-black text-xs">[${stt}]</div>
                         <div class="song-main">
                             <div class="song-title font-bold ${isPlaying ? 'text-emerald-700' : 'text-slate-800'} text-sm">${c.name}</div>
@@ -16630,6 +16642,46 @@ window.MediaHub = {
                         </div>
                     </div>`;
             }).join('');
+            try {
+                container.scrollTop = keepTop;
+                container.scrollLeft = keepLeft;
+            }
+            catch (e) { }
+        }
+    },
+    visibleListIndexForActual(actualIdx, type) {
+        const selector = type === 'tv' ? '#tv-list-container .media-item' : '#radio-list-container .media-item';
+        const items = Array.from(document.querySelectorAll(selector));
+        const found = items.findIndex(el => Number(el.getAttribute('data-lifeos-actual-index')) === Number(actualIdx));
+        return found >= 0 ? found : -1;
+    },
+    clearRemoteEdge() {
+        this.remoteEdgeKey = '';
+        this.remoteEdgeAt = 0;
+        try {
+            document.body.removeAttribute('data-lifeos-remote-edge');
+        }
+        catch (e) { }
+    },
+    scrollRemoteTarget(target) {
+        if (!target)
+            return;
+        const listBox = target.closest && target.closest('#tv-list-container,#radio-list-container,#mp3-list-container,#music-list-container');
+        if (listBox) {
+            try {
+                const tr = target.getBoundingClientRect();
+                const cr = listBox.getBoundingClientRect();
+                const pad = 8;
+                if (tr.top < cr.top + pad)
+                    listBox.scrollTop -= (cr.top + pad - tr.top);
+                else if (tr.bottom > cr.bottom - pad)
+                    listBox.scrollTop += (tr.bottom - (cr.bottom - pad));
+                return;
+            }
+            catch (e) { }
+        }
+        if (typeof target.scrollIntoView === 'function') {
+            try { target.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' }); } catch (e) { }
         }
     },
     handleSearch(val) {
@@ -16779,16 +16831,28 @@ window.MediaHub = {
         let retryCount = 0;
         let nativeRetryCount = 0;
         let watchdog = 0;
+        let stallWatchdog = 0;
         let hadPlayback = false;
         let lastPlaybackAt = 0;
+        let lastProgressTime = 0;
+        let lastProgressAt = Date.now();
+        let lastSoftReconnectAt = 0;
         let softReconnectCount = 0;
         let softFragErrorCount = 0;
+        let lastStatusKey = '';
+        let lastStatusAt = 0;
+        let playingStatusSent = false;
+        const smartboxLite = type === 'tv' && !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc'));
         const loadToken = (this._mediaLoadSeq = (this._mediaLoadSeq || 0) + 1);
         const tokenAlive = () => this._mediaLoadSeq === loadToken;
         const makeChannelMeta = (url) => Object.assign({}, channel || {}, { type, url: (channel && channel.url) || url });
         const clearWatch = () => { if (watchdog) {
             clearTimeout(watchdog);
             watchdog = 0;
+        } };
+        const clearStallWatch = () => { if (stallWatchdog) {
+            clearTimeout(stallWatchdog);
+            stallWatchdog = 0;
         } };
         const currentIdx = () => type === 'tv' ? this.currentTvIdx : this.currentRadioIdx;
         const isProxyUrl = (u) => String(u || '').includes('/proxy?url=');
@@ -16808,6 +16872,12 @@ window.MediaHub = {
             return u;
         };
         const setStatus = (state, route, detail, url, opt = {}) => {
+            const now = Date.now();
+            const statusKey = [state || '', route || '', detail || '', url || ''].join('|');
+            if (statusKey === lastStatusKey && (state === 'playing' || (now - lastStatusAt) < 1800))
+                return;
+            lastStatusKey = statusKey;
+            lastStatusAt = now;
             try {
                 const idx = currentIdx();
                 if (type === 'tv' && typeof this.lifeosSetChannelStatus === 'function')
@@ -16868,7 +16938,10 @@ window.MediaHub = {
                 return;
             hadPlayback = true;
             lastPlaybackAt = Date.now();
-            softReconnectCount = 0;
+            lastProgressAt = lastPlaybackAt;
+            clearStallWatch();
+            if (!smartboxLite || (lastPlaybackAt - lastSoftReconnectAt) > 30000)
+                softReconnectCount = 0;
             softFragErrorCount = 0;
         };
         const hasTvPlaybackSignal = () => {
@@ -16885,41 +16958,42 @@ window.MediaHub = {
         const softReconnectTv = (reason, url) => {
             if (type !== 'tv' || !tokenAlive())
                 return false;
+            const now = Date.now();
+            if (smartboxLite && (now - lastSoftReconnectAt) < 15000)
+                return false;
             if (!hasTvPlaybackSignal() && softReconnectCount >= 1)
                 return false;
-            if (softReconnectCount >= 5)
+            if (softReconnectCount >= (smartboxLite ? 2 : 5))
                 return false;
             softReconnectCount++;
+            lastSoftReconnectAt = now;
             clearWatch();
+            clearStallWatch();
             const route = routeFor(url || sources[sourceIndex]);
-            setStatus('buffering_reconnect', route, 'Đường truyền/segment TV chập chờn, đang tự nối lại lần ' + softReconnectCount + '. Không đánh dấu kênh chết.', url || sources[sourceIndex], { softReconnectCount, reason: String(reason || '').slice(0, 160) });
+            setStatus('buffering_reconnect', route, 'Đường truyền TV chập chờn, đang nối lại nhẹ lần ' + softReconnectCount + '. Không dựng lại toàn bộ giao diện.', url || sources[sourceIndex], { softReconnectCount, reason: String(reason || '').slice(0, 160) });
             try {
                 const h = this[hlsKey];
                 if (h) {
-                    try {
-                        h.stopLoad();
+                    if (smartboxLite) {
+                        try { h.startLoad(Math.max(0, (el && el.currentTime) || -1)); } catch (_) { try { h.startLoad(); } catch (__) { } }
                     }
-                    catch (_) { }
-                    setTimeout(() => {
-                        if (!tokenAlive())
-                            return;
-                        try {
-                            h.startLoad(Math.max(0, (el && el.currentTime) || -1));
-                        }
-                        catch (_) {
-                            try {
-                                h.startLoad();
-                            }
-                            catch (__) { }
-                        }
-                    }, Math.min(2800, 650 + softReconnectCount * 420));
+                    else {
+                        try { h.stopLoad(); } catch (_) { }
+                        setTimeout(() => {
+                            if (!tokenAlive())
+                                return;
+                            try { h.startLoad(Math.max(0, (el && el.currentTime) || -1)); }
+                            catch (_) { try { h.startLoad(); } catch (__) { } }
+                        }, Math.min(2800, 650 + softReconnectCount * 420));
+                    }
                 }
                 else if (el) {
                     setTimeout(() => {
                         if (!tokenAlive())
                             return;
                         try {
-                            el.load();
+                            if (!smartboxLite || el.readyState === 0)
+                                el.load();
                         }
                         catch (_) { }
                         try {
@@ -16928,7 +17002,7 @@ window.MediaHub = {
                                 p.catch(() => { });
                         }
                         catch (_) { }
-                    }, Math.min(2800, 650 + softReconnectCount * 420));
+                    }, smartboxLite ? 250 : Math.min(2800, 650 + softReconnectCount * 420));
                 }
             }
             catch (e) { }
@@ -16938,8 +17012,24 @@ window.MediaHub = {
                 if (hasTvPlaybackSignal())
                     return;
                 setStatus('loading_slow', route, 'Đường truyền vẫn chậm, đang chờ thêm trước khi thử nguồn khác', url || sources[sourceIndex], { softReconnectCount });
-            }, 15000);
+            }, smartboxLite ? 20000 : 15000);
             return true;
+        };
+        const scheduleStallCheck = (reason, url) => {
+            if (type !== 'tv' || !tokenAlive() || stallWatchdog)
+                return;
+            const startTime = Number((el && el.currentTime) || 0);
+            const startedAt = Date.now();
+            stallWatchdog = setTimeout(() => {
+                stallWatchdog = 0;
+                if (!tokenAlive() || type !== 'tv')
+                    return;
+                const nowTime = Number((el && el.currentTime) || 0);
+                const progressed = nowTime > startTime + 0.45 || lastProgressAt > startedAt + 1000;
+                if (progressed)
+                    return;
+                softReconnectTv(reason || 'TV đứng hình quá lâu', url || sources[sourceIndex]);
+            }, smartboxLite ? 13000 : 8000);
         };
         const failSource = (reason, url, skipNativeFallback) => {
             if (!tokenAlive())
@@ -16949,6 +17039,7 @@ window.MediaHub = {
                 return;
             }
             clearWatch();
+            clearStallWatch();
             const failedRoute = routeFor(url || sources[sourceIndex]);
             if (isTransientTvProblem(reason) && softReconnectTv(reason, url || sources[sourceIndex]))
                 return;
@@ -16988,7 +17079,7 @@ window.MediaHub = {
             if (type !== 'tv')
                 return;
             clearWatch();
-            watchdog = setTimeout(() => verifyTvFrame(url, 'no_video_frame_after_6s'), 6200);
+            watchdog = setTimeout(() => verifyTvFrame(url, smartboxLite ? 'no_video_frame_after_15s' : 'no_video_frame_after_6s'), smartboxLite ? 15000 : 6200);
         };
         const playSafe = (url) => {
             if (!tokenAlive())
@@ -17033,6 +17124,11 @@ window.MediaHub = {
             const isM3u8 = /\.m3u8($|\?)/i.test(decoded) || String(decoded).toLowerCase().includes('m3u8') || /\.m3u($|\?)/i.test(decoded);
             window.LIFEOS_DEBUG && console.log('[MediaHub] load start', type, `${sourceIndex + 1}/${sources.length}`, route, playUrl);
             clearWatch();
+            clearStallWatch();
+            playingStatusSent = false;
+            lastStatusKey = '';
+            lastProgressTime = 0;
+            lastProgressAt = Date.now();
             destroyHls();
             if (type === 'tv') {
                 try {
@@ -17069,20 +17165,22 @@ window.MediaHub = {
                     if (softReconnectTv(slowReason, playUrl || cur))
                         return;
                     failSource(slowReason, playUrl || cur);
-                }, 12000);
+                }, smartboxLite ? 20000 : 12000);
             }
             el.onloadedmetadata = () => {
                 if (!tokenAlive())
                     return;
                 setStatus('metadata', route, 'Đã nhận metadata, đang đợi video frame', playUrl);
                 if (type === 'tv')
-                    setTimeout(() => verifyTvFrame(playUrl, 'loadedmetadata'), 1100);
+                    setTimeout(() => verifyTvFrame(playUrl, 'loadedmetadata'), smartboxLite ? 2600 : 1100);
             };
             el.onplaying = () => {
                 if (!tokenAlive())
                     return;
-                if (type === 'tv')
+                if (type === 'tv') {
                     markTvPlayback();
+                    playingStatusSent = true;
+                }
                 setStatus('playing', route, route === 'webview_proxy' ? 'Kênh đang phát qua WebView + proxy' : 'Kênh đang phát bình thường qua WebView direct', playUrl);
                 if (type === 'tv')
                     scheduleTvWatch(playUrl);
@@ -17091,40 +17189,76 @@ window.MediaHub = {
                     this.updateRadioUI();
                 }
             };
-            el.onwaiting = () => { if (tokenAlive() && type === 'tv' && hasTvPlaybackSignal())
-                setStatus('buffering_reconnect', route, 'Mạng/luồng đang buffer, giữ kênh và chờ nối lại', playUrl); };
-            el.onstalled = () => { if (tokenAlive() && type === 'tv' && hasTvPlaybackSignal())
-                softReconnectTv('stalled sau khi đã phát', playUrl); };
+            el.onwaiting = () => {
+                if (!tokenAlive() || type !== 'tv' || !hasTvPlaybackSignal())
+                    return;
+                setStatus('buffering_reconnect', route, 'Mạng/luồng đang buffer, giữ nguyên kênh và chờ segment tiếp theo', playUrl);
+                scheduleStallCheck('waiting kéo dài sau khi đã phát', playUrl);
+            };
+            el.onstalled = () => {
+                if (!tokenAlive() || type !== 'tv' || !hasTvPlaybackSignal())
+                    return;
+                setStatus('buffering_reconnect', route, 'Luồng tạm đứng, chờ đủ lâu mới nối lại nhẹ', playUrl);
+                scheduleStallCheck('stalled kéo dài sau khi đã phát', playUrl);
+            };
             el.oncanplay = () => { if (tokenAlive() && type === 'tv')
                 scheduleTvWatch(playUrl); };
             el.ontimeupdate = () => {
                 if (!tokenAlive() || type !== 'tv')
                     return;
-                if (el.currentTime > 1.5) {
-                    markTvPlayback();
-                    if (verifyTvFrame(playUrl, 'timeupdate'))
+                const nowTime = Number(el.currentTime || 0);
+                if (nowTime > lastProgressTime + 0.18) {
+                    lastProgressTime = nowTime;
+                    lastProgressAt = Date.now();
+                    clearStallWatch();
+                }
+                if (nowTime > 1.5) {
+                    if (!hadPlayback || (Date.now() - lastPlaybackAt) > 5000)
+                        markTvPlayback();
+                    if (!playingStatusSent && verifyTvFrame(playUrl, 'timeupdate')) {
+                        playingStatusSent = true;
                         setStatus('playing', route, route === 'webview_proxy' ? 'Kênh đang phát qua WebView + proxy' : 'Kênh đang phát bình thường qua WebView direct', playUrl);
+                    }
                 }
             };
-            if (isM3u8 && type !== 'tv' && el.canPlayType('application/vnd.apple.mpegurl')) {
+            let nativeHls = '';
+            try { nativeHls = el.canPlayType('application/vnd.apple.mpegurl') || el.canPlayType('application/x-mpegURL') || ''; } catch (e) { }
+            if (isM3u8 && (type !== 'tv' || (smartboxLite && !!nativeHls))) {
+                try { el.setAttribute('playsinline', ''); el.setAttribute('webkit-playsinline', ''); el.preload = 'auto'; } catch (e) { }
+                try { el.dataset.lifeosTvEngine = type === 'tv' ? 'native-hls-smartbox' : 'native-hls'; } catch (e) { }
                 attachDirect(playUrl);
                 el.load();
                 playSafe(playUrl);
                 return;
             }
             if (isM3u8 && window.Hls && Hls.isSupported()) {
-                const hls = new Hls({
+                const hlsConfig = {
                     enableWorker: true,
                     lowLatencyMode: false,
-                    manifestLoadingTimeOut: 11000,
-                    levelLoadingTimeOut: 11000,
-                    fragLoadingTimeOut: 14000,
-                    manifestLoadingMaxRetry: 1,
-                    levelLoadingMaxRetry: 1,
-                    fragLoadingMaxRetry: 3,
-                    fragLoadingRetryDelay: 700,
-                    fragLoadingMaxRetryTimeout: 6000
-                });
+                    manifestLoadingTimeOut: smartboxLite ? 16000 : 11000,
+                    levelLoadingTimeOut: smartboxLite ? 16000 : 11000,
+                    fragLoadingTimeOut: smartboxLite ? 18000 : 14000,
+                    manifestLoadingMaxRetry: smartboxLite ? 2 : 1,
+                    levelLoadingMaxRetry: smartboxLite ? 2 : 1,
+                    fragLoadingMaxRetry: smartboxLite ? 2 : 3,
+                    fragLoadingRetryDelay: smartboxLite ? 1100 : 700,
+                    fragLoadingMaxRetryTimeout: smartboxLite ? 7000 : 6000
+                };
+                if (smartboxLite) {
+                    Object.assign(hlsConfig, {
+                        startLevel: 0,
+                        capLevelToPlayerSize: true,
+                        maxBufferLength: 10,
+                        maxMaxBufferLength: 18,
+                        backBufferLength: 0,
+                        liveSyncDurationCount: 3,
+                        liveMaxLatencyDurationCount: 8,
+                        abrBandWidthFactor: 0.72,
+                        abrBandWidthUpFactor: 0.55
+                    });
+                }
+                const hls = new Hls(hlsConfig);
+                try { el.dataset.lifeosTvEngine = smartboxLite ? 'hlsjs-smartbox-lite' : 'hlsjs'; } catch (e) { }
                 this[hlsKey] = hls;
                 hls.on(Hls.Events.MEDIA_ATTACHED, () => {
                     if (this._mediaLoadSeq === loadToken)
@@ -17141,7 +17275,17 @@ window.MediaHub = {
                                 failSource('Manifest HLS không có video level: nguồn có thể chỉ audio hoặc manifest không hợp lệ cho TV', playUrl);
                                 return;
                             }
-                            setStatus('manifest_ok', route, 'Manifest HLS OK, đang bắt đầu phát video', playUrl, { levels: levels.length });
+                            if (smartboxLite) {
+                                let cap = -1;
+                                levels.forEach((lv, i) => {
+                                    const h = Number((lv && lv.height) || 0);
+                                    if (h > 0 && h <= 720)
+                                        cap = i;
+                                });
+                                if (cap < 0) cap = 0;
+                                try { hls.autoLevelCapping = cap; } catch (e) { }
+                            }
+                            setStatus('manifest_ok', route, smartboxLite ? 'Manifest HLS OK, Smartbox ưu tiên luồng nhẹ tối đa 720p' : 'Manifest HLS OK, đang bắt đầu phát video', playUrl, { levels: levels.length });
                         }
                     }
                     catch (e) { }
@@ -17153,13 +17297,8 @@ window.MediaHub = {
                     window.LIFEOS_DEBUG && console.warn('[MediaHub] hls error', type, route, data);
                     if (type === 'tv' && data && !data.fatal && String(data.details || '').indexOf('fragLoadError') >= 0) {
                         softFragErrorCount++;
-                        setStatus('buffering_reconnect', route, 'Segment live bị hụt tạm thời, HLS đang tự retry/buffer. Không đánh dấu proxy/kênh chết.', playUrl, { softFragErrorCount });
-                        if (hasTvPlaybackSignal()) {
-                            try {
-                                hls.startLoad(Math.max(0, (el && el.currentTime) || -1));
-                            }
-                            catch (_) { }
-                        }
+                        setStatus('buffering_reconnect', route, 'Segment live hụt tạm thời; để HLS tự retry, không cưỡng bức tải lại liên tục.', playUrl, { softFragErrorCount });
+                        scheduleStallCheck('fragLoadError kéo dài', playUrl);
                         return;
                     }
                     if (!data || !data.fatal)
@@ -17335,7 +17474,7 @@ window.MediaHub = {
         }
     },
     getZoneElements() {
-        const isDesktop = window.innerWidth >= 1024;
+        const isDesktop = !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc')) || window.innerWidth >= 1024;
         const visible = (el) => {
             if (!el)
                 return false;
@@ -17423,9 +17562,8 @@ window.MediaHub = {
                 try { target.focus(); } catch (_) { }
             }
         }
-        if (target && typeof target.scrollIntoView === 'function') {
-            try { target.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' }); } catch (e) { }
-        }
+        if (target)
+            this.scrollRemoteTarget(target);
     },
     initRemoteControl() {
         if (this.remoteMatrixBound)
@@ -17484,6 +17622,20 @@ window.MediaHub = {
             this.lastSidebarIdx = this.idxSidebar;
             this.lastListIdx = this.idxList;
             this.lastPlayerIdx = this.idxPlayer;
+        };
+        const clearEdge = () => this.clearRemoteEdge();
+        const edgeDouble = (name, action) => {
+            const now = Date.now();
+            const armed = this.remoteEdgeKey === name && (now - this.remoteEdgeAt) <= this.remoteEdgeWindow;
+            if (armed) {
+                clearEdge();
+                action();
+                return true;
+            }
+            this.remoteEdgeKey = name;
+            this.remoteEdgeAt = now;
+            try { document.body.setAttribute('data-lifeos-remote-edge', name); } catch (e) { }
+            return false;
         };
         document.addEventListener('keydown', (e) => {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j;
@@ -17564,7 +17716,7 @@ window.MediaHub = {
                 }, 2000);
                 return;
             }
-            const isDesktop = window.innerWidth >= 1024;
+            const isDesktop = !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc')) || window.innerWidth >= 1024;
             let els = this.getZoneElements();
             if (isBackKey(e)) {
                 if (this.activeZone === 'player') {
@@ -17595,14 +17747,28 @@ window.MediaHub = {
             }
             if (this.activeZone === 'tabs') {
                 if (key === 'ArrowRight') {
+                    clearEdge();
                     this.idxTabs = clamp(this.idxTabs + 1, els.tabs.length);
                 }
                 else if (key === 'ArrowLeft') {
+                    clearEdge();
                     this.idxTabs = clamp(this.idxTabs - 1, els.tabs.length);
                 }
-                else if (key === 'ArrowUp' || key === 'ArrowDown') {
+                else if (key === 'ArrowDown') {
+                    clearEdge();
+                    if (this.currentTab === 'music') {
+                        this.activeZone = els.list.length > 0 ? 'list' : 'tabs';
+                    }
+                    else {
+                        this.activeZone = els.sidebar.length > 0 ? 'sidebar' : (els.list.length > 0 ? 'list' : 'tabs');
+                    }
+                }
+                else if (key === 'ArrowUp' && window.LifeOSLandscapeRemote && typeof window.LifeOSLandscapeRemote.focusDock === 'function') {
+                    if (edgeDouble('tabs-up', () => { saveMemory(); window.LifeOSLandscapeRemote.focusDock('music'); }))
+                        return;
                 }
                 else if (key === 'Enter' && els.tabs[this.idxTabs]) {
+                    clearEdge();
                     saveMemory();
                     els.tabs[this.idxTabs].click();
                     afterRender(() => {
@@ -17656,41 +17822,74 @@ window.MediaHub = {
             }
             else if (this.activeZone === 'list') {
                 const cols = this.currentTab === 'tv' ? gridColumnCount(document.getElementById('tv-list-container')) : 1;
+                const len = els.list.length;
+                const row = Math.floor(this.idxList / Math.max(1, cols));
+                const col = this.idxList % Math.max(1, cols);
                 if (key === 'ArrowDown') {
-                    this.idxList = clamp(this.idxList + cols, els.list.length);
+                    const next = this.idxList + cols;
+                    if (next < len) {
+                        clearEdge();
+                        this.idxList = next;
+                    }
                 }
                 else if (key === 'ArrowUp') {
-                    this.idxList = clamp(this.idxList - cols, els.list.length);
+                    const next = this.idxList - cols;
+                    if (next >= 0) {
+                        clearEdge();
+                        this.idxList = next;
+                    }
+                    else if (edgeDouble('list-up', () => {
+                        saveMemory();
+                        this.activeZone = 'tabs';
+                        this.idxTabs = clamp(['music', 'radio', 'tv'].indexOf(this.currentTab), els.tabs.length);
+                    })) {
+                    }
                 }
                 else if (key === 'ArrowRight') {
-                    if (els.player.length > 0) {
-                        saveMemory();
-                        this.activeZone = 'player';
-                        this.idxPlayer = clamp((_e = this.lastPlayerIdx) !== null && _e !== void 0 ? _e : preferPlayButtonIndex(els.player), els.player.length);
+                    const next = this.idxList + 1;
+                    const sameRow = next < len && Math.floor(next / Math.max(1, cols)) === row;
+                    if (cols > 1 && col < cols - 1 && sameRow) {
+                        clearEdge();
+                        this.idxList = next;
+                    }
+                    else if (els.player.length > 0) {
+                        edgeDouble('list-right', () => {
+                            saveMemory();
+                            this.activeZone = 'player';
+                            this.idxPlayer = clamp((_e = this.lastPlayerIdx) !== null && _e !== void 0 ? _e : preferPlayButtonIndex(els.player), els.player.length);
+                        });
                     }
                 }
                 else if (key === 'ArrowLeft') {
-                    saveMemory();
-                    if (this.currentTab === 'music') {
-                        this.activeZone = 'tabs';
+                    if (cols > 1 && col > 0) {
+                        clearEdge();
+                        this.idxList = Math.max(0, this.idxList - 1);
                     }
-                    else if (els.sidebar.length > 0) {
-                        this.activeZone = 'sidebar';
-                        this.idxSidebar = clamp((_f = this.lastSidebarIdx) !== null && _f !== void 0 ? _f : this.idxSidebar, els.sidebar.length);
+                    else {
+                        edgeDouble('list-left', () => {
+                            saveMemory();
+                            if (this.currentTab === 'music') {
+                                this.activeZone = 'tabs';
+                            }
+                            else if (els.sidebar.length > 0) {
+                                this.activeZone = 'sidebar';
+                                this.idxSidebar = clamp((_f = this.lastSidebarIdx) !== null && _f !== void 0 ? _f : this.idxSidebar, els.sidebar.length);
+                            }
+                            else {
+                                this.activeZone = 'tabs';
+                            }
+                        });
                     }
                 }
                 else if (key === 'Enter' && els.list[this.idxList]) {
+                    clearEdge();
                     saveMemory();
-                    els.list[this.idxList].click();
                     this.lastListIdx = this.idxList;
+                    els.list[this.idxList].click();
                     afterRender(() => {
                         els = this.getZoneElements();
+                        this.activeZone = 'list';
                         this.idxList = clamp(this.lastListIdx, els.list.length);
-                        if (els.player.length > 0) {
-                            this.activeZone = 'player';
-                            this.idxPlayer = preferPlayButtonIndex(els.player);
-                            this.lastPlayerIdx = this.idxPlayer;
-                        }
                         saveMemory();
                         this.highlightRemoteZones();
                     });
@@ -17699,56 +17898,72 @@ window.MediaHub = {
             }
             else if (this.activeZone === 'player') {
                 if (key === 'ArrowRight') {
-                    this.idxPlayer = clamp(this.idxPlayer + 1, els.player.length);
+                    if (this.idxPlayer < els.player.length - 1) {
+                        clearEdge();
+                        this.idxPlayer = clamp(this.idxPlayer + 1, els.player.length);
+                    }
                 }
                 else if (key === 'ArrowLeft') {
-                    const playIdx = preferPlayButtonIndex(els.player);
-                    if (this.idxPlayer <= playIdx) {
+                    /* R6.4: một lần Trái vẫn di giữa các nút player; hai lần Trái liên tiếp
+                       quay về danh sách ở bất kỳ vị trí nào trong cột player. */
+                    if (edgeDouble('player-left', () => {
                         saveMemory();
                         this.activeZone = 'list';
+                        let visibleIdx = -1;
                         if (this.currentTab === 'tv')
-                            this.idxList = clamp(this.currentTvIdx >= 0 ? this.currentTvIdx : ((_g = this.lastListIdx) !== null && _g !== void 0 ? _g : this.idxList), els.list.length);
+                            visibleIdx = this.visibleListIndexForActual(this.currentTvIdx, 'tv');
                         else if (this.currentTab === 'radio')
-                            this.idxList = clamp(this.currentRadioIdx >= 0 ? this.currentRadioIdx : ((_h = this.lastListIdx) !== null && _h !== void 0 ? _h : this.idxList), els.list.length);
-                        else
-                            this.idxList = clamp((_j = this.lastListIdx) !== null && _j !== void 0 ? _j : this.idxList, els.list.length);
+                            visibleIdx = this.visibleListIndexForActual(this.currentRadioIdx, 'radio');
+                        this.idxList = clamp(visibleIdx >= 0 ? visibleIdx : ((_g = this.lastListIdx) !== null && _g !== void 0 ? _g : this.idxList), els.list.length);
                         this.lastListIdx = this.idxList;
+                    })) {
+                        saveMemory();
                         this.highlightRemoteZones();
                         return;
                     }
-                    else {
+                    if (this.idxPlayer > 0)
                         this.idxPlayer = clamp(this.idxPlayer - 1, els.player.length);
-                    }
                 }
                 else if (key === 'ArrowDown') {
+                    clearEdge();
                     if (this.currentTab === 'music' && window.MusicApp)
                         window.MusicApp.playNext();
                     else
                         this.playNext(this.currentTab);
-                    if (this.currentTab === 'tv')
-                        this.idxList = clamp(this.currentTvIdx, els.list.length);
-                    else if (this.currentTab === 'radio')
-                        this.idxList = clamp(this.currentRadioIdx, els.list.length);
+                    if (this.currentTab === 'tv') {
+                        const v = this.visibleListIndexForActual(this.currentTvIdx, 'tv');
+                        if (v >= 0) this.idxList = clamp(v, els.list.length);
+                    }
+                    else if (this.currentTab === 'radio') {
+                        const v = this.visibleListIndexForActual(this.currentRadioIdx, 'radio');
+                        if (v >= 0) this.idxList = clamp(v, els.list.length);
+                    }
                     this.lastListIdx = this.idxList;
                     this.lastPlayerIdx = this.idxPlayer;
                     afterRender(() => this.highlightRemoteZones());
                     return;
                 }
                 else if (key === 'ArrowUp') {
+                    clearEdge();
                     if (this.currentTab === 'music' && window.MusicApp)
                         window.MusicApp.playPrev();
                     else
                         this.playPrev(this.currentTab);
-                    if (this.currentTab === 'tv')
-                        this.idxList = clamp(this.currentTvIdx, els.list.length);
-                    else if (this.currentTab === 'radio')
-                        this.idxList = clamp(this.currentRadioIdx, els.list.length);
+                    if (this.currentTab === 'tv') {
+                        const v = this.visibleListIndexForActual(this.currentTvIdx, 'tv');
+                        if (v >= 0) this.idxList = clamp(v, els.list.length);
+                    }
+                    else if (this.currentTab === 'radio') {
+                        const v = this.visibleListIndexForActual(this.currentRadioIdx, 'radio');
+                        if (v >= 0) this.idxList = clamp(v, els.list.length);
+                    }
                     this.lastListIdx = this.idxList;
                     this.lastPlayerIdx = this.idxPlayer;
                     afterRender(() => this.highlightRemoteZones());
                     return;
                 }
                 else if (key === 'Enter' && els.player[this.idxPlayer]) {
+                    clearEdge();
                     saveMemory();
                     els.player[this.idxPlayer].click();
                 }
@@ -18113,6 +18328,29 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
   body.lifeos-landscape-mini-pc #desktop-workspace-dock button { min-width: 82px !important; font-size: 10px !important; }
   body.lifeos-landscape-mini-pc #l64f-music-work { grid-template-columns: minmax(255px,42%) minmax(0,58%) !important; }
 }
+
+/* R6.4 — Smartbox compositor + scroll stability. */
+body.lifeos-landscape-mini-pc #tv-list-container,
+body.lifeos-landscape-mini-pc #radio-list-container {
+  scroll-behavior: auto !important;
+  overflow-anchor: none !important;
+  overscroll-behavior: contain !important;
+}
+body.lifeos-landscape-mini-pc #tv-video-element {
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+@keyframes lifeos64fRadioDiscSpin { to { transform: translateZ(0) rotate(360deg); } }
+body.lifeos-landscape-mini-pc #radio-disk-icon.animate-spin {
+  animation: lifeos64fRadioDiscSpin 2.4s linear infinite !important;
+  will-change: transform !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+body.lifeos-landscape-mini-pc[data-lifeos-remote-edge] .lifeos-remote-selected {
+  outline-width: 5px !important;
+}
 </style>
 <script id="lifeos-pha64f-landscape-mini-pc-final-js">var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18182,16 +18420,22 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         document.body.appendChild(root);
         return root;
     }
+    let lastGeometryKey = '';
     function computeHeights() {
         if (!document.body.classList.contains('lifeos-landscape-mini-pc'))
             return;
         const vv = window.visualViewport;
         const h = Math.max(260, Math.round(vv ? vv.height : window.innerHeight));
+        const w = Math.max(480, Math.round(vv ? vv.width : window.innerWidth));
         const header = document.querySelector('header.lifeos-header-final');
         const dock = document.getElementById('desktop-workspace-dock');
         const headerH = header ? Math.max(42, Math.round(header.getBoundingClientRect().height)) : 46;
         const dockH = dock ? Math.max(36, Math.round(dock.getBoundingClientRect().height)) : 40;
         const gap = h <= 430 ? 4 : 6;
+        const geometryKey = [w, h, headerH, dockH, gap].join('x');
+        if (geometryKey === lastGeometryKey)
+            return;
+        lastGeometryKey = geometryKey;
         const top = headerH + dockH + gap;
         const rootH = Math.max(250, h - top);
         document.body.style.setProperty('--l64f-head', headerH + 'px');
@@ -18619,6 +18863,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         }
         else {
             restoreAll();
+            lastGeometryKey = '';
             delete document.body.dataset.lifeosLandscapeMapped;
             ['--l64f-head', '--l64f-dock', '--l64f-gap', '--l64f-root-top', '--l64f-root-h'].forEach(p => document.body.style.removeProperty(p));
         }
@@ -18937,7 +19182,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         }, true);
     }
     window.LifeOSLandscapeRemote = {
-        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_WHOLE_PAGE_R6_3',
+        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_WHOLE_PAGE_R6_4',
         focusDock: focusDock,
         focusPanel: focusPanel,
         normalizeKey: normalizeTvRemoteKey
@@ -18954,18 +19199,30 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
                 cancelAnimationFrame(scheduleRaf);
             scheduleRaf = requestAnimationFrame(function () {
                 scheduleRaf = 0;
-                scheduleRuns++;
                 bindDock();
                 bindMediaSubtabs();
                 bindLandscapeRemote();
                 patchMedia();
+                const on = isMini();
+                const wasOn = document.body.classList.contains('lifeos-landscape-mini-pc');
+                const mapped = document.body.dataset.lifeosLandscapeMapped === '1';
+                if (on && wasOn && mapped) {
+                    /* R6.4: video/controls có thể làm visualViewport rung. Chỉ đo lại kích thước;
+                       tuyệt đối không remap DOM, render lại danh sách hoặc reset scroll/focus. */
+                    computeHeights();
+                    return;
+                }
+                scheduleRuns++;
                 apply();
-                setTimeout(refreshMedia, 220);
-                setTimeout(refreshMedia, 900);
-                if (scheduleRuns === 1)
-                    setTimeout(refreshMedia, 2200);
+                if (on) {
+                    setTimeout(refreshMedia, 260);
+                    if (scheduleRuns === 1) {
+                        setTimeout(refreshMedia, 950);
+                        setTimeout(refreshMedia, 2200);
+                    }
+                }
             });
-        }, 45);
+        }, 55);
     }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', schedule, { once: true });
