@@ -56,7 +56,7 @@
   w.LifeOSVendor={cleanCore:true,state:state,loadFirebase:loadFirebase,loadMessaging:loadMessaging,loadHls:loadHls,loadConfetti:loadConfetti};
 })(window,document);
 </script><script data-lifeos-no-transpile="1" id="lifeos-lock4-smartbox-clean-core-marker">
-window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-15',revision:'R6.4',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvGridNativeRemote:true,doubleEdgeZoneExit:true,smartboxNativeHlsFirst:true,tvStatusDedup:true,viewportRefreshStormFixed:true};
+window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-15',revision:'R6.5',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvGridNativeRemote:true,doubleEdgeZoneExit:true,smartboxNativeHlsFirst:true,tvStatusDedup:true,viewportRefreshStormFixed:true,remoteFourVisibleChannels:true,remoteScrollOwnerFixed:true,nativeBlackFrameFallback:true,androidVideoTransformRemoved:true};
 </script><script id="lifeos-lock4-inline-handler-compat-source">
 window.LifeOSCompatHandlers = window.LifeOSCompatHandlers || {};
 window.LifeOSCompatHandlers.h001 = function (event) {var _window$LifeOSRootRou, _window$LifeOSRootRou2, _window$setDesktopWor, _window;event.preventDefault();event.stopPropagation();(_window$LifeOSRootRou = window.LifeOSRootRouter) === null || _window$LifeOSRootRou === void 0 || (_window$LifeOSRootRou2 = _window$LifeOSRootRou.enterWorkspace) === null || _window$LifeOSRootRou2 === void 0 || _window$LifeOSRootRou2.call(_window$LifeOSRootRou, 'overview', 'desktop-click', event);(_window$setDesktopWor = (_window = window).setDesktopWorkspace) === null || _window$setDesktopWor === void 0 || _window$setDesktopWor.call(_window, 'overview');};
@@ -16594,8 +16594,9 @@ window.MediaHub = {
             const container = document.getElementById('tv-list-container');
             if (!container)
                 return;
-            const keepTop = container.scrollTop || 0;
-            const keepLeft = container.scrollLeft || 0;
+            const scrollOwner = container.closest && container.closest('#music-list-container') || container;
+            const keepTop = scrollOwner.scrollTop || 0;
+            const keepLeft = scrollOwner.scrollLeft || 0;
             let list = this.tvData.filter(c => this.currentGroup === 'all' || c.group === this.currentGroup);
             if (query)
                 list = list.filter(c => c.name.toLowerCase().includes(query));
@@ -16614,8 +16615,8 @@ window.MediaHub = {
                     </div>`;
             }).join('');
             try {
-                container.scrollTop = keepTop;
-                container.scrollLeft = keepLeft;
+                scrollOwner.scrollTop = keepTop;
+                scrollOwner.scrollLeft = keepLeft;
             }
             catch (e) { }
         }
@@ -16623,8 +16624,9 @@ window.MediaHub = {
             const container = document.getElementById('radio-list-container');
             if (!container)
                 return;
-            const keepTop = container.scrollTop || 0;
-            const keepLeft = container.scrollLeft || 0;
+            const scrollOwner = container.closest && container.closest('#music-list-container') || container;
+            const keepTop = scrollOwner.scrollTop || 0;
+            const keepLeft = scrollOwner.scrollLeft || 0;
             let list = this.radioData.filter(c => this.currentGroup === 'all' || c.group === this.currentGroup);
             if (query)
                 list = list.filter(c => c.name.toLowerCase().includes(query));
@@ -16643,8 +16645,8 @@ window.MediaHub = {
                     </div>`;
             }).join('');
             try {
-                container.scrollTop = keepTop;
-                container.scrollLeft = keepLeft;
+                scrollOwner.scrollTop = keepTop;
+                scrollOwner.scrollLeft = keepLeft;
             }
             catch (e) { }
         }
@@ -16666,16 +16668,22 @@ window.MediaHub = {
     scrollRemoteTarget(target) {
         if (!target)
             return;
-        const listBox = target.closest && target.closest('#tv-list-container,#radio-list-container,#mp3-list-container,#music-list-container');
+        const innerList = target.closest && target.closest('#tv-list-container,#radio-list-container,#mp3-list-container,#music-list-container');
+        const listBox = target.closest && target.closest('#music-list-container') || innerList;
         if (listBox) {
             try {
                 const tr = target.getBoundingClientRect();
                 const cr = listBox.getBoundingClientRect();
                 const pad = 8;
+                let nextTop = Number(listBox.scrollTop || 0);
                 if (tr.top < cr.top + pad)
-                    listBox.scrollTop -= (cr.top + pad - tr.top);
+                    nextTop -= (cr.top + pad - tr.top);
                 else if (tr.bottom > cr.bottom - pad)
-                    listBox.scrollTop += (tr.bottom - (cr.bottom - pad));
+                    nextTop += (tr.bottom - (cr.bottom - pad));
+                const maxTop = Math.max(0, Number(listBox.scrollHeight || 0) - Number(listBox.clientHeight || 0));
+                nextTop = Math.max(0, Math.min(nextTop, maxTop));
+                if (Math.abs(nextTop - Number(listBox.scrollTop || 0)) > 0.5)
+                    listBox.scrollTop = nextTop;
                 return;
             }
             catch (e) { }
@@ -16842,6 +16850,8 @@ window.MediaHub = {
         let lastStatusKey = '';
         let lastStatusAt = 0;
         let playingStatusSent = false;
+        let forceHlsJsForCurrentSource = false;
+        let nativeBlackFallbackBusy = false;
         const smartboxLite = type === 'tv' && !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc'));
         const loadToken = (this._mediaLoadSeq = (this._mediaLoadSeq || 0) + 1);
         const tokenAlive = () => this._mediaLoadSeq === loadToken;
@@ -16944,10 +16954,11 @@ window.MediaHub = {
                 softReconnectCount = 0;
             softFragErrorCount = 0;
         };
+        const hasTvFrame = () => !!(type === 'tv' && el && Number(el.videoWidth || 0) >= 16 && Number(el.videoHeight || 0) >= 16);
         const hasTvPlaybackSignal = () => {
             if (type !== 'tv' || !el)
                 return false;
-            return hadPlayback || el.currentTime > 0.6 || el.readyState >= 2 || el.videoWidth > 0 || el.videoHeight > 0;
+            return hadPlayback || hasTvFrame() || el.currentTime > 0.6 || el.readyState >= 2;
         };
         const isTransientTvProblem = (reason) => {
             if (type !== 'tv')
@@ -17031,6 +17042,49 @@ window.MediaHub = {
                 softReconnectTv(reason || 'TV đứng hình quá lâu', url || sources[sourceIndex]);
             }, smartboxLite ? 13000 : 8000);
         };
+        const fallbackNativeBlackToHls = (url, label) => {
+            if (type !== 'tv' || !smartboxLite || !tokenAlive() || nativeBlackFallbackBusy)
+                return false;
+            const engine = String((el && el.dataset && el.dataset.lifeosTvEngine) || '');
+            if (engine !== 'native-hls-smartbox')
+                return false;
+            nativeBlackFallbackBusy = true;
+            clearWatch();
+            clearStallWatch();
+            const route = routeFor(url || sources[sourceIndex]);
+            setStatus('video_engine_fallback', route, 'Smartbox đã có tiếng nhưng chưa dựng được hình. Đang chuyển cùng kênh sang HLS.js Lite.', url || sources[sourceIndex], { label: String(label || '') });
+            const startFallback = () => {
+                if (!tokenAlive())
+                    return;
+                nativeBlackFallbackBusy = false;
+                forceHlsJsForCurrentSource = true;
+                destroyHls();
+                this.cleanupMediaElement(el);
+                loadCurrentSource();
+            };
+            if (window.Hls && Hls.isSupported()) {
+                setTimeout(startFallback, 0);
+                return true;
+            }
+            if (window.LifeOSVendor && typeof window.LifeOSVendor.loadHls === 'function') {
+                window.LifeOSVendor.loadHls().then(() => {
+                    if (!tokenAlive())
+                        return;
+                    if (window.Hls && Hls.isSupported())
+                        startFallback();
+                    else {
+                        nativeBlackFallbackBusy = false;
+                        failSource('Smartbox có tiếng nhưng không có hình và HLS.js không được WebView hỗ trợ', url, true);
+                    }
+                }).catch(() => {
+                    nativeBlackFallbackBusy = false;
+                    failSource('Không tải được HLS.js để sửa màn hình đen trên Smartbox', url, true);
+                });
+                return true;
+            }
+            nativeBlackFallbackBusy = false;
+            return false;
+        };
         const failSource = (reason, url, skipNativeFallback) => {
             if (!tokenAlive())
                 return;
@@ -17047,6 +17101,8 @@ window.MediaHub = {
             if (sourceIndex + 1 < sources.length) {
                 sourceIndex++;
                 retryCount = 0;
+                forceHlsJsForCurrentSource = false;
+                nativeBlackFallbackBusy = false;
                 window.LIFEOS_DEBUG && console.warn('[MediaHub] try next media source', type, reason || '', `${sourceIndex + 1}/${sources.length}`, sources[sourceIndex]);
                 loadCurrentSource();
                 return;
@@ -17065,11 +17121,12 @@ window.MediaHub = {
         const verifyTvFrame = (url, label) => {
             if (type !== 'tv' || !tokenAlive())
                 return true;
-            const hasFrame = !!(el && (el.videoWidth > 0 || el.videoHeight > 0));
-            if (hasFrame)
+            if (hasTvFrame())
                 return true;
             const running = !!(el && (!el.paused || el.currentTime > 0.8 || el.readyState >= 2));
             if (running) {
+                if (fallbackNativeBlackToHls(url, label))
+                    return false;
                 failSource('Có tiếng/metadata nhưng chưa có hình: WebView/codec không dựng được video track. Kiểm tra: ' + (label || 'watchdog'), url);
                 return false;
             }
@@ -17159,7 +17216,7 @@ window.MediaHub = {
                     if (!tokenAlive())
                         return;
                     const cur = el && (el.currentSrc || el.src || '');
-                    if (el && (el.videoWidth > 0 || el.videoHeight > 0 || el.readyState >= 2 || el.currentTime > 0.6))
+                    if (el && hasTvFrame())
                         return;
                     const slowReason = (route === 'webview_proxy' ? 'Proxy/HLS phản hồi chậm hoặc segment chưa về' : 'Direct HLS phản hồi chậm') + ' sau 12s';
                     if (softReconnectTv(slowReason, playUrl || cur))
@@ -17178,13 +17235,18 @@ window.MediaHub = {
                 if (!tokenAlive())
                     return;
                 if (type === 'tv') {
-                    markTvPlayback();
-                    playingStatusSent = true;
-                }
-                setStatus('playing', route, route === 'webview_proxy' ? 'Kênh đang phát qua WebView + proxy' : 'Kênh đang phát bình thường qua WebView direct', playUrl);
-                if (type === 'tv')
+                    if (hasTvFrame()) {
+                        markTvPlayback();
+                        playingStatusSent = true;
+                        setStatus('playing', route, route === 'webview_proxy' ? 'Kênh đang phát qua WebView + proxy' : 'Kênh đang phát bình thường qua WebView direct', playUrl);
+                    }
+                    else {
+                        setStatus('audio_without_frame_probe', route, 'Đã nhận âm thanh, đang xác minh khung hình Tivi', playUrl);
+                    }
                     scheduleTvWatch(playUrl);
+                }
                 if (type === 'radio') {
+                    setStatus('playing', route, route === 'html_audio_proxy' ? 'Kênh đang phát qua proxy' : 'Kênh đang phát bình thường qua WebView direct', playUrl);
                     this.isRadioPlaying = true;
                     this.updateRadioUI();
                 }
@@ -17212,10 +17274,10 @@ window.MediaHub = {
                     lastProgressAt = Date.now();
                     clearStallWatch();
                 }
-                if (nowTime > 1.5) {
+                if (nowTime > 1.5 && hasTvFrame()) {
                     if (!hadPlayback || (Date.now() - lastPlaybackAt) > 5000)
                         markTvPlayback();
-                    if (!playingStatusSent && verifyTvFrame(playUrl, 'timeupdate')) {
+                    if (!playingStatusSent) {
                         playingStatusSent = true;
                         setStatus('playing', route, route === 'webview_proxy' ? 'Kênh đang phát qua WebView + proxy' : 'Kênh đang phát bình thường qua WebView direct', playUrl);
                     }
@@ -17223,8 +17285,17 @@ window.MediaHub = {
             };
             let nativeHls = '';
             try { nativeHls = el.canPlayType('application/vnd.apple.mpegurl') || el.canPlayType('application/x-mpegURL') || ''; } catch (e) { }
-            if (isM3u8 && (type !== 'tv' || (smartboxLite && !!nativeHls))) {
-                try { el.setAttribute('playsinline', ''); el.setAttribute('webkit-playsinline', ''); el.preload = 'auto'; } catch (e) { }
+            if (isM3u8 && !forceHlsJsForCurrentSource && (type !== 'tv' || (smartboxLite && !!nativeHls))) {
+                try {
+                    el.setAttribute('playsinline', '');
+                    el.setAttribute('webkit-playsinline', '');
+                    el.preload = 'auto';
+                    if (type === 'tv') {
+                        el.controls = true;
+                        el.setAttribute('controls', '');
+                    }
+                }
+                catch (e) { }
                 try { el.dataset.lifeosTvEngine = type === 'tv' ? 'native-hls-smartbox' : 'native-hls'; } catch (e) { }
                 attachDirect(playUrl);
                 el.load();
@@ -17232,6 +17303,15 @@ window.MediaHub = {
                 return;
             }
             if (isM3u8 && window.Hls && Hls.isSupported()) {
+                try {
+                    if (type === 'tv') {
+                        el.controls = true;
+                        el.setAttribute('controls', '');
+                        el.setAttribute('playsinline', '');
+                        el.setAttribute('webkit-playsinline', '');
+                    }
+                }
+                catch (e) { }
                 const hlsConfig = {
                     enableWorker: true,
                     lowLatencyMode: false,
@@ -17904,7 +17984,7 @@ window.MediaHub = {
                     }
                 }
                 else if (key === 'ArrowLeft') {
-                    /* R6.4: một lần Trái vẫn di giữa các nút player; hai lần Trái liên tiếp
+                    /* R6.5: một lần Trái vẫn di giữa các nút player; hai lần Trái liên tiếp
                        quay về danh sách ở bất kỳ vị trí nào trong cột player. */
                     if (edgeDouble('player-left', () => {
                         saveMemory();
@@ -18329,17 +18409,47 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
   body.lifeos-landscape-mini-pc #l64f-music-work { grid-template-columns: minmax(255px,42%) minmax(0,58%) !important; }
 }
 
-/* R6.4 — Smartbox compositor + scroll stability. */
+/* R6.5 — Smartbox list viewport + black-video guard.
+   The real scroll owner is #music-list-container. Radio shows exactly four rows;
+   TV shows exactly four cards (two columns x two rows). */
+body.lifeos-landscape-mini-pc #music-list-container,
 body.lifeos-landscape-mini-pc #tv-list-container,
 body.lifeos-landscape-mini-pc #radio-list-container {
   scroll-behavior: auto !important;
   overflow-anchor: none !important;
   overscroll-behavior: contain !important;
 }
+body.lifeos-landscape-mini-pc #radio-list-container {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+body.lifeos-landscape-mini-pc #radio-list-container .media-item {
+  height: calc((100% - 18px) / 4) !important;
+  min-height: calc((100% - 18px) / 4) !important;
+  max-height: calc((100% - 18px) / 4) !important;
+  box-sizing: border-box !important;
+}
+body.lifeos-landscape-mini-pc #tv-list-container {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  grid-auto-rows: calc((100% - 6px) / 2) !important;
+}
+body.lifeos-landscape-mini-pc #tv-list-container .media-item {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  box-sizing: border-box !important;
+}
 body.lifeos-landscape-mini-pc #tv-video-element {
-  transform: translateZ(0) !important;
-  backface-visibility: hidden !important;
-  -webkit-backface-visibility: hidden !important;
+  /* Old Android WebView may render audio-only black video when the <video> surface is transformed. */
+  transform: none !important;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 @keyframes lifeos64fRadioDiscSpin { to { transform: translateZ(0) rotate(360deg); } }
 body.lifeos-landscape-mini-pc #radio-disk-icon.animate-spin {
@@ -19182,7 +19292,7 @@ body.lifeos-landscape-mini-pc[data-lifeos-remote-edge] .lifeos-remote-selected {
         }, true);
     }
     window.LifeOSLandscapeRemote = {
-        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_WHOLE_PAGE_R6_4',
+        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_WHOLE_PAGE_R6_5',
         focusDock: focusDock,
         focusPanel: focusPanel,
         normalizeKey: normalizeTvRemoteKey
@@ -19207,7 +19317,7 @@ body.lifeos-landscape-mini-pc[data-lifeos-remote-edge] .lifeos-remote-selected {
                 const wasOn = document.body.classList.contains('lifeos-landscape-mini-pc');
                 const mapped = document.body.dataset.lifeosLandscapeMapped === '1';
                 if (on && wasOn && mapped) {
-                    /* R6.4: video/controls có thể làm visualViewport rung. Chỉ đo lại kích thước;
+                    /* R6.5: video/controls có thể làm visualViewport rung. Chỉ đo lại kích thước;
                        tuyệt đối không remap DOM, render lại danh sách hoặc reset scroll/focus. */
                     computeHeights();
                     return;
