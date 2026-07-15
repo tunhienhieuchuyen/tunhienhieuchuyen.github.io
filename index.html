@@ -56,7 +56,7 @@
   w.LifeOSVendor={cleanCore:true,state:state,loadFirebase:loadFirebase,loadMessaging:loadMessaging,loadHls:loadHls,loadConfetti:loadConfetti};
 })(window,document);
 </script><script data-lifeos-no-transpile="1" id="lifeos-lock4-smartbox-clean-core-marker">
-window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-15',revision:'R6'};
+window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-15',revision:'R6.2',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true};
 </script><script id="lifeos-lock4-inline-handler-compat-source">
 window.LifeOSCompatHandlers = window.LifeOSCompatHandlers || {};
 window.LifeOSCompatHandlers.h001 = function (event) {var _window$LifeOSRootRou, _window$LifeOSRootRou2, _window$setDesktopWor, _window;event.preventDefault();event.stopPropagation();(_window$LifeOSRootRou = window.LifeOSRootRouter) === null || _window$LifeOSRootRou === void 0 || (_window$LifeOSRootRou2 = _window$LifeOSRootRou.enterWorkspace) === null || _window$LifeOSRootRou2 === void 0 || _window$LifeOSRootRou2.call(_window$LifeOSRootRou, 'overview', 'desktop-click', event);(_window$setDesktopWor = (_window = window).setDesktopWorkspace) === null || _window$setDesktopWor === void 0 || _window$setDesktopWor.call(_window, 'overview');};
@@ -7999,9 +7999,9 @@ body.music-player-active #mini-player {
 <input class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:border-primary shadow-inner text-sm font-medium" id="music-search" oninput="window.MediaHub.handleSearch(this.value)" placeholder="Tìm kiếm tên bài hát hoặc tên kênh..." type="text"/>
 </div>
 <div class="flex gap-2 mb-3 px-2 overflow-x-auto custom-scroll-area shrink-0" id="media-subtabs">
-<button class="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-sm active:scale-95 transition whitespace-nowrap border border-primary" id="tab-media-music" role="tab" tabindex="0" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('music', false, {event:event,userIntent:true})">🎵 Nhạc MP3</button>
-<button class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap" id="tab-media-radio" role="tab" tabindex="0" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('radio', false, {event:event,userIntent:true})">📻 Radio Live</button>
-<button class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap" id="tab-media-tv" role="tab" tabindex="0" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('tv', false, {event:event,userIntent:true})">📺 Tivi Live</button>
+<button class="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-sm active:scale-95 transition whitespace-nowrap border border-primary" id="tab-media-music" role="tab" tabindex="0" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('music', false, {userIntent:true,source:'media-subtab'})">🎵 Nhạc MP3</button>
+<button class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap" id="tab-media-radio" role="tab" tabindex="0" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('radio', false, {userIntent:true,source:'media-subtab'})">📻 Radio Live</button>
+<button class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap" id="tab-media-tv" role="tab" tabindex="0" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('tv', false, {userIntent:true,source:'media-subtab'})">📺 Tivi Live</button>
 </div>
 <div class="flex-grow min-h-0 w-full grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
 <div class="hidden lg:flex lg:col-span-3 flex-col gap-1.5 overflow-y-auto pr-1" id="media-group-sidebar">
@@ -8852,6 +8852,10 @@ window.switchTab = (id, b) => {var _window$LifeOSRootRou3, _window$LifeOSRootRou
   function activeWorkspace() {
     const b = body();
     if (!b) return 'unknown';
+    /* Smartbox có thể báo CSS viewport dưới 1024 dù đang ở root landscape ba cột.
+       Phải ưu tiên root thật trước nhánh mobile, nếu không MediaHub bị chặn như một view ẩn. */
+    if (b.classList.contains('lifeos-landscape-mini-pc') && b.dataset.lifeosLandscapeRootMode)
+      return cleanMode(b.dataset.lifeosLandscapeRootMode);
     if (window.innerWidth < 1024) return ID_TO_MODE[activeMobileView()] || b.dataset.lifeosActiveWorkspace || 'tasks';
     return b.dataset.desktopWorkspace || b.dataset.lifeosActiveWorkspace || 'overview';
   }
@@ -8864,9 +8868,11 @@ window.switchTab = (id, b) => {var _window$LifeOSRootRou3, _window$LifeOSRootRou
     return !!(b && b.classList.contains('lifeos-landscape-mini-pc') && (b.dataset.lifeosLandscapeRootMode === 'music' || b.dataset.desktopWorkspace === 'music'));
   }
   function isMediaWorkspaceActive() {
+    /* Ưu tiên Smartbox landscape trước ngưỡng 1024px. */
+    if (isLandscapeMiniMusic()) return true;
     if (window.innerWidth < 1024) return activeMobileView() === 'view-music';
     const ws = activeWorkspace();
-    return ws === 'music' || isLandscapeMiniMusic();
+    return ws === 'music';
   }
   function isMediaActionAllowed(ev) {
     const ws = activeWorkspace();
@@ -17464,10 +17470,19 @@ window.MediaHub = {
             if (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName))
                 return;
             const mediaView = document.getElementById('view-music');
-            if (mediaView && !mediaView.classList.contains('active') && window.innerWidth < 1024)
-                return;
-            if (window.innerWidth >= 1024 && document.body.dataset.desktopWorkspace !== 'music' && document.body.dataset.desktopWorkspace !== 'overview')
-                return;
+            const landscapeMusic = !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc') && document.body.dataset.lifeosLandscapeRootMode === 'music');
+            if (!landscapeMusic) {
+                if (window.LifeOSRootRouter && typeof window.LifeOSRootRouter.isMediaWorkspaceActive === 'function') {
+                    if (!window.LifeOSRootRouter.isMediaWorkspaceActive())
+                        return;
+                }
+                else {
+                    if (mediaView && !mediaView.classList.contains('active') && window.innerWidth < 1024)
+                        return;
+                    if (window.innerWidth >= 1024 && document.body.dataset.desktopWorkspace !== 'music' && document.body.dataset.desktopWorkspace !== 'overview')
+                        return;
+                }
+            }
             const rawKeyCode = Number(e.keyCode || e.which || 0);
             const key = normalizeRemoteKey(e);
             const digitKey = /^[0-9]$/.test(key) ? key :
@@ -17825,9 +17840,16 @@ body.lifeos-landscape-mini-pc #desktop-workspace-dock button {
 body.lifeos-landscape-mini-pc #desktop-workspace-dock button:focus,
 body.lifeos-landscape-mini-pc #media-subtabs button:focus,
 body.lifeos-landscape-mini-pc .media-item:focus,
-body.lifeos-landscape-mini-pc #media-group-sidebar button:focus {
-  outline: 3px solid rgba(59,130,246,.75) !important;
+body.lifeos-landscape-mini-pc #media-group-sidebar button:focus,
+body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active button:focus,
+body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active [role="button"]:focus,
+body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active input:focus,
+body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active select:focus,
+body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active textarea:focus,
+body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active a:focus {
+  outline: 3px solid rgba(59,130,246,.82) !important;
   outline-offset: 2px !important;
+  box-shadow: 0 0 0 5px rgba(59,130,246,.16) !important;
 }
 body.lifeos-landscape-mini-pc #desktop-workspace-dock button.is-active,
 body.lifeos-landscape-mini-pc #desktop-workspace-dock button.l64f-active {
@@ -18141,6 +18163,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         document.querySelectorAll('#lifeos-landscape-root .l64f-panel').forEach(p => p.classList.remove('is-active'));
         (_a = document.getElementById('l64f-panel-' + mode)) === null || _a === void 0 ? void 0 : _a.classList.add('is-active');
         document.body.dataset.lifeosLandscapeRootMode = mode;
+        document.body.dataset.lifeosActiveWorkspace = mode;
         setDockActive(mode);
     }
     function mapTasks() {
@@ -18174,7 +18197,29 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         if (listPanel)
             listPanel.style.setProperty('display', 'block', 'important');
     }
-    function mapFocus() { var _a; move((_a = document.getElementById('view-focus')) === null || _a === void 0 ? void 0 : _a.firstElementChild, document.getElementById('l64f-focus-card')); }
+    function mapFocus() {
+        const source = document.getElementById('view-focus');
+        const target = document.getElementById('l64f-focus-card');
+        if (!source || !target)
+            return false;
+        let marker = document.getElementById('focus-mode-tabs') || document.getElementById('dateclock-time') || document.getElementById('cd-toggle-btn');
+        let panel = marker;
+        while (panel && panel.parentElement && panel.parentElement !== source && panel.parentElement !== target)
+            panel = panel.parentElement;
+        if (!panel || (panel.parentElement !== source && panel.parentElement !== target))
+            panel = source.firstElementChild;
+        move(panel, target);
+        if (panel) {
+            panel.classList.remove('hidden');
+            panel.hidden = false;
+            panel.style.setProperty('display', 'flex', 'important');
+            panel.style.setProperty('visibility', 'visible', 'important');
+            panel.style.setProperty('pointer-events', 'auto', 'important');
+        }
+        target.style.setProperty('display', 'block', 'important');
+        target.style.setProperty('visibility', 'visible', 'important');
+        return !!panel;
+    }
     function mapVault() { var _a; move((_a = document.getElementById('view-vault')) === null || _a === void 0 ? void 0 : _a.firstElementChild, document.getElementById('l64f-vault-card')); }
     function mapMusic() {
         var _a, _b;
@@ -18489,6 +18534,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
             catch (e) { }
         }
         if (mode === 'focus') {
+            mapFocus();
             try {
                 (_g = window.switchTimerMode) === null || _g === void 0 ? void 0 : _g.call(window, 'dateclock');
             }
@@ -18533,6 +18579,40 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
     };
     function patchMedia() { return !!window.MediaHub; }
     window.LifeOS64FReloadMedia = () => deepLoadChannels(true);
+    function bindMediaSubtabs() {
+        const tabs = document.getElementById('media-subtabs');
+        if (!tabs || tabs.__l64fDirectBound)
+            return;
+        tabs.__l64fDirectBound = true;
+        tabs.addEventListener('click', function (e) {
+            if (!document.body.classList.contains('lifeos-landscape-mini-pc') || document.body.dataset.lifeosLandscapeRootMode !== 'music')
+                return;
+            const btn = e.target && e.target.closest ? e.target.closest('#tab-media-music,#tab-media-radio,#tab-media-tv') : null;
+            if (!btn || !tabs.contains(btn) || !window.MediaHub)
+                return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof e.stopImmediatePropagation === 'function')
+                e.stopImmediatePropagation();
+            const tab = btn.id === 'tab-media-radio' ? 'radio' : (btn.id === 'tab-media-tv' ? 'tv' : 'music');
+            document.body.dataset.lifeosRemoteZone = 'panel';
+            window.MediaHub.activeZone = 'tabs';
+            window.MediaHub.idxTabs = tab === 'music' ? 0 : (tab === 'radio' ? 1 : 2);
+            window.MediaHub.switchTab(tab, false, { userIntent: true, source: 'smartbox-direct-subtab' });
+            setTimeout(function () {
+                updateMediaTabState();
+                if (window.MediaHub && typeof window.MediaHub.highlightRemoteZones === 'function')
+                    window.MediaHub.highlightRemoteZones();
+                try { btn.focus(); } catch (err) { }
+            }, 0);
+        }, true);
+        tabs.addEventListener('pointerdown', function (e) {
+            const btn = e.target && e.target.closest ? e.target.closest('#tab-media-music,#tab-media-radio,#tab-media-tv') : null;
+            if (!btn)
+                return;
+            document.body.dataset.lifeosRemoteZone = 'panel';
+        }, true);
+    }
     function bindDock() {
         const dock = document.getElementById('desktop-workspace-dock');
         if (!dock || dock.__l64fBound)
@@ -18598,8 +18678,10 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         let target = null;
         if (mode === 'tasks')
             target = document.querySelector('#l64f-task-right .task-item, #l64f-task-right [data-task-id], #l64f-task-right #todo-list > li, #l64f-task-left #input-pc');
-        else if (mode === 'focus')
+        else if (mode === 'focus') {
+            mapFocus();
             target = document.querySelector('#l64f-panel-focus button, #l64f-panel-focus [tabindex]');
+        }
         else if (mode === 'vault')
             target = document.querySelector('#l64f-panel-vault button, #l64f-panel-vault [tabindex]');
         else if (mode === 'chat')
@@ -18607,49 +18689,173 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         if (target) { try { target.focus(); } catch (e) { } }
         return !!target;
     }
+    function activeLandscapeMode() {
+        return VIEW_BY_MODE[document.body.dataset.lifeosLandscapeRootMode] || document.body.dataset.lifeosLandscapeRootMode || getMode();
+    }
+    function isVisibleFocusable(el) {
+        if (!el || el.disabled || el.hidden)
+            return false;
+        if (String(el.getAttribute && el.getAttribute('tabindex')) === '-1')
+            return false;
+        const cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || cs.pointerEvents === 'none')
+            return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+    }
+    function panelFocusables(mode) {
+        const panel = document.getElementById('l64f-panel-' + mode);
+        if (!panel)
+            return [];
+        const nodes = panel.querySelectorAll('button:not([disabled]),a[href],input:not([type="hidden"]):not([disabled]),select:not([disabled]),textarea:not([disabled]),[role="button"],[tabindex]');
+        const out = [];
+        Array.prototype.forEach.call(nodes, function (el) {
+            if (out.indexOf(el) < 0 && isVisibleFocusable(el))
+                out.push(el);
+        });
+        return out;
+    }
+    function spatialNext(items, current, key) {
+        if (!items.length)
+            return null;
+        let idx = items.indexOf(current);
+        if (idx < 0)
+            return items[0];
+        const cr = current.getBoundingClientRect();
+        const cx = cr.left + cr.width / 2;
+        const cy = cr.top + cr.height / 2;
+        let best = null;
+        let bestScore = Infinity;
+        items.forEach(function (el) {
+            if (el === current)
+                return;
+            const r = el.getBoundingClientRect();
+            const x = r.left + r.width / 2;
+            const y = r.top + r.height / 2;
+            const dx = x - cx;
+            const dy = y - cy;
+            let primary = 0, secondary = 0, ok = false;
+            if (key === 'ArrowRight' && dx > 2) { primary = dx; secondary = Math.abs(dy); ok = true; }
+            else if (key === 'ArrowLeft' && dx < -2) { primary = -dx; secondary = Math.abs(dy); ok = true; }
+            else if (key === 'ArrowDown' && dy > 2) { primary = dy; secondary = Math.abs(dx); ok = true; }
+            else if (key === 'ArrowUp' && dy < -2) { primary = -dy; secondary = Math.abs(dx); ok = true; }
+            if (!ok)
+                return;
+            const score = primary + secondary * 2.4;
+            if (score < bestScore) {
+                bestScore = score;
+                best = el;
+            }
+        });
+        if (best)
+            return best;
+        if (key === 'ArrowRight' || key === 'ArrowDown')
+            return items[Math.min(items.length - 1, idx + 1)];
+        return items[Math.max(0, idx - 1)];
+    }
     function bindLandscapeRemote() {
         if (window.__lifeos64fRemoteBound) return;
         window.__lifeos64fRemoteBound = true;
-        document.addEventListener('keydown', function (e) {
+        document.addEventListener('pointerdown', function (e) {
             if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
             const dock = document.getElementById('desktop-workspace-dock');
-            const active = document.activeElement;
-            const inDock = !!(dock && active && dock.contains(active));
-            const zone = document.body.dataset.lifeosRemoteZone || (inDock ? 'dock' : '');
-            if (!inDock && zone !== 'dock') return;
+            const root = document.getElementById('lifeos-landscape-root');
+            if (dock && dock.contains(e.target))
+                document.body.dataset.lifeosRemoteZone = 'dock';
+            else if (root && root.contains(e.target))
+                document.body.dataset.lifeosRemoteZone = 'panel';
+        }, true);
+        document.addEventListener('focusin', function (e) {
+            if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+            const dock = document.getElementById('desktop-workspace-dock');
+            const root = document.getElementById('lifeos-landscape-root');
+            if (dock && dock.contains(e.target))
+                document.body.dataset.lifeosRemoteZone = 'dock';
+            else if (root && root.contains(e.target))
+                document.body.dataset.lifeosRemoteZone = 'panel';
+        }, true);
+        document.addEventListener('keydown', function (e) {
+            if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
             const key = normalizeTvRemoteKey(e);
             if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'BrowserBack', 'Escape', 'Backspace'].indexOf(key) < 0) return;
-            const buttons = visibleDockButtons();
-            if (!buttons.length) return;
-            let idx = buttons.indexOf(active);
-            if (idx < 0) idx = Number(document.body.dataset.lifeosRemoteDockIndex || 0) || 0;
-            idx = Math.max(0, Math.min(idx, buttons.length - 1));
-            if (key === 'ArrowLeft') idx = Math.max(0, idx - 1);
-            else if (key === 'ArrowRight') idx = Math.min(buttons.length - 1, idx + 1);
-            else if (key === 'ArrowUp' || key === 'BrowserBack' || key === 'Escape' || key === 'Backspace') idx = 0;
-            else if (key === 'ArrowDown') {
-                const mode = buttons[idx].dataset.desktopView || 'tasks';
+            const dock = document.getElementById('desktop-workspace-dock');
+            const root = document.getElementById('lifeos-landscape-root');
+            const active = document.activeElement;
+            const inDock = !!(dock && active && dock.contains(active));
+            const inPanel = !!(root && active && root.contains(active));
+            let zone = document.body.dataset.lifeosRemoteZone || (inDock ? 'dock' : (inPanel ? 'panel' : ''));
+            const mode = activeLandscapeMode();
+            /* MediaHub có ma trận điều hướng riêng; sau khi sửa guard viewport, để chính nó xử lý panel Media. */
+            if (mode === 'music' && zone === 'panel')
+                return;
+            if (!zone) {
                 e.preventDefault();
                 e.stopPropagation();
-                focusPanel(mode);
+                focusDock(mode);
                 return;
             }
-            else if (key === 'Enter') {
-                const mode = buttons[idx].dataset.desktopView || 'tasks';
+            if (zone === 'dock' || inDock) {
+                const buttons = visibleDockButtons();
+                if (!buttons.length) return;
+                let idx = buttons.indexOf(active);
+                if (idx < 0) idx = Number(document.body.dataset.lifeosRemoteDockIndex || 0) || 0;
+                idx = Math.max(0, Math.min(idx, buttons.length - 1));
+                if (key === 'ArrowLeft') idx = Math.max(0, idx - 1);
+                else if (key === 'ArrowRight') idx = Math.min(buttons.length - 1, idx + 1);
+                else if (key === 'ArrowUp' || key === 'BrowserBack' || key === 'Escape' || key === 'Backspace') idx = 0;
+                else if (key === 'ArrowDown') {
+                    const nextMode = buttons[idx].dataset.desktopView || 'tasks';
+                    e.preventDefault();
+                    e.stopPropagation();
+                    focusPanel(nextMode);
+                    return;
+                }
+                else if (key === 'Enter') {
+                    const nextMode = buttons[idx].dataset.desktopView || 'tasks';
+                    e.preventDefault();
+                    e.stopPropagation();
+                    activate(nextMode);
+                    setTimeout(function () { focusPanel(nextMode); }, 50);
+                    return;
+                }
                 e.preventDefault();
                 e.stopPropagation();
-                activate(mode);
-                setTimeout(function () { focusPanel(mode); }, 50);
+                document.body.dataset.lifeosRemoteDockIndex = String(idx);
+                try { buttons[idx].focus(); } catch (err) { }
                 return;
             }
-            e.preventDefault();
-            e.stopPropagation();
-            document.body.dataset.lifeosRemoteDockIndex = String(idx);
-            try { buttons[idx].focus(); } catch (err) { }
+            if (zone === 'panel') {
+                if (key === 'BrowserBack' || key === 'Escape' || key === 'Backspace') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    focusDock(mode);
+                    return;
+                }
+                const items = panelFocusables(mode);
+                if (!items.length) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    focusDock(mode);
+                    return;
+                }
+                if (key === 'Enter') {
+                    const chosen = items.indexOf(active) >= 0 ? active : items[0];
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try { chosen.click(); } catch (err) { }
+                    return;
+                }
+                const next = spatialNext(items, active, key);
+                if (next) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try { next.focus(); next.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (err) { }
+                }
+            }
         }, true);
     }
     window.LifeOSLandscapeRemote = {
-        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_RESTORE_R6_1',
+        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_WHOLE_PAGE_R6_2',
         focusDock: focusDock,
         focusPanel: focusPanel,
         normalizeKey: normalizeTvRemoteKey
@@ -18657,6 +18863,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
     function schedule() {
         requestAnimationFrame(() => {
             bindDock();
+            bindMediaSubtabs();
             bindLandscapeRemote();
             patchMedia();
             apply();
