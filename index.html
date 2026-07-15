@@ -56,7 +56,7 @@
   w.LifeOSVendor={cleanCore:true,state:state,loadFirebase:loadFirebase,loadMessaging:loadMessaging,loadHls:loadHls,loadConfetti:loadConfetti};
 })(window,document);
 </script><script data-lifeos-no-transpile="1" id="lifeos-lock4-smartbox-clean-core-marker">
-window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-15',revision:'R6.2',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true};
+window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-15',revision:'R6.3',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true};
 </script><script id="lifeos-lock4-inline-handler-compat-source">
 window.LifeOSCompatHandlers = window.LifeOSCompatHandlers || {};
 window.LifeOSCompatHandlers.h001 = function (event) {var _window$LifeOSRootRou, _window$LifeOSRootRou2, _window$setDesktopWor, _window;event.preventDefault();event.stopPropagation();(_window$LifeOSRootRou = window.LifeOSRootRouter) === null || _window$LifeOSRootRou === void 0 || (_window$LifeOSRootRou2 = _window$LifeOSRootRou.enterWorkspace) === null || _window$LifeOSRootRou2 === void 0 || _window$LifeOSRootRou2.call(_window$LifeOSRootRou, 'overview', 'desktop-click', event);(_window$setDesktopWor = (_window = window).setDesktopWorkspace) === null || _window$setDesktopWor === void 0 || _window$setDesktopWor.call(_window, 'overview');};
@@ -16696,19 +16696,14 @@ window.MediaHub = {
         }
     },
     normalizePostPlayVolume(el, type) {
+        /* R6.3: không ép/cân bằng âm lượng kênh. Giữ nguyên mức âm thanh của nguồn và WebView. */
         if (!el)
             return;
-        const apply = () => {
-            try {
-                if (!el.paused || el.readyState >= 3) {
-                    el.volume = 0.9;
-                    window.LIFEOS_DEBUG && console.log('[MediaHub] playing', type);
-                }
-            }
-            catch (e) { }
-        };
-        el.addEventListener('playing', apply, { once: true });
-        el.addEventListener('canplay', apply, { once: true });
+        try {
+            el.dataset.lifeosVolumePolicy = 'native-source';
+        }
+        catch (e) { }
+        window.LIFEOS_DEBUG && console.log('[MediaHub] native source volume', type);
     },
     showPlayerLoadError(type, reason, url) {
         var _a;
@@ -17378,10 +17373,10 @@ window.MediaHub = {
         this.idxSidebar = clamp(this.idxSidebar, els.sidebar.length);
         this.idxList = clamp(this.idxList, els.list.length);
         this.idxPlayer = clamp(this.idxPlayer, els.player.length);
-        els.tabs.forEach(el => { el.classList.remove('tab-focused'); el.style.boxShadow = ''; });
-        els.sidebar.forEach(el => { el.classList.remove('sidebar-focused'); el.style.boxShadow = ''; });
-        els.list.forEach(el => { el.classList.remove('media-focused'); el.style.boxShadow = ''; });
-        els.player.forEach(el => { el.classList.remove('player-btn-focused'); el.style.boxShadow = ''; });
+        els.tabs.forEach(el => { el.classList.remove('tab-focused', 'lifeos-remote-selected'); el.removeAttribute('data-lifeos-remote-selected'); el.style.boxShadow = ''; });
+        els.sidebar.forEach(el => { el.classList.remove('sidebar-focused', 'lifeos-remote-selected'); el.removeAttribute('data-lifeos-remote-selected'); el.style.boxShadow = ''; });
+        els.list.forEach(el => { el.classList.remove('media-focused', 'lifeos-remote-selected'); el.removeAttribute('data-lifeos-remote-selected'); el.style.boxShadow = ''; });
+        els.player.forEach(el => { el.classList.remove('player-btn-focused', 'lifeos-remote-selected'); el.removeAttribute('data-lifeos-remote-selected'); el.style.boxShadow = ''; });
         const soft = (el, cls) => {
             if (!el)
                 return;
@@ -17417,8 +17412,19 @@ window.MediaHub = {
             if (target)
                 target.classList.add('player-btn-focused');
         }
+        if (target) {
+            target.classList.add('lifeos-remote-selected');
+            target.setAttribute('data-lifeos-remote-selected', 'true');
+            try {
+                if (document.activeElement !== target)
+                    target.focus({ preventScroll: true });
+            }
+            catch (e) {
+                try { target.focus(); } catch (_) { }
+            }
+        }
         if (target && typeof target.scrollIntoView === 'function') {
-            target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            try { target.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' }); } catch (e) { }
         }
     },
     initRemoteControl() {
@@ -17459,6 +17465,20 @@ window.MediaHub = {
             return idx >= 0 ? idx : Math.floor(buttons.length / 2);
         };
         const afterRender = (fn) => requestAnimationFrame(() => setTimeout(fn, 40));
+        const gridColumnCount = (container) => {
+            try {
+                if (!container)
+                    return 1;
+                const tpl = String(getComputedStyle(container).gridTemplateColumns || '').trim();
+                if (!tpl || tpl === 'none')
+                    return 1;
+                const cols = tpl.split(/\s+/).filter(Boolean).length;
+                return Math.max(1, cols || 1);
+            }
+            catch (e) {
+                return 1;
+            }
+        };
         const saveMemory = () => {
             this.lastTabIdx = this.idxTabs;
             this.lastSidebarIdx = this.idxSidebar;
@@ -17635,7 +17655,7 @@ window.MediaHub = {
                 }
             }
             else if (this.activeZone === 'list') {
-                const cols = (!isDesktop && this.currentTab === 'tv') ? (window.innerWidth >= 640 ? 3 : 2) : 1;
+                const cols = this.currentTab === 'tv' ? gridColumnCount(document.getElementById('tv-list-container')) : 1;
                 if (key === 'ArrowDown') {
                     this.idxList = clamp(this.idxList + cols, els.list.length);
                 }
@@ -17846,10 +17866,39 @@ body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active [role
 body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active input:focus,
 body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active select:focus,
 body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active textarea:focus,
-body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active a:focus {
-  outline: 3px solid rgba(59,130,246,.82) !important;
+body.lifeos-landscape-mini-pc #lifeos-landscape-root .l64f-panel.is-active a:focus,
+body.lifeos-landscape-mini-pc .lifeos-remote-selected {
+  outline: 4px solid #2563eb !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 5px rgba(59,130,246,.16) !important;
+  box-shadow: 0 0 0 6px rgba(37,99,235,.20), 0 8px 22px rgba(15,23,42,.16) !important;
+  position: relative !important;
+  z-index: 30 !important;
+}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #radio-list-container .media-item.media-focused,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #radio-list-container .media-item:focus {
+  background: #dcfce7 !important;
+  border: 3px solid #16a34a !important;
+  color: #14532d !important;
+  box-shadow: 0 0 0 5px rgba(22,163,74,.24), 0 10px 24px rgba(20,83,45,.18) !important;
+  transform: scale(1.018) !important;
+  transition: none !important;
+}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #tv-list-container .media-item.media-focused,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #tv-list-container .media-item:focus {
+  background: #ffe4e6 !important;
+  border: 3px solid #e11d48 !important;
+  color: #881337 !important;
+  box-shadow: 0 0 0 5px rgba(225,29,72,.22), 0 10px 24px rgba(136,19,55,.18) !important;
+  transform: scale(1.018) !important;
+  transition: none !important;
+}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #mp3-list-container .song-row.media-focused,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #mp3-list-container .song-row:focus {
+  background: #fef3c7 !important;
+  border: 3px solid #f59e0b !important;
+  color: #78350f !important;
+  box-shadow: 0 0 0 5px rgba(245,158,11,.22), 0 10px 24px rgba(120,53,15,.16) !important;
+  transition: none !important;
 }
 body.lifeos-landscape-mini-pc #desktop-workspace-dock button.is-active,
 body.lifeos-landscape-mini-pc #desktop-workspace-dock button.l64f-active {
@@ -18006,6 +18055,15 @@ body.lifeos-landscape-mini-pc #l64f-music-right {
 }
 body.lifeos-landscape-mini-pc #l64f-media-preview { flex: 1 1 auto !important; min-height: 120px !important; display: flex !important; align-items: center !important; justify-content: center !important; text-align: center !important; border-radius: 14px !important; border: 1px dashed rgba(99,102,241,.34) !important; background: rgba(255,255,255,.78) !important; color: var(--c-mut) !important; padding: 12px !important; font-size: 12px !important; font-weight: 900 !important; }
 body.lifeos-landscape-mini-pc #l64f-music-right.l64f-has-player #l64f-media-preview { display: none !important; }
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #l64f-media-preview,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-media-preview { display: none !important; }
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #radio-player-container,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #tv-player-container {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
 body.lifeos-landscape-mini-pc #tv-video-element { width: 100% !important; aspect-ratio: 16/9 !important; max-height: min(42dvh,210px) !important; min-height: 120px !important; object-fit: contain !important; }
 
 body.lifeos-landscape-mini-pc #l64f-data-status,
@@ -18119,7 +18177,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
       <section id="l64f-panel-tasks" class="l64f-panel"><div id="l64f-tasks-card" class="l64f-card"><div id="l64f-task-left"></div><div id="l64f-task-right"></div></div></section>
       <section id="l64f-panel-focus" class="l64f-panel"><div id="l64f-focus-card" class="l64f-card"></div></section>
       <section id="l64f-panel-vault" class="l64f-panel"><div id="l64f-vault-card" class="l64f-card"></div></section>
-      <section id="l64f-panel-music" class="l64f-panel"><div id="l64f-music-card" class="l64f-card"><div id="l64f-music-title"></div><div id="l64f-music-work"><div id="l64f-music-left"><div id="l64f-music-search"></div><div id="l64f-music-list"></div></div><div id="l64f-music-right"><div id="l64f-media-preview"><div><div style="font-size:24px;line-height:1;margin-bottom:6px">🖥️</div><div>Chọn kênh/bài hát để phát</div><div style="font-size:10px;margin-top:4px;opacity:.72">Mini-PC root riêng: danh sách thật không bị khung cũ che</div></div></div></div></div></div></section>
+      <section id="l64f-panel-music" class="l64f-panel"><div id="l64f-music-card" class="l64f-card"><div id="l64f-music-title"></div><div id="l64f-music-work"><div id="l64f-music-left"><div id="l64f-music-search"></div><div id="l64f-music-list"></div></div><div id="l64f-music-right"><div id="l64f-media-preview" aria-hidden="true"></div></div></div></div></section>
       <section id="l64f-panel-chat" class="l64f-panel"><div id="l64f-chat-card" class="l64f-card"><div id="l64f-chat-left"></div><div id="l64f-chat-right"></div></div></section>`;
         document.body.appendChild(root);
         return root;
@@ -18512,6 +18570,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
             catch (e) { }
         }
         if (mode === 'music') {
+            mapMusic();
             if (window.MusicApp && !window.MusicApp.isInitialized) {
                 try {
                     window.MusicApp.initAudioEngine();
@@ -18519,7 +18578,8 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
                 catch (e) { }
             }
             try {
-                (_b = (_a = window.MediaHub) === null || _a === void 0 ? void 0 : _a.init) === null || _b === void 0 ? void 0 : _b.call(_a, false, { userIntent: true, targetTab: 'music', silent: true });
+                const currentMediaTab = window.MediaHub && ['music', 'radio', 'tv'].indexOf(window.MediaHub.currentTab) >= 0 ? window.MediaHub.currentTab : 'music';
+                (_b = (_a = window.MediaHub) === null || _a === void 0 ? void 0 : _a.init) === null || _b === void 0 ? void 0 : _b.call(_a, false, { userIntent: true, targetTab: currentMediaTab, silent: true, preserveTab: true });
             }
             catch (e) { }
         }
@@ -18545,16 +18605,21 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
     }
     function apply() {
         const on = isMini();
+        const wasOn = document.body.classList.contains('lifeos-landscape-mini-pc');
         document.body.classList.toggle('lifeos-landscape-mini-pc', on);
         document.documentElement.classList.toggle('lifeos-landscape-mini-pc', on);
         if (on) {
             ensureRoot();
             computeHeights();
-            mapAll();
+            if (!wasOn || document.body.dataset.lifeosLandscapeMapped !== '1') {
+                mapAll();
+                document.body.dataset.lifeosLandscapeMapped = '1';
+            }
             activate(document.body.dataset.lifeosLandscapeRootMode || getMode());
         }
         else {
             restoreAll();
+            delete document.body.dataset.lifeosLandscapeMapped;
             ['--l64f-head', '--l64f-dock', '--l64f-gap', '--l64f-root-top', '--l64f-root-h'].forEach(p => document.body.style.removeProperty(p));
         }
     }
@@ -18651,6 +18716,17 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
             return cs.display !== 'none' && cs.visibility !== 'hidden';
         });
     }
+    function markWholePageFocus(target) {
+        if (!target)
+            return;
+        const old = document.querySelector('.lifeos-remote-selected[data-lifeos-whole-page-focus="true"]');
+        if (old && old !== target) {
+            old.classList.remove('lifeos-remote-selected');
+            old.removeAttribute('data-lifeos-whole-page-focus');
+        }
+        target.classList.add('lifeos-remote-selected');
+        target.setAttribute('data-lifeos-whole-page-focus', 'true');
+    }
     function focusDock(mode) {
         if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return false;
         const buttons = visibleDockButtons();
@@ -18660,6 +18736,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         document.body.dataset.lifeosRemoteZone = 'dock';
         document.body.dataset.lifeosRemoteDockIndex = String(idx);
         try { buttons[idx].focus(); } catch (e) { }
+        markWholePageFocus(buttons[idx]);
         return true;
     }
     function focusPanel(mode) {
@@ -18686,7 +18763,10 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
             target = document.querySelector('#l64f-panel-vault button, #l64f-panel-vault [tabindex]');
         else if (mode === 'chat')
             target = document.querySelector('#l64f-panel-chat button, #l64f-panel-chat [tabindex]');
-        if (target) { try { target.focus(); } catch (e) { } }
+        if (target) {
+            try { target.focus(); } catch (e) { }
+            markWholePageFocus(target);
+        }
         return !!target;
     }
     function activeLandscapeMode() {
@@ -18769,6 +18849,8 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
             if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
             const dock = document.getElementById('desktop-workspace-dock');
             const root = document.getElementById('lifeos-landscape-root');
+            if (e.target && (dock && dock.contains(e.target) || root && root.contains(e.target)))
+                markWholePageFocus(e.target);
             if (dock && dock.contains(e.target))
                 document.body.dataset.lifeosRemoteZone = 'dock';
             else if (root && root.contains(e.target))
@@ -18849,29 +18931,41 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
                 if (next) {
                     e.preventDefault();
                     e.stopPropagation();
-                    try { next.focus(); next.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (err) { }
+                    try { next.focus(); markWholePageFocus(next); next.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (err) { }
                 }
             }
         }, true);
     }
     window.LifeOSLandscapeRemote = {
-        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_WHOLE_PAGE_R6_2',
+        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_WHOLE_PAGE_R6_3',
         focusDock: focusDock,
         focusPanel: focusPanel,
         normalizeKey: normalizeTvRemoteKey
     };
+    let scheduleTimer = 0;
+    let scheduleRaf = 0;
+    let scheduleRuns = 0;
     function schedule() {
-        requestAnimationFrame(() => {
-            bindDock();
-            bindMediaSubtabs();
-            bindLandscapeRemote();
-            patchMedia();
-            apply();
-            setTimeout(apply, 80);
-            setTimeout(refreshMedia, 240);
-            setTimeout(refreshMedia, 1000);
-            setTimeout(refreshMedia, 2200);
-        });
+        if (scheduleTimer)
+            clearTimeout(scheduleTimer);
+        scheduleTimer = setTimeout(function () {
+            scheduleTimer = 0;
+            if (scheduleRaf)
+                cancelAnimationFrame(scheduleRaf);
+            scheduleRaf = requestAnimationFrame(function () {
+                scheduleRaf = 0;
+                scheduleRuns++;
+                bindDock();
+                bindMediaSubtabs();
+                bindLandscapeRemote();
+                patchMedia();
+                apply();
+                setTimeout(refreshMedia, 220);
+                setTimeout(refreshMedia, 900);
+                if (scheduleRuns === 1)
+                    setTimeout(refreshMedia, 2200);
+            });
+        }, 45);
     }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', schedule, { once: true });
