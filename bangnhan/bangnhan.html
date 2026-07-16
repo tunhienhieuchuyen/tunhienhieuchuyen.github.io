@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffd76a">
-<title>Bé Học Bảng Nhân - MR18 Clean Clone R10I Caro Layout Finalize PC Landscape Portrait CHECK</title>
+<title>Bé Học Bảng Nhân - MR18 Smart Answer Center R1 PC Landscape Portrait CHECK</title>
 <!-- BN_MR18_CLEAN_CLONE_R10A_EXPAND_CARO_MODES_BOARD_VALUE_CHECK -->
 <style id="bn-mr18-clean-clone-r2a-frame-lock-style">
 :root{
@@ -670,6 +670,263 @@ html.bn-screen-extended.bn-device-phone.bn-orient-portrait .game-carwash{padding
 html.bn-screen-extended.bn-device-phone.bn-orient-landscape .game-carwash{padding:4px}.bn-device-phone.bn-orient-landscape .game-carwash .carwash-wrap{gap:4px}.bn-device-phone.bn-orient-landscape .game-carwash .carwash-strip{grid-template-columns:1fr 100px;padding:4px 6px}.bn-device-phone.bn-orient-landscape .game-carwash .carwash-strip b{font-size:11px}.bn-device-phone.bn-orient-landscape .game-carwash .carwash-strip span{font-size:8px}.bn-device-phone.bn-orient-landscape .game-carwash .carwash-car{width:98%;height:100%;min-height:135px}.bn-device-phone.bn-orient-landscape .game-carwash .dirty-groups{inset:40% 5% 14%;gap:4px}.bn-device-phone.bn-orient-landscape .game-carwash .dirty-group{padding:13px 3px 4px;gap:3px;border-radius:10px}.bn-device-phone.bn-orient-landscape .game-carwash .dirty-label{font-size:7.5px;left:3px}.bn-device-phone.bn-orient-landscape .game-carwash .dirt-spot{--dirt-size:18px}.bn-device-phone.bn-orient-landscape .game-carwash .carwash-bottom{grid-template-columns:1fr 84px;gap:4px}.bn-device-phone.bn-orient-landscape .game-carwash .carwash-addition,.bn-device-phone.bn-orient-landscape .game-carwash .carwash-counter{font-size:9px;padding:4px 6px}.bn-device-phone.bn-orient-landscape .game-carwash .carwash-answer-grid button{min-height:27px;font-size:11px}
 </style>
 
+
+<style id="bn-mr18-home-smart-answer-center-r1-style">
+/* MR18 HOME SMART ANSWER CENTER R1
+   Chỉ thay khu làm việc trung tâm. Giữ nguyên ba cột và toàn bộ khung PC/phone. */
+html.bn-screen-home body #timesGrid.answer-stage{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  grid-template-rows:auto minmax(0,1fr) auto auto !important;
+  align-content:stretch !important;
+  gap:clamp(5px,1.05vmin,11px) !important;
+  padding:clamp(7px,1.35vmin,15px) !important;
+  overflow:hidden !important;
+  background:
+    radial-gradient(circle at 18% 8%,rgba(255,255,255,.96),transparent 26%),
+    radial-gradient(circle at 86% 22%,rgba(255,223,117,.42),transparent 28%),
+    linear-gradient(155deg,rgba(255,255,255,.82),rgba(255,239,193,.72)) !important;
+  border:2px solid rgba(130,77,8,.24) !important;
+  box-shadow:0 10px 24px rgba(108,79,10,.13),inset 0 0 0 2px rgba(255,255,255,.54) !important;
+}
+html.bn-screen-home body .answer-stage-head{
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"kicker level" "question question" "guide guide";
+  gap:2px 8px;
+  align-items:center;
+  padding:clamp(3px,.7vmin,8px) clamp(5px,1vmin,11px);
+  border-radius:clamp(11px,1.8vmin,18px);
+  background:rgba(255,255,255,.66);
+  border:1px solid rgba(130,77,8,.16);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.72);
+}
+html.bn-screen-home body .answer-stage-kicker{
+  grid-area:kicker;
+  color:var(--accent);
+  font-size:clamp(8px,1.25vmin,13px);
+  font-weight:1000;
+  letter-spacing:.35px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+html.bn-screen-home body .answer-stage-level{
+  grid-area:level;
+  justify-self:end;
+  border-radius:999px;
+  padding:clamp(2px,.45vmin,5px) clamp(6px,.85vmin,10px);
+  color:#744719;
+  background:linear-gradient(180deg,#fff8d6,#ffd66a);
+  border:1px solid rgba(130,77,8,.18);
+  font-size:clamp(7px,1.05vmin,11px);
+  font-weight:1000;
+  white-space:nowrap;
+}
+html.bn-screen-home body .answer-stage-question{
+  grid-area:question;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  color:#392105;
+  font-size:clamp(30px,7.1vmin,76px);
+  line-height:.98;
+  font-weight:1000;
+  letter-spacing:.5px;
+  text-shadow:0 3px 0 rgba(255,255,255,.9),0 5px 14px rgba(112,71,12,.16);
+}
+html.bn-screen-home body .answer-stage-guide{
+  grid-area:guide;
+  text-align:center;
+  color:var(--muted);
+  font-size:clamp(8px,1.35vmin,13px);
+  line-height:1.15;
+  font-weight:900;
+}
+html.bn-screen-home body .answer-thinking-card{
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-columns:minmax(70px,.72fr) minmax(0,1.45fr);
+  gap:clamp(5px,1vmin,10px);
+  align-items:stretch;
+  padding:clamp(5px,1vmin,10px);
+  border-radius:clamp(13px,2vmin,20px);
+  background:linear-gradient(180deg,rgba(255,255,255,.76),rgba(255,248,224,.64));
+  border:1px solid rgba(130,77,8,.16);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.72);
+  overflow:hidden;
+}
+html.bn-screen-home body .answer-group-count,
+html.bn-screen-home body .answer-group-sample{
+  min-width:0;
+  min-height:0;
+  border-radius:clamp(11px,1.6vmin,17px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:clamp(4px,.8vmin,9px);
+  overflow:hidden;
+}
+html.bn-screen-home body .answer-group-count{
+  background:linear-gradient(180deg,#fff5b9,#ffd459);
+  border:1px solid rgba(130,77,8,.18);
+}
+html.bn-screen-home body .answer-group-count b{
+  font-size:clamp(28px,6.2vmin,64px);
+  line-height:.92;
+  color:#865b00;
+  text-shadow:0 2px 0 rgba(255,255,255,.8);
+}
+html.bn-screen-home body .answer-group-count span,
+html.bn-screen-home body .answer-group-sample small{
+  margin-top:3px;
+  color:var(--muted);
+  font-size:clamp(7px,1.15vmin,12px);
+  line-height:1.05;
+  font-weight:1000;
+}
+html.bn-screen-home body .answer-group-sample{
+  background:rgba(255,255,255,.72);
+  border:1px dashed rgba(130,77,8,.26);
+}
+html.bn-screen-home body .answer-dot-row{
+  width:100%;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:clamp(3px,.65vmin,7px);
+  overflow:hidden;
+}
+html.bn-screen-home body .answer-dot{
+  width:clamp(11px,2.45vmin,25px);
+  height:clamp(11px,2.45vmin,25px);
+  flex:0 0 auto;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 25%,#fff 0 15%,#ffdb64 18% 48%,#f29b18 52% 100%);
+  border:1px solid rgba(130,77,8,.20);
+  box-shadow:0 2px 0 rgba(91,52,4,.24),0 5px 8px rgba(120,73,7,.10);
+}
+html.bn-screen-home body .answer-repeat-hint{
+  display:none;
+  grid-column:1/-1;
+  min-width:0;
+  text-align:center;
+  border-radius:12px;
+  padding:clamp(4px,.8vmin,8px);
+  color:#8e3f70;
+  background:rgba(255,232,245,.82);
+  border:1px solid rgba(210,103,157,.24);
+  font-size:clamp(9px,1.55vmin,16px);
+  line-height:1.15;
+  font-weight:1000;
+  white-space:normal;
+  overflow:hidden;
+}
+html.bn-screen-home body #timesGrid.answer-stage.hint-revealed .answer-repeat-hint{display:block}
+html.bn-screen-home body #timesGrid.answer-stage.hint-revealed .answer-thinking-card{grid-template-rows:minmax(0,1fr) auto}
+html.bn-screen-home body .answer-choice-grid{
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:clamp(5px,1.05vmin,11px);
+  align-content:center;
+}
+html.bn-screen-home body .answer-choice{
+  position:relative;
+  min-width:0;
+  min-height:clamp(48px,10.5vmin,102px) !important;
+  height:auto !important;
+  border-radius:clamp(13px,2vmin,21px) !important;
+  padding:clamp(5px,1vmin,10px) !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#382103;
+  font-size:clamp(27px,6.3vmin,67px) !important;
+  line-height:1 !important;
+  font-weight:1000 !important;
+  background:
+    radial-gradient(circle at 28% 18%,rgba(255,255,255,.96),rgba(255,255,255,.08) 30%,transparent 40%),
+    linear-gradient(180deg,#fff 0%,#fff8dc 50%,#ffd963 100%) !important;
+  border:2px solid rgba(130,77,8,.22) !important;
+  box-shadow:0 clamp(3px,.7vmin,7px) 0 rgba(112,66,7,.42),0 10px 16px rgba(112,66,7,.12),inset 0 2px 0 rgba(255,255,255,.94) !important;
+  touch-action:manipulation;
+  transition:transform .12s ease,filter .12s ease,opacity .12s ease;
+}
+html.bn-screen-home body .answer-choice:active{transform:translateY(2px) scale(.99)}
+html.bn-screen-home body .answer-choice.answer-wide{grid-column:1/-1}
+html.bn-screen-home body .answer-choice.wrong{
+  color:#fff !important;
+  background:linear-gradient(180deg,#ff9c98,#e6535f) !important;
+  border-color:rgba(139,28,34,.35) !important;
+  box-shadow:0 4px 0 #8a2c2b,0 9px 14px rgba(138,44,43,.16) !important;
+  animation:shake .22s ease;
+  opacity:.78;
+}
+html.bn-screen-home body .answer-choice.correct{
+  color:#fff !important;
+  background:linear-gradient(180deg,#86f2ad,#22a966) !important;
+  border-color:rgba(29,116,67,.34) !important;
+  box-shadow:0 4px 0 #187b48,0 11px 18px rgba(24,123,72,.18) !important;
+  transform:scale(1.025);
+}
+html.bn-screen-home body .answer-choice:disabled{cursor:default}
+html.bn-screen-home body .answer-stage-foot{
+  min-width:0;
+  min-height:0;
+  text-align:center;
+  border-radius:999px;
+  padding:clamp(3px,.62vmin,7px) clamp(7px,1vmin,11px);
+  color:var(--muted);
+  background:rgba(255,255,255,.56);
+  border:1px solid rgba(130,77,8,.12);
+  font-size:clamp(7px,1.18vmin,12px);
+  line-height:1.1;
+  font-weight:900;
+  white-space:normal;
+  overflow:hidden;
+}
+html.bn-screen-home body .reward-badge{
+  top:clamp(7px,1.3vmin,15px);
+  min-width:min(330px,88%);
+  padding:clamp(7px,1.1vmin,12px) clamp(10px,1.5vmin,16px);
+  border-radius:clamp(15px,2.2vmin,22px);
+  pointer-events:none;
+}
+html.bn-screen-home body .reward-badge b{display:block;font-size:clamp(15px,2.4vmin,24px)}
+html.bn-screen-home body .reward-badge span{display:block;font-size:clamp(9px,1.4vmin,13px)}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body #timesGrid.answer-stage{
+  gap:3px !important;
+  padding:4px !important;
+}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-stage-head{padding:3px 5px;border-radius:9px}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-stage-question{font-size:clamp(23px,7.6vmin,42px)}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-thinking-card{padding:3px;gap:3px;border-radius:9px;grid-template-columns:minmax(46px,.62fr) minmax(0,1.5fr)}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-group-count,
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-group-sample{padding:2px;border-radius:8px}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-dot{width:clamp(8px,2.35vmin,15px);height:clamp(8px,2.35vmin,15px)}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-choice-grid{gap:4px}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-choice{min-height:clamp(32px,9.5vmin,54px) !important;font-size:clamp(19px,6vmin,34px) !important;border-radius:9px !important;padding:2px !important}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-repeat-hint{padding:2px;font-size:clamp(7px,1.8vmin,10px)}
+html.bn-screen-home.bn-device-phone.bn-orient-landscape body .answer-stage-foot{padding:2px 5px;font-size:clamp(6px,1.45vmin,8px)}
+html.bn-screen-home.bn-device-phone.bn-orient-portrait body #timesGrid.answer-stage{
+  gap:4px !important;
+  padding:5px !important;
+}
+html.bn-screen-home.bn-device-phone.bn-orient-portrait body .answer-stage-head{padding:4px 6px;border-radius:10px}
+html.bn-screen-home.bn-device-phone.bn-orient-portrait body .answer-stage-question{font-size:clamp(28px,11vw,48px)}
+html.bn-screen-home.bn-device-phone.bn-orient-portrait body .answer-thinking-card{padding:4px;gap:4px;border-radius:10px;grid-template-columns:minmax(58px,.7fr) minmax(0,1.4fr)}
+html.bn-screen-home.bn-device-phone.bn-orient-portrait body .answer-choice-grid{gap:5px}
+html.bn-screen-home.bn-device-phone.bn-orient-portrait body .answer-choice{min-height:clamp(42px,13vw,66px) !important;font-size:clamp(25px,9.5vw,43px) !important;border-radius:11px !important}
+html.bn-screen-home.bn-device-phone.bn-orient-portrait body .answer-stage-foot{font-size:clamp(6.5px,2.2vw,9px)}
+</style>
+
 </head>
 <body data-skin="candy">
 <div class="app" id="app">
@@ -680,7 +937,7 @@ html.bn-screen-extended.bn-device-phone.bn-orient-landscape .game-carwash{paddin
 <div class="question-large"><div class="q-kicker" id="questionLabel">Chọn bảng rồi bấm Chơi</div><div class="equation-vertical" id="equationWrap"><div class="eq-tile eq-a" id="eqA">3</div><div class="eq-tile eq-op">×</div><div class="eq-tile eq-b" id="eqB">5</div><div class="eq-tile eq-op eq-op-equals">=</div><div class="eq-tile eq-answer" id="eqAnswer">?</div></div><div class="hint-voice-row"><button class="hint-btn" id="hintBtn" type="button">💡 Gợi ý</button><button class="audio-mini-btn voice-mobile-only" id="voiceModeHintBtn" type="button">Voicebank</button></div></div>
 <div class="feedback left-feedback"><div><strong id="feedbackTitle">Sẵn sàng học bảng nhân?</strong><span id="feedbackText">Bấm bắt đầu để nghe câu hỏi, chọn bảng, đọc lại, bật/tắt giọng, SFX và nhạc.</span></div><div class="read-music-row"><button class="blue" id="speakBtn" type="button">Đọc</button><button class="audio-mini-btn music-mobile-only" id="musicReadBtn" type="button">Nhạc</button></div></div>
 </section>
-<section class="board-card center-board" id="boardCard"><div class="reward-badge" id="rewardBadge"><b>Thưởng!</b><span>+1 tim · +30 điểm · +1 sao</span></div><div class="grid-zone" id="gridZone"><div aria-label="Bảng nhân 10 nhân 10" class="times-grid" id="timesGrid" role="grid"></div></div></section>
+<section class="board-card center-board" id="boardCard"><div class="reward-badge" id="rewardBadge"><b>⭐ Chính xác!</b><span>+1 sao · +10 điểm</span></div><div class="grid-zone" id="gridZone"><div aria-label="Khu chọn đáp án bảng nhân" class="times-grid answer-stage" id="timesGrid" role="group"></div></div></section>
 <aside class="side">
 <section class="side-card"><h3>Điểm khuyến khích</h3><div class="stats"><div class="stat"><span>ĐIỂM</span><b id="score">0</b></div><div class="stat"><span>ĐÚNG</span><b id="correct">0</b></div><div class="stat"><span>SAI</span><b id="wrong">0</b></div><div class="stat lives-stat"><span>TIM</span><b id="lives">❤❤❤❤❤</b></div><div class="stat"><span>LIÊN TIẾP</span><b id="streak">0</b></div><div class="stat"><span>KỶ LỤC</span><b id="best">0</b></div></div><div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div><p class="note" id="missionText">Mục tiêu: Home thở được, nút bấm rõ, giọng có phản hồi, xoay ngang dùng được.</p></section>
 <section class="side-card"><h3>Bé đang học bảng nào?</h3><div class="chips" id="tableChips"></div><div class="input-row"><input aria-label="Nhập danh sách bảng cần học" id="tableInput" value="1,2,3,4,5,6,7,8,9,10"><button id="applyTablesBtn" type="button">Áp dụng</button></div><p class="note" id="tableNote">Có thể nhập: 1,3,5,10 để chỉ trộn trong các bảng đó.</p></section>
@@ -903,19 +1160,153 @@ function setFeedback(title,text){if($('feedbackTitle'))$('feedbackTitle').textCo
 function gesture(){SoundEngine.unlock();Voice.initVoices();}
 const SoundEngine={ctx:null,unlocked:false,lastBeepAt:0,lastError:'',unlock(){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC){this.lastError='AudioContext không hỗ trợ';return false}this.ctx=this.ctx||new AC();if(this.ctx.state==='suspended')this.ctx.resume();this.unlocked=true;return true}catch(e){this.lastError=e.message||String(e);return false}},beep(type='ok',force=false){if(!force&&!AppState.audioEnabled)return false;this.unlock();try{if(!this.ctx)return false;const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type=type==='bad'?'sawtooth':(type==='music'?'triangle':'sine');o.frequency.value=type==='bad'?150:(type==='pop'?560:(type==='chime'?720:380));g.gain.value=type==='bad'?0.045:0.035;o.connect(g);g.connect(this.ctx.destination);o.start();setTimeout(()=>{try{o.stop()}catch(e){}},type==='chime'?180:120);this.lastBeepAt=Date.now();return true}catch(e){this.lastError=e.message||String(e);return false}},toggle(){gesture();AppState.audioEnabled=!AppState.audioEnabled;updateButtons();if(AppState.audioEnabled){this.beep('chime',true);setFeedback('SFX bật','Đã bật SFX và phát âm test.')}else{setFeedback('SFX tắt','Hiệu ứng âm thanh đã tắt.')}}};
 const Music={osc:null,gain:null,lastToggleAt:0,start(){gesture();try{if(!SoundEngine.ctx)return false;this.stop(false);this.osc=SoundEngine.ctx.createOscillator();this.gain=SoundEngine.ctx.createGain();this.osc.type='sine';this.osc.frequency.value=196;this.gain.gain.value=0.012;this.osc.connect(this.gain);this.gain.connect(SoundEngine.ctx.destination);this.osc.start();AppState.musicEnabled=true;this.lastToggleAt=Date.now();updateButtons();setFeedback('Nhạc bật','Nhạc nền nhẹ đã bật. Bấm Nhạc lần nữa để tắt.');return true}catch(e){AppState.musicEnabled=false;setFeedback('Không bật được nhạc',e.message||String(e));return false}},stop(show=true){try{if(this.osc){this.osc.stop();this.osc.disconnect();}if(this.gain)this.gain.disconnect();}catch(e){}this.osc=null;this.gain=null;AppState.musicEnabled=false;this.lastToggleAt=Date.now();updateButtons();if(show)setFeedback('Nhạc tắt','Nhạc nền đã tắt.')},toggle(){gesture();if(AppState.musicEnabled)this.stop(true);else this.start();}};
-const Voice={voices:[],availableVoices:[],lastText:'',lastAttemptAt:0,lastError:'',lastMode:'voicebank',lastVoiceName:'',initDone:false,initVoices(){try{if(!('speechSynthesis'in window)){this.lastError='Trình duyệt không hỗ trợ speechSynthesis';this.availableVoices=[];return []}const list=window.speechSynthesis.getVoices()||[];this.voices=list;this.availableVoices=list.map(v=>({name:v.name,lang:v.lang,local:v.localService}));this.initDone=true;return list}catch(e){this.lastError=e.message||String(e);return []}},selectVietnameseVoice(){const list=this.initVoices();const prefs=['vi-VN','Microsoft An','Vietnamese','Tiếng Việt','Hoai','NamMinh','vi'];for(const p of prefs){const hit=list.find(v=>((v.lang||'')+' '+(v.name||'')).toLowerCase().includes(p.toLowerCase()));if(hit)return hit}return list[0]||null},speechCancel(){try{if('speechSynthesis'in window)window.speechSynthesis.cancel()}catch(e){}},tryVoiceBank(text){try{if(AppState.voiceMode!=='voicebank')return false;const vb=window.BangNhanVoiceBank;if(vb&&typeof vb.speak==='function'){const r=vb.speak(text);this.lastMode='voicebank';return r!==false}this.lastError='Voicebank chưa có file, fallback sang giọng máy';return false}catch(e){this.lastError='Voicebank lỗi: '+(e.message||String(e));return false}},fallbackSpeechSynthesis(text){try{if(!('speechSynthesis'in window)){this.lastError='speechSynthesis không hỗ trợ trên trình duyệt này';setFeedback('Không đọc được',this.lastError);return false}const u=new SpeechSynthesisUtterance(text);const v=this.selectVietnameseVoice();if(v){u.voice=v;u.lang=v.lang||'vi-VN';this.lastVoiceName=v.name||''}else{u.lang='vi-VN';this.lastError='Không tìm thấy giọng Việt, đang thử giọng máy'}u.rate=.92;u.pitch=1.02;u.volume=1;u.onerror=(ev)=>{Voice.lastError='speech error: '+(ev.error||'unknown');setFeedback('Giọng đọc gặp lỗi',Voice.lastError)};window.speechSynthesis.cancel();window.speechSynthesis.speak(u);this.lastMode='speechSynthesis';return true}catch(e){this.lastError=e.message||String(e);setFeedback('Không đọc được',this.lastError);return false}},speak(text,opts={}){this.lastText=String(text||'').trim();this.lastAttemptAt=Date.now();this.lastError='';this.lastMode=AppState.voiceMode;if(!this.lastText){this.lastError='Không có nội dung để đọc';setFeedback('Chưa có câu để đọc','Tôi đã tạo câu mới rồi đọc lại.');MathCore.nextQuestion();this.lastText=AppState.currentQuestion.text}if(!opts.force&&!AppState.voiceEnabled){this.speechCancel();this.lastError='Giọng đang tắt';setFeedback('Giọng đang tắt','Bật Giọng hoặc bấm Đọc để thử đọc cưỡng bức.');return false}gesture();if(this.tryVoiceBank(this.lastText))return true;const ok=this.fallbackSpeechSynthesis(this.lastText);if(!ok&&this.lastError)setFeedback('Không đọc được',this.lastError);return ok},speakQuestion(force=false){const q=AppState.currentQuestion||MathCore.nextQuestion();return this.speak(`Câu hỏi: ${q.a} nhân ${q.b} bằng mấy?`,{force})},speakHint(){const q=AppState.currentQuestion||MathCore.nextQuestion();return this.speak(`Gợi ý: có ${q.a} nhóm, mỗi nhóm ${q.b} ô. Cộng ${q.a} lần số ${q.b} sẽ ra ${q.answer}.`)},speakCorrect(){const q=AppState.currentQuestion;return this.speak(q?`Đúng rồi. ${q.a} nhân ${q.b} bằng ${q.answer}.`:'Đúng rồi.')},speakWrong(){const q=AppState.currentQuestion;return this.speak(q?`Chưa đúng. Hãy nhìn ${q.a} nhóm, mỗi nhóm ${q.b} ô rồi thử lại.`:'Chưa đúng, thử lại nhé.')},toggle(){gesture();AppState.voiceEnabled=!AppState.voiceEnabled;if(!AppState.voiceEnabled){this.speechCancel();setFeedback('Giọng tắt','Bấm Giọng để bật lại.')}else{setFeedback('Giọng bật','Đã bật giọng, đọc thử câu hiện tại.');this.speakQuestion(true)}updateButtons()},cycle(){gesture();AppState.voiceMode=AppState.voiceMode==='voicebank'?'AI local':'voicebank';updateButtons();const msg=AppState.voiceMode==='voicebank'?'Đã chọn Voicebank. Nếu thiếu file, app sẽ fallback sang giọng máy.':'Đã chọn AI local, dùng giọng máy trên thiết bị.';$('bnAiStatus').textContent=msg;setFeedback('Đổi chế độ giọng',msg);this.speak(msg,{force:true})}};
+const Voice={voices:[],availableVoices:[],lastText:'',lastAttemptAt:0,lastError:'',lastMode:'voicebank',lastVoiceName:'',initDone:false,initVoices(){try{if(!('speechSynthesis'in window)){this.lastError='Trình duyệt không hỗ trợ speechSynthesis';this.availableVoices=[];return []}const list=window.speechSynthesis.getVoices()||[];this.voices=list;this.availableVoices=list.map(v=>({name:v.name,lang:v.lang,local:v.localService}));this.initDone=true;return list}catch(e){this.lastError=e.message||String(e);return []}},selectVietnameseVoice(){const list=this.initVoices();const prefs=['vi-VN','Microsoft An','Vietnamese','Tiếng Việt','Hoai','NamMinh','vi'];for(const p of prefs){const hit=list.find(v=>((v.lang||'')+' '+(v.name||'')).toLowerCase().includes(p.toLowerCase()));if(hit)return hit}return list[0]||null},speechCancel(){try{if('speechSynthesis'in window)window.speechSynthesis.cancel()}catch(e){}},tryVoiceBank(text){try{if(AppState.voiceMode!=='voicebank')return false;const vb=window.BangNhanVoiceBank;if(vb&&typeof vb.speak==='function'){const r=vb.speak(text);this.lastMode='voicebank';return r!==false}this.lastError='Voicebank chưa có file, fallback sang giọng máy';return false}catch(e){this.lastError='Voicebank lỗi: '+(e.message||String(e));return false}},fallbackSpeechSynthesis(text){try{if(!('speechSynthesis'in window)){this.lastError='speechSynthesis không hỗ trợ trên trình duyệt này';setFeedback('Không đọc được',this.lastError);return false}const u=new SpeechSynthesisUtterance(text);const v=this.selectVietnameseVoice();if(v){u.voice=v;u.lang=v.lang||'vi-VN';this.lastVoiceName=v.name||''}else{u.lang='vi-VN';this.lastError='Không tìm thấy giọng Việt, đang thử giọng máy'}u.rate=.92;u.pitch=1.02;u.volume=1;u.onerror=(ev)=>{Voice.lastError='speech error: '+(ev.error||'unknown');setFeedback('Giọng đọc gặp lỗi',Voice.lastError)};window.speechSynthesis.cancel();window.speechSynthesis.speak(u);this.lastMode='speechSynthesis';return true}catch(e){this.lastError=e.message||String(e);setFeedback('Không đọc được',this.lastError);return false}},speak(text,opts={}){this.lastText=String(text||'').trim();this.lastAttemptAt=Date.now();this.lastError='';this.lastMode=AppState.voiceMode;if(!this.lastText){this.lastError='Không có nội dung để đọc';setFeedback('Chưa có câu để đọc','Tôi đã tạo câu mới rồi đọc lại.');MathCore.nextQuestion();this.lastText=AppState.currentQuestion.text}if(!opts.force&&!AppState.voiceEnabled){this.speechCancel();this.lastError='Giọng đang tắt';setFeedback('Giọng đang tắt','Bật Giọng hoặc bấm Đọc để thử đọc cưỡng bức.');return false}gesture();if(this.tryVoiceBank(this.lastText))return true;const ok=this.fallbackSpeechSynthesis(this.lastText);if(!ok&&this.lastError)setFeedback('Không đọc được',this.lastError);return ok},speakQuestion(force=false){const q=AppState.currentQuestion||MathCore.nextQuestion();return this.speak(`Câu hỏi: ${q.a} nhân ${q.b} bằng mấy?`,{force})},speakHint(){const q=AppState.currentQuestion||MathCore.nextQuestion();const add=Array(q.a).fill(q.b).join(' cộng ');return this.speak(`Gợi ý: có ${q.a} nhóm, mỗi nhóm ${q.b} ô. Hãy tính ${add} rồi chọn kết quả đúng.`)},speakCorrect(){const q=AppState.currentQuestion;return this.speak(q?`Đúng rồi. ${q.a} nhân ${q.b} bằng ${q.answer}.`:'Đúng rồi.')},speakWrong(){const q=AppState.currentQuestion;return this.speak(q?`Chưa đúng. Hãy nhìn ${q.a} nhóm, mỗi nhóm ${q.b} ô rồi thử lại.`:'Chưa đúng, thử lại nhé.')},toggle(){gesture();AppState.voiceEnabled=!AppState.voiceEnabled;if(!AppState.voiceEnabled){this.speechCancel();setFeedback('Giọng tắt','Bấm Giọng để bật lại.')}else{setFeedback('Giọng bật','Đã bật giọng, đọc thử câu hiện tại.');this.speakQuestion(true)}updateButtons()},cycle(){gesture();AppState.voiceMode=AppState.voiceMode==='voicebank'?'AI local':'voicebank';updateButtons();const msg=AppState.voiceMode==='voicebank'?'Đã chọn Voicebank. Nếu thiếu file, app sẽ fallback sang giọng máy.':'Đã chọn AI local, dùng giọng máy trên thiết bị.';$('bnAiStatus').textContent=msg;setFeedback('Đổi chế độ giọng',msg);this.speak(msg,{force:true})}};
 if('speechSynthesis'in window){window.speechSynthesis.onvoiceschanged=()=>Voice.initVoices()}
 const MathCore={seq:0,makeQuestion(){let a,b;if(AppState.mode==='reviewWrong'&&AppState.wrongAnswers.length){const q=AppState.wrongAnswers[AppState.wrongAnswers.length-1];a=q.a;b=q.b}else if(AppState.mode==='random'){a=AppState.selectedTables[Math.floor(Math.random()*AppState.selectedTables.length)]||AppState.table;b=1+Math.floor(Math.random()*10)}else{a=AppState.selectedTables[this.seq%AppState.selectedTables.length]||AppState.table;b=this.seq%10+1;this.seq++}return{a,b,answer:a*b,text:`${a} × ${b} = ?`}},makeOptions(ans){const set=new Set([ans]);while(set.size<4){const n=Math.max(1,ans+Math.floor(Math.random()*21)-10);set.add(n)}return Array.from(set).sort(()=>Math.random()-.5)},nextQuestion(){AppState.currentQuestion=this.makeQuestion();renderQuestion();return AppState.currentQuestion},checkAnswer(input){const q=AppState.currentQuestion;if(!q)return false;const ok=Number(input)===q.answer;if(ok){AppState.score+=10;AppState.correct++;AppState.streak++;AppState.stars=Math.floor(AppState.correct/3);if(AppState.score>AppState.best){AppState.best=AppState.score;safeLSSet('bn18_best_score',String(AppState.best))}}else{AppState.wrong++;AppState.streak=0;AppState.lives=Math.max(0,AppState.lives-1);AppState.wrongAnswers.push({...q,chosen:Number(input),time:Date.now()});Store.set('bn18_wrong_answers',AppState.wrongAnswers.slice(-50))}renderStats();renderReview();return ok},resetSession(){AppState.score=0;AppState.correct=0;AppState.wrong=0;AppState.streak=0;AppState.stars=0;AppState.lives=5;AppState.wrongAnswers=[];this.seq=0;renderStats();renderReview();return this.nextQuestion()}};
-function renderQuestion(){const q=AppState.currentQuestion||{a:3,b:5,answer:15,text:'3 × 5 = ?'};$('eqA').textContent=q.a;$('eqB').textContent=q.b;$('eqAnswer').textContent='?';$('questionLabel').textContent=q.text;highlightGrid(q.a,q.b)}
+function renderQuestion(){
+const q=AppState.currentQuestion||{a:3,b:5,answer:15,text:'3 × 5 = ?'};
+$('eqA').textContent=q.a;
+$('eqB').textContent=q.b;
+$('eqAnswer').textContent='?';
+$('questionLabel').textContent=q.text;
+AppState.homeMissRecorded=false;
+AppState.homeQuestionLocked=false;
+buildGrid();
+}
 function renderStats(){$('score').textContent=AppState.score;$('correct').textContent=AppState.correct;$('wrong').textContent=AppState.wrong;$('streak').textContent=AppState.streak;$('stars').textContent=AppState.stars+' ⭐';$('lives').textContent='❤'.repeat(AppState.lives);$('best').textContent=AppState.best;$('progressBar').style.width=Math.min(100,AppState.correct*5)+'%';$('modalTotalCorrect').textContent=AppState.correct;$('modalMistakes').textContent=AppState.wrongAnswers.length;$('modalBest').textContent=AppState.best;$('bnArcadeScore').textContent=AppState.score;$('bnArcadeStars').textContent=AppState.stars;$('bnArcadeStreak').textContent=AppState.streak}
-function buildGrid(){const g=$('timesGrid');g.innerHTML='';for(let r=0;r<=10;r++){for(let c=0;c<=10;c++){const d=document.createElement('button');d.type='button';d.className='grid-cell';d.setAttribute('role','gridcell');if(r===0&&c===0){d.textContent='×';d.classList.add('corner','header')}else if(r===0){d.textContent=c;d.classList.add('header')}else if(c===0){d.textContent=r;d.classList.add('header')}else{d.textContent=r*c;d.classList.add('playable');d.dataset.a=r;d.dataset.b=c;d.addEventListener('click',()=>answerCell(r,c,d))}g.appendChild(d)}}}
-function highlightGrid(a,b){document.querySelectorAll('.grid-cell').forEach(el=>el.classList.remove('current-line'));document.querySelectorAll(`.grid-cell[data-a="${a}"],.grid-cell[data-b="${b}"]`).forEach(el=>el.classList.add('current-line'))}
-function answerCell(a,b,el){gesture();if(AppState.paused){setFeedback('Đang dừng','Bấm Tiếp tục để học tiếp.');return}const q=AppState.currentQuestion||MathCore.nextQuestion();const ok=(a===q.a&&b===q.b)||(a*b===q.answer);el.classList.add(ok?'correct':'wrong');SoundEngine.beep(ok?'ok':'bad');MathCore.checkAnswer(ok?q.answer:a*b);if(ok){setFeedback('Đúng rồi!',`${q.a} × ${q.b} = ${q.answer}. Câu mới sẽ hiện ngay.`);Voice.speakCorrect();setTimeout(()=>{el.classList.remove('correct','wrong');MathCore.nextQuestion();Voice.speakQuestion();},420)}else{setFeedback('Chưa đúng, thử lại nhé',`Ô đang chọn là ${a} × ${b} = ${a*b}. Câu hỏi cần ${q.text}`);Voice.speakWrong();setTimeout(()=>el.classList.remove('correct','wrong'),360)}}
+function homeShuffle(arr){
+const a=arr.slice();
+for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+return a;
+}
+function homeChoiceCount(){
+if(AppState.streak>=6)return 5;
+if(AppState.streak>=2)return 4;
+return 3;
+}
+function homeDifficultyLabel(count){
+return count===3?'Khởi động':(count===4?'Tập trung':'Thử thách');
+}
+function makeHomeOptions(q,count){
+const ans=q.answer;
+const pool=[];
+const push=n=>{n=Number(n);if(Number.isInteger(n)&&n>0&&n!==ans&&!pool.includes(n))pool.push(n)};
+const structured=[
+  q.a*Math.max(1,q.b-1),q.a*(q.b+1),
+  Math.max(1,q.a-1)*q.b,(q.a+1)*q.b,
+  ans-q.a,ans+q.a,ans-q.b,ans+q.b,
+  ans-10,ans+10,ans-5,ans+5,ans-2,ans+2,ans-1,ans+1
+];
+homeShuffle(structured).forEach(push);
+let radius=3;
+while(pool.length<count-1&&radius<40){push(ans-radius);push(ans+radius);radius++}
+const wrong=homeShuffle(pool).slice(0,count-1);
+return homeShuffle([ans,...wrong]);
+}
+function homeRepeatedAddition(q){
+return Array(q.a).fill(q.b).join(' + ')+' = ?';
+}
+function homeDotMarkup(n){
+let s='';
+for(let i=0;i<n;i++)s+='<span class="answer-dot" aria-hidden="true"></span>';
+return s;
+}
+window.__BN18HomeMakeOptions=makeHomeOptions;
+window.__BN18HomeState=AppState;
+function buildGrid(){
+const g=$('timesGrid');
+if(!g)return;
+const q=AppState.currentQuestion||{a:3,b:5,answer:15,text:'3 × 5 = ?'};
+const count=homeChoiceCount();
+const options=makeHomeOptions(q,count);
+AppState.homeOptions=options.slice();
+AppState.homeQuestionLocked=false;
+AppState.homeMissRecorded=false;
+g.className='times-grid answer-stage';
+g.setAttribute('role','group');
+g.setAttribute('aria-label',`Chọn kết quả đúng cho ${q.a} nhân ${q.b}`);
+g.innerHTML=`<div class="answer-stage-head">
+  <span class="answer-stage-kicker">BÉ TỰ TÌM KẾT QUẢ</span>
+  <span class="answer-stage-level">${homeDifficultyLabel(count)} · ${count} lựa chọn</span>
+  <b class="answer-stage-question">${q.a} × ${q.b} = ?</b>
+  <span class="answer-stage-guide">Chỉ có 1 đáp án đúng. Sai thì loại đáp án đó và chọn lại.</span>
+</div>
+<div class="answer-thinking-card">
+  <div class="answer-group-count"><b>${q.a}</b><span>NHÓM BẰNG NHAU</span></div>
+  <div class="answer-group-sample"><div class="answer-dot-row">${homeDotMarkup(q.b)}</div><small>Mỗi nhóm có ${q.b} chấm</small></div>
+  <div class="answer-repeat-hint" id="homeRepeatHint">Gợi ý cộng lặp: ${homeRepeatedAddition(q)}</div>
+</div>
+<div class="answer-choice-grid" id="homeChoiceGrid"></div>
+<div class="answer-stage-foot" id="homeStageFoot">Nhìn phép tính, tự nhẩm rồi bấm một đáp án lớn bên trên.</div>`;
+const box=$('homeChoiceGrid');
+options.forEach((value,index)=>{
+  const b=document.createElement('button');
+  b.type='button';
+  b.className='answer-choice'+((options.length%2===1&&index===options.length-1)?' answer-wide':'');
+  b.textContent=value;
+  b.dataset.answer=String(value);
+  b.setAttribute('aria-label',`Chọn đáp án ${value}`);
+  b.addEventListener('click',()=>answerCell(value,b));
+  box.appendChild(b);
+});
+}
+function highlightGrid(){
+/* R1 bỏ hoàn toàn kẻ ngang/kẻ dọc và ô giao điểm để bé phải tự tìm. */
+}
+function revealHomeHint(reason='hint'){
+const g=$('timesGrid');
+if(!g)return;
+g.classList.add('hint-revealed');
+const foot=$('homeStageFoot');
+if(foot)foot.textContent=reason==='wrong'?'Đáp án vừa chọn chưa đúng. Dùng phép cộng lặp rồi chọn một đáp án khác.':'Gợi ý đã mở: cộng số trong mỗi nhóm lặp lại theo số nhóm.';
+}
+function showHomeReward(){
+const badge=$('rewardBadge');
+if(!badge)return;
+badge.classList.add('show');
+clearTimeout(window.__bnHomeRewardTimer);
+window.__bnHomeRewardTimer=setTimeout(()=>badge.classList.remove('show'),760);
+}
+function answerCell(value,el){
+gesture();
+if(AppState.paused){setFeedback('Đang dừng','Bấm Tiếp tục để học tiếp.');return}
+if(AppState.homeQuestionLocked)return;
+const q=AppState.currentQuestion||MathCore.nextQuestion();
+const chosen=Number(value);
+const ok=chosen===q.answer;
+if(ok){
+  AppState.homeQuestionLocked=true;
+  const starsBefore=AppState.stars;
+  document.querySelectorAll('#homeChoiceGrid .answer-choice').forEach(btn=>btn.disabled=true);
+  el.classList.add('correct');
+  $('eqAnswer').textContent=q.answer;
+  SoundEngine.beep('chime');
+  MathCore.checkAnswer(q.answer);
+  AppState.stars=Math.max(AppState.stars,starsBefore+1);
+  renderStats();
+  showHomeReward();
+  setFeedback('Đúng rồi! Nhận 1 sao',`${q.a} × ${q.b} = ${q.answer}. Bé đã tự tìm đúng, chuẩn bị câu mới.`);
+  Voice.speakCorrect();
+  setTimeout(()=>{MathCore.nextQuestion();Voice.speakQuestion();},820);
+}else{
+  if(el.disabled)return;
+  el.classList.add('wrong');
+  el.disabled=true;
+  SoundEngine.beep('bad');
+  if(!AppState.homeMissRecorded){
+    AppState.homeMissRecorded=true;
+    MathCore.checkAnswer(chosen);
+  }
+  revealHomeHint('wrong');
+  setFeedback('Chưa đúng — chọn lại',`${chosen} đã bị loại. Nhìn ${q.a} nhóm, mỗi nhóm ${q.b} rồi chọn đáp án khác.`);
+  Voice.speakWrong();
+}
+}
 function buildChips(){const box=$('tableChips');box.innerHTML='';for(let i=1;i<=10;i++){const b=document.createElement('button');b.type='button';b.textContent=i;b.className=AppState.selectedTables.includes(i)?'active':'';b.addEventListener('click',()=>{gesture();AppState.selectedTables=[i];AppState.table=i;MathCore.seq=0;buildChips();MathCore.nextQuestion();setFeedback('Đã chọn bảng '+i,`Câu mới chỉ ra trong bảng ${i}.`);Voice.speakQuestion();});box.appendChild(b)}}
 function renderReview(){const box=$('reviewList');box.innerHTML='';const arr=AppState.wrongAnswers.slice(-5);if(!arr.length){box.innerHTML='<div class="review-item"><span>Chưa có lỗi</span><b>✓</b></div>';return}arr.forEach(q=>{const d=document.createElement('div');d.className='review-item';d.innerHTML=`<span>${q.a}×${q.b}</span><b>${q.answer}</b>`;box.appendChild(d)})}
 function updateModeButtons(){[['orderSeq','sequential'],['orderMix','random'],['orderMistake','reviewWrong']].forEach(([id,m])=>$(id).classList.toggle('active',AppState.mode===m))}
 function updateButtons(){$('voiceBtn').textContent=AppState.voiceEnabled?'Giọng bật':'Giọng tắt';$('voiceModeBtn').textContent=AppState.voiceMode;$('voiceModeHintBtn').textContent=AppState.voiceMode;$('sfxBtn').textContent=AppState.audioEnabled?'SFX bật':'SFX tắt';$('musicBtn').textContent=AppState.musicEnabled?'Nhạc bật':'Nhạc';$('musicReadBtn').textContent=AppState.musicEnabled?'Nhạc bật':'Nhạc';$('pauseBtn').textContent=AppState.paused?'Tiếp tục':'Dừng';updateModeButtons()}
-function hintText(){const q=AppState.currentQuestion||MathCore.nextQuestion();const add=Array(q.a).fill(q.b).join(' + ');return `Gợi ý: ${q.a} nhóm, mỗi nhóm ${q.b} ô. Cộng lặp: ${add} = ${q.answer}.`}
+function hintText(){const q=AppState.currentQuestion||MathCore.nextQuestion();const add=Array(q.a).fill(q.b).join(' + ');return `Gợi ý: ${q.a} nhóm, mỗi nhóm ${q.b} ô. Cộng lặp: ${add} = ? rồi chọn đáp án.`}
 function startLearning(source='start'){gesture();$('overlay').classList.remove('show');if(!AppState.currentQuestion)MathCore.nextQuestion();AppState.learningStarted=true;AppState.paused=false;setStatus('ĐANG HỌC');updateButtons();renderQuestion();renderStats();setFeedback('Bắt đầu vui học',`Câu đầu tiên: ${AppState.currentQuestion.text}. Bấm Đọc để nghe lại bất kỳ lúc nào.`);SoundEngine.beep('chime',true);Voice.speakQuestion(true);FrameLockEngine.update();return true}
 const MissionCore={
   create(gameId){
@@ -1055,7 +1446,7 @@ window.BN18HomeBrandTest={
   run(){FrameLockEngine.update();const side=document.querySelector('.side');const grid=$('timesGrid');const title=document.querySelector('.title');const missing=this.primaryButtons.filter(id=>!this.rectOk(id));const rr=grid?grid.getBoundingClientRect():{width:0,height:0};const tr=title?title.getBoundingClientRect():{width:0,height:0};const result={screen:AppState.screen,device:AppState.device,orientation:AppState.orientation,brandVisible:this.visibleBrand(),brandRect:{w:Math.round(tr.width||0),h:Math.round(tr.height||0)},grid:{w:Math.round(rr.width||0),h:Math.round(rr.height||0)},rightColumnNeedsScroll:side?side.scrollHeight>side.clientHeight+2:false,missingPrimaryButtons:missing};result.pass=AppState.screen==='home'&&result.brandVisible&&!result.rightColumnNeedsScroll&&!missing.length&&rr.width>=300&&rr.height>=300;return result}
 };
 
-function bind(){document.querySelectorAll('button').forEach(b=>{if(!b.hasAttribute('type'))b.type='button'});$('overlayStartBtn').onclick=()=>startLearning('overlay');$('startBtn').onclick=()=>startLearning('start');$('pauseBtn').onclick=()=>{gesture();AppState.paused=!AppState.paused;setStatus(AppState.paused?'TẠM DỪNG':'ĐANG HỌC');updateButtons();setFeedback(AppState.paused?'Đã dừng':'Tiếp tục học',AppState.paused?'Bấm Tiếp tục để học tiếp.':'Câu hỏi vẫn giữ nguyên, bấm Đọc để nghe lại.');if(!AppState.paused)Voice.speakQuestion(true)};$('skipBtn').onclick=()=>{gesture();MathCore.nextQuestion();setFeedback('Đã bỏ qua câu này',`Câu mới: ${AppState.currentQuestion.text}`);Voice.speakQuestion(true)};$('restartBtn').onclick=()=>{gesture();MathCore.resetSession();AppState.learningStarted=true;AppState.paused=false;setStatus('ĐANG HỌC');updateButtons();setFeedback('Đã làm lại từ đầu',`Câu đầu tiên: ${AppState.currentQuestion.text}`);SoundEngine.beep('chime',true);Voice.speakQuestion(true)};$('voiceBtn').onclick=()=>Voice.toggle();$('voiceModeBtn').onclick=()=>Voice.cycle();$('voiceModeHintBtn').onclick=()=>Voice.cycle();$('sfxBtn').onclick=()=>SoundEngine.toggle();$('musicBtn').onclick=()=>Music.toggle();$('musicReadBtn').onclick=()=>Music.toggle();$('speakBtn').onclick=()=>{gesture();if(!AppState.currentQuestion)MathCore.nextQuestion();Voice.speakQuestion(true);setFeedback('Đọc lại câu hỏi',AppState.currentQuestion.text)};$('hintBtn').onclick=()=>{gesture();const h=hintText();setFeedback('Gợi ý nhóm bằng nhau',h);Voice.speakHint()};$('applyTablesBtn').onclick=()=>{gesture();const nums=($('tableInput').value||'').split(/[^0-9]+/).map(Number).filter(n=>n>=1&&n<=10);AppState.selectedTables=nums.length?nums:[2];AppState.table=AppState.selectedTables[0];MathCore.seq=0;buildChips();MathCore.nextQuestion();setFeedback('Đã áp dụng bảng học','Đang học bảng: '+AppState.selectedTables.join(', '));Voice.speakQuestion(true)};$('orderSeq').onclick=()=>setMode('sequential');$('orderMix').onclick=()=>setMode('random');$('orderMistake').onclick=()=>setMode('reviewWrong');$('bnOpenWorldBtn').onclick=Router.extended;$('bnArcadeBackBtn').onclick=Router.home;$('bnAiToggle').onclick=()=>Voice.cycle();$('bnAiRepeat').onclick=()=>Voice.speakQuestion(true);$('skinCandy').onclick=()=>{document.body.dataset.skin='candy';setFeedback('Skin Kẹo','Đã đổi giao diện Kẹo.')};$('skinRetro').onclick=()=>{document.body.dataset.skin='retro';setFeedback('Skin Retro','Đã đổi giao diện Retro.')};$('fullBtn').onclick=()=>{gesture();if(document.documentElement.requestFullscreen){document.documentElement.requestFullscreen().catch(()=>setFeedback('Fullscreen chưa bật','Thiết bị không cho bật toàn màn hình lúc này.'))}else setFeedback('Fullscreen chưa hỗ trợ','Nút Full đã được ẩn ở màn nhỏ.')};$('bnArcadeGate').addEventListener('click',e=>{if(e.target.id==='bnArcadeGate')Gate.hide()});window.addEventListener('resize',schedule,true);window.addEventListener('orientationchange',schedule,true);window.addEventListener('click',()=>{setTimeout(()=>FrameLockEngine.update(),60)},true);if(window.visualViewport)window.visualViewport.addEventListener('resize',schedule,true)}
+function bind(){document.querySelectorAll('button').forEach(b=>{if(!b.hasAttribute('type'))b.type='button'});$('overlayStartBtn').onclick=()=>startLearning('overlay');$('startBtn').onclick=()=>startLearning('start');$('pauseBtn').onclick=()=>{gesture();AppState.paused=!AppState.paused;setStatus(AppState.paused?'TẠM DỪNG':'ĐANG HỌC');updateButtons();setFeedback(AppState.paused?'Đã dừng':'Tiếp tục học',AppState.paused?'Bấm Tiếp tục để học tiếp.':'Câu hỏi vẫn giữ nguyên, bấm Đọc để nghe lại.');if(!AppState.paused)Voice.speakQuestion(true)};$('skipBtn').onclick=()=>{gesture();MathCore.nextQuestion();setFeedback('Đã bỏ qua câu này',`Câu mới: ${AppState.currentQuestion.text}`);Voice.speakQuestion(true)};$('restartBtn').onclick=()=>{gesture();MathCore.resetSession();AppState.learningStarted=true;AppState.paused=false;setStatus('ĐANG HỌC');updateButtons();setFeedback('Đã làm lại từ đầu',`Câu đầu tiên: ${AppState.currentQuestion.text}`);SoundEngine.beep('chime',true);Voice.speakQuestion(true)};$('voiceBtn').onclick=()=>Voice.toggle();$('voiceModeBtn').onclick=()=>Voice.cycle();$('voiceModeHintBtn').onclick=()=>Voice.cycle();$('sfxBtn').onclick=()=>SoundEngine.toggle();$('musicBtn').onclick=()=>Music.toggle();$('musicReadBtn').onclick=()=>Music.toggle();$('speakBtn').onclick=()=>{gesture();if(!AppState.currentQuestion)MathCore.nextQuestion();Voice.speakQuestion(true);setFeedback('Đọc lại câu hỏi',AppState.currentQuestion.text)};$('hintBtn').onclick=()=>{gesture();revealHomeHint('hint');const h=hintText();setFeedback('Gợi ý nhóm bằng nhau',h);Voice.speakHint()};$('applyTablesBtn').onclick=()=>{gesture();const nums=($('tableInput').value||'').split(/[^0-9]+/).map(Number).filter(n=>n>=1&&n<=10);AppState.selectedTables=nums.length?nums:[2];AppState.table=AppState.selectedTables[0];MathCore.seq=0;buildChips();MathCore.nextQuestion();setFeedback('Đã áp dụng bảng học','Đang học bảng: '+AppState.selectedTables.join(', '));Voice.speakQuestion(true)};$('orderSeq').onclick=()=>setMode('sequential');$('orderMix').onclick=()=>setMode('random');$('orderMistake').onclick=()=>setMode('reviewWrong');$('bnOpenWorldBtn').onclick=Router.extended;$('bnArcadeBackBtn').onclick=Router.home;$('bnAiToggle').onclick=()=>Voice.cycle();$('bnAiRepeat').onclick=()=>Voice.speakQuestion(true);$('skinCandy').onclick=()=>{document.body.dataset.skin='candy';setFeedback('Skin Kẹo','Đã đổi giao diện Kẹo.')};$('skinRetro').onclick=()=>{document.body.dataset.skin='retro';setFeedback('Skin Retro','Đã đổi giao diện Retro.')};$('fullBtn').onclick=()=>{gesture();if(document.documentElement.requestFullscreen){document.documentElement.requestFullscreen().catch(()=>setFeedback('Fullscreen chưa bật','Thiết bị không cho bật toàn màn hình lúc này.'))}else setFeedback('Fullscreen chưa hỗ trợ','Nút Full đã được ẩn ở màn nhỏ.')};$('bnArcadeGate').addEventListener('click',e=>{if(e.target.id==='bnArcadeGate')Gate.hide()});window.addEventListener('resize',schedule,true);window.addEventListener('orientationchange',schedule,true);window.addEventListener('click',()=>{setTimeout(()=>FrameLockEngine.update(),60)},true);if(window.visualViewport)window.visualViewport.addEventListener('resize',schedule,true)}
 function setMode(mode){gesture();AppState.mode=mode;MathCore.seq=0;updateButtons();MathCore.nextQuestion();const label=mode==='sequential'?'Tuần tự':mode==='random'?'Trộn':'Ôn lỗi';setFeedback('Đổi cách ra bài: '+label,`Câu mới: ${AppState.currentQuestion.text}`);Voice.speakQuestion(true)}
 let raf=0;function schedule(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{FrameLockEngine.update();setTimeout(()=>FrameLockEngine.update(),80);setTimeout(()=>FrameLockEngine.update(),220)})}
 
@@ -5747,6 +6138,34 @@ html.bn-screen-extended #gameControls .bn-global-table-controls.bn-r12c-two-butt
   W.BN18GlobalTwoTableButtonsTest={run:function(){const r={twoButtonsAllGames:false,cycleButtonWorks:false,mixButtonWorks:false,singleQuestionsUseSelectedTable:false,mixedQuestionsVary:false,caroExistingButtonsSynced:false,layoutSafeVisible:true,oldGamesStillWork:false,pass:false};try{if(W.Router&&Router.extended)Router.extended(); if(W.BN18GlobalTableMode&&BN18GlobalTableMode.setSingle)BN18GlobalTableMode.setSingle(4,{noRestart:true});install();let ok=true;for(const id of GAMES){try{GameShell.start(id);sync();const box=qs('#gameControls .bn-global-table-controls.bn-r12c-two-buttons');ok=ok&&!!(box&&box.querySelector('[data-r12c-cycle]')&&box.querySelector('[data-r12c-mix]'));const rect=box&&box.getBoundingClientRect();ok=ok&&!!(rect&&rect.width>70&&rect.height>18&&rect.width<170);}catch(e){ok=false;}}r.twoButtonsAllGames=ok;GameShell.start('model');sync();const before=table();const cy0=qs('#gameControls [data-r12c-cycle]');if(cy0)cy0.click();sync();r.cycleButtonWorks=table()===((before%10)+1)&&mode()==='single';if(W.BN18GlobalTableMode&&BN18GlobalTableMode.setSingle)BN18GlobalTableMode.setSingle(5,{noRestart:true});let same=true;for(let i=0;i<14;i++){const q=W.MathCore&&MathCore.makeQuestion?MathCore.makeQuestion():W.BN18GlobalTableMode.makeQuestion();if(Number(q.a)!==5&&Number(q.b)!==5)same=false;}r.singleQuestionsUseSelectedTable=same;GameShell.start('model');sync();const mx0=qs('#gameControls [data-r12c-mix]');if(mx0)mx0.click();sync();r.mixButtonWorks=mode()==='mixed';let seen=new Set();for(let i=0;i<70;i++){const q=W.MathCore&&MathCore.makeQuestion?MathCore.makeQuestion():W.BN18GlobalTableMode.makeQuestion();seen.add(Number(q.a));seen.add(Number(q.b));}r.mixedQuestionsVary=seen.size>=5;GameShell.start('caro');sync();r.caroExistingButtonsSynced=!!((qs('#gameStage [data-r10h-key="singleTable"],#gameStage [data-caro-single]')&&qs('#gameStage [data-r10h-key="learningMode"][data-r10h-val="mixed"],#gameStage [data-caro-mixed]'))||qs('#gameControls .bn-global-table-controls.bn-r12c-two-buttons'));r.oldGamesStillWork=GAMES.every(id=>(W.Games||[]).some(g=>g.id===id&&g.state==='READY'));r.pass=!!(r.twoButtonsAllGames&&r.cycleButtonWorks&&r.mixButtonWorks&&r.singleQuestionsUseSelectedTable&&r.mixedQuestionsVary&&r.caroExistingButtonsSynced&&r.layoutSafeVisible&&r.oldGamesStillWork);}catch(e){r.error=e.message||String(e);r.pass=false;}return r;}};
   if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',()=>setTimeout(install,160));else setTimeout(install,80);
   setTimeout(install,600);setInterval(()=>{try{if(W.GameShell&&GameShell.currentId)sync();}catch(e){}},1800); W.addEventListener('resize',()=>setTimeout(sync,90),{passive:true}); W.addEventListener('orientationchange',()=>setTimeout(sync,180),{passive:true});
+})();
+</script>
+
+
+<script id="bn-mr18-home-smart-answer-center-r1-test">
+(function(){
+  window.BN18HomeSmartAnswerTest={
+    run:function(){
+      var result={samples:0,choiceCountRange:true,unique:true,exactlyOneCorrect:true,domReady:false,outerFrameUntouched:true,pass:false};
+      try{
+        var makeOptions=window.__BN18HomeMakeOptions;if(typeof makeOptions!=='function')throw new Error('makeHomeOptions missing');
+        for(var a=1;a<=10;a++)for(var b=1;b<=10;b++)for(var count=3;count<=5;count++){
+          var q={a:a,b:b,answer:a*b};
+          var opts=makeOptions(q,count);
+          result.samples++;
+          if(opts.length!==count)result.choiceCountRange=false;
+          if(new Set(opts).size!==opts.length)result.unique=false;
+          if(opts.filter(function(n){return n===q.answer}).length!==1)result.exactlyOneCorrect=false;
+        }
+        var stage=document.getElementById('timesGrid');
+        result.domReady=!!(stage&&stage.classList.contains('answer-stage')&&stage.querySelectorAll('.answer-choice').length>=3&&stage.querySelectorAll('.answer-choice').length<=5);
+        var main=document.querySelector('.main');
+        result.outerFrameUntouched=!!(main&&document.querySelector('.left-panel')&&document.querySelector('.side')&&document.getElementById('boardCard'));
+        result.pass=result.choiceCountRange&&result.unique&&result.exactlyOneCorrect&&result.domReady&&result.outerFrameUntouched;
+      }catch(e){result.error=e.message||String(e)}
+      return result;
+    }
+  };
 })();
 </script>
 
