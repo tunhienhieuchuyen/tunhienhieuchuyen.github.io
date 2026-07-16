@@ -56,7 +56,7 @@
   w.LifeOSVendor={cleanCore:true,state:state,loadFirebase:loadFirebase,loadMessaging:loadMessaging,loadHls:loadHls,loadConfetti:loadConfetti};
 })(window,document);
 </script><script data-lifeos-no-transpile="1" id="lifeos-lock4-smartbox-clean-core-marker">
-window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,remoteNativeScrollRemoved:true,tvR68PicturePathPreserved:true,tvBackgroundLoopsRemoved:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-16',revision:'R6.12',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvOneColumnLikeRadio:true,listScrollOwnerFixed:true,hlsLibraryReadyBeforeTv:true,nativeTvShortcutRemoved:true,tvStatusDedup:true,viewportRefreshStormFixed:true,tvOneClickAutoplay:true,tvNoManualPlayBlock:true,tvPlaybackOwnerIndependent:true,tvSpeechDoesNotStealActivation:true};
+window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,remoteNativeScrollRemoved:true,tvR68PicturePathPreserved:true,tvBackgroundLoopsRemoved:true,tvSinglePlayNoMute:true,tvLegacyPlaybackKilled:true,tvNoStatusDomChurn:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-16',revision:'R6.13',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvOneColumnLikeRadio:true,listScrollOwnerFixed:true,hlsLibraryReadyBeforeTv:true,nativeTvShortcutRemoved:true,tvStatusDedup:true,viewportRefreshStormFixed:true};
 </script><script id="lifeos-lock4-inline-handler-compat-source">
 window.LifeOSCompatHandlers = window.LifeOSCompatHandlers || {};
 window.LifeOSCompatHandlers.h001 = function (event) {var _window$LifeOSRootRou, _window$LifeOSRootRou2, _window$setDesktopWor, _window;event.preventDefault();event.stopPropagation();(_window$LifeOSRootRou = window.LifeOSRootRouter) === null || _window$LifeOSRootRou === void 0 || (_window$LifeOSRootRou2 = _window$LifeOSRootRou.enterWorkspace) === null || _window$LifeOSRootRou2 === void 0 || _window$LifeOSRootRou2.call(_window$LifeOSRootRou, 'overview', 'desktop-click', event);(_window$setDesktopWor = (_window = window).setDesktopWorkspace) === null || _window$setDesktopWor === void 0 || _window$setDesktopWor.call(_window, 'overview');};
@@ -16475,9 +16475,6 @@ window.MediaHub = {
         if (this.currentTab === 'radio' || this.currentTab === 'tv')
             this.groupByTab[this.currentTab] = this.currentGroup || 'all';
         this.currentTab = tab;
-        if (tab === 'tv' && this.isSmartboxMediaMode() && window.LifeOSVendor && typeof window.LifeOSVendor.loadHls === 'function') {
-            try { window.LifeOSVendor.loadHls().catch(() => { }); } catch (e) { }
-        }
         if (previousTab !== tab && this.isSmartboxMediaMode()) {
             if (!this.smartboxListOffsetByTab) this.smartboxListOffsetByTab = { radio: 0, tv: 0 };
             if (tab === 'radio' || tab === 'tv') this.smartboxListOffsetByTab[tab] = 0;
@@ -16662,7 +16659,7 @@ renderLists() {
             const tabindex = smartbox ? '-1' : '0';
             if (isTv) {
                 return `
-                <div tabindex="${tabindex}" role="button" aria-label="Kênh ${stt} ${c.name}" data-lifeos-list-index="${idxInList}" data-lifeos-actual-index="${actualIdx}" onclick="window.MediaHub.playStream(${actualIdx}, 'tv', event)" class="media-item song-row border cursor-pointer active:scale-95 transition ${borderCls}">
+                <div tabindex="${tabindex}" role="button" aria-label="Kênh ${stt} ${c.name}" data-lifeos-list-index="${idxInList}" data-lifeos-actual-index="${actualIdx}" onclick="window.MediaHub.playStream(${actualIdx}, 'tv')" class="media-item song-row border cursor-pointer active:scale-95 transition ${borderCls}">
                     <div class="song-left ${isPlaying ? 'text-rose-600 animate-pulse' : 'text-rose-500'} font-black text-xs">[${stt}]</div>
                     <div class="song-main">
                         <div class="song-title font-bold ${isPlaying ? 'text-rose-700' : 'text-slate-800'} text-sm">${c.name}</div>
@@ -16672,7 +16669,7 @@ renderLists() {
                 </div>`;
             }
             return `
-                <div tabindex="${tabindex}" role="button" aria-label="Đài ${stt} ${c.name}" data-lifeos-list-index="${idxInList}" data-lifeos-actual-index="${actualIdx}" onclick="window.MediaHub.playStream(${actualIdx}, 'radio', event)" class="media-item song-row border cursor-pointer active:scale-95 transition ${borderCls}">
+                <div tabindex="${tabindex}" role="button" aria-label="Đài ${stt} ${c.name}" data-lifeos-list-index="${idxInList}" data-lifeos-actual-index="${actualIdx}" onclick="window.MediaHub.playStream(${actualIdx}, 'radio')" class="media-item song-row border cursor-pointer active:scale-95 transition ${borderCls}">
                     <div class="song-left ${isPlaying ? 'text-emerald-600 animate-pulse' : 'text-emerald-500'} font-black text-xs">[${stt}]</div>
                     <div class="song-main">
                         <div class="song-title font-bold ${isPlaying ? 'text-emerald-700' : 'text-slate-800'} text-sm">${c.name}</div>
@@ -17028,8 +17025,8 @@ positionSmartboxListTarget(target, force) {
 },
 stopSmartboxTvSession(opts) {
     opts = opts || {};
-    /* R6.12: tăng token legacy đúng một lần để giết mọi timer/watchdog cũ,
-       nhưng phiên Smartbox mới KHÔNG phụ thuộc token dùng chung này. */
+    /* R6.13: hủy đồng thời chủ sở hữu Smartbox và mọi timer/watchdog legacy.
+       Không để callback cũ điều khiển HLS/video của phiên mới. */
     this._mediaLoadSeq = Number(this._mediaLoadSeq || 0) + 1;
     this._smartboxTvSeq = Number(this._smartboxTvSeq || 0) + 1;
     this._smartboxTvNetworkRecoveries = 0;
@@ -17045,16 +17042,17 @@ stopSmartboxTvSession(opts) {
     }
     const el = document.getElementById('tv-video-element');
     if (el) {
+        try { el.onerror = null; } catch (e) { }
         try { el.onloadedmetadata = null; } catch (e) { }
         try { el.onloadeddata = null; } catch (e) { }
         try { el.onplaying = null; } catch (e) { }
+        try { el.onpause = null; } catch (e) { }
         try { el.oncanplay = null; } catch (e) { }
         try { el.oncanplaythrough = null; } catch (e) { }
         try { el.onwaiting = null; } catch (e) { }
         try { el.onstalled = null; } catch (e) { }
         try { el.ontimeupdate = null; } catch (e) { }
         try { el.onprogress = null; } catch (e) { }
-        try { el.onerror = null; } catch (e) { }
         try { el.pause(); } catch (e) { }
         if (opts.clear !== false) {
             try { el.removeAttribute('src'); } catch (e) { }
@@ -17062,15 +17060,15 @@ stopSmartboxTvSession(opts) {
         }
         try {
             el.dataset.lifeosTvBackgroundLoops = '0';
-            el.dataset.lifeosTvOwner = 'R6.12_ONE_CLICK_AUTOPLAY_OWNER';
-            el.dataset.lifeosTvTransientState = '';
-            el.dataset.lifeosTvPlayBlock = '0';
+            el.dataset.lifeosTvOwner = 'R6.13_R610_PICTURE_SINGLE_PLAY_OWNER';
+            el.dataset.lifeosTvAutoMuted = '0';
+            el.dataset.lifeosTvAutoPaused = '0';
         }
         catch (e) { }
     }
     return true;
 },
-loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
+loadSmartboxTvStable(el, sourceQueue, channel) {
     const sources = (Array.isArray(sourceQueue) ? sourceQueue.slice() : [sourceQueue])
         .map(u => String(u || '').trim())
         .filter((u, i, a) => u && a.indexOf(u) === i);
@@ -17081,14 +17079,12 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
     this.stopSmartboxTvSession({ clear: true });
     const token = this._smartboxTvSeq;
     const channelName = String((channel && channel.name) || 'Kênh Tivi');
-    const originalMuted = !!el.muted;
     let sourceIndex = 0;
     let playbackStarted = false;
-    let mutedBootstrap = false;
-    let playAttempt = 0;
+    let playRequested = false;
     let finalErrorShown = false;
-    const audit = window.LifeOSTvPlaybackAudit = window.LifeOSTvPlaybackAudit || { revision: 'R6.12', events: [] };
-    audit.revision = 'R6.12';
+    const audit = window.LifeOSTvPlaybackAudit = window.LifeOSTvPlaybackAudit || { revision: 'R6.13', events: [] };
+    audit.revision = 'R6.13';
     if (!Array.isArray(audit.events))
         audit.events = [];
     const note = (kind, data) => {
@@ -17101,8 +17097,8 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
                 paused: !!el.paused,
                 muted: !!el.muted
             }, data || {}));
-            if (audit.events.length > 100)
-                audit.events.splice(0, audit.events.length - 100);
+            if (audit.events.length > 120)
+                audit.events.splice(0, audit.events.length - 120);
             audit.last = audit.events[audit.events.length - 1];
         }
         catch (e) { }
@@ -17110,8 +17106,20 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
     const alive = () => this._smartboxTvSeq === token && this.currentTab === 'tv' && this.isSmartboxMediaMode();
     const isProxy = u => String(u || '').indexOf('/proxy?url=') >= 0;
     const routeFor = u => isProxy(u) ? 'webview_proxy' : 'webview_direct';
+    const forceAudibleBeforePlay = () => {
+        /* Không có muted-bootstrap. Smartbox R6.10 đã chứng minh phát được hình + tiếng.
+           Bản này tuyệt đối không tự bật muted và không tự gỡ tiếng sau khi đã chạy. */
+        try { el.defaultMuted = false; } catch (e) { }
+        try { el.muted = false; } catch (e) { }
+        try { el.removeAttribute('muted'); } catch (e) { }
+        try {
+            el.dataset.lifeosTvAutoMuted = '0';
+            el.dataset.lifeosTvAutoPaused = '0';
+        }
+        catch (e) { }
+    };
     const clearElementOnly = () => {
-        try { el.onerror = null; el.onloadedmetadata = null; el.onloadeddata = null; el.onplaying = null; el.oncanplay = null; el.oncanplaythrough = null; el.onwaiting = null; el.onstalled = null; el.ontimeupdate = null; el.onprogress = null; } catch (e) { }
+        try { el.onerror = null; el.onloadedmetadata = null; el.onloadeddata = null; el.onplaying = null; el.onpause = null; el.oncanplay = null; el.oncanplaythrough = null; el.onwaiting = null; el.onstalled = null; el.ontimeupdate = null; el.onprogress = null; } catch (e) { }
         try { el.pause(); } catch (e) { }
         try { el.removeAttribute('src'); } catch (e) { }
         try { el.load(); } catch (e) { }
@@ -17121,71 +17129,43 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
             return;
         finalErrorShown = true;
         note('final_failure', { reason: String(reason || ''), url: String(url || '') });
-        /* Không tạo thêm thao tác thủ công. Chỉ báo nguồn chưa mở được khi direct + proxy đều báo lỗi thật. */
+        /* Chỉ báo lỗi thật sau khi direct + proxy đều thất bại. Không yêu cầu Play/bấm lại. */
         try { this.setTvInstruction('Kênh chưa mở được từ nguồn hiện tại', 'error'); } catch (e) { }
-    };
-    const restoreSound = () => {
-        if (!mutedBootstrap)
-            return;
-        try { el.muted = originalMuted; } catch (e) { }
-        mutedBootstrap = false;
-        note('sound_restored');
     };
     const onPlaying = url => {
         if (!alive())
             return;
-        const first = !playbackStarted;
         playbackStarted = true;
         try {
             el.dataset.lifeosTvStablePlaying = '1';
             el.dataset.lifeosTvStablePlayingAt = String(Date.now());
-            el.dataset.lifeosTvTransientState = '';
-            el.dataset.lifeosTvPlayBlock = '0';
+            el.dataset.lifeosTvOwner = 'R6.13_R610_PICTURE_SINGLE_PLAY_OWNER';
         }
         catch (e) { }
-        restoreSound();
-        note(first ? 'playing_first' : 'playing_resume', { url, route: routeFor(url) });
-        /* Tên kênh do playStream ghi là trạng thái duy nhất nhìn thấy.
-           waiting/stalled/HLS retry không được thay DOM quanh video. */
+        note('playing', { url, route: routeFor(url) });
+        /* Không đổi DOM, không mute/unmute, không reload và không chạy watchdog. */
     };
-    const requestPlay = (stage, allowMutedFallback) => {
-        if (!alive() || playbackStarted && !el.paused)
+    const requestPlayOnce = (url, stage) => {
+        if (!alive() || playRequested || playbackStarted)
             return false;
-        playAttempt++;
+        playRequested = true;
+        forceAudibleBeforePlay();
+        note('play_request', { url, stage });
         try {
-            el.autoplay = true;
-            el.setAttribute('autoplay', '');
-            el.setAttribute('controls', '');
-            el.setAttribute('playsinline', '');
-            el.setAttribute('webkit-playsinline', '');
-            note('play_request', { stage, attempt: playAttempt, userEventType: String(userEvent && userEvent.type || ''), userEventTrusted: !!(userEvent && userEvent.isTrusted) });
             const p = el.play();
             if (p && typeof p.then === 'function') {
-                p.then(() => {
-                    if (alive()) note('play_resolved', { stage, attempt: playAttempt });
-                }).catch(err => {
+                p.then(() => { if (alive()) note('play_resolved', { url, stage }); })
+                 .catch(err => {
                     if (!alive() || playbackStarted)
                         return;
-                    note('play_rejected', { stage, attempt: playAttempt, name: String(err && err.name || ''), message: String(err && err.message || '') });
-                    /* Một số WebView chỉ cho autoplay khi muted sau khi HLS tải bất đồng bộ.
-                       Dùng muted bootstrap nội bộ rồi trả âm thanh ngay ở event playing.
-                       Không hiện hướng dẫn, không dừng phiên và không bắt bấm lần hai. */
-                    if (allowMutedFallback && !mutedBootstrap) {
-                        mutedBootstrap = true;
-                        try { el.muted = true; } catch (e) { }
-                        setTimeout(() => { if (alive() && !playbackStarted) requestPlay('muted_bootstrap', false); }, 0);
-                    }
-                });
+                    note('play_rejected', { url, stage, name: String(err && err.name || ''), message: String(err && err.message || '') });
+                    /* Không chuyển muted, không pause, không hiện lớp chặn. Giữ player/controls nguyên vẹn. */
+                 });
             }
             return true;
         }
         catch (e) {
-            note('play_throw', { stage, name: String(e && e.name || ''), message: String(e && e.message || '') });
-            if (allowMutedFallback && !mutedBootstrap) {
-                mutedBootstrap = true;
-                try { el.muted = true; } catch (_) { }
-                setTimeout(() => { if (alive() && !playbackStarted) requestPlay('muted_bootstrap_throw', false); }, 0);
-            }
+            note('play_throw', { url, stage, name: String(e && e.name || ''), message: String(e && e.message || '') });
             return false;
         }
     };
@@ -17202,6 +17182,7 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
         }
         clearElementOnly();
         sourceIndex++;
+        playRequested = false;
         this._smartboxTvNetworkRecoveries = 0;
         this._smartboxTvMediaRecoveries = 0;
         if (sourceIndex >= sources.length) {
@@ -17213,10 +17194,9 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
     };
     const bindVideoEvents = url => {
         el.onplaying = () => onPlaying(url);
-        el.onloadedmetadata = () => { if (alive() && !playbackStarted) requestPlay('loadedmetadata', true); };
-        el.onloadeddata = () => { if (alive() && !playbackStarted) requestPlay('loadeddata', true); };
-        el.oncanplay = () => { if (alive() && !playbackStarted) requestPlay('canplay', true); };
-        el.oncanplaythrough = () => { if (alive() && !playbackStarted) requestPlay('canplaythrough', true); };
+        el.onpause = () => {
+            if (alive()) note(playbackStarted ? 'pause_after_playing' : 'pause_before_playing', { url });
+        };
         el.onwaiting = () => { if (alive()) note('waiting', { url }); };
         el.onstalled = () => { if (alive()) note('stalled', { url }); };
         el.ontimeupdate = null;
@@ -17226,21 +17206,25 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
         if (!alive())
             return;
         try {
-            el.dataset.lifeosTvEngine = 'webview-direct-r68-fallback-r612';
+            el.dataset.lifeosTvEngine = 'webview-direct-r610-picture-r613';
+            el.setAttribute('controls', '');
+            el.setAttribute('playsinline', '');
+            el.setAttribute('webkit-playsinline', '');
             el.preload = 'auto';
+            forceAudibleBeforePlay();
             bindVideoEvents(url);
             el.onerror = () => {
                 if (!alive())
                     return;
                 if (playbackStarted)
-                    note('direct_error_after_playing', { url });
+                    note('direct_error_after_playing_ignored', { url });
                 else
                     nextSourceBeforePlayback('WebView direct không mở được nguồn');
             };
             el.src = url;
             el.load();
-            /* Lệnh play nằm ngay trong stack click/keydown thật, không chờ callback. */
-            requestPlay('direct_sync_user_activation', true);
+            /* Giữ nguyên cách R6.10 đã phát được hình + tiếng: direct gọi play đúng một lần sau load. */
+            requestPlayOnce(url, 'direct_after_load');
         }
         catch (e) {
             nextSourceBeforePlayback('WebView direct lỗi khi gắn nguồn');
@@ -17278,49 +17262,43 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
         const hls = new HlsCtor(hlsConfig);
         this.hlsTv = hls;
         try {
-            el.dataset.lifeosTvEngine = 'hlsjs-smartbox-lite-r68-picture-r612-autoplay';
+            el.dataset.lifeosTvEngine = 'hlsjs-smartbox-lite-r610-picture-r613';
             el.dataset.lifeosTvBackgroundLoops = '0';
+            el.setAttribute('controls', '');
+            el.setAttribute('playsinline', '');
+            el.setAttribute('webkit-playsinline', '');
             el.preload = 'auto';
         }
         catch (e) { }
+        forceAudibleBeforePlay();
         bindVideoEvents(url);
         el.onerror = () => {
             if (!alive() || this.hlsTv !== hls)
                 return;
             if (playbackStarted)
-                note('video_element_error_after_playing', { url });
+                note('video_element_error_after_playing_ignored', { url });
             else
                 nextSourceBeforePlayback('Video element báo lỗi trước khi phát');
         };
-        if (HlsCtor.Events.MEDIA_ATTACHED) {
-            hls.on(HlsCtor.Events.MEDIA_ATTACHED, () => {
-                if (alive() && this.hlsTv === hls && !playbackStarted)
-                    requestPlay('hls_media_attached', true);
-            });
-        }
         hls.on(HlsCtor.Events.MANIFEST_PARSED, () => {
             if (!alive() || this.hlsTv !== hls)
                 return;
             note('manifest_parsed', { url });
-            requestPlay('hls_manifest_parsed', true);
+            /* Giữ nguyên điểm phát đã có hình + tiếng ở R6.10. */
+            requestPlayOnce(url, 'hls_manifest_parsed');
         });
         hls.on(HlsCtor.Events.ERROR, (event, data) => {
             if (!alive() || this.hlsTv !== hls || !data)
                 return;
-            const info = { url, fatal: !!data.fatal, type: String(data.type || ''), details: String(data.details || '') };
-            note(data.fatal ? 'hls_fatal' : 'hls_nonfatal', info);
+            note(data.fatal ? 'hls_fatal' : 'hls_nonfatal', { url, fatal: !!data.fatal, type: String(data.type || ''), details: String(data.details || '') });
             if (!data.fatal)
                 return;
-            /* Sau khi đã phát: lớp ngoài tuyệt đối không reload/startLoad/recover/đổi nguồn.
-               Trước khi phát: chỉ cho đúng một lần cứu lỗi khởi động. */
+            /* Sau khi đã phát: không lớp nào được startLoad/recover/đổi nguồn nữa. */
             if (playbackStarted)
                 return;
             if (data.type === HlsCtor.ErrorTypes.MEDIA_ERROR && this._smartboxTvMediaRecoveries < 1) {
                 this._smartboxTvMediaRecoveries++;
-                try {
-                    hls.recoverMediaError();
-                    setTimeout(() => { if (alive() && !playbackStarted && this.hlsTv === hls) requestPlay('after_media_recover', true); }, 120);
-                }
+                try { hls.recoverMediaError(); }
                 catch (e) { nextSourceBeforePlayback('HLS media lỗi lúc khởi động'); }
                 return;
             }
@@ -17329,21 +17307,15 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
                 setTimeout(() => {
                     if (!alive() || playbackStarted || this.hlsTv !== hls)
                         return;
-                    try {
-                        hls.startLoad();
-                        requestPlay('after_network_recover', true);
-                    }
+                    try { hls.startLoad(); }
                     catch (e) { nextSourceBeforePlayback('HLS network lỗi lúc khởi động'); }
-                }, 500);
+                }, 900);
                 return;
             }
             nextSourceBeforePlayback('Nguồn HLS hiện tại lỗi trước khi phát');
         });
         hls.attachMedia(el);
         hls.loadSource(url);
-        /* Điểm quyết định: gọi play ngay trong stack thao tác người dùng,
-           không đợi MANIFEST_PARSED rồi mới xin quyền autoplay. */
-        requestPlay('hls_sync_user_activation', true);
     };
     const startSource = () => {
         if (!alive())
@@ -17363,13 +17335,14 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
             startDirect(url);
         }
     };
-    note('session_start', { sources: sources.length, eventType: String(userEvent && userEvent.type || ''), eventTrusted: !!(userEvent && userEvent.isTrusted) });
+    forceAudibleBeforePlay();
+    note('session_start', { sources: sources.length });
     startSource();
     return true;
 },
-    loadMediaStream(el, sourceQueue, type, channel, userEvent) {
+    loadMediaStream(el, sourceQueue, type, channel) {
         if (type === 'tv' && this.isSmartboxMediaMode())
-            return this.loadSmartboxTvStable(el, sourceQueue, channel, userEvent);
+            return this.loadSmartboxTvStable(el, sourceQueue, channel);
         const hub = this;
         const queue = Array.isArray(sourceQueue) ? sourceQueue.slice() : [sourceQueue];
         const sources = queue
@@ -17932,15 +17905,8 @@ loadSmartboxTvStable(el, sourceQueue, channel, userEvent) {
             if (titleWrap)
                 titleWrap.innerHTML = `📺 Đang phát: <span class="text-slate-800 font-bold">${c.name}</span>`;
             const sourceQueue = this.buildSourceQueue(c);
-            const smartboxTv = this.isSmartboxMediaMode();
-            if (smartboxTv) {
-                try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) { }
-                /* Chặn cả lời đọc click toàn cục chạy trễ 50 ms, tránh cướp audio focus
-                   đúng lúc video đang xin quyền phát. */
-                try { window._recentSpecificSpeak = Date.now(); } catch (e) { }
-            }
-            this.loadMediaStream(video, sourceQueue, 'tv', c, ev);
-            if (window.soundEnabled && !smartboxTv)
+            this.loadMediaStream(video, sourceQueue, 'tv', c);
+            if (window.soundEnabled)
                 window.playSpeechTTS('Mở kênh ' + c.name);
         }
         else if (type === 'radio') {
@@ -18453,12 +18419,7 @@ highlightRemoteZones() {
                     clearEdge();
                     saveMemory();
                     this.lastListIdx = this.idxList;
-                    const selectedItem = els.list[this.idxList];
-                    const actualIdx = Number(selectedItem && selectedItem.getAttribute('data-lifeos-actual-index'));
-                    if ((this.currentTab === 'tv' || this.currentTab === 'radio') && isFinite(actualIdx))
-                        this.playStream(actualIdx, this.currentTab, e);
-                    else
-                        selectedItem.click();
+                    els.list[this.idxList].click();
                     afterRender(() => {
                         els = this.getZoneElements();
                         this.activeZone = 'list';
@@ -18502,7 +18463,7 @@ highlightRemoteZones() {
                     if (this.currentTab === 'music' && window.MusicApp)
                         window.MusicApp.playNext();
                     else
-                        this.playNext(this.currentTab, e);
+                        this.playNext(this.currentTab);
                     if (this.currentTab === 'tv') {
                         const v = this.visibleListIndexForActual(this.currentTvIdx, 'tv');
                         if (v >= 0) this.idxList = clamp(v, els.list.length);
@@ -18521,7 +18482,7 @@ highlightRemoteZones() {
                     if (this.currentTab === 'music' && window.MusicApp)
                         window.MusicApp.playPrev();
                     else
-                        this.playPrev(this.currentTab, e);
+                        this.playPrev(this.currentTab);
                     if (this.currentTab === 'tv') {
                         const v = this.visibleListIndexForActual(this.currentTvIdx, 'tv');
                         if (v >= 0) this.idxList = clamp(v, els.list.length);
