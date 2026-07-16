@@ -48,15 +48,16 @@
   }
   function loadMessaging(){if(w.firebase&&firebase.messaging){return Promise.resolve(true);}if(jobs.messaging)return jobs.messaging;jobs.messaging=execute('lifeos-embedded-firebase-messaging');return jobs.messaging;}
   function remoteScript(url){return new Promise(function(resolve,reject){var s=d.createElement('script');s.src=url;s.async=true;s.onload=function(){resolve(true);};s.onerror=function(){reject(new Error('Không tải được '+url));};(d.head||d.documentElement).appendChild(s);});}
-  function loadHls(){if(w.Hls&&Hls.isSupported){state.hls='ready';return Promise.resolve(true);}if(jobs.hls)return jobs.hls;state.hls='loading';jobs.hls=remoteScript('https://cdn.jsdelivr.net/npm/hls.js@1.6.13/dist/hls.light.min.js').then(function(){state.hls=w.Hls?'ready':'error';return !!w.Hls;},function(e){state.hls='error';throw e;});return jobs.hls;}
+  function isSmartboxLite(){try{return !!(d.body&&d.body.classList.contains('lifeos-landscape-mini-pc'));}catch(e){return false;}}
+  function loadHls(){if(isSmartboxLite()){state.hls='skipped-smartbox';return Promise.resolve(false);}if(w.Hls&&Hls.isSupported){state.hls='ready';return Promise.resolve(true);}if(jobs.hls)return jobs.hls;state.hls='loading';jobs.hls=remoteScript('https://cdn.jsdelivr.net/npm/hls.js@1.6.13/dist/hls.light.min.js').then(function(){state.hls=w.Hls?'ready':'error';return !!w.Hls;},function(e){state.hls='error';throw e;});return jobs.hls;}
   function loadConfetti(){if(typeof w.confetti==='function'&&!w.confetti.__lifeosLazy){state.confetti='ready';return Promise.resolve(true);}if(jobs.confetti)return jobs.confetti;state.confetti='loading';jobs.confetti=execute('lifeos-embedded-confetti').then(function(){state.confetti=typeof w.confetti==='function'?'ready':'error';return state.confetti==='ready';},function(e){state.confetti='error';throw e;});return jobs.confetti;}
   var lazy=function(opts){return loadConfetti().then(function(){return w.confetti(opts);},function(){return false;});};lazy.__lifeosLazy=true;w.confetti=lazy;
   function mediaIntent(node){var n=node;for(var i=0;n&&i<8;i++,n=n.parentNode){var id=String(n.id||''),oc=String(n.getAttribute&&n.getAttribute('onclick')||''),dv=String(n.getAttribute&&n.getAttribute('data-view')||''),dt=String(n.getAttribute&&n.getAttribute('data-tab')||'');if(/media|music|radio|tv/i.test(id+' '+oc+' '+dv+' '+dt))return true;}return false;}
-  d.addEventListener('click',function(e){if(mediaIntent(e.target))loadHls()['catch'](function(){});},true);
+  d.addEventListener('click',function(e){if(mediaIntent(e.target)&&!isSmartboxLite())loadHls()['catch'](function(){});},true);
   w.LifeOSVendor={cleanCore:true,state:state,loadFirebase:loadFirebase,loadMessaging:loadMessaging,loadHls:loadHls,loadConfetti:loadConfetti};
 })(window,document);
 </script><script data-lifeos-no-transpile="1" id="lifeos-lock4-smartbox-clean-core-marker">
-window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-15',revision:'R6.8',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvOneColumnLikeRadio:true,listScrollOwnerFixed:true,hlsLibraryReadyBeforeTv:true,nativeTvShortcutRemoved:true,tvStatusDedup:true,viewportRefreshStormFixed:true};
+window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-16',revision:'R6.9',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvGridNativeRemote:true,doubleEdgeZoneExit:true,smartboxNativeHlsFirst:true,tvStatusDedup:true,viewportRefreshStormFixed:true};
 </script><script id="lifeos-lock4-inline-handler-compat-source">
 window.LifeOSCompatHandlers = window.LifeOSCompatHandlers || {};
 window.LifeOSCompatHandlers.h001 = function (event) {var _window$LifeOSRootRou, _window$LifeOSRootRou2, _window$setDesktopWor, _window;event.preventDefault();event.stopPropagation();(_window$LifeOSRootRou = window.LifeOSRootRouter) === null || _window$LifeOSRootRou === void 0 || (_window$LifeOSRootRou2 = _window$LifeOSRootRou.enterWorkspace) === null || _window$LifeOSRootRou2 === void 0 || _window$LifeOSRootRou2.call(_window$LifeOSRootRou, 'overview', 'desktop-click', event);(_window$setDesktopWor = (_window = window).setDesktopWorkspace) === null || _window$setDesktopWor === void 0 || _window$setDesktopWor.call(_window, 'overview');};
@@ -16591,11 +16592,8 @@ window.MediaHub = {
         const list = document.getElementById(type === 'tv' ? 'tv-list-container' : (type === 'radio' ? 'radio-list-container' : 'mp3-list-container'));
         if (!list)
             return null;
-        if (document.body && document.body.classList.contains('lifeos-landscape-mini-pc')) {
-            const owner = document.getElementById('music-list-container');
-            if (owner && owner.contains(list))
-                return owner;
-        }
+        /* R6.9: mỗi danh sách là chủ sở hữu cuộn duy nhất trên Smartbox.
+           Không cuộn wrapper ngoài, không để hai lớp scroll tranh quyền. */
         return list;
     },
     renderLists() {
@@ -16688,35 +16686,37 @@ window.MediaHub = {
     scrollRemoteTarget(target) {
         if (!target)
             return;
-        let scrollBox = null;
-        const tvList = target.closest && target.closest('#tv-list-container');
-        const radioList = target.closest && target.closest('#radio-list-container');
-        const mp3List = target.closest && target.closest('#mp3-list-container');
-        if (tvList)
-            scrollBox = this.getListScrollOwner('tv');
-        else if (radioList)
-            scrollBox = this.getListScrollOwner('radio');
-        else if (mp3List)
-            scrollBox = this.getListScrollOwner('music');
-        if (scrollBox) {
-            const reveal = () => {
-                try {
-                    const tr = target.getBoundingClientRect();
-                    const cr = scrollBox.getBoundingClientRect();
-                    const pad = 8;
-                    let delta = 0;
-                    if (tr.top < cr.top + pad)
-                        delta = tr.top - (cr.top + pad);
-                    else if (tr.bottom > cr.bottom - pad)
-                        delta = tr.bottom - (cr.bottom - pad);
-                    if (Math.abs(delta) > 1)
-                        scrollBox.scrollTop = Math.max(0, (scrollBox.scrollTop || 0) + delta);
-                }
-                catch (e) { }
-            };
-            reveal();
-            requestAnimationFrame(reveal);
-            return;
+        const listBox = target.closest && target.closest('#tv-list-container,#radio-list-container');
+        if (listBox) {
+            try {
+                const tr = target.getBoundingClientRect();
+                const cr = listBox.getBoundingClientRect();
+                const pad = 6;
+                let nextTop = Number(listBox.scrollTop || 0);
+                if (tr.top < cr.top + pad)
+                    nextTop -= (cr.top + pad - tr.top);
+                else if (tr.bottom > cr.bottom - pad)
+                    nextTop += (tr.bottom - (cr.bottom - pad));
+                const maxTop = Math.max(0, Number(listBox.scrollHeight || 0) - Number(listBox.clientHeight || 0));
+                nextTop = Math.max(0, Math.min(nextTop, maxTop));
+                if (Math.abs(nextTop - Number(listBox.scrollTop || 0)) > 0.5)
+                    listBox.scrollTop = nextTop;
+                return;
+            }
+            catch (e) { }
+        }
+        const mp3Box = target.closest && target.closest('#mp3-list-container,#music-list-container');
+        if (mp3Box) {
+            try {
+                const tr = target.getBoundingClientRect();
+                const cr = mp3Box.getBoundingClientRect();
+                if (tr.top < cr.top + 6)
+                    mp3Box.scrollTop -= (cr.top + 6 - tr.top);
+                else if (tr.bottom > cr.bottom - 6)
+                    mp3Box.scrollTop += (tr.bottom - (cr.bottom - 6));
+                return;
+            }
+            catch (e) { }
         }
         if (typeof target.scrollIntoView === 'function') {
             try { target.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' }); } catch (e) { }
@@ -16762,6 +16762,17 @@ window.MediaHub = {
         catch (e) { }
         try {
             el.ontimeupdate = null;
+        }
+        catch (e) { }
+        try {
+            el.onwaiting = null;
+            el.onstalled = null;
+            el.onpause = null;
+            el.onended = null;
+            el.onabort = null;
+            el.onsuspend = null;
+            el.onseeking = null;
+            el.onseeked = null;
         }
         catch (e) { }
         try {
@@ -17192,6 +17203,71 @@ window.MediaHub = {
                 el.dataset.lifeosSourceTotal = String(sources.length);
             }
             catch (e) { }
+            if (smartboxLite && type === 'tv') {
+                /* R6.9: Smartbox dùng thẳng bộ phát WebView nhẹ.
+                   Không tải/parse HLS.js, không timeupdate watchdog, không vòng reconnect nền. */
+                try {
+                    el.controls = true;
+                    el.setAttribute('controls', '');
+                    el.setAttribute('playsinline', '');
+                    el.setAttribute('webkit-playsinline', '');
+                    el.preload = 'auto';
+                    el.dataset.lifeosTvEngine = 'webview-direct-lite';
+                }
+                catch (e) { }
+                const directLiteFail = (reason) => {
+                    if (!tokenAlive())
+                        return;
+                    clearWatch();
+                    clearStallWatch();
+                    destroyHls();
+                    this.cleanupMediaElement(el, { silent: true });
+                    if (sourceIndex + 1 < sources.length) {
+                        sourceIndex++;
+                        retryCount = 0;
+                        loadCurrentSource();
+                        return;
+                    }
+                    this.showPlayerLoadError('tv', reason || 'Smartbox không mở được nguồn Tivi này', playUrl);
+                };
+                try {
+                    el.onerror = () => {
+                        if (!el.__lifeosSuppressMediaErrors)
+                            directLiteFail('WebView không mở được nguồn Tivi, đang thử nguồn kế tiếp');
+                    };
+                    el.onloadedmetadata = () => {
+                        if (tokenAlive())
+                            setStatus('metadata', route, 'Đã nhận luồng Tivi, đang dựng hình', playUrl);
+                    };
+                    el.onplaying = () => {
+                        if (!tokenAlive())
+                            return;
+                        hadPlayback = true;
+                        setStatus('playing', route, route === 'webview_proxy'
+                            ? 'Kênh đang phát qua WebView + proxy'
+                            : 'Kênh đang phát trực tiếp bằng WebView nhẹ', playUrl);
+                    };
+                    el.onwaiting = () => {
+                        if (tokenAlive())
+                            setStatus('buffering', route, 'Kênh đang nạp thêm dữ liệu; giao diện vẫn giữ nguyên', playUrl);
+                    };
+                    el.onstalled = () => {
+                        if (tokenAlive())
+                            setStatus('buffering', route, 'Luồng đang chờ dữ liệu; không tự tải lại để tránh làm đơ Smartbox', playUrl);
+                    };
+                    el.oncanplay = null;
+                    el.ontimeupdate = null;
+                    el.src = playUrl;
+                    el.load();
+                    const p = el.play();
+                    if (p && typeof p.catch === 'function')
+                        p.catch(err => directLiteFail(classifyError(err)));
+                }
+                catch (e) {
+                    directLiteFail(classifyError(e));
+                }
+                return;
+            }
             if (type === 'tv') {
                 watchdog = setTimeout(() => {
                     if (!tokenAlive())
@@ -17385,8 +17461,8 @@ window.MediaHub = {
             playSafe(playUrl);
         };
         const startCurrentSource = () => { if (tokenAlive()) loadCurrentSource(); };
-        if (type === 'tv' && !(window.Hls && Hls.isSupported()) && window.LifeOSVendor && typeof window.LifeOSVendor.loadHls === 'function') {
-            setStatus('loading_engine', 'webview_direct', 'Đang chuẩn bị bộ phát Tivi tương thích Smartbox', sources[0] || '');
+        if (type === 'tv' && !smartboxLite && !(window.Hls && Hls.isSupported()) && window.LifeOSVendor && typeof window.LifeOSVendor.loadHls === 'function') {
+            setStatus('loading_engine', 'webview_direct', 'Đang chuẩn bị bộ phát Tivi', sources[0] || '');
             window.LifeOSVendor.loadHls().then(startCurrentSource, startCurrentSource);
         }
         else {
@@ -17598,12 +17674,23 @@ window.MediaHub = {
         if (target) {
             target.classList.add('lifeos-remote-selected');
             target.setAttribute('data-lifeos-remote-selected', 'true');
-            try {
-                if (document.activeElement !== target)
-                    target.focus({ preventScroll: true });
+            const smartboxChannelList = !!(document.body &&
+                document.body.classList.contains('lifeos-landscape-mini-pc') &&
+                this.activeZone === 'list' &&
+                (this.currentTab === 'radio' || this.currentTab === 'tv'));
+            if (smartboxChannelList) {
+                /* Chrome/WebView cũ tự cuộn sai khi focus card. Remote chỉ dùng chỉ số + màu,
+                   còn cuộn do MediaHub điều khiển duy nhất. */
+                try { document.body.dataset.lifeosRemoteZone = 'panel'; } catch (e) { }
             }
-            catch (e) {
-                try { target.focus(); } catch (_) { }
+            else {
+                try {
+                    if (document.activeElement !== target)
+                        target.focus({ preventScroll: true });
+                }
+                catch (e) {
+                    try { target.focus(); } catch (_) { }
+                }
             }
         }
         if (target)
@@ -17708,6 +17795,8 @@ window.MediaHub = {
             if (!validKeys.includes(key) && digitKey === null && ![461, 10009].includes(rawKeyCode))
                 return;
             e.preventDefault();
+            try { e.stopImmediatePropagation(); } catch (err) { }
+            try { e.stopPropagation(); } catch (err) { }
             if (digitKey !== null) {
                 if (this.currentTab === 'music')
                     return;
@@ -18402,6 +18491,45 @@ body.lifeos-landscape-mini-pc #radio-disk-icon.animate-spin {
 }
 body.lifeos-landscape-mini-pc[data-lifeos-remote-edge] .lifeos-remote-selected {
   outline-width: 5px !important;
+}
+/* R6.9 — một chủ sở hữu remote + scroll thật cho danh sách Radio/Tivi. */
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #music-list-container,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #music-list-container {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #radio-list-container,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #tv-list-container {
+  display: grid !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  align-content: start !important;
+  scroll-behavior: auto !important;
+  overflow-anchor: none !important;
+  overscroll-behavior: contain !important;
+  position: relative !important;
+  -webkit-overflow-scrolling: auto !important;
+}
+body.lifeos-landscape-mini-pc #radio-list-container .media-item,
+body.lifeos-landscape-mini-pc #tv-list-container .media-item {
+  transition: none !important;
+}
+/* Giữ bề mặt video WebView trực tiếp, không tạo compositor phụ. */
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #tv-video-element {
+  transform: none !important;
+  -webkit-transform: none !important;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+  filter: none !important;
+  will-change: auto !important;
+}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-music-left,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-music-right {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 </style>
 <script id="lifeos-pha64f-landscape-mini-pc-final-js">var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -19234,7 +19362,7 @@ body.lifeos-landscape-mini-pc[data-lifeos-remote-edge] .lifeos-remote-selected {
         }, true);
     }
     window.LifeOSLandscapeRemote = {
-        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_WHOLE_PAGE_R6_8',
+        owner: 'LIFEOS_PHA64F_SMARTBOX_REMOTE_WHOLE_PAGE_R6_4',
         focusDock: focusDock,
         focusPanel: focusPanel,
         normalizeKey: normalizeTvRemoteKey
@@ -26557,44 +26685,44 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 <style id="lifeos-r11-mobile-universal-touch-scroll-css">
 /* R11: Vuốt danh sách Radio/Tivi/Nhạc ở mọi điểm trên card, không chỉ mép scrollbar. Web-safe. */
 @media (max-width: 1023px), (max-height: 560px) and (orientation: landscape) {
-  #view-music,
-  #view-music * {
+  body:not(.lifeos-landscape-mini-pc) #view-music,
+  body:not(.lifeos-landscape-mini-pc) #view-music * {
     -webkit-tap-highlight-color: rgba(99,102,241,.10);
   }
 
-  #view-music #music-list-container,
-  #view-music #mp3-list-container,
-  #view-music #radio-list-container,
-  #view-music #tv-list-container,
-  #view-music #media-group-sidebar,
-  #view-music #media-group-mobile-bar {
+  body:not(.lifeos-landscape-mini-pc) #view-music #music-list-container,
+  body:not(.lifeos-landscape-mini-pc) #view-music #mp3-list-container,
+  body:not(.lifeos-landscape-mini-pc) #view-music #radio-list-container,
+  body:not(.lifeos-landscape-mini-pc) #view-music #tv-list-container,
+  body:not(.lifeos-landscape-mini-pc) #view-music #media-group-sidebar,
+  body:not(.lifeos-landscape-mini-pc) #view-music #media-group-mobile-bar {
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
   }
 
-  #view-music #music-list-container,
-  #view-music #mp3-list-container,
-  #view-music #radio-list-container,
-  #view-music #tv-list-container,
-  #view-music #media-group-sidebar {
+  body:not(.lifeos-landscape-mini-pc) #view-music #music-list-container,
+  body:not(.lifeos-landscape-mini-pc) #view-music #mp3-list-container,
+  body:not(.lifeos-landscape-mini-pc) #view-music #radio-list-container,
+  body:not(.lifeos-landscape-mini-pc) #view-music #tv-list-container,
+  body:not(.lifeos-landscape-mini-pc) #view-music #media-group-sidebar {
     touch-action: pan-y !important;
   }
 
-  #view-music #media-subtabs,
-  #view-music #media-group-mobile-bar {
+  body:not(.lifeos-landscape-mini-pc) #view-music #media-subtabs,
+  body:not(.lifeos-landscape-mini-pc) #view-music #media-group-mobile-bar {
     touch-action: pan-x pan-y !important;
   }
 
-  #view-music .media-item,
-  #view-music .media-item *,
-  #view-music .song-row,
-  #view-music .song-row *,
-  #view-music #music-list-container button,
-  #view-music #music-list-container button * {
+  body:not(.lifeos-landscape-mini-pc) #view-music .media-item,
+  body:not(.lifeos-landscape-mini-pc) #view-music .media-item *,
+  body:not(.lifeos-landscape-mini-pc) #view-music .song-row,
+  body:not(.lifeos-landscape-mini-pc) #view-music .song-row *,
+  body:not(.lifeos-landscape-mini-pc) #view-music #music-list-container button,
+  body:not(.lifeos-landscape-mini-pc) #view-music #music-list-container button * {
     touch-action: pan-y !important;
   }
 
-  #view-music #music-list-container {
+  body:not(.lifeos-landscape-mini-pc) #view-music #music-list-container {
     overflow-y: auto !important;
     overflow-x: hidden !important;
     scrollbar-gutter: stable both-edges;
@@ -26613,7 +26741,12 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     const CARD_SELECTOR = '#radio-list-container .media-item,#tv-list-container .media-item,#mp3-list-container .song-row,#music-list-container .song-row,#music-list-container .media-item';
     let state = null;
     let suppressClickUntil = 0;
+    function isSmartboxLandscape() {
+        return !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc'));
+    }
     function isTouchDevice() {
+        if (isSmartboxLandscape())
+            return false;
         return ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0 || window.innerWidth < 1024;
     }
     function visible(el) {
@@ -26648,6 +26781,27 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         return null;
     }
     function applyCss() {
+        if (isSmartboxLandscape()) {
+            /* Smartbox có MediaHub remote riêng. Xóa toàn bộ inline scroll/touch cũ
+               để R11 mobile không tạo lớp cuộn thứ hai. */
+            document.querySelectorAll(VSCROLL_SELECTOR).forEach(el => {
+                if (!el)
+                    return;
+                el.style.removeProperty('-webkit-overflow-scrolling');
+                el.style.removeProperty('overscroll-behavior');
+                el.style.removeProperty('touch-action');
+                if (el.id === 'music-list-container') {
+                    el.style.removeProperty('overflow-y');
+                    el.style.removeProperty('overflow-x');
+                    el.style.removeProperty('scroll-behavior');
+                }
+            });
+            document.querySelectorAll(CARD_SELECTOR).forEach(el => {
+                el.style.removeProperty('touch-action');
+            });
+            state = null;
+            return;
+        }
         if (!isTouchDevice())
             return;
         document.querySelectorAll(VSCROLL_SELECTOR).forEach(el => {
