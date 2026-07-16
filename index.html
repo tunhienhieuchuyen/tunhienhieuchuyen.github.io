@@ -16241,7 +16241,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 window.LifeOSTvPlayer = {
-    owner: 'LIFEOS_TV_CLEAN_R610_R3_EXACT_PICTURE_PATH',
+    owner: 'LIFEOS_TV_R610_R4_EXACT_SOURCE_AND_PICTURE_HANDSHAKE',
     state: 'IDLE',
     sessionId: 0,
     attemptId: 0,
@@ -16379,27 +16379,51 @@ window.LifeOSTvPlayer = {
             el.setAttribute('playsinline', '');
             el.setAttribute('webkit-playsinline', '');
             el.preload = 'auto';
-            el.autoplay = true;
+            el.autoplay = false;
+            el.removeAttribute('autoplay');
+            el.style.setProperty('transform', 'none', 'important');
+            el.style.setProperty('filter', 'none', 'important');
+            el.style.setProperty('visibility', 'visible', 'important');
+            el.style.setProperty('opacity', '1', 'important');
         }
         catch (e) { }
-        if (el.__lifeosTvCleanR3Bound)
+        if (el.__lifeosTvPictureR4Bound)
             return el;
-        el.__lifeosTvCleanR3Bound = true;
+        el.__lifeosTvPictureR4Bound = true;
+        const markPictureIfPresent = (eventName) => {
+            if (this.state === 'IDLE' || this.state === 'STOPPED')
+                return false;
+            const facts = this._videoFacts();
+            this.record(eventName, facts);
+            if (Number(facts.videoWidth || 0) > 0 && Number(facts.videoHeight || 0) > 0) {
+                this.hasPlayed = true;
+                this.state = 'PLAYING';
+                this.record('PICTURE_CONFIRMED', facts);
+                this._setStatus('playing', 'Đang phát có hình: ' + this._name());
+                return true;
+            }
+            return false;
+        };
         el.addEventListener('playing', () => {
             if (this.state === 'IDLE' || this.state === 'STOPPED')
                 return;
-            this.hasPlayed = true;
-            this.state = 'PLAYING';
-            this.record('VIDEO_PLAYING', this._videoFacts());
-            this._setStatus('playing', 'Đang phát: ' + this._name());
+            const facts = this._videoFacts();
+            this.record('VIDEO_PLAYING', facts);
+            if (!markPictureIfPresent('PICTURE_CHECK_PLAYING')) {
+                /* Android WebView may emit playing from an audio track before the video surface is ready.
+                   Do not declare success, fallback or recover; keep the exact R6.10 session alive. */
+                this.state = 'STARTING';
+                this._setStatus('waiting', this._name() + ': đã có tiếng, đang chờ khung hình video');
+            }
         }, false);
         el.addEventListener('loadedmetadata', () => {
-            if (this.state !== 'IDLE' && this.state !== 'STOPPED')
-                this.record('LOADED_METADATA', this._videoFacts());
+            markPictureIfPresent('LOADED_METADATA');
         }, false);
         el.addEventListener('canplay', () => {
-            if (this.state !== 'IDLE' && this.state !== 'STOPPED')
-                this.record('CANPLAY', this._videoFacts());
+            markPictureIfPresent('CANPLAY');
+        }, false);
+        el.addEventListener('resize', () => {
+            markPictureIfPresent('VIDEO_RESIZE');
         }, false);
         el.addEventListener('waiting', () => {
             if (this.state !== 'STARTING' && this.state !== 'PLAYING')
@@ -16501,52 +16525,29 @@ window.LifeOSTvPlayer = {
     },
 
     _buildSources(channel) {
-        const values = [];
-        const add = (u) => {
-            u = String(u || '').trim();
-            if (!u || values.indexOf(u) >= 0)
-                return;
-            values.push(u);
-        };
-        add(channel && channel.play_url);
-        add(channel && channel.url);
-        add(channel && channel.src);
-        add(channel && channel.streamUrl);
-        add(channel && channel.stream_url);
-        add(channel && channel.stream);
-        add(channel && channel.link);
-        add(channel && channel.m3u8);
-        add(channel && channel.proxyUrl);
-        this._firstValues(channel && channel.backup_play_urls).forEach(add);
-        this._firstValues(channel && channel.backup_urls).forEach(add);
-        add(channel && channel.backupUrl);
-        add(channel && channel.url2);
-        if (!values.length)
-            return [];
-
-        const first = values[0];
-        const preferredProxy = this._proxyPreferred(channel, first);
-        const proxy = this._proxyUrl(first);
-        const queue = [];
-        const put = (u) => {
-            u = String(u || '').trim();
-            if (!u || queue.indexOf(u) >= 0 || queue.length >= 2)
-                return;
-            queue.push(u);
-        };
-
-        if (preferredProxy && proxy && proxy !== first) {
-            put(proxy);
-            put(first);
+        /* Critical R4 correction: use the exact R6.10 queue builder that produced the
+           PHIM QT picture. R3 accidentally preferred play_url before channel.url and
+           could therefore select a different/audio-only route. */
+        let queue = [];
+        try {
+            if (window.MediaHub && typeof window.MediaHub.buildSourceQueue === 'function')
+                queue = window.MediaHub.buildSourceQueue(channel);
         }
-        else {
-            put(first);
-            for (let i = 1; i < values.length && queue.length < 2; i++)
-                put(values[i]);
-            if (queue.length < 2 && proxy && proxy !== first)
-                put(proxy);
+        catch (e) { queue = []; }
+        if (!Array.isArray(queue) || !queue.length) {
+            const raw = [channel && channel.url, channel && channel.src, channel && channel.streamUrl,
+                channel && channel.stream_url, channel && channel.stream, channel && channel.link,
+                channel && channel.m3u8, channel && channel.backupUrl, channel && channel.url2,
+                channel && channel.proxyUrl];
+            const seen = {};
+            queue = raw.map(x => String(x || '').trim()).filter(u => {
+                if (!u || seen[u]) return false;
+                seen[u] = true;
+                return true;
+            });
         }
-        return queue.slice(0, 2);
+        /* Keep R3 stability: at most the first direct/proxy pair, no long recovery chain. */
+        return queue.map(x => String(x || '').trim()).filter(Boolean).slice(0, 2);
     },
 
     _isDirectFile(url) {
@@ -16590,6 +16591,13 @@ window.LifeOSTvPlayer = {
             }
         }
         catch (e) { }
+        try {
+            /* Exactly one decoder/surface reset per deliberate channel change or stop.
+               This is the reset R6.10 used before it successfully displayed PHIM QT. */
+            this.record('LOAD_CALL', { reason: String(reason || '') });
+            el.load();
+        }
+        catch (e) { }
         this.intentionalPause = false;
     },
 
@@ -16622,9 +16630,11 @@ window.LifeOSTvPlayer = {
         const el = this.video;
         this.engine = 'direct';
         try {
-            el.dataset.lifeosTvEngine = 'direct-file-r3';
+            el.dataset.lifeosTvEngine = 'direct-file-r610-r4';
             this.record('SRC_WRITE', { url });
             el.src = url;
+            this.record('LOAD_CALL', { reason: 'direct_source_attach' });
+            el.load();
         }
         catch (e) {
             this._failAttempt('Không gắn được nguồn video trực tiếp');
@@ -16676,7 +16686,7 @@ window.LifeOSTvPlayer = {
         this.engine = 'hlsjs';
         this.record('HLS_CREATE', { url, config });
         try {
-            this.video.dataset.lifeosTvEngine = 'hlsjs-smartbox-r68-picture-clean-r3';
+            this.video.dataset.lifeosTvEngine = 'hlsjs-smartbox-r610-picture-handshake-r4';
             this.video.dataset.lifeosTvBackgroundLoops = '0';
         }
         catch (e) { }
@@ -16690,11 +16700,28 @@ window.LifeOSTvPlayer = {
         hls.on(HlsCtor.Events.MANIFEST_PARSED, (event, data) => {
             if (!alive())
                 return;
-            this.record('HLS_MANIFEST_PARSED', { url, levels: data && data.levels ? data.levels.length : undefined });
+            const levels = data && data.levels ? data.levels : [];
+            this.record('HLS_MANIFEST_PARSED', {
+                url,
+                levels: levels.length,
+                codecs: levels.map(x => String((x && (x.videoCodec || x.codecs)) || '')).slice(0, 8)
+            });
             if (!this.hasPlayed)
-                this._setStatus('waiting', this._name() + ': HLS đã sẵn sàng, đang chờ khung hình');
-            /* Deliberately no second play call, level switch or decoder recovery. */
+                this._setStatus('waiting', this._name() + ': manifest HLS OK, đang mở đúng đường hình R6.10');
+            this._issuePlay('manifest_parsed_exact_r610_picture_path');
         });
+        if (HlsCtor.Events && HlsCtor.Events.FRAG_BUFFERED) {
+            hls.on(HlsCtor.Events.FRAG_BUFFERED, () => {
+                if (!alive()) return;
+                const facts = this._videoFacts();
+                this.record('HLS_FRAG_BUFFERED', facts);
+                if (Number(facts.videoWidth || 0) > 0 && Number(facts.videoHeight || 0) > 0) {
+                    this.hasPlayed = true;
+                    this.state = 'PLAYING';
+                    this._setStatus('playing', 'Đang phát có hình: ' + this._name());
+                }
+            });
+        }
         hls.on(HlsCtor.Events.ERROR, (event, data) => {
             if (!alive() || !data)
                 return;
@@ -16721,7 +16748,7 @@ window.LifeOSTvPlayer = {
             this._failAttempt('Lỗi gắn nguồn HLS vào video');
             return;
         }
-        this._issuePlay('trusted_channel_selection_hls');
+        /* No play here. Old Smartbox gets the one play call only after MANIFEST_PARSED. */
     },
 
     _startAttempt() {
