@@ -16242,27 +16242,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 
 window.LifeOSTvPlayer = {
-    owner: 'LIFEOS_TV_PLAYER_V2_SINGLE_OWNER_R610',
+    owner: 'LIFEOS_TV_PLAYER_V3_1_PHIM_QT_ROUTE_R610',
     state: 'IDLE',
     sessionId: 0,
     sourceAttempt: 0,
     video: null,
     hls: null,
     channel: null,
-    sources: [],
-    sourceIndex: 0,
+    attempts: [],
+    attemptIndex: 0,
+    activeAttempt: null,
     hasPlayed: false,
-    playRequested: false,
+    playPending: false,
+    playCallCount: 0,
+    playRejectCount: 0,
     listeners: [],
+    startupTimer: null,
     debugRing: [],
-    debugLimit: 800,
+    debugLimit: 1000,
     enginePromise: null,
     _controllerPausing: false,
     _controllerLoading: false,
-    _controllerPlaying: false,
     _sourceFailing: false,
     _nativeMedia: null,
     _volumeSnapshot: null,
+    _networkRecoveries: 0,
+    _mediaRecoveries: 0,
+    _trustedGesture: false,
+    _eventType: '',
     record(eventName, detail) {
         const item = {
             at: Date.now(),
@@ -16296,6 +16303,7 @@ window.LifeOSTvPlayer = {
             owner: this.owner,
             sessionId: sid,
             state: this.state,
+            activeAttempt: this.activeAttempt ? Object.assign({}, this.activeAttempt) : null,
             firstPlayingFound: firstPlaying >= 0,
             afterPlaying: {
                 PAUSE_CALL: count('PAUSE_CALL'),
@@ -16307,6 +16315,7 @@ window.LifeOSTvPlayer = {
                 HLS_CREATE: count('HLS_CREATE'),
                 HLS_START_LOAD: count('HLS_START_LOAD'),
                 HLS_RECOVER_MEDIA: count('HLS_RECOVER_MEDIA'),
+                ATTEMPT_ADVANCE: count('ATTEMPT_ADVANCE'),
                 UNAUTHORIZED_PAUSE_CALL: count('UNAUTHORIZED_PAUSE_CALL'),
                 UNAUTHORIZED_LOAD_CALL: count('UNAUTHORIZED_LOAD_CALL'),
                 UNAUTHORIZED_PLAY_CALL: count('UNAUTHORIZED_PLAY_CALL')
@@ -16326,7 +16335,7 @@ window.LifeOSTvPlayer = {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'LifeOS_TV_SINGLE_OWNER_DEBUG_' + Date.now() + '.json';
+            a.download = 'LifeOS_TV_ROUTE_DEBUG_' + Date.now() + '.json';
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -16357,6 +16366,9 @@ window.LifeOSTvPlayer = {
         }, err => {
             this.record('ENGINE_PRELOAD_ERROR', { message: String(err && err.message || err) });
             return false;
+        }).then(ok => {
+            this.enginePromise = null;
+            return ok;
         });
         return this.enginePromise;
     },
@@ -16370,11 +16382,13 @@ window.LifeOSTvPlayer = {
         try {
             el.dataset.lifeosTvOwner = this.owner;
             el.dataset.lifeosTvBackgroundLoops = '0';
-            el.dataset.lifeosTvEngine = 'single-owner-waiting';
+            el.dataset.lifeosTvEngine = 'single-owner-ready';
             el.setAttribute('controls', '');
+            el.setAttribute('autoplay', '');
             el.setAttribute('playsinline', '');
             el.setAttribute('webkit-playsinline', '');
             el.preload = 'auto';
+            el.autoplay = true;
             el.style.setProperty('transform', 'none', 'important');
         }
         catch (e) { }
@@ -16382,11 +16396,7 @@ window.LifeOSTvPlayer = {
             try { el[name] = null; } catch (e) { }
         });
         if (!el.__lifeosTvSingleOwnerNative) {
-            const native = {
-                play: el.play,
-                pause: el.pause,
-                load: el.load
-            };
+            const native = { play: el.play, pause: el.pause, load: el.load };
             try {
                 Object.defineProperty(el, '__lifeosTvSingleOwnerNative', { value: native, configurable: false, enumerable: false, writable: false });
             }
@@ -16442,41 +16452,57 @@ window.LifeOSTvPlayer = {
         try { this._nativeCall('load'); } catch (e) { }
         this._controllerLoading = false;
     },
-    _callPlay(url) {
-        if (this.playRequested || !this._alive(this.sessionId, this.sourceAttempt))
-            return;
-        this.playRequested = true;
-        const playSessionId = this.sessionId;
-        const playAttempt = this.sourceAttempt;
-        this.record('PLAY_CALL', { url: String(url || ''), userGestureExpected: true });
-        this._controllerPlaying = true;
+    _callPlay(url, phase) {
+        if (this.hasPlayed || this.playPending || !this._alive(this.sessionId, this.sourceAttempt))
+            return false;
+        const sid = this.sessionId;
+        const attempt = this.sourceAttempt;
+        this.playPending = true;
+        this.playCallCount++;
+        this.record('PLAY_CALL', {
+            url: String(url || ''),
+            phase: String(phase || ''),
+            call: this.playCallCount,
+            trustedGesture: !!this._trustedGesture,
+            eventType: this._eventType
+        });
         let p;
-        try { p = this._nativeCall('play'); }
-        catch (e) {
-            this._controllerPlaying = false;
-            this.record('PLAY_REJECT', { url: String(url || ''), message: String(e && e.message || e) });
-            this._setFailed('WebView từ chối phát tự động dù đã chọn kênh trực tiếp');
-            return;
+        try {
+            p = this._nativeCall('play');
         }
-        this._controllerPlaying = false;
+        catch (e) {
+            this.playPending = false;
+            this.playRejectCount++;
+            this.record('PLAY_REJECT', { url: String(url || ''), phase: String(phase || ''), message: String(e && e.message || e) });
+            return false;
+        }
         if (p && typeof p.then === 'function') {
             p.then(() => {
-                if (this._alive(playSessionId, playAttempt))
-                    this.record('PLAY_RESOLVE', { url: String(url || '') });
-            }, err => {
-                if (!this._alive(playSessionId, playAttempt))
+                if (!this._alive(sid, attempt))
                     return;
-                this.record('PLAY_REJECT', { url: String(url || ''), message: String(err && err.message || err) });
-                this._setFailed('WebView từ chối phát tự động dù đã chọn kênh trực tiếp');
+                this.playPending = false;
+                this.record('PLAY_RESOLVE', { url: String(url || ''), phase: String(phase || '') });
+            }, err => {
+                if (!this._alive(sid, attempt))
+                    return;
+                this.playPending = false;
+                this.playRejectCount++;
+                this.record('PLAY_REJECT', { url: String(url || ''), phase: String(phase || ''), message: String(err && err.message || err) });
+                /* Không kết luận hỏng chỉ từ Promise reject: WebView cũ có thể reject trước khi MediaSource sẵn sàng. */
             });
         }
+        else {
+            this.playPending = false;
+            this.record('PLAY_ACCEPTED_NO_PROMISE', { url: String(url || ''), phase: String(phase || '') });
+        }
+        return true;
     },
     _writeSrc(url, reason) {
         const el = this.video || this.bindVideo();
         if (!el)
             return;
         this.record('SRC_WRITE', { url: String(url || ''), reason: String(reason || '') });
-        try { el.src = String(url || ''); } catch (e) { throw e; }
+        el.src = String(url || '');
     },
     _clearSrc(reason) {
         const el = this.video || this.bindVideo();
@@ -16502,6 +16528,22 @@ window.LifeOSTvPlayer = {
         });
         this.listeners.length = 0;
     },
+    _clearStartupTimer() {
+        if (this.startupTimer) {
+            clearTimeout(this.startupTimer);
+            this.startupTimer = null;
+        }
+    },
+    _armStartupTimer(sessionId, attempt, ms) {
+        this._clearStartupTimer();
+        this.startupTimer = setTimeout(() => {
+            this.startupTimer = null;
+            if (!this._alive(sessionId, attempt) || this.hasPlayed)
+                return;
+            this.record('STARTUP_TIMEOUT', { ms: Number(ms || 0), attempt: this.activeAttempt });
+            this._advanceAttempt('Nguồn không tạo hình trong thời gian khởi động');
+        }, Math.max(8000, Number(ms || 18000)));
+    },
     _bindSessionEvents(sessionId, attempt) {
         const el = this.video;
         if (!el)
@@ -16512,14 +16554,36 @@ window.LifeOSTvPlayer = {
             if (!alive())
                 return;
             this.hasPlayed = true;
+            this.playPending = false;
             this.state = 'PLAYING';
-            this.record('PLAYING', { currentTime: Number(el.currentTime || 0), src: String(el.currentSrc || '') });
+            this._clearStartupTimer();
+            this.record('PLAYING', {
+                currentTime: Number(el.currentTime || 0),
+                src: String(el.currentSrc || ''),
+                route: this.activeAttempt ? Object.assign({}, this.activeAttempt) : null
+            });
+            this._setTitle(this.channel && this.channel.name, 'playing');
+            this._rememberGoodRoute();
+        });
+        this._listen(el, 'loadedmetadata', () => {
+            if (!alive())
+                return;
+            this.record('LOADED_METADATA', { duration: Number(el.duration || 0) });
+            if (!this.hasPlayed && !this.playPending)
+                this._callPlay(this.activeAttempt && this.activeAttempt.url, 'loadedmetadata_retry');
+        });
+        this._listen(el, 'canplay', () => {
+            if (!alive())
+                return;
+            this.record('CAN_PLAY', { currentTime: Number(el.currentTime || 0) });
+            if (!this.hasPlayed && !this.playPending)
+                this._callPlay(this.activeAttempt && this.activeAttempt.url, 'canplay_retry');
         });
         this._listen(el, 'waiting', () => {
-            if (alive()) this.record('WAITING', { currentTime: Number(el.currentTime || 0) });
+            if (alive()) this.record('WAITING', { currentTime: Number(el.currentTime || 0), afterPlaying: !!this.hasPlayed });
         });
         this._listen(el, 'stalled', () => {
-            if (alive()) this.record('STALLED', { currentTime: Number(el.currentTime || 0) });
+            if (alive()) this.record('STALLED', { currentTime: Number(el.currentTime || 0), afterPlaying: !!this.hasPlayed });
         });
         this._listen(el, 'pause', () => {
             if (!alive())
@@ -16532,11 +16596,15 @@ window.LifeOSTvPlayer = {
             if (!alive())
                 return;
             const err = el.error;
-            this.record('ERROR', { source: 'video', code: err && err.code || 0, message: err && err.message || '' });
+            this.record('ERROR', { source: 'video', code: err && err.code || 0, message: err && err.message || '', engine: this.activeAttempt && this.activeAttempt.engine });
             if (!this.hasPlayed)
-                this._advanceSource('Video element báo lỗi trước khi phát');
-            else
-                this._setFailed('Luồng phát gặp lỗi sau khi đã chạy');
+                this._advanceAttempt('Video element báo lỗi trước khi phát');
+            else {
+                /* Không phá kênh đã có hình: một số WebView/HLS phát error muộn nhưng decoder vẫn chạy ổn. */
+                this.record('POST_PLAY_VIDEO_ERROR_IGNORED', { currentTime: Number(el.currentTime || 0) });
+                this.state = 'PLAYING';
+                this._setTitle(this.channel && this.channel.name, 'playing');
+            }
         });
         this._listen(el, 'volumechange', () => {
             if (!alive())
@@ -16549,12 +16617,6 @@ window.LifeOSTvPlayer = {
                 this.record('VOLUME_WRITE', { from: before.volume, to: after.volume });
             this._volumeSnapshot = after;
         });
-        this._listen(el, 'loadedmetadata', () => {
-            if (alive()) this.record('LOADED_METADATA', { duration: Number(el.duration || 0) });
-        });
-        this._listen(el, 'canplay', () => {
-            if (alive()) this.record('CAN_PLAY', { currentTime: Number(el.currentTime || 0) });
-        });
     },
     _destroyHls(reason) {
         if (!this.hls)
@@ -16565,6 +16627,7 @@ window.LifeOSTvPlayer = {
         try { h.destroy(); } catch (e) { }
     },
     _detachTransport(reason, clearSource) {
+        this._clearStartupTimer();
         this._removeListeners();
         this._destroyHls(reason);
         const el = this.video || this.bindVideo();
@@ -16579,88 +16642,169 @@ window.LifeOSTvPlayer = {
             try { el[name] = null; } catch (e) { }
         });
     },
-    _setTitle(channelName, failedText) {
+    _setTitle(channelName, mode, detail) {
         const el = document.getElementById('tv-channel-name');
         if (!el)
             return;
-        if (failedText) {
-            el.textContent = '📺 ' + String(channelName || 'Tivi Live') + ': ' + String(failedText);
+        if (mode === 'failed') {
+            el.textContent = '📺 ' + String(channelName || 'Tivi Live') + ': ' + String(detail || 'Không phát được nguồn hiện tại');
             el.className = 'mt-2 text-xs font-black text-rose-600 line-clamp-2 leading-snug p-1';
         }
-        else {
+        else if (mode === 'playing') {
             el.textContent = '📺 Đang phát: ' + String(channelName || 'Tivi Live');
+            el.className = 'mt-2 text-xs font-black text-rose-500 line-clamp-2 leading-snug p-1';
+        }
+        else {
+            el.textContent = '📺 Đang mở: ' + String(channelName || 'Tivi Live');
             el.className = 'mt-2 text-xs font-black text-rose-500 line-clamp-2 leading-snug p-1';
         }
     },
     _setFailed(reason) {
         if (this.state === 'FAILED')
             return;
+        this._clearStartupTimer();
         this.state = 'FAILED';
-        this.record('SESSION_FAILED', { reason: String(reason || '') });
-        this._setTitle(this.channel && this.channel.name, reason || 'Không phát được nguồn hiện tại');
+        this.record('SESSION_FAILED', { reason: String(reason || ''), attempts: this.attempts.length });
+        this._setTitle(this.channel && this.channel.name, 'failed', reason || 'Không phát được nguồn hiện tại');
     },
-    _isHlsUrl(url) {
+    _isHlsUrl(url, channel) {
         const u = String(url || '').toLowerCase();
-        return /\.m3u8?($|\?)/i.test(u) || u.indexOf('m3u8') >= 0 || u.indexOf('mpegurl') >= 0;
+        const meta = String(channel && (channel.format || channel.mime || channel.content_type || channel.stream_type || channel.protocol) || '').toLowerCase();
+        return /\.m3u8?($|\?|#)/i.test(u) || u.indexOf('m3u8') >= 0 || u.indexOf('mpegurl') >= 0 || /(?:playlist|manifest)(?:\.|\?|\/|$)/i.test(u) || /hls|mpegurl|m3u8/.test(meta);
     },
     _routeFor(url) {
         return String(url || '').indexOf('/proxy?url=') >= 0 ? 'proxy' : 'direct';
     },
-    _advanceSource(reason) {
+    _nativeHlsSupported() {
+        try {
+            if (!this.video || !this.video.canPlayType)
+                return false;
+            return !!(this.video.canPlayType('application/vnd.apple.mpegurl') || this.video.canPlayType('application/x-mpegURL'));
+        }
+        catch (e) {
+            return false;
+        }
+    },
+    _buildAttempts(sources, channel) {
+        const nativeHls = this._nativeHlsSupported();
+        const hlsJsReady = !!(window.Hls && window.Hls.isSupported && window.Hls.isSupported());
+        const attempts = [];
+        const seen = new Set();
+        const add = (url, engine) => {
+            const key = engine + '|' + url;
+            if (!url || seen.has(key))
+                return;
+            seen.add(key);
+            attempts.push({ url, engine, route: this._routeFor(url), hls: this._isHlsUrl(url, channel) });
+        };
+        sources.forEach(url => {
+            const hlsLike = this._isHlsUrl(url, channel);
+            if (!hlsLike) {
+                add(url, 'direct');
+                return;
+            }
+            /* Đường giống kênh PHIM QT: ưu tiên WebView native khi thiết bị nhận HLS; HLS.js là fallback có play đồng bộ trong click. */
+            if (nativeHls || !hlsJsReady) {
+                add(url, 'direct');
+                add(url, 'hlsjs');
+            }
+            else {
+                add(url, 'hlsjs');
+                add(url, 'direct');
+            }
+        });
+        const remembered = this._readGoodRoute(channel);
+        if (remembered) {
+            const pos = attempts.findIndex(x => x.url === remembered.url && x.engine === remembered.engine);
+            if (pos > 0)
+                attempts.unshift(attempts.splice(pos, 1)[0]);
+        }
+        return attempts;
+    },
+    _routeMemoryKey(channel) {
+        return String(channel && (channel.id || channel.name || channel.url) || '');
+    },
+    _readGoodRoute(channel) {
+        try {
+            const all = JSON.parse(localStorage.getItem('lifeos_tv_good_routes_v3') || '{}');
+            const row = all[this._routeMemoryKey(channel)];
+            if (row && row.url && row.engine)
+                return row;
+        }
+        catch (e) { }
+        return null;
+    },
+    _rememberGoodRoute() {
+        if (!this.channel || !this.activeAttempt)
+            return;
+        try {
+            const key = this._routeMemoryKey(this.channel);
+            const all = JSON.parse(localStorage.getItem('lifeos_tv_good_routes_v3') || '{}');
+            all[key] = { url: this.activeAttempt.url, engine: this.activeAttempt.engine, at: Date.now() };
+            const keys = Object.keys(all).sort((a, b) => Number(all[b] && all[b].at || 0) - Number(all[a] && all[a].at || 0));
+            keys.slice(40).forEach(k => delete all[k]);
+            localStorage.setItem('lifeos_tv_good_routes_v3', JSON.stringify(all));
+        }
+        catch (e) { }
+    },
+    _advanceAttempt(reason) {
         if (this._sourceFailing || this.hasPlayed)
             return false;
         this._sourceFailing = true;
-        const oldUrl = this.sources[this.sourceIndex] || '';
-        this.record('SOURCE_FAILED', { index: this.sourceIndex, url: oldUrl, reason: String(reason || '') });
-        this._detachTransport('source_fallback', true);
-        this.sourceIndex++;
+        const old = this.activeAttempt ? Object.assign({}, this.activeAttempt) : null;
+        this.record('ATTEMPT_ADVANCE', { index: this.attemptIndex, attempt: old, reason: String(reason || '') });
+        this._detachTransport('attempt_fallback', true);
+        this.attemptIndex++;
         this._sourceFailing = false;
-        if (this.sourceIndex >= this.sources.length) {
-            this._setFailed(reason || 'Các nguồn direct/proxy đều không phát được');
+        if (this.attemptIndex >= this.attempts.length) {
+            this._setFailed(reason || 'Các đường direct/HLS/proxy đều không phát được');
             return false;
         }
-        this._startCurrentSource();
-        return true;
+        return this._startCurrentAttempt();
     },
-    _startDirect(url, sessionId, attempt) {
-        if (!this._alive(sessionId, attempt))
+    _startDirect(attempt, sessionId, sourceAttempt) {
+        if (!this._alive(sessionId, sourceAttempt))
             return;
         const el = this.video;
         try {
-            el.dataset.lifeosTvEngine = 'webview-direct-single-owner';
-            this.record('DIRECT_ATTACH', { url, route: this._routeFor(url) });
-            this._writeSrc(url, 'direct_source');
+            el.dataset.lifeosTvEngine = 'webview-direct-gesture-v3';
+            this.record('DIRECT_ATTACH', { url: attempt.url, route: attempt.route, hls: !!attempt.hls });
+            this._writeSrc(attempt.url, 'direct_source');
             this._callLoad('direct_source');
-            this._callPlay(url);
+            /* Gọi play ngay trong stack sự kiện người dùng, không chờ metadata/manifest. */
+            this._callPlay(attempt.url, 'direct_sync_user_gesture');
+            this._armStartupTimer(sessionId, sourceAttempt, attempt.hls ? 18000 : 14000);
         }
         catch (e) {
             this.record('ERROR', { source: 'direct_attach', message: String(e && e.message || e) });
-            this._advanceSource('WebView direct lỗi khi gắn nguồn');
+            this._advanceAttempt('WebView direct lỗi khi gắn nguồn');
         }
     },
-    _startHls(url, sessionId, attempt) {
-        if (!this._alive(sessionId, attempt))
+    _startHls(attempt, sessionId, sourceAttempt) {
+        if (!this._alive(sessionId, sourceAttempt))
             return;
         const HlsCtor = window.Hls;
         if (!(HlsCtor && HlsCtor.isSupported && HlsCtor.isSupported())) {
-            this._startDirect(url, sessionId, attempt);
+            this.record('HLS_NOT_READY', { url: attempt.url });
+            this.preloadEngine();
+            this._advanceAttempt('HLS.js chưa sẵn sàng, chuyển sang đường WebView native');
             return;
         }
         const config = {
             enableWorker: true,
             lowLatencyMode: false,
-            manifestLoadingTimeOut: 16000,
-            levelLoadingTimeOut: 16000,
-            fragLoadingTimeOut: 18000,
-            manifestLoadingMaxRetry: 2,
-            levelLoadingMaxRetry: 2,
-            fragLoadingMaxRetry: 2,
-            fragLoadingRetryDelay: 1100,
-            fragLoadingMaxRetryTimeout: 7000,
+            manifestLoadingTimeOut: 18000,
+            levelLoadingTimeOut: 18000,
+            fragLoadingTimeOut: 20000,
+            manifestLoadingMaxRetry: 3,
+            levelLoadingMaxRetry: 3,
+            fragLoadingMaxRetry: 3,
+            fragLoadingRetryDelay: 900,
+            fragLoadingMaxRetryTimeout: 8000,
             startLevel: 0,
             capLevelToPlayerSize: true,
-            maxBufferLength: 10,
-            maxMaxBufferLength: 18,
+            maxBufferLength: 12,
+            maxMaxBufferLength: 22,
             backBufferLength: 0,
             liveSyncDurationCount: 3,
             liveMaxLatencyDurationCount: 8,
@@ -16673,87 +16817,111 @@ window.LifeOSTvPlayer = {
         }
         catch (e) {
             this.record('ERROR', { source: 'hls_create', message: String(e && e.message || e) });
-            this._advanceSource('Không tạo được HLS.js');
+            this._advanceAttempt('Không tạo được HLS.js');
             return;
         }
         this.hls = hls;
-        this.record('HLS_CREATE', { url, config: 'R610_R68_PICTURE_PATH' });
-        try { this.video.dataset.lifeosTvEngine = 'hlsjs-smartbox-lite-r68-picture-single-owner'; } catch (e) { }
+        this.record('HLS_CREATE', { url: attempt.url, config: 'R610_PHIM_QT_GESTURE_ROUTE_V3' });
+        try { this.video.dataset.lifeosTvEngine = 'hlsjs-gesture-v3'; } catch (e) { }
+        if (HlsCtor.Events.MEDIA_ATTACHED) {
+            hls.on(HlsCtor.Events.MEDIA_ATTACHED, () => {
+                if (!this._alive(sessionId, sourceAttempt) || this.hls !== hls)
+                    return;
+                this.record('HLS_MEDIA_ATTACHED', { url: attempt.url });
+                if (!this.hasPlayed && !this.playPending)
+                    this._callPlay(attempt.url, 'hls_media_attached_retry');
+            });
+        }
         hls.on(HlsCtor.Events.MANIFEST_PARSED, () => {
-            if (!this._alive(sessionId, attempt) || this.hls !== hls)
+            if (!this._alive(sessionId, sourceAttempt) || this.hls !== hls)
                 return;
-            this.record('HLS_MANIFEST_PARSED', { url, levels: hls.levels && hls.levels.length || 0 });
-            this._callPlay(url);
+            this.record('HLS_MANIFEST_PARSED', { url: attempt.url, levels: hls.levels && hls.levels.length || 0 });
+            if (!this.hasPlayed && !this.playPending)
+                this._callPlay(attempt.url, 'hls_manifest_retry');
         });
         hls.on(HlsCtor.Events.ERROR, (event, data) => {
-            if (!this._alive(sessionId, attempt) || this.hls !== hls || !data)
+            if (!this._alive(sessionId, sourceAttempt) || this.hls !== hls || !data)
                 return;
-            this.record('ERROR', {
-                source: 'hls',
-                fatal: !!data.fatal,
-                type: String(data.type || ''),
-                details: String(data.details || '')
-            });
+            this.record('ERROR', { source: 'hls', fatal: !!data.fatal, type: String(data.type || ''), details: String(data.details || '') });
             if (!data.fatal)
                 return;
-            if (!this.hasPlayed)
-                this._advanceSource('Nguồn HLS hiện tại lỗi trước khi phát');
-            else
-                this._setFailed('Nguồn HLS gặp lỗi fatal sau khi đã phát');
+            if (this.hasPlayed) {
+                /* Tuyệt đối không reload/recover/đổi nguồn sau khi đã có hình. Giữ kênh đang chạy như đường PHIM QT. */
+                this.record('POST_PLAY_HLS_FATAL_IGNORED', { type: String(data.type || ''), details: String(data.details || '') });
+                this.state = 'PLAYING';
+                this._setTitle(this.channel && this.channel.name, 'playing');
+                return;
+            }
+            if (data.type === HlsCtor.ErrorTypes.NETWORK_ERROR && this._networkRecoveries < 1) {
+                this._networkRecoveries++;
+                this.record('HLS_START_LOAD', { url: attempt.url, boundedRecovery: 1 });
+                setTimeout(() => {
+                    if (!this._alive(sessionId, sourceAttempt) || this.hls !== hls || this.hasPlayed)
+                        return;
+                    try {
+                        hls.startLoad();
+                        if (!this.playPending)
+                            this._callPlay(attempt.url, 'hls_network_recovery_retry');
+                    }
+                    catch (e) {
+                        this._advanceAttempt('HLS network recovery lỗi');
+                    }
+                }, 700);
+                return;
+            }
+            if (data.type === HlsCtor.ErrorTypes.MEDIA_ERROR && this._mediaRecoveries < 1) {
+                this._mediaRecoveries++;
+                this.record('HLS_RECOVER_MEDIA', { url: attempt.url, boundedRecovery: 1 });
+                try {
+                    hls.recoverMediaError();
+                    if (!this.playPending)
+                        this._callPlay(attempt.url, 'hls_media_recovery_retry');
+                }
+                catch (e) {
+                    this._advanceAttempt('HLS media recovery lỗi');
+                }
+                return;
+            }
+            this._advanceAttempt('Nguồn HLS hiện tại lỗi trước khi phát');
         });
         try {
-            this.record('HLS_ATTACH_MEDIA', { url });
+            this.record('HLS_ATTACH_MEDIA', { url: attempt.url });
             hls.attachMedia(this.video);
-            this.record('SRC_WRITE', { url, reason: 'hls_load_source' });
-            this.record('HLS_LOAD_SOURCE', { url });
-            hls.loadSource(url);
+            this.record('HLS_LOAD_SOURCE', { url: attempt.url });
+            hls.loadSource(attempt.url);
+            /* Điểm sửa quan trọng: play ngay trong click/keydown, không đợi MANIFEST_PARSED làm mất user activation. */
+            this._callPlay(attempt.url, 'hls_sync_after_loadSource');
+            this._armStartupTimer(sessionId, sourceAttempt, 22000);
         }
         catch (e) {
             this.record('ERROR', { source: 'hls_attach', message: String(e && e.message || e) });
-            this._advanceSource('HLS.js lỗi khi attach/loadSource');
+            this._advanceAttempt('HLS.js lỗi khi attach/loadSource');
         }
     },
-    _startCurrentSource() {
-        const url = String(this.sources[this.sourceIndex] || '').trim();
-        if (!url) {
-            this._setFailed('Không có nguồn phát hợp lệ');
+    _startCurrentAttempt() {
+        const attempt = this.attempts[this.attemptIndex];
+        if (!attempt) {
+            this._setFailed('Không còn đường phát hợp lệ');
             return false;
         }
         this.sourceAttempt++;
         const sessionId = this.sessionId;
-        const attempt = this.sourceAttempt;
+        const sourceAttempt = this.sourceAttempt;
+        this.activeAttempt = Object.assign({}, attempt);
         this.hasPlayed = false;
-        this.playRequested = false;
+        this.playPending = false;
+        this.playCallCount = 0;
+        this.playRejectCount = 0;
         this._sourceFailing = false;
+        this._networkRecoveries = 0;
+        this._mediaRecoveries = 0;
         this.state = 'STARTING';
-        this.record('SOURCE_START', { index: this.sourceIndex, url, route: this._routeFor(url) });
-        this._bindSessionEvents(sessionId, attempt);
-        if (!this._isHlsUrl(url)) {
-            this._startDirect(url, sessionId, attempt);
-            return true;
-        }
-        if (window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
-            this._startHls(url, sessionId, attempt);
-            return true;
-        }
-        const nativeHls = this.video && this.video.canPlayType && (this.video.canPlayType('application/vnd.apple.mpegurl') || this.video.canPlayType('application/x-mpegURL'));
-        if (nativeHls) {
-            this._startDirect(url, sessionId, attempt);
-            return true;
-        }
-        const preload = this.preloadEngine();
-        if (preload && typeof preload.then === 'function') {
-            preload.then(ok => {
-                if (!this._alive(sessionId, attempt))
-                    return;
-                if (ok)
-                    this._startHls(url, sessionId, attempt);
-                else
-                    this._startDirect(url, sessionId, attempt);
-            });
-            return true;
-        }
-        this._startDirect(url, sessionId, attempt);
+        this.record('ATTEMPT_START', { index: this.attemptIndex, total: this.attempts.length, attempt: this.activeAttempt });
+        this._bindSessionEvents(sessionId, sourceAttempt);
+        if (attempt.engine === 'hlsjs')
+            this._startHls(attempt, sessionId, sourceAttempt);
+        else
+            this._startDirect(attempt, sessionId, sourceAttempt);
         return true;
     },
     openChannel(channel, userEvent, sourceQueue) {
@@ -16765,28 +16933,30 @@ window.LifeOSTvPlayer = {
             return false;
         }
         this.destroySession('channel_change', true, false);
-        this.sessionId++;
-        this.sourceAttempt = 0;
         this.state = 'STARTING';
         this.channel = channel;
-        this.sources = sources;
-        this.sourceIndex = 0;
+        this._trustedGesture = !!(userEvent && userEvent.isTrusted);
+        this._eventType = String(userEvent && userEvent.type || '');
+        this.attempts = this._buildAttempts(sources, channel);
+        this.attemptIndex = 0;
+        this.activeAttempt = null;
         this.hasPlayed = false;
-        this.playRequested = false;
-        this._sourceFailing = false;
+        this.playPending = false;
         try {
             if (window.speechSynthesis && typeof window.speechSynthesis.cancel === 'function')
                 window.speechSynthesis.cancel();
         }
         catch (e) { }
-        this._setTitle(channel.name || 'Tivi Live', '');
+        this._setTitle(channel.name || 'Tivi Live', 'opening');
         this.record('SESSION_START', {
             channel: String(channel.name || ''),
             sourceCount: sources.length,
-            trustedEvent: !!(userEvent && userEvent.isTrusted),
-            eventType: String(userEvent && userEvent.type || '')
+            attemptCount: this.attempts.length,
+            trustedEvent: this._trustedGesture,
+            eventType: this._eventType,
+            nativeHls: this._nativeHlsSupported()
         });
-        return this._startCurrentSource();
+        return this._startCurrentAttempt();
     },
     destroySession(reason, clearSource, setStopped) {
         const hadSession = !!(this.video && (this.hls || this.video.currentSrc || this.video.getAttribute('src') || this.state !== 'IDLE'));
@@ -16795,11 +16965,13 @@ window.LifeOSTvPlayer = {
         this.sessionId++;
         this._detachTransport(reason || 'destroy', clearSource !== false);
         this.channel = null;
-        this.sources = [];
-        this.sourceIndex = 0;
+        this.attempts = [];
+        this.attemptIndex = 0;
+        this.activeAttempt = null;
         this.hasPlayed = false;
-        this.playRequested = false;
-        this._sourceFailing = false;
+        this.playPending = false;
+        this._trustedGesture = false;
+        this._eventType = '';
         if (setStopped !== false)
             this.state = 'STOPPED';
         return true;
@@ -16883,7 +17055,7 @@ window.MediaHub = {
                         }
                         if (typeof node !== 'object')
                             return;
-                        const url = String(node.url || node.src || node.stream_url || node.streamUrl || '').trim();
+                        const url = String(node.play_url || node.playUrl || node.url || node.src || node.stream_url || node.streamUrl || node.stream || node.link || node.m3u8 || '').trim();
                         if (url) {
                             let type = String(node.type || '').toLowerCase();
                             if (type !== 'tv' && type !== 'radio')
@@ -17401,23 +17573,58 @@ scrollRemoteTarget(target) {
         window.LIFEOS_DEBUG && console.warn('[MediaHub] player load error', { type, reason: msg, url });
     },
     buildSourceQueue(channel) {
-        const raw = [
-            channel === null || channel === void 0 ? void 0 : channel.url,
-            channel === null || channel === void 0 ? void 0 : channel.src,
-            channel === null || channel === void 0 ? void 0 : channel.streamUrl,
-            channel === null || channel === void 0 ? void 0 : channel.stream_url,
-            channel === null || channel === void 0 ? void 0 : channel.stream,
-            channel === null || channel === void 0 ? void 0 : channel.link,
-            channel === null || channel === void 0 ? void 0 : channel.m3u8,
-            channel === null || channel === void 0 ? void 0 : channel.backupUrl,
-            channel === null || channel === void 0 ? void 0 : channel.url2,
-            channel === null || channel === void 0 ? void 0 : channel.proxyUrl
-        ];
-        const type = String((channel === null || channel === void 0 ? void 0 : channel.type) || (channel === null || channel === void 0 ? void 0 : channel.kind) || (channel === null || channel === void 0 ? void 0 : channel.__lifeosMediaType) || '').toLowerCase();
+        const seenInput = new Set();
+        const raw = [];
+        const collect = (value) => {
+            if (!value)
+                return;
+            if (Array.isArray(value)) {
+                value.forEach(collect);
+                return;
+            }
+            if (typeof value === 'object') {
+                collect(value.play_url || value.playUrl || value.url || value.src || value.stream_url || value.streamUrl || value.stream || value.link || value.m3u8 || value.manifest_url || value.manifestUrl);
+                return;
+            }
+            const u = String(value || '').trim();
+            if (!u || seenInput.has(u))
+                return;
+            seenInput.add(u);
+            raw.push(u);
+        };
+        [
+            channel && channel.play_url,
+            channel && channel.playUrl,
+            channel && channel.url,
+            channel && channel.src,
+            channel && channel.streamUrl,
+            channel && channel.stream_url,
+            channel && channel.stream,
+            channel && channel.link,
+            channel && channel.m3u8,
+            channel && channel.manifest_url,
+            channel && channel.manifestUrl,
+            channel && channel.playback_url,
+            channel && channel.playbackUrl,
+            channel && channel.source_url,
+            channel && channel.sourceUrl,
+            channel && channel.backup_urls,
+            channel && channel.backupUrls,
+            channel && channel.backup_play_urls,
+            channel && channel.backupPlayUrls,
+            channel && channel.backupUrl,
+            channel && channel.url2,
+            channel && channel.urls,
+            channel && channel.sources,
+            channel && channel.mirrors,
+            channel && channel.fallbacks,
+            channel && channel.proxyUrl
+        ].forEach(collect);
+        const type = String((channel && channel.type) || (channel && channel.kind) || (channel && channel.__lifeosMediaType) || '').toLowerCase();
         const seen = new Set();
         const out = [];
         const add = (u) => {
-            u = (u || '').trim();
+            u = String(u || '').trim();
             if (!u || seen.has(u))
                 return;
             seen.add(u);
@@ -17425,15 +17632,13 @@ scrollRemoteTarget(target) {
         };
         const isProxy = (u) => String(u || '').includes('/proxy?url=');
         raw.forEach(u => {
-            u = (u || '').trim();
-            if (!u)
-                return;
             try {
                 const shouldAddProxy = type === 'tv' || (window.lifeosNeedsProxy && window.lifeosNeedsProxy(u, channel));
                 const proxy = window.lifeosProxyUrl ? window.lifeosProxyUrl(u) : '';
                 const likelyCorsOnlyTv = type === 'tv' && /(^|\.)vtvdigital\.vn\//i.test(u.replace(/^https?:\/\//i, ''));
                 if (likelyCorsOnlyTv && proxy && proxy !== u && !isProxy(u)) {
                     add(proxy);
+                    add(u);
                     return;
                 }
                 add(u);
