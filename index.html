@@ -16230,7 +16230,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 window.LifeOSTvPlayer = {
-    owner: 'LIFEOS_TV_R610_R6_EXACT_PICTURE_BUFFER_CUSHION_SINGLE_OWNER',
+    owner: 'LIFEOS_TV_R610_R5_EXACT_R610_PICTURE_KERNEL_SINGLE_OWNER',
     seq: 0,
     hls: null,
     video: null,
@@ -16466,27 +16466,23 @@ window.LifeOSTvPlayer = {
         const config = {
             enableWorker: true,
             lowLatencyMode: false,
-            manifestLoadingTimeOut: 20000,
-            levelLoadingTimeOut: 20000,
-            fragLoadingTimeOut: 25000,
-            manifestLoadingMaxRetry: 3,
-            levelLoadingMaxRetry: 3,
-            fragLoadingMaxRetry: 4,
-            fragLoadingRetryDelay: 900,
-            fragLoadingMaxRetryTimeout: 12000,
+            manifestLoadingTimeOut: 16000,
+            levelLoadingTimeOut: 16000,
+            fragLoadingTimeOut: 18000,
+            manifestLoadingMaxRetry: 2,
+            levelLoadingMaxRetry: 2,
+            fragLoadingMaxRetry: 2,
+            fragLoadingRetryDelay: 1100,
+            fragLoadingMaxRetryTimeout: 7000,
             startLevel: 0,
             capLevelToPlayerSize: true,
-            maxBufferLength: 24,
-            maxMaxBufferLength: 36,
-            backBufferLength: 12,
-            liveSyncDurationCount: 5,
-            liveMaxLatencyDurationCount: 12,
-            maxBufferHole: 0.75,
-            maxFragLookUpTolerance: 0.5,
-            nudgeOffset: 0.1,
-            nudgeMaxRetry: 5,
-            abrBandWidthFactor: 0.68,
-            abrBandWidthUpFactor: 0.45
+            maxBufferLength: 10,
+            maxMaxBufferLength: 18,
+            backBufferLength: 0,
+            liveSyncDurationCount: 3,
+            liveMaxLatencyDurationCount: 8,
+            abrBandWidthFactor: 0.72,
+            abrBandWidthUpFactor: 0.55
         };
         let hls;
         try { hls = new HlsCtor(config); }
@@ -16497,7 +16493,7 @@ window.LifeOSTvPlayer = {
         this.hls = hls;
         const el = this.video;
         try {
-            el.dataset.lifeosTvEngine = 'hlsjs-smartbox-r6-picture-buffer-cushion';
+            el.dataset.lifeosTvEngine = 'hlsjs-smartbox-lite-r68-picture-exact-r5';
             el.dataset.lifeosTvBackgroundLoops = '0';
             el.setAttribute('controls', '');
             el.setAttribute('playsinline', '');
