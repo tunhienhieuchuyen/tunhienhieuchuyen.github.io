@@ -8044,6 +8044,7 @@ body.music-player-active #mini-player {
 <button class="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-sm active:scale-95 transition whitespace-nowrap border border-primary" id="tab-media-music" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('music', false, {userIntent:true,source:'media-subtab'})" role="tab" tabindex="0">🎵 Nhạc MP3</button>
 <button class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap" id="tab-media-radio" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('radio', false, {userIntent:true,source:'media-subtab'})" role="tab" tabindex="0">📻 Radio Live</button>
 <button class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap" id="tab-media-tv" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('tv', false, {userIntent:true,source:'media-subtab'})" role="tab" tabindex="0">📺 Tivi Live</button>
+<button class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap" id="tab-media-youtube" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.switchTab('youtube', false, {userIntent:true,source:'media-subtab'})" role="tab" tabindex="0">▶ YouTube</button>
 </div>
 <div class="flex-grow min-h-0 w-full grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
 <div class="hidden lg:flex lg:col-span-3 flex-col gap-1.5 overflow-y-auto pr-1" id="media-group-sidebar">
@@ -8057,6 +8058,7 @@ body.music-player-active #mini-player {
 </div>
 <div class="hidden space-y-2" id="radio-list-container"></div>
 <div class="hidden grid grid-cols-2 gap-3" id="tv-list-container"></div>
+<div aria-label="Danh sách YouTube" class="hidden space-y-2" id="youtube-list-container"></div>
 </div>
 </div>
 <div class="col-span-1 lg:col-span-4 flex flex-col gap-3 justify-start">
@@ -8085,6 +8087,22 @@ body.music-player-active #mini-player {
 </div>
 </div>
 <audio class="hidden" id="radio-audio-element" preload="none"></audio>
+</div>
+<div class="w-full bg-white rounded-2xl border border-red-200 p-2 shadow-sm" id="youtube-player-container" style="display: none;">
+<div aria-label="Trình phát YouTube" id="yt-player-wrapper">
+<div id="yt-player-stage">
+<div id="yt-player-iframe"></div>
+<div aria-hidden="true" id="yt-player-fallback"></div>
+</div>
+</div>
+<div class="mt-2 text-xs font-black text-red-600 leading-snug p-1" id="yt-player-title">▶ YouTube: <span>Chọn video hoặc playlist trong danh sách</span></div>
+<div class="mt-1 text-[10px] font-bold text-slate-500 px-1" id="yt-player-status">Danh sách được đọc trực tiếp từ file danhsach.js.</div>
+<div class="youtube-player-controls" id="youtube-player-controls">
+<button aria-label="Mục YouTube trước" id="yt-prev-btn" onclick="window.LifeOSYouTubeR65.previous()" type="button"><i class="ph-fill ph-skip-back"></i></button>
+<button aria-label="Phát hoặc tạm dừng YouTube" id="yt-toggle-btn" onclick="window.LifeOSYouTubeR65.toggle()" type="button"><i class="ph-fill ph-play"></i></button>
+<button aria-label="Mục YouTube sau" id="yt-next-btn" onclick="window.LifeOSYouTubeR65.next()" type="button"><i class="ph-fill ph-skip-forward"></i></button>
+<button aria-label="Trở về danh sách YouTube" id="yt-back-list-btn" onclick="window.LifeOSYouTubeR65.focusList()" type="button"><i class="ph-bold ph-arrow-u-up-left"></i><span>Danh sách</span></button>
+</div>
 </div>
 </div>
 </div>
@@ -16667,7 +16685,7 @@ window.MediaHub = {
     remoteEdgeKey: '',
     remoteEdgeAt: 0,
     remoteEdgeWindow: 700,
-    smartboxListOffsetByTab: { radio: 0, tv: 0 },
+    smartboxListOffsetByTab: { radio: 0, tv: 0, youtube: 0 },
     owner: 'LIFEOS_MEDIAHUB_CORE_REBUILD_20260714',
     cleanOwner: 'LIFEOS_MEDIAHUB_CORE_REBUILD_20260714',
     groupByTab: { radio: 'all', tv: 'all' },
@@ -17114,38 +17132,52 @@ renderLists() {
 scrollRemoteTarget(target) {
     if (!target)
         return;
-    if (this.isSmartboxMediaMode() && (this.currentTab === 'radio' || this.currentTab === 'tv')) {
-        this.positionSmartboxListTarget(target, false);
-        return;
+    const reveal = (scrollBox) => {
+        if (!scrollBox)
+            return false;
+        try {
+            const tr = target.getBoundingClientRect();
+            const cr = scrollBox.getBoundingClientRect();
+            const pad = 8;
+            let delta = 0;
+            if (tr.top < cr.top + pad)
+                delta = tr.top - (cr.top + pad);
+            else if (tr.bottom > cr.bottom - pad)
+                delta = tr.bottom - (cr.bottom - pad);
+            if (Math.abs(delta) > 1)
+                scrollBox.scrollTop = Math.max(0, (scrollBox.scrollTop || 0) + delta);
+            return true;
+        }
+        catch (e) { return false; }
+    };
+    if (this.isSmartboxMediaMode()) {
+        const sidebar = document.getElementById('media-group-sidebar');
+        const viewport = document.getElementById('music-list-container');
+        if (sidebar && sidebar.contains(target)) {
+            reveal(sidebar);
+            return;
+        }
+        if (viewport && viewport.contains(target)) {
+            this.positionSmartboxListTarget(target, false);
+            return;
+        }
     }
     let scrollBox = null;
     const tvList = target.closest && target.closest('#tv-list-container');
     const radioList = target.closest && target.closest('#radio-list-container');
+    const youtubeList = target.closest && target.closest('#youtube-list-container');
     const mp3List = target.closest && target.closest('#mp3-list-container');
     if (tvList)
         scrollBox = this.getListScrollOwner('tv');
     else if (radioList)
         scrollBox = this.getListScrollOwner('radio');
+    else if (youtubeList)
+        scrollBox = document.getElementById('music-list-container');
     else if (mp3List)
         scrollBox = this.getListScrollOwner('music');
     if (scrollBox) {
-        const reveal = () => {
-            try {
-                const tr = target.getBoundingClientRect();
-                const cr = scrollBox.getBoundingClientRect();
-                const pad = 8;
-                let delta = 0;
-                if (tr.top < cr.top + pad)
-                    delta = tr.top - (cr.top + pad);
-                else if (tr.bottom > cr.bottom - pad)
-                    delta = tr.bottom - (cr.bottom - pad);
-                if (Math.abs(delta) > 1)
-                    scrollBox.scrollTop = Math.max(0, (scrollBox.scrollTop || 0) + delta);
-            }
-            catch (e) { }
-        };
-        reveal();
-        requestAnimationFrame(reveal);
+        reveal(scrollBox);
+        requestAnimationFrame(() => reveal(scrollBox));
         return;
     }
     if (typeof target.scrollIntoView === 'function') {
@@ -17293,6 +17325,8 @@ getSmartboxListForTab(tab) {
         return document.getElementById('tv-list-container');
     if (tab === 'radio')
         return document.getElementById('radio-list-container');
+    if (tab === 'youtube')
+        return document.getElementById('youtube-list-container');
     return null;
 },
 ensureSmartboxKeySink() {
@@ -17318,42 +17352,59 @@ prepareSmartboxRemoteSurface() {
     if (!this.isSmartboxMediaMode())
         return false;
     const viewport = document.getElementById('music-list-container');
+    const tab = this.currentTab || 'music';
     if (viewport) {
         try {
-            viewport.scrollTop = 0;
-            viewport.scrollLeft = 0;
-            viewport.style.setProperty('overflow', 'hidden', 'important');
-            viewport.style.setProperty('overflow-y', 'hidden', 'important');
+            viewport.style.setProperty('overflow', 'auto', 'important');
+            viewport.style.setProperty('overflow-y', 'auto', 'important');
             viewport.style.setProperty('overflow-x', 'hidden', 'important');
             viewport.style.setProperty('scroll-behavior', 'auto', 'important');
-            viewport.style.setProperty('touch-action', 'none', 'important');
+            viewport.style.setProperty('touch-action', 'pan-y', 'important');
+            viewport.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+            viewport.style.setProperty('overscroll-behavior', 'contain', 'important');
+            if (viewport.dataset.lifeosScrollTab !== tab) {
+                viewport.dataset.lifeosScrollTab = tab;
+                const remembered = Number((this.smartboxListOffsetByTab && this.smartboxListOffsetByTab[tab]) || 0);
+                viewport.scrollTop = Math.max(0, remembered);
+                viewport.scrollLeft = 0;
+            }
         }
         catch (e) { }
     }
-    ['radio-list-container', 'tv-list-container'].forEach(id => {
+    ['radio-list-container', 'tv-list-container', 'youtube-list-container'].forEach(id => {
         const list = document.getElementById(id);
         if (!list)
             return;
         try {
-            list.scrollTop = 0;
-            list.scrollLeft = 0;
-            list.style.setProperty('position', 'relative', 'important');
+            list.style.setProperty('position', 'static', 'important');
+            list.style.setProperty('top', 'auto', 'important');
             list.style.setProperty('overflow', 'visible', 'important');
             list.style.setProperty('overflow-y', 'visible', 'important');
             list.style.setProperty('overflow-x', 'visible', 'important');
             list.style.setProperty('scroll-behavior', 'auto', 'important');
-            list.style.setProperty('touch-action', 'none', 'important');
+            list.style.setProperty('touch-action', 'pan-y', 'important');
             list.style.setProperty('transform', 'none', 'important');
-            if (id === 'tv-list-container') {
-                list.style.setProperty('display', 'block', 'important');
+            list.removeAttribute('data-lifeos-window-offset');
+            if (id === 'tv-list-container')
                 list.style.setProperty('grid-template-columns', 'none', 'important');
-            }
         }
         catch (e) { }
     });
+    const sidebar = document.getElementById('media-group-sidebar');
+    if (sidebar) {
+        try {
+            sidebar.style.setProperty('overflow-y', 'auto', 'important');
+            sidebar.style.setProperty('overflow-x', 'hidden', 'important');
+            sidebar.style.setProperty('touch-action', 'pan-y', 'important');
+            sidebar.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+            sidebar.style.setProperty('overscroll-behavior', 'contain', 'important');
+            sidebar.style.setProperty('scroll-behavior', 'auto', 'important');
+        }
+        catch (e) { }
+    }
     const root = document.getElementById('l64f-panel-music') || document.getElementById('view-music');
     if (root) {
-        const nodes = root.querySelectorAll('#media-subtabs button,#media-group-sidebar button,#media-group-mobile-bar button,#radio-list-container .media-item,#tv-list-container .media-item,#mp3-list-container .song-row,#radio-player-container button,#tv-player-container button');
+        const nodes = root.querySelectorAll('#media-subtabs button,#media-group-sidebar button,#media-group-mobile-bar button,#radio-list-container .media-item,#tv-list-container .media-item,#youtube-list-container .youtube-media-item,#mp3-list-container .song-row,#radio-player-container button,#tv-player-container button,#youtube-player-controls button');
         Array.prototype.forEach.call(nodes, el => {
             if (!el || el.id === 'lifeos-smartbox-media-key-sink')
                 return;
@@ -17388,35 +17439,27 @@ releaseSmartboxRemoteSurface() {
     return true;
 },
 positionSmartboxListTarget(target, force) {
-    if (!this.isSmartboxMediaMode() || !target || (this.currentTab !== 'radio' && this.currentTab !== 'tv'))
+    if (!this.isSmartboxMediaMode() || !target || ['radio', 'tv', 'youtube'].indexOf(this.currentTab) < 0)
         return false;
     const viewport = document.getElementById('music-list-container');
     const list = this.getSmartboxListForTab(this.currentTab);
     if (!viewport || !list || !list.contains(target))
         return false;
     this.prepareSmartboxRemoteSurface();
-    const tab = this.currentTab;
-    let offset = Number((this.smartboxListOffsetByTab && this.smartboxListOffsetByTab[tab]) || 0);
-    const viewH = Math.max(40, Number(viewport.clientHeight || 0));
-    const targetTop = Number(target.offsetTop || 0);
-    const targetH = Math.max(1, Number(target.offsetHeight || 0));
-    const targetBottom = targetTop + targetH;
-    const pad = 8;
-    if (force || targetTop < offset + pad)
-        offset = Math.max(0, targetTop - pad);
-    if (targetBottom > offset + viewH - pad)
-        offset = Math.max(0, targetBottom - viewH + pad);
-    const contentH = Math.max(Number(list.scrollHeight || 0), targetBottom);
-    const maxOffset = Math.max(0, contentH - viewH + pad);
-    offset = Math.max(0, Math.min(offset, maxOffset));
-    if (!this.smartboxListOffsetByTab)
-        this.smartboxListOffsetByTab = { radio: 0, tv: 0 };
-    this.smartboxListOffsetByTab[tab] = offset;
     try {
-        viewport.scrollTop = 0;
-        list.scrollTop = 0;
-        list.style.setProperty('top', (-offset) + 'px', 'important');
-        list.setAttribute('data-lifeos-window-offset', String(Math.round(offset)));
+        const tr = target.getBoundingClientRect();
+        const cr = viewport.getBoundingClientRect();
+        const pad = 8;
+        let delta = 0;
+        if (force || tr.top < cr.top + pad)
+            delta = tr.top - (cr.top + pad);
+        else if (tr.bottom > cr.bottom - pad)
+            delta = tr.bottom - (cr.bottom - pad);
+        if (Math.abs(delta) > 1)
+            viewport.scrollTop = Math.max(0, (viewport.scrollTop || 0) + delta);
+        if (!this.smartboxListOffsetByTab)
+            this.smartboxListOffsetByTab = { radio: 0, tv: 0, youtube: 0 };
+        this.smartboxListOffsetByTab[this.currentTab] = viewport.scrollTop || 0;
     }
     catch (e) { }
     return true;
@@ -18152,8 +18195,8 @@ highlightRemoteZones() {
     }
     if (this.isSmartboxMediaMode()) {
         this.prepareSmartboxRemoteSurface();
-        if (target && this.activeZone === 'list')
-            this.positionSmartboxListTarget(target, false);
+        if (target)
+            this.scrollRemoteTarget(target);
         return;
     }
     if (target) {
@@ -19289,26 +19332,25 @@ function isMini() {
     function updateMediaTabState() {
         const tab = (window.MediaHub && window.MediaHub.currentTab) || 'music';
         document.body.dataset.l64fMediaTab = tab;
+        document.body.dataset.lifeosMediaTab = tab;
         const mp3 = document.getElementById('mp3-list-container');
         const radio = document.getElementById('radio-list-container');
         const tv = document.getElementById('tv-list-container');
+        const youtube = document.getElementById('youtube-list-container');
         if (!mp3 || !radio || !tv)
             return;
-        if (tab === 'tv') {
-            mp3.style.setProperty('display', 'none', 'important');
-            radio.style.setProperty('display', 'none', 'important');
-            tv.style.setProperty('display', 'grid', 'important');
-        }
-        else if (tab === 'radio') {
-            mp3.style.setProperty('display', 'none', 'important');
-            tv.style.setProperty('display', 'none', 'important');
-            radio.style.setProperty('display', 'block', 'important');
-        }
-        else {
-            radio.style.setProperty('display', 'none', 'important');
-            tv.style.setProperty('display', 'none', 'important');
-            mp3.style.setProperty('display', 'block', 'important');
-        }
+        const show = function (el, on, mode) {
+            if (!el) return;
+            el.hidden = !on;
+            el.classList.toggle('hidden', !on);
+            el.style.setProperty('display', on ? (mode || 'block') : 'none', 'important');
+            el.style.setProperty('visibility', on ? 'visible' : 'hidden', 'important');
+            el.style.setProperty('pointer-events', on ? 'auto' : 'none', 'important');
+        };
+        show(mp3, tab === 'music', 'block');
+        show(radio, tab === 'radio', 'block');
+        show(tv, tab === 'tv', 'grid');
+        show(youtube, tab === 'youtube', 'block');
     }
     function groupMap(pack) {
         const m = new Map();
@@ -19526,7 +19568,7 @@ function isMini() {
                 catch (e) { }
             }
             try {
-                const currentMediaTab = window.MediaHub && ['music', 'radio', 'tv'].indexOf(window.MediaHub.currentTab) >= 0 ? window.MediaHub.currentTab : 'music';
+                const currentMediaTab = window.MediaHub && ['music', 'radio', 'tv', 'youtube'].indexOf(window.MediaHub.currentTab) >= 0 ? window.MediaHub.currentTab : 'music';
                 (_b = (_a = window.MediaHub) === null || _a === void 0 ? void 0 : _a.init) === null || _b === void 0 ? void 0 : _b.call(_a, false, { userIntent: true, targetTab: currentMediaTab, silent: true, preserveTab: true });
             }
             catch (e) { }
@@ -19601,17 +19643,17 @@ function isMini() {
         tabs.addEventListener('click', function (e) {
             if (!document.body.classList.contains('lifeos-landscape-mini-pc') || document.body.dataset.lifeosLandscapeRootMode !== 'music')
                 return;
-            const btn = e.target && e.target.closest ? e.target.closest('#tab-media-music,#tab-media-radio,#tab-media-tv') : null;
+            const btn = e.target && e.target.closest ? e.target.closest('#tab-media-music,#tab-media-radio,#tab-media-tv,#tab-media-youtube') : null;
             if (!btn || !tabs.contains(btn) || !window.MediaHub)
                 return;
             e.preventDefault();
             e.stopPropagation();
             if (typeof e.stopImmediatePropagation === 'function')
                 e.stopImmediatePropagation();
-            const tab = btn.id === 'tab-media-radio' ? 'radio' : (btn.id === 'tab-media-tv' ? 'tv' : 'music');
+            const tab = btn.id === 'tab-media-radio' ? 'radio' : (btn.id === 'tab-media-tv' ? 'tv' : (btn.id === 'tab-media-youtube' ? 'youtube' : 'music'));
             document.body.dataset.lifeosRemoteZone = 'panel';
             window.MediaHub.activeZone = 'tabs';
-            window.MediaHub.idxTabs = tab === 'music' ? 0 : (tab === 'radio' ? 1 : 2);
+            window.MediaHub.idxTabs = tab === 'music' ? 0 : (tab === 'radio' ? 1 : (tab === 'tv' ? 2 : 3));
             window.MediaHub.switchTab(tab, false, { userIntent: true, source: 'smartbox-direct-subtab' });
             setTimeout(function () {
                 updateMediaTabState();
@@ -19622,7 +19664,7 @@ function isMini() {
             }, 0);
         }, true);
         tabs.addEventListener('pointerdown', function (e) {
-            const btn = e.target && e.target.closest ? e.target.closest('#tab-media-music,#tab-media-radio,#tab-media-tv') : null;
+            const btn = e.target && e.target.closest ? e.target.closest('#tab-media-music,#tab-media-radio,#tab-media-tv,#tab-media-youtube') : null;
             if (!btn)
                 return;
             document.body.dataset.lifeosRemoteZone = 'panel';
@@ -19694,7 +19736,7 @@ function isMini() {
         document.body.dataset.lifeosRemoteZone = 'panel';
         if (mode === 'music' && window.MediaHub) {
             const tabs = Array.from(document.querySelectorAll('#media-subtabs button'));
-            let idx = ['music', 'radio', 'tv'].indexOf(window.MediaHub.currentTab || 'music');
+            let idx = ['music', 'radio', 'tv', 'youtube'].indexOf(window.MediaHub.currentTab || 'music');
             if (idx < 0) idx = 0;
             window.MediaHub.activeZone = 'tabs';
             window.MediaHub.idxTabs = idx;
@@ -27256,187 +27298,124 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
   }
 }
 </style>
-<script id="lifeos-mobile-media-touch-scroll-core-js">(function () {
-    const PATCH_ID = 'R11_MOBILE_UNIVERSAL_TOUCH_SCROLL';
-    if (window.__lifeosR11UniversalTouchScroll)
+<script id="lifeos-mobile-media-touch-scroll-core-js">
+(function () {
+    const PATCH_ID = 'R10_MEDIA_NATIVE_TOUCH_REMOTE_SCROLL_CLEAN';
+    if (window.__lifeosR10MediaNativeScroll)
         return;
-    window.__lifeosR11UniversalTouchScroll = true;
-    const ROOT_SELECTOR = '#view-music';
-    const VSCROLL_SELECTOR = '#music-list-container,#mp3-list-container,#radio-list-container,#tv-list-container,#media-group-sidebar';
-    const HSCROLL_SELECTOR = '#media-subtabs,#media-group-mobile-bar';
-    const CARD_SELECTOR = '#radio-list-container .media-item,#tv-list-container .media-item,#mp3-list-container .song-row,#music-list-container .song-row,#music-list-container .media-item';
+    window.__lifeosR10MediaNativeScroll = true;
+    const ROOT_SELECTOR = '#view-music,#l64f-panel-music';
+    const CARD_SELECTOR = '#radio-list-container .media-item,#tv-list-container .media-item,#youtube-list-container .youtube-media-item,#mp3-list-container .song-row';
     let state = null;
     let suppressClickUntil = 0;
-    function isSmartboxMedia() { return !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc')); }
-    function clearSmartboxMediaStyles() {
-        if (!isSmartboxMedia()) return false;
-        document.querySelectorAll(VSCROLL_SELECTOR + ',' + CARD_SELECTOR).forEach(function(el){
-            ['-webkit-overflow-scrolling','overscroll-behavior','touch-action','overflow-y','overflow-x','scroll-behavior','scrollbar-gutter'].forEach(function(p){ try{ el.style.removeProperty(p); }catch(e){} });
-        });
-        return true;
-    }
     function isTouchDevice() {
-        return ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0 || window.innerWidth < 1024;
+        return ('ontouchstart' in window) || Number(navigator.maxTouchPoints || 0) > 0;
     }
     function visible(el) {
-        if (!el)
-            return false;
+        if (!el) return false;
         const cs = getComputedStyle(el);
-        if (cs.display === 'none' || cs.visibility === 'hidden')
-            return false;
+        if (cs.display === 'none' || cs.visibility === 'hidden') return false;
         const r = el.getBoundingClientRect();
         return r.width > 2 && r.height > 2;
     }
-    function canScrollY(el) {
-        return !!(el && el.scrollHeight > el.clientHeight + 2);
-    }
-    function nearestVerticalScroller(target) {
-        if (!target || !target.closest)
-            return null;
-        const direct = target.closest(VSCROLL_SELECTOR);
-        if (direct && visible(direct) && canScrollY(direct))
-            return direct;
+    function canScrollY(el) { return !!(el && el.scrollHeight > el.clientHeight + 2); }
+    function verticalScroller(target) {
+        if (!target || !target.closest) return null;
+        const sidebar = target.closest('#media-group-sidebar');
+        if (sidebar && visible(sidebar) && canScrollY(sidebar)) return sidebar;
         const list = document.getElementById('music-list-container');
-        if (list && visible(list) && canScrollY(list))
-            return list;
+        if (list && visible(list) && canScrollY(list)) return list;
         return null;
     }
-    function nearestHorizontalScroller(target) {
-        if (!target || !target.closest)
-            return null;
-        const h = target.closest(HSCROLL_SELECTOR);
-        if (h && visible(h) && h.scrollWidth > h.clientWidth + 2)
-            return h;
-        return null;
+    function horizontalScroller(target) {
+        if (!target || !target.closest) return null;
+        const box = target.closest('#media-subtabs,#media-group-mobile-bar');
+        return box && visible(box) && box.scrollWidth > box.clientWidth + 2 ? box : null;
     }
     function applyCss() {
-        if (clearSmartboxMediaStyles())
-            return;
-        if (!isTouchDevice())
-            return;
-        document.querySelectorAll(VSCROLL_SELECTOR).forEach(el => {
-            if (!el || !visible(el))
-                return;
-            el.style.setProperty('-webkit-overflow-scrolling', 'touch');
+        const list = document.getElementById('music-list-container');
+        const sidebar = document.getElementById('media-group-sidebar');
+        [list, sidebar].forEach(function (el) {
+            if (!el) return;
+            el.style.setProperty('overflow-y', 'auto', 'important');
+            el.style.setProperty('overflow-x', 'hidden', 'important');
             el.style.setProperty('overscroll-behavior', 'contain', 'important');
+            el.style.setProperty('scroll-behavior', 'auto', 'important');
+            el.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
             el.style.setProperty('touch-action', 'pan-y', 'important');
-            if (el.id === 'music-list-container') {
-                el.style.setProperty('overflow-y', 'auto', 'important');
-                el.style.setProperty('overflow-x', 'hidden', 'important');
-            }
         });
-        document.querySelectorAll(CARD_SELECTOR).forEach(el => {
+        document.querySelectorAll('#radio-list-container,#tv-list-container,#youtube-list-container').forEach(function (el) {
+            el.style.setProperty('position', 'static', 'important');
+            el.style.setProperty('top', 'auto', 'important');
+            el.style.setProperty('overflow', 'visible', 'important');
+            el.style.setProperty('touch-action', 'pan-y', 'important');
+            el.style.setProperty('transform', 'none', 'important');
+            el.removeAttribute('data-lifeos-window-offset');
+        });
+        document.querySelectorAll(CARD_SELECTOR).forEach(function (el) {
             el.style.setProperty('touch-action', 'pan-y', 'important');
         });
     }
     function onTouchStart(e) {
-        if (isSmartboxMedia()) { state = null; return; }
-        if (!isTouchDevice())
-            return;
+        if (!isTouchDevice()) return;
         const root = e.target && e.target.closest && e.target.closest(ROOT_SELECTOR);
-        if (!root)
-            return;
+        if (!root) return;
         const t = e.touches && e.touches[0];
-        if (!t)
-            return;
-        const v = nearestVerticalScroller(e.target);
-        const h = nearestHorizontalScroller(e.target);
-        state = {
-            x: t.clientX,
-            y: t.clientY,
-            lastX: t.clientX,
-            lastY: t.clientY,
-            vScroller: v,
-            hScroller: h,
-            mode: '',
-            moved: false,
-            startedOnCard: !!(e.target.closest && e.target.closest(CARD_SELECTOR))
-        };
+        if (!t) return;
+        state = { x:t.clientX, y:t.clientY, lastX:t.clientX, lastY:t.clientY,
+            v:verticalScroller(e.target), h:horizontalScroller(e.target), mode:'', moved:false,
+            card:!!(e.target.closest && e.target.closest(CARD_SELECTOR)) };
     }
     function onTouchMove(e) {
-        if (isSmartboxMedia()) { state = null; return; }
-        if (!state)
-            return;
+        if (!state) return;
         const t = e.touches && e.touches[0];
-        if (!t)
-            return;
-        const dxTotal = t.clientX - state.x;
-        const dyTotal = t.clientY - state.y;
-        const ax = Math.abs(dxTotal);
-        const ay = Math.abs(dyTotal);
-        if (!state.mode && (ax > 6 || ay > 6)) {
-            state.mode = ay >= ax ? 'y' : 'x';
-        }
-        if (state.mode === 'y' && state.vScroller) {
-            const dy = t.clientY - state.lastY;
-            if (Math.abs(dy) > 0) {
-                const before = state.vScroller.scrollTop;
-                state.vScroller.scrollTop = before - dy;
-                const after = state.vScroller.scrollTop;
-                if (after !== before || state.startedOnCard) {
-                    if (e.cancelable) {
-                        try {
-                            e.preventDefault();
-                        }
-                        catch (_) { }
-                    }
-                    state.moved = true;
-                    suppressClickUntil = Date.now() + 380;
-                }
+        if (!t) return;
+        const totalX=t.clientX-state.x, totalY=t.clientY-state.y;
+        if (!state.mode && (Math.abs(totalX)>6 || Math.abs(totalY)>6))
+            state.mode = Math.abs(totalY) >= Math.abs(totalX) ? 'y' : 'x';
+        if (state.mode === 'y' && state.v) {
+            const dy=t.clientY-state.lastY;
+            const before=state.v.scrollTop;
+            state.v.scrollTop=before-dy;
+            if (state.v.scrollTop!==before || state.card) {
+                if (e.cancelable) e.preventDefault();
+                state.moved=true;
+                suppressClickUntil=Date.now()+420;
+            }
+        } else if (state.mode === 'x' && state.h) {
+            const dx=t.clientX-state.lastX;
+            const before=state.h.scrollLeft;
+            state.h.scrollLeft=before-dx;
+            if (state.h.scrollLeft!==before) {
+                if (e.cancelable) e.preventDefault();
+                state.moved=true;
+                suppressClickUntil=Date.now()+360;
             }
         }
-        else if (state.mode === 'x' && state.hScroller) {
-            const dx = t.clientX - state.lastX;
-            const before = state.hScroller.scrollLeft;
-            state.hScroller.scrollLeft = before - dx;
-            if (state.hScroller.scrollLeft !== before) {
-                if (e.cancelable) {
-                    try {
-                        e.preventDefault();
-                    }
-                    catch (_) { }
-                }
-                state.moved = true;
-                suppressClickUntil = Date.now() + 300;
-            }
-        }
-        state.lastX = t.clientX;
-        state.lastY = t.clientY;
+        state.lastX=t.clientX; state.lastY=t.clientY;
     }
     function onTouchEnd() {
-        if (state && state.moved)
-            suppressClickUntil = Date.now() + 380;
-        state = null;
+        if (state && state.moved) suppressClickUntil=Date.now()+420;
+        state=null;
     }
     function onClick(e) {
-        if (Date.now() > suppressClickUntil)
-            return;
-        if (!(e.target && e.target.closest && e.target.closest(CARD_SELECTOR)))
-            return;
-        try {
-            e.preventDefault();
-            e.stopPropagation();
-            if (e.stopImmediatePropagation)
-                e.stopImmediatePropagation();
-        }
-        catch (_) { }
+        if (Date.now()>suppressClickUntil) return;
+        if (!(e.target && e.target.closest && e.target.closest(CARD_SELECTOR))) return;
+        e.preventDefault(); e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
     }
     function boot() {
-        document.addEventListener('touchstart', onTouchStart, { capture: true, passive: true });
-        document.addEventListener('touchmove', onTouchMove, { capture: true, passive: false });
-        document.addEventListener('touchend', onTouchEnd, { capture: true, passive: true });
-        document.addEventListener('touchcancel', onTouchEnd, { capture: true, passive: true });
-        document.addEventListener('click', onClick, true);
+        document.addEventListener('touchstart',onTouchStart,{capture:true,passive:true});
+        document.addEventListener('touchmove',onTouchMove,{capture:true,passive:false});
+        document.addEventListener('touchend',onTouchEnd,{capture:true,passive:true});
+        document.addEventListener('touchcancel',onTouchEnd,{capture:true,passive:true});
+        document.addEventListener('click',onClick,true);
         applyCss();
-        window.addEventListener('lifeos:media-layout', () => requestAnimationFrame(applyCss));
-        window.addEventListener('resize', () => setTimeout(applyCss, 60), { passive: true });
-        window.addEventListener('orientationchange', () => { setTimeout(applyCss, 120); setTimeout(applyCss, 420); }, { passive: true });
-        window.LIFEOS_DEBUG && console.info('[LifeOS ' + PATCH_ID + '] installed');
+        window.addEventListener('lifeos:media-layout',function(){ requestAnimationFrame(applyCss); });
+        window.addEventListener('resize',function(){ setTimeout(applyCss,80); },{passive:true});
+        window.addEventListener('orientationchange',function(){ setTimeout(applyCss,160); },{passive:true});
     }
-    if (document.readyState === 'loading')
-        document.addEventListener('DOMContentLoaded', boot, { once: true });
-    else
-        boot();
+    if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
 })();
 </script>
 <!-- LIFEOS R11 MOBILE UNIVERSAL TOUCH SCROLL - END -->
@@ -44868,6 +44847,992 @@ Goals:
 - Strip x-lifeos-phase header for D1 family worker to avoid CORS preflight reject.
 -->
 <!-- LIFEOS J20 R75 SAFE ROUTER + MEDIA NO AUTOPLAY + CLEAN GATE - END -->
+
+<!-- LIFEOS R6.5 YOUTUBE IFRAME MODULE - START -->
+<style id="lifeos-r65-youtube-style">
+/* R5: Giữ nguyên 3 nút cũ; khóa file://, chuẩn hóa Referer và chỉ khởi tạo YouTube trên HTTP/HTTPS. */
+#media-subtabs{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;}
+#tab-media-youtube{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important;background:#fff1f2!important;color:#be123c!important;border-color:#fda4af!important;align-items:center!important;justify-content:center!important;}
+#tab-media-youtube[aria-selected="true"]{background:#dc2626!important;color:#fff!important;border-color:#dc2626!important;}
+body.lifeos-landscape-mini-pc #tab-media-youtube{display:inline-flex!important;visibility:visible!important;opacity:1!important;}
+#youtube-list-container{width:100%;min-height:100%;overflow:hidden;}
+.youtube-media-item{width:100%;min-height:54px;display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;margin:0 0 7px;border:1px solid #e2e8f0;border-radius:13px;background:#fff;color:#0f172a;cursor:pointer;box-sizing:border-box;}
+.youtube-media-item .yt-item-number{flex:0 0 auto;min-width:34px;height:30px;border-radius:9px;background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.youtube-media-item .yt-item-main{min-width:0;flex:1 1 auto;}
+.youtube-media-item .yt-item-title{font-size:13px;line-height:1.25;font-weight:900;white-space:normal;word-break:break-word;}
+.youtube-media-item .yt-item-type{font-size:10px;line-height:1.2;font-weight:800;color:#64748b;margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
+.youtube-media-item.is-active{background:#fff1f2;border:2px solid #e11d48;color:#881337;}
+.youtube-media-item:focus,.youtube-media-item.media-focused{outline:4px solid #2563eb!important;outline-offset:2px!important;box-shadow:0 0 0 6px rgba(37,99,235,.20)!important;}
+#yt-player-wrapper{width:100%;background:#000;border-radius:12px;overflow:hidden;}
+#yt-player-stage{position:relative;width:100%;height:0;padding-top:56.25%;background:#000;overflow:hidden;}
+#yt-player-iframe,#yt-player-iframe iframe,#yt-player-fallback,#yt-player-fallback iframe{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;border:0!important;background:#000!important;}
+#yt-player-fallback{display:none;}
+#yt-file-mode-guard{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;box-sizing:border-box;background:#111827;color:#fff;text-align:center;font-family:Inter,Arial,sans-serif;}
+#yt-file-mode-guard .yt-file-guard-title{font-size:16px;line-height:1.3;font-weight:900;color:#fff;}
+#yt-file-mode-guard .yt-file-guard-text{max-width:520px;font-size:12px;line-height:1.5;font-weight:700;color:#cbd5e1;}
+#yt-file-mode-guard .yt-file-guard-code{padding:7px 10px;border-radius:9px;background:#0f172a;border:1px solid #334155;color:#fbbf24;font-size:11px;font-weight:900;}
+#yt-file-mode-guard .yt-file-guard-open{min-height:40px;padding:8px 14px;border:1px solid #fca5a5;border-radius:10px;background:#dc2626;color:#fff;font-size:12px;font-weight:900;cursor:pointer;}
+#yt-file-mode-guard .yt-file-guard-open:focus{outline:4px solid #60a5fa!important;outline-offset:2px!important;}
+.youtube-player-controls{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:7px;padding:6px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;}
+.youtube-player-controls button{min-width:42px;height:40px;padding:0 11px;border-radius:11px;border:1px solid #fecaca;background:#fff;color:#dc2626;font-weight:900;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;}
+.youtube-player-controls button:last-child{min-width:96px;color:#334155;border-color:#cbd5e1;}
+.youtube-player-controls button:focus,.youtube-player-controls button.player-btn-focused{outline:4px solid #2563eb!important;outline-offset:2px!important;box-shadow:0 0 0 6px rgba(37,99,235,.20)!important;}
+#youtube-empty-state{padding:22px 12px;border:1px dashed #fca5a5;border-radius:14px;background:#fff7ed;color:#9a3412;text-align:center;font-size:12px;font-weight:900;line-height:1.45;}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #media-group-sidebar,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #media-group-mobile-bar{display:none!important;}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #l64f-music-list{grid-column:1 / -1!important;grid-row:3!important;}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #l64f-media-preview{display:none!important;}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #youtube-player-container{display:block!important;flex:1 1 auto!important;min-height:0!important;width:100%!important;margin:0!important;}
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #l64f-mp3-right-player{display:none!important;}
+body.lifeos-landscape-mini-pc #youtube-list-container{min-height:100%!important;}
+body.lifeos-landscape-mini-pc #youtube-list-container .youtube-media-item{min-height:48px!important;padding:7px 9px!important;margin-bottom:6px!important;}
+body.lifeos-landscape-mini-pc #youtube-list-container .yt-item-title{font-size:11px!important;}
+body.lifeos-landscape-mini-pc #youtube-list-container .yt-item-type{font-size:9px!important;}
+body.lifeos-landscape-mini-pc #youtube-player-container{overflow-y:auto!important;}
+body.lifeos-landscape-mini-pc #yt-player-stage{padding-top:56.25%!important;}
+body.lifeos-landscape-mini-pc #yt-player-iframe iframe{pointer-events:none!important;}
+@media (max-width:1023px){#youtube-player-container{margin-top:4px;}#yt-player-stage{padding-top:56.25%;}}
+</style>
+<script id="lifeos-r65-youtube-data-loader">
+/* R7: luôn đọc danhsach.js mới nhất; tránh Service Worker/cache giữ bản mẫu 3 mục. */
+(function (w, d) {
+    var stamp = String(new Date().getTime());
+    var host = String((w.location && w.location.hostname) || '').toLowerCase();
+    var isLocalHttp = host === '127.0.0.1' || host === 'localhost';
+
+    if (isLocalHttp && w.navigator && 'serviceWorker' in w.navigator) {
+        try {
+            w.navigator.serviceWorker.getRegistrations().then(function (regs) {
+                var i;
+                for (i = 0; i < regs.length; i++) regs[i].unregister();
+            });
+        } catch (e) {}
+    }
+    if (isLocalHttp && 'caches' in w) {
+        try {
+            w.caches.keys().then(function (names) {
+                var i;
+                for (i = 0; i < names.length; i++) {
+                    if (String(names[i]).indexOf('lifeos-r65-youtube') === 0) w.caches.delete(names[i]);
+                }
+            });
+        } catch (e2) {}
+    }
+
+    d.write('<script src="danhsach.js?lifeos_list=' + stamp + '"><\/script>');
+})(window, document);
+</script>
+<script id="lifeos-r65-youtube-module">
+window.LIFEOS_YOUTUBE_TAB4_BUILD = 'R65_YOUTUBE_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_SW_20260716';
+(function (w, d) {
+    'use strict';
+    if (w.LifeOSYouTubeR65 && w.LifeOSYouTubeR65.installed) return;
+
+    var api = {
+        installed: true,
+        version: 'R6.5_YOUTUBE_IFRAME_ES5_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_SW',
+        items: [],
+        visibleIndexes: [],
+        currentIndex: -1,
+        player: null,
+        playerReady: false,
+        apiRequested: false,
+        apiFailed: false,
+        pendingAutoplay: false,
+        errorGuard: 0,
+        lastErrorIndex: -1
+    };
+
+    function byId(id) { return d.getElementById(id); }
+    function text(v) { return String(v == null ? '' : v); }
+    function trim(v) { return text(v).replace(/^\s+|\s+$/g, ''); }
+    function lower(v) { return trim(v).toLowerCase(); }
+    function isArray(v) { return Object.prototype.toString.call(v) === '[object Array]'; }
+    function visible(el) {
+        if (!el) return false;
+        try {
+            var cs = w.getComputedStyle ? w.getComputedStyle(el) : null;
+            return el.offsetParent !== null && (!cs || (cs.display !== 'none' && cs.visibility !== 'hidden'));
+        } catch (e) { return true; }
+    }
+    function clamp(v, len) {
+        if (!len || len <= 0) return 0;
+        v = Number(v) || 0;
+        return Math.max(0, Math.min(v, len - 1));
+    }
+    function setDisplay(el, show, mode) {
+        if (!el) return;
+        el.hidden = !show;
+        if (show) {
+            el.classList.remove('hidden');
+            el.style.setProperty('display', mode || 'block', 'important');
+            el.style.setProperty('visibility', 'visible', 'important');
+            el.style.setProperty('pointer-events', 'auto', 'important');
+        } else {
+            el.classList.add('hidden');
+            el.style.setProperty('display', 'none', 'important');
+            el.style.setProperty('visibility', 'hidden', 'important');
+            el.style.setProperty('pointer-events', 'none', 'important');
+        }
+    }
+    function toast(msg, icon) {
+        try { if (typeof w.showToast === 'function') w.showToast(msg, icon || 'ph-youtube-logo'); } catch (e) {}
+    }
+    function setStatus(msg, error) {
+        var el = byId('yt-player-status');
+        if (!el) return;
+        el.textContent = msg || '';
+        el.style.color = error ? '#b91c1c' : '#64748b';
+    }
+    function setTitle(item) {
+        var box = byId('yt-player-title');
+        if (!box) return;
+        box.textContent = item ? ('▶ YouTube: ' + item.title) : '▶ YouTube: Chọn video hoặc playlist trong danh sách';
+    }
+    function validVideoId(id) { return /^[A-Za-z0-9_-]{11}$/.test(id); }
+    function validPlaylistId(id) { return /^[A-Za-z0-9_-]{10,100}$/.test(id); }
+    function youtubeTabActive() { return !!(w.MediaHub && w.MediaHub.currentTab === 'youtube'); }
+
+    function readData() {
+        var source = w.ytStaticPlaylist;
+        var out = [];
+        var i, raw, type, id, title;
+        if (!isArray(source)) return out;
+        for (i = 0; i < source.length; i++) {
+            raw = source[i] || {};
+            type = lower(raw.type) === 'playlist' ? 'playlist' : 'video';
+            id = trim(raw.id);
+            title = trim(raw.title) || ('Mục YouTube ' + (i + 1));
+            if ((type === 'video' && validVideoId(id)) || (type === 'playlist' && validPlaylistId(id))) {
+                out.push({ type: type, id: id, title: title, sourceIndex: i });
+            }
+        }
+        return out;
+    }
+
+    function currentItem() {
+        return api.currentIndex >= 0 && api.items[api.currentIndex] ? api.items[api.currentIndex] : null;
+    }
+
+    function updateActiveRows() {
+        var rows = d.querySelectorAll('#youtube-list-container .youtube-media-item');
+        var i, actual;
+        for (i = 0; i < rows.length; i++) {
+            actual = Number(rows[i].getAttribute('data-yt-index'));
+            if (actual === api.currentIndex) rows[i].classList.add('is-active');
+            else rows[i].classList.remove('is-active');
+        }
+    }
+
+    api.render = function () {
+        var container = byId('youtube-list-container');
+        var search = byId('music-search');
+        var keyword = lower(search && search.value);
+        var i, item, row, num, main, titleEl, typeEl, actualIndex;
+        if (!container) return false;
+        api.items = readData();
+        api.visibleIndexes = [];
+        container.innerHTML = '';
+        if (!api.items.length) {
+            row = d.createElement('div');
+            row.id = 'youtube-empty-state';
+            row.textContent = typeof w.ytStaticPlaylist === 'undefined'
+                ? 'Không tìm thấy file danhsach.js hoặc biến ytStaticPlaylist.'
+                : 'danhsach.js chưa có mục YouTube hợp lệ.';
+            container.appendChild(row);
+            setStatus(row.textContent, true);
+            return false;
+        }
+        for (i = 0; i < api.items.length; i++) {
+            item = api.items[i];
+            if (keyword && lower(item.title + ' ' + item.type + ' ' + item.id).indexOf(keyword) === -1) continue;
+            actualIndex = i;
+            api.visibleIndexes.push(actualIndex);
+            row = d.createElement('button');
+            row.type = 'button';
+            row.className = 'youtube-media-item media-item song-row';
+            row.setAttribute('data-yt-index', String(actualIndex));
+            row.setAttribute('data-lifeos-list-index', String(api.visibleIndexes.length - 1));
+            row.setAttribute('aria-label', (item.type === 'playlist' ? 'Playlist ' : 'Video ') + item.title);
+            num = d.createElement('span');
+            num.className = 'yt-item-number';
+            num.textContent = String(api.visibleIndexes.length);
+            main = d.createElement('span');
+            main.className = 'yt-item-main';
+            titleEl = d.createElement('span');
+            titleEl.className = 'yt-item-title';
+            titleEl.textContent = item.title;
+            typeEl = d.createElement('span');
+            typeEl.className = 'yt-item-type';
+            typeEl.textContent = item.type === 'playlist' ? 'Danh sách phát YouTube' : 'Video YouTube';
+            main.appendChild(titleEl);
+            main.appendChild(typeEl);
+            row.appendChild(num);
+            row.appendChild(main);
+            (function (index) {
+                row.onclick = function () { api.playIndex(index, true); };
+                row.onfocus = function () {
+                    var hub = w.MediaHub;
+                    var pos = api.visibleIndexes.indexOf(index);
+                    if (hub && pos >= 0) hub.idxList = pos;
+                };
+            })(actualIndex);
+            container.appendChild(row);
+        }
+        if (!api.visibleIndexes.length) {
+            row = d.createElement('div');
+            row.id = 'youtube-empty-state';
+            row.textContent = 'Không tìm thấy nội dung YouTube phù hợp từ khóa.';
+            container.appendChild(row);
+        }
+        updateActiveRows();
+        return true;
+    };
+
+    function isHttpProtocol() {
+        try { return /^https?:$/.test(String((w.location && w.location.protocol) || '').toLowerCase()); }
+        catch (e) { return false; }
+    }
+
+    function isFileProtocol() {
+        try { return String((w.location && w.location.protocol) || '').toLowerCase() === 'file:'; }
+        catch (e) { return false; }
+    }
+
+    function youtubeClientOrigin() {
+        var loc = w.location || {};
+        try {
+            if (isHttpProtocol() && loc.host) return String(loc.protocol) + '//' + String(loc.host);
+        } catch (e) {}
+        return '';
+    }
+
+    function youtubeWidgetReferrer() {
+        var loc = w.location || {};
+        try {
+            if (isHttpProtocol() && loc.href) return String(loc.href).split('#')[0];
+        } catch (e) {}
+        return '';
+    }
+
+    function showFileProtocolGuard(item) {
+        var box = byId('yt-player-fallback');
+        var host = byId('yt-player-iframe');
+        var guard, title, info, code, openBtn;
+        if (!box) return;
+        if (host) host.style.display = 'none';
+        box.innerHTML = '';
+        guard = d.createElement('div');
+        guard.id = 'yt-file-mode-guard';
+        title = d.createElement('div');
+        title.className = 'yt-file-guard-title';
+        title.textContent = 'YouTube không thể chạy khi mở index.html trực tiếp';
+        info = d.createElement('div');
+        info.className = 'yt-file-guard-text';
+        info.textContent = 'Chế độ file:// không gửi HTTP Referer nên YouTube trả lỗi 153. Ba mục MP3, Radio và Tivi vẫn giữ nguyên; riêng YouTube phải chạy qua HTTP/HTTPS.';
+        code = d.createElement('div');
+        code.className = 'yt-file-guard-code';
+        code.textContent = 'Chạy: CHAY_TEST_LIFEOS_HTTP.bat';
+        openBtn = d.createElement('button');
+        openBtn.type = 'button';
+        openBtn.className = 'yt-file-guard-open';
+        openBtn.textContent = 'Mở http://127.0.0.1:8080/index.html';
+        openBtn.onclick = function () { w.location.href = 'http://127.0.0.1:8080/index.html'; };
+        guard.appendChild(title);
+        guard.appendChild(info);
+        guard.appendChild(code);
+        guard.appendChild(openBtn);
+        box.appendChild(guard);
+        box.style.display = 'block';
+        box.setAttribute('aria-hidden', 'false');
+        setTitle(item || currentItem());
+        setStatus('Đang mở bằng file:// nên YouTube bị khóa an toàn. Hãy chạy file BAT để có HTTP Referer hợp lệ.', true);
+    }
+
+    function fallbackUrl(item, autoplay) {
+        var base = 'https://www.youtube.com/embed/';
+        var sep;
+        var url;
+        var common = 'autoplay=' + (autoplay ? '1' : '0') +
+            '&rel=0&playsinline=1&controls=1&enablejsapi=1' +
+            '&origin=' + encodeURIComponent(youtubeClientOrigin()) +
+            '&widget_referrer=' + encodeURIComponent(youtubeWidgetReferrer());
+        if (!item) return '';
+        if (item.type === 'playlist') {
+            url = base + 'videoseries?list=' + encodeURIComponent(item.id);
+            sep = '&';
+        } else {
+            url = base + encodeURIComponent(item.id);
+            sep = '?';
+        }
+        return url + sep + common;
+    }
+
+    function ensurePlayerHost() {
+        var stage = byId('yt-player-stage');
+        var host = byId('yt-player-iframe');
+        if (!stage) return null;
+        if (!host) {
+            host = d.createElement('div');
+            host.id = 'yt-player-iframe';
+            if (stage.firstChild) stage.insertBefore(host, stage.firstChild);
+            else stage.appendChild(host);
+        }
+        return host;
+    }
+
+    function showFallback(item, autoplay) {
+        if (!youtubeTabActive()) return;
+        var box = byId('yt-player-fallback');
+        var host = ensurePlayerHost();
+        var iframe;
+        if (isFileProtocol()) { showFileProtocolGuard(item); return; }
+        if (!box || !item) return;
+        if (host) host.style.display = 'none';
+        box.innerHTML = '';
+        iframe = d.createElement('iframe');
+        iframe.src = fallbackUrl(item, autoplay);
+        iframe.title = item.title;
+        iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+        iframe.setAttribute('allowfullscreen', 'allowfullscreen');
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('tabindex', '-1');
+        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        box.appendChild(iframe);
+        box.style.display = 'block';
+        box.setAttribute('aria-hidden', 'false');
+        setStatus('Đang dùng chế độ IFrame dự phòng vì API YouTube chưa sẵn sàng.', false);
+    }
+
+    function hideFallback() {
+        var box = byId('yt-player-fallback');
+        var host = ensurePlayerHost();
+        if (box) {
+            box.style.display = 'none';
+            box.setAttribute('aria-hidden', 'true');
+            box.innerHTML = '';
+        }
+        if (host) host.style.display = 'block';
+    }
+
+    function updateToggleIcon() {
+        var btn = byId('yt-toggle-btn');
+        var state = -1;
+        if (!btn) return;
+        try { if (api.player && typeof api.player.getPlayerState === 'function') state = api.player.getPlayerState(); } catch (e) {}
+        btn.innerHTML = state === 1 ? '<i class="ph-fill ph-pause"></i>' : '<i class="ph-fill ph-play"></i>';
+    }
+
+    function playerErrorText(code) {
+        var map = {
+            2: 'ID YouTube không hợp lệ.',
+            5: 'Trình duyệt Smartbox không phát được nội dung HTML5 này.',
+            100: 'Video đã bị xóa hoặc đặt riêng tư.',
+            101: 'Chủ video không cho phép nhúng.',
+            150: 'Chủ video không cho phép nhúng.',
+            153: 'YouTube không nhận được định danh nguồn phát (Referer/Client Identity).'
+        };
+        return map[Number(code)] || ('YouTube báo lỗi mã ' + code + '.');
+    }
+
+    function onReady(event) {
+        var iframe;
+        if (!youtubeTabActive()) { api.release('late_ready_outside_youtube'); return; }
+        api.playerReady = true;
+        api.apiFailed = false;
+        hideFallback();
+        try {
+            iframe = event && event.target && event.target.getIframe ? event.target.getIframe() : null;
+            if (iframe) iframe.setAttribute('tabindex', '-1');
+        } catch (e) {}
+        setStatus('Bộ phát YouTube đã sẵn sàng. Chọn mục trong danh sách để phát.', false);
+        updateToggleIcon();
+        if (api.pendingAutoplay && api.currentIndex >= 0) {
+            api.pendingAutoplay = false;
+            api.playIndex(api.currentIndex, true);
+        }
+    }
+
+    function onStateChange(event) {
+        if (!youtubeTabActive()) return;
+        var item = currentItem();
+        var state = Number(event && event.data);
+        updateToggleIcon();
+        if (state === 1) setStatus('Đang phát: ' + (item ? item.title : 'YouTube'), false);
+        else if (state === 2) setStatus('Đã tạm dừng YouTube.', false);
+        else if (state === 3) setStatus('Đang tải dữ liệu YouTube...', false);
+        else if (state === 0 && item && item.type === 'video') {
+            w.setTimeout(function () { if (youtubeTabActive()) api.next(); }, 350);
+        }
+    }
+
+    function onError(event) {
+        if (!youtubeTabActive()) { api.release('late_error_outside_youtube'); return; }
+        var indexAtError = api.currentIndex;
+        var code = Number(event && event.data);
+        var item = currentItem();
+        var msg = playerErrorText(code);
+
+        /* Lỗi 153 là lỗi định danh nguồn, không phải lỗi từng video. Không được nhảy hàng loạt làm spam toast. */
+        if (code === 153) {
+            api.apiFailed = true;
+            api.playerReady = false;
+            try { if (api.player && typeof api.player.destroy === 'function') api.player.destroy(); } catch (e) {}
+            api.player = null;
+            if (isFileProtocol()) {
+                showFileProtocolGuard(item);
+                toast('Lỗi 153: YouTube bắt buộc HTTP/HTTPS; hãy chạy CHAY_TEST_LIFEOS_HTTP.bat.', 'ph-warning-circle');
+            } else {
+                showFallback(item, false);
+                setStatus('YouTube vẫn báo lỗi 153 dù đang chạy HTTP/HTTPS. Hãy kiểm tra Referrer-Policy hoặc WebView có chặn Referer hay không.', true);
+                toast('YouTube lỗi 153: môi trường đang chặn HTTP Referer.', 'ph-warning-circle');
+            }
+            return;
+        }
+
+        setStatus(msg + ' Hệ thống sẽ thử mục tiếp theo.', true);
+        toast(msg, 'ph-warning-circle');
+        if (api.lastErrorIndex === indexAtError) api.errorGuard += 1;
+        else { api.lastErrorIndex = indexAtError; api.errorGuard = 1; }
+        if (api.items.length > 1 && api.errorGuard <= api.items.length) {
+            w.setTimeout(function () {
+                if (youtubeTabActive() && api.currentIndex === indexAtError) api.nextStatic();
+            }, 1800);
+        }
+    }
+
+    function createPlayer() {
+        var item, vars, config, origin, referrer;
+        if (!youtubeTabActive()) return;
+        if (isFileProtocol()) { showFileProtocolGuard(currentItem() || api.items[0]); return; }
+        if (!(w.YT && w.YT.Player) || api.player) return;
+        if (!ensurePlayerHost()) return;
+        api.items = readData();
+        if (!api.items.length) return;
+        if (api.currentIndex < 0 || !api.items[api.currentIndex]) {
+            try { api.currentIndex = parseInt(w.localStorage.getItem('lifeos_youtube_last_index') || '0', 10); } catch (e) { api.currentIndex = 0; }
+            api.currentIndex = clamp(api.currentIndex, api.items.length);
+        }
+        item = api.items[api.currentIndex];
+        vars = { autoplay: 0, rel: 0, modestbranding: 1, controls: 1, playsinline: 1, fs: 1, iv_load_policy: 3 };
+        origin = youtubeClientOrigin();
+        referrer = youtubeWidgetReferrer();
+        if (origin) vars.origin = origin;
+        if (referrer) vars.widget_referrer = referrer;
+        if (item.type === 'playlist') {
+            vars.listType = 'playlist';
+            vars.list = item.id;
+        }
+        config = {
+            height: '100%',
+            width: '100%',
+            playerVars: vars,
+            events: { onReady: onReady, onStateChange: onStateChange, onError: onError }
+        };
+        if (item.type === 'video') config.videoId = item.id;
+        try {
+            api.player = new w.YT.Player('yt-player-iframe', config);
+            setTitle(item);
+            updateActiveRows();
+        } catch (e) {
+            api.player = null;
+            api.playerReady = false;
+            api.apiFailed = true;
+            showFallback(item, false);
+        }
+    }
+
+    function apiReadyCallback() {
+        api.apiFailed = false;
+        if (youtubeTabActive()) createPlayer();
+    }
+
+    function ensureApi() {
+        var oldReady, tag, first;
+        if (isFileProtocol()) {
+            api.apiFailed = true;
+            api.playerReady = false;
+            showFileProtocolGuard(currentItem() || api.items[0]);
+            return;
+        }
+        if (w.YT && w.YT.Player) { apiReadyCallback(); return; }
+        if (api.apiRequested) return;
+        api.apiRequested = true;
+        oldReady = w.onYouTubeIframeAPIReady;
+        w.onYouTubeIframeAPIReady = function () {
+            try { if (typeof oldReady === 'function') oldReady(); } catch (e) {}
+            apiReadyCallback();
+        };
+        tag = d.createElement('script');
+        tag.id = 'lifeos-youtube-iframe-api';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        tag.async = true;
+        try { tag.referrerPolicy = 'strict-origin-when-cross-origin'; } catch (e) {}
+        tag.onerror = function () {
+            api.apiFailed = true;
+            showFallback(currentItem() || api.items[0], false);
+            setStatus('Không tải được YouTube IFrame API. Đã chuyển sang IFrame dự phòng.', true);
+        };
+        first = d.getElementsByTagName('script')[0];
+        if (first && first.parentNode) first.parentNode.insertBefore(tag, first);
+        else (d.head || d.documentElement).appendChild(tag);
+        w.setTimeout(function () {
+            if (youtubeTabActive() && !api.playerReady && !(w.YT && w.YT.Player)) {
+                api.apiFailed = true;
+                showFallback(currentItem() || api.items[0], false);
+            }
+        }, 12000);
+    }
+
+    api.playIndex = function (index, autoplay) {
+        var item;
+        api.items = readData();
+        index = clamp(index, api.items.length);
+        item = api.items[index];
+        if (!item) return false;
+        api.currentIndex = index;
+        api.pendingAutoplay = !!autoplay;
+        api.errorGuard = 0;
+        setTitle(item);
+        updateActiveRows();
+        try { w.localStorage.setItem('lifeos_youtube_last_index', String(index)); } catch (e) {}
+        if (isFileProtocol()) {
+            api.apiFailed = true;
+            showFileProtocolGuard(item);
+            toast('YouTube cần chạy qua HTTP/HTTPS. Hãy mở bằng file BAT.', 'ph-warning-circle');
+            return true;
+        }
+        if (api.apiFailed) {
+            showFallback(item, !!autoplay);
+            return true;
+        }
+        if (!api.playerReady || !api.player) {
+            setStatus('Đang chuẩn bị bộ phát YouTube...', false);
+            ensureApi();
+            return true;
+        }
+        try {
+            hideFallback();
+            if (item.type === 'playlist' && typeof api.player.loadPlaylist === 'function') {
+                if (autoplay) api.player.loadPlaylist({ list: item.id, listType: 'playlist', index: 0, startSeconds: 0 });
+                else if (typeof api.player.cuePlaylist === 'function') api.player.cuePlaylist({ list: item.id, listType: 'playlist', index: 0, startSeconds: 0 });
+            } else if (item.type === 'video') {
+                if (autoplay && typeof api.player.loadVideoById === 'function') api.player.loadVideoById(item.id);
+                else if (typeof api.player.cueVideoById === 'function') api.player.cueVideoById(item.id);
+            }
+            api.pendingAutoplay = false;
+            if (autoplay) toast('Đang mở: ' + item.title, 'ph-video');
+            return true;
+        } catch (e) {
+            api.apiFailed = true;
+            showFallback(item, !!autoplay);
+            setStatus('API YouTube không điều khiển được trên thiết bị này. Đã dùng IFrame dự phòng.', true);
+            return false;
+        }
+    };
+
+    api.nextStatic = function () {
+        if (!api.items.length) return;
+        api.playIndex((api.currentIndex + 1) % api.items.length, true);
+    };
+    api.previousStatic = function () {
+        if (!api.items.length) return;
+        api.playIndex((api.currentIndex - 1 + api.items.length) % api.items.length, true);
+    };
+    api.next = function () {
+        var item = currentItem();
+        try {
+            if (item && item.type === 'playlist' && api.playerReady && api.player && typeof api.player.nextVideo === 'function') {
+                api.player.nextVideo();
+                return;
+            }
+        } catch (e) {}
+        api.nextStatic();
+    };
+    api.previous = function () {
+        var item = currentItem();
+        try {
+            if (item && item.type === 'playlist' && api.playerReady && api.player && typeof api.player.previousVideo === 'function') {
+                api.player.previousVideo();
+                return;
+            }
+        } catch (e) {}
+        api.previousStatic();
+    };
+    api.toggle = function () {
+        var state;
+        if (!api.playerReady || !api.player) {
+            if (currentItem()) api.playIndex(api.currentIndex, true);
+            return;
+        }
+        try {
+            state = api.player.getPlayerState();
+            if (state === 1) api.player.pauseVideo();
+            else api.player.playVideo();
+        } catch (e) { showFallback(currentItem(), true); }
+        updateToggleIcon();
+    };
+    api.pause = function () {
+        try { if (api.playerReady && api.player && typeof api.player.pauseVideo === 'function') api.player.pauseVideo(); } catch (e) {}
+        updateToggleIcon();
+    };
+    api.release = function (reason) {
+        var fallbackNow = byId('yt-player-fallback');
+        var liveIframe = !!(d.querySelector && d.querySelector('#yt-player-stage iframe'));
+        if (!api.player && !liveIframe && !(fallbackNow && fallbackNow.children && fallbackNow.children.length)) {
+            api.playerReady = false;
+            api.pendingAutoplay = false;
+            return true;
+        }
+        api.pendingAutoplay = false;
+        try { if (api.playerReady && api.player && typeof api.player.stopVideo === 'function') api.player.stopVideo(); } catch (e) {}
+        try { if (api.player && typeof api.player.destroy === 'function') api.player.destroy(); } catch (e) {}
+        api.player = null;
+        api.playerReady = false;
+        var fallback = byId('yt-player-fallback');
+        if (fallback) {
+            fallback.innerHTML = '';
+            fallback.style.display = 'none';
+            fallback.setAttribute('aria-hidden', 'true');
+        }
+        var stage = byId('yt-player-stage');
+        var oldHost = byId('yt-player-iframe');
+        if (oldHost && oldHost.parentNode) oldHost.parentNode.removeChild(oldHost);
+        if (stage) {
+            var host = d.createElement('div');
+            host.id = 'yt-player-iframe';
+            if (stage.firstChild) stage.insertBefore(host, stage.firstChild);
+            else stage.appendChild(host);
+        }
+        updateToggleIcon();
+        return true;
+    };
+    api.focusList = function () {
+        var hub = w.MediaHub;
+        var rows = d.querySelectorAll('#youtube-list-container .youtube-media-item');
+        var pos = api.visibleIndexes.indexOf(api.currentIndex);
+        if (pos < 0) pos = 0;
+        if (hub) {
+            hub.activeZone = 'list';
+            hub.idxList = clamp(pos, rows.length);
+            if (typeof hub.highlightRemoteZones === 'function') hub.highlightRemoteZones();
+        } else if (rows.length) {
+            try { rows[clamp(pos, rows.length)].focus(); } catch (e) {}
+        }
+    };
+    api.init = function () {
+        api.render();
+        if (api.currentIndex < 0 && api.items.length) {
+            try { api.currentIndex = parseInt(w.localStorage.getItem('lifeos_youtube_last_index') || '0', 10); } catch (e) { api.currentIndex = 0; }
+            api.currentIndex = clamp(api.currentIndex, api.items.length);
+            setTitle(api.items[api.currentIndex]);
+            updateActiveRows();
+        }
+        ensureApi();
+        return true;
+    };
+
+    function youtubeZoneElements() {
+        return {
+            tabs: Array.prototype.slice.call(d.querySelectorAll('#media-subtabs button')).filter(visible),
+            sidebar: [],
+            list: Array.prototype.slice.call(d.querySelectorAll('#youtube-list-container .youtube-media-item')).filter(visible),
+            player: Array.prototype.slice.call(d.querySelectorAll('#youtube-player-controls button')).filter(visible)
+        };
+    }
+
+    function highlightYouTube(hub) {
+        var els = youtubeZoneElements();
+        var all, i, target = null;
+        hub.idxTabs = clamp(hub.idxTabs, els.tabs.length);
+        hub.idxList = clamp(hub.idxList, els.list.length);
+        hub.idxPlayer = clamp(hub.idxPlayer, els.player.length);
+        all = d.querySelectorAll('#media-subtabs button,#youtube-list-container .youtube-media-item,#youtube-player-controls button');
+        for (i = 0; i < all.length; i++) {
+            all[i].classList.remove('tab-focused');
+            all[i].classList.remove('media-focused');
+            all[i].classList.remove('player-btn-focused');
+            all[i].classList.remove('lifeos-remote-selected');
+            all[i].removeAttribute('data-lifeos-remote-selected');
+        }
+        if (hub.activeZone === 'player' && els.player.length) {
+            target = els.player[hub.idxPlayer];
+            if (target) target.classList.add('player-btn-focused');
+        } else if (hub.activeZone === 'list' && els.list.length) {
+            target = els.list[hub.idxList];
+            if (target) target.classList.add('media-focused');
+        } else {
+            hub.activeZone = 'tabs';
+            target = els.tabs[hub.idxTabs];
+            if (target) target.classList.add('tab-focused');
+        }
+        if (target) {
+            target.classList.add('lifeos-remote-selected');
+            target.setAttribute('data-lifeos-remote-selected', 'true');
+            try { target.focus(); } catch (e) {}
+            try { if (hub.scrollRemoteTarget) hub.scrollRemoteTarget(target); else target.scrollIntoView(false); } catch (e) {}
+        }
+    }
+
+    function applyYouTubeLayout(hub) {
+        var sidebar = byId('media-group-sidebar');
+        var mobile = byId('media-group-mobile-bar');
+        var buttons, i, btn, active;
+        setDisplay(byId('mp3-list-container'), false);
+        setDisplay(byId('radio-list-container'), false);
+        setDisplay(byId('tv-list-container'), false);
+        setDisplay(byId('youtube-list-container'), true, 'block');
+        setDisplay(byId('radio-player-container'), false);
+        setDisplay(byId('tv-player-container'), false);
+        setDisplay(byId('youtube-player-container'), true, 'block');
+        setDisplay(sidebar, false);
+        setDisplay(mobile, false);
+        buttons = ['music', 'radio', 'tv', 'youtube'];
+        for (i = 0; i < buttons.length; i++) {
+            btn = byId('tab-media-' + buttons[i]);
+            if (!btn) continue;
+            active = buttons[i] === 'youtube';
+            btn.className = 'px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap ' + (active ? 'bg-red-600 text-white shadow-sm border-red-600' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100');
+            btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        }
+        try {
+            d.body.setAttribute('data-lifeos-media-tab', 'youtube');
+            d.body.setAttribute('data-lifeosMediaTab', 'youtube');
+            d.body.setAttribute('data-l64f-media-tab', 'youtube');
+            d.body.dataset.lifeosMediaTab = 'youtube';
+            d.body.dataset.l64fMediaTab = 'youtube';
+        } catch (e) {}
+        try {
+            var right = byId('l64f-music-right');
+            if (right) right.classList.add('l64f-has-player');
+        } catch (e) {}
+        api.init();
+        try {
+            if (typeof w.CustomEvent === 'function') w.dispatchEvent(new w.CustomEvent('lifeos:media-layout', { detail: { tab: 'youtube', owner: 'R6.5_YOUTUBE_IFRAME_ES5_TAB4_R3' } }));
+        } catch (e) {}
+        return true;
+    }
+
+    function hideYouTubeLayout() {
+        setDisplay(byId('youtube-list-container'), false);
+        setDisplay(byId('youtube-player-container'), false);
+        api.release('leave_youtube_tab');
+    }
+
+    function restoreOldTabSidebars() {
+        var sidebar = byId('media-group-sidebar');
+        var mobile = byId('media-group-mobile-bar');
+        if (sidebar) {
+            sidebar.style.removeProperty('visibility');
+            sidebar.style.removeProperty('pointer-events');
+        }
+        if (mobile) {
+            mobile.style.removeProperty('visibility');
+            mobile.style.removeProperty('pointer-events');
+        }
+    }
+
+    function activateYouTube(hub, opts) {
+        var audio = byId('radio-audio-element');
+        try { if (audio && !audio.paused) audio.pause(); } catch (e) {}
+        try {
+            if (hub && hub.currentTab === 'tv' && w.LifeOSTvPlayer && typeof w.LifeOSTvPlayer.stop === 'function')
+                w.LifeOSTvPlayer.stop('leave_tv_for_youtube', { silent: true, clear: true });
+        } catch (e) {}
+        try {
+            if (w.MusicApp && w.MusicApp.playing && typeof w.MusicApp.togglePlay === 'function') w.MusicApp.togglePlay();
+            if (w.MusicApp && typeof w.MusicApp.hideMiniPlayerIfIdle === 'function') w.MusicApp.hideMiniPlayerIfIdle();
+        } catch (e) {}
+        hub.currentTab = 'youtube';
+        hub.currentGroup = 'all';
+        hub.focusIdx = -1;
+        hub.activeZone = 'tabs';
+        hub.idxTabs = 3;
+        hub.idxList = 0;
+        applyYouTubeLayout(hub);
+        if (w.soundEnabled && !(opts && opts.silent)) {
+            try { if (typeof w.playSpeechTTS === 'function') w.playSpeechTTS('Mục YouTube'); } catch (e) {}
+        }
+        return true;
+    }
+
+    function patchMediaHub() {
+        var hub = w.MediaHub;
+        var oldSwitch, oldApply, oldRender, oldGetZones, oldHighlight, oldInit, oldGroups;
+        if (!hub || hub.__lifeosYoutubeR65Patched) return !!hub;
+        hub.__lifeosYoutubeR65Patched = true;
+        oldSwitch = hub.switchTab;
+        oldApply = hub.applyTabLayout;
+        oldRender = hub.renderLists;
+        oldGetZones = hub.getZoneElements;
+        oldHighlight = hub.highlightRemoteZones;
+        oldInit = hub.init;
+        oldGroups = hub.renderGroupMenus;
+
+        hub.switchTab = function (tab, keepGroup, opts) {
+            var result;
+            if (tab === 'youtube') return activateYouTube(this, opts || {});
+            hideYouTubeLayout();
+            result = oldSwitch ? oldSwitch.apply(this, arguments) : false;
+            restoreOldTabSidebars();
+            return result;
+        };
+        hub.applyTabLayout = function () {
+            if (this.currentTab === 'youtube') return applyYouTubeLayout(this);
+            hideYouTubeLayout();
+            return oldApply ? oldApply.apply(this, arguments) : true;
+        };
+        hub.renderLists = function () {
+            if (this.currentTab === 'youtube') return api.render();
+            return oldRender ? oldRender.apply(this, arguments) : undefined;
+        };
+        hub.renderGroupMenus = function () {
+            if (this.currentTab === 'youtube') return;
+            return oldGroups ? oldGroups.apply(this, arguments) : undefined;
+        };
+        hub.getZoneElements = function () {
+            if (this.currentTab === 'youtube') return youtubeZoneElements();
+            return oldGetZones ? oldGetZones.apply(this, arguments) : { tabs: [], sidebar: [], list: [], player: [] };
+        };
+        hub.highlightRemoteZones = function () {
+            if (this.currentTab === 'youtube') return highlightYouTube(this);
+            return oldHighlight ? oldHighlight.apply(this, arguments) : undefined;
+        };
+        hub.init = function (force, opts) {
+            if ((opts && opts.targetTab === 'youtube') || this.currentTab === 'youtube') {
+                activateYouTube(this, opts || { silent: true });
+                return w.Promise ? w.Promise.resolve(true) : true;
+            }
+            return oldInit ? oldInit.apply(this, arguments) : (w.Promise ? w.Promise.resolve(false) : false);
+        };
+        return true;
+    }
+
+    function normalizeKey(e) {
+        var raw = text(e && e.key);
+        var code = Number(e && (e.keyCode || e.which) || 0);
+        if (raw && raw !== 'Unidentified' && raw !== 'Process') return raw;
+        if (code === 19) return 'ArrowUp';
+        if (code === 20) return 'ArrowDown';
+        if (code === 21) return 'ArrowLeft';
+        if (code === 22) return 'ArrowRight';
+        if (code === 13 || code === 23 || code === 66) return 'Enter';
+        if (code === 4 || code === 8 || code === 461 || code === 10009) return 'BrowserBack';
+        return raw;
+    }
+    function isBack(key) { return key === 'Escape' || key === 'Backspace' || key === 'BrowserBack' || key === 'GoBack' || key === 'XF86Back'; }
+
+    function youtubeRemote(e) {
+        var hub = w.MediaHub;
+        var key, els, target;
+        if (!hub || hub.currentTab !== 'youtube') return;
+        key = normalizeKey(e);
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape', 'Backspace', 'BrowserBack', 'GoBack', 'XF86Back'].indexOf(key) === -1) return;
+        try { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); } catch (err) {}
+        els = youtubeZoneElements();
+        if (isBack(key)) {
+            if (hub.activeZone === 'player') hub.activeZone = 'list';
+            else if (hub.activeZone === 'list') { hub.activeZone = 'tabs'; hub.idxTabs = 3; }
+            else if (w.LifeOSLandscapeRemote && typeof w.LifeOSLandscapeRemote.focusDock === 'function') { w.LifeOSLandscapeRemote.focusDock('music'); return; }
+            highlightYouTube(hub);
+            return;
+        }
+        if (hub.activeZone === 'tabs') {
+            if (key === 'ArrowRight') hub.idxTabs = clamp(hub.idxTabs + 1, els.tabs.length);
+            else if (key === 'ArrowLeft') hub.idxTabs = clamp(hub.idxTabs - 1, els.tabs.length);
+            else if (key === 'ArrowDown') { hub.activeZone = els.list.length ? 'list' : 'tabs'; hub.idxList = clamp(hub.idxList, els.list.length); }
+            else if (key === 'Enter' && els.tabs[hub.idxTabs]) {
+                target = els.tabs[hub.idxTabs];
+                target.click();
+                return;
+            }
+        } else if (hub.activeZone === 'list') {
+            if (key === 'ArrowDown') hub.idxList = clamp(hub.idxList + 1, els.list.length);
+            else if (key === 'ArrowUp') {
+                if (hub.idxList > 0) hub.idxList = clamp(hub.idxList - 1, els.list.length);
+                else { hub.activeZone = 'tabs'; hub.idxTabs = 3; }
+            } else if (key === 'ArrowRight') { hub.activeZone = els.player.length ? 'player' : 'list'; hub.idxPlayer = clamp(hub.idxPlayer, els.player.length); }
+            else if (key === 'ArrowLeft') { hub.activeZone = 'tabs'; hub.idxTabs = 3; }
+            else if (key === 'Enter' && els.list[hub.idxList]) { els.list[hub.idxList].click(); }
+        } else if (hub.activeZone === 'player') {
+            if (key === 'ArrowRight') hub.idxPlayer = clamp(hub.idxPlayer + 1, els.player.length);
+            else if (key === 'ArrowLeft') {
+                if (hub.idxPlayer > 0) hub.idxPlayer = clamp(hub.idxPlayer - 1, els.player.length);
+                else { hub.activeZone = 'list'; hub.idxList = clamp(hub.idxList, els.list.length); }
+            } else if (key === 'ArrowUp' || key === 'ArrowDown') { hub.activeZone = 'list'; hub.idxList = clamp(hub.idxList, els.list.length); }
+            else if (key === 'Enter' && els.player[hub.idxPlayer]) { els.player[hub.idxPlayer].click(); }
+        }
+        highlightYouTube(hub);
+    }
+
+    function ensureYouTubeTabButton() {
+        var tabs = byId('media-subtabs');
+        var btn = byId('tab-media-youtube');
+        var tvBtn = byId('tab-media-tv');
+        if (!tabs) return false;
+        if (!btn) {
+            btn = d.createElement('button');
+            btn.id = 'tab-media-youtube';
+            btn.type = 'button';
+            btn.className = 'px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 active:scale-95 transition whitespace-nowrap';
+            btn.setAttribute('role', 'tab');
+            btn.setAttribute('tabindex', '0');
+            btn.setAttribute('aria-selected', 'false');
+            btn.textContent = '▶ YouTube';
+            btn.onclick = function (event) {
+                if (event) { try { event.preventDefault(); event.stopPropagation(); } catch (e) {} }
+                if (w.MediaHub && typeof w.MediaHub.switchTab === 'function') {
+                    w.MediaHub.switchTab('youtube', false, { userIntent: true, source: 'media-subtab' });
+                }
+                return false;
+            };
+            if (tvBtn && tvBtn.parentNode === tabs && tvBtn.nextSibling) tabs.insertBefore(btn, tvBtn.nextSibling);
+            else tabs.appendChild(btn);
+        } else if (tvBtn && btn.previousElementSibling !== tvBtn) {
+            if (tvBtn.nextSibling) tabs.insertBefore(btn, tvBtn.nextSibling);
+            else tabs.appendChild(btn);
+        }
+        btn.textContent = '▶ YouTube';
+        btn.style.setProperty('display', 'inline-flex', 'important');
+        btn.style.setProperty('visibility', 'visible', 'important');
+        btn.style.setProperty('opacity', '1', 'important');
+        btn.style.setProperty('flex', '0 0 auto', 'important');
+        btn.style.setProperty('align-items', 'center', 'important');
+        btn.style.setProperty('justify-content', 'center', 'important');
+        tabs.style.setProperty('display', 'flex', 'important');
+        tabs.style.setProperty('flex-direction', 'row', 'important');
+        tabs.style.setProperty('flex-wrap', 'nowrap', 'important');
+        tabs.style.setProperty('overflow-x', 'auto', 'important');
+        return true;
+    }
+
+    w.LifeOSYouTubeR65 = api;
+    w.initYouTubeTab = api.init;
+    w.playYtMedia = function (type, mediaId) {
+        var i;
+        api.items = readData();
+        for (i = 0; i < api.items.length; i++) {
+            if (api.items[i].type === type && api.items[i].id === mediaId) return api.playIndex(i, true);
+        }
+        return false;
+    };
+
+    ensureYouTubeTabButton();
+    patchMediaHub();
+    d.addEventListener('keydown', youtubeRemote, true);
+    if (d.readyState === 'loading') {
+        d.addEventListener('DOMContentLoaded', function () { ensureYouTubeTabButton(); patchMediaHub(); api.render(); }, false);
+    } else {
+        ensureYouTubeTabButton();
+        patchMediaHub();
+        api.render();
+    }
+    w.setTimeout(function () { ensureYouTubeTabButton(); patchMediaHub(); }, 300);
+    w.setTimeout(function () { ensureYouTubeTabButton(); patchMediaHub(); }, 900);
+    w.setTimeout(function () { ensureYouTubeTabButton(); patchMediaHub(); }, 1800);
+})(window, document);
+</script>
+<!-- LIFEOS R6.5 YOUTUBE IFRAME MODULE - END -->
 
 <!-- LIFEOS SMARTBOX WHOLE-PAGE LITE R7: SAFE RUNTIME GATES -->
 <script data-lifeos-no-transpile="1" id="lifeos-smartbox-page-lite-r7-runtime">
