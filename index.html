@@ -2,6 +2,59 @@
 
 <html lang="vi">
 <head>
+<!-- LIFEOS SMARTBOX WHOLE-PAGE LITE R7: EARLY DETECT + PAINT COST CUT -->
+<script data-lifeos-no-transpile="1" id="lifeos-smartbox-page-lite-r7-early">
+(function(w,d){
+  'use strict';
+  if(w.__lifeosSmartboxPageLiteR7Early)return;
+  w.__lifeosSmartboxPageLiteR7Early=true;
+  function media(q){try{return !!(w.matchMedia&&w.matchMedia(q).matches);}catch(e){return false;}}
+  function viewport(){var v=w.visualViewport;return {w:Math.round(v?v.width:(w.innerWidth||d.documentElement.clientWidth||0)),h:Math.round(v?v.height:(w.innerHeight||d.documentElement.clientHeight||0))};}
+  function detect(){var b=viewport(),ua=String(navigator.userAgent||''),land=(b.w>b.h)||media('(orientation: landscape)'),coarse=media('(pointer: coarse)'),android=/Android|AFT|SmartTV|TV|Mobile/i.test(ua);return !!(land&&(android||coarse||Math.min(b.w,b.h)<=720)&&b.w>=480&&b.h>=220);}
+  function mode(){var b=d.body;return String((b&&b.dataset&&b.dataset.lifeosLandscapeRootMode)||'');}
+  var candidate=detect();
+  var api={
+    phase:'R7_SMARTBOX_WHOLE_PAGE_LITE',
+    detect:function(){return candidate;},
+    refresh:function(){candidate=detect();return candidate;},
+    active:function(){var b=d.body;return !!(candidate&&(!b||b.classList.contains('lifeos-landscape-mini-pc')||d.documentElement.classList.contains('lifeos-landscape-mini-pc')));},
+    mode:mode,
+    deferFamilyDom:function(){return this.active()&&mode()!=='chat';},
+    allowFamilyDom:function(){return !this.deferFamilyDom();},
+    allowDateClockDom:function(){return !this.active()||mode()==='focus';}
+  };
+  w.LifeOSSmartboxPageLiteR7=api;
+  w.LifeOSSmartboxPageLite=api;
+  if(candidate)d.documentElement.classList.add('lifeos-smartbox-page-lite-r7');
+})(window,document);
+</script>
+<style id="lifeos-smartbox-page-lite-r7-style">
+html.lifeos-smartbox-page-lite-r7,
+html.lifeos-smartbox-page-lite-r7 body{scroll-behavior:auto!important;}
+html.lifeos-smartbox-page-lite-r7 *,
+html.lifeos-smartbox-page-lite-r7 *::before,
+html.lifeos-smartbox-page-lite-r7 *::after{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  animation-duration:0.001ms!important;
+  animation-delay:0ms!important;
+  animation-iteration-count:1!important;
+  transition-duration:0.001ms!important;
+  transition-delay:0ms!important;
+  scroll-behavior:auto!important;
+  will-change:auto!important;
+  text-shadow:none!important;
+}
+html.lifeos-smartbox-page-lite-r7 [class*="shadow"],
+html.lifeos-smartbox-page-lite-r7 .l64f-card,
+html.lifeos-smartbox-page-lite-r7 header,
+html.lifeos-smartbox-page-lite-r7 nav{box-shadow:none!important;}
+html.lifeos-smartbox-page-lite-r7 .animate-pulse,
+html.lifeos-smartbox-page-lite-r7 .animate-spin,
+html.lifeos-smartbox-page-lite-r7 .animate-ping,
+html.lifeos-smartbox-page-lite-r7 .animate-bounce{animation:none!important;}
+</style>
+
 <!-- LifeOS Pha14J20R76 Final GitHub Runtime Hard Clean - R75 Base -->
 <script data-lifeos-no-transpile="1" id="lifeos-lock4-clean-boot-owner">
 (function(w,d){
@@ -32978,7 +33031,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     else
         install();
     window.addEventListener('load', function () { setTimeout(install, 250); setTimeout(install, 1200); setTimeout(install, 3200); }, { once: true });
-    setInterval(renderD1Panel, 1500);
+    setInterval(function(){ if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) renderD1Panel(); }, 1500);
 })();
 </script>
 <!-- Pha14J20R3_HybridPendingCancel_NoFirebaseGhostStatus - END -->
@@ -35183,7 +35236,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
             scheduleReload('visibility_resume', 250);
         }
     });
-    setInterval(hideUltraOnly, 3000);
+    setInterval(function(){ if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) hideUltraOnly(); }, 3000);
 })();
 </script>
 <!-- Pha14J20R21_D1Folders_KeepInstallApp_HideUltra_R19Base - END -->
@@ -37097,11 +37150,11 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         boot();
     window.addEventListener('load', function () { setTimeout(boot, 50); setTimeout(boot, 500); setTimeout(boot, 1500); }, { once: true });
     try {
-        var mo = new MutationObserver(function () { setTimeout(transformAll, 30); });
-        mo.observe(document.documentElement, { childList: true, subtree: true });
+        var mo = new MutationObserver(function () { if (window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom()) return; setTimeout(transformAll, 30); });
+        mo.observe(document.getElementById('chat-messages') || document.documentElement, { childList: true, subtree: true });
     }
     catch (e) { }
-    setInterval(function () { patchChatEngine(); transformAll(); }, 5000);
+    setInterval(function () { patchChatEngine(); if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) transformAll(); }, 5000);
 })();
 </script>
 <!-- Pha14J20R39_NoFirebase_NoVisibilityJump_R38Base - START -->
@@ -38095,13 +38148,13 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         }
         catch (e) { }
     }
-    function boot() { patchStorage(); quietConsole(); quietFirebaseForcePull(); slowR35Poll(); cleanLabels(); }
+    function boot() { patchStorage(); quietConsole(); quietFirebaseForcePull(); slowR35Poll(); if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) cleanLabels(); }
     window.LifeOSJ20R45QuietStable = { phase: PHASE, boot: boot, summary: function () { var r = window.LifeOSR35D1TextOfficial, st = r && r.state || {}; return { phase: PHASE, storageThrottle: !!Storage.prototype.__lifeosR45StorageThrottle, blocked: blocked, r35LastRefreshAt: st.lastRefreshAt || 0, r35RefreshCount: st.refreshCount || 0, forcePullQuiet: !!(window.forcePullVaultFromFirebase && window.forcePullVaultFromFirebase.__lifeosR45Quiet) }; } };
     boot();
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', boot, { once: true });
     window.addEventListener('load', function () { setTimeout(boot, 80); setTimeout(boot, 900); setTimeout(boot, 3000); }, { once: true });
-    document.addEventListener('click', function () { setTimeout(cleanLabels, 80); }, true);
+    document.addEventListener('click', function () { setTimeout(function(){ if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) cleanLabels(); }, 80); }, true);
     setInterval(boot, 15000);
 })();
 </script>
@@ -39011,6 +39064,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
             if (window.__lifeosR48FamilyMo)
                 return;
             var mo = new MutationObserver(function () {
+                if (window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom() && !inLock()) return;
                 if (!inLock() || !r35Ready())
                     return;
                 var root = chatRoot();
@@ -39023,7 +39077,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
                 else
                     snapshotStable('mutation_stable');
             });
-            mo.observe(document.body, { subtree: true, childList: true, characterData: true });
+            var observedRoot = chatRoot() || document.body; mo.observe(observedRoot, { subtree: true, childList: true, characterData: true });
             window.__lifeosR48FamilyMo = mo;
             trace('PATCH_OK', { target: 'MutationObserver' });
         }
@@ -44814,5 +44868,26 @@ Goals:
 - Strip x-lifeos-phase header for D1 family worker to avoid CORS preflight reject.
 -->
 <!-- LIFEOS J20 R75 SAFE ROUTER + MEDIA NO AUTOPLAY + CLEAN GATE - END -->
+
+<!-- LIFEOS SMARTBOX WHOLE-PAGE LITE R7: SAFE RUNTIME GATES -->
+<script data-lifeos-no-transpile="1" id="lifeos-smartbox-page-lite-r7-runtime">
+(function(w,d){
+  'use strict';
+  if(w.__lifeosSmartboxPageLiteR7Runtime)return;
+  w.__lifeosSmartboxPageLiteR7Runtime=true;
+  var api=w.LifeOSSmartboxPageLiteR7;if(!api)return;
+  function active(){return api.active();}
+  function mode(){return api.mode();}
+  function applyClass(){var on=active();if(on){d.documentElement.classList.add('lifeos-smartbox-page-lite-r7');if(d.body)d.body.classList.add('lifeos-smartbox-page-lite-r7');}else{d.documentElement.classList.remove('lifeos-smartbox-page-lite-r7');if(d.body)d.body.classList.remove('lifeos-smartbox-page-lite-r7');}}
+  function patchDateClock(){var fn=w.updateDateClock;if(typeof fn!=='function'||fn.__lifeosR7SmartboxGate)return false;function gated(){if(active()&&mode()!=='focus')return false;return fn.apply(this,arguments);}gated.__lifeosR7SmartboxGate=true;gated.__lifeosR7Base=fn;w.updateDateClock=gated;return true;}
+  function disableConfetti(){if(!active()||typeof w.confetti!=='function'||w.confetti.__lifeosR7SmartboxLite)return false;var base=w.confetti;function quiet(){return Promise.resolve();}quiet.__lifeosR7SmartboxLite=true;quiet.__lifeosR7Base=base;quiet.reset=function(){try{return base.reset&&base.reset();}catch(e){}};w.confetti=quiet;return true;}
+  function install(){applyClass();patchDateClock();disableConfetti();}
+  function boot(){install();[80,300,900,1800].forEach(function(ms){setTimeout(install,ms);});}
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  w.addEventListener('load',function(){setTimeout(install,80);},{once:true});
+  w.addEventListener('orientationchange',function(){try{api.refresh&&api.refresh();}catch(e){}setTimeout(install,180);},{passive:true});
+  api.summary=function(){return {phase:api.phase,active:active(),mode:mode(),clockPatched:!!(w.updateDateClock&&w.updateDateClock.__lifeosR7SmartboxGate),confettiQuiet:!!(w.confetti&&w.confetti.__lifeosR7SmartboxLite),tvOwner:w.LifeOSTvPlayer&&w.LifeOSTvPlayer.owner||''};};
+})(window,document);
+</script>
 </body>
 </html>
