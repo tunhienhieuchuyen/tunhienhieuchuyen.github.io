@@ -16700,6 +16700,7 @@ window.MediaHub = {
     remoteEdgeAt: 0,
     remoteEdgeWindow: 700,
     smartboxListOffsetByTab: { radio: 0, tv: 0, youtube: 0 },
+    smartboxListIndexByTab: { radio: 0, tv: 0, youtube: 0 },
     smartboxManualScrollUntil: 0,
     smartboxRemoteMoveUntil: 0,
     smartboxProgrammaticScrollUntil: 0,
@@ -16909,12 +16910,21 @@ window.MediaHub = {
             window.LifeOSTvPlayer.stop('leave_tv_tab', { silent: true });
         if (this.currentTab === 'radio' || this.currentTab === 'tv')
             this.groupByTab[this.currentTab] = this.currentGroup || 'all';
+        if (previousTab !== tab && document.body && document.body.classList.contains('lifeos-landscape-mini-pc')) {
+            const oldViewport = document.getElementById('music-list-container');
+            if (!this.smartboxListOffsetByTab) this.smartboxListOffsetByTab = { radio: 0, tv: 0, youtube: 0 };
+            if (!this.smartboxListIndexByTab) this.smartboxListIndexByTab = { radio: 0, tv: 0, youtube: 0 };
+            if (['radio', 'tv', 'youtube'].indexOf(previousTab) >= 0) {
+                if (oldViewport) this.smartboxListOffsetByTab[previousTab] = oldViewport.scrollTop || 0;
+                this.smartboxListIndexByTab[previousTab] = Math.max(0, this.idxList || 0);
+            }
+        }
         this.currentTab = tab;
         if (previousTab !== tab && this.isSmartboxMediaMode()) {
-            if (!this.smartboxListOffsetByTab) this.smartboxListOffsetByTab = { radio: 0, tv: 0 };
-            if (tab === 'radio' || tab === 'tv') this.smartboxListOffsetByTab[tab] = 0;
-            this.idxList = 0;
-            this.lastListIdx = 0;
+            if (!this.smartboxListOffsetByTab) this.smartboxListOffsetByTab = { radio: 0, tv: 0, youtube: 0 };
+            if (!this.smartboxListIndexByTab) this.smartboxListIndexByTab = { radio: 0, tv: 0, youtube: 0 };
+            this.idxList = Math.max(0, Number(this.smartboxListIndexByTab[tab] || 0));
+            this.lastListIdx = this.idxList;
         }
         this.currentGroup = tab === 'music' ? 'all' : (keepGroup ? (this.groupByTab[tab] || 'all') : 'all');
         if (tab !== 'music')
@@ -17076,15 +17086,14 @@ renderLists() {
             list = list.filter(c => String(c.name || '').toLowerCase().includes(query));
         const signature = [type, this.currentGroup, query, list.length, list.map(c => String(c.id || c.url || c.name || '')).join('|')].join('::');
         if (smartbox && container.getAttribute('data-lifeos-render-signature') === signature && container.querySelectorAll('.media-item').length === list.length) {
+            /* Stable owner: status/player refresh must never reposition a list that the user is scrolling. */
             this.prepareSmartboxRemoteSurface();
-            const items = container.querySelectorAll('.media-item');
-            const target = items[this.idxList] || items[0];
-            if (target)
-                this.positionSmartboxListTarget(target, false);
             return;
         }
-        const scrollOwner = smartbox ? null : (this.getListScrollOwner(type) || container);
-        const keepTop = scrollOwner ? (scrollOwner.scrollTop || 0) : 0;
+        const scrollOwner = this.getListScrollOwner(type) || container;
+        const keepTop = smartbox
+            ? Math.max(0, Number((this.smartboxListOffsetByTab && this.smartboxListOffsetByTab[type]) || (scrollOwner && scrollOwner.scrollTop) || 0))
+            : (scrollOwner ? (scrollOwner.scrollTop || 0) : 0);
         const keepLeft = scrollOwner ? (scrollOwner.scrollLeft || 0) : 0;
         container.innerHTML = list.map((c, idxInList) => {
             const data = isTv ? this.tvData : this.radioData;
@@ -17118,10 +17127,16 @@ renderLists() {
         container.setAttribute('data-lifeos-render-signature', signature);
         if (smartbox) {
             this.prepareSmartboxRemoteSurface();
-            const items = container.querySelectorAll('.media-item');
-            const target = items[this.idxList] || items[0];
-            if (target)
-                this.positionSmartboxListTarget(target, false);
+            /* Re-render may replace cards, but it must preserve the exact user-owned offset. */
+            const restore = () => {
+                try {
+                    this.setSmartboxScrollTop(scrollOwner, keepTop);
+                    scrollOwner.scrollLeft = keepLeft;
+                }
+                catch (e) { }
+            };
+            restore();
+            requestAnimationFrame(restore);
         }
         else if (scrollOwner) {
             const restore = () => {
@@ -17422,8 +17437,8 @@ syncSmartboxListIndexToViewport(viewport) {
         if (best >= 0) {
             this.idxList = best;
             this.lastListIdx = best;
-            if (this.activeZone === 'list' && typeof this.highlightRemoteZones === 'function')
-                requestAnimationFrame(() => this.highlightRemoteZones());
+            if (!this.smartboxListIndexByTab) this.smartboxListIndexByTab = { radio: 0, tv: 0, youtube: 0 };
+            this.smartboxListIndexByTab[this.currentTab] = best;
             return true;
         }
     }
@@ -17448,36 +17463,13 @@ bindSmartboxScrollOwner() {
     viewport.addEventListener('pointerdown', manualStart, { passive: true });
     viewport.addEventListener('mousedown', manualStart, { passive: true });
     viewport.addEventListener('touchstart', manualStart, { passive: true });
-    viewport.addEventListener('wheel', function (event) {
+    viewport.addEventListener('wheel', function () {
         if (['radio', 'tv', 'youtube'].indexOf(hub.currentTab) < 0)
             return;
-        let raw = Number(event.deltaY || 0);
-        if (!raw)
-            return;
-        if (event.deltaMode === 1)
-            raw *= 34;
-        else if (event.deltaMode === 2)
-            raw *= Math.max(120, viewport.clientHeight * 0.82);
-        const cap = Math.max(42, Math.min(92, (viewport.clientHeight || 400) * 0.18));
-        const step = Math.max(-cap, Math.min(cap, raw));
+        /* Use the browser's native scroll path — exactly like the stable MP3 tab.
+           Do not preventDefault, accumulate delta or write scrollTop a second time. */
         hub.markSmartboxManualScroll(viewport);
-        hub.smartboxWheelDelta += step;
-        if (!hub.smartboxWheelRaf) {
-            hub.smartboxWheelRaf = requestAnimationFrame(function () {
-                hub.smartboxWheelRaf = 0;
-                const delta = Math.max(-cap * 1.25, Math.min(cap * 1.25, hub.smartboxWheelDelta));
-                hub.smartboxWheelDelta = 0;
-                const max = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
-                viewport.scrollTop = Math.max(0, Math.min(max, (viewport.scrollTop || 0) + delta));
-                if (!hub.smartboxListOffsetByTab)
-                    hub.smartboxListOffsetByTab = { radio: 0, tv: 0, youtube: 0 };
-                hub.smartboxListOffsetByTab[hub.currentTab] = viewport.scrollTop || 0;
-            });
-        }
-        if (event.cancelable)
-            event.preventDefault();
-        event.stopPropagation();
-    }, { passive: false });
+    }, { passive: true });
     viewport.addEventListener('scroll', function () {
         if (!hub.isSmartboxMediaMode())
             return;
@@ -17591,7 +17583,8 @@ positionSmartboxListTarget(target, force) {
         return false;
     this.prepareSmartboxRemoteSurface();
     const remoteOwnsScroll = Date.now() < (this.smartboxRemoteMoveUntil || 0);
-    if (!force && !remoteOwnsScroll && Date.now() < (this.smartboxManualScrollUntil || 0))
+    /* Only an explicit D-pad move may reveal a target. Render/status/focus refreshes never own scroll. */
+    if (!force && !remoteOwnsScroll)
         return false;
     try {
         const tr = target.getBoundingClientRect();
@@ -18780,6 +18773,10 @@ highlightRemoteZones() {
                 }
             }
             saveMemory();
+            if (smartboxMode && ['radio', 'tv', 'youtube'].indexOf(this.currentTab) >= 0) {
+                if (!this.smartboxListIndexByTab) this.smartboxListIndexByTab = { radio: 0, tv: 0, youtube: 0 };
+                this.smartboxListIndexByTab[this.currentTab] = Math.max(0, this.idxList || 0);
+            }
             this.highlightRemoteZones();
     };
     document.addEventListener('keydown', handleRemoteKeyDown, true);
@@ -19742,11 +19739,13 @@ function isMini() {
         }
         if (mode === 'chat') {
             try {
-                (_d = (_c = window.ChatEngine) === null || _c === void 0 ? void 0 : _c.init) === null || _d === void 0 ? void 0 : _d.call(_c);
-            }
-            catch (e) { }
-            try {
-                (_f = (_e = window.ChatEngine) === null || _e === void 0 ? void 0 : _e.render) === null || _f === void 0 ? void 0 : _f.call(_e);
+                if (window.ChatEngine && !window.ChatEngine._ready)
+                    (_d = (_c = window.ChatEngine) === null || _c === void 0 ? void 0 : _c.init) === null || _d === void 0 ? void 0 : _d.call(_c);
+                else {
+                    const existingMessages = document.getElementById('chat-messages');
+                    if ((!existingMessages || existingMessages.childElementCount === 0) && window.ChatEngine && typeof window.ChatEngine.render === 'function')
+                        window.ChatEngine.render();
+                }
             }
             catch (e) { }
             requestAnimationFrame(function () {
@@ -19929,21 +19928,14 @@ function isMini() {
         }
         else if (mode === 'vault')
             target = document.querySelector('#l64f-panel-vault button, #l64f-panel-vault [tabindex]');
-        else if (mode === 'chat')
-            target = document.querySelector('#chat-input, #chat-send-btn, #l64f-panel-chat [data-chat-msg-id], #l64f-panel-chat button, #l64f-panel-chat [tabindex]');
+        else if (mode === 'chat') {
+            if (window.LifeOSFamilyRemote && typeof window.LifeOSFamilyRemote.enter === 'function')
+                return window.LifeOSFamilyRemote.enter({ pinBottom: true });
+            target = document.getElementById('chat-messages') || document.querySelector('#l64f-panel-chat [data-chat-msg-id], #chat-send-btn, #l64f-panel-chat button');
+        }
         if (target) {
             try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (_e) { } }
             markWholePageFocus(target);
-            if (mode === 'chat') {
-                requestAnimationFrame(function () {
-                    const composer = document.getElementById('chat-input') || document.getElementById('chat-send-btn');
-                    if (!composer || !document.body.classList.contains('lifeos-landscape-mini-pc')) return;
-                    try { composer.focus({ preventScroll: true }); } catch (e) { try { composer.focus(); } catch (_e) { } }
-                    markWholePageFocus(composer);
-                    const messages = document.getElementById('chat-messages');
-                    if (messages) messages.scrollTop = messages.scrollHeight;
-                });
-            }
         }
         return !!target;
     }
@@ -20062,9 +20054,16 @@ function isMini() {
             const inPanel = !!(root && active && root.contains(active));
             let zone = document.body.dataset.lifeosRemoteZone || (inDock ? 'dock' : (inPanel ? 'panel' : ''));
             const mode = activeLandscapeMode();
-            /* MediaHub có ma trận điều hướng riêng; sau khi sửa guard viewport, để chính nó xử lý panel Media. */
+            /* MediaHub and Family each own a deterministic virtual focus matrix. */
             if (mode === 'music' && zone === 'panel')
                 return;
+            if (mode === 'chat' && zone === 'panel') {
+                const activeInput = document.activeElement;
+                if (activeInput && (activeInput.id === 'chat-input' || activeInput.tagName === 'TEXTAREA' || (activeInput.tagName === 'INPUT' && activeInput.type !== 'button'))) return;
+                if (window.LifeOSFamilyRemote && typeof window.LifeOSFamilyRemote.handleKey === 'function') {
+                    if (window.LifeOSFamilyRemote.handleKey(key, e)) return;
+                }
+            }
             if (!zone) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -20772,50 +20771,215 @@ body.lifeos-landscape-mini-pc #family-upload-error-text {
     max-height: 34px !important;
   }
 }
+
+/* R14 Smartbox Family: one scroll owner + virtual D-pad selection; no input autofocus. */
+body.lifeos-landscape-mini-pc #chat-messages {
+  scroll-behavior: auto !important;
+  overflow-anchor: none !important;
+  outline: none !important;
+}
+body.lifeos-landscape-mini-pc #chat-messages [data-chat-msg-id].lifeos-family-remote-selected {
+  outline: 3px solid #4f46e5 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 5px rgba(79,70,229,.18) !important;
+}
+body.lifeos-landscape-mini-pc .lifeos-family-remote-action {
+  outline: 3px solid #16a34a !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 5px rgba(22,163,74,.18) !important;
+}
+body.lifeos-landscape-mini-pc #chat-input[data-lifeos-family-tv-no-autofocus],
+body.lifeos-landscape-mini-pc #chat-input[tabindex="-1"] {
+  caret-color: auto !important;
+}
+
 </style>
 <script id="lifeos-pha64f3-family-chat-landscape-fix-js">(function () {
-    function canScrollY(el, delta) {
-        if (!el || el.scrollHeight <= el.clientHeight + 1)
-            return false;
-        if (delta < 0)
-            return el.scrollTop > 0;
-        return el.scrollTop + el.clientHeight < el.scrollHeight - 1;
+    const state = {
+        zone: 'cards',
+        cardIndex: -1,
+        actionIndex: -1,
+        composerIndex: 0,
+        folderIndex: 0,
+        scrollTimer: 0,
+        observer: null
+    };
+    function active() {
+        return !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc') && document.body.dataset.lifeosLandscapeRootMode === 'chat');
     }
-    function makeFamilyCardsRemoteReady(messages) {
-        if (!messages)
-            return;
-        Array.prototype.forEach.call(messages.querySelectorAll('[data-chat-msg-id]'), function (card) {
-            if (!card.hasAttribute('tabindex'))
-                card.setAttribute('tabindex', '0');
-            if (!card.hasAttribute('role'))
-                card.setAttribute('role', 'button');
+    function visible(el) {
+        if (!el || el.hidden || el.disabled) return false;
+        const cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || cs.pointerEvents === 'none') return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+    }
+    function cards() {
+        const messages = document.getElementById('chat-messages');
+        if (!messages) return [];
+        return Array.prototype.filter.call(messages.querySelectorAll('[data-chat-msg-id]'), visible);
+    }
+    function actions(card) {
+        if (!card) return [];
+        return Array.prototype.filter.call(card.querySelectorAll('button:not([disabled]),a[href],[role="button"]'), visible);
+    }
+    function composerButtons() {
+        const form = document.getElementById('chat-form');
+        if (!form) return [];
+        /* The text input is pointer-selectable, but never enters the D-pad focus chain automatically. */
+        return Array.prototype.filter.call(form.querySelectorAll('button:not([disabled]),[role="button"]'), visible);
+    }
+    function folderButtons() {
+        const panel = document.getElementById('l64f-chat-left');
+        if (!panel) return [];
+        return Array.prototype.filter.call(panel.querySelectorAll('#chat-folder-tabs button,#chat-dynamic-folders button'), visible);
+    }
+    function clearMarks() {
+        document.querySelectorAll('.lifeos-family-remote-selected,.lifeos-family-remote-action').forEach(function (el) {
+            el.classList.remove('lifeos-family-remote-selected', 'lifeos-family-remote-action');
+            el.removeAttribute('data-lifeos-family-remote');
         });
     }
-    function bindFamilyScrollSurface(right, messages) {
-        if (!right || !messages || right.__lifeos64f3ScrollBound)
-            return;
-        right.__lifeos64f3ScrollBound = true;
-        right.addEventListener('wheel', function (event) {
-            if (!document.body.classList.contains('lifeos-landscape-mini-pc') || document.body.dataset.lifeosLandscapeRootMode !== 'chat')
-                return;
-            const folders = event.target && event.target.closest ? event.target.closest('#chat-folder-tabs') : null;
-            if (folders && canScrollY(folders, event.deltaY))
-                return;
-            if (!canScrollY(messages, event.deltaY))
-                return;
-            messages.scrollTop += event.deltaY;
-            event.preventDefault();
-            event.stopPropagation();
+    function safeFocusSurface() {
+        const messages = document.getElementById('chat-messages');
+        if (!messages) return false;
+        if (!messages.hasAttribute('tabindex')) messages.setAttribute('tabindex', '0');
+        try { messages.focus({ preventScroll: true }); } catch (e) { try { messages.focus(); } catch (_) { } }
+        document.body.dataset.lifeosRemoteZone = 'panel';
+        return true;
+    }
+    function revealCard(card) {
+        const messages = document.getElementById('chat-messages');
+        if (!messages || !card) return;
+        try {
+            const mr = messages.getBoundingClientRect();
+            const cr = card.getBoundingClientRect();
+            const pad = 10;
+            let delta = 0;
+            if (cr.top < mr.top + pad) delta = cr.top - (mr.top + pad);
+            else if (cr.bottom > mr.bottom - pad) delta = cr.bottom - (mr.bottom - pad);
+            if (Math.abs(delta) > 1) messages.scrollTop = Math.max(0, messages.scrollTop + delta);
+        } catch (e) { }
+    }
+    function renderSelection(reveal) {
+        clearMarks();
+        const list = cards();
+        if (list.length) {
+            state.cardIndex = Math.max(0, Math.min(state.cardIndex < 0 ? list.length - 1 : state.cardIndex, list.length - 1));
+            const card = list[state.cardIndex];
+            card.classList.add('lifeos-family-remote-selected');
+            card.setAttribute('data-lifeos-family-remote', 'card');
+            if (state.zone === 'actions') {
+                const btns = actions(card);
+                if (btns.length) {
+                    state.actionIndex = Math.max(0, Math.min(state.actionIndex, btns.length - 1));
+                    btns[state.actionIndex].classList.add('lifeos-family-remote-action');
+                    btns[state.actionIndex].setAttribute('data-lifeos-family-remote', 'action');
+                } else state.zone = 'cards';
+            }
+            if (reveal) revealCard(card);
+        }
+        if (state.zone === 'composer') {
+            const btns = composerButtons();
+            if (btns.length) {
+                state.composerIndex = Math.max(0, Math.min(state.composerIndex, btns.length - 1));
+                btns[state.composerIndex].classList.add('lifeos-family-remote-action');
+                btns[state.composerIndex].setAttribute('data-lifeos-family-remote', 'composer');
+            } else state.zone = 'cards';
+        }
+        if (state.zone === 'folders') {
+            const btns = folderButtons();
+            if (btns.length) {
+                state.folderIndex = Math.max(0, Math.min(state.folderIndex, btns.length - 1));
+                btns[state.folderIndex].classList.add('lifeos-family-remote-action');
+                btns[state.folderIndex].setAttribute('data-lifeos-family-remote', 'folder');
+            } else state.zone = 'cards';
+        }
+        const activeEl = document.activeElement;
+        const typing = !!(activeEl && (activeEl.id === 'chat-input' || activeEl.tagName === 'TEXTAREA' || (activeEl.tagName === 'INPUT' && activeEl.type !== 'button')));
+        if (!typing) safeFocusSurface();
+    }
+    function syncIndexToViewport() {
+        const messages = document.getElementById('chat-messages');
+        const list = cards();
+        if (!messages || !list.length) return;
+        try {
+            const mr = messages.getBoundingClientRect();
+            const center = mr.top + mr.height / 2;
+            let best = -1, score = Infinity;
+            list.forEach(function (card, index) {
+                const r = card.getBoundingClientRect();
+                const overlap = Math.min(r.bottom, mr.bottom) - Math.max(r.top, mr.top);
+                if (overlap <= 1) return;
+                const s = Math.abs((r.top + r.bottom) / 2 - center);
+                if (s < score) { score = s; best = index; }
+            });
+            if (best >= 0) {
+                state.cardIndex = best;
+                state.zone = 'cards';
+                state.actionIndex = -1;
+                renderSelection(false);
+            }
+        } catch (e) { }
+    }
+    function markManualScroll() {
+        if (state.scrollTimer) clearTimeout(state.scrollTimer);
+        state.scrollTimer = setTimeout(function () {
+            state.scrollTimer = 0;
+            syncIndexToViewport();
+        }, 180);
+    }
+    function normalizeWheel(event, messages) {
+        let delta = Number(event.deltaY || 0);
+        if (event.deltaMode === 1) delta *= 34;
+        else if (event.deltaMode === 2) delta *= Math.max(120, messages.clientHeight * 0.82);
+        return delta;
+    }
+    function bindScroll(panel, messages) {
+        if (!panel || !messages || panel.__lifeosFamilyStableScrollBound) return;
+        panel.__lifeosFamilyStableScrollBound = true;
+        panel.addEventListener('wheel', function (event) {
+            if (!active()) return;
+            const target = event.target;
+            const folders = target && target.closest ? target.closest('#chat-folder-tabs,#chat-dynamic-folders') : null;
+            if (folders && folders.scrollHeight > folders.clientHeight + 1) return;
+            const form = target && target.closest ? target.closest('#chat-form') : null;
+            if (form) return;
+            const delta = normalizeWheel(event, messages);
+            if (!delta || messages.scrollHeight <= messages.clientHeight + 1) return;
+            const before = messages.scrollTop;
+            const max = Math.max(0, messages.scrollHeight - messages.clientHeight);
+            messages.scrollTop = Math.max(0, Math.min(max, before + delta));
+            if (Math.abs(messages.scrollTop - before) > 0.5) {
+                markManualScroll();
+                if (event.cancelable) event.preventDefault();
+                event.stopPropagation();
+            }
         }, { passive: false, capture: true });
+        messages.addEventListener('scroll', markManualScroll, { passive: true });
+        messages.addEventListener('touchstart', function () { state.zone = 'cards'; }, { passive: true });
+    }
+    function prepareCards(messages) {
+        if (!messages) return;
+        Array.prototype.forEach.call(messages.querySelectorAll('[data-chat-msg-id]'), function (card) {
+            card.setAttribute('tabindex', '-1');
+            if (!card.hasAttribute('role')) card.setAttribute('role', 'group');
+            Array.prototype.forEach.call(card.querySelectorAll('button,a,[role="button"]'), function (el) {
+                if (!el.hasAttribute('data-lifeos-family-old-tabindex')) {
+                    el.setAttribute('data-lifeos-family-old-tabindex', el.hasAttribute('tabindex') ? el.getAttribute('tabindex') : '__none__');
+                }
+                el.setAttribute('tabindex', '-1');
+            });
+        });
     }
     function compactFamilyLayout() {
-        if (!document.body.classList.contains('lifeos-landscape-mini-pc'))
-            return;
+        if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+        const panel = document.getElementById('l64f-panel-chat');
         const right = document.getElementById('l64f-chat-right');
         const form = document.getElementById('chat-form');
         const messages = document.getElementById('chat-messages');
-        if (!right || !form || !messages)
-            return;
+        const input = document.getElementById('chat-input');
+        if (!panel || !right || !form || !messages) return;
         right.style.setProperty('display', 'flex', 'important');
         right.style.setProperty('flex-direction', 'column', 'important');
         right.style.setProperty('height', '100%', 'important');
@@ -20826,49 +20990,134 @@ body.lifeos-landscape-mini-pc #family-upload-error-text {
         messages.style.setProperty('min-height', '0', 'important');
         messages.style.setProperty('overflow-y', 'auto', 'important');
         messages.style.setProperty('touch-action', 'pan-y', 'important');
+        messages.setAttribute('tabindex', '0');
+        if (input) {
+            input.setAttribute('tabindex', '-1');
+            if (!input.__lifeosFamilyTvInputBound) {
+                input.__lifeosFamilyTvInputBound = true;
+                input.addEventListener('focus', function () { clearMarks(); }, { passive: true });
+                input.addEventListener('blur', function () {
+                    setTimeout(function () {
+                        if (!active()) return;
+                        const ae = document.activeElement;
+                        if (!ae || ae === document.body || ae === document.documentElement) {
+                            state.zone = 'cards';
+                            state.actionIndex = -1;
+                            renderSelection(false);
+                        }
+                    }, 90);
+                }, { passive: true });
+            }
+        }
         form.style.setProperty('flex', '0 0 48px', 'important');
         form.style.setProperty('height', '48px', 'important');
         form.style.setProperty('min-height', '48px', 'important');
         form.style.setProperty('max-height', '48px', 'important');
-        makeFamilyCardsRemoteReady(messages);
-        bindFamilyScrollSurface(right, messages);
+        prepareCards(messages);
+        bindScroll(panel, messages);
+        if (!messages.__lifeosFamilyCardObserver && window.MutationObserver) {
+            messages.__lifeosFamilyCardObserver = new MutationObserver(function () {
+                prepareCards(messages);
+                requestAnimationFrame(function () { renderSelection(false); });
+            });
+            messages.__lifeosFamilyCardObserver.observe(messages, { childList: true, subtree: true });
+        }
     }
+    function enter(opts) {
+        if (!active()) return false;
+        compactFamilyLayout();
+        const messages = document.getElementById('chat-messages');
+        if (!messages) return false;
+        const list = cards();
+        state.zone = 'cards';
+        state.cardIndex = list.length ? list.length - 1 : -1;
+        state.actionIndex = -1;
+        if (!opts || opts.pinBottom !== false) messages.scrollTop = Math.max(0, messages.scrollHeight - messages.clientHeight);
+        renderSelection(true);
+        return true;
+    }
+    function handleKey(key, event) {
+        if (!active()) return false;
+        const activeEl = document.activeElement;
+        if (activeEl && (activeEl.id === 'chat-input' || activeEl.tagName === 'TEXTAREA' || (activeEl.tagName === 'INPUT' && activeEl.type !== 'button'))) return false;
+        const valid = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter'];
+        if (valid.indexOf(key) < 0) return false;
+        const list = cards();
+        if (state.cardIndex < 0 && list.length) state.cardIndex = list.length - 1;
+        if (state.zone === 'cards') {
+            if (key === 'ArrowUp' && list.length) state.cardIndex = Math.max(0, state.cardIndex - 1);
+            else if (key === 'ArrowDown') {
+                if (list.length && state.cardIndex < list.length - 1) state.cardIndex++;
+                else { state.zone = 'composer'; state.composerIndex = 0; }
+            }
+            else if (key === 'ArrowRight') {
+                const btns = actions(list[state.cardIndex]);
+                if (btns.length) { state.zone = 'actions'; state.actionIndex = 0; }
+                else { state.zone = 'composer'; state.composerIndex = 0; }
+            }
+            else if (key === 'ArrowLeft') { state.zone = 'folders'; state.folderIndex = 0; }
+            else if (key === 'Enter') {
+                const btns = actions(list[state.cardIndex]);
+                if (btns.length) { state.zone = 'actions'; state.actionIndex = 0; }
+            }
+        } else if (state.zone === 'actions') {
+            const btns = actions(list[state.cardIndex]);
+            if (key === 'ArrowRight') state.actionIndex = Math.min(btns.length - 1, state.actionIndex + 1);
+            else if (key === 'ArrowLeft') {
+                if (state.actionIndex > 0) state.actionIndex--;
+                else { state.zone = 'cards'; state.actionIndex = -1; }
+            }
+            else if (key === 'ArrowUp' && list.length) { state.zone = 'cards'; state.cardIndex = Math.max(0, state.cardIndex - 1); }
+            else if (key === 'ArrowDown' && list.length) {
+                if (state.cardIndex < list.length - 1) { state.zone = 'cards'; state.cardIndex++; }
+                else { state.zone = 'composer'; state.composerIndex = 0; }
+            }
+            else if (key === 'Enter' && btns[state.actionIndex]) { try { btns[state.actionIndex].click(); } catch (e) { } }
+        } else if (state.zone === 'composer') {
+            const btns = composerButtons();
+            if (key === 'ArrowRight') state.composerIndex = Math.min(btns.length - 1, state.composerIndex + 1);
+            else if (key === 'ArrowLeft') state.composerIndex = Math.max(0, state.composerIndex - 1);
+            else if (key === 'ArrowUp') { state.zone = 'cards'; state.cardIndex = Math.max(0, list.length - 1); }
+            else if (key === 'Enter' && btns[state.composerIndex]) { try { btns[state.composerIndex].click(); } catch (e) { } }
+        } else if (state.zone === 'folders') {
+            const btns = folderButtons();
+            if (key === 'ArrowDown') state.folderIndex = Math.min(btns.length - 1, state.folderIndex + 1);
+            else if (key === 'ArrowUp') state.folderIndex = Math.max(0, state.folderIndex - 1);
+            else if (key === 'ArrowRight') { state.zone = 'cards'; }
+            else if (key === 'Enter' && btns[state.folderIndex]) { try { btns[state.folderIndex].click(); } catch (e) { } }
+        }
+        renderSelection(true);
+        if (event) {
+            event.preventDefault();
+            if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+            event.stopPropagation();
+        }
+        return true;
+    }
+    window.LifeOSFamilyRemote = {
+        owner: 'LIFEOS_FAMILY_SMARTBOX_CONTAINER_REMOTE_R14',
+        enter: enter,
+        handleKey: handleKey,
+        refresh: function () { compactFamilyLayout(); renderSelection(false); },
+        syncToViewport: syncIndexToViewport
+    };
     function verifyUploadFlowMarkers() {
         const ce = window.ChatEngine;
-        if (!ce || ce.__lifeos64f3Verified)
-            return;
+        if (!ce || ce.__lifeos64f3Verified) return;
         ce.__lifeos64f3Verified = true;
-        try {
-            window.LIFEOS_DEBUG && console.info('[64F3 Family upload check]', {
-                hasSafeName: typeof ce.getSafeTelegramUploadName === 'function',
-                hasLastError: 'lastUploadError' in ce,
-                localStorageKey: 'lifeos_family_last_upload_error',
-                note: 'Ảnh đi sendDocument/document; lỗi upload hiển thị đầy đủ và có Chi tiết lỗi/Thử gửi lại.'
-            });
-        }
-        catch (e) { }
     }
-    function patchSetUploadStatus() { return true; }
     function schedule() {
         requestAnimationFrame(function () {
-            patchSetUploadStatus();
             verifyUploadFlowMarkers();
             compactFamilyLayout();
-            setTimeout(compactFamilyLayout, 80);
-            setTimeout(compactFamilyLayout, 260);
-            setTimeout(compactFamilyLayout, 900);
+            setTimeout(compactFamilyLayout, 120);
         });
     }
-    if (document.readyState === 'loading')
-        document.addEventListener('DOMContentLoaded', schedule, { once: true });
-    else
-        schedule();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
+    else schedule();
     window.addEventListener('resize', schedule, { passive: true });
     window.addEventListener('orientationchange', schedule, { passive: true });
-    if (window.visualViewport)
-        window.visualViewport.addEventListener('resize', schedule, { passive: true });
-})();
-</script>
+})();</script>
 <style id="lifeos-pha64f4-family-menu-event-fix-style">
 /* PHA 64F.4: family message menu must live outside hidden main and be clickable in Mini-PC. */
 body.lifeos-landscape-mini-pc #chat-msg-menu,
@@ -44457,9 +44706,18 @@ window.LIFEOS_YOUTUBE_TAB4_BUILD = 'R65_YOUTUBE_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_
         var search = byId('music-search');
         var keyword = lower(search && search.value);
         var i, item, row, num, main, titleEl, typeEl, actualIndex;
+        var hub = w.MediaHub;
+        var smartbox = !!(hub && typeof hub.isSmartboxMediaMode === 'function' && hub.isSmartboxMediaMode());
+        var viewport = byId('music-list-container');
+        var keepTop = viewport ? (viewport.scrollTop || 0) : 0;
         if (!container) return false;
         api.items = readData();
         api.visibleIndexes = [];
+        var signature = [keyword, api.items.length, api.items.map(function (x) { return x.type + ':' + x.id + ':' + x.title; }).join('|')].join('::');
+        if (container.getAttribute('data-lifeos-youtube-signature') === signature && container.querySelectorAll('.youtube-media-item').length) {
+            updateActiveRows();
+            return true;
+        }
         container.innerHTML = '';
         if (!api.items.length) {
             row = d.createElement('div');
@@ -44513,7 +44771,18 @@ window.LIFEOS_YOUTUBE_TAB4_BUILD = 'R65_YOUTUBE_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_
             row.textContent = 'Không tìm thấy nội dung YouTube phù hợp từ khóa.';
             container.appendChild(row);
         }
+        container.setAttribute('data-lifeos-youtube-signature', signature);
         updateActiveRows();
+        if (viewport) {
+            var restore = function () {
+                try {
+                    if (smartbox && hub && typeof hub.setSmartboxScrollTop === 'function') hub.setSmartboxScrollTop(viewport, keepTop);
+                    else viewport.scrollTop = keepTop;
+                } catch (e) {}
+            };
+            restore();
+            if (w.requestAnimationFrame) w.requestAnimationFrame(restore);
+        }
         return true;
     };
 
@@ -44997,8 +45266,13 @@ window.LIFEOS_YOUTUBE_TAB4_BUILD = 'R65_YOUTUBE_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_
         if (target) {
             target.classList.add('lifeos-remote-selected');
             target.setAttribute('data-lifeos-remote-selected', 'true');
-            try { target.focus(); } catch (e) {}
-            try { if (hub.scrollRemoteTarget) hub.scrollRemoteTarget(target); else target.scrollIntoView(false); } catch (e) {}
+            var smartbox = !!(hub && typeof hub.isSmartboxMediaMode === 'function' && hub.isSmartboxMediaMode());
+            if (!smartbox) {
+                try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (_) {} }
+            } else if (typeof hub.prepareSmartboxRemoteSurface === 'function') {
+                hub.prepareSmartboxRemoteSurface();
+            }
+            try { if (hub.scrollRemoteTarget) hub.scrollRemoteTarget(target); else if (!smartbox) target.scrollIntoView(false); } catch (e) {}
         }
     }
 
@@ -45076,7 +45350,8 @@ window.LIFEOS_YOUTUBE_TAB4_BUILD = 'R65_YOUTUBE_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_
         hub.focusIdx = -1;
         hub.activeZone = 'tabs';
         hub.idxTabs = 3;
-        hub.idxList = 0;
+        if (!hub.smartboxListIndexByTab) hub.smartboxListIndexByTab = { radio: 0, tv: 0, youtube: 0 };
+        hub.idxList = Math.max(0, Number(hub.smartboxListIndexByTab.youtube || 0));
         applyYouTubeLayout(hub);
         if (w.soundEnabled && !(opts && opts.silent)) {
             try { if (typeof w.playSpeechTTS === 'function') w.playSpeechTTS('Mục YouTube'); } catch (e) {}
@@ -45157,6 +45432,10 @@ window.LIFEOS_YOUTUBE_TAB4_BUILD = 'R65_YOUTUBE_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_
         key = normalizeKey(e);
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape', 'Backspace', 'BrowserBack', 'GoBack', 'XF86Back'].indexOf(key) === -1) return;
         try { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); } catch (err) {}
+        if (hub && typeof hub.isSmartboxMediaMode === 'function' && hub.isSmartboxMediaMode() && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].indexOf(key) >= 0) {
+            hub.smartboxRemoteMoveUntil = Date.now() + 320;
+            hub.smartboxManualScrollUntil = 0;
+        }
         els = youtubeZoneElements();
         if (isBack(key)) {
             if (hub.activeZone === 'player') hub.activeZone = 'list';
@@ -45190,6 +45469,8 @@ window.LIFEOS_YOUTUBE_TAB4_BUILD = 'R65_YOUTUBE_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_
             } else if (key === 'ArrowUp' || key === 'ArrowDown') { hub.activeZone = 'list'; hub.idxList = clamp(hub.idxList, els.list.length); }
             else if (key === 'Enter' && els.player[hub.idxPlayer]) { els.player[hub.idxPlayer].click(); }
         }
+        if (!hub.smartboxListIndexByTab) hub.smartboxListIndexByTab = { radio: 0, tv: 0, youtube: 0 };
+        hub.smartboxListIndexByTab.youtube = Math.max(0, hub.idxList || 0);
         highlightYouTube(hub);
     }
 
