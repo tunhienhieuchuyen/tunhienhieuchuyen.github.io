@@ -16700,6 +16700,14 @@ window.MediaHub = {
     remoteEdgeAt: 0,
     remoteEdgeWindow: 700,
     smartboxListOffsetByTab: { radio: 0, tv: 0, youtube: 0 },
+    smartboxManualScrollUntil: 0,
+    smartboxRemoteMoveUntil: 0,
+    smartboxProgrammaticScrollUntil: 0,
+    smartboxScrollSettleTimer: 0,
+    smartboxWheelRaf: 0,
+    smartboxWheelDelta: 0,
+    smartboxLastNavKey: '',
+    smartboxLastNavAt: 0,
     owner: 'LIFEOS_MEDIAHUB_CORE_REBUILD_20260714',
     cleanOwner: 'LIFEOS_MEDIAHUB_CORE_REBUILD_20260714',
     groupByTab: { radio: 'all', tv: 'all' },
@@ -17362,6 +17370,125 @@ ensureSmartboxKeySink() {
     }
     return sink;
 },
+markSmartboxManualScroll(viewport) {
+    if (!viewport || !this.isSmartboxMediaMode())
+        return;
+    this.smartboxManualScrollUntil = Date.now() + 1100;
+    this.activeZone = 'list';
+    if (this.smartboxScrollSettleTimer)
+        clearTimeout(this.smartboxScrollSettleTimer);
+    this.smartboxScrollSettleTimer = setTimeout(() => {
+        this.smartboxScrollSettleTimer = 0;
+        this.syncSmartboxListIndexToViewport(viewport);
+    }, 170);
+},
+setSmartboxScrollTop(viewport, value) {
+    if (!viewport)
+        return;
+    const max = Math.max(0, (viewport.scrollHeight || 0) - (viewport.clientHeight || 0));
+    const next = Math.max(0, Math.min(Number(value) || 0, max));
+    this.smartboxProgrammaticScrollUntil = Date.now() + 120;
+    if (Math.abs((viewport.scrollTop || 0) - next) > 0.5)
+        viewport.scrollTop = next;
+    if (!this.smartboxListOffsetByTab)
+        this.smartboxListOffsetByTab = { radio: 0, tv: 0, youtube: 0 };
+    this.smartboxListOffsetByTab[this.currentTab] = viewport.scrollTop || 0;
+},
+syncSmartboxListIndexToViewport(viewport) {
+    if (!viewport || !this.isSmartboxMediaMode())
+        return false;
+    const list = this.getSmartboxListForTab(this.currentTab);
+    if (!list)
+        return false;
+    const items = Array.from(list.querySelectorAll(this.currentTab === 'youtube' ? '.youtube-media-item' : '.media-item'));
+    if (!items.length)
+        return false;
+    try {
+        const vr = viewport.getBoundingClientRect();
+        const center = vr.top + vr.height / 2;
+        let best = -1;
+        let bestScore = Number.POSITIVE_INFINITY;
+        items.forEach((item, index) => {
+            const r = item.getBoundingClientRect();
+            const overlap = Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top);
+            if (overlap <= 1)
+                return;
+            const score = Math.abs((r.top + r.bottom) / 2 - center);
+            if (score < bestScore) {
+                bestScore = score;
+                best = index;
+            }
+        });
+        if (best >= 0) {
+            this.idxList = best;
+            this.lastListIdx = best;
+            if (this.activeZone === 'list' && typeof this.highlightRemoteZones === 'function')
+                requestAnimationFrame(() => this.highlightRemoteZones());
+            return true;
+        }
+    }
+    catch (e) { }
+    return false;
+},
+bindSmartboxScrollOwner() {
+    if (!this.isSmartboxMediaMode())
+        return false;
+    const viewport = document.getElementById('music-list-container');
+    if (!viewport)
+        return false;
+    if (viewport.__lifeosStableChannelScrollBound)
+        return true;
+    viewport.__lifeosStableChannelScrollBound = true;
+    const hub = this;
+    const manualStart = function () {
+        if (['radio', 'tv', 'youtube'].indexOf(hub.currentTab) < 0)
+            return;
+        hub.markSmartboxManualScroll(viewport);
+    };
+    viewport.addEventListener('pointerdown', manualStart, { passive: true });
+    viewport.addEventListener('mousedown', manualStart, { passive: true });
+    viewport.addEventListener('touchstart', manualStart, { passive: true });
+    viewport.addEventListener('wheel', function (event) {
+        if (['radio', 'tv', 'youtube'].indexOf(hub.currentTab) < 0)
+            return;
+        let raw = Number(event.deltaY || 0);
+        if (!raw)
+            return;
+        if (event.deltaMode === 1)
+            raw *= 34;
+        else if (event.deltaMode === 2)
+            raw *= Math.max(120, viewport.clientHeight * 0.82);
+        const cap = Math.max(42, Math.min(92, (viewport.clientHeight || 400) * 0.18));
+        const step = Math.max(-cap, Math.min(cap, raw));
+        hub.markSmartboxManualScroll(viewport);
+        hub.smartboxWheelDelta += step;
+        if (!hub.smartboxWheelRaf) {
+            hub.smartboxWheelRaf = requestAnimationFrame(function () {
+                hub.smartboxWheelRaf = 0;
+                const delta = Math.max(-cap * 1.25, Math.min(cap * 1.25, hub.smartboxWheelDelta));
+                hub.smartboxWheelDelta = 0;
+                const max = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+                viewport.scrollTop = Math.max(0, Math.min(max, (viewport.scrollTop || 0) + delta));
+                if (!hub.smartboxListOffsetByTab)
+                    hub.smartboxListOffsetByTab = { radio: 0, tv: 0, youtube: 0 };
+                hub.smartboxListOffsetByTab[hub.currentTab] = viewport.scrollTop || 0;
+            });
+        }
+        if (event.cancelable)
+            event.preventDefault();
+        event.stopPropagation();
+    }, { passive: false });
+    viewport.addEventListener('scroll', function () {
+        if (!hub.isSmartboxMediaMode())
+            return;
+        if (!hub.smartboxListOffsetByTab)
+            hub.smartboxListOffsetByTab = { radio: 0, tv: 0, youtube: 0 };
+        hub.smartboxListOffsetByTab[hub.currentTab] = viewport.scrollTop || 0;
+        if (Date.now() >= (hub.smartboxProgrammaticScrollUntil || 0))
+            hub.markSmartboxManualScroll(viewport);
+    }, { passive: true });
+    return true;
+},
 prepareSmartboxRemoteSurface() {
     if (!this.isSmartboxMediaMode())
         return false;
@@ -17369,21 +17496,26 @@ prepareSmartboxRemoteSurface() {
     const tab = this.currentTab || 'music';
     if (viewport) {
         try {
-            viewport.style.setProperty('overflow', 'auto', 'important');
-            viewport.style.setProperty('overflow-y', 'auto', 'important');
-            viewport.style.setProperty('overflow-x', 'hidden', 'important');
-            viewport.style.setProperty('scroll-behavior', 'auto', 'important');
-            viewport.style.setProperty('touch-action', 'pan-y', 'important');
-            viewport.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
-            viewport.style.setProperty('overscroll-behavior', 'contain', 'important');
+            if (viewport.dataset.lifeosStableScrollPrepared !== '1') {
+                viewport.dataset.lifeosStableScrollPrepared = '1';
+                viewport.style.setProperty('overflow', 'auto', 'important');
+                viewport.style.setProperty('overflow-y', 'auto', 'important');
+                viewport.style.setProperty('overflow-x', 'hidden', 'important');
+                viewport.style.setProperty('scroll-behavior', 'auto', 'important');
+                viewport.style.setProperty('touch-action', 'pan-y', 'important');
+                viewport.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+                viewport.style.setProperty('overscroll-behavior', 'contain', 'important');
+                viewport.style.setProperty('overflow-anchor', 'none', 'important');
+            }
             if (viewport.dataset.lifeosScrollTab !== tab) {
                 viewport.dataset.lifeosScrollTab = tab;
                 const remembered = Number((this.smartboxListOffsetByTab && this.smartboxListOffsetByTab[tab]) || 0);
-                viewport.scrollTop = Math.max(0, remembered);
+                this.setSmartboxScrollTop(viewport, remembered);
                 viewport.scrollLeft = 0;
             }
         }
         catch (e) { }
+        this.bindSmartboxScrollOwner();
     }
     ['radio-list-container', 'tv-list-container', 'youtube-list-container'].forEach(id => {
         const list = document.getElementById(id);
@@ -17430,11 +17562,9 @@ prepareSmartboxRemoteSurface() {
         });
     }
     document.body.dataset.lifeosRemoteZone = 'panel';
-    const sink = this.ensureSmartboxKeySink();
-    if (sink && document.activeElement !== sink) {
-        try { sink.focus({ preventScroll: true }); }
-        catch (e) { try { sink.focus(); } catch (_) { } }
-    }
+    /* Document capture already receives D-pad keys. Do not refocus the hidden key sink:
+       WebView 66 may ignore preventScroll and pull the channel viewport back to the top. */
+    this.ensureSmartboxKeySink();
     return true;
 },
 releaseSmartboxRemoteSurface() {
@@ -17460,18 +17590,21 @@ positionSmartboxListTarget(target, force) {
     if (!viewport || !list || !list.contains(target))
         return false;
     this.prepareSmartboxRemoteSurface();
+    const remoteOwnsScroll = Date.now() < (this.smartboxRemoteMoveUntil || 0);
+    if (!force && !remoteOwnsScroll && Date.now() < (this.smartboxManualScrollUntil || 0))
+        return false;
     try {
         const tr = target.getBoundingClientRect();
         const cr = viewport.getBoundingClientRect();
         const pad = 8;
         let delta = 0;
-        if (force || tr.top < cr.top + pad)
+        if (tr.top < cr.top + pad)
             delta = tr.top - (cr.top + pad);
         else if (tr.bottom > cr.bottom - pad)
             delta = tr.bottom - (cr.bottom - pad);
         if (Math.abs(delta) > 1)
-            viewport.scrollTop = Math.max(0, (viewport.scrollTop || 0) + delta);
-        if (!this.smartboxListOffsetByTab)
+            this.setSmartboxScrollTop(viewport, (viewport.scrollTop || 0) + delta);
+        else if (!this.smartboxListOffsetByTab)
             this.smartboxListOffsetByTab = { radio: 0, tv: 0, youtube: 0 };
         this.smartboxListOffsetByTab[this.currentTab] = viewport.scrollTop || 0;
     }
@@ -18325,6 +18458,16 @@ highlightRemoteZones() {
             if (smartboxMode) {
                 if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
                 e.stopPropagation();
+                const navNow = Date.now();
+                if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+                    const minGap = e.repeat ? 105 : 75;
+                    if (this.smartboxLastNavKey === key && navNow - (this.smartboxLastNavAt || 0) < minGap)
+                        return;
+                    this.smartboxLastNavKey = key;
+                    this.smartboxLastNavAt = navNow;
+                    this.smartboxRemoteMoveUntil = navNow + 320;
+                    this.smartboxManualScrollUntil = 0;
+                }
                 this.prepareSmartboxRemoteSurface();
             }
             if (digitKey !== null) {
@@ -19048,28 +19191,30 @@ body.lifeos-landscape-mini-pc[data-lifeos-remote-edge] .lifeos-remote-selected {
 }
 
 
-/* R6.10 — strip stacked Smartbox scroll/focus owners. One visual viewport, zero native list scroll. */
+/* R6.10/R13 — one native Smartbox channel scroll owner.
+   #music-list-container owns wheel, scrollbar, swipe and remote reveal; child lists never scroll. */
 body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #music-list-container,
-body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #music-list-container {
-  overflow: hidden !important;
-  overflow-y: hidden !important;
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #music-list-container,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #music-list-container {
+  overflow: auto !important;
+  overflow-y: auto !important;
   overflow-x: hidden !important;
   scroll-behavior: auto !important;
-  overscroll-behavior: none !important;
-  touch-action: none !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
   overflow-anchor: none !important;
 }
 body.lifeos-landscape-mini-pc #radio-list-container,
 body.lifeos-landscape-mini-pc #tv-list-container {
-  position: relative !important;
-  top: 0;
+  position: static !important;
+  top: auto !important;
   overflow: visible !important;
   overflow-y: visible !important;
   overflow-x: visible !important;
   transform: none !important;
   scroll-behavior: auto !important;
   overscroll-behavior: none !important;
-  touch-action: none !important;
+  touch-action: pan-y !important;
   overflow-anchor: none !important;
   will-change: auto !important;
 }
@@ -19089,7 +19234,7 @@ body.lifeos-landscape-mini-pc #tv-list-container .media-item.media-focused {
   transform: none !important;
 }
 #lifeos-smartbox-media-key-sink {
-  position: absolute !important;
+  position: fixed !important;
   left: 2px !important;
   top: 2px !important;
   width: 1px !important;
