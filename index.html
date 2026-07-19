@@ -28511,9 +28511,21 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         });
     }
     function guessExt(name) { var m = String(name || '').match(/\.([a-zA-Z0-9]{1,12})$/); return m ? ('.' + m[1].toLowerCase()) : ''; }
+    function isAndroidOrTvDownloadEnvironment() {
+        try {
+            var ua = String((navigator && navigator.userAgent) || '');
+            var mobileHint = !!(navigator && navigator.userAgentData && navigator.userAgentData.mobile);
+            return mobileHint || /Android|Mobile|SmartTV|SMART-TV|HbbTV|AFT[A-Z0-9]*|BRAVIA|NetCast|Web0S|webOS|Tizen|TV Safari|CrKey/i.test(ua);
+        }
+        catch (e) {
+            return false;
+        }
+    }
     function openSaveTarget(name, mime) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof window.showSaveFilePicker !== 'function')
+            /* Android/Smartbox Chrome can expose showSaveFilePicker but reject it immediately
+               with AbortError. That is a platform limitation, not a user cancellation. */
+            if (isAndroidOrTvDownloadEnvironment() || typeof window.showSaveFilePicker !== 'function' || !window.isSecureContext)
                 return null;
             try {
                 var ext = guessExt(name);
@@ -28547,24 +28559,21 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     function saveBlobSmart(blob, name) {
         return __awaiter(this, void 0, void 0, function* () {
             name = name || 'file';
-            if (typeof navigator !== 'undefined' && navigator.canShare && navigator.share) {
-                try {
-                    var f = new File([blob], name, { type: blob.type || 'application/octet-stream' });
-                    if (navigator.canShare({ files: [f] })) {
-                        yield navigator.share({ files: [f], title: name, text: name });
-                        return { mode: 'share' };
-                    }
-                }
-                catch (e) { }
-            }
+            /* The user explicitly chose Download. Never divert this action into the
+               Android share sheet, where Back/Cancel was previously mistaken for a
+               cancelled download. Use the browser download manager directly. */
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
             a.href = url;
             a.download = name;
+            a.rel = 'noopener';
             a.style.display = 'none';
+            a.setAttribute('data-lifeos-owned-download', '1');
             document.body.appendChild(a);
             a.click();
-            setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 15000);
+            /* Low-end Smartbox Chrome may hand the Blob URL to its download manager
+               slowly. Do not revoke it after only 15 seconds. */
+            setTimeout(function () { try { URL.revokeObjectURL(url); a.remove(); } catch (e) { } }, 120000);
             return { mode: 'browser-download' };
         });
     }
