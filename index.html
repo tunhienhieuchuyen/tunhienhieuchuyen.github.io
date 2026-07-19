@@ -10,7 +10,7 @@
   w.__lifeosSmartboxPageLiteR7Early=true;
   function media(q){try{return !!(w.matchMedia&&w.matchMedia(q).matches);}catch(e){return false;}}
   function viewport(){var v=w.visualViewport;return {w:Math.round(v?v.width:(w.innerWidth||d.documentElement.clientWidth||0)),h:Math.round(v?v.height:(w.innerHeight||d.documentElement.clientHeight||0))};}
-  function detect(){var b=viewport(),ua=String(navigator.userAgent||''),land=(b.w>b.h)||media('(orientation: landscape)'),coarse=media('(pointer: coarse)'),android=/Android|AFT|SmartTV|TV|Mobile/i.test(ua);return !!(land&&(android||coarse||Math.min(b.w,b.h)<=720)&&b.w>=480&&b.h>=220);}
+  function detect(){var b=viewport(),lw=Math.round(w.innerWidth||d.documentElement.clientWidth||b.w||0),lh=Math.round(w.innerHeight||d.documentElement.clientHeight||b.h||0),ua=String(navigator.userAgent||''),land=(lw&&lh&&lw!==lh)?(lw>lh):media('(orientation: landscape)'),coarse=media('(pointer: coarse)'),android=/Android|AFT|SmartTV|TV|Mobile/i.test(ua);return !!(land&&(android||coarse||Math.min(b.w,b.h)<=720)&&b.w>=480&&b.h>=220);}
   function mode(){var b=d.body;return String((b&&b.dataset&&b.dataset.lifeosLandscapeRootMode)||'');}
   var candidate=detect();
   var api={
@@ -110,7 +110,7 @@ html.lifeos-smartbox-page-lite-r7 .animate-bounce{animation:none!important;}
   w.LifeOSVendor={cleanCore:true,state:state,loadFirebase:loadFirebase,loadMessaging:loadMessaging,loadHls:loadHls,loadConfetti:loadConfetti};
 })(window,document);
 </script><script data-lifeos-no-transpile="1" id="lifeos-lock4-smartbox-clean-core-marker">
-window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,remoteNativeScrollRemoved:true,tvR68PicturePathPreserved:true,tvBackgroundLoopsRemoved:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-16',revision:'R6.10',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvOneColumnLikeRadio:true,listScrollOwnerFixed:true,hlsLibraryReadyBeforeTv:true,nativeTvShortcutRemoved:true,tvStatusDedup:true,viewportRefreshStormFixed:true};
+window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,remoteNativeScrollRemoved:true,tvR68PicturePathPreserved:true,tvBackgroundLoopsRemoved:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-16',revision:'R6.10',githubFamilyViewport:'R12',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvOneColumnLikeRadio:true,listScrollOwnerFixed:true,hlsLibraryReadyBeforeTv:true,nativeTvShortcutRemoved:true,tvStatusDedup:true,viewportRefreshStormFixed:true};
 </script><script id="lifeos-lock4-inline-handler-compat-source">
 window.LifeOSCompatHandlers = window.LifeOSCompatHandlers || {};
 window.LifeOSCompatHandlers.h001 = function (event) {var _window$LifeOSRootRou, _window$LifeOSRootRou2, _window$setDesktopWor, _window;event.preventDefault();event.stopPropagation();(_window$LifeOSRootRou = window.LifeOSRootRouter) === null || _window$LifeOSRootRou === void 0 || (_window$LifeOSRootRou2 = _window$LifeOSRootRou.enterWorkspace) === null || _window$LifeOSRootRou2 === void 0 || _window$LifeOSRootRou2.call(_window$LifeOSRootRou, 'overview', 'desktop-click', event);(_window$setDesktopWor = (_window = window).setDesktopWorkspace) === null || _window$setDesktopWor === void 0 || _window$setDesktopWor.call(_window, 'overview');};
@@ -10749,7 +10749,7 @@ window.ChatEngine = {
                 <div class="flex flex-col max-w-[75%]">
                     ${!isMe ? `<span class="text-[10px] font-bold text-slate-500 mb-1 ml-1">${window.escapeHTML(String(senderProf.name || m.sender || 'Gia đình'))}</span>` : ''}
                     <div class="relative">
-                        <div data-chat-msg-id="${msgIdAttr}" class="p-3 rounded-[1.25rem] shadow-sm cursor-pointer active:scale-95 transition-transform ${bubbleCls}" onclick="window.ChatEngine.openMsgMenu(this.dataset.chatMsgId)">
+                        <div data-chat-msg-id="${msgIdAttr}" tabindex="0" role="button" class="p-3 rounded-[1.25rem] shadow-sm cursor-pointer active:scale-95 transition-transform ${bubbleCls}" onclick="window.ChatEngine.openMsgMenu(this.dataset.chatMsgId)">
                             ${replyHtml}
                             ${contentHtml}
                         </div>
@@ -10759,7 +10759,15 @@ window.ChatEngine = {
                 </div>
             </div>`;
     }).join('');
-    setTimeout(() => {container.scrollTop = container.scrollHeight;}, 80);
+    const settleLatest = () => {
+      container.scrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+      if (document.body && document.body.classList.contains('lifeos-landscape-mini-pc')) {
+        const form = document.getElementById('chat-form');
+        if (form) form.style.setProperty('visibility', 'visible', 'important');
+      }
+    };
+    requestAnimationFrame(() => { settleLatest(); requestAnimationFrame(settleLatest); });
+    setTimeout(settleLatest, 80);
   }
 };
 window.FirebaseSync = {
@@ -19122,13 +19130,17 @@ function isMini() {
     const h = Math.round(vv ? vv.height : (window.innerHeight || document.documentElement.clientHeight || 0));
     const coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
     const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+    const layoutW = Math.round(window.innerWidth || document.documentElement.clientWidth || w || 0);
+    const layoutH = Math.round(window.innerHeight || document.documentElement.clientHeight || h || 0);
     const mmLandscape = !!(window.matchMedia && window.matchMedia('(orientation: landscape)').matches);
     const screenType = String((screen.orientation && screen.orientation.type) || '');
     const screenLandscape = /landscape/i.test(screenType);
-    const landscape = (w > h) || mmLandscape || screenLandscape;
+    const landscape = (layoutW && layoutH && layoutW !== layoutH) ? (layoutW > layoutH) : (mmLandscape || screenLandscape);
     const phoneLike = coarse || mobileUA || Math.min(w, h) <= 640;
     const candidate = !!(landscape && phoneLike && w >= 480 && h >= 260);
-    if (candidate)
+    if (!landscape)
+        smartboxMiniLatched = false;
+    else if (candidate)
         smartboxMiniLatched = true;
     if (smartboxMiniLatched && landscape && w >= 400 && h >= 220)
         return true;
@@ -19592,6 +19604,14 @@ function isMini() {
                 (_f = (_e = window.ChatEngine) === null || _e === void 0 ? void 0 : _e.render) === null || _f === void 0 ? void 0 : _f.call(_e);
             }
             catch (e) { }
+            requestAnimationFrame(function () {
+                const messages = document.getElementById('chat-messages');
+                const form = document.getElementById('chat-form');
+                if (messages)
+                    messages.scrollTop = Math.max(0, messages.scrollHeight - messages.clientHeight);
+                if (form)
+                    form.style.setProperty('visibility', 'visible', 'important');
+            });
         }
         if (mode === 'focus') {
             mapFocus();
@@ -19765,10 +19785,20 @@ function isMini() {
         else if (mode === 'vault')
             target = document.querySelector('#l64f-panel-vault button, #l64f-panel-vault [tabindex]');
         else if (mode === 'chat')
-            target = document.querySelector('#l64f-panel-chat button, #l64f-panel-chat [tabindex]');
+            target = document.querySelector('#chat-input, #chat-send-btn, #l64f-panel-chat [data-chat-msg-id], #l64f-panel-chat button, #l64f-panel-chat [tabindex]');
         if (target) {
-            try { target.focus(); } catch (e) { }
+            try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (_e) { } }
             markWholePageFocus(target);
+            if (mode === 'chat') {
+                requestAnimationFrame(function () {
+                    const composer = document.getElementById('chat-input') || document.getElementById('chat-send-btn');
+                    if (!composer || !document.body.classList.contains('lifeos-landscape-mini-pc')) return;
+                    try { composer.focus({ preventScroll: true }); } catch (e) { try { composer.focus(); } catch (_e) { } }
+                    markWholePageFocus(composer);
+                    const messages = document.getElementById('chat-messages');
+                    if (messages) messages.scrollTop = messages.scrollHeight;
+                });
+            }
         }
         return !!target;
     }
@@ -19797,6 +19827,23 @@ function isMini() {
                 out.push(el);
         });
         return out;
+    }
+    function revealPanelTarget(target, mode) {
+        if (!target)
+            return;
+        if (mode === 'chat') {
+            const messages = document.getElementById('chat-messages');
+            if (messages && messages.contains(target)) {
+                const mr = messages.getBoundingClientRect();
+                const tr = target.getBoundingClientRect();
+                if (tr.top < mr.top + 8)
+                    messages.scrollTop -= (mr.top + 8 - tr.top);
+                else if (tr.bottom > mr.bottom - 8)
+                    messages.scrollTop += (tr.bottom - (mr.bottom - 8));
+                return;
+            }
+        }
+        try { target.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { }
     }
     function spatialNext(items, current, key) {
         if (!items.length)
@@ -19934,7 +19981,7 @@ function isMini() {
                 if (next) {
                     e.preventDefault();
                     e.stopPropagation();
-                    try { next.focus(); markWholePageFocus(next); next.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (err) { }
+                    try { next.focus(); markWholePageFocus(next); revealPanelTarget(next, mode); } catch (err) { }
                 }
             }
         }, true);
@@ -20406,18 +20453,20 @@ body.lifeos-landscape-mini-pc #chat-dynamic-folders {
 
 /* Right panel: messages fill the middle, input is always visible. */
 body.lifeos-landscape-mini-pc #l64f-chat-right {
-  display: grid !important;
-  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto 48px !important;
+  display: flex !important;
+  flex-direction: column !important;
   gap: 4px !important;
   min-height: 0 !important;
   height: 100% !important;
+  max-height: 100% !important;
   overflow: hidden !important;
+  overscroll-behavior: contain !important;
   background: rgba(248,250,252,.70) !important;
   border-radius: 16px !important;
 }
 
 body.lifeos-landscape-mini-pc #chat-pinned-banner {
-  grid-row: 1 !important;
+  flex: 0 0 auto !important;
   margin: 0 !important;
   min-height: 0 !important;
   max-height: 42px !important;
@@ -20427,27 +20476,32 @@ body.lifeos-landscape-mini-pc #chat-pinned-banner {
 }
 
 body.lifeos-landscape-mini-pc #chat-messages {
-  grid-row: 2 !important;
-  height: 100% !important;
+  flex: 1 1 auto !important;
+  height: auto !important;
   min-height: 0 !important;
-  max-height: 100% !important;
+  max-height: none !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
   padding: 8px 10px !important;
   border-radius: 16px !important;
   background: rgba(248,250,252,.88) !important;
   border: 1px solid rgba(226,232,240,.9) !important;
-  scroll-padding-bottom: 64px !important;
+  scroll-padding-block: 10px 64px !important;
 }
 
-body.lifeos-landscape-mini-pc #chat-edit-banner { grid-row: 3 !important; margin: 0 !important; max-height: 38px !important; overflow: hidden !important; }
-body.lifeos-landscape-mini-pc #chat-reply-banner { grid-row: 4 !important; margin: 0 !important; max-height: 38px !important; overflow: hidden !important; }
-body.lifeos-landscape-mini-pc #chat-recording-banner { grid-row: 5 !important; margin: 0 !important; max-height: 40px !important; overflow: hidden !important; }
+body.lifeos-landscape-mini-pc #chat-edit-banner { flex: 0 0 auto !important; margin: 0 !important; max-height: 38px !important; overflow: hidden !important; }
+body.lifeos-landscape-mini-pc #chat-reply-banner { flex: 0 0 auto !important; margin: 0 !important; max-height: 38px !important; overflow: hidden !important; }
+body.lifeos-landscape-mini-pc #chat-recording-banner { flex: 0 0 auto !important; margin: 0 !important; max-height: 40px !important; overflow: hidden !important; }
 
 
 body.lifeos-landscape-mini-pc #chat-form {
-  grid-row: 7 !important;
-  align-self: end !important;
+  flex: 0 0 48px !important;
+  align-self: stretch !important;
+  position: relative !important;
+  z-index: 30 !important;
   height: 48px !important;
   min-height: 48px !important;
   max-height: 48px !important;
@@ -20575,6 +20629,40 @@ body.lifeos-landscape-mini-pc #family-upload-error-text {
 }
 </style>
 <script id="lifeos-pha64f3-family-chat-landscape-fix-js">(function () {
+    function canScrollY(el, delta) {
+        if (!el || el.scrollHeight <= el.clientHeight + 1)
+            return false;
+        if (delta < 0)
+            return el.scrollTop > 0;
+        return el.scrollTop + el.clientHeight < el.scrollHeight - 1;
+    }
+    function makeFamilyCardsRemoteReady(messages) {
+        if (!messages)
+            return;
+        Array.prototype.forEach.call(messages.querySelectorAll('[data-chat-msg-id]'), function (card) {
+            if (!card.hasAttribute('tabindex'))
+                card.setAttribute('tabindex', '0');
+            if (!card.hasAttribute('role'))
+                card.setAttribute('role', 'button');
+        });
+    }
+    function bindFamilyScrollSurface(right, messages) {
+        if (!right || !messages || right.__lifeos64f3ScrollBound)
+            return;
+        right.__lifeos64f3ScrollBound = true;
+        right.addEventListener('wheel', function (event) {
+            if (!document.body.classList.contains('lifeos-landscape-mini-pc') || document.body.dataset.lifeosLandscapeRootMode !== 'chat')
+                return;
+            const folders = event.target && event.target.closest ? event.target.closest('#chat-folder-tabs') : null;
+            if (folders && canScrollY(folders, event.deltaY))
+                return;
+            if (!canScrollY(messages, event.deltaY))
+                return;
+            messages.scrollTop += event.deltaY;
+            event.preventDefault();
+            event.stopPropagation();
+        }, { passive: false, capture: true });
+    }
     function compactFamilyLayout() {
         if (!document.body.classList.contains('lifeos-landscape-mini-pc'))
             return;
@@ -20583,14 +20671,22 @@ body.lifeos-landscape-mini-pc #family-upload-error-text {
         const messages = document.getElementById('chat-messages');
         if (!right || !form || !messages)
             return;
-        right.style.setProperty('grid-template-rows', 'auto minmax(0, 1fr) auto auto auto auto 48px', 'important');
+        right.style.setProperty('display', 'flex', 'important');
+        right.style.setProperty('flex-direction', 'column', 'important');
+        right.style.setProperty('height', '100%', 'important');
+        right.style.setProperty('max-height', '100%', 'important');
         right.style.setProperty('overflow', 'hidden', 'important');
-        messages.style.setProperty('height', '100%', 'important');
+        messages.style.setProperty('flex', '1 1 auto', 'important');
+        messages.style.setProperty('height', 'auto', 'important');
         messages.style.setProperty('min-height', '0', 'important');
         messages.style.setProperty('overflow-y', 'auto', 'important');
+        messages.style.setProperty('touch-action', 'pan-y', 'important');
+        form.style.setProperty('flex', '0 0 48px', 'important');
         form.style.setProperty('height', '48px', 'important');
         form.style.setProperty('min-height', '48px', 'important');
         form.style.setProperty('max-height', '48px', 'important');
+        makeFamilyCardsRemoteReady(messages);
+        bindFamilyScrollSurface(right, messages);
     }
     function verifyUploadFlowMarkers() {
         const ce = window.ChatEngine;
@@ -30312,7 +30408,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     } return null; }
     function hasFileId(m) { return !!(m && (m.file_id || m.fileId || m.telegramFileId)); }
     function fileIdOf(m) { return S(m && (m.file_id || m.fileId || m.telegramFileId)); }
-    function msgAttr(m) { var id = esc(idOf(m)); var k = esc(kindOf(m)); return ' data-chat-msg-id="' + id + '" data-family-r3-select-id="' + id + '" data-family-r3-select-type="' + k + '" data-lifeos-j19g-card="1"'; }
+    function msgAttr(m) { var id = esc(idOf(m)); var k = esc(kindOf(m)); return ' data-chat-msg-id="' + id + '" tabindex="0" role="button" data-family-r3-select-id="' + id + '" data-family-r3-select-type="' + k + '" data-lifeos-j19g-card="1"'; }
     function activeInput(id) { var el = document.getElementById('chat-msg-active-id'); if (el)
         el.value = S(id); }
     function actionBtn(cls, attr, html, title) { return '<button type="button" class="lifeos-j19g-btn ' + cls + '" ' + attr + ' title="' + esc(title || '') + '">' + html + '</button>'; }
@@ -30346,7 +30442,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         html += '</div></div><span class="lifeos-j19g-time">' + esc(time) + '</span></div></div>';
         return html;
     }
-    function renderText(m, isMe) { var prof = senderProf(m), id = esc(idOf(m)), time = esc(fmtTime(m)), txt = esc(m.text || ''); var cls = isMe ? 'bg-primary text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 border border-slate-200 rounded-bl-sm'; return '<div class="lifeos-j19g-row lifeos-j19g-text-row flex w-full mb-3 ' + (isMe ? 'justify-end' : 'justify-start') + '">' + (!isMe ? '<div class="lifeos-j19g-avatar">' + esc(prof.icon) + '</div>' : '') + '<div class="flex flex-col max-w-[75%]">' + (!isMe ? '<span class="text-[10px] font-bold text-slate-500 mb-1 ml-1">' + esc(prof.name) + '</span>' : '') + '<div data-chat-msg-id="' + id + '" class="lifeos-j19g-text-bubble cursor-pointer active:scale-95 transition-transform ' + cls + '" onclick="window.ChatEngine.openMsgMenu(this.dataset.chatMsgId)"><p class="text-sm font-medium whitespace-pre-wrap break-words">' + txt + '</p></div><span class="text-[9px] font-semibold text-slate-400 mt-1 ' + (isMe ? 'text-right mr-1' : 'ml-1') + '">' + time + '</span></div></div>'; }
+    function renderText(m, isMe) { var prof = senderProf(m), id = esc(idOf(m)), time = esc(fmtTime(m)), txt = esc(m.text || ''); var cls = isMe ? 'bg-primary text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 border border-slate-200 rounded-bl-sm'; return '<div class="lifeos-j19g-row lifeos-j19g-text-row flex w-full mb-3 ' + (isMe ? 'justify-end' : 'justify-start') + '">' + (!isMe ? '<div class="lifeos-j19g-avatar">' + esc(prof.icon) + '</div>' : '') + '<div class="flex flex-col max-w-[75%]">' + (!isMe ? '<span class="text-[10px] font-bold text-slate-500 mb-1 ml-1">' + esc(prof.name) + '</span>' : '') + '<div data-chat-msg-id="' + id + '" tabindex="0" role="button" class="lifeos-j19g-text-bubble cursor-pointer active:scale-95 transition-transform ' + cls + '" onclick="window.ChatEngine.openMsgMenu(this.dataset.chatMsgId)"><p class="text-sm font-medium whitespace-pre-wrap break-words">' + txt + '</p></div><span class="text-[9px] font-semibold text-slate-400 mt-1 ' + (isMe ? 'text-right mr-1' : 'ml-1') + '">' + time + '</span></div></div>'; }
     function renderAll(ce) {
         var container = document.getElementById('chat-messages');
         if (!container)
@@ -30380,10 +30476,16 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         }
         container.classList.add('lifeos-j19g-timeline');
         container.innerHTML = filtered.map(function (m) { var isMe = S(m.sender) === S(profileKey); return m.type === 'text' ? renderText(m, isMe) : renderCard(m); }).join('');
-        setTimeout(function () { try {
-            container.scrollTop = container.scrollHeight;
+        Array.prototype.forEach.call(container.querySelectorAll('[data-chat-msg-id]'), function (card) {
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+        });
+        var settleLatest = function () { try {
+            container.scrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
         }
-        catch (e) { } }, 60);
+        catch (e) { } };
+        requestAnimationFrame(function () { settleLatest(); requestAnimationFrame(settleLatest); });
+        setTimeout(settleLatest, 60);
         setTimeout(function () { try {
             if (window.LifeOSJ19G)
                 window.LifeOSJ19G.applyWide('after_render');
@@ -38327,7 +38429,9 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
         var b = vport();
         var st = screenType();
         var mmLandscape = media('(orientation: landscape)');
-        var landscape = (b.w > b.h) || mmLandscape || /landscape/i.test(st);
+        var layoutW = Math.round(window.innerWidth || document.documentElement.clientWidth || b.w || 0);
+        var layoutH = Math.round(window.innerHeight || document.documentElement.clientHeight || b.h || 0);
+        var landscape = (layoutW && layoutH && layoutW !== layoutH) ? (layoutW > layoutH) : (mmLandscape || /landscape/i.test(st));
         var phoneLike = media('(pointer: coarse)') || mobileUA() || Math.min(b.w, b.h) <= 640;
         var miniExpected = !!(landscape && phoneLike && b.w >= 480 && b.h >= 260);
         var body = document.body;
