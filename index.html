@@ -110,7 +110,7 @@ html.lifeos-smartbox-page-lite-r7 .animate-bounce{animation:none!important;}
   w.LifeOSVendor={cleanCore:true,state:state,loadFirebase:loadFirebase,loadMessaging:loadMessaging,loadHls:loadHls,loadConfetti:loadConfetti};
 })(window,document);
 </script><script data-lifeos-no-transpile="1" id="lifeos-lock4-smartbox-clean-core-marker">
-window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,remoteNativeScrollRemoved:true,tvR68PicturePathPreserved:true,tvBackgroundLoopsRemoved:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-16',revision:'R6.10',githubFamilyViewport:'R12',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvOneColumnLikeRadio:true,listScrollOwnerFixed:true,hlsLibraryReadyBeforeTv:true,nativeTvShortcutRemoved:true,tvStatusDedup:true,viewportRefreshStormFixed:true};
+window.LIFEOS_SMARTBOX_CLEAN_CORE={candidate:true,base:'LOCK4_ACCEPTED',singleIndex:true,staticTailwind:true,nativeEventOrder:true,embeddedFirebaseAuth:true,networkFetchUntouched:true,fullMusicOnIntent:true,fullChannelsMultiSource:true,vietnameseFontConsistency:true,manualAlarmActivationOnly:true,remoteNativeScrollRemoved:true,tvR68PicturePathPreserved:true,tvBackgroundLoopsRemoved:true,legacyFirestoreRetryDisabled:true,messagingManualOnly:true,createdAt:'2026-07-16',revision:'R6.10_CLEAN_BOOT_R17',githubFamilyViewport:'R17',smartboxCssViewportGuard:true,focusRemapOnActivate:true,wholePageRemote:true,nativeChannelVolume:true,mediaFocusFill:true,tvTabPersistence:true,landscapeScheduleCoalesced:true,tvOneColumnLikeRadio:true,listScrollOwnerFixed:true,hlsLibraryReadyBeforeTv:true,nativeTvShortcutRemoved:true,tvStatusDedup:true,viewportRefreshStormFixed:true};
 </script><script id="lifeos-lock4-inline-handler-compat-source">
 window.LifeOSCompatHandlers = window.LifeOSCompatHandlers || {};
 window.LifeOSCompatHandlers.h001 = function (event) {var _window$LifeOSRootRou, _window$LifeOSRootRou2, _window$setDesktopWor, _window;event.preventDefault();event.stopPropagation();(_window$LifeOSRootRou = window.LifeOSRootRouter) === null || _window$LifeOSRootRou === void 0 || (_window$LifeOSRootRou2 = _window$LifeOSRootRou.enterWorkspace) === null || _window$LifeOSRootRou2 === void 0 || _window$LifeOSRootRou2.call(_window$LifeOSRootRou, 'overview', 'desktop-click', event);(_window$setDesktopWor = (_window = window).setDesktopWorkspace) === null || _window$setDesktopWor === void 0 || _window$setDesktopWor.call(_window, 'overview');};
@@ -12802,421 +12802,9 @@ catch (e) {
     console.warn('DateClock initial start failed:', e);
 } }, 0);
 </script>
-<script>(function () {
-    function byId(id) { return document.getElementById(id); }
-    function hidePlayerHard() {
-        var mp = byId('mini-player');
-        if (mp) {
-            mp.style.display = 'none';
-            mp.classList.remove('music-player-open');
-            mp.setAttribute('aria-hidden', 'true');
-        }
-        document.body.classList.remove('music-player-active');
-    }
-    function showPlayerHard() {
-        var mp = byId('mini-player');
-        if (mp) {
-            mp.style.display = 'block';
-            mp.classList.add('music-player-open');
-            mp.setAttribute('aria-hidden', 'false');
-        }
-        document.body.classList.add('music-player-active');
-    }
-    function patchMusicApp() {
-        var app = window.MusicApp;
-        if (!app || app.__pha3bPlayerPatched)
-            return false;
-        app.__pha3bPlayerPatched = true;
-        var oldShow = app.showMiniPlayer;
-        app.showMiniPlayer = function () {
-            if (!this.hasUserSelectedTrack) {
-                hidePlayerHard();
-                return;
-            }
-            if (typeof oldShow === 'function') {
-                try {
-                    oldShow.apply(this, arguments);
-                }
-                catch (e) { }
-            }
-            showPlayerHard();
-        };
-        var oldHide = app.hideMiniPlayerIfIdle;
-        app.hideMiniPlayerIfIdle = function () {
-            if (this.hasUserSelectedTrack)
-                return;
-            if (typeof oldHide === 'function') {
-                try {
-                    oldHide.apply(this, arguments);
-                }
-                catch (e) { }
-            }
-            hidePlayerHard();
-        };
-        var oldUpdate = app.updateMiniPlayer;
-        if (typeof oldUpdate === 'function') {
-            app.updateMiniPlayer = function () {
-                if (!this.hasUserSelectedTrack || this.currentIndex < 0) {
-                    hidePlayerHard();
-                    return;
-                }
-                oldUpdate.apply(this, arguments);
-                if (this.hasUserSelectedTrack)
-                    showPlayerHard();
-            };
-        }
-        var oldPlay = app.play;
-        if (typeof oldPlay === 'function') {
-            app.play = function (idx) {
-                this.hasUserSelectedTrack = true;
-                var ret = oldPlay.apply(this, arguments);
-                showPlayerHard();
-                return ret;
-            };
-        }
-        var oldToggle = app.togglePlay;
-        if (typeof oldToggle === 'function') {
-            app.togglePlay = function () {
-                var ret = oldToggle.apply(this, arguments);
-                if (this.hasUserSelectedTrack || this.currentIndex >= 0)
-                    showPlayerHard();
-                else
-                    hidePlayerHard();
-                return ret;
-            };
-        }
-        if (!app.hasUserSelectedTrack && (app.currentIndex == null || app.currentIndex < 0))
-            hidePlayerHard();
-        return true;
-    }
-    function bootPatch() {
-        if (patchMusicApp())
-            return;
-        var tries = 0;
-        var timer = setInterval(function () {
-            tries += 1;
-            if (patchMusicApp() || tries > 80)
-                clearInterval(timer);
-        }, 100);
-    }
-    if (document.readyState === 'loading')
-        document.addEventListener('DOMContentLoaded', bootPatch, { once: true });
-    else
-        bootPatch();
-})();
-</script>
-<script>(function () {
-    function byId(id) { return document.getElementById(id); }
-    function hasTrack(app) { return !!(app && (app.hasUserSelectedTrack || (typeof app.currentIndex === 'number' && app.currentIndex >= 0))); }
-    function audioPlaying() { var a = byId('mstq-player'); return !!(a && !a.paused && !a.ended); }
-    function syncBottomNavHeight() {
-        var nav = byId('bottom-nav');
-        if (!nav || window.innerWidth >= 1024)
-            return;
-        var h = Math.max(54, Math.min(66, Math.round(nav.getBoundingClientRect().height || 58)));
-        document.documentElement.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
-        document.body.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
-    }
-    function showPlayer() {
-        var mp = byId('mini-player');
-        if (mp) {
-            mp.style.display = 'block';
-            mp.classList.add('music-player-open');
-            mp.setAttribute('aria-hidden', 'false');
-        }
-        document.body.classList.add('music-player-active');
-        syncBottomNavHeight();
-    }
-    function hidePlayer() {
-        var mp = byId('mini-player');
-        if (mp) {
-            mp.style.display = 'none';
-            mp.classList.remove('music-player-open');
-            mp.setAttribute('aria-hidden', 'true');
-        }
-        document.body.classList.remove('music-player-active');
-        syncBottomNavHeight();
-    }
-    function shouldShow(app) {
-        return hasTrack(app) || audioPlaying();
-    }
-    function patchMusicApp() {
-        var app = window.MusicApp;
-        if (!app || app.__pha3bFix2Patched)
-            return false;
-        app.__pha3bFix2Patched = true;
-        var oldShow = app.showMiniPlayer;
-        app.showMiniPlayer = function () {
-            if (!shouldShow(this)) {
-                hidePlayer();
-                return;
-            }
-            if (typeof oldShow === 'function') {
-                try {
-                    oldShow.apply(this, arguments);
-                }
-                catch (e) { }
-            }
-            showPlayer();
-        };
-        var oldHide = app.hideMiniPlayerIfIdle;
-        app.hideMiniPlayerIfIdle = function () {
-            if (shouldShow(this))
-                return;
-            if (typeof oldHide === 'function') {
-                try {
-                    oldHide.apply(this, arguments);
-                }
-                catch (e) { }
-            }
-            hidePlayer();
-        };
-        var oldPlay = app.play;
-        if (typeof oldPlay === 'function') {
-            app.play = function () {
-                this.hasUserSelectedTrack = true;
-                var ret = oldPlay.apply(this, arguments);
-                showPlayer();
-                return ret;
-            };
-        }
-        var oldToggle = app.togglePlay;
-        if (typeof oldToggle === 'function') {
-            app.togglePlay = function () {
-                var ret = oldToggle.apply(this, arguments);
-                if (shouldShow(this))
-                    showPlayer();
-                else
-                    hidePlayer();
-                return ret;
-            };
-        }
-        var oldUpdate = app.updateMiniPlayer;
-        if (typeof oldUpdate === 'function') {
-            app.updateMiniPlayer = function () {
-                if (!shouldShow(this)) {
-                    hidePlayer();
-                    return;
-                }
-                oldUpdate.apply(this, arguments);
-                showPlayer();
-            };
-        }
-        if (!shouldShow(app))
-            hidePlayer();
-        else
-            showPlayer();
-        return true;
-    }
-    function boot() {
-        syncBottomNavHeight();
-        patchMusicApp();
-        var a = byId('mstq-player');
-        if (a && !a.__pha3bFix2PlayerEvents) {
-            a.__pha3bFix2PlayerEvents = true;
-            a.addEventListener('play', showPlayer);
-            a.addEventListener('playing', showPlayer);
-            a.addEventListener('loadedmetadata', function () { if (audioPlaying())
-                showPlayer(); });
-            a.addEventListener('ended', function () {
-                var app = window.MusicApp;
-                if (!shouldShow(app))
-                    hidePlayer();
-            });
-        }
-        var tries = 0;
-        var timer = setInterval(function () {
-            tries += 1;
-            syncBottomNavHeight();
-            if (patchMusicApp() || tries > 60)
-                clearInterval(timer);
-        }, 120);
-    }
-    window.addEventListener('resize', syncBottomNavHeight, { passive: true });
-    window.addEventListener('orientationchange', function () { setTimeout(syncBottomNavHeight, 250); }, { passive: true });
-    if (document.readyState === 'loading')
-        document.addEventListener('DOMContentLoaded', boot, { once: true });
-    else
-        boot();
-})();
-</script>
-<script>(function () {
-    function byId(id) { return document.getElementById(id); }
-    function player() { return byId('mini-player'); }
-    function audio() { return byId('mstq-player'); }
-    function isDesktop() { return window.innerWidth >= 1024; }
-    function syncBottomNavHeight() {
-        var nav = byId('bottom-nav');
-        if (!nav || isDesktop())
-            return;
-        var h = Math.max(54, Math.min(66, Math.round(nav.getBoundingClientRect().height || 58)));
-        document.documentElement.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
-        document.body.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
-    }
-    function activated(app) {
-        return !!(app && (app.__lifeosPlayerEverActivated || app.hasUserSelectedTrack || (typeof app.currentIndex === 'number' && app.currentIndex >= 0)));
-    }
-    function shouldShow(app) {
-        var a = audio();
-        var audioHasTrack = !!(a && a.src && a.src !== window.location.href);
-        var audioIsPlaying = !!(a && !a.paused && !a.ended && audioHasTrack);
-        return !!(activated(app) || audioIsPlaying);
-    }
-    function showFinal() {
-        var mp = player();
-        if (!mp)
-            return;
-        syncBottomNavHeight();
-        mp.style.display = 'flex';
-        mp.classList.add('music-player-open');
-        mp.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('music-player-active');
-    }
-    function hideFinal() {
-        var mp = player();
-        if (mp) {
-            mp.style.display = 'none';
-            mp.classList.remove('music-player-open');
-            mp.setAttribute('aria-hidden', 'true');
-        }
-        document.body.classList.remove('music-player-active');
-        syncBottomNavHeight();
-    }
-    function forceVisibility() {
-        var app = window.MusicApp;
-        if (shouldShow(app))
-            showFinal();
-        else
-            hideFinal();
-    }
-    function patchMusicApp() {
-        var app = window.MusicApp;
-        if (!app || app.__pha3bFix3Patched)
-            return false;
-        app.__pha3bFix3Patched = true;
-        app.showMiniPlayer = function () {
-            if (shouldShow(this))
-                showFinal();
-            else
-                hideFinal();
-        };
-        app.hideMiniPlayerIfIdle = function () {
-            if (shouldShow(this))
-                showFinal();
-            else
-                hideFinal();
-        };
-        if (typeof app.play === 'function') {
-            var oldPlay = app.play;
-            app.play = function () {
-                this.__lifeosPlayerEverActivated = true;
-                this.hasUserSelectedTrack = true;
-                var ret = oldPlay.apply(this, arguments);
-                showFinal();
-                return ret;
-            };
-        }
-        if (typeof app.togglePlay === 'function') {
-            var oldToggle = app.togglePlay;
-            app.togglePlay = function () {
-                if (typeof this.currentIndex === 'number' && this.currentIndex >= 0) {
-                    this.__lifeosPlayerEverActivated = true;
-                    this.hasUserSelectedTrack = true;
-                }
-                var ret = oldToggle.apply(this, arguments);
-                if (shouldShow(this))
-                    showFinal();
-                else
-                    hideFinal();
-                return ret;
-            };
-        }
-        if (typeof app.updateMiniPlayer === 'function') {
-            var oldUpdate = app.updateMiniPlayer;
-            app.updateMiniPlayer = function () {
-                var ret = oldUpdate.apply(this, arguments);
-                if (shouldShow(this))
-                    showFinal();
-                else
-                    hideFinal();
-                return ret;
-            };
-        }
-        if (typeof app.playNext === 'function') {
-            var oldNext = app.playNext;
-            app.playNext = function () {
-                this.__lifeosPlayerEverActivated = true;
-                this.hasUserSelectedTrack = true;
-                var ret = oldNext.apply(this, arguments);
-                showFinal();
-                return ret;
-            };
-        }
-        if (typeof app.playPrev === 'function') {
-            var oldPrev = app.playPrev;
-            app.playPrev = function () {
-                this.__lifeosPlayerEverActivated = true;
-                this.hasUserSelectedTrack = true;
-                var ret = oldPrev.apply(this, arguments);
-                showFinal();
-                return ret;
-            };
-        }
-        forceVisibility();
-        return true;
-    }
-    function boot() {
-        syncBottomNavHeight();
-        patchMusicApp();
-        var a = audio();
-        if (a && !a.__pha3bFix3Events) {
-            a.__pha3bFix3Events = true;
-            a.addEventListener('play', function () {
-                var app = window.MusicApp;
-                if (app) {
-                    app.__lifeosPlayerEverActivated = true;
-                    app.hasUserSelectedTrack = true;
-                }
-                showFinal();
-            });
-            a.addEventListener('playing', function () {
-                var app = window.MusicApp;
-                if (app) {
-                    app.__lifeosPlayerEverActivated = true;
-                    app.hasUserSelectedTrack = true;
-                }
-                showFinal();
-            });
-            a.addEventListener('pause', function () {
-                forceVisibility();
-            });
-            a.addEventListener('ended', function () {
-                forceVisibility();
-            });
-            a.addEventListener('emptied', function () {
-                var app = window.MusicApp;
-                if (!activated(app))
-                    hideFinal();
-            });
-        }
-        var tries = 0;
-        var timer = setInterval(function () {
-            tries += 1;
-            syncBottomNavHeight();
-            patchMusicApp();
-            forceVisibility();
-            if (tries > 25)
-                clearInterval(timer);
-        }, 120);
-    }
-    window.addEventListener('resize', function () { syncBottomNavHeight(); forceVisibility(); }, { passive: true });
-    window.addEventListener('orientationchange', function () { setTimeout(function () { syncBottomNavHeight(); forceVisibility(); }, 250); }, { passive: true });
-    if (document.readyState === 'loading')
-        document.addEventListener('DOMContentLoaded', boot, { once: true });
-    else
-        boot();
-})();
-</script>
+
+
+
 <script>(function () {
     function byId(id) { return document.getElementById(id); }
     function audio() { return byId('mstq-player'); }
@@ -13391,22 +12979,16 @@ catch (e) {
             });
         });
     }
-    function boot() {
+    function installOnce() {
         syncBottomNavHeight();
         normalizeButtons();
         bindAudioEvents();
         patchMusicApp();
-        var tries = 0;
-        var timer = setInterval(function () {
-            tries += 1;
-            syncBottomNavHeight();
-            normalizeButtons();
-            bindAudioEvents();
-            patchMusicApp();
-            forceState();
-            if (tries > 35)
-                clearInterval(timer);
-        }, 120);
+        forceState();
+    }
+    function boot() {
+        installOnce();
+        [120, 500, 1500].forEach(function (ms) { setTimeout(installOnce, ms); });
     }
     window.addEventListener('resize', function () { syncBottomNavHeight(); normalizeButtons(); forceState(); }, { passive: true });
     window.addEventListener('orientationchange', function () { setTimeout(function () { syncBottomNavHeight(); normalizeButtons(); forceState(); }, 250); }, { passive: true });
@@ -13414,6 +12996,8 @@ catch (e) {
         document.addEventListener('DOMContentLoaded', boot, { once: true });
     else
         boot();
+    window.addEventListener('load', function () { setTimeout(installOnce, 80); }, { once: true });
+    window.addEventListener('lifeos:boot-ready', installOnce, { once: true });
 })();
 </script>
 <!-- PHA7_VAULT_BULK_DELETE_V2_START -->
@@ -13776,33 +13360,24 @@ catch (e) {
         window.VaultUI.renderVaultCards.__pha7BulkV2 = true;
         return true;
     }
-    function boot() {
+    function installOnce(renderInitial) {
         window.VaultBulkDelete.ensureToolbar();
-        if (patchVaultRender()) {
-            try {
-                window.VaultUI.renderVaultCards();
-            }
-            catch (err) {
-                console.warn('[PHA7 Vault bulk initial render]', err);
-            }
+        var patched = patchVaultRender();
+        try { window.VaultBulkDelete.decorateCards(); } catch (e) { }
+        if (renderInitial && patched) {
+            try { window.VaultUI.renderVaultCards(); }
+            catch (err) { console.warn('[PHA7 Vault bulk initial render]', err); }
         }
-        var tries = 0;
-        var timer = setInterval(function () {
-            tries += 1;
-            window.VaultBulkDelete.ensureToolbar();
-            patchVaultRender();
-            try {
-                window.VaultBulkDelete.decorateCards();
-            }
-            catch (e) { }
-            if (tries > 20)
-                clearInterval(timer);
-        }, 150);
+    }
+    function boot() {
+        installOnce(true);
+        [180, 650, 1600].forEach(function (ms) { setTimeout(function () { installOnce(false); }, ms); });
     }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', boot, { once: true });
     else
         boot();
+    window.addEventListener('lifeos:boot-ready', function () { installOnce(false); }, { once: true });
 })();
 </script>
 <!-- PHA7_VAULT_BULK_DELETE_V2_END -->
@@ -14080,13 +13655,7 @@ catch (e) {
     }
     function boot() {
         polishVaultOnce();
-        var tries = 0;
-        var t = setInterval(function () {
-            tries += 1;
-            polishVaultOnce();
-            if (tries > 18)
-                clearInterval(t);
-        }, 200);
+        [220, 800, 1800].forEach(function (ms) { setTimeout(polishVaultOnce, ms); });
         if (window.VaultUI && typeof window.VaultUI.renderVaultCards === 'function' && !window.VaultUI.renderVaultCards.__pha11UxPolish) {
             var original = window.VaultUI.renderVaultCards;
             window.VaultUI.renderVaultCards = function () {
@@ -14101,6 +13670,7 @@ catch (e) {
         document.addEventListener('DOMContentLoaded', boot, { once: true });
     else
         boot();
+    window.addEventListener('lifeos:boot-ready', polishVaultOnce, { once: true });
 })();
 </script>
 <!-- PHA11_VAULT_UX_POLISH_END -->
@@ -15424,13 +14994,9 @@ catch (e) {
     else {
         install();
     }
-    var tries = 0;
-    var timer = setInterval(function () {
-        tries += 1;
-        install();
-        if (tries >= 20 || hookOpenPasswordModal())
-            clearInterval(timer);
-    }, 250);
+    [100, 450, 1400].forEach(function (ms) { setTimeout(install, ms); });
+    window.addEventListener('load', function () { setTimeout(install, 80); }, { once: true });
+    window.addEventListener('lifeos:boot-ready', install, { once: true });
 })();
 </script>
 <!-- PHA15_VOICE_GUARD_STATUS_JS_START -->
@@ -21985,8 +21551,7 @@ body.lifeos-landscape-mini-pc .lifeos64g-generic-pane.is-active {
         if (typeof oldTimer === 'function') {
             window.switchTimerMode = function (mode) {
                 const ret = oldTimer.apply(this, arguments);
-                setTimeout(sync, 20);
-                setTimeout(sync, 120);
+                setTimeout(sync, 70);
                 return ret;
             };
         }
@@ -21994,8 +21559,7 @@ body.lifeos-landscape-mini-pc .lifeos64g-generic-pane.is-active {
         if (typeof oldDesktop === 'function') {
             window.setDesktopWorkspace = function (mode) {
                 const ret = oldDesktop.apply(this, arguments);
-                setTimeout(sync, 20);
-                setTimeout(sync, 120);
+                setTimeout(sync, 70);
                 return ret;
             };
         }
@@ -22003,8 +21567,7 @@ body.lifeos-landscape-mini-pc .lifeos64g-generic-pane.is-active {
         if (typeof oldSwitchTab === 'function') {
             window.switchTab = function () {
                 const ret = oldSwitchTab.apply(this, arguments);
-                setTimeout(sync, 20);
-                setTimeout(sync, 120);
+                setTimeout(sync, 70);
                 return ret;
             };
         }
@@ -22013,16 +21576,16 @@ body.lifeos-landscape-mini-pc .lifeos64g-generic-pane.is-active {
         requestAnimationFrame(function () {
             patchSwitches();
             sync();
-            setTimeout(sync, 80);
-            setTimeout(sync, 240);
-            setTimeout(sync, 700);
+            setTimeout(sync, 100);
+            setTimeout(sync, 500);
         });
     }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', schedule, { once: true });
     else
         schedule();
-    setInterval(sync, 1000);
+    window.addEventListener('pageshow', schedule, { passive: true });
+    window.addEventListener('lifeos:boot-ready', schedule, { once: true });
     window.addEventListener('resize', schedule, { passive: true });
     window.addEventListener('orientationchange', schedule, { passive: true });
     if (window.visualViewport)
@@ -22442,18 +22005,19 @@ body.lifeos-landscape-mini-pc #lifeos64h-sw-laps {
             return;
         window.__lifeos64hFocusSubmodesPatched = true;
         const wrap = (name) => { const old = window[name]; if (typeof old === 'function') {
-            window[name] = function () { const ret = old.apply(this, arguments); setTimeout(sync, 40); setTimeout(sync, 200); return ret; };
+            window[name] = function () { const ret = old.apply(this, arguments); setTimeout(sync, 90); return ret; };
         } };
         wrap('switchTimerMode');
         wrap('setDesktopWorkspace');
         wrap('switchTab');
     }
-    function schedule() { requestAnimationFrame(() => { patchSwitches(); ensureAll(); sync(); setTimeout(sync, 100); setTimeout(sync, 400); }); }
+    function schedule() { requestAnimationFrame(() => { patchSwitches(); ensureAll(); sync(); setTimeout(sync, 180); }); }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', schedule, { once: true });
     else
         schedule();
-    setInterval(sync, 1000);
+    window.addEventListener('pageshow', schedule, { passive: true });
+    window.addEventListener('lifeos:boot-ready', schedule, { once: true });
     window.addEventListener('resize', schedule, { passive: true });
     window.addEventListener('orientationchange', schedule, { passive: true });
     if (window.visualViewport)
@@ -27698,11 +27262,8 @@ No ExoPlayer / No native TV fallback in media path
         document.addEventListener('DOMContentLoaded', boot, { once: true });
     else
         boot();
-    var timer = setInterval(function () { if (patchMusic()) {
-        patchVault();
-        clearInterval(timer);
-    } }, 250);
-    setTimeout(function () { clearInterval(timer); boot(); }, 6000);
+    [120, 600, 1800, 4200].forEach(function (ms) { setTimeout(boot, ms); });
+    window.addEventListener('lifeos:boot-ready', boot, { once: true });
 })();
 </script>
 <style id="qly-r14-15-weather-area-selected-fix-style">
@@ -27793,11 +27354,8 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     const target = byId('weather-location-name');
     if (target && window.MutationObserver)
         new MutationObserver(sync).observe(target, { childList: true, characterData: true, subtree: true });
-    setInterval(function () {
-        const pane = byId('lifeos64g-weather-pane');
-        if (document.body.classList.contains('lifeos-landscape-mini-pc') && pane && pane.classList.contains('is-active'))
-            sync();
-    }, 700);
+    window.addEventListener('lifeos:boot-ready', sync, { once: true });
+    window.addEventListener('lifeos:r53-orientation-applied', sync, { passive: true });
 })();
 </script>
 <style id="github-r10-family-download-close-style">
@@ -29608,12 +29166,8 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
             return true;
         }
         wrapFirebasePush();
-        var wrapTimer = setInterval(function () { if (wrapFirebasePush())
-            clearInterval(wrapTimer); }, 500);
-        setTimeout(function () { try {
-            clearInterval(wrapTimer);
-        }
-        catch (e) { } }, 15000);
+        [200, 900, 2500, 6500].forEach(function (ms) { setTimeout(wrapFirebasePush, ms); });
+        window.addEventListener('lifeos:boot-ready', wrapFirebasePush, { once: true });
         var oldFinish = Gate.finish.bind(Gate);
         Gate.finish = function (token) {
             oldFinish(token);
@@ -33645,8 +33199,10 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         document.addEventListener('DOMContentLoaded', install, { once: true });
     else
         install();
-    window.addEventListener('load', function () { setTimeout(install, 250); setTimeout(install, 1200); setTimeout(install, 3200); }, { once: true });
-    setInterval(function(){ if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) renderD1Panel(); }, 1500);
+    window.addEventListener('load', function () { setTimeout(install, 250); setTimeout(install, 1400); }, { once: true });
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible' && !(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) renderD1Panel();
+    }, { passive: true });
 })();
 </script>
 <!-- Pha14J20R3_HybridPendingCancel_NoFirebaseGhostStatus - END -->
@@ -34102,21 +33658,21 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         document.addEventListener('DOMContentLoaded', install, { once: true });
     else
         install();
-    window.addEventListener('load', function () { setTimeout(install, 60); setTimeout(install, 350); setTimeout(install, 900); setTimeout(install, 1900); setTimeout(install, 4200); }, { once: true });
-    var t = setInterval(function () {
+    function stabilize(reason) {
         var ce = window.ChatEngine;
-        if (!ce) {
-            return;
-        }
+        if (!ce) return false;
         neutralizeX21();
         installRenderGuard();
         installSaveGuard();
-        if (false && (!STATE.listenerOwner || ce.unsubscribe !== STATE.unsubscribe) && window.FirebaseSync && window.FirebaseSync._d)
-            bindFirebaseTextListener(window.FirebaseSync._d, 'watchdog_reown_listener');
-        if (!STATE.d1Ready || now() - STATE.lastD1At > 12000)
-            loadD1('watchdog', false);
-    }, 1200);
-    setTimeout(function () { clearInterval(t); pushTrace('WATCHDOG_RELAXED', { afterMs: 18000 }); }, 18000);
+        if (!STATE.d1Ready || now() - STATE.lastD1At > 12000) loadD1(reason || 'stabilize', false);
+        return true;
+    }
+    window.addEventListener('load', function () {
+        setTimeout(function () { stabilize('load_350'); }, 350);
+        setTimeout(function () { stabilize('load_1800'); }, 1800);
+        setTimeout(function () { stabilize('load_5000'); }, 5000);
+    }, { once: true });
+    window.addEventListener('lifeos:boot-ready', function () { stabilize('boot_ready'); }, { once: true });
 })();
 </script>
 <!-- Pha14J20R7_DiagnosticTruth_J19SCountD1CardsCorrectly_NoAppLogicTouch - START -->
@@ -34296,8 +33852,8 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     else
         install();
     window.addEventListener('load', function () { setTimeout(install, 300); setTimeout(install, 2000); }, { once: true });
-    var tries = 0, tm = setInterval(function () { tries++; if (wrapCommit() || tries > 30)
-        clearInterval(tm); }, 500);
+    [200, 800, 2200, 6000].forEach(function (ms) { setTimeout(wrapCommit, ms); });
+    window.addEventListener('lifeos:boot-ready', wrapCommit, { once: true });
 })();
 </script>
 <!-- Pha14J20R8_TelegramChatIdSeal_RelaySingleMetadataBackfill_NoAppLogicRewrite - END -->
@@ -35856,7 +35412,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
             scheduleReload('visibility_resume', 250);
         }
     });
-    setInterval(function(){ if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) hideUltraOnly(); }, 3000);
+    window.addEventListener('lifeos:boot-ready', function () { if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) hideUltraOnly(); }, { once: true });
 })();
 </script>
 <!-- Pha14J20R21_D1Folders_KeepInstallApp_HideUltra_R19Base - END -->
@@ -36354,14 +35910,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         log('INSTALLED');
         return true;
     }
-    function boot() { if (patchMusic())
-        return; var tries = 0; var timer = setInterval(function () { tries++; if (patchMusic() || tries > 80)
-        clearInterval(timer); }, 120); }
+    function boot() {
+        patchMusic();
+        [180, 700, 1800, 4200].forEach(function (ms) { setTimeout(patchMusic, ms); });
+    }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', boot, { once: true });
     else
         boot();
-    window.addEventListener('load', function () { setTimeout(boot, 500); }, { once: true });
+    window.addEventListener('load', function () { setTimeout(patchMusic, 500); }, { once: true });
+    window.addEventListener('lifeos:boot-ready', patchMusic, { once: true });
 })();
 </script>
 <!-- Pha14J20R23_MusicPlayableArchive136_AutoLoad - END -->
@@ -37756,21 +37314,13 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     function boot() { ensureViewer(); patchChatEngine(); transformAll(); }
     window.LifeOSR37LongTextDomGuard = { phase: PHASE, boot: boot, transform: transformAll, isTextFile: isTextFile, open: openViewer, copy: copyId, download: downloadId, delete: deleteId, putToInput: putToInput, saveViewerAsNew: saveViewerAsNew, closeViewer: closeViewer, summary: function () { var rows = allMessages().filter(isTextFile); return { phase: PHASE, rows: rows.map(function (m) { return { msg_key: keyOf(m), name: nameOf(m), size: sizeOf(m), hasBody: !!payloadBody(m) }; }), domCards: document.querySelectorAll('[data-r37-textfile-row]').length, cePatched: !!(window.ChatEngine && window.ChatEngine.__r37LongTextPatched), r38Quiet: true }; } };
     window.LifeOSR38LongTextStable = window.LifeOSR37LongTextDomGuard;
-    window.addEventListener('click', eventHandler, true);
     document.addEventListener('click', eventHandler, true);
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', boot, { once: true });
     else
         boot();
-    window.addEventListener('load', function () { setTimeout(boot, 50); setTimeout(boot, 500); setTimeout(boot, 1500); }, { once: true });
-    try {
-        var chatRoot = document.getElementById('chat-messages');
-        if (chatRoot) {
-            var mo = new MutationObserver(function () { if (window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom()) return; setTimeout(transformAll, 30); });
-            mo.observe(chatRoot, { childList: true, subtree: true });
-        }
-    }
-    catch (e) { }
+    window.addEventListener('load', function () { setTimeout(boot, 180); }, { once: true });
+    window.addEventListener('lifeos:boot-ready', patchChatEngine, { once: true });
 })();
 </script>
 <!-- Pha14J20R39_NoFirebase_NoVisibilityJump_R38Base - START -->
@@ -38162,11 +37712,15 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
             return false;
         }
     }
-    function transformLongTextSoon() {
-        [0, 40, 90, 220, 520].forEach(function (ms) { setTimeout(function () { try {
-            window.LifeOSR37LongTextDomGuard && window.LifeOSR37LongTextDomGuard.transform && window.LifeOSR37LongTextDomGuard.transform();
-        }
-        catch (e) { } }, ms); });
+    function afterFamilyRender(reason) {
+        requestAnimationFrame(function () {
+            try { window.LifeOSR37LongTextDomGuard && window.LifeOSR37LongTextDomGuard.transform && window.LifeOSR37LongTextDomGuard.transform(); } catch (e) { }
+            try { window.LifeOSFamilyRemote && window.LifeOSFamilyRemote.afterRender && window.LifeOSFamilyRemote.afterRender(); } catch (e) { }
+            try { window.LifeOSJ20R3PendingGuard && window.LifeOSJ20R3PendingGuard.render && window.LifeOSJ20R3PendingGuard.render(); } catch (e) { }
+            try { window.LifeOSJ20R44CleanConsoleBootNoFlash && window.LifeOSJ20R44CleanConsoleBootNoFlash.save && window.LifeOSJ20R44CleanConsoleBootNoFlash.save(reason || 'family_render'); } catch (e) { }
+            try { window.LifeOSJ20R45QuietStable && window.LifeOSJ20R45QuietStable.cleanLabels && window.LifeOSJ20R45QuietStable.cleanLabels(); } catch (e) { }
+            try { window.dispatchEvent(new CustomEvent('lifeos:family-rendered', { detail: { reason: reason || '' } })); } catch (e) { }
+        });
     }
     function lowBaseRender(ce) {
         if (!ce)
@@ -38213,7 +37767,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
                 lastHardRenderAt = now();
                 ce.__r43OldRender.apply(ce, []);
             }
-            transformLongTextSoon();
+            afterFamilyRender(reason || 'render_from_r35');
             trace('SYNC_FROM_R35', { reason: reason || '', messages: all.length, visible: r35Messages().length, textFiles: countTextFiles(all), domTextFiles: domCount().textFiles });
             return true;
         }
@@ -38342,11 +37896,12 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         return true;
     }
     function afterEnterChat(reason) {
-        setTimeout(function () { patchChatEngine(); if (r35Ready())
-            renderFromR35(reason || 'enter_chat');
-        else
-            requestR35Refresh(reason || 'enter_chat_no_state'); }, 0);
-        [80, 220, 520, 1000, 1800].forEach(function (ms) { setTimeout(function () { patchChatEngine(); repairIfNeeded((reason || 'enter_chat') + '_t' + ms); }, ms); });
+        setTimeout(function () {
+            patchChatEngine();
+            if (r35Ready()) renderFromR35(reason || 'enter_chat');
+            else requestR35Refresh(reason || 'enter_chat_no_state');
+        }, 0);
+        setTimeout(function () { patchChatEngine(); repairIfNeeded((reason || 'enter_chat') + '_settled'); }, 360);
     }
     function patchSwitchers() {
         try {
@@ -38432,8 +37987,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', function () { boot('domcontentloaded'); if (chatActuallyVisible())
             afterEnterChat('domcontentloaded_chat_guard'); }, { once: true });
-    window.addEventListener('load', function () { setTimeout(function () { boot('load_80'); if (chatActuallyVisible())
-        afterEnterChat('load_chat_guard'); }, 80); setTimeout(function () { boot('load_700'); }, 700); setTimeout(function () { boot('load_2200'); }, 2200); }, { once: true });
+    window.addEventListener('load', function () { setTimeout(function () { boot('load_100'); if (chatActuallyVisible()) afterEnterChat('load_chat_guard'); }, 100); }, { once: true });
     window.addEventListener('lifeos:boot-ready', function () { patchChatEngine(); patchSwitchers(); if (document.visibilityState !== 'hidden' && chatActuallyVisible())
         repairIfNeeded('boot_ready_dom_guard'); }, { once: true });
 })();
@@ -38567,11 +38121,11 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     tick('install');
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', function () { tick('domcontentloaded'); }, { once: true });
-    window.addEventListener('load', function () { [40, 160, 420, 1200, 3000].forEach(function (ms) { setTimeout(function () { tick('load_' + ms); }, ms); }); }, { once: true });
+    window.addEventListener('load', function () { setTimeout(function () { tick('load_120'); }, 120); setTimeout(function () { if (!state() || !state().messages || !state().messages.length) tick('load_1200'); }, 1200); }, { once: true });
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible')
         tick('visible'); });
     window.addEventListener('focus', function () { tick('focus'); });
-    setInterval(function () { tick('interval'); }, 30000);
+    window.addEventListener('lifeos:boot-ready', function () { tick('boot_ready'); }, { once: true });
     window.LifeOSJ20R44CleanConsoleBootNoFlash = { phase: PHASE, hydrate: hydrate, save: save, summary: function () { var st = state() || {}; return { phase: PHASE, bootHydrated: bootHydrated, stateMessages: Array.isArray(st.messages) ? st.messages.length : 0, stateFolders: Array.isArray(st.folders) ? st.folders.length : 0, cache44: !!read(CACHE44, null), lastSaveAt: lastSaveAt }; } };
 })();
 </script>
@@ -38754,24 +38308,19 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
                 else if (/TEXT_DB.*file ảo|không Telegram/i.test(t))
                     el.textContent = t.replace(/TEXT_DB\s*·\s*file ảo\s*·\s*không Telegram/i, 'Kho Data lưu trữ').replace(/TEXT_DB/i, 'Kho Data').replace(/file ảo|không Telegram/ig, '').replace(/\s*·\s*$/, '');
             });
-            document.querySelectorAll('*').forEach(function (el) {
-                if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3) {
-                    var t = S(el.textContent);
-                    if (t === 'Văn bản dài D1')
-                        el.textContent = 'Văn bản dài';
-                }
+            document.querySelectorAll('#chat-messages .lifeos-r37-textfile-kicker, #chat-messages [data-r37-textfile-row] b, #chat-status').forEach(function (el) {
+                if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3 && S(el.textContent) === 'Văn bản dài D1') el.textContent = 'Văn bản dài';
             });
         }
         catch (e) { }
     }
     function boot() { patchStorage(); quietConsole(); quietFirebaseForcePull(); slowR35Poll(); if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) cleanLabels(); }
-    window.LifeOSJ20R45QuietStable = { phase: PHASE, boot: boot, summary: function () { var r = window.LifeOSR35D1TextOfficial, st = r && r.state || {}; return { phase: PHASE, storageThrottle: !!Storage.prototype.__lifeosR45StorageThrottle, blocked: blocked, r35LastRefreshAt: st.lastRefreshAt || 0, r35RefreshCount: st.refreshCount || 0, forcePullQuiet: !!(window.forcePullVaultFromFirebase && window.forcePullVaultFromFirebase.__lifeosR45Quiet) }; } };
+    window.LifeOSJ20R45QuietStable = { phase: PHASE, boot: boot, cleanLabels: cleanLabels, summary: function () { var r = window.LifeOSR35D1TextOfficial, st = r && r.state || {}; return { phase: PHASE, storageThrottle: !!Storage.prototype.__lifeosR45StorageThrottle, blocked: blocked, r35LastRefreshAt: st.lastRefreshAt || 0, r35RefreshCount: st.refreshCount || 0, forcePullQuiet: !!(window.forcePullVaultFromFirebase && window.forcePullVaultFromFirebase.__lifeosR45Quiet) }; } };
     boot();
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', boot, { once: true });
-    window.addEventListener('load', function () { setTimeout(boot, 80); setTimeout(boot, 900); setTimeout(boot, 3000); }, { once: true });
-    document.addEventListener('click', function () { setTimeout(function(){ if (!(window.LifeOSSmartboxPageLiteR7 && window.LifeOSSmartboxPageLiteR7.deferFamilyDom())) cleanLabels(); }, 80); }, true);
-    setInterval(boot, 15000);
+    window.addEventListener('load', function () { setTimeout(boot, 100); }, { once: true });
+    window.addEventListener('lifeos:boot-ready', boot, { once: true });
 })();
 </script>
 <!-- Pha14J20R45_QuietStableBootStorageThrottle_LabelClean_R44Base - END -->
@@ -38854,8 +38403,8 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     boot();
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', boot, { once: true });
-    window.addEventListener('load', function () { setTimeout(boot, 100); setTimeout(boot, 1000); setTimeout(boot, 3500); }, { once: true });
-    setInterval(boot, 20000);
+    window.addEventListener('load', function () { setTimeout(boot, 150); }, { once: true });
+    window.addEventListener('lifeos:boot-ready', boot, { once: true });
 })();
 </script>
 <!-- Pha14J20R46_QuietBootR35Backoff_FileOriginClean_LabelClean_R45Base - END -->
@@ -39021,7 +38570,7 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
             }
         }
         catch (e) { }
-        cleanupTimer = setInterval(clearStaleR48BootLock, 1500);
+        clearStaleR48BootLock();
     }
     bind();
     if (document.readyState === 'loading')
@@ -41582,12 +41131,11 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
         window.__lifeosR62RenderPatched = true;
         var old = typeof window.renderTasksOnly === 'function' ? window.renderTasksOnly : null;
         if (old && !old.__lifeosR62Wrapped) {
-            var w = function () { var r = old.apply(this, arguments); setTimeout(augmentTaskCards, 0); return r; };
+            var w = function () { var r = old.apply(this, arguments); setTimeout(function () { if (!window.__lifeosR63RenderPatched) augmentTaskCards(); }, 0); return r; };
             w.__lifeosR62Wrapped = true;
             window.renderTasksOnly = w;
         }
-        setInterval(augmentTaskCards, 5000);
-        setTimeout(augmentTaskCards, 500);
+        setTimeout(function () { if (!window.__lifeosR63RenderPatched) augmentTaskCards(); }, 500);
     }
     function activeIds() {
         var out = [];
@@ -41725,13 +41273,6 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
             }
             catch (e) { }
         }, true);
-        setInterval(function () { try {
-            if (document.getElementById('alarm-overlay') && !document.getElementById('alarm-overlay').classList.contains('hidden'))
-                startSiren();
-            if (document.getElementById('lifeos-r61-alarm-modal'))
-                startSiren();
-        }
-        catch (e) { } }, 2000);
     }
     function boot() { installSaveCapture(); installRenderPatch(); installAlarmPatch(); setTimeout(function () { installSaveCapture(); installRenderPatch(); installAlarmPatch(); augmentTaskCards(); }, 1500); }
     window.LifeOSJ20R62 = { phase: PHASE, installed: true, saveEdit: saveEditCore, completeActive: completeActive, startSiren: startSiren, stopSiren: stopSiren, summary: function () { return { phase: PHASE, installed: true, profile: profile(), state: JSON.parse(JSON.stringify(state)), saveEditPatched: !!(window.saveEditTask && window.saveEditTask.__lifeosR62Core), renderPatched: !!window.__lifeosR62RenderPatched, alarmPatched: !!window.__lifeosR62AlarmPatched, activeIds: activeIds(), fallbackOpen: !!document.getElementById('lifeos-r61-alarm-modal'), overlayOpen: !!document.getElementById('alarm-overlay') && !document.getElementById('alarm-overlay').classList.contains('hidden'), todos: Array.isArray(window.todos) ? window.todos.map(function (t) { return { id: t.id, text: t.text, dueDate: t.dueDate, date: t.date, displayDate: t.displayDate, timeStr: t.timeStr, alarmTime: t.alarmTime, alarmEnabled: t.alarmEnabled, alerted: t.alerted, completed: t.completed, done: t.done, isDaily: t.isDaily, r62ExplicitDate: t.r62ExplicitDate }; }).slice(-10) : [], markers: { r62: true, r61: !!window.__lifeosJ20R61TaskEditAlarmCoreInstalled, r60: !!window.__lifeosJ20R60TaskAlarmStorageCoreFixInstalled, r59: !!window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled, r55: !!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled } }; } };
@@ -42078,12 +41619,11 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
         window.__lifeosR63RenderPatched = true;
         var old = typeof window.renderTasksOnly === 'function' ? window.renderTasksOnly : null;
         if (old && !old.__lifeosR63Wrapped) {
-            var w = function () { var r = old.apply(this, arguments); setTimeout(augmentTaskCards, 0); return r; };
+            var w = function () { var r = old.apply(this, arguments); setTimeout(function () { augmentTaskCards(); try { window.LifeOSJ20R64 && window.LifeOSJ20R64.cleanupClasses && window.LifeOSJ20R64.cleanupClasses(); } catch (e) { } }, 0); return r; };
             w.__lifeosR63Wrapped = true;
             window.renderTasksOnly = w;
         }
         setTimeout(augmentTaskCards, 300);
-        setInterval(augmentTaskCards, 7000);
     }
     function installTouchHitbox() {
         if (state.hitboxPatched)
@@ -42327,13 +41867,6 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
             }
         }
         catch (e) { } }, true);
-        setInterval(function () { try {
-            if (document.getElementById('alarm-overlay') && !document.getElementById('alarm-overlay').classList.contains('hidden'))
-                startSiren();
-            if (document.getElementById('lifeos-r61-alarm-modal'))
-                startSiren();
-        }
-        catch (e) { } }, 1600);
     }
     function boot() { installTouchHitbox(); installSavePatch(); installRenderPatch(); installAlarmPatch(); setTimeout(function () { installTouchHitbox(); installSavePatch(); installRenderPatch(); installAlarmPatch(); augmentTaskCards(); }, 1500); }
     window.LifeOSJ20R63 = { phase: PHASE, installed: true, saveEdit: saveEditCore, startSiren: startSiren, stopSiren: stopSiren, completeActive: completeActive, augmentTaskCards: augmentTaskCards, summary: function () { return { phase: PHASE, installed: true, profile: profile(), state: JSON.parse(JSON.stringify(state)), saveEditPatched: !!(window.saveEditTask && window.saveEditTask.__lifeosR63Core), renderPatched: !!window.__lifeosR63RenderPatched, alarmPatched: !!window.__lifeosR63AlarmPatched, hitboxPatched: state.hitboxPatched, activeIds: activeIds(), todos: Array.isArray(window.todos) ? window.todos.map(function (t) { return { id: t.id, text: t.text, dueDate: t.dueDate, date: t.date, displayDate: t.displayDate, r63Date: t.r63Date, timeStr: t.timeStr, alarmTime: t.alarmTime, alarmEnabled: t.alarmEnabled, alerted: t.alerted, completed: t.completed, done: t.done, isDaily: t.isDaily }; }).slice(-12) : [], markers: { r63: true, r62: !!window.__lifeosJ20R62StopCompleteDateLoudAlarmInstalled, r61: !!window.__lifeosJ20R61TaskEditAlarmCoreInstalled, r60: !!window.__lifeosJ20R60TaskAlarmStorageCoreFixInstalled, r59: !!window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled, r55: !!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled } }; } };
@@ -42763,7 +42296,7 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
         installTouchBypass();
         installAlarmOverride();
         setTimeout(function () { cssInstall(); cleanupClasses(); installTouchBypass(); installAlarmOverride(); }, 800);
-        setInterval(cleanupClasses, 5000);
+        window.addEventListener('lifeos:boot-ready', cleanupClasses, { once: true });
     }
     window.LifeOSJ20R64 = { phase: PHASE, installed: true, startSiren: hardStartSiren, stopSiren: hardStopSiren, cleanupClasses: cleanupClasses, summary: function () { return { phase: PHASE, installed: true, state: JSON.parse(JSON.stringify(state)), touchBypass: !!window.__lifeosR64TouchBypassInstalled, alarmOverride: !!window.__lifeosR64AlarmOverrideInstalled, markers: { r64: true, r63: !!window.__lifeosJ20R63LoudSirenDateBadgeTouchHitboxInstalled, r62: !!window.__lifeosJ20R62StopCompleteDateLoudAlarmInstalled, r61: !!window.__lifeosJ20R61TaskEditAlarmCoreInstalled, r59: !!window.__lifeosJ20R59QuietCopyAlarmTwoWaySyncInstalled, r55: !!window.__lifeosJ20R55MobileCoolLiteNoFanInstalled } }; } };
     if (document.readyState === 'loading')
