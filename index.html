@@ -10668,6 +10668,11 @@ window.ChatEngine = {
   render() {
     const container = document.getElementById('chat-messages');
     if (!container) return;
+    const previousScrollTop = Number(container.scrollTop || 0);
+    const previousScrollHeight = Number(container.scrollHeight || 0);
+    const previousClientHeight = Number(container.clientHeight || 0);
+    const previousDistanceFromBottom = Math.max(0, previousScrollHeight - previousClientHeight - previousScrollTop);
+    const preserveFamilyViewport = container.dataset.lifeosFamilyUserScrolled === '1' && previousScrollHeight > previousClientHeight + 1 && previousDistanceFromBottom > 44;
     const profileKey = this.getKey();
     const messages = Array.isArray(window.chatHistory) ? window.chatHistory : [];
     const emptyHtml = `<div class="h-full min-h-[260px] flex flex-col items-center justify-center text-center text-slate-400 p-8"><div class="w-16 h-16 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-3"><i class="ph-duotone ph-chats-teardrop text-4xl text-primary"></i></div><div class="text-sm font-black text-slate-600">Chưa có tin nhắn</div><div class="text-xs font-semibold mt-1">Gửi lời nhắn hoặc file đầu tiên cho gia đình.</div></div>`;
@@ -10760,14 +10765,26 @@ window.ChatEngine = {
             </div>`;
     }).join('');
     const settleLatest = () => {
-      container.scrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+      const max = Math.max(0, container.scrollHeight - container.clientHeight);
+      if (preserveFamilyViewport) {
+        container.scrollTop = Math.max(0, Math.min(max, max - previousDistanceFromBottom));
+      } else {
+        container.scrollTop = max;
+        container.dataset.lifeosFamilyUserScrolled = '0';
+      }
       if (document.body && document.body.classList.contains('lifeos-landscape-mini-pc')) {
         const form = document.getElementById('chat-form');
         if (form) form.style.setProperty('visibility', 'visible', 'important');
       }
     };
-    requestAnimationFrame(() => { settleLatest(); requestAnimationFrame(settleLatest); });
-    setTimeout(settleLatest, 80);
+    requestAnimationFrame(() => {
+      settleLatest();
+      requestAnimationFrame(() => {
+        settleLatest();
+        if (window.LifeOSFamilyRemote && typeof window.LifeOSFamilyRemote.afterRender === 'function') window.LifeOSFamilyRemote.afterRender();
+      });
+    });
+    if (!preserveFamilyViewport) setTimeout(settleLatest, 80);
   }
 };
 window.FirebaseSync = {
@@ -16709,17 +16726,10 @@ window.MediaHub = {
     smartboxWheelDelta: 0,
     smartboxLastNavKey: '',
     smartboxLastNavAt: 0,
-    smartboxPreparedTab: '',
-    smartboxPreparedList: null,
-    smartboxRemoteMarks: [],
-    smartboxZoneCache: null,
-    smartboxZoneCacheTab: '',
-    smartboxZoneCacheList: null,
-    smartboxZoneCacheFirst: null,
-    smartboxZoneCacheLast: null,
     owner: 'LIFEOS_MEDIAHUB_CORE_REBUILD_20260714',
     cleanOwner: 'LIFEOS_MEDIAHUB_CORE_REBUILD_20260714',
     groupByTab: { radio: 'all', tv: 'all' },
+    _channelsVersion: 0,
     _initPromise: null,
     init() {
         return __awaiter(this, arguments, void 0, function* (force = false, opts = {}) {
@@ -16728,10 +16738,6 @@ window.MediaHub = {
             if (!this.remoteBound) {
                 try { this.initRemoteControl(); } catch (e) { }
                 this.remoteBound = true;
-            }
-            if (!force && Array.isArray(this.allChannels) && this.allChannels.length > 0) {
-                this.switchTab(requested, true, Object.assign({}, opts || {}, { silent: true, preserveTab: true, source: 'cached-mediahub' }));
-                return true;
             }
             if (this._initPromise && !force) {
                 try {
@@ -16784,6 +16790,9 @@ window.MediaHub = {
                     this.allChannels = channels;
                     this.tvData = channels.filter(c => c.type === 'tv');
                     this.radioData = channels.filter(c => c.type === 'radio');
+                    this.tvData.forEach((c, i) => { c.__lifeosActualIndex = i; });
+                    this.radioData.forEach((c, i) => { c.__lifeosActualIndex = i; });
+                    this._channelsVersion = (this._channelsVersion || 0) + 1;
                     try {
                         const mem = JSON.parse(localStorage.getItem('lifeos_media_memory') || '{}');
                         this.currentTvIdx = Number.isInteger(mem.tvIdx) ? mem.tvIdx : this.currentTvIdx;
@@ -17093,10 +17102,11 @@ renderLists() {
         const container = document.getElementById(isTv ? 'tv-list-container' : 'radio-list-container');
         if (!container)
             return;
-        let list = (isTv ? this.tvData : this.radioData).filter(c => this.currentGroup === 'all' || c.group === this.currentGroup);
+        const data = isTv ? this.tvData : this.radioData;
+        let list = data.filter(c => this.currentGroup === 'all' || c.group === this.currentGroup);
         if (query)
             list = list.filter(c => String(c.name || '').toLowerCase().includes(query));
-        const signature = [type, this.currentGroup, query, list.length, list.map(c => String(c.id || c.url || c.name || '')).join('|')].join('::');
+        const signature = [type, this._channelsVersion || 0, this.currentGroup, query, list.length].join('::');
         if (smartbox && container.getAttribute('data-lifeos-render-signature') === signature && container.querySelectorAll('.media-item').length === list.length) {
             /* Stable owner: status/player refresh must never reposition a list that the user is scrolling. */
             this.prepareSmartboxRemoteSurface();
@@ -17108,8 +17118,7 @@ renderLists() {
             : (scrollOwner ? (scrollOwner.scrollTop || 0) : 0);
         const keepLeft = scrollOwner ? (scrollOwner.scrollLeft || 0) : 0;
         container.innerHTML = list.map((c, idxInList) => {
-            const data = isTv ? this.tvData : this.radioData;
-            const actualIdx = data.findIndex(x => x.id === c.id);
+            const actualIdx = Number.isInteger(c.__lifeosActualIndex) ? c.__lifeosActualIndex : data.indexOf(c);
             const isPlaying = isTv ? this.currentTvIdx === actualIdx : this.currentRadioIdx === actualIdx;
             const borderCls = isTv
                 ? (isPlaying ? 'border-rose-500 shadow-md ring-2 ring-rose-200' : 'border-slate-200 hover:border-rose-500')
@@ -17400,14 +17409,14 @@ ensureSmartboxKeySink() {
 markSmartboxManualScroll(viewport) {
     if (!viewport || !this.isSmartboxMediaMode())
         return;
-    this.smartboxManualScrollUntil = Date.now() + 700;
+    this.smartboxManualScrollUntil = Date.now() + 1100;
     this.activeZone = 'list';
     if (this.smartboxScrollSettleTimer)
         clearTimeout(this.smartboxScrollSettleTimer);
     this.smartboxScrollSettleTimer = setTimeout(() => {
         this.smartboxScrollSettleTimer = 0;
         this.syncSmartboxListIndexToViewport(viewport);
-    }, 80);
+    }, 170);
 },
 setSmartboxScrollTop(viewport, value) {
     if (!viewport)
@@ -17427,36 +17436,32 @@ syncSmartboxListIndexToViewport(viewport) {
     const list = this.getSmartboxListForTab(this.currentTab);
     if (!list)
         return false;
-    const selector = this.currentTab === 'youtube' ? '.youtube-media-item' : '.media-item';
-    const items = Array.from(list.querySelectorAll(selector));
+    const items = Array.from(list.querySelectorAll(this.currentTab === 'youtube' ? '.youtube-media-item' : '.media-item'));
     if (!items.length)
         return false;
     try {
         const vr = viewport.getBoundingClientRect();
-        const x = Math.max(vr.left + 4, Math.min(vr.right - 4, vr.left + vr.width * 0.55));
-        const y = Math.max(vr.top + 4, Math.min(vr.bottom - 4, vr.top + vr.height * 0.5));
-        let hit = document.elementFromPoint(x, y);
-        hit = hit && hit.closest ? hit.closest(selector) : null;
-        let best = hit && list.contains(hit) ? items.indexOf(hit) : -1;
-        if (best < 0) {
-            const scrollTop = viewport.scrollTop || 0;
-            let lo = 0, hi = items.length - 1;
-            while (lo <= hi) {
-                const mid = (lo + hi) >> 1;
-                const item = items[mid];
-                const top = item.offsetTop || 0;
-                const bottom = top + (item.offsetHeight || 1);
-                if (bottom < scrollTop) lo = mid + 1;
-                else if (top > scrollTop + viewport.clientHeight) hi = mid - 1;
-                else { best = mid; break; }
+        const center = vr.top + vr.height / 2;
+        let best = -1;
+        let bestScore = Number.POSITIVE_INFINITY;
+        items.forEach((item, index) => {
+            const r = item.getBoundingClientRect();
+            const overlap = Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top);
+            if (overlap <= 1)
+                return;
+            const score = Math.abs((r.top + r.bottom) / 2 - center);
+            if (score < bestScore) {
+                bestScore = score;
+                best = index;
             }
-            if (best < 0) best = Math.max(0, Math.min(items.length - 1, lo));
+        });
+        if (best >= 0) {
+            this.idxList = best;
+            this.lastListIdx = best;
+            if (!this.smartboxListIndexByTab) this.smartboxListIndexByTab = { radio: 0, tv: 0, youtube: 0 };
+            this.smartboxListIndexByTab[this.currentTab] = best;
+            return true;
         }
-        this.idxList = best;
-        this.lastListIdx = best;
-        if (!this.smartboxListIndexByTab) this.smartboxListIndexByTab = { radio: 0, tv: 0, youtube: 0 };
-        this.smartboxListIndexByTab[this.currentTab] = best;
-        return true;
     }
     catch (e) { }
     return false;
@@ -17479,26 +17484,13 @@ bindSmartboxScrollOwner() {
     viewport.addEventListener('pointerdown', manualStart, { passive: true });
     viewport.addEventListener('mousedown', manualStart, { passive: true });
     viewport.addEventListener('touchstart', manualStart, { passive: true });
-    viewport.addEventListener('wheel', function (event) {
+    viewport.addEventListener('wheel', function () {
         if (['radio', 'tv', 'youtube'].indexOf(hub.currentTab) < 0)
             return;
-        let delta = Number(event.deltaY || 0);
-        if (event.deltaMode === 1) delta *= 34;
-        else if (event.deltaMode === 2) delta *= Math.max(120, viewport.clientHeight * 0.78);
-        if (!delta)
-            return;
-        const minStep = 48;
-        const maxStep = Math.max(130, viewport.clientHeight * 0.72);
-        delta = Math.sign(delta) * Math.min(maxStep, Math.max(minStep, Math.abs(delta)));
-        const before = viewport.scrollTop || 0;
-        hub.setSmartboxScrollTop(viewport, before + delta);
-        if (Math.abs((viewport.scrollTop || 0) - before) > 0.5) {
-            hub.markSmartboxManualScroll(viewport);
-            if (event.cancelable) event.preventDefault();
-            if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
-            event.stopPropagation();
-        }
-    }, { passive: false, capture: true });
+        /* Use the browser's native scroll path — exactly like the stable MP3 tab.
+           Do not preventDefault, accumulate delta or write scrollTop a second time. */
+        hub.markSmartboxManualScroll(viewport);
+    }, { passive: true });
     viewport.addEventListener('scroll', function () {
         if (!hub.isSmartboxMediaMode())
             return;
@@ -17515,7 +17507,6 @@ prepareSmartboxRemoteSurface() {
         return false;
     const viewport = document.getElementById('music-list-container');
     const tab = this.currentTab || 'music';
-    const list = this.getSmartboxListForTab(tab);
     if (viewport) {
         try {
             if (viewport.dataset.lifeosStableScrollPrepared !== '1') {
@@ -17539,10 +17530,10 @@ prepareSmartboxRemoteSurface() {
         catch (e) { }
         this.bindSmartboxScrollOwner();
     }
-    if (list && (this.smartboxPreparedTab !== tab || this.smartboxPreparedList !== list)) {
-        this.smartboxPreparedTab = tab;
-        this.smartboxPreparedList = list;
-        this.smartboxZoneCache = null;
+    ['radio-list-container', 'tv-list-container', 'youtube-list-container'].forEach(id => {
+        const list = document.getElementById(id);
+        if (!list)
+            return;
         try {
             list.style.setProperty('position', 'static', 'important');
             list.style.setProperty('top', 'auto', 'important');
@@ -17553,12 +17544,13 @@ prepareSmartboxRemoteSurface() {
             list.style.setProperty('touch-action', 'pan-y', 'important');
             list.style.setProperty('transform', 'none', 'important');
             list.removeAttribute('data-lifeos-window-offset');
-            if (tab === 'tv') list.style.setProperty('grid-template-columns', 'none', 'important');
-        } catch (e) { }
-    }
+            if (id === 'tv-list-container')
+                list.style.setProperty('grid-template-columns', 'none', 'important');
+        }
+        catch (e) { }
+    });
     const sidebar = document.getElementById('media-group-sidebar');
-    if (sidebar && sidebar.dataset.lifeosSmartboxPrepared !== '1') {
-        sidebar.dataset.lifeosSmartboxPrepared = '1';
+    if (sidebar) {
         try {
             sidebar.style.setProperty('overflow-y', 'auto', 'important');
             sidebar.style.setProperty('overflow-x', 'hidden', 'important');
@@ -17566,9 +17558,32 @@ prepareSmartboxRemoteSurface() {
             sidebar.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
             sidebar.style.setProperty('overscroll-behavior', 'contain', 'important');
             sidebar.style.setProperty('scroll-behavior', 'auto', 'important');
-        } catch (e) { }
+        }
+        catch (e) { }
+    }
+    const root = document.getElementById('l64f-panel-music') || document.getElementById('view-music');
+    if (root) {
+        const activeList = this.getSmartboxListForTab(tab);
+        const listSignature = activeList ? (activeList.getAttribute('data-lifeos-render-signature') || activeList.getAttribute('data-lifeos-youtube-signature') || String(activeList.childElementCount || 0)) : 'none';
+        const prepareSignature = [tab, this._channelsVersion || 0, listSignature].join('|');
+        if (root.getAttribute('data-lifeos-smartbox-prepare-signature') !== prepareSignature) {
+            const nodes = root.querySelectorAll('#media-subtabs button,#media-group-sidebar button,#media-group-mobile-bar button,#radio-list-container .media-item,#tv-list-container .media-item,#youtube-list-container .youtube-media-item,#mp3-list-container .song-row,#radio-player-container button,#tv-player-container button,#youtube-player-controls button');
+            Array.prototype.forEach.call(nodes, el => {
+                if (!el || el.id === 'lifeos-smartbox-media-key-sink')
+                    return;
+                if (!el.hasAttribute('data-lifeos-smartbox-old-tabindex')) {
+                    const old = el.hasAttribute('tabindex') ? el.getAttribute('tabindex') : '__none__';
+                    el.setAttribute('data-lifeos-smartbox-old-tabindex', old);
+                }
+                el.setAttribute('tabindex', '-1');
+            });
+            root.setAttribute('data-lifeos-smartbox-prepare-signature', prepareSignature);
+        }
     }
     document.body.dataset.lifeosRemoteZone = 'panel';
+    /* Document capture already receives D-pad keys. Do not refocus the hidden key sink:
+       WebView 66 may ignore preventScroll and pull the channel viewport back to the top. */
+    this.ensureSmartboxKeySink();
     return true;
 },
 releaseSmartboxRemoteSurface() {
@@ -18275,55 +18290,36 @@ positionSmartboxListTarget(target, force) {
         }
     },
     getZoneElements() {
-        const smartbox = this.isSmartboxMediaMode();
-        const fastVisible = (el) => {
-            if (!el || el.hidden || el.disabled) return false;
-            return el.offsetWidth > 0 && el.offsetHeight > 0;
-        };
-        const fullVisible = (el) => {
-            if (!fastVisible(el)) return false;
+        const isDesktop = !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc')) || window.innerWidth >= 1024;
+        const visible = (el) => {
+            if (!el)
+                return false;
             const cs = getComputedStyle(el);
-            return cs.display !== 'none' && cs.visibility !== 'hidden';
+            return el.offsetParent !== null && cs.display !== 'none' && cs.visibility !== 'hidden';
         };
-        const visible = smartbox ? fastVisible : fullVisible;
-        let listRoot = null;
-        let listSelector = '';
-        let playerRoot = null;
+        let listEls = [];
+        let playerEls = [];
         if (this.currentTab === 'tv') {
-            listRoot = document.getElementById('tv-list-container');
-            listSelector = '.media-item';
-            playerRoot = document.getElementById('tv-player-container');
-        } else if (this.currentTab === 'radio') {
-            listRoot = document.getElementById('radio-list-container');
-            listSelector = '.media-item';
-            playerRoot = document.getElementById('radio-player-container');
-        } else {
-            listRoot = document.getElementById('mp3-list-container');
-            listSelector = '.song-row';
-            playerRoot = document.getElementById('mini-player');
+            listEls = document.querySelectorAll('#tv-list-container .media-item');
+            playerEls = document.querySelectorAll('#tv-player-container button');
         }
-        if (smartbox && this.smartboxZoneCache &&
-            this.smartboxZoneCacheTab === this.currentTab &&
-            this.smartboxZoneCacheList === listRoot &&
-            (!listRoot || (this.smartboxZoneCacheFirst === listRoot.firstElementChild &&
-                this.smartboxZoneCacheLast === listRoot.lastElementChild &&
-                this.smartboxZoneCache.list.every(el => el && el.isConnected)))) {
-            return this.smartboxZoneCache;
+        else if (this.currentTab === 'radio') {
+            listEls = document.querySelectorAll('#radio-list-container .media-item');
+            playerEls = document.querySelectorAll('#radio-player-container button');
         }
-        const tabs = Array.from(document.querySelectorAll('#media-subtabs button')).filter(visible);
-        const isDesktop = smartbox || window.innerWidth >= 1024;
-        const sidebar = Array.from(document.querySelectorAll(isDesktop ? '#media-group-sidebar button' : '#media-group-mobile-bar button')).filter(visible);
-        const list = listRoot ? Array.from(listRoot.querySelectorAll(listSelector)).filter(visible) : [];
-        const player = playerRoot ? Array.from(playerRoot.querySelectorAll('button')).filter(visible) : [];
-        const result = { tabs, sidebar, list, player };
-        if (smartbox) {
-            this.smartboxZoneCache = result;
-            this.smartboxZoneCacheTab = this.currentTab;
-            this.smartboxZoneCacheList = listRoot;
-            this.smartboxZoneCacheFirst = listRoot ? listRoot.firstElementChild : null;
-            this.smartboxZoneCacheLast = listRoot ? listRoot.lastElementChild : null;
+        else {
+            listEls = document.querySelectorAll('#mp3-list-container .song-row');
+            const mp = document.getElementById('mini-player');
+            if (visible(mp)) {
+                playerEls = mp.querySelectorAll('button');
+            }
         }
-        return result;
+        return {
+            tabs: Array.from(document.querySelectorAll('#media-subtabs button')).filter(visible),
+            sidebar: Array.from(document.querySelectorAll(isDesktop ? '#media-group-sidebar button' : '#media-group-mobile-bar button')).filter(visible),
+            list: Array.from(listEls).filter(visible),
+            player: Array.from(playerEls).filter(visible)
+        };
     },
 highlightRemoteZones() {
     const els = this.getZoneElements();
@@ -18332,55 +18328,55 @@ highlightRemoteZones() {
     this.idxSidebar = clamp(this.idxSidebar, els.sidebar.length);
     this.idxList = clamp(this.idxList, els.list.length);
     this.idxPlayer = clamp(this.idxPlayer, els.player.length);
-    const oldMarks = Array.isArray(this.smartboxRemoteMarks) ? this.smartboxRemoteMarks : [];
-    oldMarks.forEach(el => {
+    (this._remoteMarkedElements || []).forEach(el => {
         if (!el) return;
         el.classList.remove('tab-focused', 'sidebar-focused', 'media-focused', 'player-btn-focused', 'lifeos-remote-selected');
         el.removeAttribute('data-lifeos-remote-selected');
         el.style.boxShadow = '';
     });
-    const marks = [];
-    const soft = (el, cls) => {
-        if (!el) return;
-        el.classList.add(cls);
-        el.style.boxShadow = 'none';
-        if (marks.indexOf(el) < 0) marks.push(el);
-    };
+    const marked = [];
+    const soft = (el, cls) => { if (el) { el.classList.add(cls); el.style.boxShadow = 'none'; marked.push(el); } };
     let target = null;
     if (this.activeZone === 'tabs') {
         target = els.tabs[this.idxTabs];
-        if (target) soft(target, 'tab-focused');
-    } else if (this.activeZone === 'sidebar') {
+        if (target) target.classList.add('tab-focused');
+    }
+    else if (this.activeZone === 'sidebar') {
         soft(els.tabs[this.idxTabs], 'tab-focused');
         target = els.sidebar[this.idxSidebar];
-        if (target) soft(target, 'sidebar-focused');
-    } else if (this.activeZone === 'list') {
+        if (target) target.classList.add('sidebar-focused');
+    }
+    else if (this.activeZone === 'list') {
         soft(els.tabs[this.idxTabs], 'tab-focused');
         if (this.currentTab !== 'music') soft(els.sidebar[this.idxSidebar], 'sidebar-focused');
         target = els.list[this.idxList];
-        if (target) soft(target, 'media-focused');
-    } else if (this.activeZone === 'player') {
+        if (target) target.classList.add('media-focused');
+    }
+    else if (this.activeZone === 'player') {
         soft(els.tabs[this.idxTabs], 'tab-focused');
         if (this.currentTab !== 'music') soft(els.sidebar[this.idxSidebar], 'sidebar-focused');
         soft(els.list[this.idxList], 'media-focused');
         target = els.player[this.idxPlayer];
-        if (target) soft(target, 'player-btn-focused');
+        if (target) target.classList.add('player-btn-focused');
     }
     if (target) {
         target.classList.add('lifeos-remote-selected');
         target.setAttribute('data-lifeos-remote-selected', 'true');
-        if (marks.indexOf(target) < 0) marks.push(target);
+        if (marked.indexOf(target) < 0) marked.push(target);
     }
-    this.smartboxRemoteMarks = marks;
+    this._remoteMarkedElements = marked;
     if (this.isSmartboxMediaMode()) {
         this.prepareSmartboxRemoteSurface();
-        if (target) this.scrollRemoteTarget(target);
+        if (target)
+            this.scrollRemoteTarget(target);
         return;
     }
     if (target) {
         try {
-            if (document.activeElement !== target) target.focus({ preventScroll: true });
-        } catch (e) { try { target.focus(); } catch (_) { } }
+            if (document.activeElement !== target)
+                target.focus({ preventScroll: true });
+        }
+        catch (e) { try { target.focus(); } catch (_) { } }
         this.scrollRemoteTarget(target);
     }
 },
@@ -18421,7 +18417,7 @@ highlightRemoteZones() {
             });
             return idx >= 0 ? idx : Math.floor(buttons.length / 2);
         };
-        const afterRender = (fn) => requestAnimationFrame(fn);
+        const afterRender = (fn) => requestAnimationFrame(() => setTimeout(fn, 40));
         const gridColumnCount = (container) => {
             try {
                 if (!container)
@@ -18489,7 +18485,7 @@ highlightRemoteZones() {
                 e.stopPropagation();
                 const navNow = Date.now();
                 if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(key)) {
-                    const minGap = e.repeat ? 72 : 34;
+                    const minGap = e.repeat ? 105 : 75;
                     if (this.smartboxLastNavKey === key && navNow - (this.smartboxLastNavAt || 0) < minGap)
                         return;
                     this.smartboxLastNavKey = key;
@@ -19509,71 +19505,16 @@ function isMini() {
         move(header, document.getElementById('l64f-chat-left'));
         move(folders, document.getElementById('l64f-chat-left'));
         const right = document.getElementById('l64f-chat-right');
-        if (right) {
-            const ensureRegion = function (id) {
-                let region = document.getElementById(id);
-                if (!region) {
-                    region = document.createElement('div');
-                    region.id = id;
-                    right.appendChild(region);
-                } else if (region.parentElement !== right) {
-                    right.appendChild(region);
-                }
-                return region;
-            };
-            const topStack = ensureRegion('lifeos-family-top-stack');
-            const scrollHost = ensureRegion('lifeos-family-scroll-host');
-            const composeStack = ensureRegion('lifeos-family-compose-stack');
-            move(pinned, topStack);
-            move(messages, scrollHost);
-            move(edit, composeStack);
-            move(reply, composeStack);
-            move(emoji, composeStack);
-            move(rec, composeStack);
-            move(form, composeStack);
-            right.style.setProperty('display', 'grid', 'important');
-            right.style.setProperty('grid-template-rows', 'auto minmax(0,1fr) auto', 'important');
-            right.style.setProperty('height', '100%', 'important');
-            right.style.setProperty('min-height', '0', 'important');
-            right.style.setProperty('max-height', '100%', 'important');
-            right.style.setProperty('overflow', 'hidden', 'important');
-            topStack.style.setProperty('min-height', '0', 'important');
-            topStack.style.setProperty('overflow', 'hidden', 'important');
-            scrollHost.style.setProperty('min-height', '0', 'important');
-            scrollHost.style.setProperty('height', '100%', 'important');
-            scrollHost.style.setProperty('overflow', 'hidden', 'important');
-            composeStack.style.setProperty('min-height', '0', 'important');
-            composeStack.style.setProperty('max-height', '46%', 'important');
-            composeStack.style.setProperty('overflow-y', 'auto', 'important');
-            composeStack.style.setProperty('overflow-x', 'hidden', 'important');
-            composeStack.style.setProperty('display', 'flex', 'important');
-            composeStack.style.setProperty('flex-direction', 'column', 'important');
-            composeStack.style.setProperty('gap', '4px', 'important');
-            if (messages) {
-                messages.style.setProperty('display', 'block', 'important');
-                messages.style.setProperty('height', '100%', 'important');
-                messages.style.setProperty('min-height', '0', 'important');
-                messages.style.setProperty('max-height', '100%', 'important');
-                messages.style.setProperty('overflow-y', 'scroll', 'important');
-                messages.style.setProperty('overflow-x', 'hidden', 'important');
-                messages.style.setProperty('touch-action', 'pan-y', 'important');
-                messages.style.setProperty('overscroll-behavior', 'contain', 'important');
-                messages.style.setProperty('scroll-behavior', 'auto', 'important');
-                messages.style.setProperty('overflow-anchor', 'none', 'important');
-            }
-            if (form) {
-                form.style.setProperty('display', 'flex', 'important');
-                form.style.setProperty('visibility', 'visible', 'important');
-                form.style.setProperty('position', 'relative', 'important');
-                form.style.setProperty('flex', '0 0 auto', 'important');
-                form.style.setProperty('z-index', '4', 'important');
-            }
-        }
+        move(pinned, right);
+        move(messages, right);
+        move(edit, right);
+        move(reply, right);
+        move(emoji, right);
+        move(rec, right);
+        move(form, right);
         move(menu, document.body);
         move(lightbox, document.body);
-        if (window.LifeOSFamilyRemote && typeof window.LifeOSFamilyRemote.refreshLayout === 'function') {
-            try { window.LifeOSFamilyRemote.refreshLayout({ pinBottom: false }); } catch (e) { }
-        }
+        if (window.LifeOSFamilyRemote && typeof window.LifeOSFamilyRemote.mount === 'function') window.LifeOSFamilyRemote.mount();
     }
     function updateMusicPreview() {
         const right = document.getElementById('l64f-music-right');
@@ -19689,6 +19630,9 @@ function isMini() {
                 mh.allChannels = channels;
                 mh.tvData = channels.filter(c => c.type === 'tv');
                 mh.radioData = channels.filter(c => c.type === 'radio');
+                mh.tvData.forEach((c, i) => { c.__lifeosActualIndex = i; });
+                mh.radioData.forEach((c, i) => { c.__lifeosActualIndex = i; });
+                mh._channelsVersion = (mh._channelsVersion || 0) + 1;
                 (_a = mh.renderGroupMenus) === null || _a === void 0 ? void 0 : _a.call(mh);
                 (_b = mh.renderLists) === null || _b === void 0 ? void 0 : _b.call(mh);
                 updateMediaTabState();
@@ -19769,7 +19713,7 @@ function isMini() {
     }
     function refreshMedia() {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c;
+            var _a, _b, _c, _d, _e, _f, _g, _h;
             if (!document.body.classList.contains('lifeos-landscape-mini-pc'))
                 return;
             if (!((_b = (_a = window.LifeOSRootRouter) === null || _a === void 0 ? void 0 : _a.isMediaWorkspaceActive) === null || _b === void 0 ? void 0 : _b.call(_a)))
@@ -19777,29 +19721,19 @@ function isMini() {
             const mh = window.MediaHub;
             if (!mh)
                 return;
-            if (!(mh.allChannels && mh.allChannels.length) && mh.currentTab !== 'youtube')
+            if (!((_c = mh.allChannels) === null || _c === void 0 ? void 0 : _c.length))
                 yield mh.init(false, { targetTab: mh.currentTab || 'music', silent: true });
-            const tab = mh.currentTab || 'music';
-            const container = tab === 'music'
-                ? document.getElementById('mp3-list-container')
-                : (tab === 'radio'
-                    ? document.getElementById('radio-list-container')
-                    : (tab === 'tv'
-                        ? document.getElementById('tv-list-container')
-                        : document.getElementById('youtube-list-container')));
-            const selector = tab === 'music' ? '.song-row' : (tab === 'youtube' ? '.youtube-media-item' : '.media-item');
-            const hasRows = !!(container && container.querySelector(selector));
-            if (!hasRows) {
-                if (tab === 'music') {
-                    try {
-                        (_c = window.MusicApp) === null || _c === void 0 ? void 0 : _c.renderList();
-                    } catch (e) { }
-                } else {
-                    try { if (typeof mh.renderGroupMenus === 'function') mh.renderGroupMenus(); } catch (e) { }
-                    try { if (typeof mh.renderLists === 'function') mh.renderLists(); } catch (e) { }
+            if (mh.currentTab === 'music') {
+                try {
+                    (_e = (_d = window.MusicApp) === null || _d === void 0 ? void 0 : _d.renderList) === null || _e === void 0 ? void 0 : _e.call(_d);
                 }
+                catch (e) { }
             }
-            try { if (typeof mh.applyTabLayout === 'function') mh.applyTabLayout(); } catch (e) { }
+            else {
+                (_f = mh.renderGroupMenus) === null || _f === void 0 ? void 0 : _f.call(mh);
+                (_g = mh.renderLists) === null || _g === void 0 ? void 0 : _g.call(mh);
+            }
+            (_h = mh.applyTabLayout) === null || _h === void 0 ? void 0 : _h.call(mh);
         });
     }
     function mapAll() {
@@ -19851,15 +19785,14 @@ function isMini() {
             }
             catch (e) { }
             requestAnimationFrame(function () {
+                if (window.LifeOSFamilyRemote && typeof window.LifeOSFamilyRemote.enter === 'function') {
+                    window.LifeOSFamilyRemote.enter({ pinBottom: true });
+                    return;
+                }
                 const messages = document.getElementById('chat-messages');
                 const form = document.getElementById('chat-form');
-                if (form)
-                    form.style.setProperty('visibility', 'visible', 'important');
-                if (window.LifeOSFamilyRemote && typeof window.LifeOSFamilyRemote.enter === 'function') {
-                    window.LifeOSFamilyRemote.enter({ pinBottom: true, source: 'activate-chat' });
-                } else if (messages) {
-                    messages.scrollTop = Math.max(0, messages.scrollHeight - messages.clientHeight);
-                }
+                if (messages) messages.scrollTop = Math.max(0, messages.scrollHeight - messages.clientHeight);
+                if (form) form.style.setProperty('visibility', 'visible', 'important');
             });
         }
         if (mode === 'focus') {
@@ -19887,6 +19820,7 @@ function isMini() {
             activate(document.body.dataset.lifeosLandscapeRootMode || getMode());
         }
         else {
+            if (window.LifeOSFamilyRemote && typeof window.LifeOSFamilyRemote.release === 'function') window.LifeOSFamilyRemote.release();
             restoreAll();
             lastGeometryKey = '';
             delete document.body.dataset.lifeosLandscapeMapped;
@@ -20151,7 +20085,7 @@ function isMini() {
         document.addEventListener('keydown', function (e) {
             if (!document.body.classList.contains('lifeos-landscape-mini-pc')) return;
             const key = normalizeTvRemoteKey(e);
-            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'PageUp', 'PageDown', 'Home', 'End', 'BrowserBack', 'Escape', 'Backspace'].indexOf(key) < 0) return;
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'BrowserBack', 'Escape', 'Backspace'].indexOf(key) < 0) return;
             const dock = document.getElementById('desktop-workspace-dock');
             const root = document.getElementById('lifeos-landscape-root');
             const active = document.activeElement;
@@ -20269,7 +20203,11 @@ function isMini() {
                 scheduleRuns++;
                 apply();
                 if (on) {
-                    setTimeout(refreshMedia, 180);
+                    setTimeout(refreshMedia, 260);
+                    if (scheduleRuns === 1) {
+                        setTimeout(refreshMedia, 950);
+                        setTimeout(refreshMedia, 2200);
+                    }
                 }
             });
         }, 55);
@@ -20613,164 +20551,339 @@ body.lifeos-landscape-mini-pc #l64f-mp3-help {
 })();
 </script>
 <style id="lifeos-pha64f3-family-chat-landscape-fix-style">
-/* R15 Smartbox Family: fixed 3-region layout.
-   Composer always remains visible; only #chat-messages owns message scrolling. */
+/* Family Mini-PC owner: old-WebView-safe fixed composer + one native message scroller. */
 body.lifeos-landscape-mini-pc #l64f-chat-card {
-  height: 100% !important;
-  min-height: 0 !important;
-  max-height: 100% !important;
+  grid-template-columns: minmax(210px, 27%) minmax(0, 73%) !important;
+  gap: 7px !important;
+  padding: 6px !important;
   overflow: hidden !important;
-  grid-template-columns: minmax(190px, 27%) minmax(0, 73%) !important;
 }
-body.lifeos-landscape-mini-pc #l64f-chat-right {
-  position: relative !important;
+body.lifeos-landscape-mini-pc #l64f-chat-left {
   display: grid !important;
-  grid-template-rows: auto minmax(0, 1fr) auto !important;
-  height: 100% !important;
+  grid-template-rows: 54px minmax(0, 1fr) !important;
+  gap: 6px !important;
   min-height: 0 !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #l64f-chat-left > .bg-gradient-to-r {
+  height: 54px !important;
+  min-height: 54px !important;
+  max-height: 54px !important;
+  padding: 7px 8px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(226,232,240,.9) !important;
+  background: rgba(255,255,255,.88) !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #l64f-chat-left > .bg-gradient-to-r .w-11 {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 13px !important;
+}
+body.lifeos-landscape-mini-pc #l64f-chat-left h2 {
+  font-size: 13px !important;
+  line-height: 1.05 !important;
+  max-width: 128px !important;
+}
+body.lifeos-landscape-mini-pc #chat-status {
+  font-size: 9.5px !important;
+  line-height: 1.05 !important;
+  max-width: 132px !important;
+}
+body.lifeos-landscape-mini-pc #l64f-chat-left > .bg-gradient-to-r button {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 12px !important;
+}
+body.lifeos-landscape-mini-pc #chat-folder-tabs {
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 6px !important;
+  gap: 5px !important;
+  border-radius: 16px !important;
+}
+body.lifeos-landscape-mini-pc #chat-folder-tabs button,
+body.lifeos-landscape-mini-pc #chat-dynamic-folders button {
+  width: 100% !important;
+  min-height: 30px !important;
+  height: auto !important;
+  justify-content: flex-start !important;
+  padding: 6px 8px !important;
+  border-radius: 11px !important;
+  font-size: 10.5px !important;
+  line-height: 1.1 !important;
+  white-space: normal !important;
+}
+body.lifeos-landscape-mini-pc #chat-dynamic-folders {
+  width: 100% !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+/* Absolute geometry is deliberate: WebView 66 is unreliable with a moved flex/grid scroller. */
+body.lifeos-landscape-mini-pc #l64f-chat-right {
+  display: block !important;
+  position: relative !important;
+  min-height: 0 !important;
+  height: 100% !important;
   max-height: 100% !important;
   overflow: hidden !important;
-  gap: 4px !important;
-}
-body.lifeos-landscape-mini-pc #lifeos-family-top-stack {
-  min-height: 0 !important;
-  max-height: 72px !important;
-  overflow: hidden !important;
-}
-body.lifeos-landscape-mini-pc #lifeos-family-scroll-host {
-  min-height: 0 !important;
-  height: 100% !important;
-  overflow: hidden !important;
+  overscroll-behavior: contain !important;
+  background: rgba(248,250,252,.70) !important;
+  border-radius: 16px !important;
+  outline: none !important;
 }
 body.lifeos-landscape-mini-pc #chat-messages {
   display: block !important;
-  width: 100% !important;
-  height: 100% !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 54px !important;
+  width: auto !important;
+  height: auto !important;
   min-height: 0 !important;
-  max-height: 100% !important;
+  max-height: none !important;
   overflow-y: scroll !important;
   overflow-x: hidden !important;
   overscroll-behavior: contain !important;
   touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
   scroll-behavior: auto !important;
   overflow-anchor: none !important;
+  padding: 8px 10px !important;
+  border-radius: 16px !important;
+  background: rgba(248,250,252,.88) !important;
+  border: 1px solid rgba(226,232,240,.9) !important;
   outline: none !important;
-  scrollbar-gutter: stable !important;
+  box-sizing: border-box !important;
 }
-body.lifeos-landscape-mini-pc #lifeos-family-compose-stack {
-  display: flex !important;
-  flex-direction: column !important;
-  flex: 0 0 auto !important;
+body.lifeos-landscape-mini-pc #chat-pinned-banner {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  z-index: 35 !important;
+  margin: 0 !important;
   min-height: 0 !important;
-  max-height: 46% !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  gap: 4px !important;
-  padding: 0 !important;
-  background: rgba(255,255,255,.96) !important;
-  z-index: 5 !important;
+  max-height: 42px !important;
+  padding: 6px 10px !important;
+  border-radius: 13px !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #chat-pinned-banner:not(.hidden) ~ #chat-messages {
+  top: 44px !important;
 }
 body.lifeos-landscape-mini-pc #chat-form {
   display: flex !important;
-  visibility: visible !important;
-  position: relative !important;
-  bottom: auto !important;
-  flex: 0 0 48px !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 40 !important;
+  width: auto !important;
   height: 48px !important;
   min-height: 48px !important;
   max-height: 48px !important;
-  width: 100% !important;
-  z-index: 6 !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.98) !important;
+  border: 1px solid rgba(226,232,240,.95) !important;
+  box-shadow: 0 -8px 22px rgba(15,23,42,.08) !important;
+  align-items: center !important;
+  gap: 5px !important;
+  box-sizing: border-box !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+body.lifeos-landscape-mini-pc #chat-edit-banner,
+body.lifeos-landscape-mini-pc #chat-reply-banner,
+body.lifeos-landscape-mini-pc #chat-recording-banner {
+  position: absolute !important;
+  left: 6px !important;
+  right: 6px !important;
+  bottom: 52px !important;
+  z-index: 38 !important;
+  margin: 0 !important;
+  max-height: 42px !important;
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #chat-form button {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border-radius: 13px !important;
+  padding: 0 !important;
+}
+body.lifeos-landscape-mini-pc #chat-private-toggle {
+  width: 34px !important;
+  min-width: 34px !important;
+}
+body.lifeos-landscape-mini-pc #chat-input {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  max-height: 38px !important;
+  padding: 8px 10px !important;
+  border-radius: 13px !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+body.lifeos-landscape-mini-pc #chat-messages .chat-file-card {
+  min-width: 210px !important;
+  max-width: min(330px, 48vw) !important;
+  padding: 8px !important;
+  border-radius: 14px !important;
+}
+body.lifeos-landscape-mini-pc #chat-messages [class*="max-w-"] {
+  max-width: min(520px, 76%) !important;
+}
+body.lifeos-landscape-mini-pc #chat-messages .text-sm {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+body.lifeos-landscape-mini-pc #chat-messages .p-4 { padding: 10px !important; }
+body.lifeos-landscape-mini-pc #chat-messages .rounded-2xl,
+body.lifeos-landscape-mini-pc #chat-messages .rounded-3xl { border-radius: 16px !important; }
+body.lifeos-landscape-mini-pc #chat-emoji-container {
+  position: fixed !important;
+  right: 16px !important;
+  bottom: 62px !important;
+  z-index: 9999999 !important;
+  max-height: 45dvh !important;
+  overflow-y: auto !important;
+}
+body.lifeos-landscape-mini-pc #chat-msg-menu,
+body.lifeos-landscape-mini-pc #chat-lightbox,
+body.lifeos-landscape-mini-pc #family-upload-error-modal {
+  position: fixed !important;
+  z-index: 99999999 !important;
+}
+body.lifeos-landscape-mini-pc #family-upload-error-modal > div {
+  max-height: 88dvh !important;
+  width: min(720px, 94vw) !important;
+}
+body.lifeos-landscape-mini-pc #family-upload-error-text {
+  max-height: 50dvh !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
 }
 body.lifeos-landscape-mini-pc #chat-messages [data-chat-msg-id].lifeos-family-remote-selected {
   outline: 3px solid #4f46e5 !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px rgba(79,70,229,.16) !important;
+  box-shadow: 0 0 0 5px rgba(79,70,229,.18) !important;
 }
 body.lifeos-landscape-mini-pc .lifeos-family-remote-action {
   outline: 3px solid #16a34a !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px rgba(22,163,74,.16) !important;
-}
-body.lifeos-landscape-mini-pc #chat-input[data-lifeos-family-virtual-selected="1"] {
-  outline: 3px solid #16a34a !important;
-  outline-offset: 1px !important;
+  box-shadow: 0 0 0 5px rgba(22,163,74,.18) !important;
 }
 @media (max-height:430px) {
   body.lifeos-landscape-mini-pc #l64f-chat-card {
-    grid-template-columns: minmax(145px, 23%) minmax(0, 77%) !important;
+    grid-template-columns: minmax(185px, 25%) minmax(0, 75%) !important;
+    gap: 5px !important;
   }
-  body.lifeos-landscape-mini-pc #lifeos-family-top-stack {
+  body.lifeos-landscape-mini-pc #l64f-chat-left { grid-template-rows: 48px minmax(0, 1fr) !important; }
+  body.lifeos-landscape-mini-pc #l64f-chat-left > .bg-gradient-to-r {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+  }
+  body.lifeos-landscape-mini-pc #chat-messages { bottom: 50px !important; }
+  body.lifeos-landscape-mini-pc #chat-form {
+    height: 44px !important;
+    min-height: 44px !important;
     max-height: 44px !important;
   }
-  body.lifeos-landscape-mini-pc #lifeos-family-compose-stack {
-    max-height: 52% !important;
-    gap: 3px !important;
+  body.lifeos-landscape-mini-pc #chat-form button {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
   }
-  body.lifeos-landscape-mini-pc #chat-form {
-    flex-basis: 42px !important;
-    height: 42px !important;
-    min-height: 42px !important;
-    max-height: 42px !important;
+  body.lifeos-landscape-mini-pc #chat-input {
+    min-height: 34px !important;
+    height: 34px !important;
+    max-height: 34px !important;
   }
 }
 </style>
 <script id="lifeos-pha64f3-family-chat-landscape-fix-js">(function () {
+    'use strict';
     const state = {
         zone: 'cards',
         cardIndex: -1,
         actionIndex: 0,
         composerIndex: 0,
         folderIndex: 0,
-        marked: [],
-        manualScroll: false,
-        pinBottom: false,
-        pinSettleTimer: 0,
-        scrollSyncTimer: 0,
-        observer: null,
-        observedMessages: null,
-        wheelPanel: null
+        manualScrolled: false,
+        mountedRight: null,
+        mountedBox: null,
+        preparedRoot: null,
+        preparedNodes: [],
+        cardCache: [],
+        marked: []
     };
     function active() {
-        return !!(document.body &&
-            document.body.classList.contains('lifeos-landscape-mini-pc') &&
-            document.body.dataset.lifeosLandscapeRootMode === 'chat');
+        return !!(document.body && document.body.classList.contains('lifeos-landscape-mini-pc') && document.body.dataset.lifeosLandscapeRootMode === 'chat');
     }
     function visible(el) {
         if (!el || el.hidden || el.disabled) return false;
-        if (el.offsetWidth <= 0 || el.offsetHeight <= 0) return false;
         const cs = getComputedStyle(el);
-        return cs.display !== 'none' && cs.visibility !== 'hidden' && cs.pointerEvents !== 'none';
+        if (cs.display === 'none' || cs.visibility === 'hidden' || cs.pointerEvents === 'none') return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+    }
+    function rightPanel() { return document.getElementById('l64f-chat-right'); }
+    function messagesBox() { return document.getElementById('chat-messages'); }
+    function inputBox() { return document.getElementById('chat-input'); }
+    function rebuildCardCache() {
+        const box = messagesBox();
+        if (!box) { state.cardCache = []; return state.cardCache; }
+        state.cardCache = Array.prototype.filter.call(box.querySelectorAll('[data-chat-msg-id]'), function (el) {
+            if (!el || el.hidden) return false;
+            const cs = getComputedStyle(el);
+            return cs.display !== 'none' && cs.visibility !== 'hidden';
+        });
+        return state.cardCache;
     }
     function cards() {
-        const messages = document.getElementById('chat-messages');
-        if (!messages) return [];
-        return Array.prototype.filter.call(messages.querySelectorAll('[data-chat-msg-id]'), visible);
+        const box = messagesBox();
+        if (!box) return [];
+        if (!state.cardCache.length || !state.cardCache[0].isConnected || !box.contains(state.cardCache[0])) return rebuildCardCache();
+        return state.cardCache;
     }
-    function actions(card) {
-        if (!card) return [];
-        return Array.prototype.filter.call(card.querySelectorAll('button:not([disabled]),a[href],[role="button"]'), visible);
+    function cardActions(card) {
+        return card ? Array.prototype.filter.call(card.querySelectorAll('button:not([disabled]),a[href],[role="button"]'), visible) : [];
     }
     function composerItems() {
         const form = document.getElementById('chat-form');
         if (!form) return [];
-        const out = [];
-        Array.prototype.forEach.call(form.querySelectorAll('button:not([disabled]),#chat-input,[role="button"]'), function (el) {
-            if (visible(el) && out.indexOf(el) < 0) out.push(el);
-        });
-        return out;
+        const ordered = [
+            document.querySelector('#chat-form button[aria-label="Đính kèm"]'),
+            document.querySelector('#chat-form button[aria-label="Emoji"]'),
+            document.getElementById('chat-mic-btn'),
+            inputBox(),
+            document.getElementById('chat-private-toggle'),
+            document.getElementById('chat-send-btn')
+        ];
+        return ordered.filter(visible);
     }
-    function folderButtons() {
-        const panel = document.getElementById('l64f-chat-left');
-        if (!panel) return [];
-        return Array.prototype.filter.call(panel.querySelectorAll('#chat-folder-tabs button,#chat-dynamic-folders button'), visible);
+    function folderItems() {
+        const left = document.getElementById('l64f-chat-left');
+        return left ? Array.prototype.filter.call(left.querySelectorAll('#chat-folder-tabs button,#chat-dynamic-folders button'), visible) : [];
     }
     function clearMarks() {
-        state.marked.forEach(function (el) {
+        (state.marked || []).forEach(function (el) {
             if (!el) return;
             el.classList.remove('lifeos-family-remote-selected', 'lifeos-family-remote-action');
             el.removeAttribute('data-lifeos-family-remote');
-            el.removeAttribute('data-lifeos-family-virtual-selected');
         });
         state.marked = [];
     }
@@ -20778,81 +20891,189 @@ body.lifeos-landscape-mini-pc #chat-input[data-lifeos-family-virtual-selected="1
         if (!el) return;
         el.classList.add(cls);
         el.setAttribute('data-lifeos-family-remote', kind);
-        if (el.id === 'chat-input') el.setAttribute('data-lifeos-family-virtual-selected', '1');
         state.marked.push(el);
     }
-    function messagesBox() {
-        return document.getElementById('chat-messages');
+    function saveTabIndex(el) {
+        if (!el || el.hasAttribute('data-lifeos-family-old-tabindex')) return;
+        el.setAttribute('data-lifeos-family-old-tabindex', el.hasAttribute('tabindex') ? el.getAttribute('tabindex') : '__none__');
     }
-    function maxScroll(messages) {
-        return Math.max(0, (messages.scrollHeight || 0) - (messages.clientHeight || 0));
-    }
-    function setScroll(messages, value) {
-        if (!messages) return;
-        const next = Math.max(0, Math.min(Number(value) || 0, maxScroll(messages)));
-        if (Math.abs((messages.scrollTop || 0) - next) > 0.5) messages.scrollTop = next;
-    }
-    function pinToBottom() {
-        const messages = messagesBox();
-        if (!messages) return false;
-        setScroll(messages, maxScroll(messages));
+    function prepareVirtualFocus(force) {
+        const root = document.getElementById('l64f-panel-chat');
+        const right = rightPanel();
+        const box = messagesBox();
+        if (!root || !right || !box) return false;
+        if (!force && state.preparedRoot === root && state.preparedNodes.length) return true;
+        saveTabIndex(right);
+        right.setAttribute('tabindex', '0');
+        const nodes = root.querySelectorAll('[data-chat-msg-id],button,a,textarea,input');
+        const prepared = [];
+        Array.prototype.forEach.call(nodes, function (el) {
+            if (!el || el === right) return;
+            saveTabIndex(el);
+            el.setAttribute('tabindex', '-1');
+            prepared.push(el);
+        });
+        state.preparedRoot = root;
+        state.preparedNodes = prepared;
         return true;
     }
-    function stopPinForUser() {
-        state.manualScroll = true;
-        state.pinBottom = false;
-        if (state.pinSettleTimer) {
-            clearTimeout(state.pinSettleTimer);
-            state.pinSettleTimer = 0;
-        }
-    }
-    function settleInitialPin() {
-        if (state.pinSettleTimer) clearTimeout(state.pinSettleTimer);
-        state.pinSettleTimer = setTimeout(function () {
-            state.pinSettleTimer = 0;
-            if (!state.manualScroll && cards().length) state.pinBottom = false;
-        }, 650);
-    }
-    function beginInitialPin() {
-        state.manualScroll = false;
-        state.pinBottom = true;
-        pinToBottom();
-        requestAnimationFrame(function () {
-            pinToBottom();
-            requestAnimationFrame(pinToBottom);
+    function releaseVirtualFocus() {
+        const nodes = state.preparedNodes.concat(state.preparedRoot ? [rightPanel()] : []);
+        nodes.forEach(function (el) {
+            if (!el || !el.hasAttribute || !el.hasAttribute('data-lifeos-family-old-tabindex')) return;
+            const old = el.getAttribute('data-lifeos-family-old-tabindex');
+            el.removeAttribute('data-lifeos-family-old-tabindex');
+            if (old === '__none__') el.removeAttribute('tabindex');
+            else el.setAttribute('tabindex', old);
         });
-        setTimeout(pinToBottom, 90);
-        setTimeout(function () {
-            pinToBottom();
-            settleInitialPin();
-        }, 240);
+        state.preparedRoot = null;
+        state.preparedNodes = [];
+        clearMarks();
+    }
+    function focusSurface() {
+        const right = rightPanel();
+        if (!right) return false;
+        try { right.focus({ preventScroll: true }); } catch (e) { try { right.focus(); } catch (_) { } }
+        document.body.dataset.lifeosRemoteZone = 'panel';
+        return true;
+    }
+    function maxScroll(box) { return Math.max(0, (box.scrollHeight || 0) - (box.clientHeight || 0)); }
+    function updateScrollOwnership(box) {
+        if (!box) return;
+        const distance = maxScroll(box) - (box.scrollTop || 0);
+        box.dataset.lifeosFamilyUserScrolled = distance > 44 ? '1' : '0';
+    }
+    function normalizeWheel(event, box) {
+        let delta = Number(event.deltaY || 0);
+        if (!delta) return 0;
+        if (event.deltaMode === 1) delta *= 40;
+        else if (event.deltaMode === 2) delta *= Math.max(120, (box.clientHeight || 300) * 0.8);
+        if (Math.abs(delta) < 24) delta *= 4;
+        const cap = Math.max(110, Math.min(240, (box.clientHeight || 400) * 0.46));
+        return Math.max(-cap, Math.min(cap, delta));
+    }
+    function onWheel(event) {
+        if (!active()) return;
+        const box = messagesBox();
+        if (!box || box.scrollHeight <= box.clientHeight + 1) return;
+        const delta = normalizeWheel(event, box);
+        if (!delta) return;
+        const before = box.scrollTop || 0;
+        box.scrollTop = Math.max(0, Math.min(maxScroll(box), before + delta));
+        if (Math.abs((box.scrollTop || 0) - before) > 0.5) {
+            state.manualScrolled = true;
+            state.zone = 'cards';
+            updateScrollOwnership(box);
+        }
+        if (event.cancelable) event.preventDefault();
+        if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+        event.stopPropagation();
+    }
+    function mount(forcePrepare) {
+        const right = rightPanel();
+        const box = messagesBox();
+        const form = document.getElementById('chat-form');
+        if (!right || !box || !form) return false;
+        if (state.mountedRight !== right || state.mountedBox !== box) {
+            if (state.mountedRight && state.mountedRight.__lifeosFamilyWheelHandler) {
+                try { state.mountedRight.removeEventListener('wheel', state.mountedRight.__lifeosFamilyWheelHandler, true); } catch (e) { }
+            }
+            right.__lifeosFamilyWheelHandler = onWheel;
+            right.addEventListener('wheel', onWheel, { passive: false, capture: true });
+            state.mountedRight = right;
+            state.mountedBox = box;
+            rebuildCardCache();
+            forcePrepare = true;
+        }
+        if (!right.dataset.lifeosFamilyGeometryReady) {
+            right.dataset.lifeosFamilyGeometryReady = '1';
+            right.style.setProperty('position', 'relative', 'important');
+            right.style.setProperty('height', '100%', 'important');
+            right.style.setProperty('min-height', '0', 'important');
+            right.style.setProperty('overflow', 'hidden', 'important');
+            box.style.setProperty('overflow-y', 'scroll', 'important');
+            box.style.setProperty('overflow-x', 'hidden', 'important');
+            box.style.setProperty('scroll-behavior', 'auto', 'important');
+            box.style.setProperty('touch-action', 'pan-y', 'important');
+            form.style.setProperty('visibility', 'visible', 'important');
+            form.style.setProperty('pointer-events', 'auto', 'important');
+        }
+        prepareVirtualFocus(!!forcePrepare);
+        if (!box.__lifeosFamilyScrollBound) {
+            box.__lifeosFamilyScrollBound = true;
+            box.addEventListener('scroll', function () {
+                if (!active()) return;
+                updateScrollOwnership(box);
+            }, { passive: true });
+            box.addEventListener('touchstart', function () {
+                if (!active()) return;
+                state.manualScrolled = true;
+                state.zone = 'cards';
+            }, { passive: true });
+        }
+        const input = inputBox();
+        if (input && !input.__lifeosFamilyBlurBound) {
+            input.__lifeosFamilyBlurBound = true;
+            input.addEventListener('blur', function () {
+                if (!active()) return;
+                const keepTop = box.scrollTop || 0;
+                requestAnimationFrame(function () {
+                    if (!active()) return;
+                    focusSurface();
+                    box.scrollTop = keepTop;
+                    renderSelection(false);
+                });
+            }, { passive: true });
+        }
+        return true;
     }
     function revealCard(card) {
-        const messages = messagesBox();
-        if (!messages || !card) return;
-        const mr = messages.getBoundingClientRect();
-        const cr = card.getBoundingClientRect();
-        const pad = 8;
-        let delta = 0;
-        if (cr.top < mr.top + pad) delta = cr.top - (mr.top + pad);
-        else if (cr.bottom > mr.bottom - pad) delta = cr.bottom - (mr.bottom - pad);
-        if (Math.abs(delta) > 1) setScroll(messages, (messages.scrollTop || 0) + delta);
+        const box = messagesBox();
+        if (!box || !card) return;
+        try {
+            const br = box.getBoundingClientRect();
+            const cr = card.getBoundingClientRect();
+            const pad = 10;
+            let delta = 0;
+            if (cr.top < br.top + pad) delta = cr.top - (br.top + pad);
+            else if (cr.bottom > br.bottom - pad) delta = cr.bottom - (br.bottom - pad);
+            if (Math.abs(delta) > 1) box.scrollTop = Math.max(0, Math.min(maxScroll(box), (box.scrollTop || 0) + delta));
+            updateScrollOwnership(box);
+        } catch (e) { }
+    }
+    function syncIndexToViewport() {
+        const box = messagesBox();
+        const list = cards();
+        if (!box || !list.length) return;
+        try {
+            const br = box.getBoundingClientRect();
+            const center = br.top + br.height / 2;
+            let best = -1, score = Infinity;
+            for (let i = 0; i < list.length; i++) {
+                const r = list[i].getBoundingClientRect();
+                const overlap = Math.min(r.bottom, br.bottom) - Math.max(r.top, br.top);
+                if (overlap <= 1) continue;
+                const d = Math.abs((r.top + r.bottom) / 2 - center);
+                if (d < score) { score = d; best = i; }
+            }
+            if (best >= 0) state.cardIndex = best;
+        } catch (e) { }
+        state.manualScrolled = false;
     }
     function renderSelection(reveal) {
         clearMarks();
         const list = cards();
         if (list.length) {
-            state.cardIndex = Math.max(0, Math.min(state.cardIndex < 0 ? list.length - 1 : state.cardIndex, list.length - 1));
+            if (state.cardIndex < 0) state.cardIndex = list.length - 1;
+            state.cardIndex = Math.max(0, Math.min(state.cardIndex, list.length - 1));
             const card = list[state.cardIndex];
             mark(card, 'lifeos-family-remote-selected', 'card');
             if (state.zone === 'actions') {
-                const btns = actions(card);
+                const btns = cardActions(card);
                 if (btns.length) {
                     state.actionIndex = Math.max(0, Math.min(state.actionIndex, btns.length - 1));
                     mark(btns[state.actionIndex], 'lifeos-family-remote-action', 'action');
-                } else {
-                    state.zone = 'cards';
-                }
+                } else state.zone = 'cards';
             }
             if (reveal) revealCard(card);
         }
@@ -20864,354 +21085,137 @@ body.lifeos-landscape-mini-pc #chat-input[data-lifeos-family-virtual-selected="1
             } else state.zone = 'cards';
         }
         if (state.zone === 'folders') {
-            const btns = folderButtons();
-            if (btns.length) {
-                state.folderIndex = Math.max(0, Math.min(state.folderIndex, btns.length - 1));
-                mark(btns[state.folderIndex], 'lifeos-family-remote-action', 'folder');
+            const items = folderItems();
+            if (items.length) {
+                state.folderIndex = Math.max(0, Math.min(state.folderIndex, items.length - 1));
+                mark(items[state.folderIndex], 'lifeos-family-remote-action', 'folder');
             } else state.zone = 'cards';
         }
-        document.body.dataset.lifeosRemoteZone = 'panel';
-    }
-    function syncIndexToViewport(render) {
-        const messages = messagesBox();
-        const list = cards();
-        if (!messages || !list.length) return false;
-        const mr = messages.getBoundingClientRect();
-        const x = Math.max(mr.left + 4, Math.min(mr.right - 4, mr.left + mr.width * 0.6));
-        const y = Math.max(mr.top + 4, Math.min(mr.bottom - 4, mr.top + mr.height * 0.5));
-        let hit = null;
-        try {
-            const el = document.elementFromPoint(x, y);
-            hit = el && el.closest ? el.closest('[data-chat-msg-id]') : null;
-        } catch (e) { }
-        let best = hit ? list.indexOf(hit) : -1;
-        if (best < 0) {
-            let bestScore = Infinity;
-            list.forEach(function (card, index) {
-                const r = card.getBoundingClientRect();
-                const overlap = Math.min(r.bottom, mr.bottom) - Math.max(r.top, mr.top);
-                if (overlap <= 1) return;
-                const score = Math.abs((r.top + r.bottom) * 0.5 - y);
-                if (score < bestScore) { bestScore = score; best = index; }
-            });
-        }
-        if (best >= 0) {
-            state.cardIndex = best;
-            state.zone = 'cards';
-            state.actionIndex = 0;
-            if (render) renderSelection(false);
-            return true;
-        }
-        return false;
-    }
-    function scheduleViewportSync() {
-        if (state.scrollSyncTimer) clearTimeout(state.scrollSyncTimer);
-        state.scrollSyncTimer = setTimeout(function () {
-            state.scrollSyncTimer = 0;
-            syncIndexToViewport(true);
-        }, 90);
-    }
-    function normalizeWheel(event, messages) {
-        let delta = Number(event.deltaY || 0);
-        if (event.deltaMode === 1) delta *= 34;
-        else if (event.deltaMode === 2) delta *= Math.max(120, messages.clientHeight * 0.78);
-        if (!delta) return 0;
-        const minStep = 52;
-        const maxStep = Math.max(140, messages.clientHeight * 0.72);
-        return Math.sign(delta) * Math.min(maxStep, Math.max(minStep, Math.abs(delta)));
-    }
-    function bindWheel(panel) {
-        if (!panel || panel === state.wheelPanel) return;
-        state.wheelPanel = panel;
-        panel.addEventListener('wheel', function (event) {
-            if (!active()) return;
-            const target = event.target;
-            if (target && target.closest && target.closest('#chat-folder-tabs,#chat-dynamic-folders')) return;
-            const messages = messagesBox();
-            if (!messages || maxScroll(messages) <= 0) return;
-            const delta = normalizeWheel(event, messages);
-            if (!delta) return;
-            const before = messages.scrollTop || 0;
-            stopPinForUser();
-            setScroll(messages, before + delta);
-            if (Math.abs((messages.scrollTop || 0) - before) > 0.5) {
-                scheduleViewportSync();
-                if (event.cancelable) event.preventDefault();
-                if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
-                event.stopPropagation();
-            }
-        }, { passive: false, capture: true });
-    }
-    function prepareCards(messages) {
-        if (!messages) return;
-        Array.prototype.forEach.call(messages.querySelectorAll('[data-chat-msg-id]'), function (card) {
-            card.setAttribute('tabindex', '-1');
-            if (!card.hasAttribute('role')) card.setAttribute('role', 'group');
-        });
-    }
-    function bindMessages(messages) {
-        if (!messages) return;
-        if (!messages.__lifeosFamilyR15ScrollBound) {
-            messages.__lifeosFamilyR15ScrollBound = true;
-            messages.addEventListener('scroll', function () {
-                if (!active()) return;
-                if (!state.pinBottom) {
-                    state.manualScroll = true;
-                    scheduleViewportSync();
-                }
-            }, { passive: true });
-            messages.addEventListener('pointerdown', stopPinForUser, { passive: true });
-            messages.addEventListener('touchstart', stopPinForUser, { passive: true });
-        }
-        if (state.observedMessages !== messages) {
-            if (state.observer) {
-                try { state.observer.disconnect(); } catch (e) { }
-            }
-            state.observedMessages = messages;
-            state.observer = window.MutationObserver ? new MutationObserver(function (records) {
-                let childChanged = false;
-                records.forEach(function (rec) { if (rec.type === 'childList') childChanged = true; });
-                if (!childChanged) return;
-                prepareCards(messages);
-                if (state.pinBottom && !state.manualScroll) {
-                    requestAnimationFrame(function () {
-                        pinToBottom();
-                        settleInitialPin();
-                    });
-                } else {
-                    scheduleViewportSync();
-                }
-            }) : null;
-            if (state.observer) state.observer.observe(messages, { childList: true, subtree: false });
-        }
-    }
-    function ensureStructure() {
-        if (!document.body || !document.body.classList.contains('lifeos-landscape-mini-pc')) return false;
-        const right = document.getElementById('l64f-chat-right');
-        const messages = messagesBox();
-        const form = document.getElementById('chat-form');
-        if (!right || !messages || !form) return false;
-        function ensureRegion(id) {
-            let el = document.getElementById(id);
-            if (!el) {
-                el = document.createElement('div');
-                el.id = id;
-                right.appendChild(el);
-            } else if (el.parentElement !== right) right.appendChild(el);
-            return el;
-        }
-        const top = ensureRegion('lifeos-family-top-stack');
-        const scrollHost = ensureRegion('lifeos-family-scroll-host');
-        const compose = ensureRegion('lifeos-family-compose-stack');
-        const pinned = document.getElementById('chat-pinned-banner');
-        const edit = document.getElementById('chat-edit-banner');
-        const reply = document.getElementById('chat-reply-banner');
-        const emoji = document.getElementById('chat-emoji-container');
-        const rec = document.getElementById('chat-recording-banner');
-        if (pinned && pinned.parentElement !== top) top.appendChild(pinned);
-        if (messages.parentElement !== scrollHost) scrollHost.appendChild(messages);
-        [edit, reply, emoji, rec, form].forEach(function (el) {
-            if (el && el.parentElement !== compose) compose.appendChild(el);
-        });
-        right.style.setProperty('display', 'grid', 'important');
-        right.style.setProperty('grid-template-rows', 'auto minmax(0,1fr) auto', 'important');
-        right.style.setProperty('height', '100%', 'important');
-        right.style.setProperty('min-height', '0', 'important');
-        right.style.setProperty('max-height', '100%', 'important');
-        right.style.setProperty('overflow', 'hidden', 'important');
-        scrollHost.style.setProperty('height', '100%', 'important');
-        scrollHost.style.setProperty('min-height', '0', 'important');
-        scrollHost.style.setProperty('overflow', 'hidden', 'important');
-        messages.style.setProperty('height', '100%', 'important');
-        messages.style.setProperty('min-height', '0', 'important');
-        messages.style.setProperty('max-height', '100%', 'important');
-        messages.style.setProperty('overflow-y', 'scroll', 'important');
-        messages.style.setProperty('overflow-x', 'hidden', 'important');
-        messages.style.setProperty('scroll-behavior', 'auto', 'important');
-        messages.style.setProperty('touch-action', 'pan-y', 'important');
-        messages.style.setProperty('overscroll-behavior', 'contain', 'important');
-        messages.style.setProperty('overflow-anchor', 'none', 'important');
-        messages.removeAttribute('tabindex');
-        form.style.setProperty('display', 'flex', 'important');
-        form.style.setProperty('visibility', 'visible', 'important');
-        form.style.setProperty('flex', '0 0 auto', 'important');
-        const input = document.getElementById('chat-input');
-        if (input) {
-            input.setAttribute('tabindex', '-1');
-            if (!input.__lifeosFamilyR15Bound) {
-                input.__lifeosFamilyR15Bound = true;
-                input.addEventListener('focus', function () {
-                    state.zone = 'composer';
-                    const items = composerItems();
-                    const idx = items.indexOf(input);
-                    if (idx >= 0) state.composerIndex = idx;
-                    renderSelection(false);
-                }, { passive: true });
-                input.addEventListener('blur', function () {
-                    input.setAttribute('tabindex', '-1');
-                    input.removeAttribute('data-lifeos-family-virtual-selected');
-                    document.body.dataset.lifeosRemoteZone = 'panel';
-                    setTimeout(function () {
-                        if (active()) renderSelection(false);
-                    }, 40);
-                }, { passive: true });
-            }
-        }
-        prepareCards(messages);
-        bindMessages(messages);
-        bindWheel(document.getElementById('l64f-panel-chat'));
-        return true;
     }
     function enter(opts) {
-        if (!active()) return false;
-        if (!ensureStructure()) return false;
-        const list = cards();
+        if (!active() || !mount(false)) return false;
+        const box = messagesBox();
+        const input = inputBox();
+        if (input && document.activeElement === input) {
+            try { input.blur(); } catch (e) { }
+        }
         state.zone = 'cards';
-        state.cardIndex = list.length ? list.length - 1 : -1;
         state.actionIndex = 0;
-        state.composerIndex = 0;
-        if (!opts || opts.pinBottom !== false) beginInitialPin();
+        state.manualScrolled = false;
+        const list = cards();
+        state.cardIndex = list.length ? list.length - 1 : -1;
+        if (!opts || opts.pinBottom !== false) {
+            box.dataset.lifeosFamilyUserScrolled = '0';
+            box.scrollTop = maxScroll(box);
+            requestAnimationFrame(function () { if (active()) box.scrollTop = maxScroll(box); });
+        }
+        focusSurface();
         renderSelection(false);
-        document.body.dataset.lifeosRemoteZone = 'panel';
         return true;
     }
-    function activateVirtualItem(item) {
-        if (!item) return;
-        if (item.id === 'chat-input') {
-            try {
-                item.setAttribute('tabindex', '0');
-                item.focus();
-            } catch (e) { }
-            return;
-        }
-        try { item.click(); } catch (e) { }
-    }
-    function consume(event) {
-        if (!event) return;
-        event.preventDefault();
-        if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
-        event.stopPropagation();
+    function afterRender() {
+        if (!active()) return false;
+        rebuildCardCache();
+        mount(true);
+        const list = cards();
+        if (state.cardIndex < 0 && list.length) state.cardIndex = list.length - 1;
+        if (state.cardIndex >= list.length) state.cardIndex = Math.max(0, list.length - 1);
+        renderSelection(false);
+        return true;
     }
     function handleKey(key, event) {
-        if (!active()) return false;
-        const activeEl = document.activeElement;
-        if (activeEl && (activeEl.id === 'chat-input' || activeEl.tagName === 'TEXTAREA' || (activeEl.tagName === 'INPUT' && activeEl.type !== 'button'))) return false;
-        const valid = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter','PageUp','PageDown','Home','End'];
-        if (valid.indexOf(key) < 0) return false;
-        stopPinForUser();
-        const messages = messagesBox();
+        if (!active() || !mount(false)) return false;
+        const input = inputBox();
+        if (input && document.activeElement === input) return false;
+        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter'].indexOf(key) < 0) return false;
         const list = cards();
-        if (key === 'PageUp' || key === 'PageDown') {
-            if (messages) setScroll(messages, (messages.scrollTop || 0) + (key === 'PageDown' ? 1 : -1) * Math.max(120, messages.clientHeight * 0.78));
-            syncIndexToViewport(true);
-            consume(event);
-            return true;
-        }
-        if (key === 'Home') {
-            if (messages) setScroll(messages, 0);
-            state.zone = 'cards'; state.cardIndex = 0; renderSelection(false);
-            consume(event);
-            return true;
-        }
-        if (key === 'End') {
-            pinToBottom();
-            state.zone = 'composer';
-            state.composerIndex = 0;
-            renderSelection(false);
-            consume(event);
-            return true;
-        }
-        if (state.cardIndex < 0 && list.length) {
-            syncIndexToViewport(false);
-            if (state.cardIndex < 0) state.cardIndex = list.length - 1;
-        }
+        if (state.manualScrolled && state.zone === 'cards' && (key === 'ArrowUp' || key === 'ArrowDown')) syncIndexToViewport();
+        if (state.cardIndex < 0 && list.length) state.cardIndex = list.length - 1;
         if (state.zone === 'cards') {
-            if (key === 'ArrowUp' && list.length) {
-                state.cardIndex = Math.max(0, state.cardIndex - 1);
-            } else if (key === 'ArrowDown') {
+            if (key === 'ArrowUp' && list.length) state.cardIndex = Math.max(0, state.cardIndex - 1);
+            else if (key === 'ArrowDown') {
                 if (list.length && state.cardIndex < list.length - 1) state.cardIndex++;
                 else { state.zone = 'composer'; state.composerIndex = 0; }
             } else if (key === 'ArrowRight') {
-                const btns = actions(list[state.cardIndex]);
+                const btns = cardActions(list[state.cardIndex]);
                 if (btns.length) { state.zone = 'actions'; state.actionIndex = 0; }
                 else { state.zone = 'composer'; state.composerIndex = 0; }
             } else if (key === 'ArrowLeft') {
                 state.zone = 'folders'; state.folderIndex = 0;
-            } else if (key === 'Enter') {
-                const btns = actions(list[state.cardIndex]);
-                if (btns.length) { state.zone = 'actions'; state.actionIndex = 0; }
+            } else if (key === 'Enter' && list[state.cardIndex]) {
+                try { list[state.cardIndex].click(); } catch (e) { }
             }
         } else if (state.zone === 'actions') {
-            const btns = actions(list[state.cardIndex]);
+            const btns = cardActions(list[state.cardIndex]);
             if (key === 'ArrowRight') state.actionIndex = Math.min(Math.max(0, btns.length - 1), state.actionIndex + 1);
             else if (key === 'ArrowLeft') {
                 if (state.actionIndex > 0) state.actionIndex--;
                 else { state.zone = 'cards'; state.actionIndex = 0; }
-            } else if (key === 'ArrowUp' && list.length) {
+            } else if (key === 'ArrowUp') {
                 state.zone = 'cards'; state.cardIndex = Math.max(0, state.cardIndex - 1);
             } else if (key === 'ArrowDown') {
-                if (list.length && state.cardIndex < list.length - 1) {
-                    state.zone = 'cards'; state.cardIndex++;
-                } else {
-                    state.zone = 'composer'; state.composerIndex = 0;
-                }
-            } else if (key === 'Enter') {
-                activateVirtualItem(btns[state.actionIndex]);
+                if (state.cardIndex < list.length - 1) { state.zone = 'cards'; state.cardIndex++; }
+                else { state.zone = 'composer'; state.composerIndex = 0; }
+            } else if (key === 'Enter' && btns[state.actionIndex]) {
+                try { btns[state.actionIndex].click(); } catch (e) { }
             }
         } else if (state.zone === 'composer') {
             const items = composerItems();
             if (key === 'ArrowRight') state.composerIndex = Math.min(Math.max(0, items.length - 1), state.composerIndex + 1);
             else if (key === 'ArrowLeft') state.composerIndex = Math.max(0, state.composerIndex - 1);
-            else if (key === 'ArrowUp') {
-                state.zone = 'cards'; state.cardIndex = Math.max(0, list.length - 1);
-            } else if (key === 'Enter') {
-                activateVirtualItem(items[state.composerIndex]);
+            else if (key === 'ArrowUp') { state.zone = 'cards'; state.cardIndex = Math.max(0, list.length - 1); }
+            else if (key === 'Enter' && items[state.composerIndex]) {
+                const target = items[state.composerIndex];
+                if (target === input) {
+                    const keepTop = messagesBox().scrollTop || 0;
+                    try { input.focus({ preventScroll: true }); } catch (e) { try { input.focus(); } catch (_) { } }
+                    messagesBox().scrollTop = keepTop;
+                } else {
+                    try { target.click(); } catch (e) { }
+                }
             }
         } else if (state.zone === 'folders') {
-            const btns = folderButtons();
-            if (key === 'ArrowDown') state.folderIndex = Math.min(Math.max(0, btns.length - 1), state.folderIndex + 1);
+            const items = folderItems();
+            if (key === 'ArrowDown') state.folderIndex = Math.min(Math.max(0, items.length - 1), state.folderIndex + 1);
             else if (key === 'ArrowUp') state.folderIndex = Math.max(0, state.folderIndex - 1);
             else if (key === 'ArrowRight') state.zone = 'cards';
-            else if (key === 'Enter' && btns[state.folderIndex]) {
-                try { btns[state.folderIndex].click(); } catch (e) { }
-                state.zone = 'cards';
-                state.cardIndex = -1;
-                beginInitialPin();
-            }
+            else if (key === 'Enter' && items[state.folderIndex]) { try { items[state.folderIndex].click(); } catch (e) { } }
         }
-        renderSelection(state.zone === 'cards' || state.zone === 'actions');
-        consume(event);
+        renderSelection(true);
+        if (event) {
+            event.preventDefault();
+            if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+            event.stopPropagation();
+        }
         return true;
     }
+    function release() {
+        releaseVirtualFocus();
+        state.zone = 'cards';
+        state.manualScrolled = false;
+        state.cardCache = [];
+    }
     window.LifeOSFamilyRemote = {
-        owner: 'LIFEOS_FAMILY_SMARTBOX_SINGLE_SCROLL_R15',
+        owner: 'LIFEOS_FAMILY_SMARTBOX_SINGLE_SCROLL_OWNER',
+        mount: mount,
         enter: enter,
+        afterRender: afterRender,
         handleKey: handleKey,
-        refresh: function () { ensureStructure(); renderSelection(false); },
-        refreshLayout: function (opts) {
-            const ok = ensureStructure();
-            if (ok && opts && opts.pinBottom) beginInitialPin();
-            return ok;
-        },
-        syncToViewport: function () { return syncIndexToViewport(true); },
-        jumpBottom: function () {
-            stopPinForUser();
-            pinToBottom();
-            state.zone = 'composer';
-            state.composerIndex = 0;
-            renderSelection(false);
-        }
+        release: release,
+        syncToViewport: syncIndexToViewport
     };
     function schedule() {
         requestAnimationFrame(function () {
-            ensureStructure();
-            if (active()) enter({ pinBottom: true });
+            if (active()) mount(false);
+            else if (state.preparedRoot) release();
         });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
     else schedule();
+    window.addEventListener('resize', schedule, { passive: true });
     window.addEventListener('orientationchange', schedule, { passive: true });
-})();</script>
+})();
+</script>
 <style id="lifeos-pha64f4-family-menu-event-fix-style">
 /* PHA 64F.4: family message menu must live outside hidden main and be clickable in Mini-PC. */
 body.lifeos-landscape-mini-pc #chat-msg-menu,
@@ -45324,50 +45328,42 @@ window.LIFEOS_YOUTUBE_TAB4_BUILD = 'R65_YOUTUBE_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_
     };
 
     function youtubeZoneElements() {
-        function fastVisible(el) {
-            return !!(el && !el.hidden && !el.disabled && el.offsetWidth > 0 && el.offsetHeight > 0);
-        }
         return {
-            tabs: Array.prototype.slice.call(d.querySelectorAll('#media-subtabs button')).filter(fastVisible),
+            tabs: Array.prototype.slice.call(d.querySelectorAll('#media-subtabs button')).filter(visible),
             sidebar: [],
-            list: Array.prototype.slice.call(d.querySelectorAll('#youtube-list-container .youtube-media-item')).filter(fastVisible),
-            player: Array.prototype.slice.call(d.querySelectorAll('#youtube-player-controls button')).filter(fastVisible)
+            list: Array.prototype.slice.call(d.querySelectorAll('#youtube-list-container .youtube-media-item')).filter(visible),
+            player: Array.prototype.slice.call(d.querySelectorAll('#youtube-player-controls button')).filter(visible)
         };
     }
 
     function highlightYouTube(hub) {
         var els = youtubeZoneElements();
-        var i, target = null;
+        var all, i, target = null;
         hub.idxTabs = clamp(hub.idxTabs, els.tabs.length);
         hub.idxList = clamp(hub.idxList, els.list.length);
         hub.idxPlayer = clamp(hub.idxPlayer, els.player.length);
-        var old = Array.isArray(api._remoteMarks) ? api._remoteMarks : [];
-        for (i = 0; i < old.length; i++) {
-            if (!old[i]) continue;
-            old[i].classList.remove('tab-focused', 'media-focused', 'player-btn-focused', 'lifeos-remote-selected');
-            old[i].removeAttribute('data-lifeos-remote-selected');
-        }
-        var marks = [];
-        function mark(el, cls) {
-            if (!el) return;
-            el.classList.add(cls);
-            if (marks.indexOf(el) < 0) marks.push(el);
+        all = d.querySelectorAll('#media-subtabs button,#youtube-list-container .youtube-media-item,#youtube-player-controls button');
+        for (i = 0; i < all.length; i++) {
+            all[i].classList.remove('tab-focused');
+            all[i].classList.remove('media-focused');
+            all[i].classList.remove('player-btn-focused');
+            all[i].classList.remove('lifeos-remote-selected');
+            all[i].removeAttribute('data-lifeos-remote-selected');
         }
         if (hub.activeZone === 'player' && els.player.length) {
             target = els.player[hub.idxPlayer];
-            mark(target, 'player-btn-focused');
+            if (target) target.classList.add('player-btn-focused');
         } else if (hub.activeZone === 'list' && els.list.length) {
             target = els.list[hub.idxList];
-            mark(target, 'media-focused');
+            if (target) target.classList.add('media-focused');
         } else {
             hub.activeZone = 'tabs';
             target = els.tabs[hub.idxTabs];
-            mark(target, 'tab-focused');
+            if (target) target.classList.add('tab-focused');
         }
         if (target) {
             target.classList.add('lifeos-remote-selected');
             target.setAttribute('data-lifeos-remote-selected', 'true');
-            if (marks.indexOf(target) < 0) marks.push(target);
             var smartbox = !!(hub && typeof hub.isSmartboxMediaMode === 'function' && hub.isSmartboxMediaMode());
             if (!smartbox) {
                 try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (_) {} }
@@ -45376,7 +45372,6 @@ window.LIFEOS_YOUTUBE_TAB4_BUILD = 'R65_YOUTUBE_TAB4_R7_FRESH_DANHSACH_NO_LOCAL_
             }
             try { if (hub.scrollRemoteTarget) hub.scrollRemoteTarget(target); else if (!smartbox) target.scrollIntoView(false); } catch (e) {}
         }
-        api._remoteMarks = marks;
     }
 
     function applyYouTubeLayout(hub) {
