@@ -1,6 +1,21 @@
 var ytStaticPlaylist = [
     {
         "type": "video",
+        "id": "HC5h46tO52w",
+        "title": "Bỏ ngay thói quen này nếu không muốn mãi là \"nấm lùn\" 🚫🥤 #shorts"
+    },
+    {
+        "type": "video",
+        "id": "1sRMHohYWWw",
+        "title": "Có thứ gì đang xuyên qua cơ thể bạn NGAY LÚC NÀY?! 🤯 #shorts"
+    },
+    {
+        "type": "video",
+        "id": "nall6__hoFc",
+        "title": "Vì sao chim đậu trên dây điện cao thế mà không bị giật? #shorts"
+    },
+    {
+        "type": "video",
         "id": "iDcYQXmBgAk",
         "title": "Sự Thật Bất Ngờ: Tại Sao Chỉ Có Muỗi Cái Mới Hút Máu? 🦟🩸#shorts"
     },
@@ -18,11 +33,6 @@ var ytStaticPlaylist = [
         "type": "video",
         "id": "ySGNsGtGwrg",
         "title": "Chớp mắt Bộ Não Đang \"Lừa\" Bạn 20.000 Lần Mỗi Ngày! 👁️🧠"
-    },
-    {
-        "type": "video",
-        "id": "cN0OcQKGzU8",
-        "title": "Gặp “ma” giữa đường, sợ đến chân không đạp nổi xe XEM CHO VUI #shorts"
     },
     {
         "type": "video",
