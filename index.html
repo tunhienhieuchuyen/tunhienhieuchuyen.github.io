@@ -138,6 +138,15 @@ html,body{background:var(--bg);color:var(--text)}.app-header,.main-nav,.toolbar,
   .weather-day-card{flex:0 0 150px!important;}
   .news-list{grid-template-columns:1fr!important;}
 }
+
+/* R8 Family drag and drop - single upload path */
+.family-work{position:relative}
+.family-drop-overlay{position:absolute;inset:8px;z-index:90;display:none;align-items:center;justify-content:center;pointer-events:none;border:3px dashed var(--primary);border-radius:18px;background:rgba(248,250,252,.96);color:var(--text);padding:18px;text-align:center;box-shadow:0 16px 45px rgba(15,23,42,.18)}
+.family-work.drag-active .family-drop-overlay{display:flex}
+.family-drop-card{max-width:560px;padding:24px 30px;border-radius:17px;background:var(--panel);border:1px solid var(--line);box-shadow:0 8px 24px rgba(15,23,42,.10)}
+.family-drop-icon{font-size:48px;line-height:1;margin-bottom:10px}.family-drop-title{font-size:20px;font-weight:950;color:var(--primary)}.family-drop-note{font-size:12px;font-weight:800;color:var(--muted);margin-top:7px;line-height:1.45}
+.mode-tv .family-drop-overlay{inset:6px}.mode-tv .family-drop-card{max-width:720px;padding:28px 38px}.mode-tv .family-drop-icon{font-size:58px}.mode-tv .family-drop-title{font-size:24px}.mode-tv .family-drop-note{font-size:14px}
+.mode-phone-portrait .family-drop-overlay,.mode-phone-landscape .family-drop-overlay{inset:4px}.mode-phone-portrait .family-drop-card,.mode-phone-landscape .family-drop-card{padding:18px 16px}.mode-phone-portrait .family-drop-title,.mode-phone-landscape .family-drop-title{font-size:16px}
 </style>
 </head>
 <body data-lifeos-build="R5_EXACT_20260725">
@@ -235,6 +244,7 @@ html,body{background:var(--bg);color:var(--text)}.app-header,.main-nav,.toolbar,
               <div id="chat-messages" class="chat-messages"><div class="chat-empty">Đang chờ mở dữ liệu Gia đình…</div></div>
               <form id="chat-form" class="chat-composer"><button id="chat-attach" class="icon-btn" type="button" title="Đính kèm file">📎</button><button id="chat-mic" class="icon-btn" type="button" title="Nhập bằng giọng nói">🎙</button><textarea id="chat-input" class="chat-input" rows="1" placeholder="Nhập tin nhắn…"></textarea><button id="chat-send" class="primary-btn" type="submit">Gửi</button><input id="chat-file-input" type="file" multiple class="hidden"></form>
             </div>
+            <div id="family-drop-overlay" class="family-drop-overlay" aria-hidden="true"><div class="family-drop-card"><div class="family-drop-icon">📥</div><div class="family-drop-title">Thả file vào đây để gửi</div><div id="family-drop-note" class="family-drop-note">Có thể thả nhiều file cùng lúc. File sẽ được gửi vào khu vực Gia đình đang mở.</div></div></div>
           </div>
         </div>
       </section>
@@ -248,7 +258,7 @@ html,body{background:var(--bg);color:var(--text)}.app-header,.main-nav,.toolbar,
 'use strict';
 if(!Promise.allSettled){Promise.allSettled=function(list){return Promise.all(Array.prototype.map.call(list,function(x){return Promise.resolve(x).then(function(value){return{status:'fulfilled',value:value}},function(reason){return{status:'rejected',reason:reason}})}))}}
 if(!String.prototype.padStart){String.prototype.padStart=function(n,p){var s=String(this),fill=String(p===undefined?' ':p);while(s.length<n)s=fill+s;return s.slice(-n)}}
-var VERSION='SMARTBOX_LITE_V3_FB_R7_FAMILY_SEND_FIX_BRAND_20260725';
+var VERSION='SMARTBOX_LITE_V3_FB_R8_FAMILY_DRAG_DROP_20260725';
 var PROFILES={live:{name:'Live',icon:'🟢',pin:''},admin:{name:'Admin',icon:'👑',pin:'admin'},xiem:{name:'Xiêm',icon:'👵',pin:'a'},thanh:{name:'Thành',icon:'👨',pin:'a'},tham:{name:'Thắm',icon:'👩',pin:'a'},phuc:{name:'Phúc',icon:'👦',pin:'a'},my:{name:'My',icon:'👧',pin:'a'}};
 var U={
   q:function(s,r){return (r||document).querySelector(s)},
@@ -440,7 +450,7 @@ var Media={
 window.MediaModule=Media;
 
 var Family={
- active:false,ready:false,loaded:false,merged:[],folders:[],activeFolder:'all',selectedIndex:-1,actionIndex:-1,remoteArea:'messages',composerIndex:0,pollTimer:0,userScrolling:false,nearBottom:true,rendering:false,lastRenderSignature:'',folderSignature:'',dataSignature:'',refreshPromise:null,renderStart:0,renderChunk:140,loadingOlder:false,D1_BASE:'https://lifeos-family-d1-api.tunhienhieuchuyen.workers.dev',RELAY:'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev',CHAT_ID:'-1004299606539',
+ active:false,ready:false,loaded:false,merged:[],folders:[],activeFolder:'all',selectedIndex:-1,actionIndex:-1,remoteArea:'messages',composerIndex:0,pollTimer:0,userScrolling:false,nearBottom:true,rendering:false,lastRenderSignature:'',folderSignature:'',dataSignature:'',refreshPromise:null,renderStart:0,renderChunk:140,loadingOlder:false,dragDepth:0,D1_BASE:'https://lifeos-family-d1-api.tunhienhieuchuyen.workers.dev',RELAY:'https://telegram-upload-relay.tunhienhieuchuyen.workers.dev',CHAT_ID:'-1004299606539',
  init:function(){
   if(this.ready)return;this.ready=true;var self=this;
   U.by('family-refresh').addEventListener('click',function(){self.refresh(true)});
@@ -448,6 +458,19 @@ var Family={
   U.by('chat-form').addEventListener('submit',function(e){e.preventDefault();self.submitText()});
   U.by('chat-attach').addEventListener('click',function(){U.by('chat-file-input').click()});
   U.by('chat-file-input').addEventListener('change',function(){var picked=[],list=this.files||[];for(var i=0;i<list.length;i++)picked.push(list[i]);this.value='';self.uploadFiles(picked)});
+  var familyWork=U.q('#view-family .family-work'),dropOverlay=U.by('family-drop-overlay'),dropNote=U.by('family-drop-note');
+  function fileDrag(e){var dt=e&&e.dataTransfer;if(!dt)return false;var types=dt.types||[];for(var i=0;i<types.length;i++){if(String(types[i]).toLowerCase()==='files')return true}return!!(dt.files&&dt.files.length)}
+  function showDrop(){self.dragDepth=Math.max(1,self.dragDepth);if(familyWork)familyWork.classList.add('drag-active');if(dropOverlay)dropOverlay.setAttribute('aria-hidden','false');if(dropNote)dropNote.textContent=self.activeFolder==='all'?'Có thể thả nhiều file cùng lúc. File sẽ được gửi vào Gia đình.':'Có thể thả nhiều file cùng lúc. File sẽ được gửi vào thư mục đang mở.'}
+  function hideDrop(){self.dragDepth=0;if(familyWork)familyWork.classList.remove('drag-active');if(dropOverlay)dropOverlay.setAttribute('aria-hidden','true')}
+  if(familyWork){
+   familyWork.addEventListener('dragenter',function(e){if(!fileDrag(e))return;e.preventDefault();e.stopPropagation();self.dragDepth++;showDrop()});
+   familyWork.addEventListener('dragover',function(e){if(!fileDrag(e))return;e.preventDefault();e.stopPropagation();try{e.dataTransfer.dropEffect='copy'}catch(x){}showDrop()});
+   familyWork.addEventListener('dragleave',function(e){if(!fileDrag(e))return;e.preventDefault();e.stopPropagation();self.dragDepth=Math.max(0,self.dragDepth-1);if(!self.dragDepth)hideDrop()});
+   familyWork.addEventListener('drop',function(e){if(!fileDrag(e))return;e.preventDefault();e.stopPropagation();var picked=[],list=e.dataTransfer&&e.dataTransfer.files||[];for(var i=0;i<list.length;i++)picked.push(list[i]);hideDrop();if(!picked.length){toast('Không đọc được file kéo thả trên trình duyệt này','warn');return}toast('Đã nhận '+picked.length+' file kéo thả','ok');self.uploadFiles(picked)});
+  }
+  document.addEventListener('dragover',function(e){if(Shell.active==='family'&&fileDrag(e))e.preventDefault()});
+  document.addEventListener('drop',function(e){if(Shell.active!=='family'||!fileDrag(e)||familyWork&&familyWork.contains(e.target))return;e.preventDefault();hideDrop();toast('Hãy thả file vào vùng Gia đình','warn')});
+  window.addEventListener('blur',hideDrop);
   U.by('chat-input').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,98)+'px'});
   U.by('chat-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&!U.isAndroid()){e.preventDefault();self.submitText()}});
   U.by('chat-mic').addEventListener('click',function(){self.startMic()});
@@ -458,7 +481,7 @@ var Family={
   this.loadLocal();this.renderFolders();this.renderMessages(true)
  },
  activate:function(){this.init();this.active=true;this.refresh(false);if(!this.pollTimer){var self=this;this.pollTimer=setInterval(function(){if(self.active&&!Transfer.active&&!self.userScrolling)self.refresh(false,true)},60000)}requestAnimationFrame(this.scrollBottom.bind(this,true))},
- deactivate:function(){this.active=false;if(this.pollTimer){clearInterval(this.pollTimer);this.pollTimer=0}},
+ deactivate:function(){this.active=false;this.dragDepth=0;var fw=U.q('#view-family .family-work'),ov=U.by('family-drop-overlay');if(fw)fw.classList.remove('drag-active');if(ov)ov.setAttribute('aria-hidden','true');if(this.pollTimer){clearInterval(this.pollTimer);this.pollTimer=0}},
  profileChanged:function(){this.refresh(true)},
  profile:function(){return Shell.currentProfile()},
  setSync:function(text,state){var dot=U.q('#family-sync .sync-dot'),label=U.by('family-sync-text');if(label)label.textContent=text||'';if(dot)dot.className='sync-dot '+(state||'')},
