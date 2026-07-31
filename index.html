@@ -226,34 +226,49 @@ html,body{background:var(--bg);color:var(--text)}.app-header,.main-nav,.toolbar,
     </style>
     
 
-    <!-- BẢN VÁ V24: TOÀN CẢNH VIDEO -->
-    <style id="lifeos-v24-full-view">
-        /* Đặc trị riêng cho điện thoại: Nới khung đen cao lên một chút để xem Reel rõ hơn */
-        @media screen and (max-width: 900px) {
-            .player-stage {
-                width: 100% !important;
-                height: 45vh !important; /* Cố định khung đen chiếm khoảng nửa màn hình */
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
-                background: #000 !important;
+    <!-- V25 BACKGROUND PLAY & WAKE LOCK PATCH -->
+    <script id="lifeos-background-play">
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. AudioContext Virtual Loop: Đánh lừa Android để WebView không bị đóng băng khi tắt màn hình
+            let audioCtx = null;
+            function keepAlive() {
+                try {
+                    if (!audioCtx) {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+                    let buffer = audioCtx.createBuffer(1, 1, 22050);
+                    let source = audioCtx.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(audioCtx.destination);
+                    source.start(0);
+                } catch (e) {}
             }
-        }
-        
-        /* Chìa khóa sinh tử: Ép MỌI video phải thu mình vào vừa khít khung đen */
-        .player-stage video, 
-        .player-stage iframe, 
-        .fb-video,
-        .fb-video iframe {
-            width: 100% !important;
-            height: 100% !important; /* Tuyệt đối không cho video cao hơn khung đen */
-            max-width: 100% !important;
-            max-height: 100% !important;
-            object-fit: contain !important; /* Lệnh ép thu nhỏ để hiển thị TOÀN CẢNH 100% */
-            margin: 0 auto !important;
-            display: block !important;
-        }
-    </style>
+            // Kích hoạt xung nhịp mỗi 15 giây
+            setInterval(keepAlive, 15000);
+            document.addEventListener("visibilitychange", function() {
+                if (!document.hidden) { keepAlive(); }
+            });
+
+            // 2. Media Session API: Cho phép điều khiển Play/Pause/Next từ màn hình khóa điện thoại
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.setActionHandler('play', function() {
+                    try { document.querySelector('video, audio')?.play(); } catch(e){}
+                });
+                navigator.mediaSession.setActionHandler('pause', function() {
+                    try { document.querySelector('video, audio')?.pause(); } catch(e){}
+                });
+                navigator.mediaSession.setActionHandler('previoustrack', function() {
+                    try { window.Media && window.Media.move(-1, true); } catch(e){}
+                });
+                navigator.mediaSession.setActionHandler('nexttrack', function() {
+                    try { window.Media && window.Media.move(1, true); } catch(e){}
+                });
+            }
+        });
+    </script>
     
 </head>
 <body data-lifeos-build="V_FINAL_MP4_NATIVE">
