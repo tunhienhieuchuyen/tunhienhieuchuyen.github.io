@@ -1,6 +1,76 @@
 var ytStaticPlaylist = [
     {
         "type": "video",
+        "id": "p7HschsPpN4",
+        "title": "🧠 Giấc Ngủ: \"Nhà Máy Chữa Lành\" Miễn Phí Của Cơ Thể! #Shorts"
+    },
+    {
+        "type": "video",
+        "id": "NRb0Xk2pUrE",
+        "title": "🚨 Sai Lầm Chết Người Khi Sơ Cứu Điện Giật! Xem Ngay #Shorts"
+    },
+    {
+        "type": "video",
+        "id": "Z6SGrD2c6vI",
+        "title": "Uống 1 cốc nước ấm mỗi sáng, cơ thể thay đổi ngỡ ngàng! ☕️💧 #shorts"
+    },
+    {
+        "type": "video",
+        "id": "qF4xt0u_xyE",
+        "title": "99% Mọi Người Đều Bỏ Qua những Thói Quen Nhỏ Này Khi Ăn trong bữa ăn hằng ngày! 🍽️ #shorts"
+    },
+    {
+        "type": "video",
+        "id": "YExX4ntPojQ",
+        "title": "Đừng Thức Khuya Nữa! Cơ Thể Bạn Đang \"Lão Hóa\" Nhanh Chóng Như Thế Nào? #shorts"
+    },
+    {
+        "type": "video",
+        "id": "amPVT8zJqQA",
+        "title": "Top \"thần dược\" tự nhiên giúp da trắng mịn, chống lão hóa cực đỉnh! ✨ #shorts"
+    },
+    {
+        "type": "video",
+        "id": "PZpqcWR7NG8",
+        "title": "Thói Quen Uống Nước Đang Âm Thầm Phá Hỏng Dạ Dày Của Bạn! #shorts"
+    },
+    {
+        "type": "video",
+        "id": "YVjOcjIgf9k",
+        "title": "Sự thật rợn tóc gáy về những \"vết bẩn\" trên mũi mà ít ai biết! 🔍 😱 #shorts"
+    },
+    {
+        "type": "video",
+        "id": "ANVeSp0701k",
+        "title": "Bấm báo thức lần 2 độc hại cỡ nào? Sự thật khoa học về giấc ngủ! ⏰💤 #shorts"
+    },
+    {
+        "type": "video",
+        "id": "i3ZJcxMwOBk",
+        "title": "Đặt bàn chải ở chỗ này là nuôi cả ổ vi khuẩn cực khủng! #shorts"
+    },
+    {
+        "type": "video",
+        "id": "T8EIPJthoVI",
+        "title": "90% người không biết quy tắc truyền máu này! Bạn có thuộc số đó? 🤔 #shorts"
+    },
+    {
+        "type": "video",
+        "id": "4a4pjkhScz8",
+        "title": "Hiểu Chuyện đã cho bạn thấy kết cấu thật sự của một cái giếng! 🕳️💧 #shorts"
+    },
+    {
+        "type": "video",
+        "id": "4oZ4gHynHIU",
+        "title": "Tại sao chúng ta lại đổ mồ hôi khi đá bóng dưới trời nắng? 🥵 #shorts"
+    },
+    {
+        "type": "video",
+        "id": "BGHzMTIRuXg",
+        "title": "Tại sao nước biển lại mặn? Sự thật khổng lồ không ai ngờ tới! 🌊#shorts"
+    },
+    {
+        "type": "video",
         "id": "HC5h46tO52w",
         "title": "Bỏ ngay thói quen này nếu không muốn mãi là \"nấm lùn\" 🚫🥤 #shorts"
     },
