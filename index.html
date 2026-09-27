@@ -878,7 +878,7 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
 </script>
 <!-- /LifeOS Pha14J20R73 -->
 <meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" name="viewport"/>
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content" name="viewport"/>
 <meta content="no-referrer" name="referrer"/>
 <meta content="#f8fafc" id="meta-theme-color" name="theme-color"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -8058,7 +8058,7 @@ body.music-player-active #mini-player {
 <button class="w-9 h-9 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm border border-emerald-200 active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playNext('radio', event)"><i class="ph-fill ph-skip-forward text-base"></i></button>
 </div>
 </div>
-<audio class="hidden" id="radio-audio-element" preload="none"></audio>
+<audio id="radio-audio-element" playsinline="" preload="none" webkit-playsinline=""></audio>
 </div>
 <div class="hidden w-full flex-col gap-2 bg-white rounded-2xl border border-slate-200 p-2 shadow-sm" id="lifeos-social-player">
 <div class="text-[13px] font-black text-slate-800 leading-snug" id="lifeos-social-title">Chưa chọn YouTube / Facebook</div>
@@ -8112,10 +8112,10 @@ body.music-player-active #mini-player {
 <input id="chat-msg-active-id" type="hidden"/>
 <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-2 sm:hidden"></div>
 <div class="flex justify-around bg-slate-50 p-3 rounded-2xl mb-2">
-<button class="text-3xl hover:scale-125 transition-transform active:scale-90" onclick="window.ChatEngine.reactMsg('❤️')" type="button">❤️</button>
-<button class="text-3xl hover:scale-125 transition-transform active:scale-90" onclick="window.ChatEngine.reactMsg('👍')" type="button">👍</button>
-<button class="text-3xl hover:scale-125 transition-transform active:scale-90" onclick="window.ChatEngine.reactMsg('😂')" type="button">😂</button>
-<button class="text-3xl hover:scale-125 transition-transform active:scale-90" onclick="window.ChatEngine.reactMsg('😢')" type="button">😢</button>
+<button class="text-3xl hover:scale-125 transition-transform active:scale-90" data-react="❤️" onclick="window.ChatEngine.reactMsg('❤️')" type="button">❤️</button>
+<button class="text-3xl hover:scale-125 transition-transform active:scale-90" data-react="👍" onclick="window.ChatEngine.reactMsg('👍')" type="button">👍</button>
+<button class="text-3xl hover:scale-125 transition-transform active:scale-90" data-react="😂" onclick="window.ChatEngine.reactMsg('😂')" type="button">😂</button>
+<button class="text-3xl hover:scale-125 transition-transform active:scale-90" data-react="😢" onclick="window.ChatEngine.reactMsg('😢')" type="button">😢</button>
 </div>
 <button class="flex items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition" onclick="window.ChatEngine.replyMsg()" type="button"><i class="ph-bold ph-arrow-u-up-left text-xl text-emerald-500 pointer-events-none"></i> Trả lời</button>
 <button class="flex items-center gap-3 w-full p-4 rounded-xl font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition" id="chat-menu-pin" onclick="window.ChatEngine.togglePinMsg()" type="button"><i class="ph-bold ph-push-pin text-xl text-orange-500 pointer-events-none"></i> <span id="chat-menu-pin-text">Ghim tin nhắn</span></button>
@@ -8197,6 +8197,154 @@ body.music-player-active #mini-player {
 </div>
 </div>
 </div>
+<style id="lifeos-phone-fit">
+@media (max-width: 1023px) {
+  html, body { max-width: 100%; overflow-x: clip; }
+  main, #view-tasks, #view-focus, #view-vault, #view-music, #view-chat {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  #view-tasks, #view-focus, #view-vault, #view-music, #view-chat {
+    padding-bottom: calc(var(--lifeos-bottom-nav-h, 54px) + 88px + env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+  }
+  #mobile-input {
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding-left: max(8px, env(safe-area-inset-left)) !important;
+    padding-right: max(8px, env(safe-area-inset-right)) !important;
+    bottom: calc(var(--lifeos-bottom-nav-h, 54px) + env(safe-area-inset-bottom)) !important;
+    z-index: 80 !important;
+  }
+  #form-mobile {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  #form-mobile > div {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 40px 44px !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  #input-mobile {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  #form-mobile .btn-voice,
+  #form-mobile button[type="submit"] {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+  }
+  #form-mobile > div > div[title*="Chọn"] {
+    position: relative !important;
+    overflow: hidden !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    margin: 0 !important;
+  }
+  #form-mobile input[type="datetime-local"] {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    opacity: 0.02 !important;
+    font-size: 16px !important;
+  }
+  #input-mobile,
+  #chat-input,
+  #chat-input-text,
+  #input-pc,
+  textarea {
+    font-size: 16px !important;
+  }
+  html.lifeos-r66-landscape-task-composer body:not(.lifeos-landscape-mini-pc) #mobile-input { display: block !important; }
+  html.lifeos-r66-landscape-task-composer body:not(.lifeos-landscape-mini-pc) .lifeos-r66-pc-composer-wrap { display: none !important; }
+  #btnInstall:not([data-positioned="1"]) {
+    top: auto !important;
+    bottom: calc(var(--lifeos-bottom-nav-h, 54px) + env(safe-area-inset-bottom) + 74px) !important;
+    left: max(8px, env(safe-area-inset-left)) !important;
+    right: auto !important;
+    transform: none !important;
+    padding: 0 !important;
+  }
+  #btnInstall:not([data-positioned="1"]) .install-fab-label { display: none !important; }
+  #btnInstall:not([data-positioned="1"]) .install-fab-inner { padding: 8px !important; }
+}
+body.lifeos-landscape-mini-pc #l64f-task-left,
+body.lifeos-landscape-mini-pc #l64f-task-right,
+body.lifeos-landscape-mini-pc #l64f-chat-left,
+body.lifeos-landscape-mini-pc #l64f-chat-right,
+body.lifeos-landscape-mini-pc #chat-messages,
+body.lifeos-landscape-mini-pc #l64f-music-list,
+body.lifeos-landscape-mini-pc #l64f-vault-card,
+body.lifeos-landscape-mini-pc #l64f-focus-card {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+}
+body.lifeos-landscape-mini-pc #form-pc {
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) 44px 64px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+html.lifeos-keyboard-open #bottom-nav { transform: translateY(120%) !important; }
+html.lifeos-keyboard-open #mobile-input { bottom: calc(var(--lifeos-kb, 0px) + 8px) !important; }
+html.lifeos-keyboard-open.lifeos-keyboard-chat #chat-form {
+  position: relative !important;
+  z-index: 40 !important;
+  transform: translateY(calc(-1 * var(--lifeos-kb, 0px))) !important;
+  background: #fff !important;
+}
+#input-mobile, #chat-input, #input-pc, textarea { scroll-margin-bottom: calc(var(--lifeos-kb, 0px) + 28px); }
+</style>
+<script id="lifeos-ios-keyboard-fit">
+(function () {
+  if (!window.visualViewport) return;
+  var vv = window.visualViewport;
+  function fit() {
+    var overlap = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    var open = overlap > 80;
+    var root = document.documentElement;
+    var active = document.activeElement;
+    var chatForm = document.getElementById('chat-form');
+    var inChat = !!(open && active && chatForm && chatForm.contains(active));
+    root.classList.toggle('lifeos-keyboard-open', open);
+    root.classList.toggle('lifeos-keyboard-chat', inChat);
+    root.style.setProperty('--lifeos-kb', open ? overlap + 'px' : '0px');
+    var el = document.getElementById('mobile-input');
+    if (el) el.style.bottom = '';
+    if (open && active && active.scrollIntoView) {
+      setTimeout(function () {
+        try { active.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) {}
+      }, 60);
+    }
+  }
+  vv.addEventListener('resize', fit);
+  vv.addEventListener('scroll', fit);
+  document.addEventListener('focusin', fit);
+  document.addEventListener('focusout', function () { setTimeout(fit, 80); });
+})();
+</script>
 <div class="lg:hidden fixed inset-x-0 z-[60] px-3 transition-all duration-300" id="mobile-input" style="bottom: calc(var(--lifeos-bottom-nav-h) + env(safe-area-inset-bottom));">
 <form class="w-full max-w-3xl mx-auto flex flex-col bg-white/80 backdrop-blur-2xl rounded-2xl p-1.5 shadow-[0_-8px_30px_rgba(15,23,42,0.10)] border border-white/70" id="form-mobile">
     <div class="flex items-center w-full gap-1">
@@ -8454,6 +8602,11 @@ window.lifeosTTS = {
   },
   speak: function (text) {
     if (!window.soundEnabled || !text || !this.synth) return;
+    var alarm = !!(window.isAlarmRinging || (window.lifeosRealAlarm && (window.lifeosRealAlarm.running || window.lifeosRealAlarm.active)));
+    var app = window.MusicApp;
+    var hub = window.MediaHub;
+    var listening = !alarm && ((app && app.playing && !app.__userStop) || (hub && hub.__radioWant && !hub.__radioUserStop));
+    if (listening) return;
     this.synth.cancel(); // Ngắt ngay giọng cũ để không bị vấp/lồng
     let u = new SpeechSynthesisUtterance(text);
     if (this.voice) u.voice = this.voice;
@@ -10873,8 +11026,21 @@ window.FirebaseSync = {
             if (cleanCloudTodos.length === 0 && window.todos && window.todos.length > 0) {
               console.warn('[FB:todo pull skip] cloud todo empty while local has data; not auto-pushing during snapshot');
             } else {
-              window.todos = cleanCloudTodos;
-              localStorage.setItem('lifeos_v8_data_' + this._k, JSON.stringify(cleanCloudTodos));
+              var localTodos = Array.isArray(window.todos) ? window.todos : [];
+              var byId = {};
+              localTodos.forEach(function (t) { if (t && t.id != null) byId[String(t.id)] = t; });
+              var mergedTodos = cleanCloudTodos.map(function (t) {
+                var old = byId[String(t.id)];
+                if (old && (old.completed || old.done) && !(t.completed || t.done)) {
+                  return Object.assign({}, t, { completed: true, done: true, alerted: true, completedAt: old.completedAt || Date.now() });
+                }
+                return t;
+              });
+              var cloudIds = {};
+              mergedTodos.forEach(function (t) { cloudIds[String(t.id)] = true; });
+              localTodos.forEach(function (t) { if (t && t.id != null && !cloudIds[String(t.id)]) mergedTodos.push(t); });
+              window.todos = mergedTodos;
+              localStorage.setItem('lifeos_v8_data_' + this._k, JSON.stringify(mergedTodos));
               localStorage.setItem('lifeos_v8_time_' + this._k, String(cloudTime || Date.now()));
               window.renderTasksOnly();
             }
@@ -12293,7 +12459,7 @@ window.MusicApp = {
     this.hasUserSelectedTrack = true;
     this.showMiniPlayer();
 
-    window.vibrate(10);this.currentIndex = idx;if (document.visibilityState === 'visible') this.playing = true;
+    window.vibrate(10);this.currentIndex = idx;this.playing = true;this.__userStop = false;
     this.keepScreenAnchor();
     if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: s.title, artist: s.artist });
     a.loop = false;if (a.src !== s.stream_url) {a.src = s.stream_url;a.load();}
@@ -12303,7 +12469,7 @@ window.MusicApp = {
   togglePlay() {
     window.vibrate(15);const a = el('mstq-player');if (!a || !this.playlist.length) return;
     if (this.currentIndex < 0) {this.play(0);return;}
-    if (this.playing || !a.paused && a.currentTime > 0) {if (document.visibilityState === 'visible') this.playing = false;a.pause();if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';} else {if (document.visibilityState === 'visible') this.playing = true;this.keepScreenAnchor();a.play().catch(() => {a.load();a.play().catch(() => {});});if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';}
+    if (this.playing || !a.paused && a.currentTime > 0) {this.__userStop = true;this.playing = false;a.pause();if (window.LifeOSAudioPipe) window.LifeOSAudioPipe.sync();if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';} else {this.__userStop = false;this.playing = true;this.keepScreenAnchor();a.play().catch(() => {a.load();a.play().catch(() => {});});if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';}
     this.updateMiniPlayer();
   },
   getNextIndex() {if (this.shuffle && this.playlist.length > 1) {let n = Math.floor(Math.random() * this.playlist.length);return n === this.currentIndex ? (n + 1) % this.playlist.length : n;}return (this.currentIndex + 1) % this.playlist.length;},
@@ -15864,12 +16030,41 @@ catch (e) {
   body[data-desktop-workspace="focus"] #view-chat,
   body[data-desktop-workspace="vault"] #view-chat,
   body[data-desktop-workspace="music"] #view-chat { display: none !important; }
-  body[data-desktop-workspace="chat"] #view-chat { display: flex !important; grid-column: 1 !important; width: min(1180px, calc(100vw - 48px)) !important; max-width: none !important; margin: 0 auto !important; animation: none !important; }
+  body[data-desktop-workspace="chat"] #view-chat { display: flex !important; grid-column: 1 / -1 !important; grid-row: 1 !important; min-width: 0 !important; width: 100% !important; max-width: min(1180px, 100%) !important; justify-self: center !important; margin: 0 auto !important; animation: none !important; }
   body[data-desktop-workspace="chat"] #view-tasks,
   body[data-desktop-workspace="chat"] #view-focus,
   body[data-desktop-workspace="chat"] #view-vault,
   body[data-desktop-workspace="chat"] #view-music { display: none !important; }
-  body[data-desktop-workspace="chat"] #view-chat > div { min-height: calc(100vh - 190px) !important; max-height: calc(100vh - 190px) !important; }
+  body[data-desktop-workspace="chat"] #view-chat > div { min-height: calc(100vh - 190px) !important; max-height: calc(100vh - 190px) !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
+}
+#chat-messages {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+body.lifeos-landscape-mini-pc #l64f-chat-card,
+body.lifeos-landscape-mini-pc #l64f-chat-right {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+body.lifeos-landscape-mini-pc #l64f-chat-card {
+  grid-template-columns: minmax(150px, 30%) minmax(0, 1fr) !important;
+}
+body.lifeos-landscape-mini-pc #l64f-chat-right > * {
+  min-width: 0 !important;
+}
+#chat-messages .lifeos-vrow,
+#chat-messages [data-chat-msg-id] {
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+#chat-messages p,
+#chat-messages .chat-file-card,
+#chat-messages .lifeos-j19g-card {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
 }
 /* PHA 06: GÓC GIA ĐÌNH CHAT HYBRID - END */
 </style>
@@ -16445,8 +16640,17 @@ window.MediaHub = {
                         this.remoteBound = true;
                         const rAudio = document.getElementById('radio-audio-element');
                         if (rAudio) {
-                            rAudio.onplay = () => { this.isRadioPlaying = true; this.updateRadioUI(); };
-                            rAudio.onpause = () => { this.isRadioPlaying = false; this.updateRadioUI(); };
+                            rAudio.onplay = () => { this.isRadioPlaying = true; this.__radioWant = true; this.__radioUserStop = false; this.updateRadioUI(); };
+                            rAudio.onpause = () => {
+                                if (this.__radioWant && !this.__radioUserStop) {
+                                    this.isRadioPlaying = true;
+                                    this.updateRadioUI();
+                                    if (window.LifeOSAudioPipe) window.LifeOSAudioPipe.sync();
+                                    return;
+                                }
+                                this.isRadioPlaying = false;
+                                this.updateRadioUI();
+                            };
                             rAudio.onerror = () => { this.isRadioPlaying = false; this.updateRadioUI(); this.setRadioInstruction('Kênh này cần thử lại hoặc link không hỗ trợ trình phát hiện tại', 'error'); };
                         }
                         const tVideo = document.getElementById('tv-video-element');
@@ -17209,6 +17413,8 @@ window.MediaHub = {
                 const hls = new Hls({
                     enableWorker: true,
                     lowLatencyMode: false,
+                    maxBufferLength: 24,
+                    backBufferLength: 12,
                     manifestLoadingTimeOut: 11000,
                     levelLoadingTimeOut: 11000,
                     fragLoadingTimeOut: 14000,
@@ -17340,6 +17546,8 @@ window.MediaHub = {
             }
             catch (e) { }
             this.currentRadioIdx = idx;
+            this.__radioWant = true;
+            this.__radioUserStop = false;
             const video = document.getElementById('tv-video-element');
             if (video && !video.paused)
                 video.pause();
@@ -17352,6 +17560,7 @@ window.MediaHub = {
             }
             const rAudio = document.getElementById('radio-audio-element');
             this.loadMediaStream(rAudio, sourceQueue, 'radio', c);
+            if (window.LifeOSAudioPipe) window.LifeOSAudioPipe.sync();
             if (window.soundEnabled)
                 window.playSpeechTTS('Mở đài ' + c.name);
         }
@@ -17397,8 +17606,11 @@ window.MediaHub = {
         if (!rAudio)
             return;
         (_a = window.vibrate) === null || _a === void 0 ? void 0 : _a.call(window, 10);
-        if (this.isRadioPlaying) {
+        if (this.isRadioPlaying || (rAudio && !rAudio.paused)) {
+            this.__radioUserStop = true;
+            this.__radioWant = false;
             rAudio.pause();
+            if (window.LifeOSAudioPipe) window.LifeOSAudioPipe.sync();
             if (window.soundEnabled)
                 window.playSpeechTTS('Tạm dừng Radio');
         }
@@ -17411,7 +17623,10 @@ window.MediaHub = {
                     window.playSpeechTTS('Vui lòng chọn kênh bên dưới để nghe');
             }
             else {
+                this.__radioUserStop = false;
+                this.__radioWant = true;
                 rAudio.play().catch(() => { });
+                if (window.LifeOSAudioPipe) window.LifeOSAudioPipe.sync();
             }
         }
     },
@@ -29020,14 +29235,24 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         catch (e) { }
         if (!filtered.length) {
             container.innerHTML = '<div class="h-full min-h-[260px] flex flex-col items-center justify-center text-center text-slate-400 p-8"><div class="text-sm font-black text-slate-600">Chưa có tin nhắn</div><div class="text-xs font-semibold mt-1">Gửi lời nhắn hoặc file đầu tiên cho gia đình.</div></div>';
+            container.setAttribute('data-j19-sig', 'empty');
             return;
         }
+        var lifeosSig = String(profileKey) + '#' + String(ce.currentTopic || 'all') + '#' + filtered.map(function (m) {
+            var react = m.reactions ? Object.keys(m.reactions).length + ':' + Object.values(m.reactions).join('') : '';
+            return [m.id, m.type, m.isPinned ? 1 : 0, m.text ? String(m.text).length : 0, react, m.file_id || m.file_name || ''].join('~');
+        }).join('|');
+        if (container.getAttribute('data-j19-sig') === lifeosSig && container.childElementCount)
+            return;
+        var nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 140;
         container.classList.add('lifeos-j19g-timeline');
         container.innerHTML = filtered.map(function (m) { var isMe = S(m.sender) === S(profileKey); return m.type === 'text' ? renderText(m, isMe) : renderCard(m); }).join('');
-        setTimeout(function () { try {
-            container.scrollTop = container.scrollHeight;
-        }
-        catch (e) { } }, 60);
+        container.setAttribute('data-j19-sig', lifeosSig);
+        if (nearBottom)
+            setTimeout(function () { try {
+                container.scrollTop = container.scrollHeight;
+            }
+            catch (e) { } }, 60);
         setTimeout(function () { try {
             if (window.LifeOSJ19G)
                 window.LifeOSJ19G.applyWide('after_render');
@@ -34203,14 +34428,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             var container = byId('mp3-list-container');
             if (!container)
                 return;
+            var list = getFiltered(this);
+            var show = list.slice(0, this.visibleCount);
+            var sig = String(this.filterText || '') + '|' + this.visibleCount + '|' + list.length + '|' + ((this.playlist && this.playlist.length) || 0);
+            if (container.__lifeosMp3Sig === sig && container.querySelector('.song-row')) {
+                var rows = container.querySelectorAll('.song-row');
+                for (var r = 0; r < rows.length; r++) {
+                    var row = rows[r];
+                    var on = Number(row.getAttribute('data-song')) === this.currentIndex;
+                    row.classList.toggle('active', on);
+                    var num = row.querySelector('.song-left');
+                    var titleEl = row.querySelector('.song-title');
+                    if (num) {
+                        num.textContent = on ? '▶' : String(r + 1);
+                        num.className = 'song-left text-xs font-mono flex-shrink-0 ' + (on ? 'song-idx text-primary font-black' : 'text-slate-400 font-bold');
+                    }
+                    if (titleEl)
+                        titleEl.className = 'song-title text-[0.95rem] ' + (on ? 'text-primary font-black' : 'text-slate-800 font-bold');
+                }
+                try { this.updateMiniPlayer(); } catch (e) {}
+                return;
+            }
+            container.__lifeosMp3Sig = sig;
             Array.prototype.slice.call(container.children).forEach(function (c) { if (c.id !== 'music-loading')
                 c.remove(); });
             var loading = byId('music-loading');
             if (loading)
                 loading.style.display = 'none';
-            var list = getFiltered(this);
-            var show = list.slice(0, this.visibleCount);
             var self = this;
+            var frag = document.createDocumentFragment();
             show.forEach(function (s, i) {
                 var actualIndex = self.playlist.findIndex(function (x) { return x && x.id === s.id; });
                 if (actualIndex < 0)
@@ -34221,6 +34467,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 var fmt = formatLabel(s);
                 var div = document.createElement('div');
                 div.className = 'song-row ' + (isCurrent ? 'active' : '');
+                div.setAttribute('data-song', String(actualIndex));
                 div.setAttribute('role', 'button');
                 div.setAttribute('tabindex', '0');
                 div.onclick = function (e) { if (e.target.closest('button') || e.target.closest('a'))
@@ -34238,7 +34485,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 if (dl)
                     dl.onclick = function (e) { e.preventDefault(); e.stopPropagation(); var n = s.file_name || s.title || 'music.mp3'; if (window.LifeOSTransferCore)
                         window.LifeOSTransferCore.openExternalDownload(s.stream_url, n); };
-                container.appendChild(div);
+                frag.appendChild(div);
             });
             var status = document.createElement('div');
             status.className = 'lifeos-music-autoload-status' + (list.length <= this.visibleCount ? ' is-done' : '');
@@ -34253,7 +34500,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             else {
                 status.textContent = this.filterText ? ('Đã hiển thị đủ ' + list.length + ' kết quả tìm kiếm / ' + this.playlist.length + ' bài trong kho.') : ('Đã hiển thị đủ ' + this.playlist.length + ' bài trong kho nhạc.');
             }
-            container.appendChild(status);
+            frag.appendChild(status);
+            container.appendChild(frag);
             installAutoLoad(this);
             setTimeout(function () { var host = byId('music-list-container'); if (host && getFiltered(self).length > self.visibleCount && host.scrollHeight <= host.clientHeight + 90)
                 nextPage(self); }, 80);
@@ -42466,7 +42714,7 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
     function filterTombstoned(tasks, p) { var tombs = getTombs(p); if (!Array.isArray(tasks))
         return []; return tasks.filter(function (t, i) { var id = idOf(t, i); return !tombs[id] && !tombs[S(t && t.originalId)] && !tombs[S(t && t.sourceId)]; }); }
     function getLocalTasks(p) { var arr = Array.isArray(window.todos) ? window.todos : readJSON(taskKey(p), []); return filterTombstoned(Array.isArray(arr) ? arr : [], p); }
-    function setLocalTasks(p, arr, ts) { arr = filterTombstoned(arr, p); try {
+    function setLocalTasks(p, arr, ts) { arr = filterTombstoned(Array.isArray(arr) ? arr : [], p); var local = Array.isArray(window.todos) ? window.todos : []; var merged = mergeArrayById(local, arr).map(function (t) { var id = S(t && t.id); var old = null; for (var i = 0; i < local.length; i++) { if (S(local[i] && local[i].id) === id) { old = local[i]; break; } } if (old && (old.completed || old.done || old.isDone) && !(t.completed || t.done || t.isDone)) { return Object.assign({}, t, { completed: true, done: true, isDone: true, status: 'done', alerted: true, completedAt: old.completedAt || Date.now() }); } return t; }); arr = filterTombstoned(merged, p); try {
         window.todos = arr;
     }
     catch (e) { } writeJSON(taskKey(p), arr); if (ts)
@@ -43804,6 +44052,235 @@ function paintButtons(){['youtube','facebook'].forEach(function(t){var b=documen
 function boot(){bind();hardenAutoNext();armMp3AutoSkip();setTimeout(armMediaKeys,2600);var v=document.getElementById('view-music');if(v&&window.MutationObserver){new MutationObserver(function(){if(musicOpen())Host.onMusicShow();else Host.onMusicHide()}).observe(v,{attributes:true,attributeFilter:['class']})}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:Host,player:Social};
+})();
+</script>
+<style id="lifeos-react-badge-css">
+.lifeos-react-badge{display:inline-flex;gap:4px;margin-top:4px;background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:2px 8px;font-size:13px;line-height:1.2;box-shadow:0 4px 12px rgba(15,23,42,.08);width:max-content}
+#chat-msg-menu button{touch-action:manipulation}
+</style>
+<script id="lifeos-family-menu-react">
+(function(){
+  function findMsg(id){
+    id=String(id||'');
+    var list=window.chatHistory||[];
+    for(var i=0;i<list.length;i++){
+      var m=list[i];
+      if(!m)continue;
+      if(String(m.id)===id||String(m.messageId||'')===id||String(m.localId||'')===id||String(m.file_id||m.fileId||'')===id)return m;
+    }
+    return null;
+  }
+  function paint(){
+    var list=window.chatHistory||[];
+    for(var i=0;i<list.length;i++){
+      var m=list[i];
+      if(!m||!m.reactions)continue;
+      var vals=Object.keys(m.reactions).map(function(k){return m.reactions[k];}).filter(Boolean);
+      var id=String(m.id||'');
+      var row=document.querySelector('[data-lifeos-j19g-row="'+CSS.escape(id)+'"]')||document.querySelector('[data-chat-msg-id="'+CSS.escape(id)+'"]');
+      if(!row)continue;
+      var host=row.classList&&row.classList.contains('lifeos-j19g-row')?row:(row.closest('.lifeos-j19g-row')||row.parentElement);
+      if(!host)continue;
+      var badge=host.querySelector(':scope > .lifeos-react-badge, .lifeos-react-badge');
+      if(!vals.length){if(badge)badge.remove();continue;}
+      var counts={};
+      vals.forEach(function(e){counts[e]=(counts[e]||0)+1;});
+      var text=Object.keys(counts).map(function(e){return e+(counts[e]>1?' '+counts[e]:'');}).join(' ');
+      if(!badge){badge=document.createElement('div');badge.className='lifeos-react-badge';host.appendChild(badge);}
+      badge.textContent=text;
+    }
+  }
+  function react(emoji){
+    var ce=window.ChatEngine;
+    var box=document.getElementById('chat-msg-active-id');
+    var id=box?box.value:'';
+    var m=findMsg(id);
+    if(!m){if(window.showToast)window.showToast('Không tìm thấy tin để thả cảm xúc','ph-warning-circle');return;}
+    if(!m.reactions)m.reactions={};
+    var key=ce&&ce.getKey?ce.getKey():(window.viewingUser||window.currentUser||'me');
+    if(m.reactions[key]===emoji)delete m.reactions[key];
+    else m.reactions[key]=emoji;
+    if(ce&&ce.saveAndSync)ce.saveAndSync();
+    paint();
+    if(window.showToast)window.showToast(m.reactions[key]?('Đã thả '+emoji):'Đã bỏ cảm xúc','ph-smiley');
+    try{if(window.vibrate)window.vibrate(10);}catch(e){}
+    if(ce&&ce.closeMsgMenu)ce.closeMsgMenu();
+  }
+  var painting = false;
+  var paintTimer = 0;
+  function schedulePaint() {
+    if (painting) return;
+    clearTimeout(paintTimer);
+    paintTimer = setTimeout(function () {
+      painting = true;
+      try { paint(); } finally { painting = false; }
+    }, 90);
+  }
+  function bind(){
+    var menu=document.getElementById('chat-msg-menu');
+    if(!menu||menu.__lifeosReactBound)return;
+    menu.__lifeosReactBound=true;
+    menu.addEventListener('click',function(e){
+      var btn=e.target&&e.target.closest?e.target.closest('button'):null;
+      if(!btn||!menu.contains(btn))return;
+      var emoji=btn.getAttribute('data-react');
+      if(!emoji)return;
+      e.preventDefault();
+      e.stopPropagation();
+      if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+      react(emoji);
+    },true);
+  }
+  function boot(){
+    bind();
+    paint();
+    var box=document.getElementById('chat-messages');
+    if(box&&!box.__lifeosReactObs&&window.MutationObserver){
+      box.__lifeosReactObs=true;
+      new MutationObserver(function(){schedulePaint();}).observe(box,{childList:true});
+    }
+    if(window.renderTasksOnly&&!window.renderTasksOnly.__lifeosRnSkip){
+      var oldRender=window.renderTasksOnly;
+      var wrapped=function(){
+        var list=document.getElementById('todo-list');
+        var sig=(window.filterMode||'all')+'#'+(window.todos||[]).map(function(t){return [t&&t.id,t&&t.completed?1:0,t&&t.done?1:0,t&&t.text,t&&t.alarmTime,t&&t.alerted?1:0,t&&t.timeStr].join('~');}).join('|');
+        if(list&&list.getAttribute('data-lifeos-task-sig')===sig&&list.childElementCount)return;
+        var r=oldRender.apply(this,arguments);
+        list=document.getElementById('todo-list');
+        if(list)list.setAttribute('data-lifeos-task-sig',sig);
+        return r;
+      };
+      wrapped.__lifeosRnSkip=true;
+      window.renderTasksOnly=wrapped;
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+  setTimeout(boot,800);
+  setTimeout(boot,2200);
+})();
+</script>
+<script id="lifeos-audio-pocket">
+(function(){
+  var SILENCE = './silence_30min.mp3';
+  var FALLBACK = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+  function $(id){return document.getElementById(id);}
+  function socialOwns(){
+    var host = window.LifeOSSocialClone && window.LifeOSSocialClone.host;
+    return !!(host && host.active && (host.currentTab === 'youtube' || host.currentTab === 'facebook'));
+  }
+  function mp3Want(){
+    var app = window.MusicApp;
+    return !!(app && app.playing && !app.__userStop && !socialOwns());
+  }
+  function radioWant(){
+    var hub = window.MediaHub;
+    return !!(hub && hub.__radioWant && !hub.__radioUserStop && !socialOwns());
+  }
+  function anchor(){
+    var a = $('mstq-silence') || $('lifeos-bg-anchor');
+    if (!a) return null;
+    if (a.parentElement !== document.body) document.body.appendChild(a);
+    a.loop = true;
+    a.muted = false;
+    a.volume = 1;
+    a.setAttribute('playsinline','');
+    a.setAttribute('webkit-playsinline','');
+    if (!a.getAttribute('src')) a.src = SILENCE;
+    if (!a.__lifeosPipeErr) {
+      a.__lifeosPipeErr = true;
+      a.addEventListener('error', function(){
+        if (!/data:audio\/wav/i.test(a.src || '')) a.src = FALLBACK;
+      });
+    }
+    return a;
+  }
+  function radioEl(){
+    var a = $('radio-audio-element');
+    if (!a) return null;
+    if (a.parentElement !== document.body) document.body.appendChild(a);
+    a.setAttribute('playsinline','');
+    a.setAttribute('webkit-playsinline','');
+    a.playsInline = true;
+    return a;
+  }
+  function session(title, artist){
+    if (!('mediaSession' in navigator)) return;
+    var key = (title || 'LifeOS') + '|' + (artist || 'Đang nghe');
+    if (session.last === key) return;
+    session.last = key;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: title || 'LifeOS', artist: artist || 'Đang nghe' });
+      navigator.mediaSession.playbackState = 'playing';
+    } catch (e) {}
+  }
+  function resumeMp3(){
+    var app = window.MusicApp, a = $('mstq-player');
+    if (!mp3Want() || !a || a.ended) return;
+    if (a.paused) a.play().catch(function(){});
+    var s = app.playlist && app.playlist[app.currentIndex];
+    session(s && (s.title || 'Nhạc MP3'), s && (s.artist || 'LifeOS'));
+  }
+  function resumeRadio(){
+    var hub = window.MediaHub, a = radioEl();
+    if (!radioWant() || !a) return;
+    var h = hub.hlsRadio;
+    if (a.paused) {
+      if (h && typeof h.startLoad === 'function') { try { h.startLoad(-1); } catch (e) {} }
+      a.play().catch(function(){});
+    }
+    var ch = hub.radioData && hub.radioData[hub.currentRadioIdx];
+    session(ch && ch.name || 'Radio', 'LifeOS Radio');
+    hub.isRadioPlaying = true;
+  }
+  function sync(){
+    var want = mp3Want() || radioWant();
+    var a = anchor();
+    if (want && a && (a.paused || a.ended)) a.play().catch(function(){});
+    if (!want && a && !a.paused && !window.isAlarmRinging) a.pause();
+    if (mp3Want()) resumeMp3();
+    if (radioWant()) resumeRadio();
+    arm();
+  }
+  var timer = 0;
+  function healthy(){
+    var song = $('mstq-player'), radio = $('radio-audio-element');
+    var mp3ok = !mp3Want() || (song && !song.paused && !song.ended);
+    var radiook = !radioWant() || (radio && !radio.paused);
+    return mp3ok && radiook && document.visibilityState === 'visible';
+  }
+  function arm(){
+    if (timer || healthy() || (!mp3Want() && !radioWant())) return;
+    var calm = 0;
+    timer = setInterval(function(){
+      if (!mp3Want() && !radioWant()) { clearInterval(timer); timer = 0; sync(); return; }
+      if (healthy()) { calm++; if (calm > 1) { clearInterval(timer); timer = 0; } return; }
+      calm = 0;
+      var pipe = anchor();
+      if ((mp3Want() || radioWant()) && pipe && (pipe.paused || pipe.ended)) pipe.play().catch(function(){});
+      if (mp3Want()) resumeMp3();
+      if (radioWant()) resumeRadio();
+    }, 2000);
+  }
+  window.LifeOSAudioPipe = { sync: sync, installed: true };
+  document.addEventListener('visibilitychange', sync);
+  window.addEventListener('pagehide', sync);
+  window.addEventListener('pageshow', sync);
+  document.addEventListener('freeze', sync);
+  document.addEventListener('resume', sync);
+  var song = $('mstq-player');
+  if (song && !song.__lifeosPipe) {
+    song.__lifeosPipe = true;
+    song.addEventListener('pause', function(){ if (mp3Want()) setTimeout(sync, 200); });
+    song.addEventListener('stalled', function(){ if (mp3Want()) setTimeout(sync, 400); });
+  }
+  var radio = $('radio-audio-element');
+  if (radio && !radio.__lifeosPipe) {
+    radio.__lifeosPipe = true;
+    radio.addEventListener('stalled', function(){ if (radioWant()) setTimeout(sync, 400); });
+    radio.addEventListener('waiting', function(){ if (radioWant()) setTimeout(sync, 800); });
+    radio.addEventListener('error', function(){ if (radioWant()) setTimeout(sync, 900); });
+  }
 })();
 </script>
 </body>
