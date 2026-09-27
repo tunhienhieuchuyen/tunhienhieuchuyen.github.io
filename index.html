@@ -10812,14 +10812,32 @@ window.ChatEngine = {
       return true;
     });
     this._chatTotal = filteredChat.length;
-    const lifeosStart = 0;
-    const lifeosView = filteredChat;
-    const memoSig = String(profileKey) + '#' + String(this.currentTopic) + '#' + lifeosStart + '#' + lifeosView.map((m) => [
-      m.id, m.type, m.timestamp, m.isPinned ? 1 : 0, m.isEdited ? 1 : 0, m.isPrivate ? 1 : 0,
-      m.text ? String(m.text).length + ':' + String(m.text).slice(0, 40) : 0, m.reply_to || '',
-      m.reactions ? Object.keys(m.reactions).length + ':' + Object.values(m.reactions).join('') : '',
-      m.file_id || m.file_name || m.fileName || ''
-    ].join('~')).join('|');
+    var lifeosWin = this._chatWindow || 40;
+    if (lifeosWin < 40) lifeosWin = 40;
+    if (lifeosWin > filteredChat.length) lifeosWin = filteredChat.length;
+    const lifeosStart = Math.max(0, filteredChat.length - lifeosWin);
+    const lifeosView = lifeosStart ? filteredChat.slice(lifeosStart) : filteredChat;
+    var memoHash = (lifeosStart + 1) ^ lifeosView.length;
+    for (var mi = 0; mi < lifeosView.length; mi++) {
+      var mm = lifeosView[mi] || {};
+      var mt = mm.text ? String(mm.text) : '';
+      memoHash = Math.imul(memoHash ^ (mt.length + ((mm.id && String(mm.id).length) || 0)), 16777619);
+      memoHash = Math.imul(memoHash ^ (mm.isPinned ? 3 : 1) ^ (mm.isEdited ? 5 : 0) ^ (mm.isPrivate ? 7 : 0), 16777619);
+      if (mt) {
+        memoHash = Math.imul(memoHash ^ mt.charCodeAt(0) ^ (mt.charCodeAt(mt.length - 1) << 1), 16777619);
+        var mend = Math.min(mt.length, 48);
+        for (var mj = 0; mj < mend; mj += 3) memoHash = Math.imul(memoHash ^ mt.charCodeAt(mj), 16777619);
+      }
+      if (mm.reactions) {
+        var rkeys = Object.keys(mm.reactions);
+        memoHash = Math.imul(memoHash ^ rkeys.length, 16777619);
+        for (var ri = 0; ri < rkeys.length; ri++) {
+          var rv = mm.reactions[rkeys[ri]];
+          if (rv) memoHash = Math.imul(memoHash ^ String(rv).charCodeAt(0), 16777619);
+        }
+      }
+    }
+    const memoSig = (memoHash >>> 0) + '#' + lifeosStart + '#' + String(this.currentTopic) + '#' + String(profileKey);
     if (container.getAttribute('data-lifeos-memo') === memoSig && container.childElementCount) return;
     const pinnedMsg = filteredChat.find((m) => m.isPinned);
     const banner = document.getElementById('chat-pinned-banner');
@@ -10839,7 +10857,7 @@ window.ChatEngine = {
     const lifeosPrevTop = container.scrollTop;
     const lifeosPrevHeight = container.scrollHeight;
     const lifeosPrepend = !!this._chatPrepend;
-    const lifeosOlder = '';
+    const lifeosOlder = lifeosStart ? '<button type="button" data-lifeos-older class="w-full mb-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-500">Xem ' + Math.min(40, lifeosStart) + ' tin cũ hơn</button>' : '';
     container.innerHTML = lifeosOlder + lifeosView.map((m) => {var _window$PROFILES2;
       const isMe = String(m.sender || '') === String(profileKey);
       const alignCls = isMe ? 'justify-end' : 'justify-start';
@@ -29238,17 +29256,62 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
             container.setAttribute('data-j19-sig', 'empty');
             return;
         }
-        var lifeosSig = String(profileKey) + '#' + String(ce.currentTopic || 'all') + '#' + filtered.map(function (m) {
-            var react = m.reactions ? Object.keys(m.reactions).length + ':' + Object.values(m.reactions).join('') : '';
-            return [m.id, m.type, m.isPinned ? 1 : 0, m.text ? String(m.text).length : 0, react, m.file_id || m.file_name || ''].join('~');
-        }).join('|');
+        var win = ce._chatWindow || 40;
+        if (win < 40) win = 40;
+        if (ce._chatTopic !== ce.currentTopic) {
+            ce._chatTopic = ce.currentTopic;
+            win = ce._chatWindow = 40;
+        }
+        ce._chatTotal = filtered.length;
+        if (win > filtered.length) win = filtered.length;
+        var start = Math.max(0, filtered.length - win);
+        var view = start ? filtered.slice(start) : filtered;
+        var lifeosHash = (start + 1) ^ view.length;
+        for (var hi = 0; hi < view.length; hi++) {
+            var hm = view[hi] || {};
+            var ht = hm.text ? String(hm.text) : '';
+            lifeosHash = Math.imul(lifeosHash ^ (ht.length + (hm.id ? String(hm.id).length : 0)), 16777619);
+            lifeosHash = Math.imul(lifeosHash ^ (hm.isPinned ? 3 : 1) ^ (hm.type ? String(hm.type).length : 0), 16777619);
+            if (ht) {
+                lifeosHash = Math.imul(lifeosHash ^ ht.charCodeAt(0) ^ (ht.charCodeAt(ht.length - 1) << 1), 16777619);
+                var hend = Math.min(ht.length, 48);
+                for (var hj = 0; hj < hend; hj += 3) lifeosHash = Math.imul(lifeosHash ^ ht.charCodeAt(hj), 16777619);
+            }
+            if (hm.reactions) {
+                var rkeys = Object.keys(hm.reactions);
+                lifeosHash = Math.imul(lifeosHash ^ rkeys.length, 16777619);
+                for (var ri = 0; ri < rkeys.length; ri++) {
+                    var rv = hm.reactions[rkeys[ri]];
+                    if (rv) lifeosHash = Math.imul(lifeosHash ^ String(rv).charCodeAt(0), 16777619);
+                }
+            }
+            if (hm.file_name || hm.file_id) lifeosHash = Math.imul(lifeosHash ^ String(hm.file_name || hm.file_id).length, 16777619);
+        }
+        var lifeosSig = (lifeosHash >>> 0) + '#' + start + '#' + String(ce.currentTopic || 'all') + '#' + String(profileKey);
         if (container.getAttribute('data-j19-sig') === lifeosSig && container.childElementCount)
             return;
         var nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 140;
+        var prevTop = container.scrollTop, prevHeight = container.scrollHeight, prepend = !!ce._chatPrepend;
+        var olderBtn = start ? '<button type="button" data-lifeos-older class="w-full mb-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-500">Xem ' + Math.min(40, start) + ' tin cũ hơn</button>' : '';
         container.classList.add('lifeos-j19g-timeline');
-        container.innerHTML = filtered.map(function (m) { var isMe = S(m.sender) === S(profileKey); return m.type === 'text' ? renderText(m, isMe) : renderCard(m); }).join('');
+        container.innerHTML = olderBtn + view.map(function (m) { var isMe = S(m.sender) === S(profileKey); return m.type === 'text' ? renderText(m, isMe) : renderCard(m); }).join('');
         container.setAttribute('data-j19-sig', lifeosSig);
-        if (nearBottom)
+        ce._chatPrepend = false;
+        if (!container.__lifeosOlderBound) {
+            container.__lifeosOlderBound = true;
+            container.addEventListener('click', function (ev) {
+                var btn = ev.target && ev.target.closest && ev.target.closest('[data-lifeos-older]');
+                if (!btn || !container.contains(btn)) return;
+                ev.preventDefault();
+                ce._chatPrepend = true;
+                ce._chatWindow = Math.min(ce._chatTotal || 0, (ce._chatWindow || 40) + 40);
+                renderAll(ce);
+            });
+        }
+        if (prepend) {
+            var added = container.scrollHeight - prevHeight;
+            container.scrollTop = prevTop + Math.max(0, added);
+        } else if (nearBottom)
             setTimeout(function () { try {
                 container.scrollTop = container.scrollHeight;
             }
@@ -35208,11 +35271,13 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
             catch (e) { }
         }
         var compactMessages = compactCacheList(messages), compactFolders = compactCacheList(folders);
-        writeJSON(LS_CACHE, { phase: PHASE, at: now(), reason: reason || '', compact: true, m: compactMessages, f: compactFolders, counts: { text: STATE.textRows, textFile: STATE.textFileRows, family: STATE.familyRows, folders: STATE.folderRows, total: messages.length } });
-        try {
-            localStorage.setItem(LS_SHARED, JSON.stringify({ m: compactMessages, f: compactFolders, d1TextOfficial: true, compact: true, phase: PHASE, at: now(), reason: reason || '' }));
-        }
-        catch (e) { }
+        setTimeout(function () {
+            writeJSON(LS_CACHE, { phase: PHASE, at: now(), reason: reason || '', compact: true, m: compactMessages, f: compactFolders, counts: { text: STATE.textRows, textFile: STATE.textFileRows, family: STATE.familyRows, folders: STATE.folderRows, total: messages.length } });
+            try {
+                localStorage.setItem(LS_SHARED, JSON.stringify({ m: compactMessages, f: compactFolders, d1TextOfficial: true, compact: true, phase: PHASE, at: now(), reason: reason || '' }));
+            }
+            catch (e) { }
+        }, 0);
         trace('D1_V3_TIMELINE_APPLIED', { reason: reason || '', total: messages.length, textRows: STATE.textRows, textFileRows: STATE.textFileRows, familyRows: STATE.familyRows, folderRows: STATE.folderRows });
         return { messages: messages, folders: folders };
     }
@@ -35220,28 +35285,40 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     function api(path, opt) {
         return __awaiter(this, void 0, void 0, function* () {
             opt = opt || {};
-            var res = yield fetch(textBase() + path, { method: opt.method || 'GET', cache: 'no-store', headers: Object.assign({ 'Content-Type': 'application/json' }, opt.headers || {}), body: opt.body !== undefined ? JSON.stringify(opt.body) : undefined });
-            var txt = yield res.text(), data = {};
+            var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+            var timer = ctrl ? setTimeout(function () { try { ctrl.abort(); } catch (e) {} }, 12000) : 0;
             try {
-                data = txt ? JSON.parse(txt) : {};
+                var res = yield fetch(textBase() + path, { method: opt.method || 'GET', cache: 'no-store', signal: ctrl ? ctrl.signal : undefined, headers: Object.assign({ 'Content-Type': 'application/json' }, opt.headers || {}), body: opt.body !== undefined ? JSON.stringify(opt.body) : undefined });
+                var txt = yield res.text(), data = {};
+                try {
+                    data = txt ? JSON.parse(txt) : {};
+                }
+                catch (e) {
+                    data = { ok: false, error: 'invalid_json', responseText: txt.slice(0, 800) };
+                }
+                if (!res.ok || data.ok === false) {
+                    var er = new Error(data.error || data.message || ('HTTP ' + res.status));
+                    er.status = res.status;
+                    er.data = data;
+                    throw er;
+                }
+                return data;
             }
-            catch (e) {
-                data = { ok: false, error: 'invalid_json', responseText: txt.slice(0, 800) };
+            finally {
+                if (timer) clearTimeout(timer);
             }
-            if (!res.ok || data.ok === false) {
-                var er = new Error(data.error || data.message || ('HTTP ' + res.status));
-                er.status = res.status;
-                er.data = data;
-                throw er;
-            }
-            return data;
         });
     }
     function timelineSig(rows) {
         rows = Array.isArray(rows) ? rows : [];
-        var live = rows.filter(function (r) { return !rowLooksDeleted(r) && !(window.LifeOSFamilyDeleteCore && window.LifeOSFamilyDeleteCore.isTombed(r)); }).map(function (r) {
-            var p = parsePayload(r);
-            return [
+        var h = 2166136261, n = 0, i, r, p, part, j;
+        for (i = 0; i < rows.length; i++) {
+            r = rows[i];
+            if (!r || rowLooksDeleted(r) || (window.LifeOSFamilyDeleteCore && window.LifeOSFamilyDeleteCore.isTombed(r)))
+                continue;
+            n++;
+            p = parsePayload(r);
+            part = [
                 keyOf(r) || keyOf(p),
                 S(r.kind || p.kind || r.type || p.type),
                 S(r.source || p.source),
@@ -35250,8 +35327,10 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
                 S(r.created_at || r.createdAt || r.timestamp || p.created_at || p.createdAt),
                 isRealDeleted(r.deleted_at || r.deletedAt || r.tombstone_reason || r.tombstoneReason) ? 'D' : 'L'
             ].join('|');
-        }).sort();
-        return live.join('\n');
+            for (j = 0; j < part.length; j++)
+                h = Math.imul(h ^ part.charCodeAt(j), 16777619);
+        }
+        return n + ':' + (h >>> 0);
     }
     function refresh(reason, force) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -35266,7 +35345,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
                 STATE.lastRefreshAt = now();
                 STATE.lastRefreshReason = reason || 'refresh';
                 var forceReason = S(reason || '');
-                var mustRender = !!force && /^(after_send_text_|after_delete_text_|delete_local_|install|load_|initFirebase_d1_text|manual|r37_|r38_|r39_)/i.test(forceReason);
+                var mustRender = !!force && /^(after_send_text_|after_delete_text_|delete_local_|manual|r37_|r38_|r39_)/i.test(forceReason);
                 if (unchanged && !mustRender) {
                     STATE.skippedRenders = (STATE.skippedRenders || 0) + 1;
                     STATE.lastError = '';
@@ -35282,10 +35361,12 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
             catch (e) {
                 STATE.lastError = S(e && e.message || e);
                 trace('D1_V3_TIMELINE_REFRESH_FAILED', { reason: reason || '', error: STATE.lastError, status: e.status || 0 }, 'error');
-                try {
-                    window.showToast && window.showToast('Danh sách chat lỗi: ' + STATE.lastError, 'ph-warning-circle');
+                if (!(STATE.messages && STATE.messages.length)) {
+                    try {
+                        window.showToast && window.showToast('Danh sách chat lỗi: ' + STATE.lastError, 'ph-warning-circle');
+                    }
+                    catch (_e) { }
                 }
-                catch (_e) { }
                 return false;
             }
             finally {
@@ -35931,10 +36012,11 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     } }
     function buildRow(m) { var id = keyOf(m), name = nameOf(m), size = sizeOf(m), body = payloadBody(m), prev = body ? body.slice(0, 520) : 'Bấm Xem/Sửa để tải nội dung từ D1 Text DB.', me = S(senderOf(m)) === S((window.ChatEngine && window.ChatEngine.getKey && window.ChatEngine.getKey()) || window.viewingUser || window.currentUser || ''); return '<div class="lifeos-j19g-row ' + (me ? 'lifeos-j19g-me ' : '') + 'lifeos-r37-textfile-row" data-lifeos-j19g-row="' + esc(id) + '" data-r37-textfile-row="' + esc(id) + '" style="width:100%!important;max-width:100%!important"><div class="lifeos-j19g-avatar">' + esc(avatarFor(m)) + '</div><div class="lifeos-j19g-card-wrap" style="width:100%!important;max-width:100%!important"><div class="lifeos-r37-textfile-card lifeos67h-r3-selectable-card" data-chat-msg-id="' + esc(id) + '" data-family-r3-select-id="' + esc(id) + '" data-family-r3-select-type="text_file" data-r37-card="1"><div class="lifeos-r37-textfile-icon"><i class="ph-bold ph-file-text"></i></div><div class="lifeos-r37-textfile-main"><div class="lifeos-r37-textfile-kicker"><span>Văn bản dài</span><span>TXT</span></div><div class="lifeos-r37-textfile-title">' + esc(name) + '</div><div class="lifeos-r37-textfile-meta"><span>TXT</span><span>' + esc(fmtSize(size)) + '</span><span>' + esc(fmtTime(m)) + '</span><span>Kho Data</span></div><div class="lifeos-r37-textfile-preview">' + esc(prev) + '</div><div class="lifeos-r37-textfile-actions"><button type="button" class="r37-primary" data-r37-textfile-view="' + esc(id) + '"><i class="ph-bold ph-eye"></i><span>Xem/Sửa</span></button><button type="button" data-r37-textfile-copy="' + esc(id) + '"><i class="ph-bold ph-copy"></i><span>Copy</span></button><button type="button" data-r37-textfile-download="' + esc(id) + '"><i class="ph-bold ph-download-simple"></i><span>Tải .txt</span></button><button type="button" class="r37-danger" data-r37-textfile-delete="' + esc(id) + '"><i class="ph-bold ph-trash"></i><span>Xóa</span></button></div></div></div></div></div>'; }
     function transformAll() { if (transforming)
+        return; var box = document.getElementById('chat-messages'); if (!box || !box.childElementCount)
         return; transforming = true; try {
         var list = allMessages().filter(isTextFile);
         list.forEach(function (m) { var _a, _b; var id = keyOf(m); if (!id)
-            return; var row = document.querySelector('[data-lifeos-j19g-row="' + cssEsc(id) + '"]') || ((_a = document.querySelector('[data-chat-msg-id="' + cssEsc(id) + '"]')) === null || _a === void 0 ? void 0 : _a.closest('.lifeos-j19g-row')) || ((_b = document.querySelector('[data-j19g-view="' + cssEsc(id) + '"]')) === null || _b === void 0 ? void 0 : _b.closest('.lifeos-j19g-row')); if (row && row.getAttribute('data-r37-textfile-row') !== id) {
+            return; var row = box.querySelector('[data-lifeos-j19g-row="' + cssEsc(id) + '"]') || ((_a = box.querySelector('[data-chat-msg-id="' + cssEsc(id) + '"]')) === null || _a === void 0 ? void 0 : _a.closest('.lifeos-j19g-row')) || ((_b = box.querySelector('[data-j19g-view="' + cssEsc(id) + '"]')) === null || _b === void 0 ? void 0 : _b.closest('.lifeos-j19g-row')); if (row && row.getAttribute('data-r37-textfile-row') !== id) {
             row.outerHTML = buildRow(m);
             trace('DOM_ROW_REPLACED', { msg_key: id, name: nameOf(m), size: sizeOf(m) });
         } });
@@ -36063,11 +36145,33 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         boot();
     window.addEventListener('load', function () { setTimeout(boot, 50); setTimeout(boot, 500); setTimeout(boot, 1500); }, { once: true });
     try {
-        var mo = new MutationObserver(function () { setTimeout(transformAll, 30); });
-        mo.observe(document.documentElement, { childList: true, subtree: true });
+        var moTimer = 0;
+        var mo = new MutationObserver(function () {
+            if (moTimer)
+                return;
+            moTimer = setTimeout(function () { moTimer = 0; transformAll(); }, 150);
+        });
+        function watchChat() {
+            var box = document.getElementById('chat-messages');
+            if (!box || box.__r37Watch)
+                return;
+            box.__r37Watch = true;
+            mo.observe(box, { childList: true, subtree: true });
+        }
+        watchChat();
+        document.addEventListener('DOMContentLoaded', watchChat);
     }
     catch (e) { }
-    setInterval(function () { patchChatEngine(); transformAll(); }, 5000);
+    setInterval(function () {
+        if (document.visibilityState === 'hidden')
+            return;
+        var view = document.getElementById('view-chat');
+        var desk = document.body && document.body.getAttribute('data-desktop-workspace') === 'chat';
+        if (!desk && (!view || !view.classList.contains('active')))
+            return;
+        patchChatEngine();
+        transformAll();
+    }, 8000);
 })();
 </script>
 <!-- Pha14J20R39_NoFirebase_NoVisibilityJump_R38Base - START -->
@@ -36284,7 +36388,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     else
         boot();
     window.addEventListener('load', function () { setTimeout(boot, 100); setTimeout(boot, 1000); setTimeout(boot, 4000); }, { once: true });
-    setInterval(boot, 5000);
+    setInterval(boot, 20000);
 })();
 </script>
 <!-- Pha14J20R39_NoFirebase_NoVisibilityJump_R38Base - END -->
@@ -36731,8 +36835,13 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
             afterEnterChat('domcontentloaded_chat_guard'); }, { once: true });
     window.addEventListener('load', function () { setTimeout(function () { boot('load_80'); if (chatActuallyVisible())
         afterEnterChat('load_chat_guard'); }, 80); setTimeout(function () { boot('load_700'); }, 700); setTimeout(function () { boot('load_2200'); }, 2200); }, { once: true });
-    setInterval(function () { patchChatEngine(); patchSwitchers(); if (document.visibilityState !== 'hidden' && chatActuallyVisible())
-        repairIfNeeded('interval_dom_guard'); }, 5000);
+    setInterval(function () {
+        if (document.visibilityState === 'hidden' || !chatActuallyVisible())
+            return;
+        patchChatEngine();
+        patchSwitchers();
+        repairIfNeeded('interval_dom_guard');
+    }, 8000);
 })();
 </script>
 <!-- Pha14J20R44_CleanConsoleBootNoFlash_R43Base - KEEP R43 CORE - END -->
@@ -37579,7 +37688,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     else
         boot();
     window.addEventListener('load', function () { setTimeout(boot, 100); setTimeout(boot, 1200); setTimeout(boot, 3500); }, { once: true });
-    setInterval(boot, 5000);
+    setInterval(boot, 30000);
 })();
 </script>
 <!-- Pha14J20R47_PostUploadD1ImmediateCard_FallbackNoSlow_R46Base - END -->
@@ -38031,8 +38140,15 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', function () { boot('domcontentloaded'); }, { once: true });
     window.addEventListener('load', function () { setTimeout(function () { boot('load_80'); }, 80); setTimeout(function () { boot('load_600'); }, 600); setTimeout(function () { boot('load_1800'); }, 1800); }, { once: true });
-    setInterval(function () { patchChatEngine(); patchAuxModules(); patchSwitchers(); if (chatVisible() && inLock() && now() - lastMasterAt > 900)
-        scheduleMaster('interval_lock_owner', 160); }, 3500);
+    setInterval(function () {
+        if (document.visibilityState === 'hidden' || !chatVisible())
+            return;
+        patchChatEngine();
+        patchAuxModules();
+        patchSwitchers();
+        if (inLock() && now() - lastMasterAt > 900)
+            scheduleMaster('interval_lock_owner', 160);
+    }, 8000);
 })();
 </script>
 <!-- Pha14J20R51_DirectPatchR48BootNoSpam_R48Base - END -->
@@ -44143,7 +44259,20 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
       var oldRender=window.renderTasksOnly;
       var wrapped=function(){
         var list=document.getElementById('todo-list');
-        var sig=(window.filterMode||'all')+'#'+(window.todos||[]).map(function(t){return [t&&t.id,t&&t.completed?1:0,t&&t.done?1:0,t&&t.text,t&&t.alarmTime,t&&t.alerted?1:0,t&&t.timeStr].join('~');}).join('|');
+        var todos = window.todos || [];
+        var taskHash = String(window.filterMode || 'all').length ^ todos.length;
+        for (var ti = 0; ti < todos.length; ti++) {
+          var task = todos[ti] || {};
+          var text = task.text ? String(task.text) : '';
+          taskHash = Math.imul(taskHash ^ ((task.completed || task.done) ? 3 : 1) ^ (task.alerted ? 5 : 0), 16777619);
+          taskHash = Math.imul(taskHash ^ text.length ^ ((task.alarmTime && String(task.alarmTime).length) || 0), 16777619);
+          if (text) {
+            taskHash = Math.imul(taskHash ^ text.charCodeAt(0) ^ (text.charCodeAt(text.length - 1) << 1), 16777619);
+            var tend = Math.min(text.length, 48);
+            for (var tj = 0; tj < tend; tj += 3) taskHash = Math.imul(taskHash ^ text.charCodeAt(tj), 16777619);
+          }
+        }
+        var sig = (taskHash >>> 0) + '#' + todos.length + '#' + String(window.filterMode || 'all');
         if(list&&list.getAttribute('data-lifeos-task-sig')===sig&&list.childElementCount)return;
         var r=oldRender.apply(this,arguments);
         list=document.getElementById('todo-list');
@@ -44158,6 +44287,89 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
   else boot();
   setTimeout(boot,800);
   setTimeout(boot,2200);
+})();
+</script>
+<script id="lifeos-family-entry-one-paint">
+(function(){
+  if (window.__lifeosFamilyEntryOnePaint) return;
+  window.__lifeosFamilyEntryOnePaint = true;
+  var lastSig = '', lastAt = 0;
+  function official(){
+    var st = window.LifeOSR35D1TextOfficial && window.LifeOSR35D1TextOfficial.state;
+    return (st && Array.isArray(st.messages)) ? st : null;
+  }
+  function sigOf(list){
+    list = list || [];
+    var chars = 0, react = 0, i, m;
+    for (i = 0; i < list.length; i++) {
+      m = list[i] || {};
+      chars += m.text ? String(m.text).length : 0;
+      if (m.reactions) { try { react += Object.keys(m.reactions).length; } catch (e) {} }
+    }
+    m = list[list.length - 1] || {};
+    return list.length + ':' + chars + ':' + react + ':' + (m.id || m.msg_key || '') + ':' + ((window.ChatEngine && window.ChatEngine.currentTopic) || 'all');
+  }
+  function sealFirebase(){
+    var ce = window.ChatEngine;
+    if (!ce) return;
+    ce.initFirebase = function(){
+      try { if (typeof ce.unsubscribe === 'function') ce.unsubscribe(); } catch (e) {}
+      ce.unsubscribe = null;
+      ce.dbRef = null;
+      return true;
+    };
+    var bases = ['__j20r6BaseRender', '__j19gBaseRender', '__r35BaseRender'];
+    bases.forEach(function(key){
+      var fn = ce[key];
+      if (typeof fn !== 'function' || fn.__lifeosOnePaint) return;
+      var wrapped = function(){
+        var st = official();
+        var hist = window.chatHistory || [];
+        if (st && st.messages.length && hist.length < st.messages.length && !window.__lifeosJ19X21Committing && !ce.__r35InsideRender) {
+          window.chatHistory = st.messages.slice();
+          ce.chatFolders = (st.folders || []).slice();
+          hist = window.chatHistory;
+        }
+        var sig = sigOf(hist);
+        var box = document.getElementById('chat-messages');
+        var now = Date.now();
+        if (box && box.childElementCount && sig === lastSig && now - lastAt < 1200) return;
+        var out = fn.apply(this, arguments);
+        lastSig = sig;
+        lastAt = Date.now();
+        return out;
+      };
+      wrapped.__lifeosOnePaint = true;
+      ce[key] = wrapped;
+    });
+    try {
+      var hub = window.LifeOSJ20R2HybridFamily;
+      var state = hub && hub.summary && hub.summary().state;
+      if (state && official() && official().messages.length) state._loadingD1 = true;
+    } catch (e) {}
+  }
+  function skipLegacyFamilyGet(){
+    try {
+      var r6 = window.LifeOSJ20R6HybridTimeline;
+      var st6 = r6 && r6.summary && r6.summary().state;
+      if (st6) st6._d1Loading = true;
+    } catch (e) {}
+    try {
+      var r2 = window.LifeOSJ20R2HybridFamily;
+      var st2 = r2 && r2.summary && r2.summary().state;
+      if (st2) st2._loadingD1 = true;
+    } catch (e) {}
+  }
+  function boot(){ sealFirebase(); skipLegacyFamilyGet(); }
+  boot();
+  document.addEventListener('DOMContentLoaded', boot);
+  var lock = setInterval(skipLegacyFamilyGet, 500);
+  setTimeout(function(){ clearInterval(lock); }, 20000);
+  window.addEventListener('load', function(){
+    setTimeout(boot, 200);
+    setTimeout(boot, 1200);
+    setTimeout(boot, 4000);
+  });
 })();
 </script>
 <script id="lifeos-audio-pocket">
