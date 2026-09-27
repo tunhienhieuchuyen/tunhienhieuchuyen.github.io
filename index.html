@@ -43431,6 +43431,30 @@ Goals:
 #lifeos-social-list .media-meta{font-size:10px;color:#64748b;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #lifeos-social-title{font-size:13px;font-weight:900;color:#334155;line-height:1.35;max-height:2.7em;overflow:hidden}
 #lifeos-social-status{font-size:11px;font-weight:800;color:#64748b;min-height:16px}
+#media-subtabs > #tab-media-youtube,
+#media-subtabs > #tab-media-facebook{
+  flex:0 0 auto !important;
+  width:auto !important;
+  max-width:none !important;
+  min-width:max-content !important;
+  overflow:visible !important;
+  white-space:nowrap !important;
+  text-indent:0 !important;
+  opacity:1 !important;
+  color:#475569 !important;
+  background:#f8fafc !important;
+  border:1px solid #e2e8f0 !important;
+}
+#media-subtabs > #tab-media-youtube[aria-selected="true"]{
+  color:#fff !important;
+  background:#dc2626 !important;
+  border-color:#b91c1c !important;
+}
+#media-subtabs > #tab-media-facebook[aria-selected="true"]{
+  color:#fff !important;
+  background:#1877f2 !important;
+  border-color:#1464cc !important;
+}
 </style>
 <script id="lifeos-social-yt-fb-clone">
 (function(){
@@ -43499,9 +43523,9 @@ var Host={
   move:function(delta,play){if(!this.filtered.length)return;var len=this.filtered.length;var n=((this.selected[this.currentTab]||0)+delta)%len;if(n<0)n+=len;this.selected[this.currentTab]=n;this.paintSelection();this.ensureVisible(n);if(play)this.playSelected()},
   playSelected:function(){var idx=this.selected[this.currentTab]||0,item=this.filtered[idx];if(!item||!window.LifeOSSocialPlayer)return;window.LifeOSSocialPlayer.startItem(this.currentTab,item,'manual')},
   togglePlay:function(){if(window.LifeOSSocialPlayer&&window.LifeOSSocialPlayer.toggle())return},
-  applyLayout:function(){showEl('mp3-list-container',false);showEl('radio-list-container',false);showEl('tv-list-container',false);showEl('radio-player-container',false);showEl('tv-player-container',false);showEl('lifeos-social-list',true,'block');showEl('lifeos-social-player',true,'flex');var loading=document.getElementById('music-loading');if(loading)loading.style.display='none';['media-group-sidebar','media-group-mobile-bar'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.hidden=true;el.classList.add('hidden')});var yt=document.getElementById('lifeos-social-yt-open'),fb=document.getElementById('lifeos-social-fb-open');if(yt)yt.classList.toggle('hidden',this.currentTab!=='youtube');if(fb)fb.classList.toggle('hidden',this.currentTab!=='facebook')},
+  applyLayout:function(){showEl('mp3-list-container',false);showEl('radio-list-container',false);showEl('tv-list-container',false);showEl('radio-player-container',false);showEl('tv-player-container',false);showEl('lifeos-social-list',true,'block');showEl('lifeos-social-player',true,'flex');var loading=document.getElementById('music-loading');if(loading)loading.style.display='none';['media-group-sidebar','media-group-mobile-bar'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.hidden=true;el.style.setProperty('display','none','important')});var yt=document.getElementById('lifeos-social-yt-open'),fb=document.getElementById('lifeos-social-fb-open');if(yt)yt.classList.toggle('hidden',this.currentTab!=='youtube');if(fb)fb.classList.toggle('hidden',this.currentTab!=='facebook')},
   enter:function(tab){if(tab!=='youtube'&&tab!=='facebook')return false;silenceOthers();if(this.currentTab&&this.currentTab!==tab&&window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup();this.stopElements()}this.currentTab=tab;this.active=true;var search=document.getElementById('music-search');this.query=search?String(search.value||''):'';this.applyLayout();paintButtons();var self=this;var job=tab==='youtube'?this.loadYouTube(false):this.loadFacebook(false);Promise.resolve(job).then(function(){if(self.currentTab===tab){self.render(true);paintButtons()}},function(){if(self.currentTab===tab)self.render(true)});if(window.LifeOSSocialPlayer)window.LifeOSSocialPlayer.updateModeVisibility();return true},
-  leave:function(){if(!this.currentTab)return;this.currentTab='';this.active=false;if(window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup()}this.stopElements();showEl('lifeos-social-list',false);showEl('lifeos-social-player',false);paintButtons()},
+  leave:function(){if(!this.currentTab)return;['media-group-sidebar','media-group-mobile-bar'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.hidden=false;el.style.removeProperty('display')});this.currentTab='';this.active=false;if(window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup()}this.stopElements();showEl('lifeos-social-list',false);showEl('lifeos-social-player',false);paintButtons()},
   reloadList:function(){var self=this,tab=this.currentTab;if(tab!=='youtube'&&tab!=='facebook')return;var list=by('media-list');if(list)list.removeAttribute('data-signature');this.setStatus('Đang tải mới kho '+(tab==='youtube'?'YouTube':'Facebook')+'…');var p=tab==='youtube'?this.loadYouTube(true):this.loadFacebook(true);return Promise.resolve(p).then(function(){self.render(true);paintButtons();if(window.showToast)window.showToast('Đã tải mới '+(tab==='youtube'?'YouTube':'Facebook'),'ph-check')},function(){self.render(true);if(window.showToast)window.showToast('Tải mới không thành công','ph-warning')})},
   onMusicHide:function(){this.active=false;if(window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup()}this.stopElements()},
   onMusicShow:function(){if(this.currentTab==='youtube'||this.currentTab==='facebook'){this.active=musicOpen();this.applyLayout();paintButtons()}}
@@ -43548,33 +43572,10 @@ Social.mode=Social.readMode();
 window.LifeOSSocialPlayer=Social;
 if(!document.__lifeosFacebookSoundUnlockR6){document.__lifeosFacebookSoundUnlockR6=true;var unlockFacebookSound=function(){if(Social.fbInstance)Social.forceFacebookSound(Social.fbInstance,Social.serial);var v=by('player-stage')&&by('player-stage').querySelector('video');if(v){try{v.muted=false;v.defaultMuted=false;v.volume=1;v.removeAttribute('muted')}catch(e){}}};document.addEventListener('pointerdown',unlockFacebookSound,true);document.addEventListener('keydown',unlockFacebookSound,true);}
 
-function paintButtons(){['youtube','facebook'].forEach(function(t){var b=document.getElementById('tab-media-'+t);if(!b)return;var on=Host.currentTab===t;var count=t==='youtube'?(Host.youtubeItems||[]).length:(Host.facebookItems||[]).length;b.className=BTN+(on?COLORS[t]:IDLE);b.textContent=(t==='youtube'?'▶ YouTube':'📘 Facebook')+(count?' · '+count:'')});if(Host.currentTab==='youtube'||Host.currentTab==='facebook'){['music','radio','tv'].forEach(function(t){var b=document.getElementById('tab-media-'+t);if(b)b.className=BTN+IDLE})}}
-function bind(){
-  var list=document.getElementById('lifeos-social-list');
-  if(list&&!list.__socialBound){list.__socialBound=true;list.addEventListener('click',function(e){var row=e.target.closest('.media-item');if(!row)return;Host.selected[Host.currentTab]=Number(row.getAttribute('data-index')||0);Host.paintSelection();Host.playSelected()})}
-  var prev=document.getElementById('lifeos-social-prev'),next=document.getElementById('lifeos-social-next'),play=document.getElementById('lifeos-social-play'),full=document.getElementById('lifeos-social-full'),mode=document.getElementById('lifeos-social-mode'),yt=document.getElementById('lifeos-social-yt-open'),fb=document.getElementById('lifeos-social-fb-open');
-  if(prev&&!prev.__bound){prev.__bound=true;prev.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();Host.move(-1,true)})}
-  if(next&&!next.__bound){next.__bound=true;next.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();Host.move(1,true)})}
-  if(play&&!play.__bound){play.__bound=true;play.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();Host.togglePlay()})}
-  if(full&&!full.__bound){full.__bound=true;full.addEventListener('click',function(e){e.preventDefault();var el=Host.video||Host.iframe||by('player-stage');if(el&&el.requestFullscreen)el.requestFullscreen().catch(function(){})})}
-  if(mode&&!mode.__bound){mode.__bound=true;mode.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();Social.saveMode(Social.mode==='sequential'?'random':'sequential')})}
-  if(yt&&!yt.__bound){yt.__bound=true;yt.addEventListener('click',function(e){e.preventDefault();if(Host.youtubeExternal)window.open(Host.youtubeExternal,'_blank','noopener')})}
-  if(fb&&!fb.__bound){fb.__bound=true;fb.addEventListener('click',function(e){e.preventDefault();if(Host.facebookExternal)window.open(Host.facebookExternal,'_blank','noopener')})}
-  Social.paintMode();
-  var hub=window.MediaHub;
-  if(hub&&typeof hub.switchTab==='function'&&!hub.switchTab.__lifeosSocialYtFb){var old=hub.switchTab;var wrapped=function(tab,keepGroup,opts){if(tab==='youtube'||tab==='facebook')return Host.enter(tab);Host.leave();return old.call(hub,tab,keepGroup,opts)};wrapped.__lifeosSocialYtFb=true;hub.switchTab=wrapped}
-  if(hub&&typeof hub.handleSearch==='function'&&!hub.handleSearch.__lifeosSocialYtFb){var oldSearch=hub.handleSearch;var searchWrap=function(val){if(Host.currentTab==='youtube'||Host.currentTab==='facebook'){Host.query=val||'';Host.render(true);return}return oldSearch.call(hub,val)};searchWrap.__lifeosSocialYtFb=true;hub.handleSearch=searchWrap}
-  if(hub&&typeof hub.applyTabLayout==='function'&&!hub.applyTabLayout.__lifeosSocialYtFb){var oldLayout=hub.applyTabLayout;var layoutWrap=function(){var r=oldLayout.apply(hub,arguments);if(Host.currentTab==='youtube'||Host.currentTab==='facebook')Host.applyLayout();return r};layoutWrap.__lifeosSocialYtFb=true;hub.applyTabLayout=layoutWrap}
-  if(window.MusicApp&&typeof window.MusicApp.refetch==='function'&&!window.MusicApp.refetch.__lifeosSocialYtFb){var oldRefetch=window.MusicApp.refetch;var refetchWrap=function(){if(Host.currentTab==='youtube'||Host.currentTab==='facebook')return Host.reloadList();return oldRefetch.apply(window.MusicApp,arguments)};refetchWrap.__lifeosSocialYtFb=true;window.MusicApp.refetch=refetchWrap}
-  var router=window.LifeOSRootRouter;
-  if(router&&typeof router.enterWorkspace==='function'&&!router.enterWorkspace.__lifeosSocialYtFb){var oldEnter=router.enterWorkspace;var enterWrap=function(mode){var r=oldEnter.apply(router,arguments);if(mode==='music')Host.onMusicShow();else Host.onMusicHide();return r};enterWrap.__lifeosSocialYtFb=true;router.enterWorkspace=enterWrap}
-}
-function armMp3AutoSkip(){var app=window.MusicApp,a=document.getElementById('mstq-player');if(!app||!a||a.__lifeosAutoSkip)return;a.__lifeosAutoSkip=true;var skips=0;a.addEventListener('playing',function(){skips=0});a.addEventListener('error',function(){var err=a.error;if(!err||err.code===1)return;if(Host.currentTab==='youtube'||Host.currentTab==='facebook')return;if(!app.playlist||app.playlist.length<2||app.currentIndex<0)return;if(app.repeat==='off'&&!app.shuffle&&app.currentIndex>=app.playlist.length-1)return;skips++;if(skips>6)return;setTimeout(function(){if(!a.error||a.error.code===1)return;if(Host.currentTab==='youtube'||Host.currentTab==='facebook')return;if(typeof app.playNext==='function')app.playNext()},1200)}); }
-function armMediaKeys(){if(!('mediaSession' in navigator)||navigator.mediaSession.__lifeosAutoKeys)return;try{navigator.mediaSession.setActionHandler('nexttrack',function(){if(Host.currentTab==='youtube'||Host.currentTab==='facebook'){Host.move(1,true);return}if(window.MusicApp&&window.MusicApp.playNext)window.MusicApp.playNext()});navigator.mediaSession.setActionHandler('previoustrack',function(){if(Host.currentTab==='youtube'||Host.currentTab==='facebook'){Host.move(-1,true);return}if(window.MusicApp&&window.MusicApp.playPrev)window.MusicApp.playPrev()});navigator.mediaSession.__lifeosAutoKeys=true}catch(e){}}
-function hardenAutoNext(){if(Social.__autoHard)return;Social.__autoHard=true;var oldYT=Social.playYouTube;Social.playYouTube=function(item,serial){var self=this,ret=oldYT.apply(this,arguments);clearInterval(self.ytWatch);self.ytWatch=setInterval(function(){if(serial!==self.serial){clearInterval(self.ytWatch);self.ytWatch=0;return}var player=self.ytPlayer;if(!player||typeof player.getDuration!=='function')return;var d=0,t=0,st=-1;try{d=Number(player.getDuration()||0);t=Number(player.getCurrentTime()||0);st=Number(player.getPlayerState())}catch(e){return}if(st===0||(st===1&&d>1&&t>0.8&&t>=d-0.4)){clearInterval(self.ytWatch);self.ytWatch=0;self.signalEnded(serial,'youtube-watch')}},350);return ret};var oldEnter=Host.enter;Host.enter=function(tab){var ret=oldEnter.apply(this,arguments);this.active=true;if(window.LifeOSSocialPlayer){var prep=tab==='youtube'?window.LifeOSSocialPlayer.ensureYouTube():window.LifeOSSocialPlayer.ensureFacebook();Promise.resolve(prep).catch(function(){})}return ret}}
+function paintButtons(){['youtube','facebook'].forEach(function(t){var b=document.getElementById('tab-media-'+t);if(!b)return;var on=Host.currentTab===t;var count=t==='youtube'?(Host.youtubeItems||[]).length:(Host.facebookItems||[]).length;b.className='px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap';b.setAttribute('aria-selected',on?'true':'false');b.textContent=(t==='youtube'?'YouTube':'Facebook')+(count?' · '+count:'');['background','color','border-color','flex','min-width','overflow','white-space'].forEach(function(k){b.style.removeProperty(k)});b.style.opacity='1'});if(Host.currentTab==='youtube'||Host.currentTab==='facebook'){['music','radio','tv'].forEach(function(t){var b=document.getElementById('tab-media-'+t);if(b)b.className=BTN+IDLE})}}
 function boot(){bind();hardenAutoNext();armMp3AutoSkip();setTimeout(armMediaKeys,2600);var v=document.getElementById('view-music');if(v&&window.MutationObserver){new MutationObserver(function(){if(musicOpen())Host.onMusicShow();else Host.onMusicHide()}).observe(v,{attributes:true,attributeFilter:['class']})}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r3',host:Host,player:Social};
+window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r5',host:Host,player:Social};
 })();
 </script>
 </body>
