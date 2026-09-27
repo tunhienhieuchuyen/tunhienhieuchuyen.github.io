@@ -926,7 +926,7 @@ button,input,textarea,select,option{font-family:inherit!important;}
   width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;
 }
 #chat-messages .chat-file-card{display:flex!important;align-items:center!important;gap:10px!important;}
-#chat-messages .lifeos-j20r12-render-lock{visibility:hidden!important;}
+#chat-messages .lifeos-j20r12-render-lock{visibility:visible!important;}
 </style>
 
 <script>
@@ -10626,6 +10626,30 @@ window.ChatEngine = {
   render() {
     const container = document.getElementById('chat-messages');
     if (!container) return;
+    if (!container.__lifeosVirtual) {
+      container.__lifeosVirtual = true;
+      const engine = this;
+      container.addEventListener('click', function (ev) {
+        const btn = ev.target && ev.target.closest && ev.target.closest('[data-lifeos-older]');
+        if (!btn || !container.contains(btn)) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        engine._chatPrepend = true;
+        engine._chatWindow = Math.min(engine._chatTotal || 0, (engine._chatWindow || 24) + 24);
+        engine.render();
+      });
+      container.addEventListener('scroll', function () {
+        if (container.scrollTop > 80) return;
+        if ((engine._chatWindow || 24) >= (engine._chatTotal || 0) || engine._chatPrepend) return;
+        engine._chatPrepend = true;
+        engine._chatWindow = Math.min(engine._chatTotal || 0, (engine._chatWindow || 24) + 24);
+        engine.render();
+      }, { passive: true });
+    }
+    if (this._chatTopic !== this.currentTopic) {
+      this._chatTopic = this.currentTopic;
+      this._chatWindow = 24;
+    }
     const profileKey = this.getKey();
     const messages = Array.isArray(window.chatHistory) ? window.chatHistory : [];
     const emptyHtml = `<div class="h-full min-h-[260px] flex flex-col items-center justify-center text-center text-slate-400 p-8"><div class="w-16 h-16 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-3"><i class="ph-duotone ph-chats-teardrop text-4xl text-primary"></i></div><div class="text-sm font-black text-slate-600">Chưa có tin nhắn</div><div class="text-xs font-semibold mt-1">Gửi lời nhắn hoặc file đầu tiên cho gia đình.</div></div>`;
@@ -10634,6 +10658,16 @@ window.ChatEngine = {
       if (this.currentTopic !== 'all') return String(m.topic_id || '') === String(this.currentTopic);
       return true;
     });
+    this._chatTotal = filteredChat.length;
+    const lifeosStart = 0;
+    const lifeosView = filteredChat;
+    const memoSig = String(profileKey) + '#' + String(this.currentTopic) + '#' + lifeosStart + '#' + lifeosView.map((m) => [
+      m.id, m.type, m.timestamp, m.isPinned ? 1 : 0, m.isEdited ? 1 : 0, m.isPrivate ? 1 : 0,
+      m.text ? String(m.text).length + ':' + String(m.text).slice(0, 40) : 0, m.reply_to || '',
+      m.reactions ? Object.keys(m.reactions).length + ':' + Object.values(m.reactions).join('') : '',
+      m.file_id || m.file_name || m.fileName || ''
+    ].join('~')).join('|');
+    if (container.getAttribute('data-lifeos-memo') === memoSig && container.childElementCount) return;
     const pinnedMsg = filteredChat.find((m) => m.isPinned);
     const banner = document.getElementById('chat-pinned-banner');
     if (banner) {
@@ -10647,8 +10681,13 @@ window.ChatEngine = {
         banner.classList.remove('flex');
       }
     }
-    if (!filteredChat.length) {container.innerHTML = emptyHtml;return;}
-    container.innerHTML = filteredChat.map((m) => {var _window$PROFILES2;
+    if (!filteredChat.length) {container.innerHTML = emptyHtml;container.setAttribute('data-lifeos-memo', memoSig);return;}
+    const lifeosNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 140;
+    const lifeosPrevTop = container.scrollTop;
+    const lifeosPrevHeight = container.scrollHeight;
+    const lifeosPrepend = !!this._chatPrepend;
+    const lifeosOlder = '';
+    container.innerHTML = lifeosOlder + lifeosView.map((m) => {var _window$PROFILES2;
       const isMe = String(m.sender || '') === String(profileKey);
       const alignCls = isMe ? 'justify-end' : 'justify-start';
       let bubbleCls = isMe ? 'bg-primary text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm border border-slate-200';
@@ -10659,7 +10698,8 @@ window.ChatEngine = {
       const avatarHtml = `<div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-lg shadow-sm shrink-0">${window.escapeHTML(String(senderProf.icon || '👤'))}</div>`;
       let contentHtml = '';
       if (m.type === 'text') {
-        contentHtml = `<p class="text-sm font-medium whitespace-pre-wrap break-words">${window.escapeHTML(String(m.text || ''))}</p>
+        const lifeosText = String(m.text || m.body || m.content || (m.payload && (m.payload.text || m.payload.body || m.payload.content)) || '');
+        contentHtml = `<p class="text-sm font-medium whitespace-pre-wrap break-words">${window.escapeHTML(lifeosText)}</p>
                                ${m.isEdited ? '<span class="text-[9px] text-slate-400 italic mt-1 block">(Đã chỉnh sửa)</span>' : ''}`;
       } else {
         const elId = 'file-' + String(m.id).replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -10702,7 +10742,7 @@ window.ChatEngine = {
       }
       const msgIdAttr = window.escapeHTML(String(m.id || ''));
       return `
-            <div class="flex w-full mb-4 ${alignCls}">
+            <div class="lifeos-vrow flex w-full mb-4 ${alignCls}">
                 ${!isMe ? avatarHtml + '<div class="w-2 shrink-0"></div>' : ''}
                 <div class="flex flex-col max-w-[75%]">
                     ${!isMe ? `<span class="text-[10px] font-bold text-slate-500 mb-1 ml-1">${window.escapeHTML(String(senderProf.name || m.sender || 'Gia đình'))}</span>` : ''}
@@ -10717,7 +10757,13 @@ window.ChatEngine = {
                 </div>
             </div>`;
     }).join('');
-    setTimeout(() => {container.scrollTop = container.scrollHeight;}, 80);
+    container.setAttribute('data-lifeos-memo', memoSig);
+    if (lifeosPrepend) {
+      container.scrollTop = lifeosPrevTop + Math.max(0, container.scrollHeight - lifeosPrevHeight);
+      this._chatPrepend = false;
+    } else if (lifeosNearBottom || !container.__lifeosMemoPainted) container.scrollTop = container.scrollHeight;
+    else container.scrollTop = lifeosPrevTop;
+    container.__lifeosMemoPainted = true;
   }
 };
 window.FirebaseSync = {
@@ -12150,18 +12196,43 @@ window.MusicApp = {
     if (input) input.focus({ preventScroll: true });
   }, renderList() {
     const container = el('mp3-list-container');if (!container) return;
-    Array.from(container.children).forEach((c) => {if (c.id !== 'music-loading') c.remove();});
     const keyword = (this.filterText || '').trim().toLowerCase();
+    const sig = keyword + '|' + this.visibleCount + '|' + ((this.playlist && this.playlist.length) || 0);
+    if (container.__lifeosMp3Sig === sig && container.querySelector('.song-row')) {
+      container.querySelectorAll('.song-row').forEach((row) => {
+        const on = Number(row.getAttribute('data-song')) === this.currentIndex;
+        row.classList.toggle('active', on);
+        const num = row.querySelector('.song-left');
+        const title = row.querySelector('.song-title');
+        if (num) {
+          num.textContent = on ? '▶' : String(Number(row.getAttribute('data-pos')) + 1);
+          num.className = 'song-left text-xs font-mono flex-shrink-0 ' + (on ? 'song-idx text-primary font-black' : 'text-slate-400 font-bold');
+        }
+        if (title) title.className = 'song-title text-[0.95rem] ' + (on ? 'text-primary font-black' : 'text-slate-800 font-bold');
+      });
+      this.updateMiniPlayer();
+      return;
+    }
+    container.__lifeosMp3Sig = sig;
+    Array.from(container.children).forEach((c) => {if (c.id !== 'music-loading') c.remove();});
     const list = keyword ?
     this.playlist.filter((s) => `${this.cleanSongTitle(s.title)} ${s.artist || ''}`.toLowerCase().includes(keyword)) :
     this.playlist;
     list.slice(0, this.visibleCount).forEach((s, i) => {
-      const actualIndex = this.playlist.findIndex((x) => x.id === s.id);
+      if (this._idMapSrc !== this.playlist) {
+        const map = Object.create(null);
+        (this.playlist || []).forEach((song, idx) => { if (song && song.id != null) map[song.id] = idx; });
+        this._idMap = map;
+        this._idMapSrc = this.playlist;
+      }
+      const actualIndex = this._idMap && this._idMap[s.id] != null ? this._idMap[s.id] : this.playlist.findIndex((x) => x.id === s.id);
       const isCurrent = this.currentIndex === actualIndex;
       const title = this.cleanSongTitle(s.title);
       const artist = this.cleanSongTitle(s.artist || 'Archive');
       const div = document.createElement('div');
       div.className = `song-row ${isCurrent ? 'active' : ''}`;
+      div.setAttribute('data-song', String(actualIndex));
+      div.setAttribute('data-pos', String(i));
       div.setAttribute('role', 'button');
       div.setAttribute('tabindex', '0');
       div.onclick = (e) => {
@@ -15777,7 +15848,7 @@ catch (e) {
   justify-items: center !important;
 }
 #view-chat { min-width: 0 !important; }
-#chat-messages { scroll-behavior: smooth; }
+#chat-messages { scroll-behavior: auto; }
 .lifeos-chat-bubble-img { max-width: min(250px, 72vw); border-radius: .85rem; object-fit: cover; }
 @media (max-width: 1023px) {
   #bottom-nav .nav-btn span { font-size: 9px !important; letter-spacing: 0 !important; }
@@ -32793,7 +32864,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
 #chat-messages .lifeos-j20r16-audio-status i{width:8px;height:8px;min-width:8px;border-radius:999px;background:#65c900;box-shadow:0 0 0 3px rgba(101,201,0,.13)}
 #chat-messages.lifeos-j20r16-render-lock .chat-file-card,
 #chat-messages.lifeos-j20r16-render-lock [data-chat-file-card],
-#chat-messages.lifeos-j20r16-render-lock .lifeos-j19g-card{visibility:hidden!important}
+#chat-messages.lifeos-j20r16-render-lock .lifeos-j19g-card{visibility:visible!important}
 #chat-messages .chat-file-card,#chat-messages [data-chat-file-card],#chat-messages .lifeos-j19g-row,#chat-messages .lifeos-j19g-card-wrap,#chat-messages .lifeos-j19g-card{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
 </style>
 <script id="lifeos-j20r16-audio-inline-ghost-boot-js">var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -37399,28 +37470,36 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         tickTimers = [];
     }
     function beginBoot(reason, ms) {
-        var dur = Math.max(900, Number(ms) || 2200), r = S(reason || 'family_boot'), t = now();
+        var rootNow = chatRoot();
+        if (rootNow && hasCards(rootNow)) {
+            snapshotStable('keep_cards_' + S(reason || ''));
+            return false;
+        }
+        var dur = 800, r = S(reason || 'family_boot'), t = now();
         if (t < lockUntil && (t - lastBeginAt) < 700) {
-            lockUntil = Math.max(lockUntil, t + Math.min(dur, 1800));
             lastBeginAt = t;
             lastBeginReason = r;
-            if (!pendingMasterTimer)
-                scheduleMaster('boot_lock_extend_' + r, 120);
-            trace('BOOT_LOCK_EXTEND', { reason: r, durationMs: dur, seq: bootSeq, r35: r35Count() });
-            return true;
+            trace('BOOT_LOCK_SKIP_EXTEND', { reason: r, seq: bootSeq });
+            return false;
         }
         clearBootTimers();
-        lockUntil = Math.max(lockUntil, t + dur);
+        lockUntil = t + dur;
         lockReason = r;
         bootSeq++;
         lastBeginAt = t;
         lastBeginReason = r;
         setBodyLock(true);
-        snapshotStable('lock_start_' + lockReason);
         trace('BOOT_LOCK_START', { reason: lockReason, durationMs: dur, seq: bootSeq, r35: r35Count() });
         scheduleMaster('boot_lock_start_' + lockReason, 0);
-        [120, 420, 950].forEach(function (tt) { tickTimers.push(setTimeout(function () { if (inLock())
-            scheduleMaster('boot_lock_tick_' + tt + '_' + lockReason, 60); }, tt)); });
+        tickTimers.push(setTimeout(function () {
+            var root = chatRoot();
+            if (root && hasCards(root)) {
+                snapshotStable('boot_cards_ready');
+                return;
+            }
+            if (inLock())
+                scheduleMaster('boot_still_empty_' + lockReason, 0);
+        }, 500));
         bootEndTimer = setTimeout(function () { if (now() >= lockUntil) {
             setBodyLock(false);
             snapshotStable('lock_end_' + lockReason);
@@ -37661,14 +37740,12 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
                 if (!inLock() || !r35Ready())
                     return;
                 var root = chatRoot();
-                if (!root)
+                if (!root || hasCards(root)) {
+                    if (root && hasCards(root))
+                        snapshotStable('mutation_stable');
                     return;
-                var txt = S(root.textContent).toLowerCase();
-                var cards = hasCards(root);
-                if (!cards || /đang tải|loading|danh sách chat lỗi|chat lỗi|khởi tạo/i.test(txt))
-                    scheduleMaster('mutation_loader_or_empty', 25);
-                else
-                    snapshotStable('mutation_stable');
+                }
+                scheduleMaster('mutation_loader_or_empty', 80);
             });
             mo.observe(document.body, { subtree: true, childList: true, characterData: true });
             window.__lifeosR48FamilyMo = mo;
@@ -43562,7 +43639,7 @@ var Host={
   playYouTubeIframe:function(item){var stage=by('player-stage'),id=String(item.id||'').trim(),type=item.ytType||item.type||'video';if(!id){if(stage)stage.innerHTML='<div class="player-empty" style="color:#cbd5e1;padding:16px">Link YouTube không hợp lệ</div>';return}var origin=(location.protocol==='http:'||location.protocol==='https:')?location.origin:'',src=type==='playlist'?'https://www.youtube.com/embed/videoseries?list='+encodeURIComponent(item.id)+'&autoplay=1&playsinline=1&enablejsapi=1':'https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&playsinline=1&enablejsapi=1';if(origin)src+='&origin='+encodeURIComponent(origin);var f=document.createElement('iframe');f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;f.referrerPolicy='strict-origin-when-cross-origin';f.src=src;if(stage){stage.innerHTML='';stage.appendChild(f)}this.iframe=f;this.youtubeExternal=type==='playlist'?'https://www.youtube.com/playlist?list='+encodeURIComponent(item.id):'https://www.youtube.com/watch?v='+encodeURIComponent(id);this.setStatus('YouTube đang dùng iframe dự phòng')},
   paintSelection:function(){var idx=this.selected[this.currentTab]||0,list=by('media-list');if(!list)return;var row=list.querySelector('.media-item[data-index="'+idx+'"]');var active=this.playing.tab===this.currentTab?list.querySelector('.media-item[data-index="'+this.playing.index+'"]'):null;if(this._paintRow&&this._paintRow!==row)this._paintRow.classList.remove('remote-selected');if(row)row.classList.add('remote-selected');this._paintRow=row;if(this._activeRow&&this._activeRow!==active)this._activeRow.classList.remove('active');if(active)active.classList.add('active');this._activeRow=active},
   ensureVisible:function(idx){var list=by('media-list');if(!list)return;var row=list.querySelector('.media-item[data-index="'+idx+'"]');if(!row)return;var top=row.offsetTop-(list.clientHeight/2)+(row.offsetHeight/2);list.scrollTop=Math.max(0,top)},
-  render:function(){var list=by('media-list');if(!list)return;var q=String(this.query||'').toLowerCase().trim();var all=this.sourceItems();var self=this;var filtered=all.filter(function(x){return String(x.name||x.title||'').toLowerCase().indexOf(q)>=0});this.filtered=filtered;list.innerHTML='';if(!filtered.length){list.innerHTML='<div class="p-6 text-center text-slate-500 font-bold">'+(this.busy[this.currentTab]?'Đang tải…':'Không có nội dung phù hợp.')+'</div>';this.paintSelection();return}filtered.forEach(function(item,index){var row=document.createElement('div');row.className='media-item';row.setAttribute('data-index',String(index));var meta=self.currentTab==='youtube'?(item.ytType==='playlist'?'Playlist YouTube':'Video YouTube'):('Facebook Reel'+(item.durationSeconds?(' · '+Math.round(item.durationSeconds)+'s'):''));row.innerHTML='<div class="media-num">'+(index+1)+'</div><div style="min-width:0;flex:1"><div class="media-title">'+esc(self.shortTitle(item))+'</div><div class="media-meta">'+esc(meta)+'</div></div>';row.title=String(item.title||item.name||'');list.appendChild(row)});this.paintSelection()},
+  render:function(){var list=by('media-list');if(!list)return;var q=String(this.query||'').toLowerCase().trim();var all=this.sourceItems();var self=this;var filtered=all.filter(function(x){return String(x.name||x.title||'').toLowerCase().indexOf(q)>=0});this.filtered=filtered;var head=filtered[0],tail=filtered[filtered.length-1];var sig=this.currentTab+'|'+q+'|'+filtered.length+'|'+((head&&(head.id||head.url))||'')+'|'+((tail&&(tail.id||tail.url))||'');if(list.__lifeosSig===sig){this.paintSelection();return}list.__lifeosSig=sig;list.innerHTML='';var frag=document.createDocumentFragment();if(!filtered.length){list.innerHTML='<div class="p-6 text-center text-slate-500 font-bold">'+(this.busy[this.currentTab]?'Đang tải…':'Không có nội dung phù hợp.')+'</div>';this.paintSelection();return}filtered.forEach(function(item,index){var row=document.createElement('div');row.className='media-item';row.setAttribute('data-index',String(index));row.onclick=function(ev){if(ev){ev.preventDefault();ev.stopPropagation()}var idx=Number(this.getAttribute('data-index'));if(!isFinite(idx))return;Host.selected[Host.currentTab]=idx;Host.playSelected()};var meta=self.currentTab==='youtube'?(item.ytType==='playlist'?'Playlist YouTube':'Video YouTube'):('Facebook Reel'+(item.durationSeconds?(' · '+Math.round(item.durationSeconds)+'s'):''));row.innerHTML='<div class="media-num">'+(index+1)+'</div><div style="min-width:0;flex:1"><div class="media-title">'+esc(self.shortTitle(item))+'</div><div class="media-meta">'+esc(meta)+'</div></div>';row.title=String(item.title||item.name||'');frag.appendChild(row)});list.appendChild(frag);this.paintSelection()},
   move:function(delta,play){if(!this.filtered.length)return;var len=this.filtered.length;var n=((this.selected[this.currentTab]||0)+delta)%len;if(n<0)n+=len;this.selected[this.currentTab]=n;this.paintSelection();this.ensureVisible(n);if(play)this.playSelected()},
   playSelected:function(){var idx=this.selected[this.currentTab]||0,item=this.filtered[idx];if(!item||!window.LifeOSSocialPlayer)return;window.LifeOSSocialPlayer.startItem(this.currentTab,item,'manual')},
   togglePlay:function(){if(window.LifeOSSocialPlayer&&window.LifeOSSocialPlayer.toggle())return},
@@ -43571,7 +43648,7 @@ var Host={
   leave:function(){if(!this.currentTab)return;['media-group-sidebar','media-group-mobile-bar'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.hidden=false;el.style.removeProperty('display')});this.currentTab='';this.active=false;if(window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup()}this.stopElements();showEl('lifeos-social-list',false);showEl('lifeos-social-player',false);paintButtons()},
   reloadList:function(){var self=this,tab=this.currentTab;if(tab!=='youtube'&&tab!=='facebook')return;var list=by('media-list');if(list)list.removeAttribute('data-signature');this.setStatus('Đang tải mới kho '+(tab==='youtube'?'YouTube':'Facebook')+'…');var p=tab==='youtube'?this.loadYouTube(true):this.loadFacebook(true);return Promise.resolve(p).then(function(){self.render(true);paintButtons();if(window.showToast)window.showToast('Đã tải mới '+(tab==='youtube'?'YouTube':'Facebook'),'ph-check')},function(){self.render(true);if(window.showToast)window.showToast('Tải mới không thành công','ph-warning')})},
   onMusicHide:function(){this.active=false;if(window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup()}this.stopElements()},
-  onMusicShow:function(){if(this.currentTab==='youtube'||this.currentTab==='facebook'){this.active=musicOpen();this.applyLayout();paintButtons()}}
+  onMusicShow:function(){if(this.currentTab!=='youtube'&&this.currentTab!=='facebook')return;this.active=musicOpen();var list=document.getElementById('lifeos-social-list');if(!list||list.hidden||list.classList.contains('hidden'))this.applyLayout();paintButtons()}
 };
 var Media=Host;
 var Base={stopElements:function(){Host.stopElements()},playYouTube:function(item){Host.playYouTubeIframe(item)}};
@@ -43615,6 +43692,33 @@ Social.mode=Social.readMode();
 window.LifeOSSocialPlayer=Social;
 if(!document.__lifeosFacebookSoundUnlockR6){document.__lifeosFacebookSoundUnlockR6=true;var unlockFacebookSound=function(){if(Social.fbInstance)Social.forceFacebookSound(Social.fbInstance,Social.serial);var v=by('player-stage')&&by('player-stage').querySelector('video');if(v){try{v.muted=false;v.defaultMuted=false;v.volume=1;v.removeAttribute('muted')}catch(e){}}};document.addEventListener('pointerdown',unlockFacebookSound,true);document.addEventListener('keydown',unlockFacebookSound,true);}
 
+function armSocialClicks(){
+  if(armSocialClicks.done)return;
+  var list=document.getElementById('lifeos-social-list');
+  if(!list)return;
+  armSocialClicks.done=true;
+  list.addEventListener('click',function(ev){
+    var row=ev.target&&ev.target.closest?ev.target.closest('.media-item'):null;
+    if(!row||!list.contains(row))return;
+    var idx=Number(row.getAttribute('data-index'));
+    if(!isFinite(idx))return;
+    Host.selected[Host.currentTab]=idx;
+    Host.playSelected();
+  });
+  function on(id,fn){
+    var b=document.getElementById(id);
+    if(!b||b.__lifeosSocialCtl)return;
+    b.__lifeosSocialCtl=true;
+    b.addEventListener('click',function(ev){if(ev){ev.preventDefault();ev.stopPropagation()}fn()});
+  }
+  on('lifeos-social-prev',function(){Host.move(-1,true)});
+  on('lifeos-social-next',function(){Host.move(1,true)});
+  on('lifeos-social-play',function(){var player=window.LifeOSSocialPlayer;if(!(player&&player.toggle&&player.toggle()))Host.playSelected()});
+  on('lifeos-social-mode',function(){var player=window.LifeOSSocialPlayer;if(player)player.saveMode(player.mode==='random'?'sequential':'random')});
+  on('lifeos-social-full',function(){var stage=document.getElementById('lifeos-social-stage');if(!stage)return;var el=stage.querySelector('iframe,video')||stage;if(el.requestFullscreen)el.requestFullscreen();else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen()});
+  on('lifeos-social-yt-open',function(){var url=Host.youtubeExternal;if(!url){var item=(Host.filtered||[])[Host.selected.youtube||0];if(item&&item.id)url=(item.ytType==='playlist'?'https://www.youtube.com/playlist?list=':'https://www.youtube.com/watch?v=')+encodeURIComponent(item.id)}if(url)window.open(url,'_blank','noopener')});
+  on('lifeos-social-fb-open',function(){var item=(Host.filtered||[])[Host.selected.facebook||0];var url=item&&(item.url||item.permalink)||Host.facebookExternal;if(url)window.open(url,'_blank','noopener')});
+}
 function bind(){
   var n=0;
   var timer=setInterval(function(){
@@ -43651,6 +43755,7 @@ function bind(){
       });
     }
   },200);
+  armSocialClicks();
   ['youtube','facebook'].forEach(function(tab){
     var b=document.getElementById('tab-media-'+tab);
     if(!b||b.__lifeosYtFbClick)return;
@@ -43669,14 +43774,18 @@ function hardenAutoNext(){
     var self=this;
     var r=oldYT.apply(this, arguments);
     clearInterval(this.ytWatch);
-    this.ytWatch=setInterval(function(){
+    var gap=1000;
+    var tick=function(){
       if(serial!==self.serial){clearInterval(self.ytWatch);return}
       var player=self.ytPlayer;
       if(!player||typeof player.getDuration!=='function')return;
       var d=0,t=0,st=-1;
       try{d=Number(player.getDuration()||0);t=Number(player.getCurrentTime()||0);st=Number(player.getPlayerState())}catch(e){return}
-      if(st===0||(st===1&&d>1&&t>0.8&&t>=d-0.35)){clearInterval(self.ytWatch);self.signalEnded(serial,'youtube-watch')}
-    },350);
+      if(st===0||(st===1&&d>1&&t>0.8&&t>=d-0.35)){clearInterval(self.ytWatch);self.signalEnded(serial,'youtube-watch');return}
+      var want=(d>1&&t>=d-3)?350:1000;
+      if(want!==gap){gap=want;clearInterval(self.ytWatch);self.ytWatch=setInterval(tick,gap)}
+    };
+    this.ytWatch=setInterval(tick,gap);
     return r;
   };
 }
@@ -43694,7 +43803,7 @@ function armMediaKeys(){}
 function paintButtons(){['youtube','facebook'].forEach(function(t){var b=document.getElementById('tab-media-'+t);if(!b)return;var on=Host.currentTab===t;var count=t==='youtube'?(Host.youtubeItems||[]).length:(Host.facebookItems||[]).length;b.className='px-4 py-2 rounded-xl text-sm font-bold border active:scale-95 transition whitespace-nowrap';b.setAttribute('aria-selected',on?'true':'false');b.textContent=(t==='youtube'?'YouTube':'Facebook')+(count?' · '+count:'');['background','color','border-color','flex','min-width','overflow','white-space'].forEach(function(k){b.style.removeProperty(k)});b.style.opacity='1'});if(Host.currentTab==='youtube'||Host.currentTab==='facebook'){['music','radio','tv'].forEach(function(t){var b=document.getElementById('tab-media-'+t);if(b)b.className=BTN+IDLE})}}
 function boot(){bind();hardenAutoNext();armMp3AutoSkip();setTimeout(armMediaKeys,2600);var v=document.getElementById('view-music');if(v&&window.MutationObserver){new MutationObserver(function(){if(musicOpen())Host.onMusicShow();else Host.onMusicHide()}).observe(v,{attributes:true,attributeFilter:['class']})}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r6',host:Host,player:Social};
+window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:Host,player:Social};
 })();
 </script>
 </body>
