@@ -1,0 +1,18 @@
+{
+  "id": "./hoctienganh.html",
+  "name": "Học từ vựng lớp 9",
+  "short_name": "Từ lớp 9",
+  "description": "Học từ Global Success lớp 9 và ôn thi vào 10.",
+  "lang": "vi",
+  "dir": "ltr",
+  "start_url": "./hoctienganh.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4efe6",
+  "theme_color": "#0f5c56",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
