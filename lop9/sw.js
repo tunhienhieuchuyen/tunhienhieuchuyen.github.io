@@ -1,4 +1,4 @@
-var CACHE = "lop9-hoc-v1";
+var CACHE = "lop9-hoc-v2";
 var CORE = ["./hoctienganh.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", function (event) {

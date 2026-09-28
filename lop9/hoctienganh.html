@@ -218,27 +218,36 @@
     * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
   }
   .install-fab {
-    position: fixed; z-index: 80; right: max(10px, env(safe-area-inset-right)); top: 42%;
-    border: 0; background: transparent; padding: 8px; cursor: pointer; touch-action: none;
-    user-select: none; display: none;
+    position: fixed; z-index: 45;
+    right: max(12px, env(safe-area-inset-right));
+    bottom: calc(4.85rem + env(safe-area-inset-bottom));
+    top: auto; left: auto;
+    border: 0; background: transparent; padding: 6px; margin: 0;
+    cursor: grab; touch-action: none; display: none;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none;
   }
-  .install-fab[data-positioned="1"] { top: auto; right: auto; }
+  .install-fab, .install-fab * {
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  .install-fab[data-positioned="1"] { right: auto; bottom: auto; }
   .install-fab-inner {
-    display: inline-flex; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 999px;
-    background: rgba(15, 92, 86, .92); color: #f7f3eb; border: 1px solid rgba(255,255,255,.7);
+    display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 999px;
+    background: rgba(15, 92, 86, .94); color: #f7f3eb; border: 1px solid rgba(255,255,255,.75);
     box-shadow: 0 10px 24px rgba(15, 40, 36, .28); font-weight: 700; font-size: .82rem; line-height: 1;
+    pointer-events: none;
   }
-  .install-fab.is-dragging .install-fab-inner { transform: scale(.97); }
+  .install-fab.is-dragging { cursor: grabbing; }
+  .install-fab.is-dragging .install-fab-inner { transform: scale(1.04); }
   #pwa-guide, #poster-sheet {
     position: fixed; inset: 0; z-index: 95; background: rgba(28, 25, 23, .55);
     display: flex; align-items: flex-end; justify-content: center; padding: 1rem;
   }
   #pwa-guide[hidden], #poster-sheet[hidden] { display: none; }
-  .sheet {
+  .pwa-card {
     width: min(24rem, 100%); background: var(--surface); color: var(--ink); border-radius: 1.1rem;
     padding: 1rem 1rem 1.1rem; box-shadow: 0 16px 40px rgba(28, 25, 23, .2);
   }
-  .sheet h2 { font-size: 1.15rem; margin: 0; }
+  .pwa-card h2 { font-size: 1.15rem; margin: 0; }
   .guide-step { display: flex; gap: .6rem; margin-top: .7rem; font-size: .95rem; }
   .step-num { width: 1.5rem; height: 1.5rem; border-radius: 999px; background: var(--teal); color: var(--teal-fg); display: flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
   #poster-sheet img { width: 100%; max-height: 62vh; object-fit: contain; background: var(--bg); border-radius: .7rem; }
@@ -251,14 +260,14 @@
   <span class="install-fab-inner"><span aria-hidden="true">↓</span><span class="install-fab-label">Cài app</span></span>
 </button>
 <div id="pwa-guide" hidden>
-  <div class="sheet" role="dialog" aria-labelledby="pwa-guide-title">
+  <div class="pwa-card" role="dialog" aria-labelledby="pwa-guide-title">
     <h2 id="pwa-guide-title">Cài app học từ</h2>
     <div id="pwa-guide-body"></div>
     <button class="btn btn-surface" type="button" id="pwa-guide-close" style="margin-top:1rem">Đóng</button>
   </div>
 </div>
 <div id="poster-sheet" hidden>
-  <div class="sheet" role="dialog" aria-labelledby="poster-title">
+  <div class="pwa-card" role="dialog" aria-labelledby="poster-title">
     <h2 id="poster-title">Ảnh học</h2>
     <p class="sm muted" style="margin:.35rem 0 .6rem">Nhấn giữ ảnh để lưu vào thư viện, hoặc bấm Chia sẻ.</p>
     <img id="poster-preview" alt="Ảnh các từ cần nhớ">
@@ -1025,7 +1034,7 @@ function render() {
 
 document.body.addEventListener("pointerdown", (e) => {
   const b = e.target.closest("button");
-  if (!b || b.disabled) return;
+  if (!b || b.disabled || b.id === "btnInstall") return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const act = b.dataset.act || "";
   const hard = act === "grade" || act === "again" || act === "pin" || act === "known";
@@ -1350,7 +1359,7 @@ render();
 </script>
 <script>
 (function () {
-  var KEY = "lop9_install_fab_position";
+  var KEY = "lop9_install_fab_position_v2";
   var fab = document.getElementById("btnInstall");
   var guide = document.getElementById("pwa-guide");
   var body = document.getElementById("pwa-guide-body");
@@ -1400,10 +1409,16 @@ render();
     }
     showGuide();
   }
-  var suppress = false;
+  var suppressClick = false;
   var pointer = null;
   var drag = false;
   var sx = 0, sy = 0, sl = 0, st = 0;
+  function clearSelection() {
+    try {
+      var sel = window.getSelection && window.getSelection();
+      if (sel && sel.removeAllRanges) sel.removeAllRanges();
+    } catch (e) {}
+  }
   function clamp(left, top) {
     var rect = fab.getBoundingClientRect();
     var maxL = window.innerWidth - rect.width - 8;
@@ -1414,6 +1429,8 @@ render();
     var next = clamp(pos.left, pos.top);
     fab.style.left = next.left + "px";
     fab.style.top = next.top + "px";
+    fab.style.right = "auto";
+    fab.style.bottom = "auto";
     fab.dataset.positioned = "1";
     return next;
   }
@@ -1421,37 +1438,62 @@ render();
     var saved = JSON.parse(localStorage.getItem(KEY) || "null");
     if (saved && isFinite(saved.left) && isFinite(saved.top)) place(saved);
   } catch (e) {}
-  fab.addEventListener("pointerdown", function (ev) {
-    if (ev.button !== undefined && ev.button !== 0) return;
-    pointer = ev.pointerId;
+  function begin(clientX, clientY, id) {
+    pointer = id;
     var rect = fab.getBoundingClientRect();
-    sx = ev.clientX; sy = ev.clientY; sl = rect.left; st = rect.top; drag = false;
-    if (fab.setPointerCapture) fab.setPointerCapture(ev.pointerId);
-  });
-  fab.addEventListener("pointermove", function (ev) {
-    if (pointer === null || ev.pointerId !== pointer) return;
-    var dx = ev.clientX - sx, dy = ev.clientY - sy;
-    if (!drag && Math.hypot(dx, dy) > 8) { drag = true; fab.classList.add("is-dragging"); }
+    sx = clientX; sy = clientY; sl = rect.left; st = rect.top; drag = false;
+    clearSelection();
+  }
+  function move(clientX, clientY) {
+    var dx = clientX - sx, dy = clientY - sy;
+    if (!drag && Math.hypot(dx, dy) > 10) { drag = true; fab.classList.add("is-dragging"); clearSelection(); }
     if (!drag) return;
-    ev.preventDefault();
     place({ left: sl + dx, top: st + dy });
-  });
-  function endDrag(ev) {
-    if (pointer === null || (ev.pointerId !== undefined && ev.pointerId !== pointer)) return;
-    if (drag) {
+  }
+  function finish() {
+    var moved = drag;
+    if (moved) {
       fab.classList.remove("is-dragging");
       var pos = place({ left: fab.getBoundingClientRect().left, top: fab.getBoundingClientRect().top });
       localStorage.setItem(KEY, JSON.stringify(pos));
-      suppress = true;
-      setTimeout(function () { suppress = false; }, 280);
+      suppressClick = true;
+      setTimeout(function () { suppressClick = false; }, 400);
+      if (window.toast) window.toast("Đã dời nút Cài app.", "info");
     }
-    pointer = null; drag = false;
+    pointer = null;
+    drag = false;
+    return moved;
   }
-  fab.addEventListener("pointerup", endDrag);
-  fab.addEventListener("pointercancel", endDrag);
+  fab.addEventListener("pointerdown", function (ev) {
+    if (ev.button !== undefined && ev.button !== 0) return;
+    ev.preventDefault();
+    begin(ev.clientX, ev.clientY, ev.pointerId);
+    if (fab.setPointerCapture) { try { fab.setPointerCapture(ev.pointerId); } catch (e) {} }
+  }, { passive: false });
+  fab.addEventListener("pointermove", function (ev) {
+    if (pointer === null || ev.pointerId !== pointer) return;
+    ev.preventDefault();
+    move(ev.clientX, ev.clientY);
+  }, { passive: false });
+  function endPointer(ev) {
+    if (pointer === null || (ev.pointerId !== undefined && ev.pointerId !== pointer)) return;
+    var moved = finish();
+    if (!moved) install();
+  }
+  fab.addEventListener("pointerup", endPointer);
+  fab.addEventListener("pointercancel", function (ev) {
+    if (pointer === null || (ev.pointerId !== undefined && ev.pointerId !== pointer)) return;
+    finish();
+  });
   fab.addEventListener("click", function (ev) {
-    if (suppress) { ev.preventDefault(); ev.stopPropagation(); suppress = false; return; }
-    install();
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+  fab.addEventListener("contextmenu", function (ev) { ev.preventDefault(); });
+  fab.addEventListener("selectstart", function (ev) { ev.preventDefault(); });
+  window.addEventListener("resize", function () {
+    if (fab.dataset.positioned !== "1") return;
+    place({ left: fab.getBoundingClientRect().left, top: fab.getBoundingClientRect().top });
   });
   document.getElementById("pwa-guide-close").addEventListener("click", function () { guide.hidden = true; });
   guide.addEventListener("click", function (ev) { if (ev.target === guide) guide.hidden = true; });
