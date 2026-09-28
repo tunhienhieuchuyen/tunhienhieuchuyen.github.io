@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e4d7b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Toán lớp 9">
+<title>Học toán lớp 9</title>
+<link rel="manifest" href="./manifest-toan.json">
+<link rel="icon" href="./icon-toan-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icon-toan-192.png">
+<script>
+(function () {
+  if (window.__lop9ToanCapture) return;
+  window.__lop9ToanCapture = true;
+  window.__lop9InstallPrompt = null;
+  window.addEventListener("beforeinstallprompt", function (event) {
+    event.preventDefault();
+    window.__lop9InstallPrompt = event;
+    window.dispatchEvent(new CustomEvent("lop9:pwa-install-ready"));
+  });
+})();
+</script>
+<style>
+  :root { --bg:#f4efe6; --card:#fffdf8; --ink:#1c1917; --muted:#5c564e; --line:#e6dfd2; --blue:#1e4d7b; --blue-fg:#f4efe6; --warn:#9a3412; --ok:#166534; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Be Vietnam Pro", "Noto Sans", Roboto, "Segoe UI", sans-serif; }
+  body { min-height: 100vh; }
+  button, input { font: inherit; }
+  #app { max-width: 32rem; margin: 0 auto; padding: 1rem 1rem 6.2rem; }
+  h1 { font-size: 1.7rem; line-height: 1.15; margin: 0 0 .35rem; }
+  h2 { font-size: 1.25rem; margin: 0; }
+  p { margin: .35rem 0; }
+  .muted { color: var(--muted); }
+  .sm { font-size: .92rem; }
+  .note { background: #fff; border: 1px solid var(--line); border-radius: 1rem; padding: .8rem .9rem; }
+  .warn { color: var(--warn); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 1rem; padding: .9rem 1rem; margin: .7rem 0; }
+  .card h2 { margin-bottom: .2rem; }
+  .tag { display: inline-block; font-size: .75rem; font-weight: 700; color: var(--blue); }
+  .btn { min-height: 3rem; border-radius: .9rem; border: 1px solid var(--line); background: #fff; padding: .6rem .8rem; font-weight: 700; }
+  .btn-primary { background: var(--blue); color: var(--blue-fg); border-color: var(--blue); width: 100%; }
+  .btn-surface { background: #fff; }
+  .row { display: flex; gap: .5rem; }
+  .row .btn { flex: 1; }
+  .he { display: flex; gap: .45rem; align-items: center; background: #f7f3eb; border-radius: .8rem; padding: .7rem .8rem; margin: .5rem 0; font-weight: 700; }
+  .brace { font-size: 2rem; line-height: .8; color: var(--blue); }
+  .steps { margin: .4rem 0 .2rem 1.1rem; padding: 0; }
+  .steps li { margin: .35rem 0; }
+  .hide { display: none; }
+  .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: rgba(255,253,248,.96); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0); }
+  .dock-in { max-width: 32rem; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; }
+  .dock button { min-height: 4rem; border: 0; background: transparent; font-weight: 700; color: var(--muted); }
+  .dock button.on { color: var(--blue); }
+  #toasts { position: fixed; top: .6rem; right: .6rem; z-index: 100; display: flex; flex-direction: column; gap: .4rem; }
+  .toast { background: #fff; border-radius: .7rem; padding: .55rem .7rem; box-shadow: 0 8px 20px rgba(28,25,23,.12); border-left: 4px solid #a8a29e; max-width: 16rem; font-size: .9rem; }
+  .toast.ok { border-left-color: #16a34a; }
+  .toast.warn { border-left-color: #d97706; }
+  .toast.info { border-left-color: #1e4d7b; }
+  .install-fab { position: fixed; z-index: 45; right: max(12px, env(safe-area-inset-right)); bottom: calc(4.85rem + env(safe-area-inset-bottom)); border: 0; background: transparent; padding: 6px; touch-action: none; display: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .install-fab, .install-fab * { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .install-fab[data-positioned="1"] { right: auto; bottom: auto; }
+  .install-fab-inner { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 999px; background: rgba(30,77,123,.94); color: #f4efe6; font-weight: 700; pointer-events: none; box-shadow: 0 10px 24px rgba(15,40,70,.28); }
+  #pwa-guide { position: fixed; inset: 0; z-index: 95; background: rgba(28,25,23,.55); display: flex; align-items: flex-end; justify-content: center; padding: 1rem; }
+  #pwa-guide[hidden] { display: none; }
+  .pwa-card { width: min(24rem, 100%); background: #fffdf8; border-radius: 1.1rem; padding: 1rem; }
+  .guide-step { display: flex; gap: .6rem; margin-top: .7rem; }
+  .step-num { width: 1.5rem; height: 1.5rem; border-radius: 999px; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toasts" aria-live="polite"></div>
+<button class="install-fab" id="btnInstall" type="button" aria-label="Cài app toán">
+  <span class="install-fab-inner">Cài app</span>
+</button>
+<div id="pwa-guide" hidden>
+  <div class="pwa-card" role="dialog">
+    <h2>Cài app toán</h2>
+    <div id="pwa-guide-body"></div>
+    <button class="btn btn-surface" type="button" id="pwa-guide-close" style="margin-top:1rem">Đóng</button>
+  </div>
+</div>
+<script>
+const FORMS = [
+  {
+    id: "nghiem", bai: "Bài 1", title: "Nhận ra nghiệm của phương trình bậc nhất hai ẩn",
+    when: "Khi đề cho một phương trình ax + by = c và một cặp số, cần biết cặp đó có là nghiệm hay không.",
+    rule: "Cặp (x; y) là nghiệm chỉ khi thay vào vế trái ra đúng bằng c. Nghiệm là một cặp, không phải một số.",
+    trap: "Hay quên phải thử cả hai số. Viết mỗi giá trị x là chưa đủ.",
+    ex: { lines: ["x + 2y = 7"], steps: ["Thử (1; 3): 1 + 2·3 = 7. Đúng, nên (1; 3) là nghiệm.", "Thử (3; 1): 3 + 2·1 = 5, mà 5 ≠ 7. Không phải nghiệm."], ans: "(1; 3) là nghiệm. (3; 1) không phải." },
+    drills: [
+      { lv: "Cơ bản", q: "Phương trình 3x + y = 10. Cặp (2; 4) hay cặp (4; 2) là nghiệm?", hint: "Thay từng cặp vào vế trái rồi so với 10.", steps: ["(2; 4): 3·2 + 4 = 10. Đúng.", "(4; 2): 3·4 + 2 = 14 ≠ 10. Sai."], ans: "Nghiệm là (2; 4)." },
+      { lv: "Vận dụng", q: "Tìm y để cặp (2; y) là nghiệm của x + 3y = 11.", hint: "Thay x = 2 vào phương trình.", steps: ["2 + 3y = 11.", "3y = 9, y = 3."], ans: "y = 3. Cặp nghiệm là (2; 3)." },
+      { lv: "Nâng cao", q: "Tìm mọi nghiệm nguyên không âm của x + y = 3.", hint: "x chỉ có thể là 0, 1, 2 hoặc 3. Với mỗi x, tính y = 3 − x.", steps: ["x = 0 thì y = 3.", "x = 1 thì y = 2.", "x = 2 thì y = 1.", "x = 3 thì y = 0."], ans: "(0; 3), (1; 2), (2; 1), (3; 0)." }
+    ]
+  },
+  {
+    id: "the", bai: "Bài 2", title: "Giải hệ bằng phép thế",
+    when: "Khi một phương trình dễ rút x hoặc dễ rút y.",
+    rule: "Rút một ẩn từ phương trình đơn hơn, thay vào phương trình kia, giải ra một ẩn, rồi tính ẩn còn lại. Cuối cùng thử lại vào cả hai phương trình.",
+    trap: "Khi thay một biểu thức có trừ, phải có ngoặc. Quên dấu là ra nghiệm sai.",
+    ex: { lines: ["x + y = 5", "2x − y = 4"], steps: ["Từ phương trình đầu, y = 5 − x.", "Thay vào phương trình sau: 2x − (5 − x) = 4.", "2x − 5 + x = 4, nên 3x = 9, x = 3.", "y = 5 − 3 = 2.", "Thử: 3 + 2 = 5 và 6 − 2 = 4. Đúng."], ans: "(x; y) = (3; 2)." },
+    drills: [
+      { lv: "Cơ bản", q: "Giải hệ: x + y = 10 và x − y = 2.", hint: "Rút x = 10 − y từ phương trình đầu, thay vào phương trình sau.", steps: ["x = 10 − y.", "(10 − y) − y = 2, nên 10 − 2y = 2.", "2y = 8, y = 4, x = 6.", "Thử: 6 + 4 = 10 và 6 − 4 = 2."], ans: "(x; y) = (6; 4)." },
+      { lv: "Vận dụng", q: "Giải hệ: y = 2x và x + y = 9.", hint: "y đã được rút sẵn. Thay y = 2x vào phương trình còn lại.", steps: ["x + 2x = 9, 3x = 9, x = 3.", "y = 6.", "Thử: 3 + 6 = 9."], ans: "(x; y) = (3; 6)." },
+      { lv: "Nâng cao", q: "Giải hệ: x + 2y = 8 và 3x − 2y = 4.", hint: "Rút x = 8 − 2y. Khi thay vào 3x, nhân cả ngoặc.", steps: ["3(8 − 2y) − 2y = 4.", "24 − 6y − 2y = 4, 24 − 8y = 4, 8y = 20, y = 5/2.", "x = 8 − 2·(5/2) = 3.", "Thử: 3 + 5 = 8 và 9 − 5 = 4."], ans: "(x; y) = (3; 5/2)." }
+    ]
+  },
+  {
+    id: "cong", bai: "Bài 2", title: "Giải hệ bằng phép cộng",
+    when: "Khi cộng hoặc trừ hai phương trình thì một ẩn bị triệt tiêu.",
+    rule: "Nhân hai vế để hệ số một ẩn bằng nhau hoặc đối nhau, rồi cộng hoặc trừ. Giải ẩn còn lại, thế ngược, rồi thử lại.",
+    trap: "Nhân một phương trình thì phải nhân cả hai vế, kể cả số hạng không chứa ẩn.",
+    ex: { lines: ["2x + 3y = 12", "2x − y = 4"], steps: ["Trừ hai phương trình theo vế: (2x + 3y) − (2x − y) = 12 − 4.", "4y = 8, y = 2.", "2x − 2 = 4, 2x = 6, x = 3.", "Thử: 6 + 6 = 12 và 6 − 2 = 4."], ans: "(x; y) = (3; 2)." },
+    drills: [
+      { lv: "Cơ bản", q: "Giải hệ: x + y = 7 và x − y = 1.", hint: "Cộng hai phương trình để mất y.", steps: ["Cộng: 2x = 8, x = 4.", "4 + y = 7, y = 3.", "Thử: 4 + 3 = 7 và 4 − 3 = 1."], ans: "(x; y) = (4; 3)." },
+      { lv: "Vận dụng", q: "Giải hệ: 3x + y = 11 và x + y = 5.", hint: "Trừ hai phương trình để mất y.", steps: ["Trừ: 2x = 6, x = 3.", "3 + y = 5, y = 2.", "Thử: 9 + 2 = 11 và 3 + 2 = 5."], ans: "(x; y) = (3; 2)." },
+      { lv: "Nâng cao", q: "Giải hệ: 2x + 5y = 16 và 3x − 5y = 9.", hint: "Cộng hai phương trình, y đối nhau nên mất y.", steps: ["Cộng: 5x = 25, x = 5.", "10 + 5y = 16, 5y = 6, y = 6/5.", "Thử: 10 + 6 = 16 và 15 − 6 = 9."], ans: "(x; y) = (5; 6/5)." }
+    ]
+  },
+  {
+    id: "dacbiet", bai: "Bài 2", title: "Hệ vô nghiệm hoặc vô số nghiệm",
+    when: "Khi hai phương trình cùng dạng, hoặc sau khi biến đổi thì hai vế mâu thuẫn.",
+    rule: "Nếu phương trình này là bội của phương trình kia thì vô số nghiệm. Nếu vế trái là bội mà vế phải không cùng bội đó thì vô nghiệm. Còn lại thì có một nghiệm duy nhất.",
+    trap: "Thấy hai phương trình giống nhau một phần đã kết luận vô số. Phải nhìn cả vế phải.",
+    ex: { lines: ["x + y = 3", "2x + 2y = 6"], steps: ["Phương trình sau đúng bằng 2 lần phương trình trước, cả hai vế.", "Hai phương trình là một. Hệ có vô số nghiệm.", "Nghiệm là mọi cặp (x; y) với y = 3 − x."], ans: "Vô số nghiệm. Ví dụ (0; 3), (1; 2), (3; 0)." },
+    drills: [
+      { lv: "Cơ bản", q: "Hệ 2x + y = 4 và 4x + 2y = 8 có bao nhiêu nghiệm?", hint: "Xem phương trình sau có phải là 2 lần phương trình trước không.", steps: ["2·(2x + y) = 4x + 2y và 2·4 = 8.", "Hai phương trình là một."], ans: "Vô số nghiệm." },
+      { lv: "Vận dụng", q: "Hệ x + 2y = 5 và 2x + 4y = 9 có nghiệm không?", hint: "Nhân phương trình đầu với 2 rồi so vế phải.", steps: ["2·(x + 2y) = 2x + 4y và 2·5 = 10.", "Vế trái trùng, nhưng 10 ≠ 9.", "Không có cặp nào thỏa cả hai."], ans: "Vô nghiệm." },
+      { lv: "Nâng cao", q: "Tìm m để hệ x + y = 2 và mx + y = 3 có đúng một nghiệm.", hint: "Trừ hai phương trình: (m − 1)x = 1.", steps: ["Nếu m ≠ 1 thì x = 1/(m − 1), y = 2 − x. Có một nghiệm.", "Nếu m = 1 thì hệ thành x + y = 2 và x + y = 3. Vô nghiệm."], ans: "Có đúng một nghiệm khi m ≠ 1." }
+    ]
+  },
+  {
+    id: "lap-so", bai: "Bài 3", title: "Lập hệ từ tổng, hiệu hoặc tuổi",
+    when: "Bài chữ cho hai điều kiện về hai đại lượng. Thi Hà Nội hay hỏi kiểu này ở mức cơ bản.",
+    rule: "Gọi hai ẩn kèm đơn vị. Mỗi câu của đề thành một phương trình. Giải hệ, rồi viết lại câu trả lời và thử vào đề.",
+    trap: "Gọi ẩn mà không nói rõ là số hiện nay hay số của năm trước. Tuổi trong quá khứ phải trừ ở cả hai người.",
+    ex: { lines: ["x + y = 28", "x − y = 6"], steps: ["x, y là hai số cần tìm.", "Cộng hai phương trình: 2x = 34, x = 17.", "y = 28 − 17 = 11.", "Thử: tổng 28, hiệu 6."], ans: "Hai số là 17 và 11." },
+    drills: [
+      { lv: "Cơ bản", q: "Một lớp có 40 học sinh. Số nữ nhiều hơn số nam là 4. Tìm số nam và số nữ.", hint: "Gọi n là số nam, f là số nữ. n + f = 40 và f − n = 4.", steps: ["Cộng: 2f = 44, f = 22.", "n = 18.", "Thử: 22 + 18 = 40 và 22 − 18 = 4."], ans: "18 nam và 22 nữ." },
+      { lv: "Vận dụng", q: "Năm nay tổng tuổi bố và con là 50. Cách đây 5 năm, tuổi bố bằng 4 lần tuổi con. Tìm tuổi mỗi người năm nay.", hint: "Gọi b và c là tuổi năm nay. Năm năm trước là b − 5 và c − 5.", steps: ["b + c = 50.", "b − 5 = 4(c − 5).", "50 − c − 5 = 4c − 20, nên 65 = 5c, c = 13, b = 37.", "Năm năm trước: 32 và 8. 32 = 4·8. Đúng."], ans: "Bố 37 tuổi, con 13 tuổi." },
+      { lv: "Nâng cao", q: "Hình chữ nhật có chu vi 28 cm. Chiều dài hơn chiều rộng 2 cm. Tìm hai cạnh.", hint: "Chu vi 28 nên tổng hai cạnh kề là 14.", steps: ["d + r = 14 và d − r = 2.", "2d = 16, d = 8, r = 6.", "Thử: chu vi 2·(8 + 6) = 28, dài hơn rộng đúng 2 cm."], ans: "Dài 8 cm, rộng 6 cm." }
+    ]
+  },
+  {
+    id: "lap-gia", bai: "Bài 3", title: "Lập hệ từ giá tiền hoặc đếm chân",
+    when: "Đề cho hai lần mua, hoặc số con và số chân. Vẫn là hai ẩn, hai phương trình.",
+    rule: "Chọn ẩn là giá một đơn vị hoặc số từng loại. Viết phương trình theo từng câu. Đáp án phải kèm đơn vị và thử lại bằng số của đề.",
+    trap: "Cộng tiền mà quên đơn vị nghìn đồng. Hoặc đếm chân gà là 4.",
+    ex: { lines: ["5t + 3c = 210", "2t + 3c = 120"], steps: ["t là giá 1 kg táo, c là giá 1 kg cam, đơn vị nghìn đồng.", "Trừ hai phương trình: 3t = 90, t = 30.", "60 + 3c = 120, c = 20.", "Thử: 150 + 60 = 210 và 60 + 60 = 120."], ans: "Táo 30 nghìn đồng/kg, cam 20 nghìn đồng/kg." },
+    drills: [
+      { lv: "Cơ bản", q: "3 quyển vở và 2 cây bút hết 32 nghìn đồng. 1 quyển vở và 2 cây bút hết 16 nghìn đồng. Tìm giá mỗi thứ.", hint: "Gọi v và b theo nghìn đồng. Trừ hai phương trình để mất b.", steps: ["3v + 2b = 32 và v + 2b = 16.", "Trừ: 2v = 16, v = 8.", "8 + 2b = 16, b = 4.", "Thử: 24 + 8 = 32 và 8 + 8 = 16."], ans: "Vở 8 nghìn đồng, bút 4 nghìn đồng." },
+      { lv: "Vận dụng", q: "Có 10 con gà và chó, đếm được 28 chân. Hỏi mỗi loại mấy con? Gà 2 chân, chó 4 chân.", hint: "Gọi g và c. g + c = 10 và 2g + 4c = 28.", steps: ["Chia phương trình chân cho 2: g + 2c = 14.", "Trừ g + c = 10: c = 4, g = 6.", "Thử: 6 + 4 = 10 con, 12 + 16 = 28 chân."], ans: "6 gà và 4 chó." },
+      { lv: "Nâng cao", q: "8 vé người lớn và trẻ em thu 340 nghìn đồng. Vé người lớn 50 nghìn, vé trẻ em 30 nghìn. Hỏi mỗi loại mấy vé?", hint: "Gọi a là số vé người lớn, t là số vé trẻ em.", steps: ["a + t = 8 và 50a + 30t = 340.", "Chia phương trình tiền cho 10: 5a + 3t = 34.", "t = 8 − a, nên 5a + 3(8 − a) = 34, 2a + 24 = 34, a = 5, t = 3.", "Thử: 5 + 3 = 8 và 250 + 90 = 340."], ans: "5 vé người lớn và 3 vé trẻ em." }
+    ]
+  }
+];
+const KEY = "lop9-toan-v1";
+const DAY = 86400000;
+let tab = "hoc";
+let openId = null;
+let revealed = {};
+function load() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
+let prog = load();
+function save() { localStorage.setItem(KEY, JSON.stringify(prog)); }
+function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return ({ "&": "&", "<": "<", ">": ">" })[c]; }); }
+function toast(text, kind) {
+  const box = document.getElementById("toasts");
+  const el = document.createElement("div");
+  el.className = "toast " + (kind || "info");
+  el.textContent = text;
+  box.appendChild(el);
+  setTimeout(function () { el.remove(); }, 3600);
+}
+function formBy(id) { return FORMS.filter(function (f) { return f.id === id; })[0]; }
+function statusOf(id) {
+  const row = prog[id];
+  if (!row) return { text: "Mới", due: false };
+  if (row.due <= Date.now()) return { text: "Đến hạn ôn", due: true };
+  const days = Math.max(1, Math.ceil((row.due - Date.now()) / DAY));
+  return { text: "Ôn sau " + days + " ngày", due: false };
+}
+function he(lines) {
+  return '<div class="he"><span class="brace">{</span><div>' + lines.map(function (line) { return "<div>" + esc(line) + "</div>"; }).join("") + "</div></div>";
+}
+function renderHome() {
+  const due = FORMS.filter(function (f) { return statusOf(f.id).due; }).length;
+  return '<p class="tag">Hà Nội · đầu năm · Kết nối tri thức · tập một</p><h1>Chương 1</h1><p class="muted">Phương trình và hệ hai phương trình bậc nhất hai ẩn. Đây là bài đang học tháng 9 và tháng 10, chưa phải ôn tủ.</p><div class="note sm">Làm ra giấy trước. Xong mới lật lời giải rồi tự soát. Thi vào 10 là tự luận, app không chấm hộ.</div><p class="sm muted">Đến hạn hôm nay: ' + due + ' dạng.</p>' + FORMS.map(function (f) {
+    const st = statusOf(f.id);
+    return '<article class="card"><p class="tag">' + esc(f.bai) + " · " + esc(st.text) + "</p><h2>" + esc(f.title) + '</h2><button class="btn btn-primary" type="button" data-open="' + f.id + '" style="margin-top:.7rem">Học dạng này</button></article>';
+  }).join("") + '<p class="sm muted"><a href="./hoctienganh.html">Sang trang tiếng Anh</a></p>';
+}
+function renderOn() {
+  const list = FORMS.filter(function (f) { return statusOf(f.id).due; });
+  if (!list.length) return "<h1>Ôn</h1><p>Chưa có dạng đến hạn. Học một dạng ở trang Học, tự chấm xong thì ngày ôn sẽ hiện ở đây.</p>";
+  return "<h1>Ôn hôm nay</h1>" + list.map(function (f) {
+    return '<article class="card"><h2>' + esc(f.title) + '</h2><button class="btn btn-primary" type="button" data-open="' + f.id + '" style="margin-top:.7rem">Ôn dạng này</button></article>';
+  }).join("");
+}
+function blockDrill(f, drill, index) {
+  const key = f.id + ":" + index;
+  const showHint = revealed[key + ":h"];
+  const showAns = revealed[key + ":a"];
+  return '<article class="card"><p class="tag">' + esc(drill.lv) + "</p><p>" + esc(drill.q) + '</p><div class="row" style="margin-top:.6rem"><button class="btn" type="button" data-hint="' + key + '">Gợi ý</button><button class="btn" type="button" data-ans="' + key + '">Xem đáp án</button></div><div class="' + (showHint ? "" : "hide") + '"><p class="sm"><b>Gợi ý.</b> ' + esc(drill.hint) + '</p></div><div class="' + (showAns ? "" : "hide") + '"><ol class="steps">' + drill.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol><p><b>" + esc(drill.ans) + "</b></p></div></article>";
+}
+function renderForm(f) {
+  const show = revealed[f.id + ":ex"];
+  return '<button class="btn" type="button" data-back="1">Về chương 1</button><p class="tag" style="margin-top:.8rem">' + esc(f.bai) + '</p><h1>' + esc(f.title) + '</h1><div class="card"><p class="tag">Khi nào dùng</p><p>' + esc(f.when) + '</p><p class="tag">Cách làm</p><p>' + esc(f.rule) + "</p></div><div class=\"card\"><p class=\"tag\">Ví dụ mẫu</p>" + he(f.ex.lines) + '<button class="btn btn-primary" type="button" data-ex="' + f.id + '">Đã làm ra giấy, xem lời giải</button><div class="' + (show ? "" : "hide") + '"><ol class="steps">' + f.ex.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol><p><b>" + esc(f.ex.ans) + "</b></p></div></div><div class=\"note sm warn\"><b>Hay sai.</b> " + esc(f.trap) + "</div><h2 style=\"margin-top:1rem\">Ba bài tự làm</h2>" + f.drills.map(function (d, i) { return blockDrill(f, d, i); }).join("") + '<div class="card"><p class="tag">Tự chấm</p><p class="sm">Chỉ bấm sau khi đã làm ra giấy và đã đối chiếu.</p><div class="row"><button class="btn" type="button" data-grade="fail">Chưa được</button><button class="btn" type="button" data-grade="fuzzy">Còn vướng</button><button class="btn" type="button" data-grade="know">Làm được</button></div><button class="btn" type="button" data-report="1" style="margin-top:.5rem;width:100%">Báo lời giải có chỗ lạ</button></div>';
+}
+function render() {
+  const root = document.getElementById("app");
+  const f = openId && formBy(openId);
+  root.innerHTML = (f ? renderForm(f) : (tab === "on" ? renderOn() : renderHome())) + '<nav class="dock"><div class="dock-in"><button type="button" data-tab="hoc" class="' + (tab === "hoc" && !openId ? "on" : "") + '">Học</button><button type="button" data-tab="on" class="' + (tab === "on" && !openId ? "on" : "") + '">Ôn</button></div></nav>';
+}
+document.body.addEventListener("click", function (ev) {
+  const t = ev.target.closest("button");
+  if (!t) return;
+  if (t.dataset.tab) { tab = t.dataset.tab; openId = null; render(); return; }
+  if (t.dataset.open) { openId = t.dataset.open; revealed = {}; render(); window.scrollTo(0, 0); return; }
+  if (t.dataset.back) { openId = null; render(); return; }
+  if (t.dataset.ex) { revealed[t.dataset.ex + ":ex"] = true; toast("Đối chiếu từng bước với bài trên giấy.", "info"); render(); return; }
+  if (t.dataset.hint) { revealed[t.dataset.hint + ":h"] = true; toast("Đọc gợi ý, thử viết tiếp ra giấy.", "info"); render(); return; }
+  if (t.dataset.ans) { revealed[t.dataset.ans + ":a"] = true; toast("Đã mở đáp án. Tự soát từng bước.", "warn"); render(); return; }
+  if (t.dataset.grade && openId) {
+    const days = t.dataset.grade === "know" ? 7 : (t.dataset.grade === "fuzzy" ? 3 : 1);
+    prog[openId] = { kind: t.dataset.grade, due: Date.now() + days * DAY };
+    save();
+    toast(t.dataset.grade === "know" ? "Làm được. Ôn lại sau 7 ngày." : (t.dataset.grade === "fuzzy" ? "Còn vướng. Ôn lại sau 3 ngày." : "Chưa được. Mai làm lại dạng này."), t.dataset.grade === "fail" ? "warn" : "ok");
+    openId = null; tab = "hoc"; render(); return;
+  }
+  if (t.dataset.report && openId) {
+    const bag = JSON.parse(localStorage.getItem("lop9-toan-bao-loi") || "[]");
+    bag.push({ id: openId, at: Date.now() });
+    localStorage.setItem("lop9-toan-bao-loi", JSON.stringify(bag));
+    toast("Đã ghi. Nhờ thầy cô xem lại dạng này.", "warn");
+  }
+});
+render();
+</script>
+<script>
+(function () {
+  var KEY = "lop9_toan_fab_v1";
+  var fab = document.getElementById("btnInstall");
+  var guide = document.getElementById("pwa-guide");
+  var body = document.getElementById("pwa-guide-body");
+  var ua = navigator.userAgent.toLowerCase();
+  var phone = /iphone|ipad|ipod|android/.test(ua) || navigator.maxTouchPoints > 1;
+  var ios = /iphone|ipad|ipod/.test(ua);
+  var zalo = /zalo|fban|fbav|instagram/.test(ua);
+  var alone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  function showGuide() {
+    var html = zalo ? "<p>Zalo đang chặn cài app. Bấm ⋯ rồi chọn Mở bằng trình duyệt.</p>" : (ios ? "<p>Trên iPhone, bấm Chia sẻ rồi chọn Thêm vào Màn hình chính.</p>" : (phone ? "<p>Trên Android, bấm ⋮ rồi chọn Cài đặt ứng dụng.</p>" : "<p>Trên máy tính, dùng Chrome hoặc Edge và bấm biểu tượng cài ở thanh địa chỉ.</p>"));
+    body.innerHTML = html;
+    guide.hidden = false;
+  }
+  function showFab() { fab.style.display = "block"; }
+  function hideFab() { fab.style.display = "none"; }
+  function install() {
+    var promptEvent = window.__lop9InstallPrompt;
+    if (promptEvent && promptEvent.prompt) {
+      window.__lop9InstallPrompt = null;
+      promptEvent.prompt().then(function () { return promptEvent.userChoice; }).then(function (choice) {
+        if (choice && choice.outcome === "accepted") hideFab();
+      }).catch(showGuide);
+      return;
+    }
+    showGuide();
+  }
+  var pointer = null, drag = false, sx = 0, sy = 0, sl = 0, st = 0;
+  function place(left, top) {
+    var rect = fab.getBoundingClientRect();
+    left = Math.min(Math.max(8, left), Math.max(8, window.innerWidth - rect.width - 8));
+    top = Math.min(Math.max(8, top), Math.max(8, window.innerHeight - rect.height - 8));
+    fab.style.left = left + "px"; fab.style.top = top + "px"; fab.style.right = "auto"; fab.style.bottom = "auto";
+    fab.dataset.positioned = "1";
+    return { left: left, top: top };
+  }
+  try { var saved = JSON.parse(localStorage.getItem(KEY) || "null"); if (saved) place(saved.left, saved.top); } catch (e) {}
+  fab.addEventListener("pointerdown", function (ev) {
+    if (ev.button && ev.button !== 0) return;
+    ev.preventDefault();
+    pointer = ev.pointerId; drag = false; sx = ev.clientX; sy = ev.clientY;
+    var rect = fab.getBoundingClientRect(); sl = rect.left; st = rect.top;
+    if (fab.setPointerCapture) fab.setPointerCapture(ev.pointerId);
+  }, { passive: false });
+  fab.addEventListener("pointermove", function (ev) {
+    if (ev.pointerId !== pointer) return;
+    ev.preventDefault();
+    var dx = ev.clientX - sx, dy = ev.clientY - sy;
+    if (!drag && Math.hypot(dx, dy) > 10) drag = true;
+    if (drag) place(sl + dx, st + dy);
+  }, { passive: false });
+  fab.addEventListener("pointerup", function (ev) {
+    if (ev.pointerId !== pointer) return;
+    if (drag) { var pos = place(fab.getBoundingClientRect().left, fab.getBoundingClientRect().top); localStorage.setItem(KEY, JSON.stringify(pos)); toast("Đã dời nút Cài app.", "info"); }
+    else install();
+    pointer = null; drag = false;
+  });
+  fab.addEventListener("click", function (ev) { ev.preventDefault(); });
+  fab.addEventListener("contextmenu", function (ev) { ev.preventDefault(); });
+  document.getElementById("pwa-guide-close").addEventListener("click", function () { guide.hidden = true; });
+  window.addEventListener("appinstalled", hideFab);
+  window.addEventListener("lop9:pwa-install-ready", function () { if (!alone) showFab(); });
+  if (alone) hideFab(); else showFab();
+  if ("serviceWorker" in navigator && /^https?:$/i.test(location.protocol)) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("./sw.js", { scope: "./", updateViaCache: "none" }).catch(function () {});
+    });
+  }
+})();
+</script>
+</body>
+</html>

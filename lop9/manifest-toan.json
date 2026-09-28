@@ -1,0 +1,18 @@
+{
+  "id": "./toan.html",
+  "name": "Học toán lớp 9",
+  "short_name": "Toán lớp 9",
+  "description": "Dạng bài Toán 9 Kết nối tri thức, ôn thi vào 10 Hà Nội.",
+  "lang": "vi",
+  "dir": "ltr",
+  "start_url": "./toan.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4efe6",
+  "theme_color": "#1e4d7b",
+  "icons": [
+    { "src": "./icon-toan-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-toan-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-toan-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
