@@ -46,6 +46,7 @@
     min-height: 100dvh;
   }
   button, select { font: inherit; color: inherit; }
+  a { color: var(--teal); }
   button { cursor: pointer; border: 0; background: transparent; }
   button:disabled { cursor: default; }
   #app { max-width: 32rem; margin: 0 auto; padding: 1.15rem 1rem 6.5rem; }
@@ -623,7 +624,8 @@ function renderHome(now) {
     + '<div class="row3">' + [5, 8, 12].map((n) => '<button type="button" class="chip' + (progress.sessionSize === n ? " on" : "") + '" data-act="size" data-n="' + n + '">' + n + " từ</button>").join("") + "</div>"
     + '<button class="btn btn-primary" type="button" data-act="go" data-mode="learn">' + esc(start) + "</button>"
     + '<div class="row2"><button class="btn btn-surface" type="button" data-act="go" data-mode="quiz">Gợi nhớ</button><button class="btn btn-surface" type="button" data-act="poster">Tạo ảnh học</button></div>'
-    + '<p class="sm muted">' + esc(coach) + "</p>";
+    + '<p class="sm muted">' + esc(coach) + '</p>'
+    + '<p class="sm" style="margin-top:.8rem"><a href="./toan.html">Sang trang toán</a> · <a href="./van.html">Sang trang văn</a></p>';
 }
 function stat(label, value) {
   return '<div class="card stat"><p class="xs muted">' + esc(label) + '</p><p class="sm" style="font-weight:600;margin-top:.2rem">' + esc(value) + "</p></div>";
