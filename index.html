@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content" name="viewport"/>
+<meta content="no-referrer" name="referrer"/>
+<meta content="#f8fafc" id="meta-theme-color" name="theme-color"/>
+<meta content="yes" name="mobile-web-app-capable"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="LifeOS" name="application-name"/>
+<title>LifeOS Master Pha40 - Push Trigger</title>
+<link href="./manifest.json" id="manifest-link" rel="manifest"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link id="lifeos-font-preconnect" rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin=""/>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin=""/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" id="lifeos-font-inter-vn" media="print" onload="this.media='all'" rel="stylesheet"/>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/></noscript>
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236366f1'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='34' fill='white'%3EL%3C/text%3E%3C/svg%3E" rel="icon" type="image/svg+xml"/>
+<style id="lifeos-html-early">html{background:#f8fafc;-webkit-text-size-adjust:100%;text-size-adjust:100%}body{margin:0}</style>
 <!-- LifeOS Pha14J20R76 Final GitHub Runtime Hard Clean - R75 Base -->
 <script data-lifeos-no-transpile="1" id="lifeos-lock4-clean-boot-owner">
 (function(w,d){
@@ -105,6 +123,131 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
     var nativePlay = (window.HTMLMediaElement && window.HTMLMediaElement.prototype && window.HTMLMediaElement.prototype.play) ? window.HTMLMediaElement.prototype.play : null;
     var nativePause = (window.HTMLMediaElement && window.HTMLMediaElement.prototype && window.HTMLMediaElement.prototype.pause) ? window.HTMLMediaElement.prototype.pause : null;
     var lastGestureAt = 0;
+    function __lifeosFnFlags(fn) {
+        var t = [];
+        try {
+            if (!fn || typeof fn !== 'function') return 'none';
+            if (fn.__lifeosTraceLayer) t.push('T:' + fn.__lifeosTraceLayer);
+            if (fn.__lifeosR76FinalGate) t.push('R76');
+            if (fn.__lifeosR73Gate) t.push('R73');
+            if (fn.__lifeosR67SingleSchemaPatched) t.push('R67');
+            if (fn.__lifeosR72WriteGate) t.push('R72');
+        }
+        catch (e0) { }
+        return t.join('+') || 'plain';
+    }
+    function __lifeosHeaderNames(input, init) {
+        var names = [];
+        try {
+            var raw = (init && init.headers) || (typeof input !== 'string' && input && input.headers) || undefined;
+            var h = new Headers(raw || undefined);
+            ['x-lifeos-phase', 'x-lifeos-folder-contract', 'x-lifeos-token', 'authorization', 'content-type', 'x-lifeos-relay-key'].forEach(function (k) {
+                if (h.has(k)) names.push(k);
+            });
+        }
+        catch (e1) { }
+        return names.join(',');
+    }
+    function __lifeosHostTag(url) {
+        url = S(url);
+        if (url.indexOf('lifeos-family-d1-text-api') >= 0) return 'd1-text';
+        if (url.indexOf('lifeos-family-d1-api') >= 0) return 'd1-file';
+        if (url.indexOf('telegram-upload-relay') >= 0) return 'tg-relay';
+        if (url.indexOf('lifeos-video-range-stream') >= 0) return 'video-range';
+        if (url.indexOf('firestore.googleapis.com') >= 0) return 'firestore';
+        return '';
+    }
+    window.__lifeosFnFlags = __lifeosFnFlags;
+    window.__lifeosHeaderNames = __lifeosHeaderNames;
+    window.__lifeosHostTag = __lifeosHostTag;
+    window.__lifeosFetchTrace = window.__lifeosFetchTrace || [];
+    window.__lifeosNoteFetch = function (layer, info, run) {
+        var depth = 0, traced = false;
+        try {
+            depth = (window.__lifeosFetchDepth || 0) + 1;
+            window.__lifeosFetchDepth = depth;
+            traced = true;
+            var id;
+            if (depth === 1) {
+                id = (window.__lifeosFetchSeq = (window.__lifeosFetchSeq || 0) + 1);
+                window.__lifeosFetchCurrentId = id;
+            }
+            else id = window.__lifeosFetchCurrentId || 0;
+            var list = window.__lifeosFetchTrace || (window.__lifeosFetchTrace = []);
+            var pass = 1, i;
+            for (i = 0; i < list.length; i++) {
+                if (list[i] && list[i].id === id && list[i].layer === layer) pass++;
+            }
+            info = info || {};
+            list.push({
+                t: Date.now(),
+                id: id,
+                depth: depth,
+                pass: pass,
+                layer: layer,
+                method: info.method || '',
+                url: info.url || '',
+                host: info.host || '',
+                branch: info.branch || '',
+                callee: info.callee || '',
+                outer: __lifeosFnFlags(window.fetch),
+                changedUrl: !!info.changedUrl,
+                changedHeader: !!info.changedHeader,
+                changedBody: !!info.changedBody,
+                fake: info.fake || '',
+                headers: info.headers || '',
+                note: info.note || ''
+            });
+            if (list.length > 200) list.splice(0, list.length - 200);
+        }
+        catch (e2) { }
+        try {
+            return run();
+        }
+        finally {
+            try { if (traced && window.__lifeosFetchDepth === depth) window.__lifeosFetchDepth = depth - 1; } catch (e3) { }
+        }
+    };
+    window.__lifeosXhrTrace = window.__lifeosXhrTrace || [];
+    function __lifeosNoteXhr(phase, xhr, note, body) {
+        try {
+            var url = S(xhr && xhr.__lifeosR76Url || '');
+            var host = __lifeosHostTag(url);
+            var headers = '';
+            try { headers = (xhr && xhr.__lifeosR76HeaderList || []).join(','); } catch (eH) { }
+            var bodyKind = '';
+            if (phase === 'send') {
+                if (body == null) bodyKind = '';
+                else if (typeof body === 'string') bodyKind = 'string:' + body.length;
+                else if (typeof FormData !== 'undefined' && body instanceof FormData) bodyKind = 'formdata';
+                else if (typeof Blob !== 'undefined' && body instanceof Blob) bodyKind = 'blob:' + (body.size || 0);
+                else if (typeof ArrayBuffer !== 'undefined' && body instanceof ArrayBuffer) bodyKind = 'arraybuffer:' + body.byteLength;
+                else bodyKind = typeof body;
+            }
+            var list = window.__lifeosXhrTrace || (window.__lifeosXhrTrace = []);
+            list.push({
+                t: Date.now(),
+                phase: phase || '',
+                method: S(xhr && xhr.__lifeosR76Method || ''),
+                url: url.slice(0, 220),
+                host: host,
+                match: (host === 'tg-relay' || host === 'd1-file' || host === 'd1-text') ? host : '',
+                headers: headers,
+                body: bodyKind,
+                note: note || ''
+            });
+            if (list.length > 200) {
+                var drop = -1, i;
+                for (i = 0; i < list.length; i++) {
+                    if (!list[i] || !list[i].host) { drop = i; break; }
+                }
+                if (drop < 0) drop = 0;
+                list.splice(drop, 1);
+            }
+        }
+        catch (eX) { }
+    }
+    window.__lifeosNoteXhr = __lifeosNoteXhr;
     function S(v) { try {
         return String(v == null ? '' : v);
     }
@@ -291,17 +434,37 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
             return;
         window.fetch = function (input, init) {
             var url = urlOf(input), method = methodOf(input, init);
+            var changedUrl = false, changedHeader = false, changedBody = false;
+            function hop(branch, fake) {
+                return window.__lifeosNoteFetch('R76', {
+                    method: method,
+                    url: S(url).slice(0, 180),
+                    host: __lifeosHostTag(url),
+                    branch: branch,
+                    callee: branch === 'nativeFetch' ? 'native' : '',
+                    changedUrl: changedUrl,
+                    changedHeader: changedHeader,
+                    changedBody: changedBody,
+                    fake: fake || '',
+                    headers: __lifeosHeaderNames(input, init)
+                }, function () {
+                    if (fake) return fakeResponse(fake);
+                    return nativeFetch(input, init);
+                });
+            }
             try {
                 if (isFirestoreListenUrl(url)) {
                     stats.fetchListenBlocked++;
                     rec('block_listen_fetch', { url: url.slice(0, 180) });
-                    return fakeResponse('firestore_listen_blocked');
+                    return hop('fake', 'firestore_listen_blocked');
                 }
+                var beforeHeaders = __lifeosHeaderNames(input, init);
                 var out = stripForbiddenHeaders(input, init);
                 input = out.input;
                 init = out.init;
                 url = urlOf(input);
                 method = methodOf(input, init);
+                if (__lifeosHeaderNames(input, init) !== beforeHeaders) changedHeader = true;
                 if (isFirestoreProfileUrl(url) && method === 'PATCH') {
                     stats.fetchProfileWrites++;
                     stats.lastFirestoreUrl = url;
@@ -310,11 +473,12 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
                         if (nb.block) {
                             stats.fetchLegacyBlocked++;
                             rec('block_legacy_fetch', { reason: nb.reason, url: url.slice(0, 160) });
-                            return fakeResponse(nb.reason);
+                            return hop('fake', nb.reason || 'legacy_only_no_canonical');
                         }
                         stats.fetchCanonicalRewrites++;
                         stats.lastRewriteKeys = nb.keys || [];
                         rec('rewrite_firestore_fetch', { keys: nb.keys, url: url.slice(0, 160) });
+                        var prevUrl = url;
                         if (typeof input === 'string')
                             input = nb.url;
                         else
@@ -329,15 +493,20 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
                         }
                         h.set('Content-Type', 'application/json');
                         init.headers = h;
+                        url = nb.url;
+                        changedUrl = S(nb.url) !== S(prevUrl);
+                        changedBody = true;
+                        changedHeader = true;
                     }
                 }
             }
             catch (e) {
                 rec('fetch_gate_error', { msg: S(e && e.message) });
             }
-            return nativeFetch(input, init);
+            return hop('nativeFetch', '');
         };
         window.fetch.__lifeosR76FinalGate = true;
+        window.fetch.__lifeosTraceLayer = 'R76';
     }
     function installXHR() {
         if (!NativeXHR || NativeXHR.prototype.__lifeosR76FinalGate)
@@ -348,15 +517,21 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
             this.__lifeosR76Method = S(method || 'GET').toUpperCase();
             this.__lifeosR76Url = S(url || '');
             this.__lifeosR76BlockedListen = isFirestoreListenUrl(this.__lifeosR76Url);
+            this.__lifeosR76HeaderList = [];
+            __lifeosNoteXhr('open', this, '', null);
             return oldOpen.apply(this, arguments);
         };
         p.setRequestHeader = function (name, value) {
             try {
-                if (isFamilyWorkerUrl(this.__lifeosR76Url) && FORBIDDEN_HEADERS[S(name).toLowerCase()]) {
+                var n = S(name).toLowerCase();
+                if (!this.__lifeosR76HeaderList) this.__lifeosR76HeaderList = [];
+                if (isFamilyWorkerUrl(this.__lifeosR76Url) && FORBIDDEN_HEADERS[n]) {
+                    this.__lifeosR76HeaderList.push('strip:' + n);
                     stats.familyHeaderStripped++;
                     rec('strip_family_xhr_header', { header: S(name) });
                     return;
                 }
+                this.__lifeosR76HeaderList.push(n);
             }
             catch (e) { }
             return oldSet.apply(this, arguments);
@@ -390,10 +565,12 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
             }, 0);
         }
         p.send = function (body) {
+            var note = 'pass';
             try {
                 if (this.__lifeosR76BlockedListen) {
                     stats.xhrListenBlocked++;
                     rec('block_listen_xhr', { url: S(this.__lifeosR76Url).slice(0, 180) });
+                    __lifeosNoteXhr('send', this, 'fake:firestore_listen_blocked', body);
                     fakeXHRDone(this, 'firestore_listen_blocked');
                     return;
                 }
@@ -402,6 +579,7 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
                     if (nb) {
                         stats.xhrLegacyBlocked++;
                         rec('block_or_rewrite_legacy_xhr', { keys: nb.keys || [], url: S(this.__lifeosR76Url).slice(0, 160) });
+                        __lifeosNoteXhr('send', this, 'fake:legacy_firestore_xhr_blocked', body);
                         fakeXHRDone(this, 'legacy_firestore_xhr_blocked');
                         return;
                     }
@@ -409,7 +587,9 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
             }
             catch (e) {
                 rec('xhr_gate_error', { msg: S(e && e.message) });
+                note = 'gate_error_pass';
             }
+            __lifeosNoteXhr('send', this, note, body);
             return oldSend.apply(this, arguments);
         };
         p.__lifeosR76FinalGate = true;
@@ -774,9 +954,29 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
         if (!nativeFetch)
             return Promise.reject(new Error('fetch unavailable'));
         var url = urlOf(input), method = methodOf(input, init);
+        function hop(branch, fake) {
+            var info = {
+                method: method,
+                url: S(url).slice(0, 180),
+                host: window.__lifeosHostTag ? window.__lifeosHostTag(url) : '',
+                branch: branch,
+                callee: branch === 'nativeFetch' && window.__lifeosFnFlags ? window.__lifeosFnFlags(nativeFetch) : '',
+                changedUrl: false,
+                changedHeader: false,
+                changedBody: false,
+                fake: fake || '',
+                headers: window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : ''
+            };
+            var run = function () {
+                if (fake) return fakeOk(fake);
+                return nativeFetch(input, init);
+            };
+            if (typeof window.__lifeosNoteFetch !== 'function') return run();
+            return window.__lifeosNoteFetch('R73', info, run);
+        }
         if (!isFsWrite(url, method)) {
             state.passFetch++;
-            return nativeFetch(input, init);
+            return hop('nativeFetch', '');
         }
         var body = S(bodyOf(input, init));
         var h = fnv(stable(canonicalFromBody(body)));
@@ -785,26 +985,27 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
             state.fsSkippedDuplicate++;
             state.lastReason = 'skip_firestore_duplicate';
             record('skip_fs', { hash: h, age: t - state.lastFsAt });
-            return fakeOk('duplicate_material');
+            return hop('fake', 'duplicate_material');
         }
         if (state.lastFsAt && (t - state.lastFsAt) < 2500) {
             state.fsSkippedTooSoon++;
             state.lastReason = 'skip_firestore_too_soon';
             record('skip_fs_too_soon', { hash: h, age: t - state.lastFsAt });
-            return fakeOk('too_soon');
+            return hop('fake', 'too_soon');
         }
         state.fsAllowed++;
         state.lastFsHash = h;
         state.lastFsAt = t;
         state.lastReason = 'allow_firestore_changed';
         record('allow_fs', { hash: h });
-        return nativeFetch(input, init);
+        return hop('nativeFetch', '');
     }
     function patchFetch() {
         if (!nativeFetch || window.fetch.__lifeosR73Gate)
             return;
         var f = function (input, init) { return gateFetch(input, init); };
         f.__lifeosR73Gate = true;
+        f.__lifeosTraceLayer = 'R73';
         window.fetch = f;
     }
     function isManualReason(r) { return /manual|user|click|save|edit|delete|create|add|exec|force/i.test(S(r)); }
@@ -877,19 +1078,6 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
 })();
 </script>
 <!-- /LifeOS Pha14J20R73 -->
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content" name="viewport"/>
-<meta content="no-referrer" name="referrer"/>
-<meta content="#f8fafc" id="meta-theme-color" name="theme-color"/>
-<meta content="yes" name="mobile-web-app-capable"/>
-<meta content="yes" name="apple-mobile-web-app-capable"/>
-<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
-<meta content="LifeOS" name="application-name"/>
-<title>LifeOS Master Pha40 - Push Trigger</title>
-<link href="./manifest.json" id="manifest-link" rel="manifest"/>
-<link id="lifeos-font-preconnect" rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link id="lifeos-font-inter-vn" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"></noscript>
 <style id="lifeos-font-vietnamese-consistency">
 html,body{font-family:Inter,Roboto,"Noto Sans","Segoe UI",Arial,sans-serif!important;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 button,input,textarea,select,option{font-family:inherit!important;}
@@ -912,9 +1100,6 @@ button,input,textarea,select,option{font-family:inherit!important;}
     });
 })();
 </script>
-<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236366f1'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='34' fill='white'%3EL%3C/text%3E%3C/svg%3E" rel="icon" type="image/svg+xml"/>
-
-
 <style id="lifeos-j20r12-family-preboot-card-lock">
 /* R12: khóa ngay từ đầu để tránh legacy chat-file-card chớp ngắn/căn giữa trước khi J19G render final */
 #chat-messages{box-sizing:border-box!important;}
@@ -7746,7 +7931,6 @@ body.music-player-active #mini-player {
 </script></head>
 <body class="min-h-[100dvh] flex flex-col transition-colors duration-300 relative">
 <section aria-atomic="true" aria-hidden="true" aria-live="assertive" data-owner="LIFEOS_TRANSFER_R34_CLEAN_REBUILD_20260714" id="lifeos-transfer-hud-v3" role="status"></section>
-<script></script>
 <audio id="mstq-player" playsinline="" preload="none" webkit-playsinline=""></audio>
 <audio id="mstq-silence" loop="" playsinline="" preload="none" src="./silence_30min.mp3" webkit-playsinline=""></audio>
 <audio id="mstq-alarm" loop="" playsinline="" preload="none" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" webkit-playsinline=""></audio>
@@ -7769,7 +7953,7 @@ body.music-player-active #mini-player {
 <div class="lifeos-header-brand flex items-center gap-2 sm:gap-3">
 <div class="bg-primary p-2 sm:p-2.5 rounded-xl text-white shadow-lg flex items-center justify-center cursor-pointer transition hover:scale-105 active:scale-95 shrink-0" onclick="window.initTTS()" title="Đánh thức Giọng Nói AI"><i class="ph-bold ph-robot text-xl sm:text-2xl transition-all duration-300" id="bot-icon"></i></div>
 <div class="lifeos-brand-text"><h1 class="text-lg sm:text-xl md:text-2xl font-black text-primary tracking-tight cursor-pointer" onclick="window.initTTS()">LifeOS.Cloud</h1>
-<div class="flex items-center gap-2 mt-0.5"><span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all border border-emerald-200" id="sentinel-badge" onclick="window.showSentinelPanel()"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> <span class="hidden sm:inline">Voice Guard</span></span></div>
+<div class="flex items-center gap-2 mt-0.5"><span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-md flex items-center gap-1.5 sentinel-pulse cursor-pointer transition-all border border-emerald-200" id="sentinel-badge" onclick="window.showSentinelPanel()" title="Voice Guard"><i class="ph-fill ph-shield-check text-xs sm:text-sm"></i> <span class="hidden sm:inline">Voice Guard</span></span></div>
 </div>
 </div>
 <div class="lifeos-header-actions flex gap-1.5 sm:gap-2 items-center relative flex-shrink-0 z-50">
@@ -7782,7 +7966,7 @@ body.music-player-active #mini-player {
 <button class="text-[11px] sm:text-[12px] font-bold text-primary bg-slate-50 border border-slate-200 px-2 sm:px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition-all active:scale-95 hover:brightness-95" id="profile-btn" onclick="window.toggleProfileMenu()"><span id="profile-name-badge">N/A</span><i class="ph-bold ph-caret-down text-[10px]"></i></button>
 <div class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-[9999] origin-top-right transition-transform" id="profile-menu" style="animation:scaleIn .2s cubic-bezier(.16,1,.3,1)"></div>
 </div>
-<button class="p-1.5 sm:p-2.5 rounded-xl bg-slate-50 active:scale-90 transition border border-slate-200 shadow-sm ml-0.5 hover:brightness-95 flex items-center justify-center" id="theme-toggle" onclick="window.cycleTheme()"><i class="ph-bold ph-sun text-base sm:text-lg transition-transform" id="theme-icon"></i></button>
+<button class="p-1.5 sm:p-2.5 rounded-xl bg-slate-50 active:scale-90 transition border border-slate-200 shadow-sm ml-0.5 hover:brightness-95 flex items-center justify-center" id="theme-toggle" onclick="window.cycleTheme()" title="Đổi giao diện" type="button"><i class="ph-bold ph-sun text-base sm:text-lg transition-transform" id="theme-icon"></i></button>
 </div>
 </header>
 <div aria-label="Không gian làm việc LifeOS" class="hidden lg:flex" id="desktop-workspace-dock" role="navigation">
@@ -7816,7 +8000,7 @@ body.music-player-active #mini-player {
 <div class="lg:col-span-4 flex flex-col h-full view-section" id="view-focus">
 <div class="bg-white p-5 sm:p-6 lg:p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center justify-start lg:sticky lg:top-24 transition-shadow hover:shadow-xl relative overflow-hidden min-h-[500px]">
 <div class="absolute inset-0 bg-primary opacity-5 pointer-events-none rounded-[2rem]"></div>
-<div class="flex w-full justify-between items-center mb-6 relative z-10"><h2 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i class="ph-fill ph-hourglass-high text-primary text-lg"></i> Bộ đếm thời gian</h2><button class="p-2 text-primary bg-slate-50 rounded-xl transition-colors shadow-sm border border-slate-100 active:scale-90 hover:brightness-95" id="timer-sound-btn" onclick="window.toggleTimerSound()"><i class="ph-bold ph-speaker-high text-lg"></i></button></div>
+<div class="flex w-full justify-between items-center mb-6 relative z-10"><h2 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i class="ph-fill ph-hourglass-high text-primary text-lg"></i> Bộ đếm thời gian</h2><button class="p-2 text-primary bg-slate-50 rounded-xl transition-colors shadow-sm border border-slate-100 active:scale-90 hover:brightness-95" id="timer-sound-btn" onclick="window.toggleTimerSound()" title="Bật tắt âm thanh" type="button"><i class="ph-bold ph-speaker-high text-lg"></i></button></div>
 <div class="hidden w-full bg-white border border-primary/30 p-4 rounded-2xl mb-6 text-center relative shadow-sm animate-scaleIn z-10" id="focus-task-card"><span class="block text-[9px] font-black text-primary uppercase mb-1 tracking-widest flex justify-center items-center gap-1"><i class="ph-fill ph-target"></i> Đang tập trung vào</span><span class="font-bold text-[15px] text-slate-800 line-clamp-2 leading-snug" id="focus-task-name"></span><button class="absolute top-2 right-2 p-2 sm:p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors active:scale-90" onclick="window.unpinTask()"><i class="ph-bold ph-x text-sm"></i></button></div>
 <div class="grid grid-cols-5 w-full bg-slate-50 p-1 rounded-xl mb-6 z-10 shadow-inner border border-slate-200 gap-1 overflow-x-auto custom-scroll-area" id="focus-mode-tabs">
 <button class="py-2 text-[10px] sm:text-sm font-bold rounded-lg transition-all shadow-sm bg-white text-primary active:scale-95 truncate" id="tab-dateclock" onclick="window.switchTimerMode('dateclock')">Ngày giờ</button>
@@ -8038,9 +8222,9 @@ body.music-player-active #mini-player {
 <video class="w-full aspect-video bg-black rounded-xl shadow-inner border border-slate-800" controls="" id="tv-video-element" playsinline=""></video>
 <div class="mt-2 text-xs font-black text-rose-500 line-clamp-2 leading-snug p-1" id="tv-channel-name">📺 Cần thao tác: <span class="text-rose-600 italic font-medium">Vui lòng chọn kênh danh sách để bật xem</span></div>
 <div class="flex items-center justify-center gap-3 mt-1 bg-slate-50 border border-slate-200 rounded-xl p-1.5">
-<button class="w-9 h-9 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playPrev('tv', event)"><i class="ph-fill ph-skip-back text-lg"></i></button>
+<button class="w-9 h-9 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playPrev('tv', event)" title="Kênh trước" type="button"><i class="ph-fill ph-skip-back text-lg"></i></button>
 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Đổi Kênh</span>
-<button class="w-9 h-9 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playNext('tv', event)"><i class="ph-fill ph-skip-forward text-lg"></i></button>
+<button class="w-9 h-9 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playNext('tv', event)" title="Kênh sau" type="button"><i class="ph-fill ph-skip-forward text-lg"></i></button>
 </div>
 </div>
 <div class="w-full" id="radio-player-container" style="display: none;">
@@ -8053,9 +8237,9 @@ body.music-player-active #mini-player {
 </div>
 </div>
 <div class="flex items-center justify-center gap-4 border-t border-emerald-200/60 pt-2 mt-1">
-<button class="w-9 h-9 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm border border-emerald-200 active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playPrev('radio', event)"><i class="ph-fill ph-skip-back text-base"></i></button>
-<button class="w-11 h-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg active:scale-90 transition" id="radio-play-btn" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.toggleRadio(event)"><i class="ph-fill ph-play text-xl"></i></button>
-<button class="w-9 h-9 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm border border-emerald-200 active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playNext('radio', event)"><i class="ph-fill ph-skip-forward text-base"></i></button>
+<button class="w-9 h-9 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm border border-emerald-200 active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playPrev('radio', event)" title="Đài trước" type="button"><i class="ph-fill ph-skip-back text-base"></i></button>
+<button class="w-11 h-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg active:scale-90 transition" id="radio-play-btn" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.toggleRadio(event)" title="Phát hoặc dừng đài" type="button"><i class="ph-fill ph-play text-xl"></i></button>
+<button class="w-9 h-9 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm border border-emerald-200 active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playNext('radio', event)" title="Đài sau" type="button"><i class="ph-fill ph-skip-forward text-base"></i></button>
 </div>
 </div>
 <audio id="radio-audio-element" playsinline="" preload="none" webkit-playsinline=""></audio>
@@ -8184,6 +8368,7 @@ body.music-player-active #mini-player {
 <div class="lifeos-mini-meta">
 <p id="music-title">Bài hát</p>
 <p id="music-status">Sẵn sàng</p>
+<button aria-label="Đóng trình phát" id="btn-mini-close" title="Đóng" type="button" onclick="window.__lifeosCloseMp3Bar && window.__lifeosCloseMp3Bar()">×</button>
 </div>
 <div aria-label="Điều khiển nhạc" class="lifeos-mini-controls">
 <button aria-label="Trộn bài" id="btn-shuffle" onclick="window.MusicApp.toggleShuffle()" title="Trộn bài" type="button"><i class="ph-bold ph-shuffle"></i></button>
@@ -8360,27 +8545,27 @@ html.lifeos-keyboard-open.lifeos-keyboard-chat #chat-form {
 </div>
 <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-2xl border-t border-slate-200/80 z-[40] pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] lg:hidden" id="bottom-nav">
 <div class="flex justify-around px-2 py-2">
-<button class="nav-btn active group text-primary flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative" onclick="return window.LifeOSCompatHandlers.h011.call(this,event);">
+<button type="button" class="nav-btn active group text-primary flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative" onclick="return window.LifeOSCompatHandlers.h011.call(this,event);">
   <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-100 scale-100 transition-all nav-bg"></div>
   <i class="ph-fill ph-list-checks text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
   <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Nhiệm vụ</span>
 </button>
-<button class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h012.call(this,event);">
+<button type="button" class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h012.call(this,event);">
   <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
   <i class="ph-fill ph-timer text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
   <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Tập trung</span>
 </button>
-<button class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h013.call(this,event);">
+<button type="button" class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h013.call(this,event);">
   <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
   <i class="ph-fill ph-vault text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
   <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Kho lưu trữ</span>
 </button>
-<button class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h014.call(this,event);">
+<button type="button" class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h014.call(this,event);">
   <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
   <i class="ph-fill ph-music-notes text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
   <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Nghe nhạc</span>
 </button>
-<button class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h015.call(this,event);">
+<button type="button" class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h015.call(this,event);">
 <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
 <i class="ph-fill ph-chats-teardrop text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
 <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Gia đình</span>
@@ -9229,7 +9414,15 @@ window.stopGlobalAlarm = (actionType) => {
   if (ttsAudio) {ttsAudio.pause();ttsAudio.muted = true;}
   if (window.synth) window.synth.cancel();
 
-  hideEl('alarm-overlay');window.vibrate(10);
+  hideEl('alarm-overlay');
+  try {
+    var __am = document.getElementById('lifeos-task-alarm-modal');
+    if (__am) { __am.classList.add('hidden'); __am.style.display = 'none'; }
+    var __r61 = document.getElementById('lifeos-r61-alarm-modal');
+    if (__r61) __r61.remove();
+    if (window.__lifeosR61BeepTimer) { clearInterval(window.__lifeosR61BeepTimer); window.__lifeosR61BeepTimer = null; }
+  } catch (__e) {}
+  window.vibrate(10);
 
   if (window.activeAlarmTaskIds && window.activeAlarmTaskIds.length) {
     let needsSync = false;
@@ -9242,9 +9435,9 @@ window.stopGlobalAlarm = (actionType) => {
       }
     });
 
-    if (actionType === 'complete') {if (window.confetti) window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });window.showToast('Nhiệm vụ xuất sắc!', 'ph-check-circle');} else
-    if (actionType === 'snooze') window.showToast('Sẽ báo lại sau 5 phút', 'ph-clock');else
-    if (actionType === 'dismiss') window.showToast('Đã tạm ẩn báo thức.', 'ph-eye-closed');
+    if (actionType === 'complete') {if (!window.__lifeosAlarmToastOwned && window.confetti) window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });if (!window.__lifeosAlarmToastOwned) window.showToast('Nhiệm vụ xuất sắc!', 'ph-check-circle');} else
+    if (actionType === 'snooze') {if (!window.__lifeosAlarmToastOwned) window.showToast('Sẽ báo lại sau 5 phút', 'ph-clock');} else
+    if (actionType === 'dismiss') {if (!window.__lifeosAlarmToastOwned) window.showToast('Đã dừng báo thức', 'ph-stop-circle');}
 
     if (needsSync) {window.saveLocalTodos();window.renderTasksOnly();if (window.FirebaseSync) window.FirebaseSync.pushAll();}
   }
@@ -11200,7 +11393,7 @@ window.renderTasksOnly = () => {
 
       const actionsHTML = `<div class="flex flex-col sm:flex-row items-center gap-1.5 flex-shrink-0 pl-2 ml-auto"><button onclick="window.pinToFocus('${taskIdForJS}')" class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 flex items-center justify-center shadow-sm border border-slate-200 transition active:scale-90" title="Tập trung"><i class="ph-bold ph-target text-base"></i></button><button type="button" data-task-action="copy" onclick="event.stopPropagation();window.lifeosDuplicateTask('${taskIdForJS}')" class="lifeos-task-card-btn w-8 h-8 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 flex items-center justify-center shadow-sm border border-sky-100 transition active:scale-90" title="Nhân bản nhiệm vụ" aria-label="Nhân bản nhiệm vụ"><i class="ph-bold ph-copy text-base pointer-events-none"></i></button><button onclick="window.openEditTask('${taskIdForJS}')" class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 text-blue-500 flex items-center justify-center shadow-sm border border-slate-200 transition active:scale-90" title="Sửa"><i class="ph-bold ph-pencil-simple text-base"></i></button><button onclick="window.confirmDeleteTask('${taskIdForJS}')" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 flex items-center justify-center shadow-sm border border-rose-200 transition active:scale-90" title="Xóa"><i class="ph-bold ph-trash text-base"></i></button></div>`;
 
-      return `<li data-task-id="${t.id}" class="swipe-item group ${t.completed ? 'opacity-60 bg-slate-50' : ''}"><div class="swipe-bg-left"><i class="ph-bold ph-check text-2xl"></i></div><div class="swipe-bg-right"><i class="ph-bold ph-trash text-2xl"></i></div><div class="swipe-front p-3 sm:p-4 flex items-start sm:items-center gap-3"><div class="priority-bar ${pC}"></div><button onclick="window.toggleTask('${t.id}')" class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-xl border-2 flex items-center justify-center transition-colors mt-0.5 sm:mt-0 ${t.completed ? 'bg-primary border-primary shadow-md' : 'border-slate-300 hover:border-primary'}">${t.completed ? '<i class="ph-bold ph-check text-white text-sm"></i>' : ''}</button><div class="flex-grow min-w-0 flex flex-col justify-center"><div onclick="window.openEditTask('${t.id}')" class="font-bold cursor-pointer py-0.5 leading-snug break-words text-[15px] ${t.completed ? 'line-through text-slate-400' : t.alarmTime < nowMs && !t.completed && t.alarmEnabled !== false ? 'text-rose-600' : 'text-slate-800'}">${window.escapeHTML(t.text)}</div>${badgeHTML}</div>${actionsHTML}</div></li>`;
+      return `<li data-task-id="${t.id}" class="swipe-item group ${t.completed ? 'opacity-60 bg-slate-50' : ''}"><div class="swipe-bg-left"><i class="ph-bold ph-check text-2xl"></i></div><div class="swipe-bg-right"><i class="ph-bold ph-trash text-2xl"></i></div><div class="swipe-front p-3 sm:p-4 flex items-start sm:items-center gap-3"><div class="priority-bar ${pC}"></div><button type="button" title="Hoàn thành" aria-label="Hoàn thành" onclick="window.toggleTask('${t.id}')" class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-xl border-2 flex items-center justify-center transition-colors mt-0.5 sm:mt-0 ${t.completed ? 'bg-primary border-primary shadow-md' : 'border-slate-300 hover:border-primary'}">${t.completed ? '<i class="ph-bold ph-check text-white text-sm"></i>' : ''}</button><div class="flex-grow min-w-0 flex flex-col justify-center"><div onclick="window.openEditTask('${t.id}')" class="font-bold cursor-pointer py-0.5 leading-snug break-words text-[15px] ${t.completed ? 'line-through text-slate-400' : t.alarmTime < nowMs && !t.completed && t.alarmEnabled !== false ? 'text-rose-600' : 'text-slate-800'}">${window.escapeHTML(t.text)}</div>${badgeHTML}</div>${actionsHTML}</div></li>`;
     }).join(''));
   }
   window.updateProgress();
@@ -12116,11 +12309,11 @@ window.VaultUI = { _c: 'all', _q: '', _tI: null,
                         <h3 class="font-bold text-slate-800 text-base lg:text-lg leading-tight break-words">${sn}</h3>
                         <span class="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md mt-1.5 inline-flex items-center gap-1 border border-primary/20">${ci} ${window.escapeHTML(dc)}</span>
                     </div>
-                    <div class="flex gap-2 flex-shrink-0">
+                    <div class="vault-card-actions flex gap-2 flex-shrink-0">
                         <div class="w-10 h-10 flex items-center justify-center text-slate-600 bg-slate-50 rounded-xl transition border border-slate-200 shadow-sm" style="transform: ${chevronRot}; transition: transform 0.3s;" id="vault-chevron-${strId}">
                             <i class="ph-bold ph-caret-down text-lg"></i>
                         </div>
-                        <button type="button" onclick="event.stopPropagation();window.VaultApp.copyEntry('${strId}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary bg-slate-50 hover:bg-primary/10 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Copy nội dung"><i class="ph-bold ph-copy text-lg"></i></button>
+                        <button type="button" data-vault-copy="${strId}" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary bg-slate-50 hover:bg-primary/10 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Copy hoặc nhân bản" aria-label="Copy hoặc nhân bản"><i class="ph-bold ph-copy text-lg pointer-events-none"></i></button>
                         <button type="button" onclick="event.stopPropagation();window.VaultUI.openModal('${strId}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Sửa"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
                         <button type="button" onclick="event.stopPropagation();window.VaultApp.confirmDeleteEntry('${strId}')" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 rounded-xl transition active:scale-90 border border-slate-200 shadow-sm" title="Xóa"><i class="ph-bold ph-trash text-lg"></i></button>
                     </div>
@@ -12134,7 +12327,84 @@ window.VaultUI = { _c: 'all', _q: '', _tI: null,
 window.VaultApp = {
   setCategoryFilter(c) {window.vibrate(15);window.VaultUI._c = c;document.querySelectorAll('.cat-filter-btn').forEach((b) => {b.classList.remove('active', 'bg-primary', 'text-white', 'shadow-sm');b.classList.add('bg-white', 'text-slate-700');});if (event && event.target) {event.target.classList.remove('bg-white', 'text-slate-700');event.target.classList.add('active', 'bg-primary', 'text-white');}this.filterData(window.VaultUI._q);},
   filterData(q) {window.VaultUI._q = (q || '').trim();window.VaultUI.renderVaultCards();},
+  openCopyChoices(id) {
+    var old = document.getElementById('vault-copy-sheet');
+    if (old) old.remove();
+    window.__lifeosVaultCopyId = String(id);
+    var entries = window.VaultStorageLayer && window.VaultStorageLayer.getData ? window.VaultStorageLayer.getData() : [];
+    var entry = entries.find(function (x) { return String(x.id) === String(id); });
+    if (!entry) { window.showToast && window.showToast('Không tìm thấy mục', 'ph-warning'); return; }
+    var name = String(entry.name || entry.title || 'Mục');
+    var sheet = document.createElement('div');
+    sheet.id = 'vault-copy-sheet';
+    sheet.innerHTML = '<div class="vault-copy-card" role="dialog" aria-label="Copy hoặc nhân bản">' +
+      '<div class="vault-copy-kicker">Kho lưu trữ</div>' +
+      '<div class="vault-copy-name"></div>' +
+      '<button type="button" data-act="copy" class="vault-copy-btn is-copy"><i class="ph-bold ph-clipboard-text"></i><span><b>Copy nội dung</b><small>Dán được ngay</small></span></button>' +
+      '<button type="button" data-act="dup" class="vault-copy-btn is-dup"><i class="ph-bold ph-copy"></i><span><b>Nhân bản ngay</b><small>Thêm thẻ _copy và ghi Firebase</small></span></button>' +
+      '<button type="button" data-act="cancel" class="vault-copy-cancel">Đóng</button></div>';
+    sheet.querySelector('.vault-copy-name').textContent = name;
+    sheet.addEventListener('click', function (ev) {
+      if (ev.target === sheet) sheet.remove();
+    });
+    var self = this;
+    sheet.querySelector('[data-act="copy"]').onclick = function (ev) {
+      ev.stopPropagation();
+      var pick = window.__lifeosVaultCopyId;
+      sheet.remove();
+      self.copyEntry(pick);
+    };
+    sheet.querySelector('[data-act="dup"]').onclick = function (ev) {
+      ev.stopPropagation();
+      var pick = window.__lifeosVaultCopyId;
+      sheet.remove();
+      self.duplicateEntry(pick);
+    };
+    sheet.querySelector('[data-act="cancel"]').onclick = function (ev) {
+      ev.stopPropagation();
+      sheet.remove();
+    };
+    document.body.appendChild(sheet);
+  },
+  duplicateEntry(id) {
+    try {
+      window.vibrate && window.vibrate(15);
+      var entries = window.VaultStorageLayer && window.VaultStorageLayer.getData ? window.VaultStorageLayer.getData() : [];
+      var entry = entries.find(function (x) { return String(x.id) === String(id); });
+      if (!entry) { window.showToast && window.showToast('Không tìm thấy mục để nhân bản', 'ph-warning'); return; }
+      var sourceName = String(entry.name || entry.title || 'Mục').trim() || 'Mục';
+      var esc = sourceName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var re = new RegExp('^' + esc + '_copy(\\d+)$', 'i');
+      var max = 0;
+      entries.forEach(function (item) {
+        var m = String(item && (item.name || item.title) || '').trim().match(re);
+        if (m) max = Math.max(max, Number(m[1] || 0));
+      });
+      var now = Date.now();
+      var clone = {
+        id: String(now) + Math.floor(Math.random() * 1000).toString(),
+        name: sourceName + '_copy' + (max + 1),
+        category: entry.category || 'note',
+        content: entry.content || entry.body || entry.note || '',
+        createdAt: now,
+        updatedAt: now,
+        copiedFrom: String(entry.id)
+      };
+      if (entry.category === 'custom') clone.customCategory = entry.customCategory || 'Khác';
+      else if (entry.customCategory) clone.customCategory = entry.customCategory;
+      window.VaultStorageLayer.add(clone);
+      this.filterData(window.VaultUI && window.VaultUI._q);
+      if (window.FirebaseSync && window.FirebaseSync.pushAll) window.FirebaseSync.pushAll();
+      window.showToast && window.showToast('Đã nhân bản trong kho', 'ph-copy');
+    } catch (err) {
+      console.warn('Vault duplicate failed:', err);
+      window.showToast && window.showToast('Nhân bản kho thất bại', 'ph-warning');
+    }
+  },
   async copyEntry(id) {
+    if (window.__lifeosVaultCopyLock) return;
+    window.__lifeosVaultCopyLock = true;
+    setTimeout(function () { window.__lifeosVaultCopyLock = false; }, 700);
     try {var _window$vibrate19, _window94, _window$VaultStorageL12, _window$VaultUtils3, _window$showToast44, _window97;
       (_window$vibrate19 = (_window94 = window).vibrate) === null || _window$vibrate19 === void 0 || _window$vibrate19.call(_window94, 15);
       const entries = (_window$VaultStorageL12 = window.VaultStorageLayer) !== null && _window$VaultStorageL12 !== void 0 && _window$VaultStorageL12.getData ? window.VaultStorageLayer.getData() : [];
@@ -12207,6 +12477,18 @@ window.VaultApp = {
     r.onload = (ev) => {try {const d = JSON.parse(ev.target.result);if (!Array.isArray(d)) throw new Error();window.VaultStorageLayer.replaceAll(d);this.filterData('');window.showToast(`Phục hồi thành công ${d.length} mục!`, 'ph-upload-simple');if (window.FirebaseSync) window.FirebaseSync.pushAll();} catch (err) {window.showToast('File JSON không hợp lệ!', 'ph-warning-circle');}};r.readAsText(f);e.target.value = '';
   }
 };
+
+if (!window.__lifeosVaultCopyBound) {
+  window.__lifeosVaultCopyBound = true;
+  document.addEventListener('click', function (ev) {
+    var btn = ev.target && ev.target.closest ? ev.target.closest('[data-vault-copy]') : null;
+    if (!btn) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (window.VaultApp && window.VaultApp.openCopyChoices)
+      window.VaultApp.openCopyChoices(btn.getAttribute('data-vault-copy'));
+  }, true);
+}
 
 // ==============================================================================
 // 6. MODULE NGHE NHẠC (V45: CHUẨN AWAIT CLIPBOARD VÀ BẢO TOÀN DỮ LIỆU LOCAL)
@@ -13466,7 +13748,15 @@ catch (e) {
         var playing = !!(a && audioHasPlayableSrc(a) && !a.paused && !a.ended);
         return !!(hasActivated(app) || playing);
     }
+    function allowMiniBar() {
+        if (window.__lifeosMp3BarDismissed) return false;
+        if (document.body.classList.contains('lifeos-landscape-mini-pc')) return false;
+        if (typeof window.__lifeosMp3Surface === 'function') return !!window.__lifeosMp3Surface();
+        var view = byId('view-music');
+        return !!(view && view.classList.contains('active'));
+    }
     function showPlayer() {
+        if (!allowMiniBar()) return;
         var mp = player();
         if (!mp)
             return;
@@ -13489,9 +13779,11 @@ catch (e) {
     }
     function forceState() {
         var app = window.MusicApp;
-        if (shouldShow(app))
+        var mp = player();
+        var barOpen = !!(mp && (mp.classList.contains('music-player-open') || mp.style.display === 'flex')) || document.body.classList.contains('music-player-active');
+        if (shouldShow(app) && allowMiniBar())
             showPlayer();
-        else
+        else if (barOpen)
             hidePlayer();
     }
     function patchMusicApp() {
@@ -13608,6 +13900,322 @@ catch (e) {
     }
     window.addEventListener('resize', function () { syncBottomNavHeight(); normalizeButtons(); forceState(); }, { passive: true });
     window.addEventListener('orientationchange', function () { setTimeout(function () { syncBottomNavHeight(); normalizeButtons(); forceState(); }, 250); }, { passive: true });
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot, { once: true });
+    else
+        boot();
+})();
+</script>
+<style id="lifeos-mp3-yield-vault-copy">
+body:not([data-lifeos-mp3-bar="1"]) #mini-player.music-player-open,
+body:not([data-lifeos-mp3-bar="1"]).music-player-active #mini-player,
+body.lifeos-landscape-mini-pc #mini-player,
+body.lifeos-landscape-mini-pc #mini-player.music-player-open,
+body.lifeos-landscape-mini-pc.music-player-active #mini-player {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+#btn-mini-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 8;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #64748b;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+}
+#vault-copy-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 2300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px 12px calc(16px + env(safe-area-inset-bottom));
+  background: rgba(15, 23, 42, .46);
+}
+#vault-copy-sheet .vault-copy-card {
+  width: min(100%, 440px);
+  background: #fff;
+  border-radius: 24px;
+  padding: 16px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, .28);
+}
+#vault-copy-sheet .vault-copy-kicker {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #6366f1;
+}
+#vault-copy-sheet .vault-copy-name {
+  margin: 4px 0 12px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.35;
+  word-break: break-word;
+}
+#vault-copy-sheet .vault-copy-btn {
+  width: 100%;
+  min-height: 58px;
+  margin-bottom: 8px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 15px;
+}
+#vault-copy-sheet .vault-copy-btn b { display: block; font-weight: 900; }
+#vault-copy-sheet .vault-copy-btn small { display: block; font-size: 12px; font-weight: 700; opacity: .75; }
+#vault-copy-sheet .vault-copy-btn i { font-size: 22px; }
+#vault-copy-sheet .is-copy { background: #f8fafc; color: #0f172a; border: 1px solid #e2e8f0; }
+#vault-copy-sheet .is-dup { background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe; }
+#vault-copy-sheet .vault-copy-cancel {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-weight: 800;
+}
+@media (max-width: 1023px) {
+  .vault-card-wrapper { padding: 14px !important; margin-bottom: 12px !important; border-radius: 22px !important; }
+  .vault-card-actions { gap: 6px !important; }
+  .vault-card-actions > button,
+  .vault-card-actions > div { width: 36px !important; height: 36px !important; }
+}
+@media (min-width: 720px) {
+  #vault-copy-sheet { align-items: center; }
+}
+</style>
+<script id="lifeos-mp3-yield-gate">
+(function () {
+    function musicWorkspaceOn() {
+        var view = document.getElementById('view-music');
+        if (!view) return false;
+        var land = document.body.dataset.lifeosLandscapeRootMode || '';
+        if (land) return land === 'music';
+        var desk = document.body.dataset.desktopWorkspace || '';
+        if (desk && window.innerWidth >= 1024) return desk === 'music';
+        if (!view.classList.contains('active')) return false;
+        try { return window.getComputedStyle(view).display !== 'none'; }
+        catch (e) { return true; }
+    }
+    window.__lifeosMp3Surface = function () {
+        if (!musicWorkspaceOn()) return false;
+        var host = window.LifeOSSocialClone && window.LifeOSSocialClone.host;
+        if (host && host.active && (host.currentTab === 'youtube' || host.currentTab === 'facebook')) return false;
+        var tab = document.body.dataset.l64fMediaTab || '';
+        if (tab === 'radio' || tab === 'tv' || tab === 'youtube' || tab === 'facebook') return false;
+        var hubTab = window.MediaHub && window.MediaHub.currentTab;
+        if (hubTab && hubTab !== 'music') return false;
+        return true;
+    };
+    function hasTrack() {
+        var app = window.MusicApp;
+        return !!(app && app.hasUserSelectedTrack && typeof app.currentIndex === 'number' && app.currentIndex >= 0);
+    }
+    function shouldShowBar() {
+        if (window.__lifeosMp3BarDismissed) return false;
+        if (document.body.classList.contains('lifeos-landscape-mini-pc')) return false;
+        if (!window.__lifeosMp3Surface()) return false;
+        return hasTrack();
+    }
+    var busy = false;
+    var busyTimer = 0;
+    function releaseBusy() {
+        clearTimeout(busyTimer);
+        busyTimer = setTimeout(function () { busy = false; }, 0);
+    }
+    function musicViewOpen() {
+        var view = document.getElementById('view-music');
+        return !!(view && view.classList.contains('active') && window.innerWidth < 1024 && !document.body.classList.contains('lifeos-landscape-mini-pc'));
+    }
+    function syncInstallFab() {
+        var fab = document.getElementById('btnInstall');
+        if (!fab) return;
+        if (musicViewOpen()) {
+            fab.dataset.lifeosFabHold = '1';
+            if (fab.style.display !== 'none') {
+                fab.style.setProperty('display', 'none', 'important');
+                fab.style.setProperty('visibility', 'hidden', 'important');
+                fab.style.setProperty('pointer-events', 'none', 'important');
+            }
+        } else if (fab.dataset.lifeosFabHold === '1') {
+            fab.dataset.lifeosFabHold = '0';
+            if (fab.dataset.pwaReady === '1') {
+                fab.style.setProperty('display', 'flex', 'important');
+                fab.style.setProperty('visibility', 'visible', 'important');
+                fab.style.setProperty('pointer-events', 'auto', 'important');
+            }
+        }
+    }
+    function clearLift() {
+        var mi = document.getElementById('mobile-input');
+        if (mi) mi.style.bottom = '';
+        var fab = document.getElementById('fab-add-vault');
+        if (fab) fab.style.bottom = '';
+    }
+    function pauseIfLeft() {
+        if (window.__lifeosMp3Surface() && !window.__lifeosMp3BarDismissed) return;
+        var app = window.MusicApp;
+        var audio = document.getElementById('mstq-player');
+        if (audio && !audio.paused) {
+            try { audio.pause(); } catch (e) {}
+        }
+        if (app && app.playing) app.playing = false;
+    }
+    function yieldRight(off) {
+        var panel = document.getElementById('l64f-mp3-right-player');
+        if (!panel) return;
+        if (off) panel.classList.add('is-yielded');
+        else if (!panel.classList.contains('is-user-closed')) panel.classList.remove('is-yielded');
+    }
+    function sync() {
+        if (busy) return;
+        busy = true;
+        try {
+            var show = shouldShowBar();
+            var next = show ? '1' : '0';
+            if (document.body.dataset.lifeosMp3Bar !== next) document.body.dataset.lifeosMp3Bar = next;
+            var mp = document.getElementById('mini-player');
+            if (!show) {
+                if (mp) {
+                    if (mp.classList.contains('music-player-open')) mp.classList.remove('music-player-open');
+                    if (mp.style.display !== 'none') mp.style.setProperty('display', 'none', 'important');
+                    mp.setAttribute('aria-hidden', 'true');
+                }
+                if (document.body.classList.contains('music-player-active'))
+                    document.body.classList.remove('music-player-active');
+                clearLift();
+                pauseIfLeft();
+            } else if (mp) {
+                mp.style.removeProperty('display');
+                mp.classList.add('music-player-open');
+                mp.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('music-player-active');
+            }
+            yieldRight(!window.__lifeosMp3Surface());
+            syncInstallFab();
+        } finally {
+            releaseBusy();
+        }
+    }
+    window.__lifeosSyncMp3Chrome = sync;
+    window.__lifeosCloseMp3Bar = function () {
+        window.__lifeosMp3BarDismissed = true;
+        var panel = document.getElementById('l64f-mp3-right-player');
+        if (panel) panel.classList.add('is-user-closed');
+        var app = window.MusicApp;
+        var audio = document.getElementById('mstq-player');
+        if (app) app.playing = false;
+        if (audio && !audio.paused) {
+            try { audio.pause(); } catch (e) {}
+        }
+        sync();
+    };
+    function armApp() {
+        var app = window.MusicApp;
+        if (!app || app.__lifeosMp3Gate) return false;
+        app.__lifeosMp3Gate = true;
+        ['play', 'playNext', 'playPrev'].forEach(function (name) {
+            var old = app[name];
+            if (typeof old !== 'function') return;
+            app[name] = function () {
+                window.__lifeosMp3BarDismissed = false;
+                var panel = document.getElementById('l64f-mp3-right-player');
+                if (panel) panel.classList.remove('is-user-closed');
+                var ret = old.apply(this, arguments);
+                setTimeout(sync, 0);
+                return ret;
+            };
+        });
+        if (typeof app.togglePlay === 'function') {
+            var oldToggle = app.togglePlay;
+            app.togglePlay = function () {
+                if (!this.playing) {
+                    window.__lifeosMp3BarDismissed = false;
+                    var panel = document.getElementById('l64f-mp3-right-player');
+                    if (panel) panel.classList.remove('is-user-closed');
+                }
+                var ret = oldToggle.apply(this, arguments);
+                setTimeout(sync, 0);
+                return ret;
+            };
+        }
+        return true;
+    }
+    function hookSwitch() {
+        if (typeof window.switchTab === 'function' && !window.switchTab.__lifeosMp3Gate) {
+            var old = window.switchTab;
+            var wrapped = function () {
+                var ret = old.apply(this, arguments);
+                setTimeout(sync, 0);
+                setTimeout(sync, 80);
+                return ret;
+            };
+            wrapped.__lifeosMp3Gate = true;
+            window.switchTab = wrapped;
+        }
+        var hub = window.MediaHub;
+        if (hub && typeof hub.switchTab === 'function' && !hub.switchTab.__lifeosMp3Gate) {
+            var oldHub = hub.switchTab;
+            var wrappedHub = function () {
+                var ret = oldHub.apply(this, arguments);
+                setTimeout(sync, 0);
+                setTimeout(sync, 80);
+                return ret;
+            };
+            wrappedHub.__lifeosMp3Gate = true;
+            hub.switchTab = wrappedHub;
+        }
+    }
+    function boot() {
+        armApp();
+        hookSwitch();
+        var pwa = window.pwaEngine;
+        if (pwa && typeof pwa.showFab === 'function' && !pwa.showFab.__lifeosFabHold) {
+            var oldShow = pwa.showFab;
+            var wrappedShow = function () {
+                var ret = oldShow.apply(this, arguments);
+                syncInstallFab();
+                return ret;
+            };
+            wrappedShow.__lifeosFabHold = true;
+            pwa.showFab = wrappedShow;
+        }
+        sync();
+        var bodyObs = new MutationObserver(function () { sync(); });
+        bodyObs.observe(document.body, { attributes: true, attributeFilter: ['class', 'data-l64f-media-tab', 'data-lifeos-landscape-root-mode', 'data-desktop-workspace'] });
+        var view = document.getElementById('view-music');
+        if (view) bodyObs.observe(view, { attributes: true, attributeFilter: ['class'] });
+        var mp = document.getElementById('mini-player');
+        if (mp) bodyObs.observe(mp, { attributes: true, attributeFilter: ['class'] });
+        var audio = document.getElementById('mstq-player');
+        if (audio && !audio.__lifeosMp3Yield) {
+            audio.__lifeosMp3Yield = true;
+            audio.addEventListener('play', function () { setTimeout(sync, 0); }, true);
+            audio.addEventListener('playing', function () { setTimeout(sync, 40); }, true);
+        }
+        var tries = 0;
+        var timer = setInterval(function () {
+            tries += 1;
+            armApp();
+            hookSwitch();
+            sync();
+            if (tries > 40) clearInterval(timer);
+        }, 150);
+    }
     if (document.readyState === 'loading')
         document.addEventListener('DOMContentLoaded', boot, { once: true });
     else
@@ -15238,6 +15846,19 @@ catch (e) {
             m.classList.add('hidden');
             m.style.display = 'none';
         }
+        var old = $('alarm-overlay');
+        if (old) {
+            old.classList.add('hidden');
+            old.style.display = 'none';
+        }
+        var extra = $('lifeos-r61-alarm-modal');
+        if (extra && extra.parentNode)
+            extra.parentNode.removeChild(extra);
+        try {
+            clearInterval(window.__lifeosR61BeepTimer);
+            window.__lifeosR61BeepTimer = null;
+        }
+        catch (e) { }
     }
     function scheduleNextTtsLoop(delay) {
         clearTimeout(state.nextLoopTimer);
@@ -15313,21 +15934,28 @@ catch (e) {
         }
         catch (e) { }
         var result;
-        if (typeof oldStopGlobalAlarm === 'function')
-            result = oldStopGlobalAlarm.apply(this, arguments);
-        else {
-            window.isAlarmRinging = false;
-            if (actionType === 'snooze' && Array.isArray(window.activeAlarmTaskIds)) {
-                window.activeAlarmTaskIds.forEach(function (id) {
-                    var t = (window.todos || []).find(function (x) { return String(x.id) === String(id); });
-                    if (t) {
-                        t.alarmTime = Date.now() + 5 * 60000;
-                        t.alerted = false;
-                    }
-                });
+        window.__lifeosAlarmToastOwned = true;
+        try {
+            if (typeof oldStopGlobalAlarm === 'function')
+                result = oldStopGlobalAlarm.apply(this, arguments);
+            else {
+                window.isAlarmRinging = false;
+                if (actionType === 'snooze' && Array.isArray(window.activeAlarmTaskIds)) {
+                    window.activeAlarmTaskIds.forEach(function (id) {
+                        var t = (window.todos || []).find(function (x) { return String(x.id) === String(id); });
+                        if (t) {
+                            t.alarmTime = Date.now() + 5 * 60000;
+                            t.alerted = false;
+                        }
+                    });
+                }
+                window.activeAlarmTaskIds = [];
             }
-            window.activeAlarmTaskIds = [];
         }
+        finally {
+            window.__lifeosAlarmToastOwned = false;
+        }
+        hideAlarmModal();
         if (actionType === 'snooze')
             toast('Đã nhắc lại sau 5 phút', 'ph-clock-afternoon');
         else
@@ -16751,9 +17379,17 @@ window.MediaHub = {
             }
         }
         try {
-            document.body.dataset.lifeosMediaTab = tab;
-            document.body.dataset.l64fMediaTab = tab;
-            window.dispatchEvent(new CustomEvent('lifeos:media-layout', { detail: { tab, owner: this.cleanOwner } }));
+            var socialTab = '';
+            try {
+                var socialHost = window.LifeOSSocialClone && window.LifeOSSocialClone.host;
+                if (socialHost && socialHost.active && (socialHost.currentTab === 'youtube' || socialHost.currentTab === 'facebook'))
+                    socialTab = socialHost.currentTab;
+            }
+            catch (e2) { }
+            var layoutTab = socialTab || tab;
+            document.body.dataset.lifeosMediaTab = layoutTab;
+            document.body.dataset.l64fMediaTab = layoutTab;
+            window.dispatchEvent(new CustomEvent('lifeos:media-layout', { detail: { tab: layoutTab, owner: this.cleanOwner } }));
         }
         catch (e) { }
     },
@@ -18494,13 +19130,26 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         right.classList.toggle('l64f-has-player', !!(tvShown || radioShown));
     }
     function updateMediaTabState() {
-        const tab = (window.MediaHub && window.MediaHub.currentTab) || 'music';
+        var socialTab = '';
+        try {
+            var host = window.LifeOSSocialClone && window.LifeOSSocialClone.host;
+            if (host && host.active && (host.currentTab === 'youtube' || host.currentTab === 'facebook'))
+                socialTab = host.currentTab;
+        }
+        catch (e) { }
+        const tab = socialTab || (window.MediaHub && window.MediaHub.currentTab) || 'music';
         document.body.dataset.l64fMediaTab = tab;
         const mp3 = document.getElementById('mp3-list-container');
         const radio = document.getElementById('radio-list-container');
         const tv = document.getElementById('tv-list-container');
         if (!mp3 || !radio || !tv)
             return;
+        if (tab === 'youtube' || tab === 'facebook') {
+            mp3.style.setProperty('display', 'none', 'important');
+            radio.style.setProperty('display', 'none', 'important');
+            tv.style.setProperty('display', 'none', 'important');
+            return;
+        }
         if (tab === 'tv') {
             mp3.style.setProperty('display', 'none', 'important');
             radio.style.setProperty('display', 'none', 'important');
@@ -18829,8 +19478,29 @@ body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #l64f-mp3-right-playe
 }
 
 body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #l64f-mp3-right-player,
-body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-mp3-right-player {
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-mp3-right-player,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #l64f-mp3-right-player,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="facebook"] #l64f-mp3-right-player,
+body.lifeos-landscape-mini-pc #l64f-mp3-right-player.is-user-closed,
+body.lifeos-landscape-mini-pc #l64f-mp3-right-player.is-yielded,
+body.lifeos-landscape-mini-pc:not([data-l64f-media-tab="music"]) #l64f-mp3-right-player {
   display: none !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #l64f-media-preview,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="facebook"] #l64f-media-preview {
+  display: none !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"]:has(#l64f-mp3-right-player.is-user-closed) #l64f-media-preview {
+  display: flex !important;
+}
+
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #lifeos-social-player,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="facebook"] #lifeos-social-player {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-height: 180px !important;
 }
 
 body.lifeos-landscape-mini-pc #l64f-mp3-right-player {
@@ -19000,11 +19670,12 @@ body.lifeos-landscape-mini-pc #l64f-mp3-help {
         panel.innerHTML = `
       <div id="l64f-mp3-now-top">
         <div id="l64f-mp3-cover"><i class="ph-fill ph-music-notes"></i></div>
-        <div>
+        <div style="flex:1;min-width:0">
           <div id="l64f-mp3-now-title">Chọn một bài MP3 bên trái</div>
           <div id="l64f-mp3-now-artist">Mini-PC Player</div>
           <div id="l64f-mp3-now-status">Sẵn sàng phát nhạc</div>
         </div>
+        <button id="l64f-mp3-close" type="button" title="Đóng trình phát" style="margin-left:auto;width:36px;height:36px;border-radius:12px;border:1px solid rgba(244,216,122,.9);background:#fff;color:#9a3412;font-weight:900;font-size:18px;line-height:1">×</button>
       </div>
       <div id="l64f-mp3-controls">
         <button id="l64f-mp3-shuffle" type="button" title="Trộn bài"><i class="ph-bold ph-shuffle"></i></button>
@@ -19037,11 +19708,24 @@ body.lifeos-landscape-mini-pc #l64f-mp3-help {
             (_b = (_a = window.MusicApp) === null || _a === void 0 ? void 0 : _a.toggleRepeat) === null || _b === void 0 ? void 0 : _b.call(_a);
         }
         catch (e) { } sync(); };
+        panel.querySelector('#l64f-mp3-close').onclick = function () {
+            panel.classList.add('is-user-closed');
+            try {
+                if (window.MusicApp)
+                    window.MusicApp.playing = false;
+                var audio = document.getElementById('mstq-player');
+                if (audio && !audio.paused)
+                    audio.pause();
+            }
+            catch (e) { }
+            sync();
+        };
         panel.querySelector('#l64f-mp3-play').onclick = function () {
             try {
                 const app = window.MusicApp;
                 if (!app)
                     return;
+                panel.classList.remove('is-user-closed');
                 if ((!app.hasUserSelectedTrack || app.currentIndex < 0) && Array.isArray(app.playlist) && app.playlist.length)
                     app.play(0);
                 else
@@ -19072,6 +19756,13 @@ body.lifeos-landscape-mini-pc #l64f-mp3-help {
         const panel = ensurePanel();
         if (!panel)
             return;
+        try {
+            var host = window.LifeOSSocialClone && window.LifeOSSocialClone.host;
+            var socialOn = !!(host && host.active && (host.currentTab === 'youtube' || host.currentTab === 'facebook'));
+            var surface = typeof window.__lifeosMp3Surface === 'function' ? !!window.__lifeosMp3Surface() : !socialOn;
+            panel.classList.toggle('is-yielded', !surface);
+        }
+        catch (e) { }
         const app = window.MusicApp || {};
         const a = document.getElementById('mstq-player');
         const list = Array.isArray(app.playlist) ? app.playlist : [];
@@ -19096,7 +19787,11 @@ body.lifeos-landscape-mini-pc #l64f-mp3-help {
             titleEl.textContent = 'Chọn một bài MP3 bên trái';
             artistEl.textContent = 'Danh sách đang tải hoặc chưa có bài';
         }
-        const playing = !!(a && !a.paused && !a.ended) || !!app.playing;
+        const playing = !!(a && !a.paused && !a.ended);
+        if (playing)
+            panel.classList.remove('is-user-closed');
+        if (panel.classList.contains('is-user-closed'))
+            return;
         statusEl.textContent = current ? (playing ? 'Đang phát...' : 'Đã tạm dừng') : (song ? 'Bấm phát để nghe bài đầu tiên' : 'Sẵn sàng phát nhạc');
         playBtn.innerHTML = playing ? '<i class="ph-fill ph-pause"></i>' : '<i class="ph-fill ph-play"></i>';
         shuffleBtn.classList.toggle('is-on', !!app.shuffle);
@@ -29450,6 +30145,7 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         return menuPop(m.getAttribute('data-j19g-menu'), m);
     } }, true); document.addEventListener('keydown', function (e) { if (e.key === 'Escape') {
         closeMenu();
+        closeVideoOverlay();
     } }); }
     function applyWide(reason) { var chat = document.getElementById('chat-messages'); if (!chat)
         return; chat.classList.add('lifeos-j19g-timeline'); Array.prototype.forEach.call(chat.querySelectorAll('.lifeos-j19g-card'), function (card) { card.style.setProperty('width', '100%', 'important'); card.style.setProperty('max-width', '100%', 'important'); var row = card.closest('.lifeos-j19g-row'); if (row) {
@@ -36258,12 +36954,37 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         if (typeof old !== 'function')
             return false;
         window.__lifeosR39FetchCorsCleanerInstalled = true;
-        window.fetch = function (input, init) {
+        var wrappedFetch = function (input, init) {
+            var self = this, argLen = arguments.length;
             var url = S(input && input.url || input);
-            if (/lifeos-family-d1-api\.tunhienhieuchuyen\.workers\.dev/i.test(url))
+            var method = 'GET';
+            try { method = S((init && init.method) || (input && input.method) || 'GET').toUpperCase(); }
+            catch (eM) { }
+            var before = window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : '';
+            var changedHeader = false;
+            if (/lifeos-family-d1-api\.tunhienhieuchuyen\.workers\.dev/i.test(url)) {
                 init = stripForbiddenHeaders(init, url);
-            return old.apply(this, arguments.length > 1 ? [input, init] : [input]);
+                var after = window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : before;
+                changedHeader = after !== before;
+            }
+            var info = {
+                method: method,
+                url: S(url).slice(0, 180),
+                host: window.__lifeosHostTag ? window.__lifeosHostTag(url) : '',
+                branch: 'old',
+                callee: window.__lifeosFnFlags ? window.__lifeosFnFlags(old) : '',
+                changedUrl: false,
+                changedHeader: changedHeader,
+                changedBody: false,
+                fake: '',
+                headers: window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : ''
+            };
+            var run = function () { return old.apply(self, argLen > 1 ? [input, init] : [input]); };
+            if (typeof window.__lifeosNoteFetch !== 'function') return run();
+            return window.__lifeosNoteFetch('R39', info, run);
         };
+        wrappedFetch.__lifeosTraceLayer = 'R39';
+        window.fetch = wrappedFetch;
         trace('FETCH_CORS_CLEANER_INSTALLED', { oldWorker: OLD_WORKER });
         return true;
     }
@@ -37570,7 +38291,8 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         if (window.__lifeosR47FetchPostPromotePatched || typeof window.fetch !== 'function')
             return true;
         var old = window.fetch;
-        window.fetch = function (input, init) {
+        var wrappedFetch = function (input, init) {
+            var self = this, args = arguments;
             var url = S(input && input.url || input), method = S((init && init.method) || (input && input.method) || 'GET').toUpperCase();
             var bodyObj = null, key = '';
             if (method === 'POST' && /lifeos-family-d1-api\.tunhienhieuchuyen\.workers\.dev\/api\/family\/messages\/?(?:$|\?)/i.test(url)) {
@@ -37581,19 +38303,38 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
                     trace('FETCH_POST_OBSERVED', { key: key, fileName: bodyObj.file_name || bodyObj.fileName || bodyObj.name || '', size: bodyObj.file_size || bodyObj.size || 0 });
                 }
             }
-            var p = old.apply(this, arguments);
-            if (bodyObj && key) {
-                return Promise.resolve(p).then(function (res) {
-                    try {
-                        if (res && res.ok)
-                            setTimeout(function () { promote(bodyObj, 'fetch_post_d1_insert_ok'); }, 0);
-                    }
-                    catch (e) { }
-                    return res;
-                }, function (e) { throw e; });
-            }
-            return p;
+            var info = {
+                method: method,
+                url: S(url).slice(0, 180),
+                host: window.__lifeosHostTag ? window.__lifeosHostTag(url) : '',
+                branch: 'old',
+                callee: window.__lifeosFnFlags ? window.__lifeosFnFlags(old) : '',
+                changedUrl: false,
+                changedHeader: false,
+                changedBody: false,
+                fake: '',
+                headers: window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : '',
+                note: bodyObj && key ? 'post-promote-watch' : ''
+            };
+            var run = function () {
+                var p = old.apply(self, args);
+                if (bodyObj && key) {
+                    return Promise.resolve(p).then(function (res) {
+                        try {
+                            if (res && res.ok)
+                                setTimeout(function () { promote(bodyObj, 'fetch_post_d1_insert_ok'); }, 0);
+                        }
+                        catch (e) { }
+                        return res;
+                    }, function (e) { throw e; });
+                }
+                return p;
+            };
+            if (typeof window.__lifeosNoteFetch !== 'function') return run();
+            return window.__lifeosNoteFetch('R47', info, run);
         };
+        wrappedFetch.__lifeosTraceLayer = 'R47';
+        window.fetch = wrappedFetch;
         window.__lifeosR47FetchPostPromotePatched = true;
         trace('FETCH_POST_PROMOTE_PATCHED', {});
         return true;
@@ -40491,6 +41232,12 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
         catch (e) { }
     }
     function fallbackModal(ids, text) {
+        var taskModal = document.getElementById('lifeos-task-alarm-modal');
+        var overlay = document.getElementById('alarm-overlay');
+        if (taskModal && !taskModal.classList.contains('hidden') && taskModal.style.display !== 'none')
+            return;
+        if (overlay && !overlay.classList.contains('hidden'))
+            return;
         if (document.getElementById('lifeos-r61-alarm-modal'))
             return;
         var html = '<div id="lifeos-r61-alarm-modal" style="position:fixed;inset:0;z-index:999999;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:18px">' +
@@ -40527,8 +41274,10 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
         }
         setTimeout(function () {
             var overlay = document.getElementById('alarm-overlay');
+            var taskModal = document.getElementById('lifeos-task-alarm-modal');
             var visible = overlay && !overlay.classList.contains('hidden') && overlay.offsetParent !== null;
-            if (!visible && !before)
+            var taskVisible = taskModal && !taskModal.classList.contains('hidden') && taskModal.style.display !== 'none';
+            if (!visible && !taskVisible && !before)
                 fallbackModal(ids, text);
         }, 450);
         trace('ALARM_FIRE', { ids: ids, text: text });
@@ -43072,16 +43821,18 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
         trace('REWRITE_LEGACY_PATCH_FAIL', { error: S(e.message || e) });
         return { input: input, init: init };
     } }
+    var __lifeosR67PatchGen = 0;
     function patchFetch() { if (!rawFetch || window.fetch.__lifeosR67SingleSchemaPatched)
-        return; var prev = window.fetch.bind(window); var wrapped = function (input, init) { try {
-        var url = (input && input.url) || input;
+        return; __lifeosR67PatchGen += 1; var gen = __lifeosR67PatchGen; var prev = window.fetch.bind(window); var wrapped = function (input, init) { var url = (input && input.url) || input; var method = 'GET'; try { method = S((init && init.method) || 'GET').toUpperCase(); } catch (eM) { } var beforeUrl = S(url), beforeBody = init && init.body; var changedUrl = false, changedBody = false; try {
         if (isFirestoreProfilePatch(url, init)) {
             var r = rewriteLegacyFirestorePatch(url, init || {});
             input = r.input;
             init = r.init;
+            changedUrl = S(input) !== beforeUrl;
+            changedBody = !!(init && init.body !== beforeBody);
         }
     }
-    catch (e) { } return prev(input, init); }; wrapped.__lifeosR67SingleSchemaPatched = true; window.fetch = wrapped; }
+    catch (e) { } var info = { method: method, url: S(input && input.url || input || url).slice(0, 180), host: window.__lifeosHostTag ? window.__lifeosHostTag(input || url) : '', branch: 'prev', callee: window.__lifeosFnFlags ? window.__lifeosFnFlags(prev) : '', changedUrl: changedUrl, changedHeader: false, changedBody: changedBody, fake: '', headers: window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : '', note: 'gen' + gen }; var run = function () { return prev(input, init); }; if (typeof window.__lifeosNoteFetch !== 'function') return run(); return window.__lifeosNoteFetch('R67', info, run); }; wrapped.__lifeosR67SingleSchemaPatched = true; wrapped.__lifeosTraceLayer = 'R67'; window.fetch = wrapped; }
     function patchLocalStorage() { try {
         if (Storage.prototype.setItem.__lifeosR67SingleSchemaPatched)
             return;
@@ -43787,7 +44538,10 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
         var isWrite = isFsProfileUrl(u) && (m === 'PATCH' || u.indexOf('updateMask.fieldPaths=') > -1);
         if (!isWrite) {
             state.passthrough++;
-            return rawFetch(input, init);
+            var infoPass = { method: m, url: S(u).slice(0, 180), host: window.__lifeosHostTag ? window.__lifeosHostTag(u) : '', branch: 'rawFetch', callee: window.__lifeosFnFlags ? window.__lifeosFnFlags(rawFetch) : '', changedUrl: false, changedHeader: false, changedBody: false, fake: '', headers: window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : '', note: 'passthrough' };
+            var runPass = function () { return rawFetch(input, init); };
+            if (typeof window.__lifeosNoteFetch !== 'function') return runPass();
+            return window.__lifeosNoteFetch('R72', infoPass, runPass);
         }
         var bodyText = S(b);
         var canonical = canonicalPayload(bodyText);
@@ -43801,13 +44555,19 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
             state.skippedDuplicateWrites++;
             state.lastReason = 'skip_duplicate_canonical';
             record('skip_duplicate', { hash: hash, age: t - state.lastAllowedAt });
-            return fakeOk(u, 'duplicate_canonical');
+            var infoDup = { method: m, url: S(u).slice(0, 180), host: window.__lifeosHostTag ? window.__lifeosHostTag(u) : '', branch: 'fake', callee: '', changedUrl: false, changedHeader: false, changedBody: false, fake: 'duplicate_canonical', headers: window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : '', note: 'duplicate' };
+            var runDup = function () { return fakeOk(u, 'duplicate_canonical'); };
+            if (typeof window.__lifeosNoteFetch !== 'function') return runDup();
+            return window.__lifeosNoteFetch('R72', infoDup, runDup);
         }
         if (tooSoon && hash === state.lastStableHash) {
             state.skippedTooSoonWrites++;
             state.lastReason = 'skip_too_soon_same';
             record('skip_too_soon', { hash: hash, age: t - state.lastWriteAt });
-            return fakeOk(u, 'too_soon_same');
+            var infoSoon = { method: m, url: S(u).slice(0, 180), host: window.__lifeosHostTag ? window.__lifeosHostTag(u) : '', branch: 'fake', callee: '', changedUrl: false, changedHeader: false, changedBody: false, fake: 'too_soon_same', headers: window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : '', note: 'too_soon' };
+            var runSoon = function () { return fakeOk(u, 'too_soon_same'); };
+            if (typeof window.__lifeosNoteFetch !== 'function') return runSoon();
+            return window.__lifeosNoteFetch('R72', infoSoon, runSoon);
         }
         state.allowedWrites++;
         state.lastAllowedAt = t;
@@ -43816,14 +44576,17 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
         state.lastUrl = u.slice(0, 180);
         state.lastReason = 'allow_changed_or_first';
         record('allow', { hash: hash, counts: { tasks: (canonical.tasks || []).length, vault: (canonical.vault || []).length, tombstones: Object.keys(canonical.deletedTaskTombstones || {}).length } });
-        return fetchPrev(input, init).then(function (res) {
+        var infoAllow = { method: m, url: S(u).slice(0, 180), host: window.__lifeosHostTag ? window.__lifeosHostTag(u) : '', branch: 'fetchPrev', callee: window.__lifeosFnFlags ? window.__lifeosFnFlags(fetchPrev) : '', changedUrl: false, changedHeader: false, changedBody: false, fake: '', headers: window.__lifeosHeaderNames ? window.__lifeosHeaderNames(input, init) : '', note: 'profile-write' };
+        var runAllow = function () { return fetchPrev(input, init).then(function (res) {
             try {
                 var clone = res.clone();
                 clone.json().then(function (j) { state.lastResponse = j; }).catch(function () { });
             }
             catch (e) { }
             return res;
-        });
+        }); };
+        if (typeof window.__lifeosNoteFetch !== 'function') return runAllow();
+        return window.__lifeosNoteFetch('R72', infoAllow, runAllow);
     }
     var fetchPrev = rawFetch;
     function patchFetch() {
@@ -43832,6 +44595,7 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
         fetchPrev = window.fetch.bind(window);
         var f = function (input, init) { return guardFetch(input, init); };
         f.__lifeosR72WriteGate = true;
+        f.__lifeosTraceLayer = 'R72';
         window.fetch = f;
     }
     function patchSyncFacades() {
@@ -44011,8 +44775,8 @@ var Host={
   playSelected:function(){var idx=this.selected[this.currentTab]||0,item=this.filtered[idx];if(!item||!window.LifeOSSocialPlayer)return;window.LifeOSSocialPlayer.startItem(this.currentTab,item,'manual')},
   togglePlay:function(){if(window.LifeOSSocialPlayer&&window.LifeOSSocialPlayer.toggle())return},
   applyLayout:function(){showEl('mp3-list-container',false);showEl('radio-list-container',false);showEl('tv-list-container',false);showEl('radio-player-container',false);showEl('tv-player-container',false);showEl('lifeos-social-list',true,'block');showEl('lifeos-social-player',true,'flex');var loading=document.getElementById('music-loading');if(loading)loading.style.display='none';['media-group-sidebar','media-group-mobile-bar'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.hidden=true;el.style.setProperty('display','none','important')});var yt=document.getElementById('lifeos-social-yt-open'),fb=document.getElementById('lifeos-social-fb-open');if(yt)yt.classList.toggle('hidden',this.currentTab!=='youtube');if(fb)fb.classList.toggle('hidden',this.currentTab!=='facebook')},
-  enter:function(tab){if(tab!=='youtube'&&tab!=='facebook')return false;silenceOthers();if(this.currentTab&&this.currentTab!==tab&&window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup();this.stopElements()}this.currentTab=tab;this.active=true;var search=document.getElementById('music-search');this.query=search?String(search.value||''):'';this.applyLayout();paintButtons();var self=this;var job=tab==='youtube'?this.loadYouTube(false):this.loadFacebook(false);Promise.resolve(job).then(function(){if(self.currentTab===tab){self.render(true);paintButtons()}},function(){if(self.currentTab===tab)self.render(true)});if(window.LifeOSSocialPlayer)window.LifeOSSocialPlayer.updateModeVisibility();return true},
-  leave:function(){if(!this.currentTab)return;['media-group-sidebar','media-group-mobile-bar'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.hidden=false;el.style.removeProperty('display')});this.currentTab='';this.active=false;if(window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup()}this.stopElements();showEl('lifeos-social-list',false);showEl('lifeos-social-player',false);paintButtons()},
+  enter:function(tab){if(tab!=='youtube'&&tab!=='facebook')return false;silenceOthers();if(this.currentTab&&this.currentTab!==tab&&window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup();this.stopElements()}this.currentTab=tab;this.active=true;try{document.body.dataset.l64fMediaTab=tab;var mp3=document.getElementById('l64f-mp3-right-player');if(mp3)mp3.classList.add('is-yielded')}catch(e){}var search=document.getElementById('music-search');this.query=search?String(search.value||''):'';this.applyLayout();paintButtons();var self=this;var job=tab==='youtube'?this.loadYouTube(false):this.loadFacebook(false);Promise.resolve(job).then(function(){if(self.currentTab===tab){self.render(true);paintButtons()}},function(){if(self.currentTab===tab)self.render(true)});if(window.LifeOSSocialPlayer)window.LifeOSSocialPlayer.updateModeVisibility();return true},
+  leave:function(){if(!this.currentTab)return;['media-group-sidebar','media-group-mobile-bar'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.hidden=false;el.style.removeProperty('display')});this.currentTab='';this.active=false;try{var mp3=document.getElementById('l64f-mp3-right-player');if(mp3)mp3.classList.remove('is-yielded')}catch(e){}if(window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup()}this.stopElements();showEl('lifeos-social-list',false);showEl('lifeos-social-player',false);paintButtons()},
   reloadList:function(){var self=this,tab=this.currentTab;if(tab!=='youtube'&&tab!=='facebook')return;var list=by('media-list');if(list)list.removeAttribute('data-signature');this.setStatus('Đang tải mới kho '+(tab==='youtube'?'YouTube':'Facebook')+'…');var p=tab==='youtube'?this.loadYouTube(true):this.loadFacebook(true);return Promise.resolve(p).then(function(){self.render(true);paintButtons();if(window.showToast)window.showToast('Đã tải mới '+(tab==='youtube'?'YouTube':'Facebook'),'ph-check')},function(){self.render(true);if(window.showToast)window.showToast('Tải mới không thành công','ph-warning')})},
   onMusicHide:function(){this.active=false;if(window.LifeOSSocialPlayer){window.LifeOSSocialPlayer.serial++;window.LifeOSSocialPlayer.cleanup()}this.stopElements()},
   onMusicShow:function(){if(this.currentTab!=='youtube'&&this.currentTab!=='facebook')return;this.active=musicOpen();var list=document.getElementById('lifeos-social-list');if(!list||list.hidden||list.classList.contains('hidden'))this.applyLayout();paintButtons()}
@@ -44496,6 +45260,758 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
     radio.addEventListener('waiting', function(){ if (radioWant()) setTimeout(sync, 800); });
     radio.addEventListener('error', function(){ if (radioWant()) setTimeout(sync, 900); });
   }
+})();
+</script>
+<style id="lifeos-mobile-polish">
+@media (max-width: 1023px) {
+  body:not(.lifeos-landscape-mini-pc) {
+    --lifeos-header-h: calc(56px + env(safe-area-inset-top, 0px));
+    --lifeos-bottom-nav-h: calc(58px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: 0 !important;
+    overflow-x: clip !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) main {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px !important;
+    gap: 10px !important;
+    overflow-x: clip !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) img,
+  body:not(.lifeos-landscape-mini-pc) video,
+  body:not(.lifeos-landscape-mini-pc) iframe,
+  body:not(.lifeos-landscape-mini-pc) canvas {
+    max-width: 100%;
+  }
+  body:not(.lifeos-landscape-mini-pc) header.lifeos-header-final {
+    gap: 6px !important;
+    padding: max(6px, env(safe-area-inset-top, 0px)) 8px 6px !important;
+    min-width: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) header.lifeos-header-final h1 {
+    font-size: 15px !important;
+    line-height: 1.1 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) header.lifeos-header-final .lifeos-header-link-group {
+    gap: 4px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) header.lifeos-header-final .lifeos-header-link-group a {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #profile-btn {
+    max-width: 96px !important;
+    min-width: 0 !important;
+    padding-left: 8px !important;
+    padding-right: 6px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #profile-name-badge {
+    display: block !important;
+    max-width: 62px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #theme-toggle {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #bottom-nav {
+    box-sizing: border-box !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 3px 4px max(4px, env(safe-area-inset-bottom, 0px)) !important;
+    overflow: hidden !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #bottom-nav > div {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+    padding: 2px 2px 1px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #bottom-nav .nav-btn {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    padding: 3px 1px 2px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #bottom-nav .nav-btn span {
+    font-size: 9px !important;
+    letter-spacing: -0.03em !important;
+    text-overflow: ellipsis !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #mobile-input {
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    bottom: var(--lifeos-bottom-nav-h, 62px) !important;
+  }
+  html.lifeos-keyboard-open body:not(.lifeos-landscape-mini-pc) #mobile-input {
+    bottom: calc(var(--lifeos-kb, 0px) + 8px) !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-tasks {
+    padding-bottom: calc(var(--lifeos-bottom-nav-h, 62px) + 74px) !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-tasks .filter-btn {
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #todo-list {
+    min-width: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #todo-list .swipe-front {
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #todo-list .swipe-front > .flex-grow {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #todo-list .swipe-front > .flex.flex-col.ml-auto.flex-shrink-0 {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    grid-template-columns: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+    flex: 1 0 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #todo-list .swipe-front > .ml-auto button {
+    flex: 0 0 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #focus-mode-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #focus-mode-tabs > button {
+    flex: 0 0 auto !important;
+    min-width: 78px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-focus {
+    padding-bottom: calc(var(--lifeos-bottom-nav-h, 62px) + 12px) !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-vault {
+    padding-bottom: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-vault .vault-container-special {
+    max-height: calc(100dvh - var(--lifeos-header-h, 64px) - var(--lifeos-bottom-nav-h, 62px) - 16px) !important;
+    padding: 8px !important;
+    padding-bottom: 12px !important;
+    border-width: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-vault .sticky.top-0 {
+    padding: 8px !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-vault .sticky.top-0 h2 {
+    font-size: 16px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-vault .sticky.top-0 > .flex.flex-col {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-vault .sticky.top-0 > .flex.flex-col > .flex {
+    grid-column: 1 / -1 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #vaultSearchInput,
+  body:not(.lifeos-landscape-mini-pc) #music-search,
+  body:not(.lifeos-landscape-mini-pc) #chat-input {
+    font-size: 16px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #vault-mobile-add-btn {
+    width: auto !important;
+    min-height: 44px !important;
+    padding: 0 12px !important;
+    white-space: nowrap !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #vaultCategoryFilters {
+    margin-bottom: 8px !important;
+    gap: 6px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #vaultCategoryFilters .cat-filter-btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #vaultCardsContainer {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    columns: auto !important;
+    padding-bottom: 8px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) .vault-card-wrapper {
+    height: auto !important;
+    margin: 0 !important;
+    padding: 12px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) .vault-card-wrapper > .flex {
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) .vault-card-wrapper h3 {
+    font-size: 15px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) .vault-card-actions {
+    flex-wrap: nowrap !important;
+    margin-left: auto !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-chat {
+    margin-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-chat > .bg-white {
+    min-height: 0 !important;
+    height: calc(100dvh - var(--lifeos-header-h, 64px) - var(--lifeos-bottom-nav-h, 62px) - 16px) !important;
+    max-height: calc(100dvh - var(--lifeos-header-h, 64px) - var(--lifeos-bottom-nav-h, 62px) - 16px) !important;
+  }
+  html.lifeos-keyboard-open body:not(.lifeos-landscape-mini-pc) #view-chat > .bg-white {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 280px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #chat-form {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    padding: 8px !important;
+    align-items: center !important;
+    min-width: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #chat-form > button {
+    flex: 0 0 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    border-radius: 14px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #chat-send-btn {
+    margin-left: auto !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #chat-input {
+    order: -1 !important;
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 40px !important;
+    padding: 8px 10px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-music {
+    padding-bottom: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-music > .bg-white {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    height: calc(100dvh - var(--lifeos-header-h, 64px) - var(--lifeos-bottom-nav-h, 62px) - 16px) !important;
+    max-height: calc(100dvh - var(--lifeos-header-h, 64px) - var(--lifeos-bottom-nav-h, 62px) - 16px) !important;
+    padding: 10px !important;
+    overflow: hidden !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-lifeos-mp3-bar="1"] #view-music > .bg-white {
+    height: calc(100dvh - var(--lifeos-header-h, 64px) - var(--lifeos-bottom-nav-h, 62px) - 86px) !important;
+    max-height: calc(100dvh - var(--lifeos-header-h, 64px) - var(--lifeos-bottom-nav-h, 62px) - 86px) !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-music .music-titlebar {
+    margin-bottom: 8px !important;
+    padding-bottom: 8px !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-music .music-titlebar h2 {
+    font-size: 13px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-music .music-header-actions {
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #music-sleep-timer {
+    max-width: 108px !important;
+    font-size: 11px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #media-subtabs,
+  body:not(.lifeos-landscape-mini-pc) #media-group-mobile-bar {
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+    padding-bottom: 2px !important;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  body:not(.lifeos-landscape-mini-pc) #media-subtabs > button {
+    flex: 0 0 auto !important;
+    scroll-snap-align: start;
+    min-height: 36px !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-music .flex-grow.min-h-0 {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    gap: 8px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-music .lg\:col-span-5 {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 0 !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-music #music-list-container {
+    flex: 1 1 0% !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    overscroll-behavior: contain !important;
+    padding-bottom: 8px !important;
+    scroll-padding-bottom: 8px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="radio"] #view-music #music-list-container,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="tv"] #view-music #music-list-container,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="youtube"] #view-music #music-list-container,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="facebook"] #view-music #music-list-container {
+    max-height: 34dvh !important;
+    min-height: 112px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #todo-list .flex-wrap button {
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 28px !important;
+    padding: 2px 8px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-music .lg\:col-span-4 {
+    flex: 0 1 auto !important;
+    max-height: 42dvh !important;
+    overflow: auto !important;
+    min-height: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #lifeos-social-stage.lifeos-facebook-stage {
+    max-height: 38dvh !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-lifeos-mp3-bar="1"] #mini-player {
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    bottom: calc(var(--lifeos-bottom-nav-h, 62px) + 8px) !important;
+    left: 8px !important;
+    right: 8px !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-lifeos-mp3-bar="1"] #mini-player .lifeos-mini-shell {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    column-gap: 8px !important;
+    height: 100% !important;
+    padding-right: 30px !important;
+    position: relative !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-lifeos-mp3-bar="1"] #mini-player .lifeos-mini-meta {
+    position: static !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    pointer-events: none !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-lifeos-mp3-bar="1"] #mini-player #music-title {
+    -webkit-line-clamp: 1 !important;
+    max-height: 18px !important;
+    font-size: 13px !important;
+    max-width: 100% !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-lifeos-mp3-bar="1"] #mini-player #music-status {
+    display: none !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-lifeos-mp3-bar="1"] #mini-player .lifeos-mini-controls {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-lifeos-mp3-bar="1"] #mini-player #btn-mini-close {
+    position: absolute !important;
+    top: 6px !important;
+    right: 4px !important;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+    pointer-events: auto !important;
+    z-index: 9 !important;
+  }
+}
+@media (max-width: 390px) {
+  body:not(.lifeos-landscape-mini-pc) .vault-card-actions > button,
+  body:not(.lifeos-landscape-mini-pc) .vault-card-actions > div {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+</style>
+<style id="lifeos-scroll-and-names">
+.custom-scroll-area,
+#vaultCategoryFilters,
+#media-subtabs,
+#media-group-mobile-bar,
+#focus-mode-tabs,
+#chat-folder-tabs,
+#news-filter-tabs,
+#weather-hourly-list,
+#weather-daily-list,
+#music-list-container,
+#mp3-list-container,
+#radio-list-container,
+#tv-list-container,
+#chat-messages,
+#chat-emoji-list,
+#news-list,
+.vault-container-special,
+#view-tasks .overflow-y-auto,
+#view-music .music-header-actions,
+#todo-list .swipe-front > .ml-auto,
+.vault-card-actions {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  min-width: 0;
+}
+#vaultCategoryFilters,
+#media-subtabs,
+#media-group-mobile-bar,
+#focus-mode-tabs,
+#chat-folder-tabs,
+#news-filter-tabs,
+#weather-hourly-list,
+#weather-daily-list,
+#view-music .music-header-actions,
+#todo-list .swipe-front > .ml-auto,
+.vault-card-actions,
+#view-tasks .overflow-x-auto.custom-scroll-area {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  touch-action: pan-x pan-y !important;
+  max-width: 100% !important;
+  flex-wrap: nowrap !important;
+  scroll-behavior: auto !important;
+}
+html,
+body,
+.custom-scroll-area,
+.hide-scrollbar,
+#chat-folder-tabs,
+#music-list-container,
+#chat-messages,
+#news-list,
+.vault-container-special,
+#view-tasks .overflow-y-auto,
+#chat-emoji-list {
+  scroll-behavior: auto !important;
+}
+#view-tasks .filter-btn {
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+#music-list-container,
+#chat-messages,
+#news-list,
+.vault-container-special,
+#view-tasks .overflow-y-auto,
+#chat-emoji-list {
+  overflow-y: auto !important;
+  touch-action: pan-y !important;
+}
+#lifeos-hover-name {
+  position: fixed;
+  z-index: 2147483000;
+  left: 0;
+  top: 0;
+  display: none;
+  max-width: min(240px, 70vw);
+  padding: 6px 9px;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #fff;
+  font: 700 12px/1.25 Inter, "Segoe UI", sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 8px 22px rgba(15,23,42,.28);
+  pointer-events: none;
+}
+#lifeos-hover-name.is-on { display: block; }
+.lifeos-scroll-inner {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  width: max-content;
+  min-width: 100%;
+  gap: 6px;
+}
+</style>
+<script id="lifeos-hover-names">
+(function () {
+  if (window.__lifeosHoverNames) return;
+  window.__lifeosHoverNames = true;
+  var tip = document.createElement('div');
+  tip.id = 'lifeos-hover-name';
+  tip.setAttribute('role', 'tooltip');
+  function mount() {
+    if (!tip.parentNode) document.body.appendChild(tip);
+  }
+  function plain(s) {
+    return String(s || '').replace(/[^\p{L}\p{N}]+/gu, '');
+  }
+  function hasVisibleText(el) {
+    var text = '';
+    var i, n, nodes = el.querySelectorAll('span, b, small, em, strong');
+    if (!nodes.length) {
+      for (i = 0; i < el.childNodes.length; i++) {
+        n = el.childNodes[i];
+        if (n.nodeType === 3) text += n.textContent || '';
+      }
+    } else {
+      nodes.forEach(function (s) {
+        if (s.offsetWidth > 1 && s.offsetHeight > 1) text += s.textContent || '';
+      });
+    }
+    return plain(text).length >= 2;
+  }
+  function hostOf(node) {
+    if (!node || !node.closest) return null;
+    return node.closest('button, a, label, [role="button"], [title]');
+  }
+  function iconName(el) {
+    var i = el.querySelector('i');
+    if (!i) return '';
+    var cls = String(i.className || '');
+    var map = [
+      ['ph-arrow-counter-clockwise', 'Đặt lại'],
+      ['ph-arrows-clockwise', 'Tải lại'],
+      ['ph-paper-plane-right', 'Gửi'],
+      ['ph-paper-plane-tilt', 'Gửi'],
+      ['ph-eye-slash', 'Ẩn mật khẩu'],
+      ['ph-eye-closed', 'Ẩn'],
+      ['ph-microphone', 'Nói để nhập'],
+      ['ph-calendar-plus', 'Chọn ngày giờ'],
+      ['ph-skip-back', 'Bài trước'],
+      ['ph-skip-forward', 'Bài sau'],
+      ['ph-speaker-slash', 'Tắt âm thanh'],
+      ['ph-speaker-high', 'Bật tắt âm thanh'],
+      ['ph-share-network', 'Chia sẻ'],
+      ['ph-download-simple', 'Tải xuống'],
+      ['ph-upload-simple', 'Tải lên'],
+      ['ph-pencil-simple', 'Sửa'],
+      ['ph-broadcast', 'Tải lại kênh'],
+      ['ph-repeat', 'Lặp lại'],
+      ['ph-pause', 'Tạm dừng'],
+      ['ph-play', 'Phát'],
+      ['ph-trash', 'Xóa'],
+      ['ph-copy', 'Sao chép'],
+      ['ph-target', 'Tập trung'],
+      ['ph-check', 'Hoàn thành'],
+      ['ph-plus', 'Thêm'],
+      ['ph-house', 'Trang chủ'],
+      ['ph-book-open', 'Hướng dẫn'],
+      ['ph-robot', 'Giọng nói AI'],
+      ['ph-sun', 'Đổi giao diện'],
+      ['ph-moon', 'Đổi giao diện'],
+      ['ph-eye', 'Hiện mật khẩu'],
+      ['ph-x', 'Đóng']
+    ];
+    for (var k = 0; k < map.length; k++) {
+      if (cls.indexOf(map[k][0]) !== -1) return map[k][1];
+    }
+    return '';
+  }
+  function nameOf(el) {
+    if (!el || el.id === 'lifeos-hover-name') return '';
+    if (el.closest('#bottom-nav, #desktop-workspace-dock, #media-subtabs, #focus-mode-tabs, #vaultCategoryFilters, #chat-folder-tabs')) return '';
+    var name = el.getAttribute('data-lifeos-name') || el.getAttribute('title') || el.getAttribute('aria-label') || '';
+    name = String(name).replace(/\s+/g, ' ').trim();
+    if (hasVisibleText(el)) return '';
+    if (!name || name.length > 60) name = iconName(el);
+    if (!name || name.length > 60) return '';
+    if (el.hasAttribute('title')) {
+      el.setAttribute('data-lifeos-name', name);
+      el.removeAttribute('title');
+    }
+    return name;
+  }
+  var hideTimer = 0;
+  function hide() {
+    tip.classList.remove('is-on');
+  }
+  function show(el, name) {
+    mount();
+    tip.textContent = name;
+    tip.classList.add('is-on');
+    var r = el.getBoundingClientRect();
+    var w = tip.offsetWidth || 80;
+    var h = tip.offsetHeight || 28;
+    var left = r.right + 8;
+    if (left + w > window.innerWidth - 8) left = r.left - w - 8;
+    if (left < 8) left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+    var top = r.top + (r.height - h) / 2;
+    if (top < 8) top = r.bottom + 6;
+    if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+    tip.style.left = Math.round(left) + 'px';
+    tip.style.top = Math.round(top) + 'px';
+  }
+  document.addEventListener('mouseover', function (e) {
+    var el = hostOf(e.target);
+    var name = el && nameOf(el);
+    if (!name) { hide(); return; }
+    show(el, name);
+  }, true);
+  document.addEventListener('mouseout', function (e) {
+    var el = hostOf(e.target);
+    if (!el) return;
+    if (e.relatedTarget && el.contains(e.relatedTarget)) return;
+    hide();
+  }, true);
+  document.addEventListener('focusin', function (e) {
+    var el = hostOf(e.target);
+    var name = el && nameOf(el);
+    if (name) show(el, name);
+  }, true);
+  document.addEventListener('focusout', hide, true);
+  document.addEventListener('scroll', hide, true);
+  document.addEventListener('touchstart', function (e) {
+    var el = hostOf(e.target);
+    var name = el && nameOf(el);
+    if (!name) return;
+    show(el, name);
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hide, 1100);
+  }, { capture: true, passive: true });
+})();
+</script>
+<script id="lifeos-drag-scroll">
+(function () {
+  if (window.__lifeosDragScroll) return;
+  window.__lifeosDragScroll = true;
+  var state = null;
+  var blockClick = false;
+  function axis(el) {
+    if (!el || el === document.body || el === document.documentElement) return null;
+    var cs;
+    try { cs = getComputedStyle(el); } catch (e) { return null; }
+    if (!cs || cs.display === 'none' || cs.visibility === 'hidden') return null;
+    var x = (el.scrollWidth - el.clientWidth) > 6 && (cs.overflowX === 'auto' || cs.overflowX === 'scroll');
+    var y = (el.scrollHeight - el.clientHeight) > 6 && (cs.overflowY === 'auto' || cs.overflowY === 'scroll');
+    if (!x && !y) return null;
+    return { el: el, x: x, y: y };
+  }
+  function find(start) {
+    if (!start || !start.closest) return null;
+    if (start.closest('input, textarea, select, option, [contenteditable="true"]')) return null;
+    var n = start.nodeType === 1 ? start : start.parentElement;
+    var horizontal = null;
+    while (n && n !== document.body) {
+      if (n.closest && n.classList && n.classList.contains('swipe-item')) {
+        n = n.parentElement;
+        continue;
+      }
+      var hit = axis(n);
+      if (hit && hit.x && !hit.y) return hit;
+      if (hit && hit.y && !horizontal) horizontal = hit;
+      n = n.parentElement;
+    }
+    return null;
+  }
+  function arm(el) {
+    if (!el || el.dataset.lifeosScrollFast === '1') return;
+    el.dataset.lifeosScrollFast = '1';
+    el.style.setProperty('scroll-behavior', 'auto', 'important');
+  }
+  document.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'touch' || e.button !== 0) return;
+    var hit = find(e.target);
+    if (!hit) return;
+    arm(hit.el);
+    state = { el: hit.el, x: hit.x, y: false, sx: e.clientX, sy: e.clientY, sl: hit.el.scrollLeft, moved: false, id: e.pointerId };
+  }, true);
+  document.addEventListener('pointermove', function (e) {
+    if (!state || e.pointerId !== state.id) return;
+    var dx = e.clientX - state.sx;
+    if (!state.moved) {
+      if (Math.abs(dx) < 5 && Math.abs(e.clientY - state.sy) < 5) return;
+      if (Math.abs(e.clientY - state.sy) > Math.abs(dx)) { state = null; return; }
+      state.moved = true;
+    }
+    state.el.scrollLeft = state.sl - dx;
+    if (e.cancelable) e.preventDefault();
+  }, { capture: true, passive: false });
+  function end(e) {
+    if (!state || (e && e.pointerId !== undefined && e.pointerId !== state.id)) return;
+    blockClick = !!(state && state.moved);
+    state = null;
+  }
+  document.addEventListener('pointerup', end, true);
+  document.addEventListener('pointercancel', end, true);
+  document.addEventListener('click', function (e) {
+    if (!blockClick) return;
+    e.preventDefault();
+    e.stopPropagation();
+    blockClick = false;
+  }, true);
+  document.addEventListener('wheel', function (e) {
+    if (e.ctrlKey) return;
+    var hit = find(e.target);
+    if (!hit || !hit.x || hit.y) return;
+    arm(hit.el);
+    var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (!delta) return;
+    var before = hit.el.scrollLeft;
+    hit.el.scrollLeft = before + delta;
+    if (hit.el.scrollLeft !== before && e.cancelable) e.preventDefault();
+  }, { capture: true, passive: false });
 })();
 </script>
 </body>
