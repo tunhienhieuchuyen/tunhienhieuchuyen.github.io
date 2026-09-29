@@ -67,7 +67,7 @@
   }
   .btn-primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); width: 100%; }
   .row { display: flex; gap: .5rem; flex-wrap: wrap; }
-  .row .btn { flex: 1; }
+  .row .btn { flex: 1; width: auto; }
   .hide { display: none; }
   ol.steps { margin: .4rem 0 .2rem 1.2rem; padding: 0; }
   ol.steps li { margin: .45rem 0; }
@@ -79,6 +79,8 @@
     margin: .6rem 0;
   }
   a { color: var(--accent); }
+  label.tick { display: flex; gap: .55rem; align-items: flex-start; margin: .45rem 0; }
+  textarea.box { width: 100%; min-height: 5.5rem; border-radius: .8rem; border: 1px solid var(--line); background: #fff8ea; color: var(--ink); padding: .6rem; }
   .dock {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
     background: rgba(255, 246, 226, .96);
@@ -128,13 +130,17 @@
 const UNITS = [
   {
     id: "cach-doc",
-    bai: "Bài 1 · kỹ năng",
+    bai: "Kỹ năng",
     title: "Cách đọc truyện có yếu tố kì ảo",
+    sortSets: [
+      [{text:"Bóng trên tường", side:"thuc", why:"Đêm có đèn thì ai cũng có bóng. Đây là việc đời thường."},{text:"Vũ Nương hiện về giữa sông", side:"ao", why:"Người đã mất hiện lên giữa dòng là việc không xảy ra ngoài đời."},{text:"Trương Sinh đi lính", side:"thuc", why:"Đi lính là việc người đời làm được."},{text:"Hồn trẻ nhập vào con dế", side:"ao", why:"Hồn người nhập vào con vật là việc lạ."},{text:"Quan bắt nộp dế", side:"thuc", why:"Lệnh của quan và nỗi sợ bị đánh là việc đời."}],
+      [{text:"Đản trỏ bóng trên vách", side:"thuc", why:"Đứa trẻ trỏ bóng là việc có thật khi trong phòng có đèn."},{text:"Vũ Nương ngồi kiệu hoa giữa sông", side:"ao", why:"Người đã mất hiện hình giữa sông là chuyện lạ."},{text:"Phan Lang được đưa vào thủy cung", side:"ao", why:"Thủy cung và người được cứu sống dưới nước là chuyện lạ."},{text:"Trương Sinh lập đàn bên bến", side:"thuc", why:"Lập đàn là một việc người đời làm được."},{text:"Vũ Nương lo tang cho mẹ chồng", side:"thuc", why:"Lo tang là việc đời thường."}]
+    ],
     paras: [
-      "Đầu năm, Ngữ văn 9 Kết nối tri thức mở bằng bài Thế giới kì ảo. Em không cần học thuộc cả truyện. Em cần biết chi tiết nào là chuyện lạ, chi tiết nào là đời thực, và chuyện lạ ấy muốn nói điều gì.",
+      "Việc cần luyện là biết chi tiết nào là chuyện lạ, chi tiết nào là đời thực, và chuyện lạ ấy đang nói điều gì.",
       "Kì ảo là việc không xảy ra ngoài đời: người chết hiện về, cung nước, hồn nhập vào con dế, thần hô mưa gọi gió. Hiện thực là việc có thật: nghi oan, đánh đập, nộp cống, lũ lụt, nỗi sợ của một đứa trẻ."
     ],
-    meo: "Gặp một chi tiết lạ, đừng hỏi có thật không. Hãy hỏi: nếu bỏ chi tiết này, nỗi oan hoặc nỗi khổ của người trong truyện còn được thấy không?",
+    meo: "Gặp một chi tiết lạ, câu nên hỏi là: nếu bỏ chi tiết này, nỗi oan hoặc nỗi khổ còn được thấy không?",
     steps: [
       "Đọc một lượt để biết chuyện xảy ra với ai.",
       "Gạch hai cột: việc lạ và việc đời thường.",
@@ -155,15 +161,17 @@ const UNITS = [
   },
   {
     id: "vu-nuong",
-    bai: "Bài 1 · văn bản",
+    bai: "Văn bản",
     title: "Chuyện người con gái Nam Xương",
     paras: [
-      "Tác giả Nguyễn Dữ, khoảng thế kỷ XVI. Truyện nằm trong Truyền kỳ mạn lục, viết bằng chữ Hán, thuộc thể truyền kỳ: chuyện đời thực có xen việc lạ.",
-      "Vũ Nương ở Nam Xương, chồng là Trương Sinh phải đi lính. Nàng ở nhà nuôi con. Đêm đùa với con, nàng trỏ bóng mình trên tường và nói đó là cha. Trương Sinh trở về. Đứa trẻ không nhận cha, nói người đêm nào cũng đến mới là cha. Chồng nghi oan. Nàng không phân trần được, gieo mình xuống sông.",
-      "Phần sau, một người được vào cung nước gặp Vũ Nương. Nàng nhờ nhắn chồng lập đàn giải oan bên sông. Đêm hôm ấy nàng hiện về giữa dòng, nói lời thanh thản rồi biến mất. Trương Sinh hiểu ra khi chính mình thấy bóng mình trên tường và đứa trẻ lại gọi đó là cha.",
-      "Nên nhớ khi làm bài: truyện không chỉ kể một người vợ hiền. Nó nói về sự cả tin vào một lời trẻ con, về người đàn bà không có tiếng nói để tự bênh, và về nỗi ân hận khi sự thật đến quá muộn."
+      "Tóm tắt này là gợi ý. App không chép câu trích. Câu dẫn chứng em tự ghi từ sách em đang học.",
+      "Tác giả Nguyễn Dữ, khoảng thế kỷ XVI. Truyện trong Truyền kỳ mạn lục, viết bằng chữ Hán, thể truyền kỳ.",
+      "Vũ Nương quê Nam Xương, chồng là Trương Sinh. Chồng đi lính, nàng sinh con trai tên Đản, ở nhà chăm mẹ chồng. Đêm, nàng trỏ bóng mình trên tường bảo Đản đó là cha. Trương Sinh về, Đản không nhận cha và nói người đêm nào cũng đến mới là cha. Chàng nghi oan, đuổi vợ. Vũ Nương thanh minh không được, gieo mình xuống sông Hoàng Giang.",
+      "Người cùng làng tên Phan Lang được vào thủy cung của Linh Phi, gặp Vũ Nương. Nàng gửi chiếc hoa vàng và nhờ chàng nhắn Trương Sinh lập đàn giải oan. Nàng hiện bên bến Hoàng Giang rồi biến mất. Trương Sinh nhận ra nỗi oan khi chính Đản trỏ bóng của chàng trên vách.",
+      "Câu này được điểm khi bám một việc: Trương Sinh tin lời Đản hơn tin người đã chờ mình. Một việc cụ thể nặng hơn câu khen nàng rất tốt."
     ],
-    meo: "Đừng viết \"nàng rất tốt, chồng rất xấu\". Hãy chỉ một việc: Trương Sinh tin lời con hơn tin người đã chờ mình. Một việc cụ thể nặng hơn một câu khen.",
+    quote: true,
+    meo: "Một bài khá thường chỉ có một chi tiết, ở đây là bóng trên tường, rồi nói chi tiết ấy làm lộ cách chồng nhìn vợ.",
     steps: [
       "Nêu thể loại: truyện truyền kỳ, yếu tố thực và yếu tố lạ cùng có.",
       "Kể ngắn bốn mốc: đi lính, bóng trên tường, nghi oan, hiện về trên sông.",
@@ -172,7 +180,7 @@ const UNITS = [
     ],
     practice: {
       q: "Viết ra giấy 5 đến 7 dòng: chi tiết bóng trên tường nói gì về cách Trương Sinh nhìn vợ mình?",
-      hint: "Đừng kể lại cả truyện. Chỉ bám một việc: ông tin điều đứa trẻ nói về cái bóng.",
+      hint: "Kể một việc thôi: ông tin điều đứa trẻ nói về cái bóng. Kể cả truyện thì ý bị loãng.",
       steps: [
         "Mở bằng chi tiết: đêm về, ông thấy bóng mình, con gọi đó là cha.",
         "Trước đó ông đã lấy đúng hình bóng ấy để kết tội vợ.",
@@ -184,14 +192,16 @@ const UNITS = [
   },
   {
     id: "de-choi",
-    bai: "Bài 1 · văn bản",
+    bai: "Văn bản",
     title: "Dế chọi",
+    quote: true,
     paras: [
-      "Tác giả Bồ Tùng Linh, người Trung Quốc đời Thanh, truyện trong Liêu trai chí dị. Sách Kết nối đưa truyện này cạnh chuyện Vũ Nương để em thấy truyền kỳ không chỉ có ở Việt Nam: vẫn là chuyện lạ dùng để nói chuyện đời.",
+      "Tóm tắt là gợi ý. Bản dịch có thể đặt tên khác, nên em chép tên từ sách em đang học, không học thuộc tên nghe ở nơi khác.",
+      "Bồ Tùng Linh, đời Thanh, truyện trong Liêu trai chí dị. Truyện dùng chuyện lạ để nói chuyện đời.",
       "Một người bị quan trên bắt phải nộp dế chọi. Tìm không ra thì bị đánh. Ông tìm được một con dế khỏe. Đứa con vô tình làm chết con dế, sợ quá nên nhảy xuống giếng. Hồn đứa trẻ nhập vào một con dế nhỏ. Con dế ấy chọi thắng, được dâng lên vua. Nhà ấy hết nạn, đứa trẻ sống lại.",
       "Việc lạ là hồn nhập vào dế. Việc đời là lệnh nộp cống, roi vọt, và nỗi sợ của một đứa trẻ trước lỗi không đáng chết. Con dế thắng không phải để ca ngợi trò chọi. Nó để thấy mạng người bị đem đổi lấy thú vui của kẻ có quyền."
     ],
-    meo: "Khi so với chuyện Vũ Nương, đừng so từng tình tiết. Hãy so một câu: cả hai đều cần yếu tố lạ thì nỗi oan hoặc nỗi khổ mới được người khác nhìn thấy.",
+    meo: "So với chuyện Vũ Nương ở một câu thôi: cả hai đều cần yếu tố lạ thì nỗi khổ mới được người khác nhìn thấy.",
     steps: [
       "Nêu một câu cốt truyện, không kể lan man.",
       "Tách một chi tiết lạ: hồn trẻ nhập vào dế.",
@@ -212,14 +222,15 @@ const UNITS = [
   },
   {
     id: "son-tinh",
-    bai: "Bài 1 · văn bản",
+    bai: "Văn bản",
     title: "Sơn Tinh, Thủy Tinh",
+    quote: true,
     paras: [
-      "Đây là bài thơ của Nguyễn Nhược Pháp, kể lại truyền thuyết Sơn Tinh và Thủy Tinh bằng giọng trong, gần lời nói thường, không phải văn biền ngẫu. Sách xếp bài này cạnh hai truyện truyền kỳ để em thấy cùng một thế giới kì ảo có thể được viết bằng thơ.",
+      "Đây là bài thơ của Nguyễn Nhược Pháp, kể lại truyền thuyết Sơn Tinh và Thủy Tinh bằng giọng trong, gần lời nói thường. Nếu dùng vào bài, em đối chiếu lại đúng bài trong sách em đang học.",
       "Hai thần tranh một người, rồi tranh bằng mưa, lũ, núi và nước. Người đọc nhận ra lũ lụt năm nào cũng về. Yếu tố kì ảo giải thích một việc đời: vì sao có mùa nước dâng, và vì sao người ở đồng bằng vừa sợ nước vừa phải sống cùng nước.",
       "Khi phân tích thơ này, đừng biến lại thành bản kể truyền thuyết ở lớp dưới. Hãy nói giọng thơ: việc thần kỳ được kể như một câu chuyện ai cũng thuộc, nên nỗi sợ lũ hiện ra gần, không cần lời hô hào."
     ],
-    meo: "Với thơ, trích một hình ảnh rồi nói tác dụng. Đừng kể hết cuộc đánh nhau của hai thần. Nếu chưa chắc từng chữ trong sách, hãy diễn bằng lời mình và nói rõ đó là ý, không phải câu trích.",
+    meo: "Với thơ, một hình ảnh kèm tác dụng được điểm hơn là kể hết cuộc đánh nhau của hai thần. Nếu chưa chắc từng chữ trong sách, diễn bằng lời mình và nói rõ đó là ý, không phải câu trích.",
     steps: [
       "Nêu thể loại: thơ kể chuyện truyền thuyết.",
       "Chỉ ra yếu tố kì ảo: thần, phép, mưa gió được gọi đến.",
@@ -240,7 +251,7 @@ const UNITS = [
   },
   {
     id: "doc-hieu",
-    bai: "Bài 1 · luyện",
+    bai: "Luyện đọc",
     title: "Làm một đề đọc hiểu",
     paras: [
       "Thi vào 10 Hà Nội, phần đọc hiểu thường cho một ngữ liệu ngoài sách. Cách làm quan trọng hơn việc nhớ truyện. Dưới đây là một đoạn viết riêng cho buổi luyện, không có trong sách giáo khoa. Em đọc chậm, rồi mới mở gợi ý.",
@@ -268,11 +279,11 @@ const UNITS = [
   },
   {
     id: "nghi-luan",
-    bai: "Bài 1 · viết",
+    bai: "Viết",
     title: "Nghị luận: người với tự nhiên",
     paras: [
       "Phần viết của bài 1 là nghị luận về một vấn đề thời sự, trục con người với tự nhiên. Đề không đòi một bài thật dài ở buổi đầu. Đòi em có mở, có thân, có một việc làm được, và có kết.",
-      "Đừng học thuộc một bài mẫu trên mạng. Đề năm sau đổi việc. Em chỉ giữ cái khung. Việc trong bài phải là việc quanh nhà em ở Hà Nội: ngõ ngập, rác, cây, điện, hồ.",
+      "Bài mẫu trên mạng hết hạn khi đề đổi. Em giữ cái khung. Việc trong bài là việc quanh nhà: ngõ, điện, cây, hồ.",
       "Khi nói và nghe ở lớp, cũng dùng khung ấy: nêu một ý, nghe bạn nói một ý khác, chốt một việc cả nhóm làm được. Không tranh để thắng."
     ],
     meo: "Thiếu giải pháp thì bài mới chỉ là than. Thiếu một việc cụ thể thì giải pháp chỉ là khẩu hiệu. Một câu \"tối nay em không xả túi nilon xuống cống\" hơn một đoạn \"hãy bảo vệ môi trường\".",
@@ -284,7 +295,7 @@ const UNITS = [
     ],
     practice: {
       q: "Đề luyện: Viết đoạn nghị luận khoảng 15 đến 20 dòng về việc giữ cho ngõ nhà mình không ngập vì rác. Làm ra giấy, rồi mở khung ý.",
-      hint: "Mở bằng một trận mưa em nhớ. Đừng mở bằng \"từ xưa đến nay\".",
+      hint: "Mở bằng một trận mưa em nhớ. Câu \"từ xưa đến nay\" chưa đưa được việc cụ thể.",
       steps: [
         "Mở: sau một trận mưa, nước đứng ở cửa nhà vì miệng cống bị túi nilon bịt.",
         "Biểu hiện: lá, túi, chai nằm ngay chỗ nước phải thoát.",
@@ -292,19 +303,107 @@ const UNITS = [
         "Việc làm: nhà em để một túi rác có nắp, không ném đồ xuống đường khi tối. Em nói với em nhỏ trong nhà một câu cụ thể.",
         "Kết: ngõ khô hay ngập một phần nằm ở thứ mình ném ra trước cửa."
       ],
-      ans: "Gợi ý ôn. Em được đổi ví dụ nếu ví dụ của em có thật. Đừng chép nguyên khung này vào bài thi."
+      ans: "Gợi ý ôn. Em được đổi ví dụ nếu ví dụ của em có thật. Chép nguyên khung này vào bài thì mất giọng của em."
+    },
+    alts: [
+      "Hướng 1: ngõ ngập vì rác, một việc là để túi rác có nắp.",
+      "Hướng 2: quạt và đèn để cả buổi, một việc là tắt khi ra khỏi phòng.",
+      "Hướng 3: cây trước cổng trường bị bẻ, một việc là không vịn, không bẻ thêm."
+    ],
+    before: "Trước khi sửa: Môi trường rất quan trọng. Chúng ta hãy bảo vệ môi trường. Em rất xúc động.",
+    after: "Sau khi sửa: Tối qua mưa một chập, nước đứng trước cửa vì miệng cống vướng túi nilon. Nhà ướt, bà đi lại khó. Tối nay em buộc miệng túi rác trước khi đem ra."
+  },
+  {
+    id: "tu-tu",
+    bai: "Tiếng Việt",
+    title: "Biện pháp và tác dụng",
+    passage: "Chiều qua, mây kéo như một tấm chăn. Cái quạt gật gù. Mặt trời của ngõ tắt từ lúc chiều. Áo trắng ùa ra cổng. Em mang bút, thước, tẩy và vở. Trước cửa có rác, rác, và rác.",
+    paras: [
+      "Đọc hiểu hay có một ý: gọi tên biện pháp, rồi nói tác dụng. Tác dụng là người đọc thấy được điều gì.",
+      "So sánh có từ như, là, tựa. Nhân hóa là vật được gán hành động, lời nói, suy nghĩ hoặc tình cảm của người."
+    ],
+    meo: "Gọi đúng tên mới được một phần điểm. Phần còn lại nằm ở câu tác dụng, viết bằng việc trong câu chứ không bằng lời khen.",
+    steps: [
+      "Tìm từ so sánh hoặc hành động của người gắn cho vật.",
+      "Gọi tên: so sánh hoặc nhân hóa.",
+      "Viết một câu tác dụng: hình ảnh ấy làm em thấy vật này giống điều gì."
+    ],
+    quizzes: [
+      { q: "Trong đoạn trên, câu \"mây kéo như một tấm chăn\" dùng biện pháp nào?", choices: ["So sánh", "Ẩn dụ", "Hoán dụ"], answer: "So sánh", why: "Có từ như, đặt mây cạnh tấm chăn." },
+      { q: "Trong đoạn trên, câu \"Cái quạt gật gù\" dùng biện pháp nào?", choices: ["Nhân hóa", "Liệt kê", "Điệp ngữ"], answer: "Nhân hóa", why: "Quạt được gán hành động gật của người." },
+      { q: "\"Mặt trời của ngõ\" trong câu \"Mặt trời của ngõ tắt từ lúc chiều\" chỉ ngọn đèn. Đây là biện pháp nào?", choices: ["Ẩn dụ", "So sánh", "Liệt kê"], answer: "Ẩn dụ", why: "Gọi ngọn đèn bằng một tên khác, không có từ so sánh." },
+      { q: "\"Áo trắng\" trong câu \"Áo trắng ùa ra cổng\" chỉ học sinh. Đây là biện pháp nào?", choices: ["Hoán dụ", "Nhân hóa", "Điệp ngữ"], answer: "Hoán dụ", why: "Lấy áo để gọi người mặc áo." },
+      { q: "Câu \"Em mang bút, thước, tẩy và vở\" dùng biện pháp nào?", choices: ["Liệt kê", "Ẩn dụ", "So sánh"], answer: "Liệt kê", why: "Kể tiếp nhiều đồ vật cùng loại." },
+      { q: "Cụm \"rác, rác, và rác\" dùng biện pháp nào?", choices: ["Điệp ngữ", "Hoán dụ", "Nhân hóa"], answer: "Điệp ngữ", why: "Từ rác được nhắc lại." }
+    ],
+    practice: {
+      q: "Viết một câu nói tác dụng của hình ảnh \"mây kéo như một tấm chăn\" trong đoạn trên.",
+      hint: "Nói mây bị thấy giống một vật trong nhà, nên trời chiều có hình.",
+      steps: ["Gọi tên: so sánh.", "Tác dụng: mây không còn chỉ là mây, em thấy nó như chăn phủ."],
+      ans: "Gợi ý ôn. Câu của em được khác chữ, miễn gọi đúng tên và nói một tác dụng cụ thể."
     }
   }
 ];
-const KEY = "lop9-van-v1";
+const KEY = "lop9-van-v2";
 const DAY = 86400000;
 let tab = "hoc";
 let openId = null;
 let revealed = {};
+let sortPick = {};
+let sortMark = {};
+let sortSet = {};
+let sortLocked = {};
+let quizOrder = {};
+let quizAns = {};
+let quizLocked = {};
+function shuffle(list) {
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+function prepareQuiz(u, force) {
+  if (!u || !u.quizzes) return;
+  if (quizOrder[u.id] && !force) return;
+  const pool = u.quizzes.slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+  }
+  quizOrder[u.id] = pool.slice(0, 4).map(function (item) {
+    return { q: item.q, why: item.why, answer: item.answer, choices: shuffle(item.choices) };
+  });
+  quizAns[u.id] = {};
+  quizLocked[u.id] = false;
+}
+function activeSort(u) {
+  const sets = u.sortSets || (u.sort ? [u.sort] : []);
+  return sets[(sortSet[u.id] || 0) % Math.max(sets.length, 1)] || [];
+}
+function markSkill(id, ok) {
+  const row = prog[id] || {};
+  row.skill = ok ? "ok" : "fail";
+  if (!ok) row.due = Date.now();
+  else row.due = Date.now() + 3 * DAY;
+  prog[id] = row;
+  save();
+}
+function ticks() { try { return JSON.parse(localStorage.getItem("lop9-van-tieu-chi") || "{}"); } catch (e) { return {}; } }
+function quotes() { try { return JSON.parse(localStorage.getItem("lop9-van-dan-chung") || "{}"); } catch (e) { return {}; } }
+function criteriaOf(u) {
+  if (u.id === "nghi-luan") return ["Mở bằng một việc em vừa thấy", "Có nói hậu quả với người quanh em", "Có một việc em làm được tuần này", "Kết nhắc lại việc ấy"];
+  if (u.id === "doc-hieu") return ["Nêu được phương thức biểu đạt chính", "Chỉ ra một hình ảnh và tác dụng của hình ảnh ấy", "Chỉ ra chi tiết kéo về hiện thực", "Phần suy nghĩ có một việc em làm được"];
+  if (u.id === "tu-tu") return ["Gọi đúng tên biện pháp", "Tác dụng nói điều người đọc thấy được", "Câu tác dụng bám đúng hình ảnh trong câu"];
+  if (u.id === "cach-doc") return ["Tách được việc đời thường", "Tách được việc lạ", "Viết được một câu: việc lạ làm lộ điều gì ở đời thực"];
+  if (u.quote) return ["Bám một chi tiết", "Nói chi tiết ấy làm người đọc thấy điều gì", "Đã chép một câu từ sách em đang học vào sổ"];
+  return ["Có một ý cụ thể", "Có nói tác dụng của ý ấy"];
+}
 function load() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
 let prog = load();
 function save() { localStorage.setItem(KEY, JSON.stringify(prog)); }
-function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return ({ "&": "&", "<": "<", ">": ">" })[c]; }); }
+function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return "&#" + c.charCodeAt(0) + ";"; }); }
 function toast(text, kind) {
   const box = document.getElementById("toasts");
   const el = document.createElement("div");
@@ -323,7 +422,7 @@ function statusOf(id) {
 }
 function dueCount() { return UNITS.filter(function (u) { return prog[u.id] && prog[u.id].due <= Date.now(); }).length; }
 function renderHome() {
-  return '<p class="tag">Hà Nội · đầu năm · Kết nối tri thức · tập một</p><h1>Bài 1. Thế giới kì ảo</h1><p>Nền này lấy màu đèn học, vàng ấm, để em đọc lâu. Chữ không đen kịt, nền không trắng gắt.</p><div class="note sm">Phần gợi ý là cách làm, không phải bài mẫu để học thuộc. Viết ra giấy trước, rồi mới lật. Thi Văn vào 10 là tự luận.</div><p class="sm muted">Đến hạn hôm nay: ' + dueCount() + ' phần.</p>' + UNITS.map(function (u) {
+  return '<p class="tag">Ngữ văn 9</p><h1>Một chi tiết lạ đang nói điều gì?</h1><p>Chưa phải đề thi thử. Viết ra giấy trước, rồi mới lật gợi ý.</p><div class="note sm">Tóm tắt là gợi ý, cần đối chiếu sách em đang học. Câu trích em tự ghi. Bảng tick chưa phải thang chấm của Sở. Cô mới là người chấm.</div><p class="sm muted">Đến hạn hôm nay: ' + dueCount() + ' phần.</p>' + UNITS.map(function (u) {
     return '<article class="card"><p class="tag">' + esc(u.bai) + " · " + esc(statusOf(u.id)) + "</p><h2>" + esc(u.title) + '</h2><button class="btn btn-primary" type="button" data-open="' + u.id + '" style="margin-top:.8rem">Đọc phần này</button></article>';
   }).join("") + '<p class="sm"><a href="./toan.html">Sang trang toán</a> · <a href="./hoctienganh.html">Sang trang tiếng Anh</a></p>';
 }
@@ -336,7 +435,22 @@ function renderOn() {
 }
 function renderUnit(u) {
   const show = revealed[u.id];
-  return '<button class="btn" type="button" data-back="1">Về bài 1</button><p class="tag" style="margin-top:.9rem">' + esc(u.bai) + "</p><h1>" + esc(u.title) + "</h1>" + u.paras.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("") + (u.passage ? '<div class="passage"><p class="tag">Đoạn luyện, không có trong sách</p><p>' + esc(u.passage) + "</p></div>" : "") + '<div class="card"><p class="tag">Mẹo</p><p>' + esc(u.meo) + '</p><p class="tag">Cách làm</p><ol class="steps">' + u.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol></div>" + '<div class="card"><p class="tag">Việc cần làm ra giấy</p><p>' + esc(u.practice.q) + '</p><button class="btn btn-primary" type="button" data-show="' + u.id + '">Đã viết xong, xem gợi ý</button><div class="' + (show ? "" : "hide") + '"><p class="sm"><b>Hướng đi.</b> ' + esc(u.practice.hint) + "</p><ol class=\"steps\">" + u.practice.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol><p><b>" + esc(u.practice.ans) + "</b></p></div></div>" + '<div class="card"><p class="tag">Tự chấm</p><p class="sm">Chỉ bấm sau khi đã viết và đã đọc gợi ý. Gợi ý không phải đáp án duy nhất.</p><div class="row"><button class="btn" type="button" data-grade="fail">Chưa viết được</button><button class="btn" type="button" data-grade="fuzzy">Còn vướng</button><button class="btn" type="button" data-grade="know">Làm được</button></div><button class="btn" type="button" data-report="1" style="width:100%;margin-top:.55rem">Báo chỗ này chưa ổn</button></div>';
+  const bag = ticks()[u.id] || {};
+  const crit = criteriaOf(u);
+  const sortItems = activeSort(u);
+  const sort = sortItems.map(function (item, i) {
+    const pick = sortPick[u.id + ":" + i] || "";
+    const mark = (sortMark[u.id] && sortMark[u.id][i]) || "";
+    return '<p>' + esc(item.text) + (mark ? " · " + esc(mark) : "") + '</p><div class="row"><button class="btn' + (pick === "thuc" ? " btn-primary" : "") + '" type="button" data-side="thuc" data-i="' + i + '">Đời thực</button><button class="btn' + (pick === "ao" ? " btn-primary" : "") + '" type="button" data-side="ao" data-i="' + i + '">Chuyện lạ</button></div>';
+  }).join("");
+  const quizItems = quizOrder[u.id] || [];
+  const quiz = quizItems.map(function (item, qi) {
+    const picked = (quizAns[u.id] && quizAns[u.id][qi]) || "";
+    return '<div class="card"><p class="tag">Câu ' + (qi + 1) + '</p><p>' + esc(item.q) + '</p><div class="row">' + item.choices.map(function (c) { return '<button class="btn' + (picked === c ? " btn-primary" : "") + '" type="button" data-qi="' + qi + '" data-qa="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + "</div>" + (picked ? "<p class=\"sm\">" + esc(picked === item.answer ? item.why : "Chưa phải. " + item.why) + "</p>" : "") + "</div>";
+  }).join("");
+  const alts = u.alts ? '<div class="card"><p class="tag">Ba hướng cho cùng một kiểu đề</p>' + u.alts.map(function (s) { return "<p>" + esc(s) + "</p>"; }).join("") + "<p><b>Trước khi sửa.</b> " + esc(u.before) + "</p><p><b>Sau khi sửa.</b> " + esc(u.after) + "</p></div>" : "";
+  const quote = u.quote ? '<div class="card"><p class="tag">Sổ dẫn chứng</p><p class="sm">Chép một câu từ sách em đang học, kèm số trang nếu có. App không có câu trích nguyên văn.</p><textarea class="box" data-quote="1">' + esc(quotes()[u.id] || "") + "</textarea></div>" : "";
+  return '<button class="btn" type="button" data-back="1">Về danh sách</button><p class="tag" style="margin-top:.9rem">' + esc(u.bai) + "</p><h1>" + esc(u.title) + "</h1>" + u.paras.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("") + (u.passage ? '<div class="passage"><p class="tag">Đoạn luyện, không có trong sách</p><p>' + esc(u.passage) + "</p></div>" : "") + (sort ? '<div class="card"><p class="tag">Tách chi tiết trước khi viết</p>' + sort + '<button class="btn btn-primary" type="button" data-sort-check="1" style="margin-top:.6rem">Kiểm tra cách tách</button><button class="btn" type="button" data-new-sort="1" style="margin-top:.4rem;width:100%">Bộ chi tiết khác</button></div>' : "") + quiz + (u.quizzes ? '<button class="btn" type="button" data-new-quiz="1">Bộ câu khác</button>' : "") + '<div class="card"><p class="tag">Vì sao cách này được điểm</p><p>' + esc(u.meo) + '</p><ol class="steps">' + u.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol></div>" + alts + quote + '<div class="card"><p class="tag">Việc cần làm ra giấy</p><p>' + esc(u.practice.q) + '</p><button class="btn btn-primary" type="button" data-show="' + u.id + '">Đã viết xong, xem gợi ý</button><div class="' + (show ? "" : "hide") + '"><p class="sm"><b>Hướng đi.</b> ' + esc(u.practice.hint) + "</p><ol class=\"steps\">" + u.practice.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol><p><b>" + esc(u.practice.ans) + "</b></p></div></div>" + '<div class="card"><p class="tag">Bảng tự đối chiếu</p><p class="sm">Chỉ tick sau khi đã viết ra giấy và bấm Đã viết xong. Bảng này không đặt lịch ôn. Cô mới là người chấm.</p>' + crit.map(function (c, i) { return '<label class="tick"><input type="checkbox" data-tick="' + i + '"' + (show ? "" : " disabled") + (bag[i] ? " checked" : "") + "> <span>" + esc(c) + "</span></label>"; }).join("") + '<button class="btn" type="button" data-copy="1" style="width:100%;margin-top:.55rem">Hiện đoạn chữ để gửi cô hoặc bố mẹ</button><pre id="report-out" class="sm" style="white-space:pre-wrap"></pre></div>';
 }
 function render() {
   const root = document.getElementById("app");
@@ -346,22 +460,105 @@ function render() {
 document.body.addEventListener("click", function (ev) {
   const t = ev.target.closest("button");
   if (!t || t.id === "btnInstall" || t.id === "pwa-guide-close") return;
-  if (t.dataset.tab) { tab = t.dataset.tab; openId = null; render(); return; }
-  if (t.dataset.open) { openId = t.dataset.open; revealed = {}; render(); window.scrollTo(0, 0); return; }
-  if (t.dataset.back) { openId = null; render(); return; }
-  if (t.dataset.show) { revealed[t.dataset.show] = true; toast("Đây là gợi ý. Đối chiếu với bài em vừa viết.", "info"); render(); return; }
-  if (t.dataset.grade && openId) {
-    const days = t.dataset.grade === "know" ? 7 : (t.dataset.grade === "fuzzy" ? 3 : 1);
-    prog[openId] = { kind: t.dataset.grade, due: Date.now() + days * DAY };
-    save();
-    toast(t.dataset.grade === "know" ? "Làm được. Ôn lại sau 7 ngày." : (t.dataset.grade === "fuzzy" ? "Còn vướng. Ôn lại sau 3 ngày." : "Mai viết lại phần này."), t.dataset.grade === "fail" ? "warn" : "ok");
-    openId = null; tab = "hoc"; render(); return;
+  const quoteBox = document.querySelector("[data-quote]");
+  if (quoteBox && openId) {
+    const all = quotes();
+    all[openId] = quoteBox.value;
+    localStorage.setItem("lop9-van-dan-chung", JSON.stringify(all));
   }
-  if (t.dataset.report && openId) {
-    const bag = JSON.parse(localStorage.getItem("lop9-van-bao-loi") || "[]");
-    bag.push({ id: openId, at: Date.now() });
-    localStorage.setItem("lop9-van-bao-loi", JSON.stringify(bag));
-    toast("Đã ghi. Nhờ thầy cô xem lại phần này.", "warn");
+  if (t.dataset.tab) { tab = t.dataset.tab; openId = null; render(); return; }
+  if (t.dataset.open) { openId = t.dataset.open; revealed = {}; prepareQuiz(unitBy(openId)); render(); window.scrollTo(0, 0); return; }
+  if (t.dataset.back) { openId = null; render(); return; }
+  if (t.dataset.show) {
+    revealed[t.dataset.show] = true;
+    const row = prog[t.dataset.show] || {};
+    row.wroteAt = Date.now();
+    row.due = Date.now() + 3 * DAY;
+    prog[t.dataset.show] = row;
+    save();
+    toast("Đã ghi ngày viết. Ba ngày nữa phần này vào Ôn. Lần sau viết bằng một đề khác.", "info");
+    render();
+    return;
+  }
+  if (t.dataset.side) { if (sortLocked[openId]) return; sortPick[openId + ":" + t.dataset.i] = t.dataset.side; render(); return; }
+  if (t.dataset.newSort && openId) {
+    sortSet[openId] = (sortSet[openId] || 0) + 1;
+    sortLocked[openId] = false;
+    sortMark[openId] = {};
+    Object.keys(sortPick).forEach(function (k) { if (k.indexOf(openId + ":") === 0) delete sortPick[k]; });
+    toast("Đã đổi bộ chi tiết. Lần chấm của bộ trước vẫn được giữ.", "info");
+    render();
+    return;
+  }
+  if (t.dataset.sortCheck && openId) {
+    if (sortLocked[openId]) { toast("Bộ này đã chấm. Bấm Bộ chi tiết khác.", "info"); return; }
+    const items = activeSort(unitBy(openId));
+    const marks = {};
+    let wrong = 0;
+    items.forEach(function (item, i) {
+      const pick = sortPick[openId + ":" + i];
+      if (pick === item.side) marks[i] = "Đúng";
+      else { wrong += 1; marks[i] = item.why; }
+    });
+    sortMark[openId] = marks;
+    sortLocked[openId] = true;
+    markSkill(openId, wrong === 0);
+    toast(wrong ? "Có chi tiết chưa đúng cột. Lý do hiện ngay dưới chi tiết đó. Lần này đã được ghi." : "Tách đúng. Lần này đã được ghi.", wrong ? "warn" : "ok");
+    render();
+    return;
+  }
+  if (t.dataset.newQuiz && openId) {
+    quizLocked[openId] = false;
+    prepareQuiz(unitBy(openId), true);
+    toast("Đã đổi bộ câu. Chấm xong bộ này thì Ôn mới cập nhật.", "info");
+    render();
+    return;
+  }
+  if (t.dataset.qa && openId) {
+    if (quizLocked[openId]) return;
+    const qi = t.dataset.qi;
+    const items = quizOrder[openId] || [];
+    const item = items[qi];
+    if (!item) return;
+    quizAns[openId] = quizAns[openId] || {};
+    if (quizAns[openId][qi]) return;
+    quizAns[openId][qi] = t.dataset.qa;
+    const ok = t.dataset.qa === item.answer;
+    const done = items.every(function (_, i) { return quizAns[openId][i]; });
+    const allOk = done && items.every(function (q, i) { return quizAns[openId][i] === q.answer; });
+    if (done) { quizLocked[openId] = true; markSkill(openId, allOk); }
+    toast(ok ? "Đúng. " + item.why : "Chưa phải. " + item.why, ok ? "ok" : "warn");
+    render();
+    return;
+  }
+  if (t.dataset.copy && openId) {
+    const u = unitBy(openId);
+    const note = (quotes()[openId] || "").trim();
+    const bag = ticks()[openId] || {};
+    const crit = criteriaOf(u);
+    const lines = crit.map(function (c, i) { return (bag[i] ? "[x] " : "[ ] ") + c; }).join("\n");
+    const text = "Bài văn lớp 9\nPhần: " + u.title + "\nChụp bài giấy gửi cô qua Zalo.\nBảng tick:\n" + lines + "\nDẫn chứng em chép: " + (note || "(chưa ghi)");
+    const out = document.getElementById("report-out");
+    if (out) out.textContent = text;
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast("Đã sao chép. Gửi cô hoặc bố mẹ.", "ok"); }).catch(function () { toast("Nhấn giữ đoạn chữ vừa hiện để sao chép.", "warn"); });
+    else toast("Nhấn giữ đoạn chữ vừa hiện để sao chép.", "info");
+  }
+});
+document.body.addEventListener("change", function (ev) {
+  if (ev.target.dataset.tick != null && openId) {
+    const all = ticks();
+    const bag = all[openId] || {};
+    bag[ev.target.dataset.tick] = ev.target.checked;
+    all[openId] = bag;
+    if (!revealed[openId]) { ev.target.checked = false; toast("Viết ra giấy và bấm Đã viết xong, rồi mới tick.", "info"); return; }
+    localStorage.setItem("lop9-van-tieu-chi", JSON.stringify(all));
+    const n = Object.keys(bag).filter(function (k) { return bag[k]; }).length;
+    toast(n + " ý đã tick. Bảng này không thay cô chấm.", "info");
+  }
+  if (ev.target.dataset.quote && openId) {
+    const all = quotes();
+    all[openId] = ev.target.value;
+    localStorage.setItem("lop9-van-dan-chung", JSON.stringify(all));
   }
 });
 render();

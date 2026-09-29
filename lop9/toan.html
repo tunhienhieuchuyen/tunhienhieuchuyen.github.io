@@ -29,27 +29,33 @@
   html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Be Vietnam Pro", "Noto Sans", Roboto, "Segoe UI", sans-serif; }
   body { min-height: 100vh; }
   button, input { font: inherit; }
+  a { color: var(--blue); }
   #app { max-width: 32rem; margin: 0 auto; padding: 1rem 1rem 6.2rem; }
   h1 { font-size: 1.7rem; line-height: 1.15; margin: 0 0 .35rem; }
   h2 { font-size: 1.25rem; margin: 0; }
   p { margin: .35rem 0; }
   .muted { color: var(--muted); }
   .sm { font-size: .92rem; }
-  .note { background: #fff; border: 1px solid var(--line); border-radius: 1rem; padding: .8rem .9rem; }
+  .note, .card { background: var(--card); border: 1px solid var(--line); border-radius: 1rem; padding: .9rem 1rem; margin: .7rem 0; }
+  .note { background: #fff; }
   .warn { color: var(--warn); }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 1rem; padding: .9rem 1rem; margin: .7rem 0; }
-  .card h2 { margin-bottom: .2rem; }
+  .ok { color: var(--ok); }
   .tag { display: inline-block; font-size: .75rem; font-weight: 700; color: var(--blue); }
   .btn { min-height: 3rem; border-radius: .9rem; border: 1px solid var(--line); background: #fff; padding: .6rem .8rem; font-weight: 700; }
   .btn-primary { background: var(--blue); color: var(--blue-fg); border-color: var(--blue); width: 100%; }
-  .btn-surface { background: #fff; }
-  .row { display: flex; gap: .5rem; }
-  .row .btn { flex: 1; }
+  .row { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .row .btn { flex: 1; width: auto; }
   .he { display: flex; gap: .45rem; align-items: center; background: #f7f3eb; border-radius: .8rem; padding: .7rem .8rem; margin: .5rem 0; font-weight: 700; }
   .brace { font-size: 2rem; line-height: .8; color: var(--blue); }
   .steps { margin: .4rem 0 .2rem 1.1rem; padding: 0; }
   .steps li { margin: .35rem 0; }
   .hide { display: none; }
+  table.map { width: 100%; border-collapse: collapse; }
+  table.map td { border-top: 1px solid var(--line); padding: .4rem .15rem; vertical-align: top; }
+  table.map td:first-child { width: 46%; color: var(--muted); }
+  input.ans, textarea.note-box { min-height: 3rem; border-radius: .7rem; border: 1px solid var(--line); padding: .45rem .6rem; background: #fff; width: 100%; }
+  input.ans { width: 6.2rem; }
+  label.field { display: flex; align-items: center; gap: .45rem; font-weight: 700; margin: .35rem 0; }
   .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: rgba(255,253,248,.96); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0); }
   .dock-in { max-width: 32rem; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; }
   .dock button { min-height: 4rem; border: 0; background: transparent; font-weight: 700; color: var(--muted); }
@@ -58,6 +64,7 @@
   .toast { background: #fff; border-radius: .7rem; padding: .55rem .7rem; box-shadow: 0 8px 20px rgba(28,25,23,.12); border-left: 4px solid #a8a29e; max-width: 16rem; font-size: .9rem; }
   .toast.ok { border-left-color: #16a34a; }
   .toast.warn { border-left-color: #d97706; }
+  .toast.bad { border-left-color: #dc2626; }
   .toast.info { border-left-color: #1e4d7b; }
   .install-fab { position: fixed; z-index: 45; right: max(12px, env(safe-area-inset-right)); bottom: calc(4.85rem + env(safe-area-inset-bottom)); border: 0; background: transparent; padding: 6px; touch-action: none; display: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   .install-fab, .install-fab * { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
@@ -66,176 +73,589 @@
   #pwa-guide { position: fixed; inset: 0; z-index: 95; background: rgba(28,25,23,.55); display: flex; align-items: flex-end; justify-content: center; padding: 1rem; }
   #pwa-guide[hidden] { display: none; }
   .pwa-card { width: min(24rem, 100%); background: #fffdf8; border-radius: 1.1rem; padding: 1rem; }
-  .guide-step { display: flex; gap: .6rem; margin-top: .7rem; }
-  .step-num { width: 1.5rem; height: 1.5rem; border-radius: 999px; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="toasts" aria-live="polite"></div>
-<button class="install-fab" id="btnInstall" type="button" aria-label="Cài app toán">
-  <span class="install-fab-inner">Cài app</span>
-</button>
-<div id="pwa-guide" hidden>
-  <div class="pwa-card" role="dialog">
-    <h2>Cài app toán</h2>
-    <div id="pwa-guide-body"></div>
-    <button class="btn btn-surface" type="button" id="pwa-guide-close" style="margin-top:1rem">Đóng</button>
-  </div>
-</div>
+<button class="install-fab" id="btnInstall" type="button" aria-label="Cài app toán"><span class="install-fab-inner">Cài app</span></button>
+<div id="pwa-guide" hidden><div class="pwa-card" role="dialog"><h2>Cài app toán</h2><div id="pwa-guide-body"></div><button class="btn" type="button" id="pwa-guide-close" style="margin-top:1rem">Đóng</button></div></div>
 <script>
+function ri(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+function num(s) {
+  const t = String(s == null ? "" : s).trim().replace(/−/g, "-").replace(",", ".");
+  if (!t || t === "-" || t === "/") return NaN;
+  const m = t.match(/^(-?\d+)\/(\d+)$/);
+  if (m) return Number(m[2]) ? Number(m[1]) / Number(m[2]) : NaN;
+  if (!/^-?\d+(\.\d+)?$/.test(t)) return NaN;
+  return Number(t);
+}
+function same(a, b) { return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) < 1e-6; }
 const FORMS = [
   {
-    id: "nghiem", bai: "Bài 1", title: "Nhận ra nghiệm của phương trình bậc nhất hai ẩn",
-    when: "Khi đề cho một phương trình ax + by = c và một cặp số, cần biết cặp đó có là nghiệm hay không.",
-    rule: "Cặp (x; y) là nghiệm chỉ khi thay vào vế trái ra đúng bằng c. Nghiệm là một cặp, không phải một số.",
-    trap: "Hay quên phải thử cả hai số. Viết mỗi giá trị x là chưa đủ.",
-    ex: { lines: ["x + 2y = 7"], steps: ["Thử (1; 3): 1 + 2·3 = 7. Đúng, nên (1; 3) là nghiệm.", "Thử (3; 1): 3 + 2·1 = 5, mà 5 ≠ 7. Không phải nghiệm."], ans: "(1; 3) là nghiệm. (3; 1) không phải." },
-    drills: [
-      { lv: "Cơ bản", q: "Phương trình 3x + y = 10. Cặp (2; 4) hay cặp (4; 2) là nghiệm?", hint: "Thay từng cặp vào vế trái rồi so với 10.", steps: ["(2; 4): 3·2 + 4 = 10. Đúng.", "(4; 2): 3·4 + 2 = 14 ≠ 10. Sai."], ans: "Nghiệm là (2; 4)." },
-      { lv: "Vận dụng", q: "Tìm y để cặp (2; y) là nghiệm của x + 3y = 11.", hint: "Thay x = 2 vào phương trình.", steps: ["2 + 3y = 11.", "3y = 9, y = 3."], ans: "y = 3. Cặp nghiệm là (2; 3)." },
-      { lv: "Nâng cao", q: "Tìm mọi nghiệm nguyên không âm của x + y = 3.", hint: "x chỉ có thể là 0, 1, 2 hoặc 3. Với mỗi x, tính y = 3 − x.", steps: ["x = 0 thì y = 3.", "x = 1 thì y = 2.", "x = 2 thì y = 1.", "x = 3 thì y = 0."], ans: "(0; 3), (1; 2), (2; 1), (3; 0)." }
-    ]
+    id: "nghiem", bai: "Bài 1", title: "Nhận ra nghiệm",
+    when: "Khi đề cho một phương trình và một cặp số, hoặc bắt tìm ẩn còn lại.",
+    rule: "Thay số vào đúng chỗ. Cặp (x; y) là nghiệm chỉ khi vế trái bằng vế phải. Kết luận phải viết lại cặp số.",
+    trap: "Chuyển vế quên đổi dấu, hoặc viết mỗi giá trị x mà không thành cặp.",
+    example: {
+      prompt: "Tìm y để cặp (2; y) là nghiệm của x + 3y = 11.",
+      lines: ["x + 3y = 11"],
+      steps: ["Gọi y là số cần tìm.", "Thay x = 2: 2 + 3y = 11.", "3y = 9, y = 3.", "Đối chiếu: 2 + 9 = 11. Đúng.", "Kết luận: y = 3. Cặp nghiệm là (2; 3)."]
+    }
   },
   {
     id: "the", bai: "Bài 2", title: "Giải hệ bằng phép thế",
     when: "Khi một phương trình dễ rút x hoặc dễ rút y.",
-    rule: "Rút một ẩn từ phương trình đơn hơn, thay vào phương trình kia, giải ra một ẩn, rồi tính ẩn còn lại. Cuối cùng thử lại vào cả hai phương trình.",
-    trap: "Khi thay một biểu thức có trừ, phải có ngoặc. Quên dấu là ra nghiệm sai.",
-    ex: { lines: ["x + y = 5", "2x − y = 4"], steps: ["Từ phương trình đầu, y = 5 − x.", "Thay vào phương trình sau: 2x − (5 − x) = 4.", "2x − 5 + x = 4, nên 3x = 9, x = 3.", "y = 5 − 3 = 2.", "Thử: 3 + 2 = 5 và 6 − 2 = 4. Đúng."], ans: "(x; y) = (3; 2)." },
-    drills: [
-      { lv: "Cơ bản", q: "Giải hệ: x + y = 10 và x − y = 2.", hint: "Rút x = 10 − y từ phương trình đầu, thay vào phương trình sau.", steps: ["x = 10 − y.", "(10 − y) − y = 2, nên 10 − 2y = 2.", "2y = 8, y = 4, x = 6.", "Thử: 6 + 4 = 10 và 6 − 4 = 2."], ans: "(x; y) = (6; 4)." },
-      { lv: "Vận dụng", q: "Giải hệ: y = 2x và x + y = 9.", hint: "y đã được rút sẵn. Thay y = 2x vào phương trình còn lại.", steps: ["x + 2x = 9, 3x = 9, x = 3.", "y = 6.", "Thử: 3 + 6 = 9."], ans: "(x; y) = (3; 6)." },
-      { lv: "Nâng cao", q: "Giải hệ: x + 2y = 8 và 3x − 2y = 4.", hint: "Rút x = 8 − 2y. Khi thay vào 3x, nhân cả ngoặc.", steps: ["3(8 − 2y) − 2y = 4.", "24 − 6y − 2y = 4, 24 − 8y = 4, 8y = 20, y = 5/2.", "x = 8 − 2·(5/2) = 3.", "Thử: 3 + 5 = 8 và 9 − 5 = 4."], ans: "(x; y) = (3; 5/2)." }
-    ]
+    rule: "Rút một ẩn, thay vào phương trình kia bằng cả ngoặc, giải, thế ngược, rồi thử vào cả hai phương trình.",
+    trap: "Quên ngoặc khi thay một biểu thức có dấu trừ. Đó là lỗi đổi dấu.",
+    example: {
+      prompt: "Giải hệ.",
+      lines: ["x + y = 5", "2x − y = 4"],
+      steps: ["Từ phương trình thứ nhất, rút y = 5 − x.", "Thay vào phương trình sau: 2x − (5 − x) = 4.", "2x − 5 + x = 4, 3x = 9, x = 3.", "y = 5 − 3 = 2.", "Đối chiếu: 3 + 2 = 5 và 6 − 2 = 4.", "Kết luận: nghiệm duy nhất (x; y) = (3; 2)."]
+    }
   },
   {
     id: "cong", bai: "Bài 2", title: "Giải hệ bằng phép cộng",
-    when: "Khi cộng hoặc trừ hai phương trình thì một ẩn bị triệt tiêu.",
-    rule: "Nhân hai vế để hệ số một ẩn bằng nhau hoặc đối nhau, rồi cộng hoặc trừ. Giải ẩn còn lại, thế ngược, rồi thử lại.",
-    trap: "Nhân một phương trình thì phải nhân cả hai vế, kể cả số hạng không chứa ẩn.",
-    ex: { lines: ["2x + 3y = 12", "2x − y = 4"], steps: ["Trừ hai phương trình theo vế: (2x + 3y) − (2x − y) = 12 − 4.", "4y = 8, y = 2.", "2x − 2 = 4, 2x = 6, x = 3.", "Thử: 6 + 6 = 12 và 6 − 2 = 4."], ans: "(x; y) = (3; 2)." },
-    drills: [
-      { lv: "Cơ bản", q: "Giải hệ: x + y = 7 và x − y = 1.", hint: "Cộng hai phương trình để mất y.", steps: ["Cộng: 2x = 8, x = 4.", "4 + y = 7, y = 3.", "Thử: 4 + 3 = 7 và 4 − 3 = 1."], ans: "(x; y) = (4; 3)." },
-      { lv: "Vận dụng", q: "Giải hệ: 3x + y = 11 và x + y = 5.", hint: "Trừ hai phương trình để mất y.", steps: ["Trừ: 2x = 6, x = 3.", "3 + y = 5, y = 2.", "Thử: 9 + 2 = 11 và 3 + 2 = 5."], ans: "(x; y) = (3; 2)." },
-      { lv: "Nâng cao", q: "Giải hệ: 2x + 5y = 16 và 3x − 5y = 9.", hint: "Cộng hai phương trình, y đối nhau nên mất y.", steps: ["Cộng: 5x = 25, x = 5.", "10 + 5y = 16, 5y = 6, y = 6/5.", "Thử: 10 + 6 = 16 và 15 − 6 = 9."], ans: "(x; y) = (5; 6/5)." }
-    ]
+    when: "Khi cộng hoặc trừ hai phương trình thì một ẩn mất.",
+    rule: "Muốn nhân một phương trình thì nhân cả hai vế. Cộng hoặc trừ, giải ẩn còn lại, thế ngược, rồi thử lại.",
+    trap: "Nhân quên số hạng không chứa ẩn, hoặc trừ mà quên đổi dấu biểu thức trong ngoặc.",
+    example: {
+      prompt: "Giải hệ.",
+      lines: ["2x + y = 8", "3x − 2y = 5"],
+      steps: ["Nhân phương trình thứ nhất với 2: 4x + 2y = 16.", "Cộng với phương trình thứ hai: 7x = 21, x = 3.", "Thay vào 2x + y = 8: 6 + y = 8, y = 2.", "Đối chiếu: 6 + 2 = 8 và 9 − 4 = 5.", "Kết luận: nghiệm duy nhất (x; y) = (3; 2)."]
+    }
   },
   {
-    id: "dacbiet", bai: "Bài 2", title: "Hệ vô nghiệm hoặc vô số nghiệm",
-    when: "Khi hai phương trình cùng dạng, hoặc sau khi biến đổi thì hai vế mâu thuẫn.",
-    rule: "Nếu phương trình này là bội của phương trình kia thì vô số nghiệm. Nếu vế trái là bội mà vế phải không cùng bội đó thì vô nghiệm. Còn lại thì có một nghiệm duy nhất.",
-    trap: "Thấy hai phương trình giống nhau một phần đã kết luận vô số. Phải nhìn cả vế phải.",
-    ex: { lines: ["x + y = 3", "2x + 2y = 6"], steps: ["Phương trình sau đúng bằng 2 lần phương trình trước, cả hai vế.", "Hai phương trình là một. Hệ có vô số nghiệm.", "Nghiệm là mọi cặp (x; y) với y = 3 − x."], ans: "Vô số nghiệm. Ví dụ (0; 3), (1; 2), (3; 0)." },
-    drills: [
-      { lv: "Cơ bản", q: "Hệ 2x + y = 4 và 4x + 2y = 8 có bao nhiêu nghiệm?", hint: "Xem phương trình sau có phải là 2 lần phương trình trước không.", steps: ["2·(2x + y) = 4x + 2y và 2·4 = 8.", "Hai phương trình là một."], ans: "Vô số nghiệm." },
-      { lv: "Vận dụng", q: "Hệ x + 2y = 5 và 2x + 4y = 9 có nghiệm không?", hint: "Nhân phương trình đầu với 2 rồi so vế phải.", steps: ["2·(x + 2y) = 2x + 4y và 2·5 = 10.", "Vế trái trùng, nhưng 10 ≠ 9.", "Không có cặp nào thỏa cả hai."], ans: "Vô nghiệm." },
-      { lv: "Nâng cao", q: "Tìm m để hệ x + y = 2 và mx + y = 3 có đúng một nghiệm.", hint: "Trừ hai phương trình: (m − 1)x = 1.", steps: ["Nếu m ≠ 1 thì x = 1/(m − 1), y = 2 − x. Có một nghiệm.", "Nếu m = 1 thì hệ thành x + y = 2 và x + y = 3. Vô nghiệm."], ans: "Có đúng một nghiệm khi m ≠ 1." }
-    ]
+    id: "dacbiet", bai: "Bài 2", title: "Vô nghiệm hoặc vô số nghiệm",
+    when: "Khi hai phương trình trông cùng dạng.",
+    rule: "Nhân để so. Nếu cả hai vế cùng một bội thì vô số nghiệm. Nếu vế trái cùng bội mà vế phải không cùng bội thì vô nghiệm. Không kết luận khi mới nhìn một vế.",
+    trap: "Thấy vế trái giống nhau rồi kết luận vô số, bỏ quên vế phải.",
+    example: {
+      prompt: "Xét hệ.",
+      lines: ["x + y = 3", "2x + 2y = 6"],
+      steps: ["Phương trình sau bằng 2 lần phương trình trước, cả vế trái lẫn vế phải.", "Hai phương trình là một.", "Kết luận: vô số nghiệm. Mọi cặp thỏa y = 3 − x."]
+    }
   },
   {
-    id: "lap-so", bai: "Bài 3", title: "Lập hệ từ tổng, hiệu hoặc tuổi",
-    when: "Bài chữ cho hai điều kiện về hai đại lượng. Thi Hà Nội hay hỏi kiểu này ở mức cơ bản.",
-    rule: "Gọi hai ẩn kèm đơn vị. Mỗi câu của đề thành một phương trình. Giải hệ, rồi viết lại câu trả lời và thử vào đề.",
-    trap: "Gọi ẩn mà không nói rõ là số hiện nay hay số của năm trước. Tuổi trong quá khứ phải trừ ở cả hai người.",
-    ex: { lines: ["x + y = 28", "x − y = 6"], steps: ["x, y là hai số cần tìm.", "Cộng hai phương trình: 2x = 34, x = 17.", "y = 28 − 17 = 11.", "Thử: tổng 28, hiệu 6."], ans: "Hai số là 17 và 11." },
-    drills: [
-      { lv: "Cơ bản", q: "Một lớp có 40 học sinh. Số nữ nhiều hơn số nam là 4. Tìm số nam và số nữ.", hint: "Gọi n là số nam, f là số nữ. n + f = 40 và f − n = 4.", steps: ["Cộng: 2f = 44, f = 22.", "n = 18.", "Thử: 22 + 18 = 40 và 22 − 18 = 4."], ans: "18 nam và 22 nữ." },
-      { lv: "Vận dụng", q: "Năm nay tổng tuổi bố và con là 50. Cách đây 5 năm, tuổi bố bằng 4 lần tuổi con. Tìm tuổi mỗi người năm nay.", hint: "Gọi b và c là tuổi năm nay. Năm năm trước là b − 5 và c − 5.", steps: ["b + c = 50.", "b − 5 = 4(c − 5).", "50 − c − 5 = 4c − 20, nên 65 = 5c, c = 13, b = 37.", "Năm năm trước: 32 và 8. 32 = 4·8. Đúng."], ans: "Bố 37 tuổi, con 13 tuổi." },
-      { lv: "Nâng cao", q: "Hình chữ nhật có chu vi 28 cm. Chiều dài hơn chiều rộng 2 cm. Tìm hai cạnh.", hint: "Chu vi 28 nên tổng hai cạnh kề là 14.", steps: ["d + r = 14 và d − r = 2.", "2d = 16, d = 8, r = 6.", "Thử: chu vi 2·(8 + 6) = 28, dài hơn rộng đúng 2 cm."], ans: "Dài 8 cm, rộng 6 cm." }
-    ]
+    id: "lap-so", bai: "Bài 3", title: "Lập hệ từ bài có lời",
+    when: "Đề cho hai điều kiện về hai đại lượng: tổng và hiệu, tuổi, cạnh hình.",
+    rule: "Gọi ẩn kèm đơn vị và điều kiện. Mỗi câu của đề thành một phương trình. Giải xong phải đối chiếu điều kiện rồi mới viết câu trả lời.",
+    trap: "Bỏ qua bước gọi ẩn. Hoặc tìm ra số mà không thử lại vào câu chữ của đề.",
+    example: {
+      prompt: "Hai số có tổng 28. Số lớn hơn số bé 6 đơn vị. Tìm hai số.",
+      map: [["Tổng bằng 28", "x + y = 28"], ["Số lớn hơn số bé 6", "x − y = 6"]],
+      steps: ["Gọi x là số lớn, y là số bé. Điều kiện: x > y.", "Lập hệ: x + y = 28 và x − y = 6.", "Cộng: 2x = 34, x = 17. y = 28 − 17 = 11.", "Đối chiếu: 17 > 11, tổng 28, hiệu 6. Thỏa.", "Kết luận: hai số là 17 và 11."]
+    }
   },
   {
-    id: "lap-gia", bai: "Bài 3", title: "Lập hệ từ giá tiền hoặc đếm chân",
-    when: "Đề cho hai lần mua, hoặc số con và số chân. Vẫn là hai ẩn, hai phương trình.",
-    rule: "Chọn ẩn là giá một đơn vị hoặc số từng loại. Viết phương trình theo từng câu. Đáp án phải kèm đơn vị và thử lại bằng số của đề.",
-    trap: "Cộng tiền mà quên đơn vị nghìn đồng. Hoặc đếm chân gà là 4.",
-    ex: { lines: ["5t + 3c = 210", "2t + 3c = 120"], steps: ["t là giá 1 kg táo, c là giá 1 kg cam, đơn vị nghìn đồng.", "Trừ hai phương trình: 3t = 90, t = 30.", "60 + 3c = 120, c = 20.", "Thử: 150 + 60 = 210 và 60 + 60 = 120."], ans: "Táo 30 nghìn đồng/kg, cam 20 nghìn đồng/kg." },
-    drills: [
-      { lv: "Cơ bản", q: "3 quyển vở và 2 cây bút hết 32 nghìn đồng. 1 quyển vở và 2 cây bút hết 16 nghìn đồng. Tìm giá mỗi thứ.", hint: "Gọi v và b theo nghìn đồng. Trừ hai phương trình để mất b.", steps: ["3v + 2b = 32 và v + 2b = 16.", "Trừ: 2v = 16, v = 8.", "8 + 2b = 16, b = 4.", "Thử: 24 + 8 = 32 và 8 + 8 = 16."], ans: "Vở 8 nghìn đồng, bút 4 nghìn đồng." },
-      { lv: "Vận dụng", q: "Có 10 con gà và chó, đếm được 28 chân. Hỏi mỗi loại mấy con? Gà 2 chân, chó 4 chân.", hint: "Gọi g và c. g + c = 10 và 2g + 4c = 28.", steps: ["Chia phương trình chân cho 2: g + 2c = 14.", "Trừ g + c = 10: c = 4, g = 6.", "Thử: 6 + 4 = 10 con, 12 + 16 = 28 chân."], ans: "6 gà và 4 chó." },
-      { lv: "Nâng cao", q: "8 vé người lớn và trẻ em thu 340 nghìn đồng. Vé người lớn 50 nghìn, vé trẻ em 30 nghìn. Hỏi mỗi loại mấy vé?", hint: "Gọi a là số vé người lớn, t là số vé trẻ em.", steps: ["a + t = 8 và 50a + 30t = 340.", "Chia phương trình tiền cho 10: 5a + 3t = 34.", "t = 8 − a, nên 5a + 3(8 − a) = 34, 2a + 24 = 34, a = 5, t = 3.", "Thử: 5 + 3 = 8 và 250 + 90 = 340."], ans: "5 vé người lớn và 3 vé trẻ em." }
-    ]
+    id: "lap-gia", bai: "Bài 3", title: "Lập hệ từ giá hoặc số chân",
+    when: "Đề có hai lần mua, hoặc đếm số con và số chân.",
+    rule: "Ẩn là giá một đơn vị hoặc số từng loại, có đơn vị. Hai câu đề là hai phương trình. Đáp án phải kèm đơn vị và thử lại bằng đúng số trong đề.",
+    trap: "Quên đơn vị nghìn đồng. Hoặc đếm chân gà thành 4, chân chó thành 2.",
+    example: {
+      prompt: "3 quyển vở và 2 cây bút hết 32 nghìn đồng. 1 quyển vở và 2 cây bút hết 16 nghìn đồng. Tìm giá mỗi thứ.",
+      map: [["3 vở và 2 bút hết 32 nghìn", "3v + 2b = 32"], ["1 vở và 2 bút hết 16 nghìn", "v + 2b = 16"]],
+      steps: ["Gọi v là giá một quyển vở, b là giá một cây bút, đơn vị nghìn đồng. Điều kiện: v > 0, b > 0.", "Lập hệ như bảng trên.", "Trừ theo vế: 2v = 16, v = 8. 8 + 2b = 16, b = 4.", "Đối chiếu: 24 + 8 = 32 và 8 + 8 = 16.", "Kết luận: vở 8 nghìn đồng, bút 4 nghìn đồng."]
+    }
   }
 ];
-const KEY = "lop9-toan-v1";
+function shuffle(list) {
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+function showNum(n) {
+  if (n < 0) return "−" + showNum(-n);
+  if (Number.isInteger(n)) return String(n);
+  const den = 2;
+  const nume = Math.round(n * den);
+  if (Math.abs(n * den - nume) < 1e-6) {
+    const g = gcd(Math.abs(nume), den);
+    return (nume / g) + "/" + (den / g);
+  }
+  return String(n);
+}
+function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+function make(id) {
+  if (id === "nghiem") {
+    const roll = ri(0, 3);
+    if (roll === 0) {
+      const x = ri(1, 6), y = ri(1, 6), a = ri(2, 4), c = a * x + y;
+      return { shape: "tim-y", kind: "one", key: "y", label: "y", answer: { y: y }, prompt: "Tìm y để cặp (" + x + "; y) là nghiệm của " + a + "x + y = " + c + ".", lines: [a + "x + y = " + c], steps: ["Thay x = " + x + ".", a + "·" + x + " + y = " + c + ", nên y = " + c + " − " + (a * x) + " = " + y + ".", "Đối chiếu: " + (a * x) + " + " + y + " = " + c + ".", "Kết luận: y = " + y + "."], slip: { value: a * x + c, msg: "Em đã cộng khi chuyển vế. Chuyển sang vế kia thì phải đổi dấu." } };
+    }
+    if (roll === 1) {
+      const x = ri(2, 6), y = -ri(1, 4), a = ri(2, 3), c = a * x + y;
+      return { shape: "tim-y-am", kind: "one", key: "y", label: "y", answer: { y: y }, prompt: "Tìm y để cặp (" + x + "; y) là nghiệm của " + a + "x + y = " + c + ". y có thể âm.", lines: [a + "x + y = " + c], steps: ["Thay x = " + x + ": " + (a * x) + " + y = " + c + ".", "y = " + c + " − " + (a * x) + " = " + y + ".", "Kết luận: y = " + y + "."] };
+    }
+    if (roll === 2) {
+      const x = ri(1, 5), half = ri(1, 5), y = half / 2, c = x + half;
+      return { shape: "tim-y-phan", kind: "one", key: "y", label: "y", answer: { y: y }, prompt: "Tìm y để cặp (" + x + "; y) là nghiệm của x + 2y = " + c + ". Nếu ra phân số, gõ dạng a/b.", lines: ["x + 2y = " + c], steps: ["Thay x = " + x + ": " + x + " + 2y = " + c + ".", "2y = " + half + ", y = " + showNum(y) + ".", "Kết luận: y = " + showNum(y) + "."], slip: { value: half, msg: "Em chưa chia cho 2. Từ 2y = " + half + " thì y bằng một nửa số đó." } };
+    }
+    const x = ri(1, 5), y = ri(1, 5), a = ri(2, 3), c = a * x + y, lie = ri(0, 1) === 1, py = lie ? y + 2 : y;
+    const left = a * x + py;
+    return { shape: "cap-nghiem", kind: "choice", nLabel: "Vế trái bằng", choices: shuffle(["Đúng", "Không"]), answer: { choice: lie ? "Không" : "Đúng", n: left }, prompt: "Cặp (" + x + "; " + py + ") có phải nghiệm của " + a + "x + y = " + c + " không? Tính vế trái rồi chọn.", lines: [a + "x + y = " + c], steps: ["Thay x = " + x + ", y = " + py + ". Vế trái = " + left + ".", "Vế phải = " + c + ".", "Kết luận: " + (lie ? "không phải nghiệm." : "là nghiệm.")] };
+  }
+  if (id === "the") {
+    const roll = ri(0, 3);
+    if (roll === 0) {
+      const x = ri(1, 8);
+      let y = ri(1, 8);
+      if (y === x) y = x === 8 ? 1 : x + 1;
+      const s = x + y, t = 2 * x - y;
+      return { shape: "the-don", kind: "pair", answer: { x: x, y: y }, prove: function (ans) { return ans.x + ans.y === s && 2 * ans.x - ans.y === t; }, prompt: "Giải hệ bằng phép thế.", lines: ["x + y = " + s, "2x − y = " + t], steps: ["Rút y = " + s + " − x.", "Thay vào phương trình sau, nhớ ngoặc: 2x − (" + s + " − x) = " + t + ".", "3x = " + (3 * x) + ", x = " + x + ", y = " + y + ".", "Kết luận: (" + x + "; " + y + ")."] };
+    }
+    if (roll === 1) {
+      const x = ri(1, 5), y = ri(1, 5);
+      const p = 2 * x + y, q = x + 3 * y;
+      return { shape: "the-he-so", kind: "pair", answer: { x: x, y: y }, prove: function (ans) { return 2 * ans.x + ans.y === p && ans.x + 3 * ans.y === q; }, prompt: "Giải hệ. Hệ số không còn là 1 ở cả hai ẩn.", lines: ["2x + y = " + p, "x + 3y = " + q], steps: ["Từ phương trình đầu, y = " + p + " − 2x.", "Thay vào phương trình sau: x + 3(" + p + " − 2x) = " + q + ".", "x = " + x + ", y = " + y + ".", "Kết luận: (" + x + "; " + y + ")."] };
+    }
+    if (roll === 2) {
+      const x = ri(1, 6), y = 2 * x;
+      return { shape: "the-rut-san", kind: "pair", answer: { x: x, y: y }, prove: function (ans) { return ans.y === 2 * ans.x && ans.x + ans.y === x + y; }, prompt: "Giải hệ. Một ẩn đã được rút sẵn.", lines: ["y = 2x", "x + y = " + (x + y)], steps: ["Thay y = 2x vào phương trình thứ hai.", "x + 2x = " + (x + y) + ", x = " + x + ", y = " + y + ".", "Kết luận: (" + x + "; " + y + ")."] };
+    }
+    const x = ri(1, 6), y = -ri(1, 4);
+    const s = x + y, t = 2 * x - y;
+    return { shape: "the-am", kind: "pair", answer: { x: x, y: y }, prove: function (ans) { return ans.x + ans.y === s && 2 * ans.x - ans.y === t; }, prompt: "Giải hệ. Một nghiệm có thể âm.", lines: ["x + y = " + s, "2x − y = " + t], steps: ["Rút y = " + s + " − x.", "Thay: 2x − (" + s + " − x) = " + t + ".", "x = " + x + ", y = " + y + ".", "Kết luận: (" + x + "; " + y + ")."] };
+  }
+  if (id === "cong") {
+    const roll = ri(0, 2);
+    if (roll === 0) {
+      const x = ri(2, 9), y = ri(1, x - 1);
+      return { shape: "cong-khong-nhan", kind: "pair", answer: { x: x, y: y }, prove: function (ans) { return ans.x + ans.y === x + y && ans.x - ans.y === x - y; }, prompt: "Giải hệ bằng phép cộng. Chưa cần nhân.", lines: ["x + y = " + (x + y), "x − y = " + (x - y)], steps: ["Cộng hai phương trình: 2x = " + (2 * x) + ", x = " + x + ".", "y = " + y + ".", "Kết luận: (" + x + "; " + y + ")."] };
+    }
+    if (roll === 1) {
+      const x = ri(1, 6), y = ri(1, 6);
+      return { shape: "cong-tru", kind: "pair", answer: { x: x, y: y }, prove: function (ans) { return 3 * ans.x + ans.y === 3 * x + y && ans.x + ans.y === x + y; }, prompt: "Giải hệ. Trừ để mất một ẩn.", lines: ["3x + y = " + (3 * x + y), "x + y = " + (x + y)], steps: ["Trừ hai phương trình: 2x = " + (2 * x) + ", x = " + x + ".", "y = " + y + ".", "Kết luận: (" + x + "; " + y + ")."] };
+    }
+    const x = ri(1, 5), y = ri(1, 5);
+    const p = 2 * x + y, q = 3 * x - 2 * y;
+    return { shape: "cong-nhan", kind: "pair", answer: { x: x, y: y }, prove: function (ans) { return 2 * ans.x + ans.y === p && 3 * ans.x - 2 * ans.y === q; }, prompt: "Giải hệ. Cần nhân một phương trình trước khi cộng.", lines: ["2x + y = " + p, "3x − 2y = " + q], steps: ["Nhân phương trình thứ nhất với 2: 4x + 2y = " + (2 * p) + ".", "Cộng với phương trình thứ hai: 7x = " + (7 * x) + ", x = " + x + ".", "y = " + y + ". Kết luận: (" + x + "; " + y + ")."] };
+  }
+  if (id === "dacbiet") {
+    const roll = ri(0, 3);
+    if (roll === 0) {
+      const k = ri(2, 4), s = ri(3, 9);
+      return { shape: "vo-so", kind: "choice", nLabel: "Nhân phương trình đầu với", choices: shuffle(["Một nghiệm", "Vô nghiệm", "Vô số nghiệm"]), answer: { choice: "Vô số nghiệm", n: k }, prompt: "Hệ này có bao nhiêu nghiệm? Nhân phương trình đầu với mấy thì ra phương trình sau?", lines: ["x + y = " + s, k + "x + " + k + "y = " + (k * s)], steps: ["Phương trình sau bằng " + k + " lần phương trình trước, cả hai vế.", "Kết luận: vô số nghiệm."] };
+    }
+    if (roll === 1) {
+      const k = ri(2, 4), s = ri(3, 9);
+      return { shape: "vo-nghiem", kind: "choice", nLabel: "Nhân phương trình đầu với", choices: shuffle(["Một nghiệm", "Vô nghiệm", "Vô số nghiệm"]), answer: { choice: "Vô nghiệm", n: k }, prompt: "Hệ này có bao nhiêu nghiệm? Nhân phương trình đầu với mấy thì vế trái trùng phương trình sau?", lines: ["x + 2y = " + s, k + "x + " + (2 * k) + "y = " + (k * s + 1)], steps: [k + " lần phương trình đầu có vế phải " + (k * s) + ", phương trình sau có vế phải " + (k * s + 1) + ".", "Kết luận: vô nghiệm."] };
+    }
+    if (roll === 2) {
+      const x = ri(1, 6), y = ri(1, 6);
+      return { shape: "mot-nghiem", kind: "choice", nLabel: "x bằng", choices: shuffle(["Một nghiệm", "Vô nghiệm", "Vô số nghiệm"]), answer: { choice: "Một nghiệm", n: x }, prompt: "Hệ này có bao nhiêu nghiệm? Nếu có một nghiệm, x bằng bao nhiêu?", lines: ["x + y = " + (x + y), "x − y = " + (x - y)], steps: ["Hai phương trình không là bội của nhau. Cộng ra x = " + x + ", y = " + y + ".", "Kết luận: một nghiệm."] };
+    }
+    const right1 = ri(2, 6), right2 = right1 + ri(1, 4);
+    return { shape: "tham-so", kind: "choice", nLabel: "Hiệu hai vế phải", choices: shuffle(["m ≠ 1", "m = 1", "mọi m"]), answer: { choice: "m ≠ 1", n: right2 - right1 }, prompt: "Tìm m để hệ có đúng một nghiệm. Hiệu hai vế phải bằng bao nhiêu?", lines: ["x + y = " + right1, "mx + y = " + right2], steps: ["Trừ hai phương trình: (m − 1)x = " + (right2 - right1) + ".", "Nếu m ≠ 1 thì có một giá trị x, rồi có y.", "Nếu m = 1 thì hai vế phải khác nhau, vô nghiệm.", "Kết luận: có đúng một nghiệm khi m ≠ 1."] };
+  }
+  if (id === "lap-so") {
+    const roll = ri(0, 2);
+    if (roll === 0) {
+      const x = ri(10, 24), y = ri(3, x - 2);
+      return { shape: "tong-hieu", kind: "pair", answer: { x: x, y: y }, labels: ["Số lớn", "Số bé"], prompt: "Hai số có tổng " + (x + y) + ". Số lớn hơn số bé " + (x - y) + " đơn vị. Tìm hai số.", map: [["Tổng", "x + y = " + (x + y)], ["Hơn nhau", "x − y = " + (x - y)]], steps: ["Gọi x là số lớn, y là số bé. Điều kiện x > y.", "Cộng: 2x = " + (2 * x) + ", x = " + x + ", y = " + y + ".", "Đối chiếu tổng và hiệu.", "Kết luận: số lớn " + x + ", số bé " + y + "."] };
+    }
+    if (roll === 1) {
+      let picked = null;
+      for (let guard = 0; guard < 80 && !picked; guard++) {
+        const gap = ri(22, 35), c = ri(6, 14), b = c + gap;
+        if (b < 30 || b > 55) continue;
+        const agoMax = Math.min(6, c - 2);
+        if (agoMax < 2) continue;
+        const ago = ri(2, agoMax);
+        const childThen = c - ago, parentThen = b - ago;
+        if (childThen > 0 && parentThen % childThen === 0) {
+          const k = parentThen / childThen;
+          if (k >= 2 && k <= 5) picked = { b: b, c: c, ago: ago, k: k };
+        }
+      }
+      if (!picked) picked = { b: 36, c: 12, ago: 4, k: 4 };
+      const b = picked.b, c = picked.c, ago = picked.ago, k = picked.k;
+      return { shape: "tuoi", kind: "pair", answer: { x: b, y: c }, labels: ["Tuổi bố", "Tuổi con"], prompt: "Năm nay tổng tuổi bố và con là " + (b + c) + ". Cách đây " + ago + " năm, tuổi bố gấp " + k + " lần tuổi con. Tìm tuổi mỗi người năm nay.", map: [["Tổng tuổi năm nay", "x + y = " + (b + c)], ["Cách đây " + ago + " năm", "x − " + ago + " = " + k + "(y − " + ago + ")"]], steps: ["Gọi x là tuổi bố năm nay, y là tuổi con năm nay. Điều kiện x > y > " + ago + " và x − y từ 22 đến 35.", "Cách đây " + ago + " năm: x − " + ago + " = " + k + "(y − " + ago + ").", "Giải ra x = " + b + ", y = " + c + ".", "Đối chiếu: " + (b - ago) + " = " + k + "·" + (c - ago) + ", hiệu tuổi " + (b - c) + ".", "Kết luận: bố " + b + " tuổi, con " + c + " tuổi."] };
+    }
+    const d = ri(6, 14), r = ri(3, d - 1);
+    return { shape: "chu-vi", kind: "pair", answer: { x: d, y: r }, labels: ["Chiều dài", "Chiều rộng"], prompt: "Hình chữ nhật có chu vi " + (2 * (d + r)) + " cm. Chiều dài hơn chiều rộng " + (d - r) + " cm. Tìm hai cạnh.", map: [["Nửa chu vi", "x + y = " + (d + r)], ["Dài hơn rộng", "x − y = " + (d - r)]], steps: ["Gọi x là chiều dài, y là chiều rộng, đơn vị cm. Điều kiện x > y > 0.", "Chu vi " + (2 * (d + r)) + " nên x + y = " + (d + r) + ".", "Cộng với x − y = " + (d - r) + ": x = " + d + ", y = " + r + ".", "Đối chiếu chu vi 2·(" + d + " + " + r + ") = " + (2 * (d + r)) + ".", "Kết luận: dài " + d + " cm, rộng " + r + " cm."] };
+  }
+  const roll = ri(0, 2);
+  if (roll === 0) {
+    const v = ri(4, 12);
+    let b = ri(2, 8);
+    if (b === v) b = v === 12 ? 2 : v + 1;
+    return { shape: "vo-but", kind: "pair", answer: { x: v, y: b }, labels: ["Giá vở", "Giá bút"], prompt: "3 quyển vở và 2 cây bút hết " + (3 * v + 2 * b) + " nghìn đồng. 1 quyển vở và 2 cây bút hết " + (v + 2 * b) + " nghìn đồng. Tìm giá mỗi thứ.", map: [["Lần mua 1", "3x + 2y = " + (3 * v + 2 * b)], ["Lần mua 2", "x + 2y = " + (v + 2 * b)]], steps: ["Gọi x là giá một vở, y là giá một bút, đơn vị nghìn đồng.", "Trừ: 2x = " + (2 * v) + ", x = " + v + ", y = " + b + ".", "Kết luận: vở " + v + " nghìn, bút " + b + " nghìn."] };
+  }
+  if (roll === 1) {
+    const g = ri(2, 8), c = ri(1, 6);
+    return { shape: "ga-cho", kind: "pair", answer: { x: g, y: c }, labels: ["Số gà", "Số chó"], prompt: "Có " + (g + c) + " con gà và chó, đếm được " + (2 * g + 4 * c) + " chân. Gà 2 chân, chó 4 chân. Hỏi mỗi loại mấy con?", map: [["Số con", "x + y = " + (g + c)], ["Số chân", "2x + 4y = " + (2 * g + 4 * c)]], steps: ["Gọi x là số gà, y là số chó.", "Chia phương trình chân cho 2: x + 2y = " + (g + 2 * c) + ".", "Trừ phương trình số con: y = " + c + ", x = " + g + ".", "Đối chiếu số chân " + (2 * g + 4 * c) + ".", "Kết luận: " + g + " gà và " + c + " chó."] };
+  }
+  const a = ri(2, 6), t = ri(1, 5);
+  return { shape: "ve", kind: "pair", answer: { x: a, y: t }, labels: ["Vé người lớn", "Vé trẻ em"], prompt: "Có " + (a + t) + " vé người lớn và trẻ em, thu " + (50 * a + 30 * t) + " nghìn đồng. Vé người lớn 50 nghìn, vé trẻ em 30 nghìn. Hỏi mỗi loại mấy vé?", map: [["Số vé", "x + y = " + (a + t)], ["Số tiền", "50x + 30y = " + (50 * a + 30 * t)]], steps: ["Gọi x là số vé người lớn, y là số vé trẻ em.", "Từ số vé, y = " + (a + t) + " − x.", "Thay vào tiền, ra x = " + a + ", y = " + t + ".", "Đối chiếu: 50·" + a + " + 30·" + t + " = " + (50 * a + 30 * t) + ".", "Kết luận: " + a + " vé người lớn và " + t + " vé trẻ em."] };
+}
+function judge(prob, raw) {
+  if (prob.kind === "choice") {
+    if (!raw.choice) return { ok: false, kind: "thiếu", msg: "Hãy chọn một ý rồi mới kiểm tra." };
+    if (prob.answer.n != null) {
+      const n = num(raw.n);
+      if (!Number.isFinite(n)) return { ok: false, kind: "thiếu", msg: "Hãy chọn ý và nhập con số. Phân số gõ dạng a/b." };
+      if (raw.choice === prob.answer.choice && same(n, prob.answer.n)) return { ok: true };
+      if (raw.choice === prob.answer.choice) return { ok: false, kind: "tính", msg: "Ý chọn đúng, con số chưa khớp." };
+      if (same(n, prob.answer.n)) return { ok: false, kind: "nhận dạng", msg: "Con số đúng, ý chọn chưa đúng." };
+    } else if (raw.choice === prob.answer.choice) return { ok: true };
+    return { ok: false, kind: "nhận dạng", msg: "Chưa đúng. So cả hai vế, kể cả số bên phải." };
+  }
+  const keys = Object.keys(prob.answer);
+  const got = {};
+  for (const key of keys) {
+    const value = num(raw[key]);
+    if (!Number.isFinite(value)) return { ok: false, kind: "thiếu", msg: "Hãy nhập đủ đáp số. Phân số gõ dạng a/b." };
+    got[key] = value;
+  }
+  if (keys.every(function (key) { return same(got[key], prob.answer[key]); })) return { ok: true };
+  if (got.x != null && got.y != null && same(got.x, prob.answer.y) && same(got.y, prob.answer.x) && !same(prob.answer.x, prob.answer.y)) {
+    const lx = (prob.labels && prob.labels[0]) || "x";
+    const ly = (prob.labels && prob.labels[1]) || "y";
+    return { ok: false, kind: "đảo ẩn", msg: "Hai đáp số bị đảo. Kiểm tra lại " + lx + " và " + ly + "." };
+  }
+  if (keys.some(function (key) { return same(got[key], -prob.answer[key]); })) return { ok: false, kind: "dấu", msg: "Có một dấu bị ngược. Hay gặp khi quên đổi dấu lúc bỏ ngoặc hoặc khi chuyển vế." };
+  if (prob.slip && same(got[prob.key], prob.slip.value)) return { ok: false, kind: "dấu", msg: prob.slip.msg };
+  return { ok: false, kind: "tính", msg: "Chưa đúng. Thay kết quả vào đề. Nếu không khớp, làm lại đúng một bước cộng hoặc thế." };
+}
+const KEY = "lop9-toan-v3";
 const DAY = 86400000;
 let tab = "hoc";
 let openId = null;
-let revealed = {};
-function load() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
-let prog = load();
+let live = null;
+let showSol = false;
+let showMau = false;
+let prog = {};
+try { prog = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { prog = {}; }
 function save() { localStorage.setItem(KEY, JSON.stringify(prog)); }
-function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return ({ "&": "&", "<": "<", ">": ">" })[c]; }); }
+function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return "&#" + c.charCodeAt(0) + ";"; }); }
 function toast(text, kind) {
-  const box = document.getElementById("toasts");
   const el = document.createElement("div");
   el.className = "toast " + (kind || "info");
   el.textContent = text;
-  box.appendChild(el);
-  setTimeout(function () { el.remove(); }, 3600);
+  document.getElementById("toasts").appendChild(el);
+  setTimeout(function () { el.remove(); }, 3800);
 }
 function formBy(id) { return FORMS.filter(function (f) { return f.id === id; })[0]; }
-function statusOf(id) {
-  const row = prog[id];
-  if (!row) return { text: "Mới", due: false };
-  if (row.due <= Date.now()) return { text: "Đến hạn ôn", due: true };
-  const days = Math.max(1, Math.ceil((row.due - Date.now()) / DAY));
-  return { text: "Ôn sau " + days + " ngày", due: false };
+function he(lines) { return '<div class="he"><span class="brace">{</span><div>' + lines.map(function (line) { return "<div>" + esc(line) + "</div>"; }).join("") + "</div></div>"; }
+function stepsHtml(list) { return '<ol class="steps">' + list.map(function (step) { return "<li>" + esc(String(step).replace(/-(\d)/g, "−$1")) + "</li>"; }).join("") + "</ol>"; }
+function mapHtml(rows) { return '<table class="map">' + rows.map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td>" + esc(r[1]) + "</td></tr>"; }).join("") + "</table>"; }
+function topError(errors) {
+  const keys = Object.keys(errors || {});
+  if (!keys.length) return "";
+  keys.sort(function (a, b) { return errors[b] - errors[a]; });
+  return keys[0] + ": " + errors[keys[0]];
 }
-function he(lines) {
-  return '<div class="he"><span class="brace">{</span><div>' + lines.map(function (line) { return "<div>" + esc(line) + "</div>"; }).join("") + "</div></div>";
+function statText(id) {
+  const row = prog[id];
+  if (!row || (!row.ok && !row.fail)) return "Chưa làm";
+  const firm = row.firm ? "Vững" : (row.streak === 1 ? "Đúng 1/2, cần khuôn khác và cách một ngày" : "Chưa vững");
+  const hot = topError(row.errors);
+  return firm + " · đúng " + (row.ok || 0) + " · sai " + (row.fail || 0) + (hot ? " · hay sai " + hot : "");
+}
+function errorSummary() {
+  const bag = {};
+  FORMS.forEach(function (f) {
+    const errors = (prog[f.id] && prog[f.id].errors) || {};
+    Object.keys(errors).forEach(function (k) { bag[k] = (bag[k] || 0) + errors[k]; });
+  });
+  const keys = Object.keys(bag);
+  if (!keys.length) return "Chưa có lỗi được ghi.";
+  return keys.map(function (k) { return k + ": " + bag[k] + " lần"; }).join(" · ");
+}
+function tickSummary() {
+  let n = 0;
+  FORMS.forEach(function (f) {
+    const ticks = prog[f.id] && prog[f.id].ticks;
+    if (!ticks) return;
+    ["he", "loi"].forEach(function (bucket) {
+      Object.keys(ticks[bucket] || {}).forEach(function (k) { if (ticks[bucket][k]) n += 1; });
+    });
+  });
+  return n ? "Đã tick trình bày: " + n + "." : "";
+}
+function needsReview(id) {
+  const row = prog[id];
+  if (!row || (!row.ok && !row.fail)) return false;
+  if (!row.firm) return true;
+  return row.due <= Date.now();
 }
 function renderHome() {
-  const due = FORMS.filter(function (f) { return statusOf(f.id).due; }).length;
-  return '<p class="tag">Hà Nội · đầu năm · Kết nối tri thức · tập một</p><h1>Chương 1</h1><p class="muted">Phương trình và hệ hai phương trình bậc nhất hai ẩn. Đây là bài đang học tháng 9 và tháng 10, chưa phải ôn tủ.</p><div class="note sm">Làm ra giấy trước. Xong mới lật lời giải rồi tự soát. Thi vào 10 là tự luận, app không chấm hộ.</div><p class="sm muted">Đến hạn hôm nay: ' + due + ' dạng.</p>' + FORMS.map(function (f) {
-    const st = statusOf(f.id);
-    return '<article class="card"><p class="tag">' + esc(f.bai) + " · " + esc(st.text) + "</p><h2>" + esc(f.title) + '</h2><button class="btn btn-primary" type="button" data-open="' + f.id + '" style="margin-top:.7rem">Học dạng này</button></article>';
-  }).join("") + '<p class="sm muted"><a href="./hoctienganh.html">Sang trang tiếng Anh</a></p>';
+  const wrong = FORMS.filter(function (f) { return needsReview(f.id); }).length;
+  return '<p class="tag">Kết nối tri thức · tập một · Chương 1</p><h1>Hệ phương trình bậc nhất hai ẩn</h1><p class="muted">Mới có chương này. Vững khi đúng hai khuôn khác nhau, lần sau cách ít nhất một ngày, và không mở gợi ý.</p><div class="note sm">Làm ra giấy: gọi ẩn, lập phương trình, giải, đối chiếu, kết luận. Nhập đáp số. Sai thì sửa ngay tại chỗ. Lần đầu mới được ghi vào thống kê.</div><p class="sm">Cần ôn: ' + wrong + ' dạng. ' + esc(errorSummary()) + " " + esc(tickSummary()) + '</p>' + FORMS.map(function (f) {
+    return '<article class="card"><p class="tag">' + esc(f.bai) + " · " + esc(statText(f.id)) + "</p><h2>" + esc(f.title) + '</h2><button class="btn btn-primary" type="button" data-open="' + f.id + '" style="margin-top:.7rem">Làm dạng này</button></article>';
+  }).join("") + '<p class="sm"><a href="./van.html">Sang trang văn</a> · <a href="./hoctienganh.html">Sang trang tiếng Anh</a></p>';
 }
 function renderOn() {
-  const list = FORMS.filter(function (f) { return statusOf(f.id).due; });
-  if (!list.length) return "<h1>Ôn</h1><p>Chưa có dạng đến hạn. Học một dạng ở trang Học, tự chấm xong thì ngày ôn sẽ hiện ở đây.</p>";
-  return "<h1>Ôn hôm nay</h1>" + list.map(function (f) {
-    return '<article class="card"><h2>' + esc(f.title) + '</h2><button class="btn btn-primary" type="button" data-open="' + f.id + '" style="margin-top:.7rem">Ôn dạng này</button></article>';
+  const list = FORMS.filter(function (f) { return needsReview(f.id); });
+  if (!list.length) return "<h1>Ôn</h1><p>Chưa có dạng làm sai hoặc đến hạn. Làm một bài ở trang Học. App ghi theo đáp số, không theo nút tự khen.</p>";
+  return "<h1>Cần làm lại</h1>" + list.map(function (f) {
+    return '<article class="card"><p class="tag">' + esc(statText(f.id)) + "</p><h2>" + esc(f.title) + '</h2><button class="btn btn-primary" type="button" data-open="' + f.id + '" style="margin-top:.7rem">Làm lại</button></article>';
   }).join("");
 }
-function blockDrill(f, drill, index) {
-  const key = f.id + ":" + index;
-  const showHint = revealed[key + ":h"];
-  const showAns = revealed[key + ":a"];
-  return '<article class="card"><p class="tag">' + esc(drill.lv) + "</p><p>" + esc(drill.q) + '</p><div class="row" style="margin-top:.6rem"><button class="btn" type="button" data-hint="' + key + '">Gợi ý</button><button class="btn" type="button" data-ans="' + key + '">Xem đáp án</button></div><div class="' + (showHint ? "" : "hide") + '"><p class="sm"><b>Gợi ý.</b> ' + esc(drill.hint) + '</p></div><div class="' + (showAns ? "" : "hide") + '"><ol class="steps">' + drill.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol><p><b>" + esc(drill.ans) + "</b></p></div></article>";
+function signRow() {
+  return '<div class="row"><button class="btn" type="button" data-ins="-">Dấu trừ</button><button class="btn" type="button" data-ins="/">Gạch phân số</button></div>';
+}
+function inputsHtml(prob) {
+  let html = "";
+  if (prob.choices) html += '<div class="row">' + prob.choices.map(function (c) { return '<button class="btn" type="button" data-choice="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + "</div>";
+  if (prob.kind === "one") html += '<label class="field">' + esc(prob.label) + ' <input class="ans" id="ans-y" inputmode="text" autocomplete="off"></label>';
+  else if (prob.kind === "pair") {
+    const lx = (prob.labels && prob.labels[0]) || "x";
+    const ly = (prob.labels && prob.labels[1]) || "y";
+    html += '<label class="field">' + esc(lx) + ' <input class="ans" id="ans-x" inputmode="text" autocomplete="off"></label><label class="field">' + esc(ly) + ' <input class="ans" id="ans-y" inputmode="text" autocomplete="off"></label>';
+  }
+  if (prob.answer && prob.answer.n != null) html += '<label class="field">' + esc(prob.nLabel || "Số") + ' <input class="ans" id="ans-n" inputmode="text" autocomplete="off"></label>';
+  if (html) html += signRow();
+  return html;
+}
+function tickLabels(prob) {
+  if (prob.labels) return ["Đã gọi ẩn kèm đơn vị", "Đã viết điều kiện", "Đã đối chiếu lại câu chữ của đề", "Kết luận có đơn vị"];
+  return ["Đã rút một ẩn hoặc nhân một phương trình", "Đã thử lại vào cả hai phương trình", "Kết luận viết đúng cặp nghiệm"];
+}
+function tickBucket(prob) { return prob.labels ? "loi" : "he"; }
+const GUIDE = {
+  "tim-y": ["Thay x đã cho vào phương trình.", "Chuyển số hạng không chứa y sang vế kia và đổi dấu."],
+  "tim-y-am": ["Thay x đã cho.", "Chuyển vế phải đổi dấu. Kết quả có thể âm."],
+  "tim-y-phan": ["Thay x, chuyển vế.", "Nếu còn 2y thì chia cho 2. Gõ dạng a/b."],
+  "cap-nghiem": ["Thay cả hai số vào vế trái.", "So số vừa tính với vế phải."],
+  "the-don": ["Rút y từ phương trình thứ nhất.", "Thay vào phương trình sau bằng cả ngoặc.", "Nếu trước ngoặc là dấu trừ, đổi dấu mọi số hạng trong ngoặc."],
+  "the-he-so": ["Rút y từ phương trình có hệ số của y bằng 1.", "Thay cả biểu thức ấy vào phương trình còn lại."],
+  "the-rut-san": ["Một phương trình đã cho y theo x.", "Thay đúng biểu thức ấy vào phương trình kia."],
+  "the-am": ["Rút một ẩn.", "Khi bỏ ngoặc sau dấu trừ, đổi dấu. Kết quả có thể âm."],
+  "cong-khong-nhan": ["Cộng hai phương trình theo từng vế.", "Một ẩn sẽ mất. Giải ẩn còn lại rồi thế ngược."],
+  "cong-tru": ["Hai phương trình có một ẩn cùng hệ số. Trừ theo vế."],
+  "cong-nhan": ["Nhân một phương trình để hai hệ số của một ẩn bằng nhau.", "Nhân cả hai vế, rồi mới cộng hoặc trừ."],
+  "vo-so": ["Nhân phương trình đầu để so với phương trình sau.", "Nếu cả hai vế cùng một bội thì vô số nghiệm."],
+  "vo-nghiem": ["Nhân để so vế trái.", "Vế trái cùng bội mà vế phải không cùng bội thì vô nghiệm."],
+  "mot-nghiem": ["Hai phương trình không là bội của nhau thì có một nghiệm. Cộng hoặc trừ để tìm x."],
+  "tham-so": ["Trừ hai phương trình để còn (m − 1)x.", "Xem khi m = 1 thì hai vế phải còn bằng nhau không."],
+  "tong-hieu": ["Gọi số lớn và số bé, kèm điều kiện số lớn hơn số bé.", "Mỗi câu đề là một phương trình."],
+  "tuoi": ["Gọi tuổi năm nay, đơn vị tuổi.", "Câu về năm trước phải trừ đúng số năm ở cả hai người."],
+  "chu-vi": ["Chu vi là hai lần tổng hai cạnh.", "Câu hơn nhau là một hiệu."],
+  "vo-but": ["Gọi giá một thứ, đơn vị nghìn đồng.", "Hai lần mua là hai phương trình."],
+  "ga-cho": ["Gà 2 chân, chó 4 chân.", "Một phương trình đếm con, một phương trình đếm chân."],
+  "ve": ["Gọi số vé từng loại.", "Một phương trình đếm số vé, một phương trình đếm tiền."]
+};
+function freshLive(id) {
+  return { id: id, prob: make(id), hintN: 0, scored: false, done: false, wasOk: false, usedHint: false, firstWrong: false, paper: {}, note: "", choice: "", raw: {} };
+}
+function saveDraft() {
+  if (!openId || !live) return;
+  const prob = Object.assign({}, live.prob);
+  delete prob.prove;
+  localStorage.setItem("lop9-toan-draft", JSON.stringify({
+    id: openId, prob: prob, raw: live.raw || {}, choice: live.choice || "", hintN: live.hintN || 0,
+    note: live.note || "", scored: !!live.scored, done: !!live.done, showSol: !!showSol,
+    usedHint: !!live.usedHint, paper: live.paper || {}, wasOk: !!live.wasOk, firstWrong: !!live.firstWrong
+  }));
+}
+function takeDraft(id) {
+  try {
+    const d = JSON.parse(localStorage.getItem("lop9-toan-draft") || "null");
+    return d && d.id === id ? d : null;
+  } catch (e) { return null; }
 }
 function renderForm(f) {
-  const show = revealed[f.id + ":ex"];
-  return '<button class="btn" type="button" data-back="1">Về chương 1</button><p class="tag" style="margin-top:.8rem">' + esc(f.bai) + '</p><h1>' + esc(f.title) + '</h1><div class="card"><p class="tag">Khi nào dùng</p><p>' + esc(f.when) + '</p><p class="tag">Cách làm</p><p>' + esc(f.rule) + "</p></div><div class=\"card\"><p class=\"tag\">Ví dụ mẫu</p>" + he(f.ex.lines) + '<button class="btn btn-primary" type="button" data-ex="' + f.id + '">Đã làm ra giấy, xem lời giải</button><div class="' + (show ? "" : "hide") + '"><ol class="steps">' + f.ex.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol><p><b>" + esc(f.ex.ans) + "</b></p></div></div><div class=\"note sm warn\"><b>Hay sai.</b> " + esc(f.trap) + "</div><h2 style=\"margin-top:1rem\">Ba bài tự làm</h2>" + f.drills.map(function (d, i) { return blockDrill(f, d, i); }).join("") + '<div class="card"><p class="tag">Tự chấm</p><p class="sm">Chỉ bấm sau khi đã làm ra giấy và đã đối chiếu.</p><div class="row"><button class="btn" type="button" data-grade="fail">Chưa được</button><button class="btn" type="button" data-grade="fuzzy">Còn vướng</button><button class="btn" type="button" data-grade="know">Làm được</button></div><button class="btn" type="button" data-report="1" style="margin-top:.5rem;width:100%">Báo lời giải có chỗ lạ</button></div>';
+  if (!live || live.id !== f.id) {
+    const d = takeDraft(f.id);
+    if (d && !d.done) {
+      live = { id: f.id, prob: d.prob, hintN: d.hintN || 0, scored: !!d.scored, done: false, wasOk: !!d.wasOk, usedHint: !!d.usedHint, firstWrong: !!d.firstWrong, paper: d.paper || {}, note: d.note || "", choice: d.choice || "", raw: d.raw || {} };
+      showSol = !!d.showSol;
+    } else {
+      live = freshLive(f.id);
+      showSol = false;
+      saveDraft();
+    }
+  }
+  const prob = live.prob;
+  const guide = GUIDE[prob.shape] || ["Làm từng bước trên giấy, chưa cần mở lời giải."];
+  const shown = guide.slice(0, Math.min(live.hintN || 0, guide.length));
+  const savedTicks = ((prog[f.id] && prog[f.id].ticks) || {})[tickBucket(prob)] || {};
+  const ticks = showSol ? '<p class="sm">Tick bước em đã viết trên giấy. Bộ này là ' + (prob.labels ? "bài có lời" : "hệ thuần") + '.</p>' + tickLabels(prob).map(function (label, i) {
+    const on = (live.paper && live.paper[i] != null) ? live.paper[i] : !!savedTicks[i];
+    return '<label class="field"><input type="checkbox"' + (on ? " checked" : "") + ' data-paper="' + i + '"> ' + esc(label) + "</label>";
+  }).join("") : "";
+  const picked = live.choice ? '<p class="sm">Em chọn: <b>' + esc(live.choice) + "</b></p>" : "";
+  return '<button class="btn" type="button" data-back="1">Về chương 1</button><p class="tag" style="margin-top:.8rem">' + esc(f.bai) + " · " + esc(statText(f.id)) + "</p><h1>" + esc(f.title) + '</h1><div class="card"><p class="tag">Khi nào dùng</p><p>' + esc(f.when) + '</p><p class="tag">Cách trình bày</p><p>' + esc(f.rule) + '</p><p class="warn sm"><b>Hay sai.</b> ' + esc(f.trap) + "</p></div>"
+    + '<div class="card"><p class="tag">Ví dụ trình bày như bài thi</p><p>' + esc(f.example.prompt) + "</p>" + (f.example.lines ? he(f.example.lines) : "") + (f.example.map ? mapHtml(f.example.map) : "") + '<button class="btn" type="button" data-mau="1">' + (showMau ? "Ẩn lời giải mẫu" : "Xem lời giải mẫu") + "</button>" + (showMau ? stepsHtml(f.example.steps) : "") + "</div>"
+    + '<div class="card"><p class="tag">Bài luyện · khuôn ' + esc(prob.shape) + '</p><p>' + esc(prob.prompt) + "</p>" + (prob.lines ? he(prob.lines) : "") + (live.done ? "" : inputsHtml(prob)) + picked
+    + (live.note ? '<p class="warn sm">' + esc(live.note) + "</p>" : "")
+    + (shown.length ? '<p class="tag">Gợi ý, chưa có đáp số</p>' + stepsHtml(shown) : "")
+    + '<div class="row" style="margin-top:.6rem"><button class="btn btn-primary" type="button" data-check="1"' + (live.done ? " disabled" : "") + '>Kiểm tra</button><button class="btn" type="button" data-hint="1"' + (showSol || (live.hintN || 0) >= guide.length ? " disabled" : "") + '>Gợi ý bước tiếp</button><button class="btn" type="button" data-new="1">Bài khác</button></div>'
+    + (showSol ? '<p class="tag">Lời giải</p>' + (prob.map ? mapHtml(prob.map) : "") + stepsHtml(prob.steps) + ticks : '<button class="btn" type="button" data-force="1" style="margin-top:.5rem;width:100%">Xem lời giải dù chưa đúng</button>') + "</div>"
+    + '<div class="card"><p class="tag">Báo một chỗ chưa ổn</p><textarea class="note-box" id="report-note" placeholder="Viết ngắn chỗ em thấy lạ"></textarea><button class="btn" type="button" data-copy="1" style="margin-top:.5rem;width:100%">Hiện đoạn chữ để gửi thầy cô</button><pre id="report-out" class="sm" style="white-space:pre-wrap"></pre></div>';
 }
 function render() {
-  const root = document.getElementById("app");
   const f = openId && formBy(openId);
-  root.innerHTML = (f ? renderForm(f) : (tab === "on" ? renderOn() : renderHome())) + '<nav class="dock"><div class="dock-in"><button type="button" data-tab="hoc" class="' + (tab === "hoc" && !openId ? "on" : "") + '">Học</button><button type="button" data-tab="on" class="' + (tab === "on" && !openId ? "on" : "") + '">Ôn</button></div></nav>';
+  document.getElementById("app").innerHTML = (f ? renderForm(f) : (tab === "on" ? renderOn() : renderHome())) + '<nav class="dock"><div class="dock-in"><button type="button" data-tab="hoc" class="' + (tab === "hoc" && !openId ? "on" : "") + '">Học</button><button type="button" data-tab="on" class="' + (tab === "on" && !openId ? "on" : "") + '">Ôn</button></div></nav>';
+  if (live && live.raw) {
+    ["x", "y", "n"].forEach(function (key) {
+      const el = document.getElementById("ans-" + key);
+      if (el && live.raw[key] != null) el.value = live.raw[key];
+    });
+  }
+  saveDraft();
 }
+function readRaw(prob) {
+  const raw = {};
+  if (prob.choices) raw.choice = live.choice || "";
+  ["x", "y", "n"].forEach(function (key) {
+    const el = document.getElementById("ans-" + key);
+    if (el) raw[key] = el.value;
+  });
+  if (prob.kind === "one" && raw.y == null) raw.y = "";
+  if (prob.kind === "pair") { if (raw.x == null) raw.x = ""; if (raw.y == null) raw.y = ""; }
+  return raw;
+}
+function record(id, result, shape) {
+  const row = prog[id] || { ok: 0, fail: 0, errors: {}, firm: false, streak: 0, lastShape: "", lastOkAt: 0, ticks: { he: {}, loi: {} } };
+  row.errors = row.errors || {};
+  row.ticks = row.ticks || { he: {}, loi: {} };
+  if (result.ok) {
+    row.ok += 1; row.last = "ok"; row.lastError = "";
+    if (result.hinted) {
+      /* đúng nhờ gợi ý: không tiến tới vững, cũng không làm tụt vững */
+    } else if (row.firm) {
+      row.lastShape = shape; row.due = Date.now() + 3 * DAY;
+    } else if (row.streak >= 1 && row.lastShape && row.lastShape !== shape && row.lastOkAt && Date.now() - row.lastOkAt >= DAY) {
+      row.streak = 2; row.firm = true; row.due = Date.now() + 3 * DAY; row.lastShape = shape; row.lastOkAt = Date.now();
+    } else if (!row.streak) {
+      row.streak = 1; row.firm = false; row.lastShape = shape; row.lastOkAt = Date.now(); row.due = Date.now();
+    }
+  } else {
+    row.fail += 1; row.streak = 0; row.firm = false; row.last = "fail"; row.due = Date.now() + DAY; row.lastShape = ""; row.lastOkAt = 0;
+    row.errors[result.kind] = (row.errors[result.kind] || 0) + 1; row.lastError = result.kind;
+  }
+  prog[id] = row;
+  save();
+}
+function answerLine(prob) {
+  if (prob.kind === "choice") return prob.answer.choice + (prob.answer.n != null ? ", số = " + showNum(prob.answer.n) : "");
+  return Object.keys(prob.answer).map(function (k) {
+    const label = prob.labels ? (k === "x" ? prob.labels[0] : prob.labels[1]) : k;
+    return label + " = " + showNum(prob.answer[k]);
+  }).join(", ");
+}
+function enteredLine(prob) {
+  const raw = (live && live.raw) || {};
+  if (prob.kind === "choice") {
+    const bits = [raw.choice || (live && live.choice) || "(chưa chọn)"];
+    if (prob.answer.n != null) bits.push("số = " + (raw.n === undefined || raw.n === "" ? "(trống)" : raw.n));
+    return bits.join(", ");
+  }
+  const keys = Object.keys(prob.answer).filter(function (k) { return k !== "choice" && k !== "n"; });
+  return keys.map(function (k) {
+    const label = prob.labels ? (k === "x" ? prob.labels[0] : prob.labels[1]) : k;
+    return label + " = " + (raw[k] === undefined || raw[k] === "" ? "(trống)" : raw[k]);
+  }).join(", ");
+}
+let lastAns = "ans-y";
+function leaveForm() {
+  if (live && openId && !live.scored) {
+    record(openId, { ok: false, kind: "bỏ qua" }, live.prob.shape);
+    toast("Rời bài khi chưa nộp. Tính một lần bỏ qua.", "warn");
+    localStorage.removeItem("lop9-toan-draft");
+  } else if (live && live.done) {
+    localStorage.removeItem("lop9-toan-draft");
+  } else if (live) saveDraft();
+  live = null;
+  showSol = false;
+}
+function paperLines(prob) {
+  const bucket = tickBucket(prob);
+  const saved = ((prog[openId] && prog[openId].ticks) || {})[bucket] || {};
+  const labels = tickLabels(prob);
+  return labels.map(function (label, i) {
+    const on = live.paper && live.paper[i] != null ? live.paper[i] : !!saved[i];
+    return (on ? "[x] " : "[ ] ") + label;
+  }).join("\n");
+}
+document.body.addEventListener("focusin", function (ev) {
+  if (ev.target.classList && ev.target.classList.contains("ans")) lastAns = ev.target.id;
+});
 document.body.addEventListener("click", function (ev) {
   const t = ev.target.closest("button");
-  if (!t) return;
-  if (t.dataset.tab) { tab = t.dataset.tab; openId = null; render(); return; }
-  if (t.dataset.open) { openId = t.dataset.open; revealed = {}; render(); window.scrollTo(0, 0); return; }
-  if (t.dataset.back) { openId = null; render(); return; }
-  if (t.dataset.ex) { revealed[t.dataset.ex + ":ex"] = true; toast("Đối chiếu từng bước với bài trên giấy.", "info"); render(); return; }
-  if (t.dataset.hint) { revealed[t.dataset.hint + ":h"] = true; toast("Đọc gợi ý, thử viết tiếp ra giấy.", "info"); render(); return; }
-  if (t.dataset.ans) { revealed[t.dataset.ans + ":a"] = true; toast("Đã mở đáp án. Tự soát từng bước.", "warn"); render(); return; }
-  if (t.dataset.grade && openId) {
-    const days = t.dataset.grade === "know" ? 7 : (t.dataset.grade === "fuzzy" ? 3 : 1);
-    prog[openId] = { kind: t.dataset.grade, due: Date.now() + days * DAY };
-    save();
-    toast(t.dataset.grade === "know" ? "Làm được. Ôn lại sau 7 ngày." : (t.dataset.grade === "fuzzy" ? "Còn vướng. Ôn lại sau 3 ngày." : "Chưa được. Mai làm lại dạng này."), t.dataset.grade === "fail" ? "warn" : "ok");
-    openId = null; tab = "hoc"; render(); return;
+  if (!t || t.id === "btnInstall" || t.id === "pwa-guide-close") return;
+  if (live && document.querySelector(".ans")) live.raw = readRaw(live.prob);
+  if (t.dataset.ins && live && !live.done) {
+    const el = document.getElementById(lastAns) || document.querySelector(".ans");
+    if (!el) return;
+    if (t.dataset.ins === "-") el.value = el.value.charAt(0) === "-" ? el.value.slice(1) : "-" + el.value;
+    else if (el.value.indexOf("/") < 0) el.value += "/";
+    live.raw = readRaw(live.prob);
+    saveDraft();
+    return;
   }
-  if (t.dataset.report && openId) {
-    const bag = JSON.parse(localStorage.getItem("lop9-toan-bao-loi") || "[]");
-    bag.push({ id: openId, at: Date.now() });
-    localStorage.setItem("lop9-toan-bao-loi", JSON.stringify(bag));
-    toast("Đã ghi. Nhờ thầy cô xem lại dạng này.", "warn");
+  if (t.dataset.tab) { leaveForm(); tab = t.dataset.tab; openId = null; render(); return; }
+  if (t.dataset.open) {
+    if (openId && t.dataset.open !== openId) leaveForm();
+    openId = t.dataset.open; live = null; showMau = false; render(); window.scrollTo(0, 0); return;
+  }
+  if (t.dataset.back) { leaveForm(); openId = null; render(); return; }
+  if (t.dataset.mau) { showMau = !showMau; render(); return; }
+  if (t.dataset.choice) { if (!live || live.done) return; live.choice = t.dataset.choice; live.raw = readRaw(live.prob); live.raw.choice = t.dataset.choice; render(); return; }
+  if (t.dataset.hint && live && !showSol) {
+    live.hintN = (live.hintN || 0) + 1; live.usedHint = true;
+    toast("Gợi ý chỉ nói cách làm, không có đáp số. Bài này nếu đúng sẽ không tính vào vững.", "info");
+    render(); return;
+  }
+  if (t.dataset.new) {
+    if (live && !live.scored) { record(openId, { ok: false, kind: "bỏ qua" }, live.prob.shape); toast("Đổi bài khi chưa nộp. Tính một lần bỏ qua.", "warn"); }
+    else toast("Đã đổi khuôn. Làm bài mới ra giấy.", "info");
+    live = freshLive(openId); showSol = false; saveDraft(); render(); return;
+  }
+  if (t.dataset.force && live) {
+    if (!live.scored) { record(openId, { ok: false, kind: "bỏ qua" }, live.prob.shape); live.scored = true; toast("Mở lời giải khi chưa đúng. Tính một lần bỏ qua.", "warn"); }
+    live.done = true; live.wasOk = false; showSol = true; live.note = "Đã mở lời giải. Lần này tính là bỏ qua."; saveDraft(); render(); return;
+  }
+  if (t.dataset.check && live) {
+    if (live.done) { toast("Bài này đã xong. Bấm Bài khác để làm đề mới.", "info"); return; }
+    const raw = readRaw(live.prob);
+    live.raw = raw;
+    const result = judge(live.prob, raw);
+    if (result.kind === "thiếu") { live.note = result.msg; toast(result.msg, "info"); render(); return; }
+    if (!live.scored) {
+      record(openId, { ok: result.ok, kind: result.kind, hinted: !!live.usedHint }, live.prob.shape);
+      live.scored = true;
+    }
+    live.note = result.ok ? "" : result.msg;
+    if (result.ok) {
+      live.done = true; showSol = true; live.wasOk = !live.firstWrong;
+      const row = prog[openId];
+      const msg = live.usedHint ? "Đúng, nhưng có mở gợi ý nên không tính vào vững." : (live.firstWrong ? "Lần này đúng. Lần đầu vẫn được tính là sai." : (row.firm ? "Đủ hai khuôn, cách nhau ít nhất một ngày. Dạng này vững." : "Đúng. Lần vững còn lại cần khuôn khác và cách ít nhất một ngày."));
+      toast(msg, "ok");
+    } else {
+      live.firstWrong = true;
+      toast(result.msg + " Có thể sửa rồi kiểm tra lại. Thống kê giữ lần đầu.", "bad");
+    }
+    saveDraft(); render(); return;
+  }
+  if (t.dataset.copy && openId && live) {
+    const note = (document.getElementById("report-note") || {}).value || "";
+    const prob = live.prob;
+    const text = "Báo Toán 9\nDạng: " + formBy(openId).title + "\nKhuôn: " + prob.shape + "\nĐề: " + prob.prompt + (prob.lines ? "\nHệ: " + prob.lines.join(" | ") : "") + "\nEm nhập: " + enteredLine(prob) + "\nĐáp đúng: " + answerLine(prob) + "\nTrình bày:\n" + paperLines(prob) + "\nGhi chú: " + (note || "(không)");
+    const out = document.getElementById("report-out");
+    if (out) out.textContent = text;
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast("Đã sao chép. Gửi cho thầy cô.", "ok"); }).catch(function () { toast("Chưa sao chép được. Nhấn giữ đoạn chữ vừa hiện.", "warn"); });
+    else toast("Nhấn giữ đoạn chữ vừa hiện để sao chép.", "info");
+  }
+});
+document.body.addEventListener("change", function (ev) {
+  if (ev.target.dataset.paper != null && live && openId) {
+    live.paper = live.paper || {};
+    live.paper[ev.target.dataset.paper] = ev.target.checked;
+    const row = prog[openId] || { ticks: { he: {}, loi: {} } };
+    row.ticks = row.ticks || { he: {}, loi: {} };
+    const bucket = tickBucket(live.prob);
+    row.ticks[bucket] = row.ticks[bucket] || {};
+    row.ticks[bucket][ev.target.dataset.paper] = ev.target.checked;
+    prog[openId] = row;
+    save();
+    saveDraft();
   }
 });
 render();
@@ -252,19 +672,15 @@ render();
   var zalo = /zalo|fban|fbav|instagram/.test(ua);
   var alone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
   function showGuide() {
-    var html = zalo ? "<p>Zalo đang chặn cài app. Bấm ⋯ rồi chọn Mở bằng trình duyệt.</p>" : (ios ? "<p>Trên iPhone, bấm Chia sẻ rồi chọn Thêm vào Màn hình chính.</p>" : (phone ? "<p>Trên Android, bấm ⋮ rồi chọn Cài đặt ứng dụng.</p>" : "<p>Trên máy tính, dùng Chrome hoặc Edge và bấm biểu tượng cài ở thanh địa chỉ.</p>"));
-    body.innerHTML = html;
+    body.innerHTML = zalo ? "<p>Zalo đang chặn cài app. Bấm ⋯ rồi chọn Mở bằng trình duyệt.</p>" : (ios ? "<p>Trên iPhone, bấm Chia sẻ rồi chọn Thêm vào Màn hình chính.</p>" : (phone ? "<p>Trên Android, bấm ⋮ rồi chọn Cài đặt ứng dụng.</p>" : "<p>Trên máy tính, dùng Chrome hoặc Edge và bấm biểu tượng cài ở thanh địa chỉ.</p>"));
     guide.hidden = false;
   }
-  function showFab() { fab.style.display = "block"; }
   function hideFab() { fab.style.display = "none"; }
   function install() {
     var promptEvent = window.__lop9InstallPrompt;
     if (promptEvent && promptEvent.prompt) {
       window.__lop9InstallPrompt = null;
-      promptEvent.prompt().then(function () { return promptEvent.userChoice; }).then(function (choice) {
-        if (choice && choice.outcome === "accepted") hideFab();
-      }).catch(showGuide);
+      promptEvent.prompt().then(function () { return promptEvent.userChoice; }).then(function (choice) { if (choice && choice.outcome === "accepted") hideFab(); }).catch(showGuide);
       return;
     }
     showGuide();
@@ -279,37 +695,16 @@ render();
     return { left: left, top: top };
   }
   try { var saved = JSON.parse(localStorage.getItem(KEY) || "null"); if (saved) place(saved.left, saved.top); } catch (e) {}
-  fab.addEventListener("pointerdown", function (ev) {
-    if (ev.button && ev.button !== 0) return;
-    ev.preventDefault();
-    pointer = ev.pointerId; drag = false; sx = ev.clientX; sy = ev.clientY;
-    var rect = fab.getBoundingClientRect(); sl = rect.left; st = rect.top;
-    if (fab.setPointerCapture) fab.setPointerCapture(ev.pointerId);
-  }, { passive: false });
-  fab.addEventListener("pointermove", function (ev) {
-    if (ev.pointerId !== pointer) return;
-    ev.preventDefault();
-    var dx = ev.clientX - sx, dy = ev.clientY - sy;
-    if (!drag && Math.hypot(dx, dy) > 10) drag = true;
-    if (drag) place(sl + dx, st + dy);
-  }, { passive: false });
-  fab.addEventListener("pointerup", function (ev) {
-    if (ev.pointerId !== pointer) return;
-    if (drag) { var pos = place(fab.getBoundingClientRect().left, fab.getBoundingClientRect().top); localStorage.setItem(KEY, JSON.stringify(pos)); toast("Đã dời nút Cài app.", "info"); }
-    else install();
-    pointer = null; drag = false;
-  });
+  fab.addEventListener("pointerdown", function (ev) { if (ev.button && ev.button !== 0) return; ev.preventDefault(); pointer = ev.pointerId; drag = false; sx = ev.clientX; sy = ev.clientY; var rect = fab.getBoundingClientRect(); sl = rect.left; st = rect.top; if (fab.setPointerCapture) fab.setPointerCapture(ev.pointerId); }, { passive: false });
+  fab.addEventListener("pointermove", function (ev) { if (ev.pointerId !== pointer) return; ev.preventDefault(); var dx = ev.clientX - sx, dy = ev.clientY - sy; if (!drag && Math.hypot(dx, dy) > 10) drag = true; if (drag) place(sl + dx, st + dy); }, { passive: false });
+  fab.addEventListener("pointerup", function (ev) { if (ev.pointerId !== pointer) return; if (drag) { var pos = place(fab.getBoundingClientRect().left, fab.getBoundingClientRect().top); localStorage.setItem(KEY, JSON.stringify(pos)); toast("Đã dời nút Cài app.", "info"); } else install(); pointer = null; drag = false; });
   fab.addEventListener("click", function (ev) { ev.preventDefault(); });
   fab.addEventListener("contextmenu", function (ev) { ev.preventDefault(); });
   document.getElementById("pwa-guide-close").addEventListener("click", function () { guide.hidden = true; });
   window.addEventListener("appinstalled", hideFab);
-  window.addEventListener("lop9:pwa-install-ready", function () { if (!alone) showFab(); });
-  if (alone) hideFab(); else showFab();
-  if ("serviceWorker" in navigator && /^https?:$/i.test(location.protocol)) {
-    window.addEventListener("load", function () {
-      navigator.serviceWorker.register("./sw.js", { scope: "./", updateViaCache: "none" }).catch(function () {});
-    });
-  }
+  window.addEventListener("lop9:pwa-install-ready", function () { if (!alone) fab.style.display = "block"; });
+  if (!alone) fab.style.display = "block";
+  if ("serviceWorker" in navigator && /^https?:$/i.test(location.protocol)) window.addEventListener("load", function () { navigator.serviceWorker.register("./sw.js", { scope: "./", updateViaCache: "none" }).catch(function () {}); });
 })();
 </script>
 </body>
