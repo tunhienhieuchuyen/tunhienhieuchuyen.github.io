@@ -69,6 +69,7 @@
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
   .stat { text-align: center; padding: 0.7rem 0.3rem; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  #poster-nav[hidden] { display: none; }
   .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
@@ -111,8 +112,9 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
     backdrop-filter: blur(8px);
   }
-  .dock-in { max-width: 32rem; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
-  .dock button { min-height: 4rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.1rem; font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+  .dock-in { max-width: 32rem; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); }
+  .dock button { min-height: 3.6rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.05rem; font-size: 0.68rem; font-weight: 600; color: var(--muted); padding: 0.2rem; }
+  .dock svg { width: 1.05rem; height: 1.05rem; }
   .dock button.on { color: var(--teal); }
   .sheet { position: fixed; inset: 0; z-index: 30; overflow: auto; background: var(--bg); }
   .sheet-in { max-width: 32rem; margin: 0 auto; padding: 1rem 1rem 2rem; }
@@ -251,7 +253,8 @@
   .pwa-card h2 { font-size: 1.15rem; margin: 0; }
   .guide-step { display: flex; gap: .6rem; margin-top: .7rem; font-size: .95rem; }
   .step-num { width: 1.5rem; height: 1.5rem; border-radius: 999px; background: var(--teal); color: var(--teal-fg); display: flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
-  #poster-sheet img { width: 100%; max-height: 62vh; object-fit: contain; background: var(--bg); border-radius: .7rem; }
+  #poster-frame { max-height: 58vh; overflow: auto; border-radius: .7rem; background: var(--bg); }
+  #poster-sheet img { width: 100%; height: auto; max-height: none; object-fit: contain; background: var(--bg); border-radius: .7rem; display: block; }
 </style>
 </head>
 <body>
@@ -270,8 +273,13 @@
 <div id="poster-sheet" hidden>
   <div class="pwa-card" role="dialog" aria-labelledby="poster-title">
     <h2 id="poster-title">Ảnh học</h2>
-    <p class="sm muted" style="margin:.35rem 0 .6rem">Nhấn giữ ảnh để lưu vào thư viện, hoặc bấm Chia sẻ.</p>
-    <img id="poster-preview" alt="Ảnh các từ cần nhớ">
+    <p class="sm muted" id="poster-note" style="margin:.35rem 0 .6rem">Bảng từ điển, chỉ nghĩa vỡ lòng, xếp A–Z. Nhấn giữ ảnh để lưu.</p>
+    <div id="poster-frame"><img id="poster-preview" alt="Ảnh từ điển nghĩa vỡ lòng"></div>
+    <p class="sm" id="poster-page" style="text-align:center;margin:.55rem 0 0;font-weight:700"></p>
+    <div class="row2" id="poster-nav" style="margin-top:.45rem">
+      <button class="btn btn-surface" type="button" id="poster-prev">Trang trước</button>
+      <button class="btn btn-surface" type="button" id="poster-next">Trang sau</button>
+    </div>
     <div class="row2" style="margin-top:.7rem">
       <button class="btn btn-primary" type="button" id="poster-share">Chia sẻ</button>
       <button class="btn btn-surface" type="button" id="poster-close">Đóng</button>
@@ -342,7 +350,7 @@ function markStudied(now) {
 }
 function schedule(prev, q, now) {
   const ease0 = prev ? prev.ease : 2.5;
-  if (q === 0) return { ease: Math.max(1.3, ease0 - 0.2), interval: 10 / 1440, due: now + 10 * 60 * 1000, reps: 0, lapses: (prev ? prev.lapses : 0) + 1 };
+  if (q === 0) return { ease: Math.max(1.3, ease0 - 0.2), interval: 10 / 1440, due: now + 10 * 60 * 1000, reps: 0, lapses: (prev ? prev.lapses : 0) + 1, mastered: !!(prev && prev.mastered) };
   const smq = q === 1 ? 3 : q === 2 ? 4 : 5;
   const ease = Math.max(1.3, ease0 + (0.1 - (5 - smq) * (0.08 + (5 - smq) * 0.02)));
   const reps = (prev ? prev.reps : 0) + 1;
@@ -353,7 +361,7 @@ function schedule(prev, q, now) {
     const base = (prev && prev.interval > 0.2 ? prev.interval : 1) * ease;
     interval = q === 1 ? Math.max(0.5, base * 0.6) : q === 3 ? base * 1.3 : base;
   }
-  return { ease, interval, due: now + interval * 86400000, reps, lapses: prev ? prev.lapses : 0 };
+  return { ease, interval, due: now + interval * 86400000, reps, lapses: prev ? prev.lapses : 0, mastered: !!(prev && prev.mastered) };
 }
 function whenLabel(days) {
   if (days < 0.03) return "vài phút nữa";
@@ -364,12 +372,14 @@ function whenLabel(days) {
   if (rounded < 13) return "tuần sau";
   return rounded + " ngày nữa";
 }
-function isDue(card, now) { return !!(card && card.reps > 0 && card.due <= now); }
-function isFresh(card) { return !card || card.reps === 0; }
+function isDue(card, now) { return !!(card && !card.mastered && card.reps > 0 && card.due <= now); }
+function isFresh(card) { return !isMastered(card) && (!card || card.reps === 0); }
+function isMastered(card) { return !!(card && card.mastered); }
 function pickPractice(ids, size, seed) {
   return ids.slice().sort((a, b) => hash(seed + a) - hash(seed + b)).slice(0, size);
 }
 function buildQueue(ids, mode, size, now, seed) {
+  ids = ids.filter((id) => !isMastered(progress.cards[id]));
   const cards = progress.cards;
   const due = ids.filter((id) => isDue(cards[id], now)).sort((a, b) => (cards[a].due || 0) - (cards[b].due || 0));
   const fresh = ids.filter((id) => isFresh(cards[id]));
@@ -381,7 +391,7 @@ function buildQueue(ids, mode, size, now, seed) {
   return work.concat(rest).slice(0, size);
 }
 function buildReview(now, size) {
-  return Object.entries(progress.cards).filter((pair) => isDue(pair[1], now)).sort((a, b) => a[1].due - b[1].due).slice(0, size).map((pair) => pair[0]);
+  return Object.entries(progress.cards).filter((pair) => pair[1] && !pair[1].mastered && isDue(pair[1], now)).sort((a, b) => a[1].due - b[1].due).slice(0, size).map((pair) => pair[0]);
 }
 function buildSteps(ids, mode) {
   if (mode === "cards") return ids.map((id) => ({ id, kind: "card" }));
@@ -517,7 +527,7 @@ function openSession(mode, sectionId) {
     const lessonId = sectionId || progress.lessonId;
     session = { mode: "learn", deck: true, lessonId: lessonId, ids: [], cursor: 0, flipped: false, steps: [], dirs: {}, hint: 0, removed: false, picked: null, plan: "", cardDone: false, done: false, stats: { asked: 0, good: 0, fail: 0 }, again: {} };
     session.ids = takeDeck([]);
-    if (!session.ids.length) { session = null; toast("Bài này chưa có từ để học.", "bad"); return false; }
+    if (!session.ids.length) { session = null; toast("Bài này không còn từ trong bảng học. Từ đã thuộc nằm ở tab Xong.", "info"); return false; }
     picker = false; bookId = null; query = "";
     window.scrollTo(0, 0);
     render();
@@ -533,7 +543,7 @@ function openSession(mode, sectionId) {
     const lessonId = sectionId || progress.lessonId;
     const pool = rows.filter((r) => r.section.id === lessonId).map((r) => r.id);
     ids = buildQueue(pool, mode, progress.sessionSize, now, seed);
-    if (!ids.length) { toast("Bài này chưa có từ để học.", "bad"); return false; }
+    if (!ids.length) { toast("Bài này không còn từ trong bảng học. Từ đã thuộc nằm ở tab Xong.", "info"); return false; }
   }
   session = {
     mode: learnMode, steps: buildSteps(ids, learnMode), cursor: 0, hint: 0, removed: false,
@@ -566,29 +576,34 @@ function grade(id, q) {
   markStudied(now);
   save();
 }
-function isKnown(card) { return !!(card && card.reps >= 2 && card.interval >= 14); }
-function isPinned(card) { return !!(card && card.reps > 0 && !isKnown(card)); }
+function isKnown(card) { return isMastered(card); }
+function isPinned(card) { return !!(card && !card.mastered && card.reps > 0); }
 function markKnown(id) {
-  const prev = progress.cards[id];
-  progress.cards[id] = { ease: 2.6, interval: 21, due: Date.now() + 21 * 86400000, reps: 4, lapses: prev ? prev.lapses : 0 };
+  const prev = progress.cards[id] || {};
+  progress.cards[id] = { ease: prev.ease || 2.6, interval: 21, due: Date.now() + 21 * 86400000, reps: Math.max(prev.reps || 0, 2), lapses: prev.lapses || 0, mastered: true, masteredAt: Date.now() };
   markStudied(new Date());
+  save();
+}
+function restoreWord(id) {
+  const prev = progress.cards[id] || {};
+  progress.cards[id] = { ease: prev.ease || 2.5, interval: 0, due: Date.now(), reps: 0, lapses: prev.lapses || 0, mastered: false };
   save();
 }
 function pinWord(id) {
   const prev = progress.cards[id];
-  progress.cards[id] = { ease: prev ? prev.ease : 2.5, interval: 0, due: Date.now(), reps: 1, lapses: prev ? prev.lapses : 0 };
+  progress.cards[id] = { ease: prev ? prev.ease : 2.5, interval: 0, due: Date.now(), reps: 1, lapses: prev ? prev.lapses : 0, mastered: false };
   markStudied(new Date());
   save();
 }
 function markAgain(id) {
   const prev = progress.cards[id];
-  progress.cards[id] = { ease: 2.3, interval: 0, due: Date.now(), reps: 0, lapses: (prev ? prev.lapses : 0) + 1 };
+  progress.cards[id] = { ease: 2.3, interval: 0, due: Date.now(), reps: 0, lapses: (prev ? prev.lapses : 0) + 1, mastered: false };
   markStudied(new Date());
   save();
 }
 function lessonIds() {
   const id = session && session.lessonId ? session.lessonId : progress.lessonId;
-  return rows.filter((r) => r.section.id === id).map((r) => r.id);
+  return rows.filter((r) => r.section.id === id && !isMastered(progress.cards[r.id])).map((r) => r.id);
 }
 function takeDeck(skip) {
   const pool = lessonIds();
@@ -610,19 +625,21 @@ function renderHome(now) {
   const studied = progress.days.includes(today);
   const run = streak(progress.days, today);
   const late = progress.remind.on && !studied && (now.getHours() * 60 + now.getMinutes() >= progress.remind.hour * 60 + progress.remind.minute);
-  const start = "Học " + progress.sessionSize + " từ mới";
-  let coach = "Chọn 5, 8 hoặc 12 từ. Mỗi từ: nghe, đoán, lật, rồi chấm Quên / Mơ hồ / Nhớ.";
+  const masteredN = rows.filter((r) => isMastered(progress.cards[r.id])).length;
+  const lessonLeft = lessonRows.filter((r) => !isMastered(progress.cards[r.id])).length;
+  const start = lessonLeft ? "Học " + Math.min(progress.sessionSize, lessonLeft) + " từ còn lại" : "Xem từ đã thuộc";
+  let coach = "Chọn 5, 8 hoặc 12 từ. Từ bấm Đã thuộc sẽ rời bảng học và nằm ở tab Xong.";
   if (late) coach = "Đã qua giờ nhắc. Một vòng ngắn vẫn tính cho hôm nay.";
   else if (due >= 8) coach = "Có từ đến hạn. Vào tab Ôn, hoặc ghim thêm từ khi đang học.";
   else if (run >= 2 && studied) coach = "Chuỗi " + run + " ngày. Mai chỉ cần gặp từ đã ghim.";
   else if (studied) coach = "Hôm nay đã có nhịp. Muốn bộ từ khác thì vào học và bấm Đổi bộ từ.";
   const where = sec.kind === "exam" ? "Ôn thi vào 10" : "Kỳ " + sec.ky + " · Tuần " + sec.weeks;
-  return '<header><p class="kicker">LỚP 9 · GLOBAL SUCCESS</p><h1>' + esc(greeting(now)) + '</h1><p class="sm muted" style="margin-top:.35rem">Hôm nay: ' + fresh + " từ mới trong bài" + (due ? " + " + due + " từ cần ôn" : "") + ". Nghe, tự đoán nghĩa, rồi lật thẻ.</p></header>"
+  return '<header><p class="kicker">LỚP 9 · GLOBAL SUCCESS</p><h1>' + esc(greeting(now)) + '</h1><p class="sm muted" style="margin-top:.35rem">Bài này còn ' + lessonLeft + " từ trong bảng học" + (due ? ". Có " + due + " từ cần ôn" : "") + ". Đã thuộc: " + masteredN + ".</p></header>"
     + (late ? '<p class="banner sm">Đã qua giờ nhắc mà hôm nay chưa học. Làm một vòng là giữ mạch.</p>' : "")
-    + '<section class="stats">' + stat("Chuỗi", run ? run + " ngày" : "Mới") + stat("Hôm nay", studied ? progress.todayCount + " từ" : "Chưa") + stat("Đã ghim", String(rows.filter((r) => isPinned(progress.cards[r.id])).length)) + "</section>"
-    + '<section class="card"><p class="xs" style="font-weight:600;color:var(--teal)">' + esc(where) + '</p><h2>' + esc(sec.titleVi) + '</h2><p class="sm muted">' + esc(sec.titleEn) + '</p><p class="sm" style="margin-top:.45rem">' + fresh + " từ mới" + (lessonDue ? " · " + lessonDue + " đến hạn trong bài" : "") + '</p><button class="btn-ghost" data-act="picker" type="button">Đổi bài</button></section>'
+    + '<section class="stats">' + stat("Chuỗi", run ? run + " ngày" : "Mới") + stat("Hôm nay", studied ? progress.todayCount + " từ" : "Chưa") + stat("Đã thuộc", String(masteredN)) + "</section>"
+    + '<section class="card"><p class="xs" style="font-weight:600;color:var(--teal)">' + esc(where) + '</p><h2>' + esc(sec.titleVi) + '</h2><p class="sm muted">' + esc(sec.titleEn) + '</p><p class="sm" style="margin-top:.45rem">' + lessonLeft + " từ còn học" + (fresh ? " · " + fresh + " chưa gặp" : "") + (lessonDue ? " · " + lessonDue + " đến hạn" : "") + '</p><button class="btn-ghost" data-act="picker" type="button">Đổi bài</button></section>'
     + '<div class="row3">' + [5, 8, 12].map((n) => '<button type="button" class="chip' + (progress.sessionSize === n ? " on" : "") + '" data-act="size" data-n="' + n + '">' + n + " từ</button>").join("") + "</div>"
-    + '<button class="btn btn-primary" type="button" data-act="go" data-mode="learn">' + esc(start) + "</button>"
+    + (lessonLeft ? '<button class="btn btn-primary" type="button" data-act="go" data-mode="learn">' + esc(start) + "</button>" : '<button class="btn btn-primary" type="button" data-act="tab" data-tab="xong">' + esc(start) + "</button>")
     + '<div class="row2"><button class="btn btn-surface" type="button" data-act="go" data-mode="quiz">Gợi nhớ</button><button class="btn btn-surface" type="button" data-act="poster">Tạo ảnh học</button></div>'
     + '<p class="sm muted">' + esc(coach) + '</p>'
     + '<p class="sm" style="margin-top:.8rem"><a href="./toan.html">Sang trang toán</a> · <a href="./van.html">Sang trang văn</a></p>';
@@ -655,12 +672,14 @@ function renderBook(now) {
   const section = BOOK.sections.find((s) => s.id === bookId);
   if (section) {
     const hero = section.kind === "exam" ? "hero-clay" : "hero-teal";
-    const list = section.entries.map((entry, i) => {
+    const visible = section.entries.map((entry, i) => {
       const id = section.id + "::" + entry.en;
       const row = byId.get(id);
-      return row ? wordCard(row, i + 1) : "";
+      return row && !isMastered(progress.cards[row.id]) ? wordCard(row, i + 1) : "";
     }).join("");
-    return '<button class="btn-ghost" type="button" data-act="close-book">← Mục lục</button><div class="' + hero + '"><h2>' + esc(section.titleVi) + '</h2><p class="sm" style="opacity:.9;margin-top:.25rem">' + esc(section.titleEn) + '</p></div><p class="sm muted">' + esc(section.blurb) + '</p><button class="btn btn-primary" type="button" data-act="study-sec" data-id="' + esc(section.id) + '">Học bài này</button><div class="stack">' + list + "</div>";
+    const hidden = section.entries.filter((entry) => isMastered(progress.cards[section.id + "::" + entry.en])).length;
+    const note = hidden ? '<p class="sm muted">' + hidden + " từ đã thuộc, không còn trong bảng này. Lấy lại ở tab Xong.</p>" : "";
+    return '<button class="btn-ghost" type="button" data-act="close-book">← Mục lục</button><div class="' + hero + '"><h2>' + esc(section.titleVi) + '</h2><p class="sm" style="opacity:.9;margin-top:.25rem">' + esc(section.titleEn) + '</p></div><p class="sm muted">' + esc(section.blurb) + '</p>' + note + '<button class="btn btn-primary" type="button" data-act="study-sec" data-id="' + esc(section.id) + '">Học các từ còn lại</button><div class="stack">' + visible + "</div>";
   }
   const chips = [["all", "Tất cả"], ["1", "Kỳ 1"], ["2", "Kỳ 2"], ["exam", "Vào 10"]].map(([id, label]) => '<button type="button" class="chip' + (filter === id ? " on" : "") + '" data-act="filter" data-f="' + id + '">' + label + "</button>").join("");
   const list = BOOK.sections.filter((sec) => filter === "all" || (filter === "exam" ? sec.kind === "exam" : String(sec.ky) === filter)).map((sec) => {
@@ -673,9 +692,13 @@ function renderBook(now) {
 function wordCard(row, index) {
   const card = progress.cards[row.id];
   const now = Date.now();
-  const badge = isKnown(card) ? "Đã thuộc" : isDue(card, now) ? "Đến hạn" : isPinned(card) ? "Đã ghim" : "Mới";
+  const mastered = isMastered(card);
+  const badge = mastered ? "Đã thuộc" : isDue(card, now) ? "Đến hạn" : isPinned(card) ? "Đã ghim" : "Mới";
   const open = openWord === row.id;
-  const body = open ? '<div style="border-top:1px solid var(--line);padding:.75rem 1rem 1rem"><p class="xs clay" style="font-weight:600">' + esc(posLabel(row.entry.pos)) + '</p><p class="sm" style="margin-top:.4rem">' + esc(row.entry.ex) + '</p><p class="sm muted">' + esc(row.entry.exVi) + '</p><p class="sm clay" style="margin-top:.45rem">' + esc(memoryHook(row.entry)) + '</p><div class="row2" style="margin-top:.7rem"><button class="btn ' + (isKnown(card) ? "btn-primary" : "btn-surface") + '" type="button" data-act="known" data-id="' + esc(row.id) + '">Đã thuộc</button><button class="btn ' + (isPinned(card) ? "btn-primary" : "btn-surface") + '" type="button" data-act="pin" data-id="' + esc(row.id) + '">Ghim ôn</button></div><button class="btn-ghost" type="button" data-act="speak" data-text="' + esc(row.entry.en) + '">' + icon("vol") + " Nghe</button></div>" : "";
+  const actions = mastered
+    ? '<button class="btn btn-primary" type="button" data-act="restore" data-id="' + esc(row.id) + '">Đưa lại bảng học</button>'
+    : '<button class="btn btn-primary" type="button" data-act="known" data-id="' + esc(row.id) + '">Đã thuộc</button><button class="btn btn-surface" type="button" data-act="pin" data-id="' + esc(row.id) + '">Ghim ôn</button>';
+  const body = open ? '<div style="border-top:1px solid var(--line);padding:.75rem 1rem 1rem"><p class="xs clay" style="font-weight:600">' + esc(posLabel(row.entry.pos)) + '</p><p class="sm" style="margin-top:.4rem">' + esc(row.entry.ex) + '</p><p class="sm muted">' + esc(row.entry.exVi) + '</p><p class="sm clay" style="margin-top:.45rem">' + esc(memoryHook(row.entry)) + '</p><div class="row2" style="margin-top:.7rem">' + actions + '</div><button class="btn-ghost" type="button" data-act="speak" data-text="' + esc(row.entry.en) + '">' + icon("vol") + " Nghe</button></div>" : "";
   return '<article class="card" style="padding:0"><button class="word" type="button" style="padding:.8rem 1rem" data-act="word" data-id="' + esc(row.id) + '">' + (index ? '<span class="sm muted" style="width:1.4rem">' + index + "</span>" : "") + '<span style="flex:1;min-width:0"><span style="font-weight:600;overflow-wrap:anywhere">' + esc(row.entry.en) + '</span><span class="sm teal" style="display:block">' + esc(row.entry.ipa) + '</span><span class="sm muted" style="display:block;margin-top:.15rem">' + esc(row.entry.vi) + '</span></span><span class="badge">' + badge + "</span></button>" + body + "</article>";
 }
 function renderRemind(now) {
@@ -750,22 +773,54 @@ function gradeRecall(id, kind) {
     interval = prev && prev.interval >= 7 ? 14 : 7;
     reps = interval >= 14 ? Math.max(2, (prev ? prev.reps : 0) + 1) : Math.max(1, (prev ? prev.reps : 0) + 1);
   }
-  progress.cards[id] = { ease: 2.5, interval: interval, due: Date.now() + interval * day, reps: reps, lapses: lapses };
+  progress.cards[id] = { ease: 2.5, interval: interval, due: Date.now() + interval * day, reps: reps, lapses: lapses, mastered: !!(prev && prev.mastered) };
   markStudied(new Date());
   save();
   return interval;
 }
-function posterRows() {
-  const lessonId = session && session.lessonId ? session.lessonId : progress.lessonId;
-  const pool = rows.filter((r) => r.section.id === lessonId);
-  function rank(row) {
-    const c = progress.cards[row.id];
-    if (c && c.reps > 0 && c.interval <= 1) return 0;
-    if (c && c.interval === 3) return 1;
-    if (isFresh(c)) return 2;
-    return 3;
+function glossOf(vi) {
+  const first = promptVi(vi).replace(/\s+/g, " ").trim();
+  const cut = first.split(/[;:(]/)[0].trim().replace(/[.,\s]+$/, "");
+  return cut || first;
+}
+function wrapLines(ctx, text, maxW, maxLines) {
+  const words = String(text || "").split(/\s+/).filter(Boolean);
+  if (!words.length) return [""];
+  const lines = [];
+  let cur = "";
+  for (let i = 0; i < words.length; i += 1) {
+    const trial = cur ? cur + " " + words[i] : words[i];
+    if (ctx.measureText(trial).width <= maxW) { cur = trial; continue; }
+    if (cur) lines.push(cur);
+    cur = words[i];
+    if (lines.length === maxLines - 1) {
+      let rest = words.slice(i).join(" ");
+      while (rest.length > 1 && ctx.measureText(rest + "…").width > maxW) rest = rest.slice(0, -1);
+      if (rest !== words.slice(i).join(" ")) rest = rest.replace(/\s+\S*$/, "") + "…";
+      lines.push(rest);
+      return lines;
+    }
   }
-  return pool.slice().sort((a, b) => rank(a) - rank(b)).slice(0, 8);
+  if (cur) lines.push(cur);
+  return lines.slice(0, maxLines);
+}
+function posterPool() {
+  if (session && session.deck && session.ids && session.ids.length) {
+    const keep = {};
+    session.ids.forEach(function (id) { keep[id] = 1; });
+    return rows.filter(function (r) { return keep[r.id]; });
+  }
+  const lessonId = bookId || progress.lessonId;
+  return rows.filter(function (r) {
+    if (r.section.id !== lessonId) return false;
+    if (typeof isMastered === "function" && isMastered(progress.cards[r.id])) return false;
+    return true;
+  });
+}
+function posterRows() {
+  return posterPool().slice().sort(function (a, b) {
+    return a.entry.en.localeCompare(b.entry.en, "en", { sensitivity: "base" });
+  });
 }
 function posHex(pos) {
   if (pos === "n") return "#1d4e89";
@@ -784,88 +839,168 @@ function downloadBlob(blob, name) {
   a.remove();
   setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
 }
-function showPoster(blob) {
+let posterState = { blobs: [], index: 0 };
+function showPoster(blobs) {
+  posterState.blobs = blobs;
+  posterState.index = 0;
+  paintPoster();
+}
+function paintPoster() {
+  const blob = posterState.blobs[posterState.index];
   const sheet = document.getElementById("poster-sheet");
   const img = document.getElementById("poster-preview");
+  if (!blob || !sheet || !img) return;
   if (img._url) URL.revokeObjectURL(img._url);
   img._url = URL.createObjectURL(blob);
   img.src = img._url;
+  const n = posterState.blobs.length;
+  const page = document.getElementById("poster-page");
+  const nav = document.getElementById("poster-nav");
+  if (page) page.textContent = "Trang " + (posterState.index + 1) + "/" + n;
+  if (nav) nav.hidden = n < 2;
+  const prev = document.getElementById("poster-prev");
+  const next = document.getElementById("poster-next");
+  if (prev) prev.disabled = posterState.index === 0;
+  if (next) next.disabled = posterState.index >= n - 1;
   sheet.hidden = false;
   document.getElementById("poster-share").onclick = function () {
-    const file = new File([blob], "hoc-tu-lop-9.jpg", { type: "image/jpeg" });
+    const name = "tu-dien-lop-9-trang-" + (posterState.index + 1) + ".jpg";
+    const file = new File([blob], name, { type: "image/jpeg" });
     if (location.protocol === "https:" && navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: "Từ cần nhớ lớp 9" }).then(function () {
+      navigator.share({ files: [file], title: "Từ điển nghĩa vỡ lòng lớp 9" }).then(function () {
         toast("Đã mở hộp chia sẻ.", "ok");
       }).catch(function () {
         toast("Nếu không gửi được, nhấn giữ ảnh để lưu.", "warn");
       });
       return;
     }
-    downloadBlob(blob, "hoc-tu-lop-9.jpg");
-    toast("Đã tải ảnh. Nếu không thấy file, nhấn giữ ảnh để lưu.", "info");
+    downloadBlob(blob, name);
+    toast("Đã tải ảnh trang này. Nếu không thấy file, nhấn giữ ảnh để lưu.", "info");
+  };
+  if (prev) prev.onclick = function () {
+    if (posterState.index <= 0) return;
+    posterState.index -= 1;
+    paintPoster();
+  };
+  if (next) next.onclick = function () {
+    if (posterState.index >= posterState.blobs.length - 1) return;
+    posterState.index += 1;
+    paintPoster();
   };
 }
+function drawDictPage(ctx, slice, pageIndex, pageCount, total) {
+  const W = 1080;
+  const H = 1920;
+  ctx.fillStyle = "#f4efe6";
+  ctx.fillRect(0, 0, W, H);
+  const sec = slice[0].section;
+  const where = sec.kind === "exam" ? "ÔN THI VÀO 10" : "KỲ " + sec.ky + " · TUẦN " + sec.weeks;
+  ctx.fillStyle = "#0f5c56";
+  ctx.font = "700 28px 'Be Vietnam Pro', sans-serif";
+  ctx.fillText("LỚP 9 · " + where, 40, 58);
+  ctx.fillStyle = "#1c1917";
+  ctx.font = "700 44px 'Be Vietnam Pro', sans-serif";
+  ctx.fillText(trimLen(sec.titleVi, 28), 40, 112);
+  ctx.fillStyle = "#5c564e";
+  ctx.font = "500 26px 'Be Vietnam Pro', sans-serif";
+  ctx.fillText("Từ điển nghĩa vỡ lòng · xếp A–Z · " + total + " từ", 40, 154);
+  const top = 180;
+  const left = 28;
+  const tableW = W - 56;
+  const headH = 58;
+  const tableH = H - top - 52;
+  const rowH = (tableH - headH) / 12;
+  const base = pageIndex * 12;
+  const cStt = 90;
+  const cWord = 360;
+  ctx.fillStyle = "#fffdf8";
+  ctx.fillRect(left, top, tableW, tableH);
+  ctx.fillStyle = "#0f5c56";
+  ctx.fillRect(left, top, tableW, headH);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "700 26px 'Be Vietnam Pro', sans-serif";
+  ctx.fillText("STT", left + 16, top + 38);
+  ctx.fillText("Từ vựng", left + cStt + 16, top + 38);
+  ctx.fillText("Nghĩa vỡ lòng", left + cStt + cWord + 16, top + 38);
+  slice.forEach(function (item, r) {
+    const y = top + headH + r * rowH;
+    if (r % 2 === 1) {
+      ctx.fillStyle = "#f3efe6";
+      ctx.fillRect(left + 1, y, tableW - 2, rowH);
+    }
+    ctx.strokeStyle = "#e6dfd4";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(left, y);
+    ctx.lineTo(left + tableW, y);
+    ctx.stroke();
+    const mid = y + rowH * 0.64;
+    ctx.fillStyle = "#0f5c56";
+    ctx.font = "700 28px 'Be Vietnam Pro', sans-serif";
+    ctx.fillText(String(base + r + 1), left + 16, mid);
+    const wordMax = cWord - 28;
+    let size = 34;
+    ctx.font = "700 " + size + "px 'Be Vietnam Pro', sans-serif";
+    const word = item.entry.en;
+    while (size > 22 && ctx.measureText(word).width > wordMax) {
+      size -= 1;
+      ctx.font = "700 " + size + "px 'Be Vietnam Pro', sans-serif";
+    }
+    ctx.fillStyle = "#1c1917";
+    ctx.fillText(word, left + cStt + 16, mid);
+    const meanX = left + cStt + cWord + 16;
+    const meanW = tableW - cStt - cWord - 32;
+    ctx.font = "500 28px 'Be Vietnam Pro', sans-serif";
+    const lines = wrapLines(ctx, glossOf(item.entry.vi), meanW, 2);
+    const lh = 34;
+    let ty = y + (rowH - lines.length * lh) / 2 + 26;
+    ctx.fillStyle = "#1c1917";
+    lines.forEach(function (line) {
+      ctx.fillText(line, meanX, ty);
+      ty += lh;
+    });
+  });
+  ctx.strokeStyle = "#d5ebe6";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(left + cStt, top);
+  ctx.lineTo(left + cStt, top + tableH);
+  ctx.moveTo(left + cStt + cWord, top);
+  ctx.lineTo(left + cStt + cWord, top + tableH);
+  ctx.stroke();
+  ctx.strokeStyle = "#cfc6b8";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(left, top, tableW, tableH);
+  ctx.fillStyle = "#5c564e";
+  ctx.font = "500 24px 'Be Vietnam Pro', sans-serif";
+  ctx.fillText("Lớp 9 · Global Success · trang " + (pageIndex + 1) + "/" + pageCount, 40, H - 22);
+}
+
 function drawPoster() {
   const list = posterRows();
-  if (!list.length) { toast("Chưa có từ để tạo ảnh.", "warn"); return; }
+  if (!list.length) { toast("Chưa có từ để tạo ảnh. Từ đã thuộc không đưa vào bảng này.", "warn"); return; }
+  const per = 12;
+  const pages = [];
+  for (let i = 0; i < list.length; i += per) pages.push(list.slice(i, i + per));
   const paint = function () {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1080;
-    canvas.height = 1920;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#f4efe6";
-    ctx.fillRect(0, 0, 1080, 1920);
-    const sec = list[0].section;
-    ctx.fillStyle = "#0f5c56";
-    ctx.font = "600 34px 'Be Vietnam Pro', sans-serif";
-    ctx.fillText(sec.kind === "exam" ? "LỚP 9 · ÔN THI VÀO 10" : "LỚP 9 · KỲ " + sec.ky, 72, 108);
-    ctx.fillStyle = "#1c1917";
-    ctx.font = "700 58px 'Be Vietnam Pro', sans-serif";
-    ctx.fillText(trimLen(sec.titleVi, 28), 72, 186);
-    ctx.fillStyle = "#5c564e";
-    ctx.font = "500 32px 'Be Vietnam Pro', sans-serif";
-    ctx.fillText(list.length + " từ cần nhớ hôm nay", 72, 246);
-    const top = 310;
-    const block = Math.floor(1480 / list.length);
-    list.forEach(function (row, i) {
-      const e = row.entry;
-      const y = top + i * block;
-      ctx.fillStyle = "#1c1917";
-      ctx.font = "700 52px 'Be Vietnam Pro', sans-serif";
-      ctx.fillText((i + 1) + ". " + trimLen(e.en, 22), 72, y + 52);
-      ctx.font = "600 28px 'Be Vietnam Pro', sans-serif";
-      ctx.fillStyle = posHex(e.pos);
-      ctx.fillText(posLabel(e.pos) + "   " + e.ipa, 72, y + 98);
-      ctx.fillStyle = "#1c1917";
-      ctx.font = "700 36px 'Be Vietnam Pro', sans-serif";
-      ctx.fillText(trimLen(promptVi(e.vi), 42), 72, y + 150);
-      const token = (e.en.split(/[/+]/)[0] || e.en).trim().split(/\s+/)[0] || "";
-      const head = token.replace(/[^A-Za-z'-]/g, "");
-      const ex = trimLen(e.ex, 72);
-      const re = head.length >= 3 ? new RegExp("(" + head.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "i") : null;
-      const bits = re ? ex.split(re) : [ex];
-      let x = 72;
-      bits.forEach(function (part, n) {
-        if (!part) return;
-        const hit = n % 2 === 1;
-        ctx.font = (hit ? "700 " : "400 ") + "28px 'Be Vietnam Pro', sans-serif";
-        const w = ctx.measureText(part).width;
-        if (hit) { ctx.fillStyle = "#ffe08a"; ctx.fillRect(x - 3, y + 168, w + 6, 36); }
-        ctx.fillStyle = "#1c1917";
-        ctx.fillText(part, x, y + 198);
-        x += w;
-      });
+    const blobs = new Array(pages.length);
+    let left = pages.length;
+    pages.forEach(function (slice, pi) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1920;
+      drawDictPage(canvas.getContext("2d"), slice, pi, pages.length, list.length);
+      canvas.toBlob(function (blob) {
+        blobs[pi] = blob;
+        left -= 1;
+        if (left !== 0) return;
+        if (blobs.some(function (b) { return !b; })) { toast("Không tạo được ảnh.", "bad"); return; }
+        showPoster(blobs);
+        toast(pages.length > 1 ? "Ảnh từ điển đã sẵn, " + pages.length + " trang. Chỉ nghĩa vỡ lòng, xếp A–Z." : "Ảnh từ điển đã sẵn. Chỉ nghĩa vỡ lòng, xếp A–Z.", "ok");
+      }, "image/jpeg", 0.92);
     });
-    ctx.fillStyle = "#5c564e";
-    ctx.font = "500 26px 'Be Vietnam Pro', sans-serif";
-    ctx.fillText("Lớp 9 · Global Success", 72, 1864);
-    canvas.toBlob(function (blob) {
-      if (!blob) { toast("Không tạo được ảnh.", "bad"); return; }
-      showPoster(blob);
-      toast("Ảnh đã sẵn. Nhấn giữ ảnh để lưu, hoặc bấm Chia sẻ.", "ok");
-    }, "image/jpeg", 0.9);
   };
-  if (document.fonts && document.fonts.load) document.fonts.load("700 58px 'Be Vietnam Pro'").then(paint).catch(paint);
+  if (document.fonts && document.fonts.load) document.fonts.load("700 46px 'Be Vietnam Pro'").then(paint).catch(paint);
   else paint();
 }
 function renderDeck() {
@@ -914,9 +1049,10 @@ function renderDeck() {
       + '<h1 class="' + wordClass(row.entry.en) + '" style="margin-top:.35rem">' + esc(row.entry.en) + "</h1>"
       + '<p class="teal" style="font-size:1.2rem;margin-top:.2rem">' + stressIpa(row.entry.ipa) + "</p>"
       + '<p class="sm muted" style="margin-top:1rem">Tự nghĩ nghĩa, rồi chạm để lật.</p></button>';
+  const masterBtn = '<button class="btn btn-surface" type="button" data-act="known" data-id="' + esc(row.id) + '">Đã thuộc, chuyển sang Xong</button>';
   const dock = session.flipped
-    ? slot("mark") + '<div class="grade-dock"><button class="btn btn-surface" type="button" data-act="grade" data-g="forget">Quên</button><button class="btn btn-surface" type="button" data-act="grade" data-g="fuzzy">Mơ hồ</button><button class="btn btn-primary" type="button" data-act="grade" data-g="know">Nhớ</button></div>'
-    : '<div class="grade-dock"><button class="btn btn-primary one" type="button" data-act="flip-deck">Lật nghĩa</button></div>';
+    ? slot("mark") + '<div class="grade-dock"><button class="btn btn-surface" type="button" data-act="grade" data-g="forget">Quên</button><button class="btn btn-surface" type="button" data-act="grade" data-g="fuzzy">Mơ hồ</button><button class="btn btn-primary" type="button" data-act="grade" data-g="know">Nhớ</button></div>' + masterBtn
+    : '<div class="grade-dock"><button class="btn btn-primary one" type="button" data-act="flip-deck">Lật nghĩa</button></div>' + masterBtn;
   return '<div class="stack">' + slot("top") + '<div class="topbar"><button class="btn-ghost" type="button" data-act="exit">← Quay lại</button><p class="sm" style="font-weight:600">' + (i + 1) + "/" + ids.length + "</p></div>"
     + '<div class="track fat"><span style="width:' + pct + '%"></span></div>'
     + slot("size")
@@ -992,9 +1128,23 @@ function renderPicker() {
   const body = groups.map(([label, items]) => '<section class="stack"><p class="xs" style="font-weight:600;color:var(--teal)">' + label + "</p>" + items.map((sec) => '<button type="button" class="card" style="text-align:left;border-color:' + (sec.id === progress.lessonId ? "var(--teal)" : "var(--line)") + '" data-act="pick-lesson" data-id="' + esc(sec.id) + '"><p style="font-weight:600">' + esc(sec.titleVi) + '</p><p class="sm muted">' + esc(sec.titleEn) + " · " + sec.entries.length + " mục</p></button>").join("") + "</section>").join("");
   return '<div class="sheet"><div class="sheet-in stack"><div class="topbar"><h2>Chọn bài</h2><button class="btn-ghost" type="button" data-act="close-picker">Đóng</button></div>' + body + "</div></div>";
 }
+function renderDone() {
+  const done = rows.filter((r) => isMastered(progress.cards[r.id]));
+  const head = '<header><p class="kicker">VỐN TỪ ĐÃ THUỘC</p><h1>Đã học xong</h1><p class="sm muted" style="margin-top:.35rem">Em tự bấm Đã thuộc. Từ đó rời bảng học và vòng ôn. Muốn học lại thì đưa về.</p></header>';
+  if (!done.length) return head + '<section class="card"><p class="sm">Chưa có từ nào. Trong lúc học, bấm Đã thuộc. Từ sẽ nằm ở tab này.</p></section>';
+  const blocks = BOOK.sections.map((sec) => {
+    const items = done.filter((r) => r.section.id === sec.id);
+    if (!items.length) return "";
+    const where = sec.kind === "exam" ? "Ôn thi vào 10" : "Kỳ " + sec.ky + " · Tuần " + sec.weeks;
+    const list = items.map((row) => '<article class="card" style="padding:.8rem 1rem"><p style="font-weight:600">' + esc(row.entry.en) + '</p><p class="sm teal">' + esc(row.entry.ipa) + '</p><p class="sm muted">' + esc(row.entry.vi) + '</p><button class="btn btn-surface" type="button" data-act="restore" data-id="' + esc(row.id) + '" style="margin-top:.55rem">Đưa lại bảng học</button></article>').join("");
+    return '<section class="stack"><p class="xs" style="font-weight:700;color:var(--teal)">' + esc(where) + " · " + esc(sec.titleVi) + " · " + items.length + " từ</p>" + list + "</section>";
+  }).join("");
+  return head + '<section class="card"><p class="w-hero teal">' + done.length + '</p><p class="sm muted">từ đã rời bảng học</p></section>' + blocks;
+}
 function dock() {
   const dueN = rows.filter((r) => isPinned(progress.cards[r.id]) || isDue(progress.cards[r.id], Date.now())).length;
-  const items = [["hoc", "Học", "cap"], ["on", dueN ? "Ôn " + dueN : "Ôn", "refresh"], ["sach", "Sách", "book"], ["nhac", "Nhắc", "bell"]];
+  const doneN = rows.filter((r) => isMastered(progress.cards[r.id])).length;
+  const items = [["hoc", "Học", "cap"], ["on", dueN ? "Ôn " + dueN : "Ôn", "refresh"], ["xong", doneN ? "Xong " + doneN : "Xong", "check"], ["sach", "Sách", "book"], ["nhac", "Nhắc", "bell"]];
   return '<nav class="dock" aria-label="Chính"><div class="dock-in">' + items.map(([id, label, ic]) => '<button type="button" class="' + (tab === id ? "on" : "") + '" data-act="tab" data-tab="' + id + '">' + icon(ic) + label + "</button>").join("") + "</div></nav>";
 }
 function render() {
@@ -1020,6 +1170,7 @@ function render() {
   if (session) html = renderSession();
   else if (tab === "hoc") html = '<div class="stack">' + renderHome(now) + "</div>";
   else if (tab === "on") html = '<div class="stack">' + renderReview(now) + "</div>";
+  else if (tab === "xong") html = '<div class="stack">' + renderDone() + "</div>";
   else if (tab === "sach") html = '<div class="stack">' + renderBook(now) + "</div>";
   else html = '<div class="stack">' + renderRemind(now) + "</div>";
   app.innerHTML = (session && session.deck ? "" : noticeHtml()) + html + (session ? "" : dock()) + (picker && !session ? renderPicker() : "");
@@ -1131,6 +1282,13 @@ document.body.addEventListener("click", (e) => {
     session = { mode: "quiz", steps: buildSteps(ids, "quiz"), cursor: 0, hint: 0, removed: false, picked: null, flipped: false, plan: "", cardDone: false, done: false, stats: { asked: 0, good: 0, fail: 0 }, again: {}, dirs: {} };
     toast("Kiểm tra nhanh " + ids.length + " từ.", "info");
     window.scrollTo(0, 0);
+    render();
+    return;
+  }
+  if (act === "restore") {
+    const row = byId.get(b.dataset.id);
+    restoreWord(b.dataset.id);
+    toast("Đã đưa " + (row ? row.entry.en : "từ này") + " về bảng học.", "ok");
     render();
     return;
   }
@@ -1321,20 +1479,34 @@ function gradeDeck(kind) {
   const next = byId.get(session.ids[session.cursor]);
   if (next) speak(next.entry.en);
 }
+function pullFromDeck(id) {
+  if (!session || !session.deck || !session.ids) return;
+  const at = session.ids.indexOf(id);
+  if (at < 0) return;
+  session.ids.splice(at, 1);
+  if (session.cursor > at) session.cursor -= 1;
+  if (session.cursor >= session.ids.length) session.cursor = Math.max(0, session.ids.length - 1);
+  session.flipped = false;
+  if (!session.ids.length) session.batchDone = true;
+}
 function markAndGo(kind, id) {
   const row = byId.get(id);
   const word = row ? row.entry.en : "Từ này";
   const msg = kind === "known"
-    ? "Đã thuộc " + word + ". Từ này không còn là từ mới."
+    ? "Đã thuộc " + word + ". Từ đã sang tab Xong, không còn trong bảng học."
     : kind === "pin"
       ? "Đã ghim " + word + ". Mở tab Ôn là thấy từ này."
-      : "Chưa thuộc " + word + ". Sẽ học lại từ này.";
-  if (kind === "known") markKnown(id);
+      : "Chưa thuộc " + word + ". Đã đưa lại bảng học.";
+  if (kind === "known") { markKnown(id); pullFromDeck(id); }
   else if (kind === "pin") pinWord(id);
-  else markAgain(id);
+  else { markAgain(id); }
   toast(msg, kind === "again" ? "warn" : "ok", kind === "again" ? "again" : "mark");
   if (session && session.deck) session.motion = "pop";
   render();
+  if (kind === "known" && session && session.deck && session.ids && session.ids.length && !session.batchDone) {
+    const next = byId.get(session.ids[session.cursor]);
+    if (next) speak(next.entry.en);
+  }
 }
 let swipe = null;
 document.body.addEventListener("touchstart", (e) => {
