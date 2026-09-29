@@ -4105,7 +4105,7 @@ body.music-player-active #mini-player {
 /* PHA 8: TAB NAVIGATION SCROLL SNAP - scoped to tab scroll only */
 @media (max-width: 1023px) {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     scroll-padding-top: calc(var(--lifeos-header-h, 72px) + 10px);
     scroll-padding-bottom: calc(var(--lifeos-bottom-nav-h, 54px) + env(safe-area-inset-bottom) + 96px);
   }
@@ -9240,11 +9240,15 @@ window.switchTab = (id, b) => {var _window$LifeOSRootRou3, _window$LifeOSRootRou
     return !!(b && b.classList.contains('lifeos-landscape-mini-pc') && (b.dataset.lifeosLandscapeRootMode === 'music' || b.dataset.desktopWorkspace === 'music'));
   }
   function isMediaWorkspaceActive() {
+    if (isLandscapeMiniMusic()) return true;
     if (window.innerWidth < 1024) return activeMobileView() === 'view-music';
     const ws = activeWorkspace();
     return ws === 'music' || isLandscapeMiniMusic();
   }
   function isMediaActionAllowed(ev) {
+    const b = body();
+    if (isLandscapeMiniMusic()) return true;
+    if (b && b.classList.contains('lifeos-landscape-mini-pc') && isInMediaDom(ev)) return true;
     const ws = activeWorkspace();
     if (isMediaWorkspaceActive()) return true;
     // Tổng quan có thể hiển thị card media; chỉ cho chạy nếu click thật nằm trong card media.
@@ -14076,7 +14080,18 @@ body.lifeos-landscape-mini-pc.music-player-active #mini-player {
         if (fab) fab.style.bottom = '';
     }
     function pauseIfLeft() {
-        if (window.__lifeosMp3Surface() && !window.__lifeosMp3BarDismissed) return;
+        var land = document.body.classList.contains('lifeos-landscape-mini-pc');
+        if (land) {
+            var mode = document.body.dataset.lifeosLandscapeRootMode || '';
+            var tab = document.body.dataset.l64fMediaTab || '';
+            var hubTab = window.MediaHub && window.MediaHub.currentTab;
+            var social = window.LifeOSSocialClone && window.LifeOSSocialClone.host;
+            var socialOn = !!(social && social.active && (social.currentTab === 'youtube' || social.currentTab === 'facebook'));
+            var mp3Here = (!mode || mode === 'music') && !socialOn && tab !== 'radio' && tab !== 'tv' && tab !== 'youtube' && tab !== 'facebook' && (!hubTab || hubTab === 'music');
+            if (mp3Here) return;
+        } else if (window.__lifeosMp3Surface() && !window.__lifeosMp3BarDismissed) {
+            return;
+        }
         var app = window.MusicApp;
         var audio = document.getElementById('mstq-player');
         if (audio && !audio.paused) {
@@ -18847,14 +18862,20 @@ body.lifeos-landscape-mini-pc #music-search { width: 100% !important; height: 34
 body.lifeos-landscape-mini-pc #media-subtabs { grid-column: 1 / -1 !important; grid-row: 2 !important; height: 34px !important; min-height: 34px !important; padding: 0 !important; margin: 0 !important; gap: 5px !important; display: flex !important; overflow-x: auto !important; }
 body.lifeos-landscape-mini-pc #media-subtabs button { height: 32px !important; min-height: 32px !important; padding: 0 8px !important; border-radius: 12px !important; font-size: 10.5px !important; flex: 1 0 auto !important; }
 
-/* MP3 uses full left list width. Radio/TV use group sidebar + list. */
+/* MP3 / YouTube / Facebook use the full left column. Radio/TV keep group sidebar + list. */
 body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #media-group-sidebar,
-body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #media-group-mobile-bar { display: none !important; }
-body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #l64f-music-list { grid-column: 1 / -1 !important; grid-row: 3 !important; }
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #media-group-mobile-bar,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #media-group-sidebar,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #media-group-mobile-bar,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="facebook"] #media-group-sidebar,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="facebook"] #media-group-mobile-bar { display: none !important; }
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="music"] #l64f-music-list,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="youtube"] #l64f-music-list,
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="facebook"] #l64f-music-list { grid-column: 1 / -1 !important; grid-row: 3 !important; width: auto !important; min-width: 0 !important; justify-self: stretch !important; }
 body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #media-group-sidebar,
 body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #media-group-sidebar { display: flex !important; }
 body.lifeos-landscape-mini-pc[data-l64f-media-tab="radio"] #l64f-music-list,
-body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-music-list { grid-column: 2 !important; grid-row: 3 !important; }
+body.lifeos-landscape-mini-pc[data-l64f-media-tab="tv"] #l64f-music-list { grid-column: 2 !important; grid-row: 3 !important; width: auto !important; min-width: 0 !important; justify-self: stretch !important; }
 
 body.lifeos-landscape-mini-pc #media-group-sidebar { grid-column: 1 !important; grid-row: 3 !important; display: flex !important; flex-direction: column !important; gap: 4px !important; height: 100% !important; min-height: 0 !important; overflow-y: auto !important; padding: 4px !important; border-radius: 13px !important; border: 1px solid rgba(226,232,240,.85) !important; background: rgba(255,255,255,.82) !important; }
 body.lifeos-landscape-mini-pc #media-group-sidebar button { min-height: 28px !important; padding: 5px 6px !important; border-radius: 10px !important; font-size: 10px !important; line-height: 1.05 !important; text-align: left !important; }
@@ -18863,9 +18884,28 @@ body.lifeos-landscape-mini-pc #media-group-mobile-bar { display: none !important
 body.lifeos-landscape-mini-pc #l64f-music-list {
   min-height: 0 !important;
   height: 100% !important;
+  width: auto !important;
+  min-width: 0 !important;
   overflow: hidden !important;
   border-radius: 13px !important;
   border: 1px solid rgba(226,232,240,.75) !important;
+}
+body.lifeos-landscape-mini-pc #l64f-music-list > div,
+body.lifeos-landscape-mini-pc #music-list-container,
+body.lifeos-landscape-mini-pc #lifeos-social-list,
+body.lifeos-landscape-mini-pc #mp3-list-container,
+body.lifeos-landscape-mini-pc #radio-list-container,
+body.lifeos-landscape-mini-pc #tv-list-container {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+body.lifeos-landscape-mini-pc #lifeos-social-list .media-item {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
 body.lifeos-landscape-mini-pc #music-list-container { height: 100% !important; min-height: 0 !important; max-height: 100% !important; padding: 6px !important; overflow-y: auto !important; overflow-x: hidden !important; background: rgba(255,255,255,.78) !important; }
 body.lifeos-landscape-mini-pc #mp3-list-container,
@@ -18945,6 +18985,33 @@ body.lifeos-landscape-mini-pc #form-pc button { width: 100% !important; height: 
 
 body.lifeos-landscape-mini-pc #l64f-focus-card,
 body.lifeos-landscape-mini-pc #l64f-vault-card { padding: 8px !important; overflow-y: auto !important; }
+
+/* Mini-PC landscape: one scrollport. The moved vault shell must not swallow the gesture. */
+body.lifeos-landscape-mini-pc #l64f-vault-card {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+body.lifeos-landscape-mini-pc #l64f-vault-card > .vault-container-special {
+  display: block !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  overscroll-behavior: auto !important;
+  touch-action: pan-y !important;
+  flex: none !important;
+}
+body.lifeos-landscape-mini-pc #l64f-vault-card #vaultCategoryFilters {
+  overscroll-behavior-x: contain !important;
+  overscroll-behavior-y: auto !important;
+  touch-action: pan-x pan-y !important;
+}
 
 body.lifeos-landscape-mini-pc #mini-player { display: none !important; }
 body.lifeos-landscape-mini-pc #chat-msg-menu,
@@ -19064,6 +19131,15 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         document.querySelectorAll('#lifeos-landscape-root .l64f-panel').forEach(p => p.classList.remove('is-active'));
         (_a = document.getElementById('l64f-panel-' + mode)) === null || _a === void 0 ? void 0 : _a.classList.add('is-active');
         document.body.dataset.lifeosLandscapeRootMode = mode;
+        document.body.dataset.desktopWorkspace = mode;
+        document.body.dataset.lifeosActiveWorkspace = mode;
+        var viewId = { tasks: 'view-tasks', focus: 'view-focus', vault: 'view-vault', music: 'view-music', chat: 'view-chat' }[mode];
+        if (viewId) {
+            document.querySelectorAll('.view-section').forEach(function (sec) { sec.classList.remove('active'); });
+            var view = document.getElementById(viewId);
+            if (view)
+                view.classList.add('active');
+        }
         setDockActive(mode);
     }
     function mapTasks() {
@@ -19417,6 +19493,7 @@ body.lifeos-landscape-mini-pc #family-upload-error-modal { position: fixed !impo
         }
         else {
             restoreAll();
+            delete document.body.dataset.lifeosLandscapeRootMode;
             ['--l64f-head', '--l64f-dock', '--l64f-gap', '--l64f-root-top', '--l64f-root-h'].forEach(p => document.body.style.removeProperty(p));
         }
     }
@@ -35496,6 +35573,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
                 return;
             var dx = Math.abs(e.deltaX), dy = Math.abs(e.deltaY);
             if (dy > dx) {
+                if (!isVerticalFolderRail() && window.innerWidth < 1024) return;
                 el.scrollLeft += e.deltaY;
                 e.preventDefault();
             }
@@ -35546,7 +35624,7 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         el.addEventListener('keydown', function (e) {
             if (!canScroll(el))
                 return;
-            var step = Math.max(120, Math.floor((isVerticalFolderRail() ? el.clientHeight : el.clientWidth) * 0.65));
+            var step = Math.max(72, Math.floor((isVerticalFolderRail() ? el.clientHeight : el.clientWidth) * 0.34));
             if (isVerticalFolderRail()) {
                 if (e.key === 'ArrowDown') {
                     el.scrollTop += step;
@@ -45534,7 +45612,8 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
     gap: 6px !important;
     margin-bottom: 8px !important;
     padding-bottom: 2px !important;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: none !important;
+    scroll-behavior: auto !important;
     scrollbar-width: none;
   }
   body:not(.lifeos-landscape-mini-pc) #media-subtabs > button {
@@ -45594,6 +45673,75 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
     max-height: 42dvh !important;
     overflow: auto !important;
     min-height: 0 !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="radio"] #view-music,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="tv"] #view-music,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="youtube"] #view-music,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="facebook"] #view-music {
+    padding-bottom: calc(var(--lifeos-bottom-nav-h, 62px) + 28px) !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="radio"] #view-music > .bg-white,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="tv"] #view-music > .bg-white,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="youtube"] #view-music > .bg-white,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="facebook"] #view-music > .bg-white {
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="radio"] #view-music .flex-grow.min-h-0,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="tv"] #view-music .flex-grow.min-h-0,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="youtube"] #view-music .flex-grow.min-h-0,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="facebook"] #view-music .flex-grow.min-h-0,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="radio"] #view-music .lg\:col-span-5,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="tv"] #view-music .lg\:col-span-5,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="youtube"] #view-music .lg\:col-span-5,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="facebook"] #view-music .lg\:col-span-5 {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: none !important;
+    flex: none !important;
+    overflow: visible !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="radio"] #view-music #music-list-container,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="tv"] #view-music #music-list-container,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="youtube"] #view-music #music-list-container,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="facebook"] #view-music #music-list-container {
+    flex: none !important;
+    height: auto !important;
+    min-height: 96px !important;
+    max-height: 38dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: auto !important;
+    scroll-behavior: auto !important;
+    touch-action: pan-y !important;
+  }
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="radio"] #view-music .lg\:col-span-4,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="tv"] #view-music .lg\:col-span-4,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="youtube"] #view-music .lg\:col-span-4,
+  body:not(.lifeos-landscape-mini-pc)[data-l64f-media-tab="facebook"] #view-music .lg\:col-span-4 {
+    flex: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  body:not(.lifeos-landscape-mini-pc) #view-tasks .overflow-y-auto,
+  body:not(.lifeos-landscape-mini-pc) #view-vault .vault-container-special,
+  body:not(.lifeos-landscape-mini-pc) #chat-messages,
+  body:not(.lifeos-landscape-mini-pc) #chat-folder-tabs,
+  body:not(.lifeos-landscape-mini-pc) #music-list-container,
+  body:not(.lifeos-landscape-mini-pc) .custom-scroll-area {
+    scroll-behavior: auto !important;
+  }
+  body:not(.lifeos-landscape-mini-pc):has(#view-music.active) #mobile-input,
+  body:not(.lifeos-landscape-mini-pc):has(#view-focus.active) #mobile-input,
+  body:not(.lifeos-landscape-mini-pc):has(#view-vault.active) #mobile-input,
+  body:not(.lifeos-landscape-mini-pc):has(#view-chat.active) #mobile-input {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
   body:not(.lifeos-landscape-mini-pc) #lifeos-social-stage.lifeos-facebook-stage {
     max-height: 38dvh !important;
@@ -45731,6 +45879,35 @@ body,
 #chat-emoji-list {
   overflow-y: auto !important;
   touch-action: pan-y !important;
+}
+/* After every generic overflow rule: mini-PC vault has exactly one scrollport. */
+body.lifeos-landscape-mini-pc #l64f-panel-vault {
+  overflow: hidden !important;
+}
+body.lifeos-landscape-mini-pc #l64f-vault-card.l64f-card {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+body.lifeos-landscape-mini-pc #l64f-vault-card > .vault-container-special.custom-scroll-area {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overscroll-behavior: auto !important;
+  touch-action: pan-y !important;
+}
+body.lifeos-landscape-mini-pc #l64f-vault-card #vaultCategoryFilters.custom-scroll-area {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  overscroll-behavior-x: contain !important;
+  overscroll-behavior-y: auto !important;
 }
 #lifeos-hover-name {
   position: fixed;
@@ -45975,6 +46152,7 @@ button, a, input, textarea, select, label, summary, [role="button"] {
   }, true);
   document.addEventListener('wheel', function (e) {
     if (e.ctrlKey) return;
+    if (Math.abs(e.deltaY) >= Math.abs(e.deltaX)) return;
     var hit = find(e.target);
     if (!hit || !hit.x || hit.y) return;
     arm(hit.el);
