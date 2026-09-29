@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8d4e16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Văn lớp 9">
+<title>Học văn lớp 9</title>
+<link rel="manifest" href="./manifest-van.json">
+<link rel="icon" href="./icon-van-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icon-van-192.png">
+<script>
+(function () {
+  if (window.__lop9VanCapture) return;
+  window.__lop9VanCapture = true;
+  window.__lop9InstallPrompt = null;
+  window.addEventListener("beforeinstallprompt", function (event) {
+    event.preventDefault();
+    window.__lop9InstallPrompt = event;
+    window.dispatchEvent(new CustomEvent("lop9:pwa-install-ready"));
+  });
+})();
+</script>
+<style>
+  :root {
+    --bg: #f3e0b8;
+    --card: #fff6e2;
+    --ink: #3b2a1a;
+    --muted: #7a6148;
+    --line: #e4d0a4;
+    --accent: #8d4e16;
+    --accent-fg: #fff6e4;
+    --warn: #8a3b12;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background: #f3e0b8;
+    color: var(--ink);
+    font-family: "Be Vietnam Pro", "Noto Sans", Roboto, "Segoe UI", sans-serif;
+    font-size: 1.075rem;
+    line-height: 1.75;
+    text-rendering: optimizeLegibility;
+  }
+  button { font: inherit; color: inherit; }
+  #app { max-width: 36rem; margin: 0 auto; padding: 1.15rem 1.1rem 6.4rem; }
+  h1 { font-size: 1.65rem; line-height: 1.35; margin: 0 0 .4rem; font-weight: 700; }
+  h2 { font-size: 1.22rem; line-height: 1.4; margin: 0; font-weight: 700; }
+  p { margin: .7rem 0; }
+  .muted { color: var(--muted); }
+  .sm { font-size: .98rem; }
+  .tag { display: inline-block; font-size: .78rem; font-weight: 700; letter-spacing: .01em; color: var(--accent); }
+  .note, .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    padding: 1rem 1.05rem;
+    margin: .85rem 0;
+  }
+  .warn { color: var(--warn); }
+  .btn {
+    min-height: 3rem; border-radius: .9rem; border: 1px solid var(--line);
+    background: #fff8ea; padding: .65rem .85rem; font-weight: 700;
+  }
+  .btn-primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); width: 100%; }
+  .row { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .row .btn { flex: 1; }
+  .hide { display: none; }
+  ol.steps { margin: .4rem 0 .2rem 1.2rem; padding: 0; }
+  ol.steps li { margin: .45rem 0; }
+  .passage {
+    background: #fff3d4;
+    border-left: 4px solid #c4842a;
+    border-radius: .4rem;
+    padding: .8rem .95rem;
+    margin: .6rem 0;
+  }
+  a { color: var(--accent); }
+  .dock {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    background: rgba(255, 246, 226, .96);
+    border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .dock-in { max-width: 36rem; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; }
+  .dock button { min-height: 4rem; border: 0; background: transparent; font-weight: 700; color: var(--muted); }
+  .dock button.on { color: var(--accent); }
+  #toasts { position: fixed; top: .7rem; right: .7rem; z-index: 100; display: flex; flex-direction: column; gap: .4rem; }
+  .toast { background: #fff6e2; color: var(--ink); border-radius: .7rem; padding: .6rem .75rem; box-shadow: 0 8px 20px rgba(80, 50, 20, .12); border-left: 4px solid #c4842a; max-width: 17rem; }
+  .toast.ok { border-left-color: #6b8f3c; }
+  .toast.warn { border-left-color: #c45c1a; }
+  .install-fab {
+    position: fixed; z-index: 45; right: max(12px, env(safe-area-inset-right));
+    bottom: calc(4.85rem + env(safe-area-inset-bottom));
+    border: 0; background: transparent; padding: 6px; touch-action: none; display: none;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  .install-fab, .install-fab * { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .install-fab[data-positioned="1"] { right: auto; bottom: auto; }
+  .install-fab-inner {
+    display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 999px;
+    background: rgba(141, 78, 22, .94); color: #fff6e4; font-weight: 700; pointer-events: none;
+    box-shadow: 0 10px 24px rgba(90, 50, 10, .25);
+  }
+  #pwa-guide { position: fixed; inset: 0; z-index: 95; background: rgba(59, 42, 26, .45); display: flex; align-items: flex-end; justify-content: center; padding: 1rem; }
+  #pwa-guide[hidden] { display: none; }
+  .pwa-card { width: min(24rem, 100%); background: #fff6e2; color: var(--ink); border-radius: 1.1rem; padding: 1rem; }
+  .guide-step { display: flex; gap: .6rem; margin-top: .7rem; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toasts" aria-live="polite"></div>
+<button class="install-fab" id="btnInstall" type="button" aria-label="Cài app văn">
+  <span class="install-fab-inner">Cài app</span>
+</button>
+<div id="pwa-guide" hidden>
+  <div class="pwa-card" role="dialog">
+    <h2>Cài app văn</h2>
+    <div id="pwa-guide-body"></div>
+    <button class="btn" type="button" id="pwa-guide-close" style="margin-top:1rem">Đóng</button>
+  </div>
+</div>
+<script>
+const UNITS = [
+  {
+    id: "cach-doc",
+    bai: "Bài 1 · kỹ năng",
+    title: "Cách đọc truyện có yếu tố kì ảo",
+    paras: [
+      "Đầu năm, Ngữ văn 9 Kết nối tri thức mở bằng bài Thế giới kì ảo. Em không cần học thuộc cả truyện. Em cần biết chi tiết nào là chuyện lạ, chi tiết nào là đời thực, và chuyện lạ ấy muốn nói điều gì.",
+      "Kì ảo là việc không xảy ra ngoài đời: người chết hiện về, cung nước, hồn nhập vào con dế, thần hô mưa gọi gió. Hiện thực là việc có thật: nghi oan, đánh đập, nộp cống, lũ lụt, nỗi sợ của một đứa trẻ."
+    ],
+    meo: "Gặp một chi tiết lạ, đừng hỏi có thật không. Hãy hỏi: nếu bỏ chi tiết này, nỗi oan hoặc nỗi khổ của người trong truyện còn được thấy không?",
+    steps: [
+      "Đọc một lượt để biết chuyện xảy ra với ai.",
+      "Gạch hai cột: việc lạ và việc đời thường.",
+      "Với mỗi việc lạ, viết một câu: việc này làm nổi bật điều gì ở đời thực.",
+      "Chốt chủ đề bằng một câu của mình, không chép lời người khác."
+    ],
+    practice: {
+      q: "Trong chuyện Vũ Nương, bóng trên tường là chi tiết đời thường hay chi tiết kì ảo? Nó gây ra chuyện gì?",
+      hint: "Bóng là hình của người mẹ khi thắp đèn. Đứa trẻ nhìn bóng mà gọi là cha. Chưa phải cung nước.",
+      steps: [
+        "Bóng trên tường là việc đời thường. Đêm có đèn thì ai cũng có bóng.",
+        "Người mẹ trỏ bóng để dỗ con. Đứa trẻ tin đó là cha.",
+        "Khi chồng về, lời trẻ con trở thành bằng chứng oan.",
+        "Chi tiết kì ảo thật sự nằm ở phần sau: cung nước và cảnh nàng hiện về trên sông."
+      ],
+      ans: "Bóng là chi tiết thực. Nó mở ra nỗi oan. Cung nước mới là yếu tố kì ảo, để nàng được minh oan."
+    }
+  },
+  {
+    id: "vu-nuong",
+    bai: "Bài 1 · văn bản",
+    title: "Chuyện người con gái Nam Xương",
+    paras: [
+      "Tác giả Nguyễn Dữ, khoảng thế kỷ XVI. Truyện nằm trong Truyền kỳ mạn lục, viết bằng chữ Hán, thuộc thể truyền kỳ: chuyện đời thực có xen việc lạ.",
+      "Vũ Nương ở Nam Xương, chồng là Trương Sinh phải đi lính. Nàng ở nhà nuôi con. Đêm đùa với con, nàng trỏ bóng mình trên tường và nói đó là cha. Trương Sinh trở về. Đứa trẻ không nhận cha, nói người đêm nào cũng đến mới là cha. Chồng nghi oan. Nàng không phân trần được, gieo mình xuống sông.",
+      "Phần sau, một người được vào cung nước gặp Vũ Nương. Nàng nhờ nhắn chồng lập đàn giải oan bên sông. Đêm hôm ấy nàng hiện về giữa dòng, nói lời thanh thản rồi biến mất. Trương Sinh hiểu ra khi chính mình thấy bóng mình trên tường và đứa trẻ lại gọi đó là cha.",
+      "Nên nhớ khi làm bài: truyện không chỉ kể một người vợ hiền. Nó nói về sự cả tin vào một lời trẻ con, về người đàn bà không có tiếng nói để tự bênh, và về nỗi ân hận khi sự thật đến quá muộn."
+    ],
+    meo: "Đừng viết \"nàng rất tốt, chồng rất xấu\". Hãy chỉ một việc: Trương Sinh tin lời con hơn tin người đã chờ mình. Một việc cụ thể nặng hơn một câu khen.",
+    steps: [
+      "Nêu thể loại: truyện truyền kỳ, yếu tố thực và yếu tố lạ cùng có.",
+      "Kể ngắn bốn mốc: đi lính, bóng trên tường, nghi oan, hiện về trên sông.",
+      "Chọn một chi tiết để phân tích. Bóng đèn là lựa chọn chắc nhất.",
+      "Kết bằng điều truyện muốn người đọc nghĩ, không kết bằng \"em rất xúc động\"."
+    ],
+    practice: {
+      q: "Viết ra giấy 5 đến 7 dòng: chi tiết bóng trên tường nói gì về cách Trương Sinh nhìn vợ mình?",
+      hint: "Đừng kể lại cả truyện. Chỉ bám một việc: ông tin điều đứa trẻ nói về cái bóng.",
+      steps: [
+        "Mở bằng chi tiết: đêm về, ông thấy bóng mình, con gọi đó là cha.",
+        "Trước đó ông đã lấy đúng hình bóng ấy để kết tội vợ.",
+        "Ông không hỏi nàng đã sống những đêm một mình ra sao.",
+        "Chi tiết cho thấy oan khuất đến từ sự vội vàng, không cần một kẻ thứ ba nào cả."
+      ],
+      ans: "Gợi ý ôn: bóng là bằng chứng ông tự tạo ra rồi lại dùng để buộc tội. Đây không phải bài mẫu để học thuộc."
+    }
+  },
+  {
+    id: "de-choi",
+    bai: "Bài 1 · văn bản",
+    title: "Dế chọi",
+    paras: [
+      "Tác giả Bồ Tùng Linh, người Trung Quốc đời Thanh, truyện trong Liêu trai chí dị. Sách Kết nối đưa truyện này cạnh chuyện Vũ Nương để em thấy truyền kỳ không chỉ có ở Việt Nam: vẫn là chuyện lạ dùng để nói chuyện đời.",
+      "Một người bị quan trên bắt phải nộp dế chọi. Tìm không ra thì bị đánh. Ông tìm được một con dế khỏe. Đứa con vô tình làm chết con dế, sợ quá nên nhảy xuống giếng. Hồn đứa trẻ nhập vào một con dế nhỏ. Con dế ấy chọi thắng, được dâng lên vua. Nhà ấy hết nạn, đứa trẻ sống lại.",
+      "Việc lạ là hồn nhập vào dế. Việc đời là lệnh nộp cống, roi vọt, và nỗi sợ của một đứa trẻ trước lỗi không đáng chết. Con dế thắng không phải để ca ngợi trò chọi. Nó để thấy mạng người bị đem đổi lấy thú vui của kẻ có quyền."
+    ],
+    meo: "Khi so với chuyện Vũ Nương, đừng so từng tình tiết. Hãy so một câu: cả hai đều cần yếu tố lạ thì nỗi oan hoặc nỗi khổ mới được người khác nhìn thấy.",
+    steps: [
+      "Nêu một câu cốt truyện, không kể lan man.",
+      "Tách một chi tiết lạ: hồn trẻ nhập vào dế.",
+      "Nói chi tiết ấy lộ điều gì ở đời: sức ép của lệnh trên, sự yếu thế của nhà nghèo.",
+      "Nếu đề hỏi thái độ tác giả, trả lời bằng việc ông để đứa trẻ được sống lại sau khi người lớn đã thấy cái giá của trò chơi."
+    ],
+    practice: {
+      q: "Vì sao có thể nói con dế thắng trận vẫn là một chi tiết đau, không phải là một kết vui trọn vẹn?",
+      hint: "Nhìn ai phải trả giá trước khi con dế ấy xuất hiện.",
+      steps: [
+        "Con dế thắng làm quan trên hài lòng và nhà ấy thoát đòn.",
+        "Nhưng để có con dế ấy, một đứa trẻ đã phải chết hụt vì sợ.",
+        "Chiến thắng của con vật là mạng của đứa trẻ bị mang ra chọi.",
+        "Kết có hậu không xóa được điều truyện vừa chỉ ra."
+      ],
+      ans: "Gợi ý ôn: vui ở bề mặt, đau ở cái giá. Em có thể viết khác, miễn bám được việc đứa trẻ phải gánh lệnh của người lớn."
+    }
+  },
+  {
+    id: "son-tinh",
+    bai: "Bài 1 · văn bản",
+    title: "Sơn Tinh, Thủy Tinh",
+    paras: [
+      "Đây là bài thơ của Nguyễn Nhược Pháp, kể lại truyền thuyết Sơn Tinh và Thủy Tinh bằng giọng trong, gần lời nói thường, không phải văn biền ngẫu. Sách xếp bài này cạnh hai truyện truyền kỳ để em thấy cùng một thế giới kì ảo có thể được viết bằng thơ.",
+      "Hai thần tranh một người, rồi tranh bằng mưa, lũ, núi và nước. Người đọc nhận ra lũ lụt năm nào cũng về. Yếu tố kì ảo giải thích một việc đời: vì sao có mùa nước dâng, và vì sao người ở đồng bằng vừa sợ nước vừa phải sống cùng nước.",
+      "Khi phân tích thơ này, đừng biến lại thành bản kể truyền thuyết ở lớp dưới. Hãy nói giọng thơ: việc thần kỳ được kể như một câu chuyện ai cũng thuộc, nên nỗi sợ lũ hiện ra gần, không cần lời hô hào."
+    ],
+    meo: "Với thơ, trích một hình ảnh rồi nói tác dụng. Đừng kể hết cuộc đánh nhau của hai thần. Nếu chưa chắc từng chữ trong sách, hãy diễn bằng lời mình và nói rõ đó là ý, không phải câu trích.",
+    steps: [
+      "Nêu thể loại: thơ kể chuyện truyền thuyết.",
+      "Chỉ ra yếu tố kì ảo: thần, phép, mưa gió được gọi đến.",
+      "Nối với hiện thực: mùa lũ và cách người Việt nhớ chuyện lũ bằng một truyền thuyết.",
+      "Kết một câu về giọng điệu, không kết bằng lời khen \"bài thơ rất hay\"."
+    ],
+    practice: {
+      q: "Đề hỏi: yếu tố kì ảo trong bài thơ giúp em hiểu thêm điều gì về đời sống, không phải về các vị thần?",
+      hint: "Trả lời về nước, về mùa mưa, về người phải ở lại sau cuộc tranh chấp của thần.",
+      steps: [
+        "Thần và phép là lớp kể.",
+        "Việc còn lại với người đọc là nước dâng, nhà cửa, mùa màng.",
+        "Truyền thuyết giữ một cách giải thích cho việc thiên nhiên lặp lại mỗi năm.",
+        "Vì thế kì ảo ở đây không để trốn đời, mà để gọi tên một nỗi lo có thật."
+      ],
+      ans: "Gợi ý ôn: nói về lũ và người sống cùng lũ. Không biến bài thành thần thoại thuần túy."
+    }
+  },
+  {
+    id: "doc-hieu",
+    bai: "Bài 1 · luyện",
+    title: "Làm một đề đọc hiểu",
+    paras: [
+      "Thi vào 10 Hà Nội, phần đọc hiểu thường cho một ngữ liệu ngoài sách. Cách làm quan trọng hơn việc nhớ truyện. Dưới đây là một đoạn viết riêng cho buổi luyện, không có trong sách giáo khoa. Em đọc chậm, rồi mới mở gợi ý.",
+      "Mẹo chung cho bốn ý: câu hỏi \"là gì\" thì trả lời ngắn; câu hỏi \"tác dụng\" thì chỉ ra hình ảnh rồi nói hình ảnh ấy làm người đọc thấy điều gì; câu hỏi \"suy nghĩ\" thì viết 5 đến 7 dòng, có một việc em làm được, không chép lại đoạn văn."
+    ],
+    passage: "Đêm ngõ ngập, đèn đường tắt. Bé Lan ngồi trên bậc thềm, thấy những đốm sáng nhỏ trôi theo dòng nước đục. Em cứ ngỡ đó là những cửa sổ của một cung điện dưới cống. Mẹ bảo chỉ là đom đóm lạc, đừng thò tay xuống nước. Lan vẫn nhìn. Một đốm dừng trước bậc, nhấp nháy như có người vẫy. Gió thổi, đốm tắt. Sáng hôm sau ngõ khô. Chỉ còn một vỏ túi nilon mắc ở miệng cống.",
+    meo: "Đốm sáng là chỗ em dễ viết lan man. Hãy quyết định một câu: đó là điều Lan tưởng, không phải điều có thật. Điểm được nằm ở chỗ em phân biệt được hai tầng ấy.",
+    steps: [
+      "Đọc đoạn một lần, khoanh người kể và người được kể. Ở đây người nhìn là Lan.",
+      "Câu về phương thức: đoạn chủ yếu kể một việc xảy ra lúc đêm và lúc sáng, nên là tự sự.",
+      "Câu về hình ảnh: \"cửa sổ của một cung điện\" là liên tưởng của em bé, kéo nước cống bẩn thành cõi lạ.",
+      "Câu về hiện thực: vỏ túi nilon kéo người đọc trở lại cái cống. Ý nằm ở đó, không nằm ở đom đóm."
+    ],
+    practice: {
+      q: "Viết ra giấy bốn ý ngắn: phương thức biểu đạt chính, liên tưởng của Lan nói lên cách em nhìn dòng nước, chi tiết nào kéo về hiện thực, và 5 đến 7 dòng về việc giữ miệng cống.",
+      hint: "Ý 1 chỉ cần hai chữ hoặc một câu. Ý 4 không được chép đoạn. Hãy nêu một việc: không ném túi nilon xuống cống.",
+      steps: [
+        "Phương thức chính là tự sự, có xen tả đốm sáng.",
+        "Lan thấy cung điện vì em đang biến nước bẩn thành chuyện lạ. Đó là cái nhìn của trẻ, tác giả cố ý để người đọc thấy khoảng cách giữa tưởng tượng và dòng nước thật.",
+        "Chi tiết kéo về hiện thực là vỏ túi nilon mắc miệng cống buổi sáng.",
+        "Phần suy nghĩ: ngập không chỉ vì mưa. Rác bịt cống. Việc em làm được là gom túi nilon, không ném xuống đường khi tối."
+      ],
+      ans: "Gợi ý ôn, không phải đáp án duy nhất. Giám khảo chấm ý và cách viết, không chấm đúng từng chữ."
+    }
+  },
+  {
+    id: "nghi-luan",
+    bai: "Bài 1 · viết",
+    title: "Nghị luận: người với tự nhiên",
+    paras: [
+      "Phần viết của bài 1 là nghị luận về một vấn đề thời sự, trục con người với tự nhiên. Đề không đòi một bài thật dài ở buổi đầu. Đòi em có mở, có thân, có một việc làm được, và có kết.",
+      "Đừng học thuộc một bài mẫu trên mạng. Đề năm sau đổi việc. Em chỉ giữ cái khung. Việc trong bài phải là việc quanh nhà em ở Hà Nội: ngõ ngập, rác, cây, điện, hồ.",
+      "Khi nói và nghe ở lớp, cũng dùng khung ấy: nêu một ý, nghe bạn nói một ý khác, chốt một việc cả nhóm làm được. Không tranh để thắng."
+    ],
+    meo: "Thiếu giải pháp thì bài mới chỉ là than. Thiếu một việc cụ thể thì giải pháp chỉ là khẩu hiệu. Một câu \"tối nay em không xả túi nilon xuống cống\" hơn một đoạn \"hãy bảo vệ môi trường\".",
+    steps: [
+      "Mở: nêu việc em vừa thấy, một hoặc hai câu. Không định nghĩa \"tự nhiên là gì\".",
+      "Thân một: việc ấy xảy ra thế nào, ở đâu.",
+      "Thân hai: hại gì với người trong ngõ, không cần nói cả trái đất.",
+      "Thân ba: một việc em làm được tuần này. Kết: nhắc lại việc ấy, dừng."
+    ],
+    practice: {
+      q: "Đề luyện: Viết đoạn nghị luận khoảng 15 đến 20 dòng về việc giữ cho ngõ nhà mình không ngập vì rác. Làm ra giấy, rồi mở khung ý.",
+      hint: "Mở bằng một trận mưa em nhớ. Đừng mở bằng \"từ xưa đến nay\".",
+      steps: [
+        "Mở: sau một trận mưa, nước đứng ở cửa nhà vì miệng cống bị túi nilon bịt.",
+        "Biểu hiện: lá, túi, chai nằm ngay chỗ nước phải thoát.",
+        "Hại: nhà ướt, muỗi, mùi, người già khó đi.",
+        "Việc làm: nhà em để một túi rác có nắp, không ném đồ xuống đường khi tối. Em nói với em nhỏ trong nhà một câu cụ thể.",
+        "Kết: ngõ khô hay ngập một phần nằm ở thứ mình ném ra trước cửa."
+      ],
+      ans: "Gợi ý ôn. Em được đổi ví dụ nếu ví dụ của em có thật. Đừng chép nguyên khung này vào bài thi."
+    }
+  }
+];
+const KEY = "lop9-van-v1";
+const DAY = 86400000;
+let tab = "hoc";
+let openId = null;
+let revealed = {};
+function load() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
+let prog = load();
+function save() { localStorage.setItem(KEY, JSON.stringify(prog)); }
+function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return ({ "&": "&", "<": "<", ">": ">" })[c]; }); }
+function toast(text, kind) {
+  const box = document.getElementById("toasts");
+  const el = document.createElement("div");
+  el.className = "toast " + (kind || "info");
+  el.textContent = text;
+  box.appendChild(el);
+  setTimeout(function () { el.remove(); }, 3800);
+}
+function unitBy(id) { return UNITS.filter(function (u) { return u.id === id; })[0]; }
+function statusOf(id) {
+  const row = prog[id];
+  if (!row) return "Mới";
+  if (row.due <= Date.now()) return "Đến hạn ôn";
+  const days = Math.max(1, Math.ceil((row.due - Date.now()) / DAY));
+  return "Ôn sau " + days + " ngày";
+}
+function dueCount() { return UNITS.filter(function (u) { return prog[u.id] && prog[u.id].due <= Date.now(); }).length; }
+function renderHome() {
+  return '<p class="tag">Hà Nội · đầu năm · Kết nối tri thức · tập một</p><h1>Bài 1. Thế giới kì ảo</h1><p>Nền này lấy màu đèn học, vàng ấm, để em đọc lâu. Chữ không đen kịt, nền không trắng gắt.</p><div class="note sm">Phần gợi ý là cách làm, không phải bài mẫu để học thuộc. Viết ra giấy trước, rồi mới lật. Thi Văn vào 10 là tự luận.</div><p class="sm muted">Đến hạn hôm nay: ' + dueCount() + ' phần.</p>' + UNITS.map(function (u) {
+    return '<article class="card"><p class="tag">' + esc(u.bai) + " · " + esc(statusOf(u.id)) + "</p><h2>" + esc(u.title) + '</h2><button class="btn btn-primary" type="button" data-open="' + u.id + '" style="margin-top:.8rem">Đọc phần này</button></article>';
+  }).join("") + '<p class="sm"><a href="./toan.html">Sang trang toán</a> · <a href="./hoctienganh.html">Sang trang tiếng Anh</a></p>';
+}
+function renderOn() {
+  const list = UNITS.filter(function (u) { return prog[u.id] && prog[u.id].due <= Date.now(); });
+  if (!list.length) return "<h1>Ôn</h1><p>Chưa có phần đến hạn. Đọc một phần, tự chấm xong thì lịch ôn hiện ở đây.</p>";
+  return "<h1>Ôn hôm nay</h1>" + list.map(function (u) {
+    return '<article class="card"><h2>' + esc(u.title) + '</h2><button class="btn btn-primary" type="button" data-open="' + u.id + '" style="margin-top:.8rem">Ôn phần này</button></article>';
+  }).join("");
+}
+function renderUnit(u) {
+  const show = revealed[u.id];
+  return '<button class="btn" type="button" data-back="1">Về bài 1</button><p class="tag" style="margin-top:.9rem">' + esc(u.bai) + "</p><h1>" + esc(u.title) + "</h1>" + u.paras.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("") + (u.passage ? '<div class="passage"><p class="tag">Đoạn luyện, không có trong sách</p><p>' + esc(u.passage) + "</p></div>" : "") + '<div class="card"><p class="tag">Mẹo</p><p>' + esc(u.meo) + '</p><p class="tag">Cách làm</p><ol class="steps">' + u.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol></div>" + '<div class="card"><p class="tag">Việc cần làm ra giấy</p><p>' + esc(u.practice.q) + '</p><button class="btn btn-primary" type="button" data-show="' + u.id + '">Đã viết xong, xem gợi ý</button><div class="' + (show ? "" : "hide") + '"><p class="sm"><b>Hướng đi.</b> ' + esc(u.practice.hint) + "</p><ol class=\"steps\">" + u.practice.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol><p><b>" + esc(u.practice.ans) + "</b></p></div></div>" + '<div class="card"><p class="tag">Tự chấm</p><p class="sm">Chỉ bấm sau khi đã viết và đã đọc gợi ý. Gợi ý không phải đáp án duy nhất.</p><div class="row"><button class="btn" type="button" data-grade="fail">Chưa viết được</button><button class="btn" type="button" data-grade="fuzzy">Còn vướng</button><button class="btn" type="button" data-grade="know">Làm được</button></div><button class="btn" type="button" data-report="1" style="width:100%;margin-top:.55rem">Báo chỗ này chưa ổn</button></div>';
+}
+function render() {
+  const root = document.getElementById("app");
+  const u = openId && unitBy(openId);
+  root.innerHTML = (u ? renderUnit(u) : (tab === "on" ? renderOn() : renderHome())) + '<nav class="dock"><div class="dock-in"><button type="button" data-tab="hoc" class="' + (tab === "hoc" && !openId ? "on" : "") + '">Học</button><button type="button" data-tab="on" class="' + (tab === "on" && !openId ? "on" : "") + '">Ôn</button></div></nav>';
+}
+document.body.addEventListener("click", function (ev) {
+  const t = ev.target.closest("button");
+  if (!t || t.id === "btnInstall" || t.id === "pwa-guide-close") return;
+  if (t.dataset.tab) { tab = t.dataset.tab; openId = null; render(); return; }
+  if (t.dataset.open) { openId = t.dataset.open; revealed = {}; render(); window.scrollTo(0, 0); return; }
+  if (t.dataset.back) { openId = null; render(); return; }
+  if (t.dataset.show) { revealed[t.dataset.show] = true; toast("Đây là gợi ý. Đối chiếu với bài em vừa viết.", "info"); render(); return; }
+  if (t.dataset.grade && openId) {
+    const days = t.dataset.grade === "know" ? 7 : (t.dataset.grade === "fuzzy" ? 3 : 1);
+    prog[openId] = { kind: t.dataset.grade, due: Date.now() + days * DAY };
+    save();
+    toast(t.dataset.grade === "know" ? "Làm được. Ôn lại sau 7 ngày." : (t.dataset.grade === "fuzzy" ? "Còn vướng. Ôn lại sau 3 ngày." : "Mai viết lại phần này."), t.dataset.grade === "fail" ? "warn" : "ok");
+    openId = null; tab = "hoc"; render(); return;
+  }
+  if (t.dataset.report && openId) {
+    const bag = JSON.parse(localStorage.getItem("lop9-van-bao-loi") || "[]");
+    bag.push({ id: openId, at: Date.now() });
+    localStorage.setItem("lop9-van-bao-loi", JSON.stringify(bag));
+    toast("Đã ghi. Nhờ thầy cô xem lại phần này.", "warn");
+  }
+});
+render();
+</script>
+<script>
+(function () {
+  var FAB = "lop9_van_fab_v1";
+  var fab = document.getElementById("btnInstall");
+  var guide = document.getElementById("pwa-guide");
+  var box = document.getElementById("pwa-guide-body");
+  var ua = navigator.userAgent.toLowerCase();
+  var phone = /iphone|ipad|ipod|android/.test(ua) || navigator.maxTouchPoints > 1;
+  var ios = /iphone|ipad|ipod/.test(ua);
+  var zalo = /zalo|fban|fbav|instagram/.test(ua);
+  var alone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  function showGuide() {
+    box.innerHTML = zalo ? "<p>Zalo đang chặn cài app. Bấm ⋯ rồi chọn Mở bằng trình duyệt.</p>" : (ios ? "<p>Trên iPhone, bấm Chia sẻ rồi chọn Thêm vào Màn hình chính.</p>" : (phone ? "<p>Trên Android, bấm ⋮ rồi chọn Cài đặt ứng dụng.</p>" : "<p>Trên máy tính, dùng Chrome hoặc Edge và bấm biểu tượng cài ở thanh địa chỉ.</p>"));
+    guide.hidden = false;
+  }
+  function install() {
+    var promptEvent = window.__lop9InstallPrompt;
+    if (promptEvent && promptEvent.prompt) {
+      window.__lop9InstallPrompt = null;
+      promptEvent.prompt().then(function () { return promptEvent.userChoice; }).then(function (choice) {
+        if (choice && choice.outcome === "accepted") fab.style.display = "none";
+      }).catch(showGuide);
+      return;
+    }
+    showGuide();
+  }
+  var pointer = null, drag = false, sx = 0, sy = 0, sl = 0, st = 0;
+  function place(left, top) {
+    var rect = fab.getBoundingClientRect();
+    left = Math.min(Math.max(8, left), Math.max(8, window.innerWidth - rect.width - 8));
+    top = Math.min(Math.max(8, top), Math.max(8, window.innerHeight - rect.height - 8));
+    fab.style.left = left + "px"; fab.style.top = top + "px"; fab.style.right = "auto"; fab.style.bottom = "auto";
+    fab.dataset.positioned = "1";
+    return { left: left, top: top };
+  }
+  try { var saved = JSON.parse(localStorage.getItem(FAB) || "null"); if (saved) place(saved.left, saved.top); } catch (e) {}
+  fab.addEventListener("pointerdown", function (ev) {
+    if (ev.button && ev.button !== 0) return;
+    ev.preventDefault();
+    pointer = ev.pointerId; drag = false; sx = ev.clientX; sy = ev.clientY;
+    var rect = fab.getBoundingClientRect(); sl = rect.left; st = rect.top;
+    if (fab.setPointerCapture) fab.setPointerCapture(ev.pointerId);
+  }, { passive: false });
+  fab.addEventListener("pointermove", function (ev) {
+    if (ev.pointerId !== pointer) return;
+    ev.preventDefault();
+    var dx = ev.clientX - sx, dy = ev.clientY - sy;
+    if (!drag && Math.hypot(dx, dy) > 10) drag = true;
+    if (drag) place(sl + dx, st + dy);
+  }, { passive: false });
+  fab.addEventListener("pointerup", function (ev) {
+    if (ev.pointerId !== pointer) return;
+    if (drag) { var pos = place(fab.getBoundingClientRect().left, fab.getBoundingClientRect().top); localStorage.setItem(FAB, JSON.stringify(pos)); toast("Đã dời nút Cài app.", "info"); }
+    else install();
+    pointer = null; drag = false;
+  });
+  fab.addEventListener("click", function (ev) { ev.preventDefault(); });
+  fab.addEventListener("contextmenu", function (ev) { ev.preventDefault(); });
+  document.getElementById("pwa-guide-close").addEventListener("click", function () { guide.hidden = true; });
+  window.addEventListener("appinstalled", function () { fab.style.display = "none"; });
+  window.addEventListener("lop9:pwa-install-ready", function () { if (!alone) fab.style.display = "block"; });
+  if (!alone) fab.style.display = "block";
+  if ("serviceWorker" in navigator && /^https?:$/i.test(location.protocol)) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("./sw.js", { scope: "./", updateViaCache: "none" }).catch(function () {});
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "id": "./van.html",
+  "name": "Học văn lớp 9",
+  "short_name": "Văn lớp 9",
+  "description": "Ngữ văn 9 Kết nối tri thức, đọc lâu bằng ánh đèn ấm, ôn thi vào 10 Hà Nội.",
+  "lang": "vi",
+  "dir": "ltr",
+  "start_url": "./van.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3e0b8",
+  "theme_color": "#8d4e16",
+  "icons": [
+    { "src": "./icon-van-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-van-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-van-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
