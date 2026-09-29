@@ -1115,10 +1115,10 @@ button,input,textarea,select,option{font-family:inherit!important;}
 </style>
 
 <script>
-    window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
-    const savedTheme = localStorage.getItem('lifeos_v22_theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    if(window.tailwind){window.tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']}}}}}
+    window.themes = ['light', 'lemon', 'orange', 'rose', 'mint'];
+    const savedTheme = localStorage.getItem('lifeos_v22_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    if(window.tailwind){window.tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']}}}}}
 </script>
 
 
@@ -7981,16 +7981,16 @@ body.music-player-active #mini-player {
 <div class="lg:col-span-8 flex flex-col h-full view-section active" id="view-tasks">
 <div class="hidden lg:block bg-white p-5 rounded-3xl shadow-sm border border-slate-200 mb-6 relative z-10">
 <form class="flex gap-3" id="form-pc">
-    <button class="btn-voice flex p-3.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl items-center justify-center active:scale-95 border border-slate-200" onclick="window.lifeosStartMicToInput('input-pc', this)" type="button"><i class="ph-fill ph-microphone text-xl pointer-events-none"></i></button>
-    <div class="relative flex-grow">
-        <i class="ph-bold ph-magic-wand absolute left-4 top-1/2 -translate-y-1/2 text-primary text-lg"></i>
-        <input autocomplete="off" class="w-full bg-slate-50 border border-slate-200 outline-none py-3.5 pl-12 pr-4 rounded-xl text-base font-semibold text-slate-800 focus:border-primary transition-all shadow-inner" id="input-pc" placeholder="Gõ NLP: hằng ngày lúc 14h30 đọc sách !gấp #hoc_tap..." type="text"/>
-    </div>
-    <div class="relative flex items-center justify-center px-3 bg-slate-50 rounded-xl border border-slate-200 shadow-inner overflow-hidden cursor-pointer hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
-        <i class="ph-bold ph-calendar-plus text-xl text-primary absolute pointer-events-none"></i>
-        <input class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" id="dt-pc" onchange="window.syncManualDateToInput(this, 'input-pc')" type="datetime-local"/>
-    </div>
-    <button class="bg-primary text-white px-8 py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition flex justify-center items-center gap-2 hover:brightness-110" type="submit">Thêm</button>
+    <button class="btn-voice flex p-3.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl items-center justify-center active:scale-95 border border-slate-200" onclick="window.lifeosStartMicToInput('input-pc', this)" type="button"><i class="ph-fill ph-microphone text-xl pointer-events-none"></i></button>
+    <div class="relative flex-grow">
+        <i class="ph-bold ph-magic-wand absolute left-4 top-1/2 -translate-y-1/2 text-primary text-lg"></i>
+        <input autocomplete="off" class="w-full bg-slate-50 border border-slate-200 outline-none py-3.5 pl-12 pr-4 rounded-xl text-base font-semibold text-slate-800 focus:border-primary transition-all shadow-inner" id="input-pc" placeholder="Gõ NLP: hằng ngày lúc 14h30 đọc sách !gấp #hoc_tap..." type="text"/>
+    </div>
+    <div class="relative flex items-center justify-center px-3 bg-slate-50 rounded-xl border border-slate-200 shadow-inner overflow-hidden cursor-pointer hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
+        <i class="ph-bold ph-calendar-plus text-xl text-primary absolute pointer-events-none"></i>
+        <input class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" id="dt-pc" onchange="window.syncManualDateToInput(this, 'input-pc')" type="datetime-local"/>
+    </div>
+    <button class="bg-primary text-white px-8 py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition flex justify-center items-center gap-2 hover:brightness-110" type="submit">Thêm</button>
 </form>
 </div>
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 sm:gap-4">
@@ -8010,24 +8010,24 @@ body.music-player-active #mini-player {
 <button class="py-2 text-[10px] sm:text-sm font-bold rounded-lg transition-all text-slate-500 hover:bg-slate-50 active:scale-95 truncate" id="tab-stopwatch" onclick="window.switchTimerMode('stopwatch')">Bấm giờ</button>
 </div>
 <div class="w-full flex flex-col items-center z-10 animate-fadeIn" id="mode-dateclock-ui">
-    <div class="w-full bg-white border border-slate-200 rounded-[1.75rem] p-4 sm:p-5 shadow-sm overflow-hidden min-w-0 text-center">
-        <div class="flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 mb-3"><i class="ph-bold ph-clock text-primary text-lg"></i> Theo giờ hệ thống thiết bị</div>
-        <div class="font-mono text-[clamp(2.35rem,12vw,4.25rem)] leading-none font-black text-slate-900 tracking-[-0.08em] tabular-nums whitespace-nowrap overflow-hidden text-center" id="dateclock-time">--:--:--</div>
-        <div class="text-base sm:text-lg font-black text-primary mt-3" id="dateclock-weekday">--</div>
-        <div class="grid grid-cols-2 gap-3 mt-5 w-full min-w-0 lifeos-dateclock-two-cols-lock" id="dateclock-dual-cards">
-            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden lifeos-dateclock-card lifeos-dateclock-card-solar">
-                <div class="flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-amber-600 mb-2"><i class="ph-fill ph-sun text-base sm:text-lg"></i> Dương lịch</div>
-                <div class="text-[clamp(1.15rem,4.8vw,1.65rem)] sm:text-2xl font-black text-slate-800 leading-none tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-center" id="dateclock-solar-short">--/--/----</div>
-                <div class="text-xs sm:text-sm font-semibold text-slate-500 mt-2 leading-snug text-center" id="dateclock-solar-long">--</div>
-            </div>
-            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden lifeos-dateclock-card lifeos-dateclock-card-lunar">
-                <div class="flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-indigo-600 mb-2"><i class="ph-fill ph-moon-stars text-base sm:text-lg"></i> Âm lịch</div>
-                <div class="text-[clamp(1.15rem,4.8vw,1.65rem)] sm:text-2xl font-black text-slate-800 leading-none tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-center" id="dateclock-lunar-short">--/--/----</div>
-                <div class="text-xs sm:text-sm font-semibold text-slate-500 mt-2 leading-snug text-center" id="dateclock-lunar-long">--</div>
-            </div>
-        </div>
-        <div class="mt-4 text-[11px] font-bold text-slate-400 flex items-center justify-center gap-1"><i class="ph-bold ph-device-mobile"></i> Theo giờ hệ thống thiết bị</div>
-    </div>
+    <div class="w-full bg-white border border-slate-200 rounded-[1.75rem] p-4 sm:p-5 shadow-sm overflow-hidden min-w-0 text-center">
+        <div class="flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 mb-3"><i class="ph-bold ph-clock text-primary text-lg"></i> Theo giờ hệ thống thiết bị</div>
+        <div class="font-mono text-[clamp(2.35rem,12vw,4.25rem)] leading-none font-black text-slate-900 tracking-[-0.08em] tabular-nums whitespace-nowrap overflow-hidden text-center" id="dateclock-time">--:--:--</div>
+        <div class="text-base sm:text-lg font-black text-primary mt-3" id="dateclock-weekday">--</div>
+        <div class="grid grid-cols-2 gap-3 mt-5 w-full min-w-0 lifeos-dateclock-two-cols-lock" id="dateclock-dual-cards">
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden lifeos-dateclock-card lifeos-dateclock-card-solar">
+                <div class="flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-amber-600 mb-2"><i class="ph-fill ph-sun text-base sm:text-lg"></i> Dương lịch</div>
+                <div class="text-[clamp(1.15rem,4.8vw,1.65rem)] sm:text-2xl font-black text-slate-800 leading-none tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-center" id="dateclock-solar-short">--/--/----</div>
+                <div class="text-xs sm:text-sm font-semibold text-slate-500 mt-2 leading-snug text-center" id="dateclock-solar-long">--</div>
+            </div>
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 sm:p-4 text-center shadow-inner min-w-0 overflow-hidden lifeos-dateclock-card lifeos-dateclock-card-lunar">
+                <div class="flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-indigo-600 mb-2"><i class="ph-fill ph-moon-stars text-base sm:text-lg"></i> Âm lịch</div>
+                <div class="text-[clamp(1.15rem,4.8vw,1.65rem)] sm:text-2xl font-black text-slate-800 leading-none tracking-tight tabular-nums whitespace-nowrap overflow-hidden text-center" id="dateclock-lunar-short">--/--/----</div>
+                <div class="text-xs sm:text-sm font-semibold text-slate-500 mt-2 leading-snug text-center" id="dateclock-lunar-long">--</div>
+            </div>
+        </div>
+        <div class="mt-4 text-[11px] font-bold text-slate-400 flex items-center justify-center gap-1"><i class="ph-bold ph-device-mobile"></i> Theo giờ hệ thống thiết bị</div>
+    </div>
 </div>
 <div class="hidden w-full flex-col items-center z-10 animate-fadeIn" id="mode-weather-ui">
 <div class="w-full bg-white border border-slate-200 rounded-[1.75rem] p-4 sm:p-6 shadow-sm overflow-hidden min-w-0">
@@ -8414,11 +8414,19 @@ body.music-player-active #mini-player {
   #form-mobile > div {
     display: grid !important;
     grid-template-columns: 44px minmax(0, 1fr) 40px 44px !important;
+    grid-template-rows: 44px !important;
     align-items: center !important;
     gap: 6px !important;
     width: 100% !important;
     min-width: 0 !important;
+    height: 44px !important;
+    max-height: 44px !important;
+    overflow: hidden !important;
   }
+  #form-mobile > div > .btn-voice { grid-column: 1; grid-row: 1; }
+  #form-mobile > div > #input-mobile { grid-column: 2; grid-row: 1; height: 40px !important; }
+  #form-mobile > div > div { grid-column: 3; grid-row: 1; }
+  #form-mobile > div > button[type="submit"] { grid-column: 4; grid-row: 1; }
   #input-mobile {
     min-width: 0 !important;
     width: 100% !important;
@@ -8532,38 +8540,38 @@ html.lifeos-keyboard-open.lifeos-keyboard-chat #chat-form {
 </script>
 <div class="lg:hidden fixed inset-x-0 z-[60] px-3 transition-all duration-300" id="mobile-input" style="bottom: calc(var(--lifeos-bottom-nav-h) + env(safe-area-inset-bottom));">
 <form class="w-full max-w-3xl mx-auto flex flex-col bg-white/80 backdrop-blur-2xl rounded-2xl p-1.5 shadow-[0_-8px_30px_rgba(15,23,42,0.10)] border border-white/70" id="form-mobile">
-    <div class="flex items-center w-full gap-1">
-        <button class="btn-voice p-2.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl active:scale-90 border border-slate-200 shadow-sm shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center" onclick="window.lifeosStartMicToInput('input-mobile', this)" type="button"><i class="ph-fill ph-microphone text-[20px] pointer-events-none"></i></button>
-        <input autocomplete="off" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" type="text"/>
-        <div class="relative flex items-center justify-center mr-1 w-10 h-10 bg-slate-50 rounded-xl overflow-hidden cursor-pointer shadow-sm border border-slate-200 hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
-            <i class="ph-bold ph-calendar-plus text-lg text-primary absolute pointer-events-none"></i>
-            <input class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" id="dt-mb" onchange="window.syncManualDateToInput(this, 'input-mobile')" type="datetime-local"/>
-        </div>
-        <button class="bg-primary text-white p-3 rounded-xl active:scale-90 shadow-md flex-shrink-0 transition-transform hover:brightness-110" type="submit"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
-    </div>
+    <div class="flex items-center w-full gap-1">
+        <button class="btn-voice p-2.5 bg-slate-50 text-slate-500 hover:text-primary transition rounded-xl active:scale-90 border border-slate-200 shadow-sm shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center" onclick="window.lifeosStartMicToInput('input-mobile', this)" type="button"><i class="ph-fill ph-microphone text-[20px] pointer-events-none"></i></button>
+        <input autocomplete="off" class="flex-grow bg-transparent border-none outline-none text-base font-semibold py-2 px-1 text-slate-800 placeholder-slate-400" id="input-mobile" placeholder="Gõ NLP hoặc chọn lịch ➜" type="text"/>
+        <div class="relative flex items-center justify-center mr-1 w-10 h-10 bg-slate-50 rounded-xl overflow-hidden cursor-pointer shadow-sm border border-slate-200 hover:brightness-95 transition" title="Chọn ngày giờ thủ công">
+            <i class="ph-bold ph-calendar-plus text-lg text-primary absolute pointer-events-none"></i>
+            <input class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" id="dt-mb" onchange="window.syncManualDateToInput(this, 'input-mobile')" type="datetime-local"/>
+        </div>
+        <button class="bg-primary text-white p-3 rounded-xl active:scale-90 shadow-md flex-shrink-0 transition-transform hover:brightness-110" type="submit"><i class="ph-bold ph-paper-plane-right text-lg"></i></button>
+    </div>
 </form>
 </div>
 <nav class="fixed bottom-0 w-full bg-white/90 backdrop-blur-2xl border-t border-slate-200/80 z-[40] pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] lg:hidden" id="bottom-nav">
 <div class="flex justify-around px-2 py-2">
 <button type="button" class="nav-btn active group text-primary flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative" onclick="return window.LifeOSCompatHandlers.h011.call(this,event);">
-  <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-100 scale-100 transition-all nav-bg"></div>
-  <i class="ph-fill ph-list-checks text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
-  <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Nhiệm vụ</span>
+  <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-100 scale-100 transition-all nav-bg"></div>
+  <i class="ph-fill ph-list-checks text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
+  <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Nhiệm vụ</span>
 </button>
 <button type="button" class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h012.call(this,event);">
-  <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
-  <i class="ph-fill ph-timer text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
-  <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Tập trung</span>
+  <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
+  <i class="ph-fill ph-timer text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
+  <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Tập trung</span>
 </button>
 <button type="button" class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h013.call(this,event);">
-  <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
-  <i class="ph-fill ph-vault text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
-  <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Kho lưu trữ</span>
+  <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
+  <i class="ph-fill ph-vault text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
+  <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Kho lưu trữ</span>
 </button>
 <button type="button" class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h014.call(this,event);">
-  <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
-  <i class="ph-fill ph-music-notes text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
-  <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Nghe nhạc</span>
+  <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
+  <i class="ph-fill ph-music-notes text-[22px] mb-1 transition-transform group-active:scale-90 relative z-10"></i>
+  <span class="text-[10px] font-bold relative z-10 tracking-wide mt-0.5">Nghe nhạc</span>
 </button>
 <button type="button" class="nav-btn group text-slate-400 flex flex-col items-center w-full py-1.5 transition-all rounded-2xl mx-1 relative hover:text-slate-600" onclick="return window.LifeOSCompatHandlers.h015.call(this,event);">
 <div class="absolute inset-0 bg-slate-50 border border-slate-100 rounded-xl opacity-0 scale-50 transition-all nav-bg"></div>
@@ -8635,18 +8643,18 @@ window.vibrate = function (p) { try {
 catch (e) { } return false; };
 </script>
 <div class="hidden fixed inset-0 z-[1000] bg-slate-900/60 backdrop-blur-md items-center justify-center p-4" id="sentinel-panel">
-    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]">
-        <div class="flex items-center justify-between mb-6 flex-shrink-0">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100"><i class="ph-fill ph-shield-check text-2xl text-emerald-500"></i></div>
-                <div><h2 class="text-xl font-black text-slate-800">Voice Guard &amp; Alarm</h2><span class="text-[10px] font-bold text-slate-500 block mt-0.5" id="voice-info-badge">Đang tải giọng...</span></div>
-            </div>
-            <button class="p-3 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition-colors" onclick="window.closeSentinelPanel()"><i class="ph-bold ph-x text-lg"></i></button>
-        </div>
-        <div class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
-            <b>Cảnh báo iOS/Android:</b><br/>Bật chuông điện thoại (Bỏ gạt rung). Chạm màn hình 1 lần để tải trước Audio. Background Audio sẽ đếm giờ bất chấp tắt màn hình!
-        </div>
-        
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]">
+        <div class="flex items-center justify-between mb-6 flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100"><i class="ph-fill ph-shield-check text-2xl text-emerald-500"></i></div>
+                <div><h2 class="text-xl font-black text-slate-800">Voice Guard &amp; Alarm</h2><span class="text-[10px] font-bold text-slate-500 block mt-0.5" id="voice-info-badge">Đang tải giọng...</span></div>
+            </div>
+            <button class="p-3 text-slate-400 hover:bg-slate-100 rounded-xl active:scale-90 transition-colors" onclick="window.closeSentinelPanel()"><i class="ph-bold ph-x text-lg"></i></button>
+        </div>
+        <div class="text-sm text-slate-600 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed shadow-inner">
+            <b>Cảnh báo iOS/Android:</b><br/>Bật chuông điện thoại (Bỏ gạt rung). Chạm màn hình 1 lần để tải trước Audio. Background Audio sẽ đếm giờ bất chấp tắt màn hình!
+        </div>
+        
 <!-- PHA15_VOICE_GUARD_STATUS_BLOCK_START -->
 <div class="mb-5 p-4 flex-shrink-0" id="lifeos-voiceguard-status-card">
 <div class="flex items-center justify-between gap-3 mb-3">
@@ -8662,69 +8670,69 @@ catch (e) { } return false; };
 </div>
 <!-- PHA15_VOICE_GUARD_STATUS_BLOCK_END -->
 <div class="grid grid-cols-2 gap-3 flex-shrink-0">
-            <button class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100" onclick="return window.LifeOSCompatHandlers.h016.call(this,event);"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
-            <button class="py-3.5 rounded-xl bg-slate-50 text-primary font-bold text-sm active:scale-95 border border-slate-200 flex justify-center items-center gap-2 transition-all hover:brightness-95" onclick="window.testVoiceGuard()"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
+            <button class="py-3.5 rounded-xl bg-rose-50 text-rose-500 font-bold text-sm active:scale-95 border border-rose-100 flex justify-center items-center gap-2 transition-all hover:bg-rose-100" onclick="return window.LifeOSCompatHandlers.h016.call(this,event);"><i class="ph-bold ph-warning-circle"></i> Thử Loa Alarm</button>
+            <button class="py-3.5 rounded-xl bg-slate-50 text-primary font-bold text-sm active:scale-95 border border-slate-200 flex justify-center items-center gap-2 transition-all hover:brightness-95" onclick="window.testVoiceGuard()"><i class="ph-bold ph-speaker-high"></i> Thử Giọng AI</button>
 <button class="col-span-2 py-3.5 rounded-xl bg-emerald-50 text-emerald-700 font-black text-sm active:scale-95 border border-emerald-200 flex justify-center items-center gap-2 transition-all hover:bg-emerald-100" id="lifeos-alarm-anchor-btn" onclick="window.activateLifeOSAlarmAnchor &amp;&amp; window.activateLifeOSAlarmAnchor()" type="button"><i class="ph-bold ph-broadcast"></i> Kích hoạt báo thức nền</button>
 <button class="col-span-2 py-3.5 rounded-xl bg-amber-50 text-amber-700 font-black text-sm active:scale-95 border border-amber-200 flex justify-center items-center gap-2 transition-all hover:bg-amber-100" id="lifeos-alarm-test15-btn" onclick="window.lifeosTestAlarm15s &amp;&amp; window.lifeosTestAlarm15s()" type="button"><i class="ph-bold ph-timer"></i> Test báo thức 15 giây</button>
-        </div>
-    </div>
+        </div>
+    </div>
 </div>
 <div class="hidden fixed inset-0 z-[9999999] bg-slate-900/95 backdrop-blur-xl flex-col items-center justify-center alarm-flash px-4 sm:px-6 overflow-y-auto" id="alarm-overlay">
-    <div class="text-white text-center mb-8 flex-shrink-0 mt-10">
-        <i class="ph-fill ph-bell-ringing text-7xl animate-bounce mb-4 inline-block drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"></i>
-        <h2 class="text-3xl font-black uppercase tracking-widest">ĐẾN GIỜ RỒI!</h2>
-    </div>
-    <p class="text-xl lg:text-2xl text-white font-bold mb-10 w-full max-w-md text-center bg-white/10 p-6 rounded-3xl border border-white/20 leading-relaxed shadow-inner flex-shrink-0 break-words" id="alarm-message"></p>
-    <div class="flex flex-col gap-3 w-full max-w-sm flex-shrink-0 pb-10">
-        <button class="bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2" id="btn-alarm-complete" onclick="window.stopGlobalAlarm('complete')"><i class="ph-bold ph-check-circle text-3xl"></i> XÁC NHẬN HOÀN THÀNH</button>
-        <div class="grid grid-cols-2 gap-3 mt-2">
-            <button class="bg-amber-500 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition shadow-lg flex justify-center items-center gap-2" onclick="window.stopGlobalAlarm('snooze')"><i class="ph-bold ph-clock-afternoon"></i> Báo lại (5 phút)</button>
-            <button class="bg-slate-700 border border-slate-600 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition hover:bg-slate-600 flex justify-center items-center gap-2" onclick="window.stopGlobalAlarm('dismiss')"><i class="ph-bold ph-eye-closed"></i> Bỏ qua (Tạm ẩn)</button>
-        </div>
-        <p class="text-[10px] text-white/50 text-center mt-2 italic font-medium tracking-wide">Mẹo: Để tắt hẳn chuông hôm nay, hãy bấm vào icon 🔔 trên thẻ công việc.</p>
-    </div>
+    <div class="text-white text-center mb-8 flex-shrink-0 mt-10">
+        <i class="ph-fill ph-bell-ringing text-7xl animate-bounce mb-4 inline-block drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"></i>
+        <h2 class="text-3xl font-black uppercase tracking-widest">ĐẾN GIỜ RỒI!</h2>
+    </div>
+    <p class="text-xl lg:text-2xl text-white font-bold mb-10 w-full max-w-md text-center bg-white/10 p-6 rounded-3xl border border-white/20 leading-relaxed shadow-inner flex-shrink-0 break-words" id="alarm-message"></p>
+    <div class="flex flex-col gap-3 w-full max-w-sm flex-shrink-0 pb-10">
+        <button class="bg-emerald-500 text-white font-black text-xl py-4 rounded-2xl shadow-xl active:scale-95 transition hover:scale-105 flex justify-center items-center gap-2" id="btn-alarm-complete" onclick="window.stopGlobalAlarm('complete')"><i class="ph-bold ph-check-circle text-3xl"></i> XÁC NHẬN HOÀN THÀNH</button>
+        <div class="grid grid-cols-2 gap-3 mt-2">
+            <button class="bg-amber-500 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition shadow-lg flex justify-center items-center gap-2" onclick="window.stopGlobalAlarm('snooze')"><i class="ph-bold ph-clock-afternoon"></i> Báo lại (5 phút)</button>
+            <button class="bg-slate-700 border border-slate-600 text-white font-bold text-base py-3.5 rounded-xl active:scale-95 transition hover:bg-slate-600 flex justify-center items-center gap-2" onclick="window.stopGlobalAlarm('dismiss')"><i class="ph-bold ph-eye-closed"></i> Bỏ qua (Tạm ẩn)</button>
+        </div>
+        <p class="text-[10px] text-white/50 text-center mt-2 italic font-medium tracking-wide">Mẹo: Để tắt hẳn chuông hôm nay, hãy bấm vào icon 🔔 trên thẻ công việc.</p>
+    </div>
 </div>
 <div id="modal-container"></div>
 <div class="hidden fixed inset-0 z-[500] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6" id="vaultFormModal">
-    <div class="relative w-full max-w-md bg-white dark:bg-darkcard rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-scaleIn border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div class="flex-shrink-0 flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard z-10">
-            <h2 class="text-xl font-black text-slate-800 dark:text-white tracking-tight" id="vaultModalTitle">Thêm Mục Mới</h2>
-            <button class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-2.5 rounded-xl transition-colors active:scale-90" onclick="window.VaultUI.closeModal()" type="button"><i class="ph-bold ph-x text-xl"></i></button>
-        </div>
-        <div class="flex-grow overflow-y-auto p-5 custom-scroll-area custom-scrollbar bg-slate-50/50 dark:bg-slate-900/20 min-h-0">
-            <div class="mb-5 px-4 py-3 bg-primary/10 border border-primary/30 rounded-xl shadow-sm">
-                <p class="text-[11px] sm:text-xs text-primary font-medium leading-relaxed"><b>Smart Input:</b> Gõ <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Tài khoản:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Mật khẩu:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">2FA:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Link:</code> ở đầu dòng để tự bóc tách dữ liệu.</p>
-            </div>
-            <form class="space-y-4" id="vaultForm" onsubmit="window.VaultApp.saveEntry(event)">
-                <input id="vaultEntryId" type="hidden"/>
-                <div class="bg-white dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-2 pt-1">Loại dữ liệu <span class="text-rose-500">*</span></label>
-                    <select class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border-none focus:outline-none cursor-pointer font-semibold text-sm text-slate-800 dark:text-white" id="vaultEntryCategory" onchange="window.VaultUI.toggleCustomCategory()">
-                        <option value="account">🔑 Tài khoản</option><option value="crypto">💰 Tài chính</option><option value="note">📝 Ghi chú</option><option value="service">📞 Dịch vụ</option><option value="custom">✨ Tùy chỉnh...</option>
-                    </select>
-                    <div class="hidden mt-3 px-2 pb-2" id="vaultCustomCatWrapper">
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tên loại <span class="text-rose-500">*</span></label>
-                        <input class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 outline-none focus:border-primary text-sm text-slate-800 dark:text-white font-medium shadow-inner" id="vaultEntryCustomCategory" placeholder="VD: Server..." type="text"/>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1">Tiêu đề <span class="text-rose-500">*</span></label>
-                    <input class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 font-bold text-sm text-slate-800 dark:text-white shadow-sm" id="vaultEntryName" placeholder="Tên gợi nhớ..." type="text"/>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1 flex justify-between items-center">
-                        <span>Nội dung</span>
-                        <button class="text-primary hover:brightness-110 active:scale-95 flex items-center gap-1 bg-primary/10 px-2.5 py-1.5 rounded-lg font-bold shadow-sm transition-colors border border-primary/20" onclick="return window.LifeOSCompatHandlers.h017.call(this,event);" type="button"><i class="ph-bold ph-magic-wand"></i> Tạo MK</button>
-                    </label>
-                    <textarea class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm text-slate-800 dark:text-white shadow-sm custom-scrollbar whitespace-pre-wrap" id="vaultEntryContent" placeholder="Nhập tự do..." rows="6"></textarea>
-                </div>
-            </form>
-        </div>
-        <div class="flex-shrink-0 p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard flex gap-3 z-10">
-            <button class="flex-1 px-4 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all hover:bg-slate-200 dark:hover:bg-slate-700" onclick="window.vibrate(10); window.VaultUI.closeModal()" type="button">Hủy</button>
-            <button class="flex-1 px-4 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110" form="vaultForm" type="submit"><i class="ph-bold ph-check-circle text-lg"></i> Lưu Lại</button>
-        </div>
-    </div>
+    <div class="relative w-full max-w-md bg-white dark:bg-darkcard rounded-3xl shadow-2xl flex flex-col max-h-[90vh] animate-scaleIn border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="flex-shrink-0 flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard z-10">
+            <h2 class="text-xl font-black text-slate-800 dark:text-white tracking-tight" id="vaultModalTitle">Thêm Mục Mới</h2>
+            <button class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 p-2.5 rounded-xl transition-colors active:scale-90" onclick="window.VaultUI.closeModal()" type="button"><i class="ph-bold ph-x text-xl"></i></button>
+        </div>
+        <div class="flex-grow overflow-y-auto p-5 custom-scroll-area custom-scrollbar bg-slate-50/50 dark:bg-slate-900/20 min-h-0">
+            <div class="mb-5 px-4 py-3 bg-primary/10 border border-primary/30 rounded-xl shadow-sm">
+                <p class="text-[11px] sm:text-xs text-primary font-medium leading-relaxed"><b>Smart Input:</b> Gõ <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Tài khoản:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Mật khẩu:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">2FA:</code> <code class="bg-white dark:bg-slate-800 px-1 rounded font-bold shadow-sm text-slate-800 dark:text-white">Link:</code> ở đầu dòng để tự bóc tách dữ liệu.</p>
+            </div>
+            <form class="space-y-4" id="vaultForm" onsubmit="window.VaultApp.saveEntry(event)">
+                <input id="vaultEntryId" type="hidden"/>
+                <div class="bg-white dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-2 pt-1">Loại dữ liệu <span class="text-rose-500">*</span></label>
+                    <select class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border-none focus:outline-none cursor-pointer font-semibold text-sm text-slate-800 dark:text-white" id="vaultEntryCategory" onchange="window.VaultUI.toggleCustomCategory()">
+                        <option value="account">🔑 Tài khoản</option><option value="crypto">💰 Tài chính</option><option value="note">📝 Ghi chú</option><option value="service">📞 Dịch vụ</option><option value="custom">✨ Tùy chỉnh...</option>
+                    </select>
+                    <div class="hidden mt-3 px-2 pb-2" id="vaultCustomCatWrapper">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tên loại <span class="text-rose-500">*</span></label>
+                        <input class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 outline-none focus:border-primary text-sm text-slate-800 dark:text-white font-medium shadow-inner" id="vaultEntryCustomCategory" placeholder="VD: Server..." type="text"/>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1">Tiêu đề <span class="text-rose-500">*</span></label>
+                    <input class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 font-bold text-sm text-slate-800 dark:text-white shadow-sm" id="vaultEntryName" placeholder="Tên gợi nhớ..." type="text"/>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1 flex justify-between items-center">
+                        <span>Nội dung</span>
+                        <button class="text-primary hover:brightness-110 active:scale-95 flex items-center gap-1 bg-primary/10 px-2.5 py-1.5 rounded-lg font-bold shadow-sm transition-colors border border-primary/20" onclick="return window.LifeOSCompatHandlers.h017.call(this,event);" type="button"><i class="ph-bold ph-magic-wand"></i> Tạo MK</button>
+                    </label>
+                    <textarea class="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm text-slate-800 dark:text-white shadow-sm custom-scrollbar whitespace-pre-wrap" id="vaultEntryContent" placeholder="Nhập tự do..." rows="6"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="flex-shrink-0 p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-darkcard flex gap-3 z-10">
+            <button class="flex-1 px-4 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold active:scale-95 transition-all hover:bg-slate-200 dark:hover:bg-slate-700" onclick="window.vibrate(10); window.VaultUI.closeModal()" type="button">Hủy</button>
+            <button class="flex-1 px-4 py-3.5 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30 active:scale-95 transition-all flex justify-center items-center gap-2 hover:brightness-110" form="vaultForm" type="submit"><i class="ph-bold ph-check-circle text-lg"></i> Lưu Lại</button>
+        </div>
+    </div>
 </div>
 <script>
 function ownKeys(e, r) {var t = Object.keys(e);if (Object.getOwnPropertySymbols) {var o = Object.getOwnPropertySymbols(e);r && (o = o.filter(function (r) {return Object.getOwnPropertyDescriptor(e, r).enumerable;})), t.push.apply(t, o);}return t;}function _objectSpread(e) {for (var r = 1; r < arguments.length; r++) {var t = null != arguments[r] ? arguments[r] : {};r % 2 ? ownKeys(Object(t), !0).forEach(function (r) {_defineProperty(e, r, t[r]);}) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) {Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));});}return e;}function _defineProperty(e, r, t) {return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e;}function _toPropertyKey(t) {var i = _toPrimitive(t, "string");return "symbol" == typeof i ? i : i + "";}function _toPrimitive(t, r) {if ("object" != typeof t || !t) return t;var e = t[Symbol.toPrimitive];if (void 0 !== e) {var i = e.call(t, r || "default");if ("object" != typeof i) return i;throw new TypeError("@@toPrimitive must return a primitive value.");}return ("string" === r ? String : Number)(t);}function _asyncIterator(r) {var n,t,o,e = 2;for ("undefined" != typeof Symbol && (t = Symbol.asyncIterator, o = Symbol.iterator); e--;) {if (t && null != (n = r[t])) return n.call(r);if (o && null != (n = r[o])) return new AsyncFromSyncIterator(n.call(r));t = "@@asyncIterator", o = "@@iterator";}throw new TypeError("Object is not async iterable");}function AsyncFromSyncIterator(r) {function AsyncFromSyncIteratorContinuation(r) {if (Object(r) !== r) return Promise.reject(new TypeError(r + " is not an object."));var n = r.done;return Promise.resolve(r.value).then(function (r) {return { value: r, done: n };});}return AsyncFromSyncIterator = function (r) {this.s = r, this.n = r.next;}, AsyncFromSyncIterator.prototype = { s: null, n: null, next: function () {return AsyncFromSyncIteratorContinuation(this.n.apply(this.s, arguments));}, return: function (r) {var n = this.s.return;return void 0 === n ? Promise.resolve({ value: r, done: !0 }) : AsyncFromSyncIteratorContinuation(n.apply(this.s, arguments));}, throw: function (r) {var n = this.s.return;return void 0 === n ? Promise.reject(r) : AsyncFromSyncIteratorContinuation(n.apply(this.s, arguments));} }, new AsyncFromSyncIterator(r);}
@@ -9318,7 +9326,7 @@ window.closeSentinelPanel = () => {hideEl('sentinel-panel');window.vibrate(10);}
 
 
 // ==============================================================================
-// 2. TRÍ TUỆ NHÂN TẠO NLP & BACKGROUND SENTINEL ALARM 
+// 2. TRÍ TUỆ NHÂN TẠO NLP & BACKGROUND SENTINEL ALARM 
 // ==============================================================================
 window.parseTaskNLP = (rawText) => {
   let text = rawText;let isDaily = false;let priority = false;let tags = [];let timeStr = null;let alarmTime = null;
@@ -12832,6 +12840,7 @@ document.addEventListener('DOMContentLoaded', () => {var _el3, _el4;
       window.unlockAudio();if (window.innerWidth >= 1024 || e.target.closest('button') || e.target.closest('.cursor-pointer') || e.target.closest('a')) return;
       const f = e.target.closest('.swipe-front');if (!f) return;
       const li = f.closest('li');swObj.el = f;swObj.id = String(li.getAttribute('data-task-id'));
+      swObj.bgL = li.querySelector('.swipe-bg-left');swObj.bgR = li.querySelector('.swipe-bg-right');
       const tk = (window.todos || []).find((t) => String(t.id) === swObj.id);if (tk) swObj.comp = tk.completed;
       swObj.startX = e.touches[0].clientX;swObj.startY = e.touches[0].clientY;swObj.isDrag = true;swObj.isScr = false;swObj.el.style.transition = 'none';
     }, { passive: true });
@@ -12842,13 +12851,13 @@ document.addEventListener('DOMContentLoaded', () => {var _el3, _el4;
       if (swObj.isScr) return;if (swObj.comp && dx > 0) return;
       let mx = dx;if (mx > swObj.th) mx = swObj.th + (mx - swObj.th) * 0.2;if (mx < -swObj.th) mx = -swObj.th + (mx + swObj.th) * 0.2;
       swObj.curX = mx;swObj.el.style.transform = `translateX(${mx}px)`;
-      const pLi = swObj.el.closest('li'),bL = pLi.querySelector('.swipe-bg-left'),bR = pLi.querySelector('.swipe-bg-right');
+      const bL = swObj.bgL,bR = swObj.bgR;
       if (bL && bR) {if (mx > 0) {bL.style.opacity = Math.min(mx / 50, 1);bR.style.opacity = 0;} else {bR.style.opacity = Math.min(Math.abs(mx) / 50, 1);bL.style.opacity = 0;}}
       if (Math.abs(mx) > 20) {e.preventDefault();e.stopPropagation();}
     }, { passive: false });
     todoList.addEventListener('touchend', (e) => {
       if (!swObj.isDrag || !swObj.el) return;swObj.isDrag = false;swObj.el.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-      const pLi = swObj.el.closest('li'),bL = pLi.querySelector('.swipe-bg-left'),bR = pLi.querySelector('.swipe-bg-right'),cEl = swObj.el,cId = swObj.id;
+      const bL = swObj.bgL,bR = swObj.bgR,cEl = swObj.el,cId = swObj.id;
       if (swObj.curX > swObj.th && !swObj.comp) {cEl.style.transform = `translateX(100%)`;setTimeout(() => {window.toggleTask(cId);}, 250);} else
       if (swObj.curX < -swObj.th) {cEl.style.transform = `translateX(-100%)`;setTimeout(() => {window.confirmDeleteTask(cId);cEl.style.transform = 'translateX(0)';}, 250);} else
       {cEl.style.transform = `translateX(0)`;if (bL) bL.style.opacity = 0;if (bR) bR.style.opacity = 0;}
@@ -12977,12 +12986,12 @@ document.addEventListener('DOMContentLoaded', () => {var _el3, _el4;
         box-shadow: 0 16px 38px rgba(79,70,229,0.34);
         background: rgba(99, 102, 241, 0.68);
     }
-    .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
-    .step-num { background: var(--c-primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    @keyframes pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
-    .animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    .guide-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; text-align: left; }
+    .step-num { background: var(--c-primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; font-size: 14px; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes pop-in { 0% { transform: scale(0) translateY(20px); opacity: 0; } 80% { transform: scale(1.1) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
+    .animate-pop-in { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 </style>
 <button aria-label="Cài App LifeOS" class="install-fab" id="btnInstall" type="button">
 <span class="install-fab-inner">
@@ -12991,16 +13000,16 @@ document.addEventListener('DOMContentLoaded', () => {var _el3, _el4;
 </span>
 </button>
 <div class="hidden fixed inset-0 z-[100000] bg-slate-900/80 text-slate-800 flex flex-col justify-center items-center p-4 backdrop-blur-sm transition-opacity" id="pwaHealthModal">
-    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary">
-        <div class="bg-primary p-5 text-white text-center">
-            <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
-            <div class="text-xs font-medium opacity-90">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
-        </div>
-        <div class="p-6" id="smartGuideContent"></div>
-        <div class="p-4 bg-slate-50 text-center border-t border-slate-100">
-            <button class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors" onclick="document.getElementById('pwaHealthModal').classList.add('hidden')">Đóng lại</button>
-        </div>
-    </div>
+    <div class="w-full max-w-sm bg-white rounded-2xl p-0 shadow-2xl overflow-hidden animate-slide-up border-2 border-primary">
+        <div class="bg-primary p-5 text-white text-center">
+            <div class="font-black text-xl mb-1 uppercase tracking-wide">Cài đặt LifeOS</div>
+            <div class="text-xs font-medium opacity-90">Truy cập nhanh hơn - Trải nghiệm mượt mà</div>
+        </div>
+        <div class="p-6" id="smartGuideContent"></div>
+        <div class="p-4 bg-slate-50 text-center border-t border-slate-100">
+            <button class="text-slate-500 font-bold text-sm hover:text-rose-500 transition-colors" onclick="document.getElementById('pwaHealthModal').classList.add('hidden')">Đóng lại</button>
+        </div>
+    </div>
 </div>
 <script>var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13393,7 +13402,7 @@ catch (e) {
         var nav = byId('bottom-nav');
         if (!nav || window.innerWidth >= 1024)
             return;
-        var h = Math.max(54, Math.min(66, Math.round(nav.getBoundingClientRect().height || 58)));
+        var h = Math.max(54, Math.min(120, Math.round(nav.getBoundingClientRect().height || 58)));
         document.documentElement.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
         document.body.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
     }
@@ -13529,7 +13538,7 @@ catch (e) {
         var nav = byId('bottom-nav');
         if (!nav || isDesktop())
             return;
-        var h = Math.max(54, Math.min(66, Math.round(nav.getBoundingClientRect().height || 58)));
+        var h = Math.max(54, Math.min(120, Math.round(nav.getBoundingClientRect().height || 58)));
         document.documentElement.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
         document.body.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
     }
@@ -13709,7 +13718,7 @@ catch (e) {
         if (!nav)
             return;
         var rect = nav.getBoundingClientRect();
-        var h = Math.max(54, Math.min(72, Math.round(rect.height || 58)));
+        var h = Math.max(54, Math.min(120, Math.round(rect.height || 58)));
         document.documentElement.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
         document.body.style.setProperty('--lifeos-bottom-nav-h', h + 'px');
     }
@@ -24299,14 +24308,14 @@ Ghi chú: token/secret chỉ nằm trong Cloudflare Worker env/secret, không n�
                 return;
             activate(btn, e);
         }
-        const activeCapture = { capture: true, passive: false };
-        box.addEventListener('pointerdown', beginPress, activeCapture);
-        box.addEventListener('pointerup', finishPress, activeCapture);
-        box.addEventListener('pointercancel', cancelPress, activeCapture);
-        box.addEventListener('touchstart', beginPress, activeCapture);
-        box.addEventListener('touchend', finishPress, activeCapture);
-        box.addEventListener('touchcancel', cancelPress, activeCapture);
-        box.addEventListener('click', clickFallback, activeCapture);
+        const listen = { capture: true, passive: true };
+        box.addEventListener('pointerdown', beginPress, listen);
+        box.addEventListener('pointerup', finishPress, listen);
+        box.addEventListener('pointercancel', cancelPress, listen);
+        box.addEventListener('touchstart', beginPress, listen);
+        box.addEventListener('touchend', finishPress, listen);
+        box.addEventListener('touchcancel', cancelPress, listen);
+        box.addEventListener('click', clickFallback, true);
         box.addEventListener('keydown', keyActivate, true);
         if (!box.__lifeos67hR3Observer) {
             box.__lifeos67hR3Observer = new MutationObserver(function () { clearTimeout(box.__lifeos67hR3DecorateTimer); box.__lifeos67hR3DecorateTimer = setTimeout(decorate, 60); });
@@ -26893,78 +26902,29 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
         });
     }
     function onTouchStart(e) {
-        if (!isTouchDevice())
-            return;
-        const root = e.target && e.target.closest && e.target.closest(ROOT_SELECTOR);
-        if (!root)
+        if (!e.target || !e.target.closest || !e.target.closest(ROOT_SELECTOR))
             return;
         const t = e.touches && e.touches[0];
         if (!t)
             return;
-        const v = nearestVerticalScroller(e.target);
-        const h = nearestHorizontalScroller(e.target);
-        state = {
-            x: t.clientX,
-            y: t.clientY,
-            lastX: t.clientX,
-            lastY: t.clientY,
-            vScroller: v,
-            hScroller: h,
-            mode: '',
-            moved: false,
-            startedOnCard: !!(e.target.closest && e.target.closest(CARD_SELECTOR))
-        };
+        state = { x: t.clientX, y: t.clientY, moved: false };
+        document.addEventListener('touchmove', onTouchMove, { capture: true, passive: true });
     }
     function onTouchMove(e) {
-        if (!state)
+        if (!state || state.moved)
             return;
         const t = e.touches && e.touches[0];
         if (!t)
             return;
-        const dxTotal = t.clientX - state.x;
-        const dyTotal = t.clientY - state.y;
-        const ax = Math.abs(dxTotal);
-        const ay = Math.abs(dyTotal);
-        if (!state.mode && (ax > 6 || ay > 6)) {
-            state.mode = ay >= ax ? 'y' : 'x';
-        }
-        if (state.mode === 'y' && state.vScroller) {
-            const dy = t.clientY - state.lastY;
-            if (Math.abs(dy) > 0) {
-                const before = state.vScroller.scrollTop;
-                state.vScroller.scrollTop = before - dy;
-                const after = state.vScroller.scrollTop;
-                if (after !== before || state.startedOnCard) {
-                    if (e.cancelable) {
-                        try {
-                            e.preventDefault();
-                        }
-                        catch (_) { }
-                    }
-                    state.moved = true;
-                    suppressClickUntil = Date.now() + 380;
-                }
-            }
-        }
-        else if (state.mode === 'x' && state.hScroller) {
-            const dx = t.clientX - state.lastX;
-            const before = state.hScroller.scrollLeft;
-            state.hScroller.scrollLeft = before - dx;
-            if (state.hScroller.scrollLeft !== before) {
-                if (e.cancelable) {
-                    try {
-                        e.preventDefault();
-                    }
-                    catch (_) { }
-                }
-                state.moved = true;
-                suppressClickUntil = Date.now() + 300;
-            }
-        }
-        state.lastX = t.clientX;
-        state.lastY = t.clientY;
+        const dx = t.clientX - state.x;
+        const dy = t.clientY - state.y;
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8)
+            return;
+        state.moved = true;
+        suppressClickUntil = Date.now() + 380;
     }
     function onTouchEnd() {
+        document.removeEventListener('touchmove', onTouchMove, true);
         if (state && state.moved)
             suppressClickUntil = Date.now() + 380;
         state = null;
@@ -26984,7 +26944,6 @@ body.lifeos-landscape-mini-pc #lifeos64h-weather-locs button:not(.is-active) {
     }
     function boot() {
         document.addEventListener('touchstart', onTouchStart, { capture: true, passive: true });
-        document.addEventListener('touchmove', onTouchMove, { capture: true, passive: false });
         document.addEventListener('touchend', onTouchEnd, { capture: true, passive: true });
         document.addEventListener('touchcancel', onTouchEnd, { capture: true, passive: true });
         document.addEventListener('click', onClick, true);
@@ -35178,7 +35137,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             return; if (host.scrollTop + host.clientHeight >= host.scrollHeight - 220)
             nextPage(window.MusicApp); }); }
         host.addEventListener('scroll', onScroll, { passive: true });
-        host.addEventListener('touchmove', onScroll, { passive: true });
     }
     function patchRender(app) {
         app.pageSize = PAGE_SIZE;
@@ -35544,6 +35502,8 @@ body.lifeos-landscape-mini-pc #chat-folder-tabs .chat-folder-btn{
         }, { passive: false });
         var dragging = false, moved = false, startX = 0, startY = 0, sl = 0, st = 0, pid = null;
         el.addEventListener('pointerdown', function (e) {
+            if (e.pointerType && e.pointerType !== 'mouse')
+                return;
             if (e.button !== undefined && e.button !== 0)
                 return;
             if (e.target && (e.target.closest && e.target.closest('button'))) {
@@ -44821,7 +44781,7 @@ var Social={
 };
 Social.mode=Social.readMode();
 window.LifeOSSocialPlayer=Social;
-if(!document.__lifeosFacebookSoundUnlockR6){document.__lifeosFacebookSoundUnlockR6=true;var unlockFacebookSound=function(){if(Social.fbInstance)Social.forceFacebookSound(Social.fbInstance,Social.serial);var v=by('player-stage')&&by('player-stage').querySelector('video');if(v){try{v.muted=false;v.defaultMuted=false;v.volume=1;v.removeAttribute('muted')}catch(e){}}};document.addEventListener('pointerdown',unlockFacebookSound,true);document.addEventListener('keydown',unlockFacebookSound,true);}
+if(!document.__lifeosFacebookSoundUnlockR6){document.__lifeosFacebookSoundUnlockR6=true;var unlockFacebookSound=function(){if(Media.currentTab!=='facebook')return;if(Social.fbInstance)Social.forceFacebookSound(Social.fbInstance,Social.serial);var v=by('player-stage')&&by('player-stage').querySelector('video');if(v){try{v.muted=false;v.defaultMuted=false;v.volume=1;v.removeAttribute('muted')}catch(e){}}};document.addEventListener('pointerdown',unlockFacebookSound,true);document.addEventListener('keydown',unlockFacebookSound,true);}
 
 function armSocialClicks(){
   if(armSocialClicks.done)return;
@@ -45363,6 +45323,7 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
   body:not(.lifeos-landscape-mini-pc) #view-tasks .filter-btn {
     padding: 7px 10px !important;
     font-size: 12px !important;
+    min-height: 36px !important;
   }
   body:not(.lifeos-landscape-mini-pc) #todo-list {
     min-width: 0 !important;
@@ -45456,8 +45417,9 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
     gap: 6px !important;
   }
   body:not(.lifeos-landscape-mini-pc) #vaultCategoryFilters .cat-filter-btn {
-    padding: 6px 10px !important;
+    padding: 8px 12px !important;
     font-size: 12px !important;
+    min-height: 36px !important;
   }
   body:not(.lifeos-landscape-mini-pc) #vaultCardsContainer {
     display: flex !important;
@@ -45557,9 +45519,13 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
     flex-wrap: nowrap !important;
     gap: 4px !important;
   }
+  body:not(.lifeos-landscape-mini-pc) #focus-mode-tabs > button {
+    min-height: 36px !important;
+    white-space: nowrap !important;
+  }
   body:not(.lifeos-landscape-mini-pc) #music-sleep-timer {
-    max-width: 108px !important;
-    font-size: 11px !important;
+    max-width: 118px !important;
+    font-size: 16px !important;
     padding-top: 6px !important;
     padding-bottom: 6px !important;
   }
@@ -45785,6 +45751,18 @@ body,
   pointer-events: none;
 }
 #lifeos-hover-name.is-on { display: block; }
+button, a, input, textarea, select, label, summary, [role="button"] {
+  touch-action: manipulation;
+}
+#todo-list .swipe-item,
+#todo-list .swipe-front,
+#todo-list .swipe-front * {
+  touch-action: pan-y;
+}
+#todo-list .swipe-front > .ml-auto,
+#todo-list .swipe-front > .ml-auto * {
+  touch-action: pan-x pan-y;
+}
 .lifeos-scroll-inner {
   display: flex !important;
   flex-wrap: nowrap !important;
@@ -45948,27 +45926,36 @@ body,
     if (!x && !y) return null;
     return { el: el, x: x, y: y };
   }
+  var STRIP = '#vaultCategoryFilters,#media-subtabs,#media-group-mobile-bar,#focus-mode-tabs,#chat-folder-tabs,#news-filter-tabs,#weather-hourly-list,#weather-daily-list,.music-header-actions,#view-tasks .overflow-x-auto.custom-scroll-area,.vault-card-actions';
   function find(start) {
     if (!start || !start.closest) return null;
-    if (start.closest('input, textarea, select, option, [contenteditable="true"]')) return null;
-    var n = start.nodeType === 1 ? start : start.parentElement;
-    var horizontal = null;
-    while (n && n !== document.body) {
-      if (n.closest && n.classList && n.classList.contains('swipe-item')) {
-        n = n.parentElement;
-        continue;
-      }
-      var hit = axis(n);
-      if (hit && hit.x && !hit.y) return hit;
-      if (hit && hit.y && !horizontal) horizontal = hit;
-      n = n.parentElement;
-    }
-    return null;
+    if (start.closest('input, textarea, select, option, [contenteditable="true"], .swipe-item')) return null;
+    var el = start.closest(STRIP);
+    if (!el) return null;
+    var hit = axis(el);
+    return hit && hit.x && !hit.y ? hit : null;
   }
   function arm(el) {
     if (!el || el.dataset.lifeosScrollFast === '1') return;
     el.dataset.lifeosScrollFast = '1';
     el.style.setProperty('scroll-behavior', 'auto', 'important');
+  }
+  function onDragMove(e) {
+    if (!state || e.pointerId !== state.id) return;
+    var dx = e.clientX - state.sx;
+    if (!state.moved) {
+      if (Math.abs(dx) < 5 && Math.abs(e.clientY - state.sy) < 5) return;
+      if (Math.abs(e.clientY - state.sy) > Math.abs(dx)) { stopDrag(e); return; }
+      state.moved = true;
+    }
+    state.el.scrollLeft = state.sl - dx;
+    if (e.cancelable) e.preventDefault();
+  }
+  function stopDrag(e) {
+    if (!state || (e && e.pointerId !== undefined && e.pointerId !== state.id)) return;
+    blockClick = !!(state && state.moved);
+    state = null;
+    document.removeEventListener('pointermove', onDragMove, true);
   }
   document.addEventListener('pointerdown', function (e) {
     if (e.pointerType === 'touch' || e.button !== 0) return;
@@ -45976,25 +45963,10 @@ body,
     if (!hit) return;
     arm(hit.el);
     state = { el: hit.el, x: hit.x, y: false, sx: e.clientX, sy: e.clientY, sl: hit.el.scrollLeft, moved: false, id: e.pointerId };
+    document.addEventListener('pointermove', onDragMove, { capture: true, passive: false });
   }, true);
-  document.addEventListener('pointermove', function (e) {
-    if (!state || e.pointerId !== state.id) return;
-    var dx = e.clientX - state.sx;
-    if (!state.moved) {
-      if (Math.abs(dx) < 5 && Math.abs(e.clientY - state.sy) < 5) return;
-      if (Math.abs(e.clientY - state.sy) > Math.abs(dx)) { state = null; return; }
-      state.moved = true;
-    }
-    state.el.scrollLeft = state.sl - dx;
-    if (e.cancelable) e.preventDefault();
-  }, { capture: true, passive: false });
-  function end(e) {
-    if (!state || (e && e.pointerId !== undefined && e.pointerId !== state.id)) return;
-    blockClick = !!(state && state.moved);
-    state = null;
-  }
-  document.addEventListener('pointerup', end, true);
-  document.addEventListener('pointercancel', end, true);
+  document.addEventListener('pointerup', stopDrag, true);
+  document.addEventListener('pointercancel', stopDrag, true);
   document.addEventListener('click', function (e) {
     if (!blockClick) return;
     e.preventDefault();
