@@ -8512,30 +8512,55 @@ html.lifeos-keyboard-open.lifeos-keyboard-chat #chat-form {
 </style>
 <script id="lifeos-ios-keyboard-fit">
 (function () {
-  if (!window.visualViewport) return;
-  var vv = window.visualViewport;
-  function fit() {
+  var root = document.documentElement;
+  function box() {
+    var vv = window.visualViewport;
+    if (!vv) return { open: false, overlap: 0, h: window.innerHeight || 0, top: 0 };
     var overlap = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
-    var open = overlap > 80;
-    var root = document.documentElement;
+    return { open: overlap > 80, overlap: overlap, h: Math.round(vv.height), top: Math.round(vv.offsetTop) };
+  }
+  function growChat() {
+    var input = document.getElementById('chat-input');
+    if (!input) return false;
+    input.style.height = 'auto';
+    var next = Math.max(40, Math.min(input.scrollHeight, 88));
+    input.style.height = next + 'px';
+    return input.value.length > 42 || input.scrollHeight > 56 || /\n/.test(input.value);
+  }
+  function fit() {
+    var b = box();
     var active = document.activeElement;
     var chatForm = document.getElementById('chat-form');
-    var inChat = !!(open && active && chatForm && chatForm.contains(active));
-    root.classList.toggle('lifeos-keyboard-open', open);
+    var inChat = !!(b.open && active && chatForm && chatForm.contains(active));
+    var tight = !!(inChat || (chatForm && document.getElementById('view-chat') && document.getElementById('view-chat').classList.contains('active') && growChat()));
+    root.classList.toggle('lifeos-keyboard-open', b.open);
     root.classList.toggle('lifeos-keyboard-chat', inChat);
-    root.style.setProperty('--lifeos-kb', open ? overlap + 'px' : '0px');
+    root.classList.toggle('lifeos-chat-compose-tight', tight);
+    root.style.setProperty('--lifeos-kb', b.open ? b.overlap + 'px' : '0px');
+    root.style.setProperty('--lifeos-vvh', b.h + 'px');
+    root.style.setProperty('--lifeos-vv-top', b.top + 'px');
     var el = document.getElementById('mobile-input');
     if (el) el.style.bottom = '';
-    if (open && active && active.scrollIntoView) {
+    if (b.open && active && active.scrollIntoView) {
       setTimeout(function () {
         try { active.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) {}
       }, 60);
     }
+    var boxMsg = document.getElementById('chat-messages');
+    if (inChat && boxMsg) {
+      setTimeout(function () { try { boxMsg.scrollTop = boxMsg.scrollHeight; } catch (e) {} }, 80);
+    }
   }
-  vv.addEventListener('resize', fit);
-  vv.addEventListener('scroll', fit);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fit);
+    window.visualViewport.addEventListener('scroll', fit);
+  }
   document.addEventListener('focusin', fit);
   document.addEventListener('focusout', function () { setTimeout(fit, 80); });
+  document.addEventListener('input', function (ev) {
+    if (ev.target && ev.target.id === 'chat-input') fit();
+  });
+  fit();
 })();
 </script>
 <div class="lg:hidden fixed inset-x-0 z-[60] px-3 transition-all duration-300" id="mobile-input" style="bottom: calc(var(--lifeos-bottom-nav-h) + env(safe-area-inset-bottom));">
@@ -9443,7 +9468,7 @@ window.stopGlobalAlarm = (actionType) => {
       if (t) {
         if (actionType === 'complete') {t.completed = true;t.alerted = true;needsSync = true;} else
         if (actionType === 'snooze') {t.alarmTime = Date.now() + 5 * 60000;t.alerted = false;window.notifiedTasks.delete(String(id));needsSync = true;} else
-        if (actionType === 'dismiss') {if (t.isDaily) {t.alarmTime += 86400000;t.alerted = false;} else {t.alerted = true;}needsSync = true;}
+        if (actionType === 'dismiss') {if (t.isDaily) {t.alarmTime += 86400000;t.alerted = false;} else {t.alerted = true;t.completed = true;t.done = true;}needsSync = true;}
       }
     });
 
@@ -9451,9 +9476,67 @@ window.stopGlobalAlarm = (actionType) => {
     if (actionType === 'snooze') {if (!window.__lifeosAlarmToastOwned) window.showToast('Sẽ báo lại sau 5 phút', 'ph-clock');} else
     if (actionType === 'dismiss') {if (!window.__lifeosAlarmToastOwned) window.showToast('Đã dừng báo thức', 'ph-stop-circle');}
 
-    if (needsSync) {window.saveLocalTodos();window.renderTasksOnly();if (window.FirebaseSync) window.FirebaseSync.pushAll();}
+    if (needsSync) {window.saveLocalTodos();window.__lifeosForceTaskPaint = 1;window.renderTasksOnly();if (navigator.onLine && window.FirebaseSync) window.FirebaseSync.pushAll();}
   }
+  window.__lifeosTaskStopSnap = (window.todos || []).map(function (t) { return Object.assign({}, t); });
+  window.__lifeosTaskStopIds = (window.activeAlarmTaskIds || []).map(function (id) { return String(id); });
   window.activeAlarmTaskIds = [];
+  window.__lifeosRepairTasksAfterAlarm = function () {
+    var snap = window.__lifeosTaskStopSnap || [];
+    if ((!Array.isArray(window.todos) || !window.todos.length) && snap.length) {
+      window.todos = snap.map(function (t) { return Object.assign({}, t); });
+      try { localStorage.setItem('lifeos_v8_data_' + (window.viewingUser || 'live'), JSON.stringify(window.todos)); } catch (e) {}
+    }
+    if (window.filterMode !== 'all') {
+      var struck = (window.__lifeosTaskStopIds || []).some(function (id) {
+        return (window.todos || []).some(function (t) { return String(t.id) === id && (t.completed || t.done); });
+      });
+      if (struck) window.filterMode = 'all';
+    }
+    document.querySelectorAll('.filter-btn').forEach(function (b) {
+      var on = b.getAttribute('data-filter') === 'all';
+      b.classList.toggle('active', on);
+      b.classList.toggle('bg-primary', on);
+      b.classList.toggle('text-white', on);
+      b.classList.toggle('shadow-sm', on);
+      b.classList.toggle('bg-white', !on);
+      b.classList.toggle('text-slate-500', !on);
+    });
+    window.__lifeosForceTaskPaint = 1;
+    if (typeof window.renderTasksOnly === 'function') window.renderTasksOnly();
+    var list = document.getElementById('todo-list');
+    var empty = document.getElementById('empty-state');
+    if (empty && (window.todos || []).length) { empty.classList.add('hidden'); empty.style.display = 'none'; }
+    if (list && !list.children.length && (window.todos || []).length) {
+      list.removeAttribute('data-lifeos-task-sig');
+      window.__lifeosForceTaskPaint = 1;
+      window.renderTasksOnly();
+    }
+    (window.__lifeosTaskStopIds || []).forEach(function (id) {
+      var card = null;
+      document.querySelectorAll('#todo-list [data-task-id]').forEach(function (el) {
+        if (!card && String(el.getAttribute('data-task-id')) === id) card = el;
+      });
+      if (!card) return;
+      var title = card.querySelector('.font-bold');
+      var task = (window.todos || []).find(function (t) { return String(t.id) === id; });
+      if (task && (task.completed || task.done)) {
+        card.classList.add('opacity-60');
+        if (title) { title.classList.add('line-through', 'text-slate-400'); title.classList.remove('text-rose-600', 'text-slate-800'); }
+      }
+    });
+    var first = (window.__lifeosTaskStopIds || [])[0];
+    if (first) {
+      var hit = null;
+      document.querySelectorAll('#todo-list [data-task-id]').forEach(function (el) {
+        if (!hit && String(el.getAttribute('data-task-id')) === first) hit = el;
+      });
+      if (hit && hit.scrollIntoView) { try { hit.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+    }
+  };
+  try { window.__lifeosRepairTasksAfterAlarm(); } catch (e) {}
+  setTimeout(function () { try { window.__lifeosRepairTasksAfterAlarm(); } catch (e) {} }, 350);
+  setTimeout(function () { try { window.__lifeosRepairTasksAfterAlarm(); } catch (e) {} }, 1200);
 };
 
 window.checkAlarms = () => {
@@ -11222,6 +11305,9 @@ window.FirebaseSync = {
           } else window._pendingPush = false;
         }
 
+        if (!skipTodoPullBecausePendingPush && typeof navigator !== 'undefined' && navigator.onLine === false) {
+          skipTodoPullBecausePendingPush = true;
+        }
         const cloudData = c.data;
         if (!skipTodoPullBecausePendingPush && cloudData && Array.isArray(cloudData)) {
           const cleanCloudTodos = cloudData.map((t) => _objectSpread(_objectSpread({}, t), {}, { id: String(t.id) }));
@@ -42959,7 +43045,7 @@ body.lifeos-r52-orient-landscape.lifeos-landscape-mini-pc{
         return v; if (v && Array.isArray(v.data))
         return v.data; if (Array.isArray(window.todos))
         return window.todos; return []; }
-    function setLocalTasks(p, arr, ts) { arr = filterTombstonedTasks(arr || [], p, 'setLocalTasks'); try {
+    function setLocalTasks(p, arr, ts) { var existing = getLocalTasks(p); arr = filterTombstonedTasks(arr || [], p, 'setLocalTasks'); if ((!arr || !arr.length) && existing.length) { trace('SKIP_EMPTY_TASK_REPLACE', { existing: existing.length }); arr = existing; } try {
         localStorage.setItem(taskKey(p), JSON.stringify(arr));
     }
     catch (e) { } try {
@@ -45119,7 +45205,8 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
           }
         }
         var sig = (taskHash >>> 0) + '#' + todos.length + '#' + String(window.filterMode || 'all');
-        if(list&&list.getAttribute('data-lifeos-task-sig')===sig&&list.childElementCount)return;
+        if(!window.__lifeosForceTaskPaint&&list&&list.getAttribute('data-lifeos-task-sig')===sig&&list.childElementCount)return;
+        window.__lifeosForceTaskPaint=0;
         var r=oldRender.apply(this,arguments);
         list=document.getElementById('todo-list');
         if(list)list.setAttribute('data-lifeos-task-sig',sig);
@@ -45573,17 +45660,27 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
     max-height: calc(100dvh - var(--lifeos-header-h, 64px) - var(--lifeos-bottom-nav-h, 62px) - 16px) !important;
   }
   html.lifeos-keyboard-open body:not(.lifeos-landscape-mini-pc) #view-chat > .bg-white {
-    height: auto !important;
-    max-height: none !important;
-    min-height: 280px !important;
+    height: calc(var(--lifeos-vvh, 100dvh) - var(--lifeos-header-h, 64px) - 8px) !important;
+    max-height: calc(var(--lifeos-vvh, 100dvh) - var(--lifeos-header-h, 64px) - 8px) !important;
+    min-height: 0 !important;
   }
   body:not(.lifeos-landscape-mini-pc) #chat-form {
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 6px !important;
     padding: 8px !important;
-    align-items: center !important;
+    align-items: flex-end !important;
     min-width: 0 !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    background: #fff !important;
+    z-index: 30 !important;
+  }
+  html.lifeos-keyboard-open.lifeos-keyboard-chat body:not(.lifeos-landscape-mini-pc) #chat-form,
+  html.lifeos-chat-compose-tight body:not(.lifeos-landscape-mini-pc) #chat-form {
+    flex-wrap: nowrap !important;
+    transform: none !important;
+    align-items: flex-end !important;
   }
   body:not(.lifeos-landscape-mini-pc) #chat-form > button {
     flex: 0 0 44px !important;
@@ -45603,7 +45700,30 @@ window.LifeOSSocialClone={installed:true,version:'banR6-yt-fb-autonext-r8',host:
     width: 100% !important;
     min-width: 0 !important;
     min-height: 40px !important;
+    max-height: 96px !important;
     padding: 8px 10px !important;
+    overflow-y: auto !important;
+  }
+  html.lifeos-keyboard-open.lifeos-keyboard-chat body:not(.lifeos-landscape-mini-pc) #chat-input,
+  html.lifeos-chat-compose-tight body:not(.lifeos-landscape-mini-pc) #chat-input {
+    order: 0 !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-height: 88px !important;
+  }
+  html.lifeos-keyboard-open.lifeos-keyboard-chat body:not(.lifeos-landscape-mini-pc) #chat-form > button:not(#chat-send-btn):not(:first-of-type),
+  html.lifeos-chat-compose-tight body:not(.lifeos-landscape-mini-pc) #chat-form > button:not(#chat-send-btn):not(:first-of-type) {
+    display: none !important;
+  }
+  html.lifeos-keyboard-open.lifeos-keyboard-chat body:not(.lifeos-landscape-mini-pc) #chat-send-btn,
+  html.lifeos-chat-compose-tight body:not(.lifeos-landscape-mini-pc) #chat-send-btn {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex: 0 0 48px !important;
+    width: 48px !important;
+    height: 48px !important;
+    margin-left: 0 !important;
   }
   body:not(.lifeos-landscape-mini-pc) #view-music {
     padding-bottom: 0 !important;
