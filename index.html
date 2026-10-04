@@ -116,7 +116,7 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
         recent: []
     };
     var BAD = { data: 1, vaultData: 1, r65DeletedTasks: 1, r59Meta: 1 };
-    var CAN = { tasks: 1, vault: 1, deletedTaskTombstones: 1, stats: 1, updatedAt: 1 };
+    var CAN = { tasks: 1, vault: 1, deletedTaskTombstones: 1, deletedVaultTombstones: 1, stats: 1, updatedAt: 1 };
     var FORBIDDEN_HEADERS = { 'x-lifeos-phase': 1 };
     var nativeFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
     var NativeXHR = window.XMLHttpRequest;
@@ -388,6 +388,8 @@ window.LifeOSCompatHandlers.h017 = function (event) {window.vibrate([15]);const 
                 out.vault = Array.isArray(plain.vault) ? plain.vault : plain.vaultData;
             if (plain.deletedTaskTombstones !== undefined || plain.r65DeletedTasks !== undefined)
                 out.deletedTaskTombstones = compactTombs(plain.deletedTaskTombstones || plain.r65DeletedTasks || {});
+            if (plain.deletedVaultTombstones !== undefined)
+                out.deletedVaultTombstones = compactTombs(plain.deletedVaultTombstones);
             if (plain.stats !== undefined)
                 out.stats = plain.stats && typeof plain.stats === 'object' ? plain.stats : {};
             if (plain.updatedAt !== undefined)
@@ -12567,7 +12569,7 @@ window.VaultApp = {
     const confirmHTML = `<div id="deleteModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><div class="flex-grow overflow-y-auto custom-scroll-area min-h-0 p-2"><div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4 border border-rose-200 shrink-0"><i class="ph-fill ph-trash text-3xl text-rose-500"></i></div><h2 class="text-xl font-black mb-2 text-slate-800 shrink-0">Xóa vĩnh viễn?</h2><p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(e.name)}"</p></div><div class="flex gap-3 flex-shrink-0 mt-2"><button onclick="window.vibrate(10); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200 hover:brightness-95">Giữ lại</button><button onclick="window.VaultApp.execDeleteEntry('${id}'); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-rose-500 text-white font-bold active:scale-95 shadow-lg transition-all hover:brightness-110">Xóa Ngay</button></div></div></div>`;
     document.body.insertAdjacentHTML('beforeend', confirmHTML);
   },
-  execDeleteEntry(id) {window.vibrate([30, 50, 30]);window.VaultStorageLayer.remove(id);this.filterData(window.VaultUI._q);window.showToast('Đã xóa dữ liệu!', 'ph-trash');if (window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'vault-delete', force: true });},
+  execDeleteEntry(id) {window.vibrate([30, 50, 30]);if (window.LifeOSMarkVaultDeleted) window.LifeOSMarkVaultDeleted(id);window.VaultStorageLayer.remove(id);this.filterData(window.VaultUI._q);window.showToast('Đã xóa dữ liệu!', 'ph-trash');if (window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'vault-delete', force: true });},
   exportBackup() {
     window.vibrate(20);const d = window.VaultStorageLayer.getData();if (!d.length) {window.showToast('Kho lưu trữ đang trống!', 'ph-warning-circle');return;}
     const b = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }),n = `lifeos_vault_${window.viewingUser || 'data'}_${window.getTodayStr().replace(/-/g, '')}.json`;
@@ -14664,6 +14666,7 @@ body.lifeos-landscape-mini-pc.music-player-active #mini-player {
                 return;
             }
             var before = getData().length;
+            if (window.LifeOSMarkVaultDeleted) window.LifeOSMarkVaultDeleted(ids);
             if (window.VaultStorageLayer && typeof window.VaultStorageLayer.remove === 'function') {
                 ids.forEach(function (id) { window.VaultStorageLayer.remove(id); });
             }
@@ -43884,7 +43887,7 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
     var REST_DOC_BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/LifeOS_Profiles/';
     var rawFetch = window.fetch ? window.fetch.bind(window) : null;
     var state = { installedAt: Date.now(), profile: '', fetchRewrites: 0, cleanupOk: 0, cleanupFail: 0, pushOk: 0, pushFail: 0, pullOk: 0, pullFail: 0, pending: false, lastOk: '', lastError: '', lastAt: 0, lastCounts: null, legacyDeleted: false, inFlight: false, queued: false };
-    var CANONICAL_FIELDS = ['tasks', 'vault', 'deletedTaskTombstones', 'stats', 'updatedAt'];
+    var CANONICAL_FIELDS = ['tasks', 'vault', 'deletedTaskTombstones', 'deletedVaultTombstones', 'stats', 'updatedAt'];
     var LEGACY_FIELDS = ['data', 'vaultData', 'r65DeletedTasks', 'r59Meta'];
     function S(v) { try {
         return String(v == null ? '' : v);
@@ -44290,7 +44293,7 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
     var API_KEY = window.LIFEOS_FIREBASE_CONFIG.apiKey;
     var REST_DOC_BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/LifeOS_Profiles/';
     var rawFetch = window.fetch ? window.fetch.bind(window) : null;
-    var CANONICAL_FIELDS = ['tasks', 'vault', 'deletedTaskTombstones', 'stats', 'updatedAt'];
+    var CANONICAL_FIELDS = ['tasks', 'vault', 'deletedTaskTombstones', 'deletedVaultTombstones', 'stats', 'updatedAt'];
     var LEGACY_FIELDS = ['data', 'vaultData', 'r65DeletedTasks', 'r59Meta'];
     var state = { startedAt: Date.now(), profile: '', compactLocal: 0, compactRemote: 0, pushOk: 0, pushFail: 0, lastOk: '', lastError: '', lastAt: 0, lastCounts: null, setItemPatched: false, facadePatched: false };
     function S(v) { try {
@@ -44392,6 +44395,31 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
     }
     function getLocalTasks(p) { var arr = readJSON(taskKey(p), []); if (!Array.isArray(arr) && Array.isArray(window.todos))
         arr = window.todos; return Array.isArray(arr) ? arr : []; }
+    function vaultTombKey(p) { return 'lifeos_vault_tombstones_' + p; }
+    function readVaultTombs(p) { var o = readJSON(vaultTombKey(p), {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
+    function writeVaultTombs(p, o) { try {
+        localStorage.setItem(vaultTombKey(p), JSON.stringify(o || {}));
+    }
+    catch (e) { } }
+    function mergeVaultTombs(a, b) {
+        var o = {};
+        [a, b].forEach(function (src) { if (!src || typeof src !== 'object')
+            return; Object.keys(src).forEach(function (k) { var n = Number(src[k]) || 0; if (!n && src[k] && typeof src[k] === 'object')
+            n = Number(src[k].at || src[k].updatedAt || src[k].deletedAt) || Date.now(); if (!n)
+            n = Date.now(); if (!o[k] || n > o[k])
+            o[k] = n; }); });
+        return o;
+    }
+    function dropTombedVault(arr, tombs) { tombs = tombs || {}; if (!Array.isArray(arr))
+        return []; return arr.filter(function (x) { return x && x.id != null && !tombs[String(x.id)]; }); }
+    window.LifeOSMarkVaultDeleted = function (ids) {
+        var p = getProfile();
+        var tombs = readVaultTombs(p);
+        (Array.isArray(ids) ? ids : [ids]).forEach(function (id) { if (id != null && String(id) !== '')
+            tombs[String(id)] = Date.now(); });
+        writeVaultTombs(p, tombs);
+        return tombs;
+    };
     function getLocalVault(p) {
         var arr = readJSON(vaultKey(p), []);
         if (!Array.isArray(arr))
@@ -44576,10 +44604,13 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
                 compactLocalTombs(p, 'after_merge_remote_' + reason);
                 var cloudTaskSrc = mergeArrays(Array.isArray(cloud.tasks) ? cloud.tasks : [], Array.isArray(cloud.data) ? cloud.data : []);
                 var tasks = mergeCloudFirst(filterTasks(cloudTaskSrc, tombs), filterTasks(getLocalTasks(p), tombs));
-                var cloudVaultSrc = mergeArrays(Array.isArray(cloud.vault) ? cloud.vault : [], Array.isArray(cloud.vaultData) ? cloud.vaultData : []);
-                var vault = mergeCloudFirst(cloudVaultSrc, getLocalVault(p));
+                var cloudVaultSrc = dropTombedVault(mergeArrays(Array.isArray(cloud.vault) ? cloud.vault : [], Array.isArray(cloud.vaultData) ? cloud.vaultData : []), {});
+                var vaultTombs = mergeVaultTombs(readVaultTombs(p), cloud.deletedVaultTombstones || {});
+                writeVaultTombs(p, vaultTombs);
+                cloudVaultSrc = dropTombedVault(cloudVaultSrc, vaultTombs);
+                var vault = dropTombedVault(mergeCloudFirst(cloudVaultSrc, getLocalVault(p)), vaultTombs);
                 showMerged(p, tasks, vault);
-                var payload = { tasks: tasks, vault: Array.isArray(vault) ? vault : [], deletedTaskTombstones: tombs, stats: (cloud.stats && typeof cloud.stats === 'object') ? cloud.stats : cleanPlain(window.stats || {}), updatedAt: now() };
+                var payload = { tasks: tasks, vault: Array.isArray(vault) ? vault : [], deletedTaskTombstones: tombs, deletedVaultTombstones: vaultTombs, stats: (cloud.stats && typeof cloud.stats === 'object') ? cloud.stats : cleanPlain(window.stats || {}), updatedAt: now() };
                 yield restPatch(p, payload, reason || 'compact_tombstone_r68');
                 state.compactRemote++;
                 state.pushOk++;
