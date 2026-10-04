@@ -8225,7 +8225,8 @@ body.music-player-active #mini-player {
 <div class="col-span-1 lg:col-span-4 flex flex-col gap-3 justify-start">
 <div class="w-full bg-white rounded-2xl border border-slate-200 p-2 shadow-sm" id="tv-player-container" style="display: none;">
 <video class="w-full aspect-video bg-black rounded-xl shadow-inner border border-slate-800" controls="" id="tv-video-element" playsinline=""></video>
-<div class="mt-2 text-xs font-black text-rose-500 line-clamp-2 leading-snug p-1" id="tv-channel-name">📺 Cần thao tác: <span class="text-rose-600 italic font-medium">Vui lòng chọn kênh danh sách để bật xem</span></div>
+<div class="mt-2 text-xs font-black text-slate-800 line-clamp-2 leading-snug p-1" id="tv-channel-name">📺 Đang phát: <span class="text-slate-500 italic font-medium">Chưa chọn kênh</span></div>
+<div class="mt-1 text-[11px] font-semibold text-slate-500 leading-snug" id="tv-channel-status"></div>
 <div class="flex items-center justify-center gap-3 mt-1 bg-slate-50 border border-slate-200 rounded-xl p-1.5">
 <button class="w-9 h-9 rounded-full bg-white text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center active:scale-90 transition" onclick="event.preventDefault(); event.stopPropagation(); window.MediaHub.playPrev('tv', event)" title="Kênh trước" type="button"><i class="ph-fill ph-skip-back text-lg"></i></button>
 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Đổi Kênh</span>
@@ -8237,8 +8238,9 @@ body.music-player-active #mini-player {
 <div class="flex items-center gap-3 min-w-0">
 <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm" id="radio-disk-icon"><i class="ph-fill ph-radio text-xl"></i></div>
 <div class="min-w-0 flex-grow">
-<div class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">📻 Đài phát thanh</div>
-<div class="text-sm font-bold text-rose-500 truncate italic" id="radio-channel-name">Chưa chọn kênh đài! Vui lòng chọn bên dưới</div>
+<div class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">ĐÀI PHÁT THANH</div>
+<div class="text-sm font-bold text-slate-800 truncate" id="radio-channel-name">Đang phát: chưa chọn kênh</div>
+<div class="text-[11px] font-semibold text-slate-500 leading-snug" id="radio-channel-status"></div>
 </div>
 </div>
 <div class="flex items-center justify-center gap-4 border-t border-emerald-200/60 pt-2 mt-1">
@@ -17429,31 +17431,35 @@ window.MediaHub = {
     },
     setTvInstruction(msg, type = 'info') {
         const titleWrap = document.getElementById('tv-channel-name');
-        if (!titleWrap)
+        const statusEl = document.getElementById('tv-channel-status');
+        if ((type === 'error' || type === 'action') && statusEl) {
+            statusEl.textContent = msg || '';
+            statusEl.className = type === 'error'
+                ? 'mt-1 text-[11px] font-bold text-rose-600 leading-snug'
+                : 'mt-1 text-[11px] font-semibold text-slate-500 leading-snug';
             return;
-        if (type === 'error') {
-            titleWrap.innerHTML = `📺 <span class="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded border border-rose-200 animate-pulse">${msg}</span>`;
         }
-        else if (type === 'action') {
-            titleWrap.innerHTML = `📺 Cần thao tác: <span class="text-rose-600 font-bold animate-pulse">${msg}</span>`;
-        }
-        else {
-            titleWrap.innerHTML = `📺 Đang phát: <span class="text-slate-800 font-bold">${msg}</span>`;
-        }
+        if (titleWrap)
+            titleWrap.innerHTML = `📺 Đang phát: <span class="text-slate-800 font-bold">${window.escapeHTML ? window.escapeHTML(msg || '') : (msg || '')}</span>`;
+        if (statusEl && type === 'info')
+            statusEl.textContent = '';
     },
     setRadioInstruction(msg, type = 'info') {
         const titleEl = document.getElementById('radio-channel-name');
-        if (!titleEl)
+        const statusEl = document.getElementById('radio-channel-status');
+        if ((type === 'error' || type === 'action') && statusEl) {
+            statusEl.textContent = msg || '';
+            statusEl.className = type === 'error'
+                ? 'text-[11px] font-bold text-rose-600 leading-snug'
+                : 'text-[11px] font-semibold text-emerald-700 leading-snug';
             return;
-        if (type === 'error') {
-            titleEl.innerHTML = `<span class="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded border border-rose-200 animate-pulse">${msg}</span>`;
         }
-        else if (type === 'action') {
-            titleEl.innerHTML = `<span class="text-rose-600 font-bold animate-pulse">${msg}</span>`;
+        if (titleEl) {
+            titleEl.textContent = 'Đang phát: ' + (msg || 'chưa chọn kênh');
+            titleEl.className = 'text-sm font-bold text-slate-800 truncate';
         }
-        else {
-            titleEl.textContent = msg;
-        }
+        if (statusEl && type === 'info')
+            statusEl.textContent = '';
     },
     setElementVisible(el, visible, displayMode = 'block') {
         if (!el)
@@ -17642,7 +17648,7 @@ window.MediaHub = {
                 list = list.filter(c => c.name.toLowerCase().includes(query));
             container.innerHTML = list.map((c, idxInList) => {
                 const actualIdx = this.tvData.findIndex(x => x.id === c.id);
-                const isPlaying = this.currentTvIdx === actualIdx;
+                const isPlaying = (this.currentTvId && c.id === this.currentTvId) || this.currentTvIdx === actualIdx;
                 const borderCls = isPlaying ? 'border-rose-500 shadow-md ring-2 ring-rose-200' : 'border-slate-200 hover:border-rose-500';
                 const stt = String(idxInList + 1).padStart(3, '0');
                 return `
@@ -17664,7 +17670,7 @@ window.MediaHub = {
                 list = list.filter(c => c.name.toLowerCase().includes(query));
             container.innerHTML = list.map((c, idxInList) => {
                 const actualIdx = this.radioData.findIndex(x => x.id === c.id);
-                const isPlaying = this.currentRadioIdx === actualIdx;
+                const isPlaying = (this.currentRadioId && c.id === this.currentRadioId) || this.currentRadioIdx === actualIdx;
                 const borderCls = isPlaying ? 'border-emerald-500 shadow-md bg-emerald-50' : 'border-slate-200 bg-white hover:border-emerald-500';
                 const stt = String(idxInList + 1).padStart(3, '0');
                 return `
@@ -17759,12 +17765,11 @@ window.MediaHub = {
     showPlayerLoadError(type, reason, url) {
         var _a;
         const msg = reason || 'Kênh này cần proxy/nguồn dự phòng hoặc codec WebView không hỗ trợ';
-        const extra = url ? ` (${url})` : '';
         if (type === 'tv') {
-            this.setTvInstruction(msg + extra, 'error');
+            this.setTvInstruction(msg, 'error');
         }
         else {
-            this.setRadioInstruction(msg + extra, 'error');
+            this.setRadioInstruction(msg, 'error');
             (_a = window.showToast) === null || _a === void 0 ? void 0 : _a.call(window, msg, 'ph-warning-circle');
         }
         window.LIFEOS_DEBUG && console.warn('[MediaHub] player load error', { type, reason: msg, url });
@@ -17801,7 +17806,8 @@ window.MediaHub = {
                 const shouldAddProxy = type === 'tv' || (window.lifeosNeedsProxy && window.lifeosNeedsProxy(u, channel));
                 const proxy = window.lifeosProxyUrl ? window.lifeosProxyUrl(u) : '';
                 const likelyCorsOnlyTv = type === 'tv' && /(^|\.)vtvdigital\.vn\//i.test(u.replace(/^https?:\/\//i, ''));
-                if (likelyCorsOnlyTv && proxy && proxy !== u && !isProxy(u)) {
+                const zingDeadDirect = /zmdcdn\.me|zingmp3\.vn/i.test(u);
+                if ((likelyCorsOnlyTv || zingDeadDirect) && proxy && proxy !== u && !isProxy(u)) {
                     add(proxy);
                     return;
                 }
@@ -17871,7 +17877,7 @@ window.MediaHub = {
                 else if (type === 'radio' && typeof this.lifeosSetChannelStatus === 'function')
                     this.lifeosSetChannelStatus('radio', idx, state, Object.assign({ route, detail, url: url || '' }, opt));
                 else if (type === 'tv')
-                    this.setTvInstruction(detail, String(state).includes('error') ? 'error' : (state === 'playing' ? 'info' : 'action'));
+                    this.setTvInstruction(detail, String(state).includes('error') ? 'error' : 'action');
                 else
                     this.setRadioInstruction(detail, state && String(state).includes('error') ? 'error' : 'action');
             }
@@ -18176,11 +18182,26 @@ window.MediaHub = {
                     setStatus('playing', route, route === 'webview_proxy' ? 'Kênh đang phát qua WebView + proxy' : 'Kênh đang phát bình thường qua WebView direct', playUrl);
                 }
             };
-            if (isM3u8 && type !== 'tv' && el.canPlayType('application/vnd.apple.mpegurl')) {
-                attachDirect(playUrl);
-                el.load();
-                playSafe(playUrl);
-                return;
+            if (isM3u8 && !(window.Hls && window.Hls.isSupported && window.Hls.isSupported())) {
+                var safariNative = !!(el.canPlayType && el.canPlayType('application/vnd.apple.mpegurl') === 'probably');
+                if (!safariNative) {
+                    setStatus('loading', route, 'Đang tải bộ phát HLS', playUrl);
+                    var hlsLoader = window.LifeOSVendor && typeof window.LifeOSVendor.loadHls === 'function' ? window.LifeOSVendor.loadHls() : Promise.reject(new Error('no_hls_loader'));
+                    Promise.resolve(hlsLoader).then(function () {
+                        if (!tokenAlive())
+                            return;
+                        if (window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
+                            loadCurrentSource();
+                            return;
+                        }
+                        failSource('Trình duyệt không phát được kênh HLS', playUrl);
+                    }, function () {
+                        if (!tokenAlive())
+                            return;
+                        failSource('Không tải được bộ phát HLS', playUrl);
+                    });
+                    return;
+                }
             }
             if (isM3u8 && window.Hls && Hls.isSupported()) {
                 const hls = new Hls(type === 'tv' ? {
@@ -18479,15 +18500,16 @@ window.MediaHub = {
             }
             catch (e) { }
             this.currentTvIdx = idx;
+            this.currentTvId = c.id;
             const rAudio = document.getElementById('radio-audio-element');
             if (rAudio && !rAudio.paused)
                 rAudio.pause();
             const video = document.getElementById('tv-video-element');
-            const titleWrap = document.getElementById('tv-channel-name');
-            if (titleWrap)
-                titleWrap.innerHTML = `📺 Đang phát: <span class="text-slate-800 font-bold">${c.name}</span>`;
+            this.setTvInstruction(c.name);
             const sourceQueue = this.buildSourceQueue(c);
             this.loadMediaStream(video, sourceQueue, 'tv', c);
+            if (typeof this.renderLists === 'function')
+                this.renderLists();
             if (window.soundEnabled)
                 window.playSpeechTTS('Mở kênh ' + c.name);
         }
@@ -18500,6 +18522,7 @@ window.MediaHub = {
             }
             catch (e) { }
             this.currentRadioIdx = idx;
+            this.currentRadioId = c.id;
             this.__radioWant = true;
             this.__radioUserStop = false;
             const video = document.getElementById('tv-video-element');
@@ -18507,13 +18530,11 @@ window.MediaHub = {
                 video.pause();
             const sourceQueue = this.buildSourceQueue(c);
             this.currentRadioUrl = sourceQueue[0] || c.url;
-            const titleEl = document.getElementById('radio-channel-name');
-            if (titleEl) {
-                titleEl.textContent = c.name;
-                titleEl.className = "text-sm font-bold text-slate-800 truncate";
-            }
+            this.setRadioInstruction(c.name);
             const rAudio = document.getElementById('radio-audio-element');
             this.loadMediaStream(rAudio, sourceQueue, 'radio', c);
+            if (typeof this.renderLists === 'function')
+                this.renderLists();
             if (window.LifeOSAudioPipe) window.LifeOSAudioPipe.sync();
             if (window.soundEnabled)
                 window.playSpeechTTS('Mở đài ' + c.name);
