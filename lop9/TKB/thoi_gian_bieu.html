@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trình chỉnh Thời Gian Biểu</title>
+<style>
+  :root {
+    --cyan: #00ffff; /* Màu xanh ngọc giống ảnh gốc */
+    --gold: #f0c14a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Times New Roman", "Be Vietnam Pro", sans-serif;
+    background: #0a1228;
+    color: #eef3ff;
+  }
+  .app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+  @media (max-width: 980px) { .app { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #0d1733;
+    border-right: 1px solid #22315c;
+    padding: 18px 16px 28px;
+    overflow: auto;
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 18px; color: var(--gold); font-family: "Be Vietnam Pro", sans-serif;}
+  .panel p.hint { margin: 0 0 16px; color: #9db0d8; font-size: 13px; line-height: 1.45; font-family: "Be Vietnam Pro", sans-serif;}
+  
+  .control-group {
+    background: #152247;
+    border: 1px solid #2c4278;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .control-group label { display: block; font-size: 13px; color: #b7c6e6; margin-bottom: 8px; font-weight: bold; font-family: "Be Vietnam Pro", sans-serif;}
+  
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button {
+    border: 0; border-radius: 6px; padding: 8px 10px; cursor: pointer;
+    font: 650 13px/1 "Be Vietnam Pro", sans-serif; color: #0b1224;
+    background: var(--gold);
+    flex: 1; min-width: 45%;
+  }
+  button.ghost { background: #1b2c58; color: #dce6ff; }
+  button.danger { background: #8b2a3a; color: #fff; }
+  button.full { min-width: 100%; }
+  button:hover { filter: brightness(1.1); }
+  button:active { transform: scale(.96); }
+
+  #toasts {
+    position: fixed; top: 16px; right: 16px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+  }
+  .toast {
+    pointer-events: auto; background: #121a2f; color: #eef3ff;
+    border: 1px solid #2a3c66; border-left: 5px solid #22c55e;
+    border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 650;
+    animation: toastIn .2s ease, toastOut .3s ease 2.6s forwards;
+    font-family: "Be Vietnam Pro", sans-serif;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes toastOut { to { opacity: 0; transform: translateX(16px); } }
+
+  .status { min-height: 18px; font-size: 12px; color: #8dffb0; margin-top: 12px; text-align: center; font-family: "Be Vietnam Pro", sans-serif;}
+
+  .stage {
+    padding: 24px;
+    overflow: auto;
+    background: linear-gradient(165deg, #071433 0%, #0b1d4a 42%, #10245c 100%);
+    display: flex; justify-content: center; align-items: flex-start;
+  }
+  
+  .poster {
+    width: 210mm; /* Chiều rộng chuẩn A4 */
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 40px;
+    color: #000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  
+  [contenteditable="true"] { outline: none; transition: background 0.2s; }
+  [contenteditable="true"]:hover { box-shadow: inset 0 0 0 2px rgba(0, 255, 255, 0.5); }
+  [contenteditable="true"]:focus { box-shadow: inset 0 0 0 2px #000; background: #fffbe6; }
+
+  .table-title {
+    font-weight: bold; font-size: 24px;
+    text-align: center; text-transform: uppercase;
+    margin: 35px 0 15px 0;
+  }
+  .table-title:first-child { margin-top: 0; }
+
+  table.tgb {
+    width: 100%; 
+    border-collapse: collapse; 
+    table-layout: fixed;
+    margin-bottom: 30px;
+  }
+  table.tgb th, table.tgb td {
+    border: 1px solid #000; /* Viền đen rõ nét */
+    text-align: center; vertical-align: middle;
+    padding: 12px 5px; 
+    font-size: 18px; 
+    font-weight: bold;
+  }
+  table.tgb th {
+    background-color: var(--cyan);
+    color: #000; 
+    text-transform: uppercase;
+  }
+  /* Cột TIẾT thu nhỏ lại 1 chút */
+  table.tgb td:first-child, table.tgb th:first-child { width: 15%; }
+
+  /* ===== CSS CHUẨN IN A4 ===== */
+  @media print {
+    @page { size: A4 portrait; margin: 15mm; }
+    
+    * {
+      -webkit-print-color-adjust: exact !important; 
+      print-color-adjust: exact !important;
+    }
+    
+    .panel, #toasts { display: none !important; }
+    .app { display: block; }
+    .stage { padding: 0; background: #fff; display: block; }
+    
+    .poster { 
+      width: 100%; max-width: 100%;
+      box-shadow: none; border: none; 
+      padding: 0; margin: 0;
+    }
+    
+    table.tgb { page-break-inside: avoid; }
+    table.tgb th, table.tgb td { border: 1.5pt solid #000 !important; }
+    
+    [contenteditable="true"]:hover, [contenteditable="true"]:focus { 
+      box-shadow: none; background: transparent; 
+    }
+  }
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+<div class="app">
+  <aside class="panel">
+    <h2>Thời Gian Biểu</h2>
+    <p class="hint">Bấm trực tiếp vào chữ hoặc ô bên phải để sửa. Đã tối ưu in A4.</p>
+
+    <div class="control-group">
+      <label>Trường Chính</label>
+      <div class="btns">
+        <button class="ghost" onclick="addRow('table1')">+ Thêm dòng</button>
+        <button class="ghost" onclick="removeRow('table1')">− Xóa dòng</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Điểm Trường</label>
+      <div class="btns">
+        <button class="ghost" onclick="addRow('table2')">+ Thêm dòng</button>
+        <button class="ghost" onclick="removeRow('table2')">− Xóa dòng</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Hệ thống</label>
+      <div class="btns">
+        <button class="ghost full" onclick="window.print()">In / Xuất PDF (A4)</button>
+        <button class="ghost" onclick="exportJSON()">Tải JSON</button>
+        <button class="ghost" onclick="document.getElementById('fileJSON').click()">Mở JSON</button>
+        <button class="danger full" onclick="resetData()">Khôi phục dữ liệu gốc</button>
+      </div>
+    </div>
+    
+    <input id="fileJSON" type="file" accept="application/json" hidden onchange="importJSON(event)" />
+    <div class="status" id="status"></div>
+  </aside>
+
+  <main class="stage">
+    <section class="poster" id="poster">
+      <!-- Bảng sẽ được Javascript vẽ vào đây -->
+    </section>
+  </main>
+</div>
+
+<script>
+const DEFAULT_DATA = {
+  table1: {
+    title: "THỜI GIAN BIỂU TRƯỜNG CHÍNH",
+    headers: ["TIẾT", "SÁNG", "CHIỀU", "SÁNG THỨ 2"],
+    rows: [
+      ["Truy bài", "7h00 – 7h15", "13h45 – 14h", "CC 7h00 – 7h35"],
+      ["1", "7h15 – 8h00", "14h00 – 14h45", "7h40 – 8h25"],
+      ["2", "8h05 – 8h50", "14h50 – 15h35", "8h35 – 9h20"],
+      ["3", "9h00 – 9h45", "15h45 – 16h30", "9h25 – 10h10"],
+      ["4", "9h50 – 10h35", "", "10h15 – 11h00"],
+      ["", "SHL 10h40 – 11h00", "", ""]
+    ]
+  },
+  table2: {
+    title: "THỜI GIAN BIỂU ĐIỂM TRƯỜNG",
+    headers: ["TIẾT", "SÁNG", "CHIỀU", "CHIỀU THỨ 2"],
+    rows: [
+      ["Truy bài", "7h00 – 7h15", "13h45 – 14h", "13h45 – 14h"],
+      ["1", "7h15 – 8h00", "14h00 – 14h45", "14h00 – 14h45"],
+      ["2", "8h05 – 8h50", "14h50 – 15h35", "14h50 – 15h35"],
+      ["3", "9h00 – 9h45", "15h45 – 16h30", "15h45 – 16h30"],
+      ["4", "9h50 – 10h35", "", "CC 16h35 – 16h55"],
+      ["", "SHL 10h40 – 11h00", "", ""]
+    ]
+  }
+};
+
+const KEY = "tgb_editor_v2"; // Đổi KEY để buộc xóa cache cũ bị lỗi
+let data = loadData();
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return structuredClone(DEFAULT_DATA);
+    return { ...structuredClone(DEFAULT_DATA), ...JSON.parse(raw) };
+  } catch { return structuredClone(DEFAULT_DATA); }
+}
+
+function saveData() {
+  localStorage.setItem(KEY, JSON.stringify(data));
+  document.getElementById("status").textContent = "Đã lưu lúc " + new Date().toLocaleTimeString("vi-VN");
+}
+
+function toast(msg) {
+  const box = document.getElementById("toasts");
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function addRow(tableKey) {
+  data[tableKey].rows.push(["", "", "", ""]);
+  render(); saveData();
+  toast("Đã thêm 1 dòng mới");
+}
+
+function removeRow(tableKey) {
+  if (data[tableKey].rows.length > 1) {
+    data[tableKey].rows.pop();
+    render(); saveData();
+    toast("Đã xóa dòng cuối");
+  } else {
+    toast("Cần giữ ít nhất 1 dòng!");
+  }
+}
+
+function render() {
+  const poster = document.getElementById("poster");
+  poster.innerHTML = ""; // Xóa sạch poster cũ
+
+  ['table1', 'table2'].forEach(key => {
+    const tableData = data[key];
+
+    // Tạo Tiêu đề bảng
+    const title = document.createElement("div");
+    title.className = "table-title";
+    title.contentEditable = "true";
+    title.textContent = tableData.title;
+    title.onblur = () => { tableData.title = title.textContent; saveData(); };
+    poster.appendChild(title); // Chèn tiêu đề
+
+    // Tạo Bảng
+    const table = document.createElement("table");
+    table.className = "tgb";
+
+    // Tạo Header
+    const thead = document.createElement("thead");
+    const trHead = document.createElement("tr");
+    tableData.headers.forEach((h, i) => {
+      const th = document.createElement("th");
+      th.contentEditable = "true";
+      th.textContent = h;
+      th.onblur = () => { tableData.headers[i] = th.textContent; saveData(); };
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+
+    // Tạo Body
+    const tbody = document.createElement("tbody");
+    tableData.rows.forEach((row, r) => {
+      const tr = document.createElement("tr");
+      row.forEach((cell, c) => {
+        const td = document.createElement("td");
+        td.contentEditable = "true";
+        td.textContent = cell;
+        td.oninput = () => { data[key].rows[r][c] = td.textContent; };
+        td.onblur = saveData;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    
+    // ĐÂY LÀ DÒNG FIX LỖI: Chèn bảng vào poster
+    poster.appendChild(table); 
+  });
+}
+
+function resetData() {
+  if(confirm("Bạn có chắc muốn xóa mọi chỉnh sửa và quay về dữ liệu gốc?")) {
+    data = structuredClone(DEFAULT_DATA);
+    render(); saveData();
+    toast("Đã khôi phục dữ liệu gốc");
+  }
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "thoi-gian-bieu.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Đã tải file JSON");
+}
+
+function importJSON(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      data = { ...structuredClone(DEFAULT_DATA), ...JSON.parse(reader.result) };
+      render(); saveData();
+      toast("Đã nạp dữ liệu từ file");
+    } catch { toast("File JSON không hợp lệ"); }
+  };
+  reader.readAsText(file);
+  ev.target.value = "";
+}
+
+// Khởi chạy khi load trang
+render();
+</script>
+</body>
+</html>

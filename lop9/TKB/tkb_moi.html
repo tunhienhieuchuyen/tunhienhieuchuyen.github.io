@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trình chỉnh thời khóa biểu</title>
+<style>
+  :root {
+    --gold: #f0c14a;
+    --line: #111;
+    --ink: #111;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Be Vietnam Pro", "Noto Sans", Montserrat, system-ui, sans-serif;
+    background: #0a1228;
+    color: #eef3ff;
+  }
+  .app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+  @media (max-width: 980px) { .app { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #0d1733;
+    border-right: 1px solid #22315c;
+    padding: 18px 16px 28px;
+    overflow: auto;
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 18px; color: var(--gold); }
+  .panel p.hint { margin: 0 0 16px; color: #9db0d8; font-size: 13px; line-height: 1.45; }
+  label { display: block; font-size: 12px; color: #b7c6e6; margin: 10px 0 4px; }
+  input[type="text"] {
+    width: 100%;
+    background: #152247;
+    border: 1px solid #2c4278;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: inherit;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  button {
+    border: 0; border-radius: 8px; padding: 8px 10px; cursor: pointer;
+    font: 650 13px/1 "Be Vietnam Pro", sans-serif; color: #0b1224;
+    background: var(--gold);
+  }
+  button.ghost { background: #1b2c58; color: #dce6ff; }
+  button.danger { background: #8b2a3a; color: #fff; }
+  button:hover { filter: brightness(1.08); }
+
+  button {
+    transform: translateZ(0);
+    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+  }
+  button:active { transform: scale(.94); }
+  button.bump {
+    animation: btnBump .28s cubic-bezier(.2,1.4,.3,1);
+  }
+  @keyframes btnBump {
+    0% { transform: scale(1); }
+    35% { transform: scale(.9) rotate(-1deg); }
+    70% { transform: scale(1.06) rotate(1deg); }
+    100% { transform: scale(1); }
+  }
+  .poster.flash {
+    animation: boardFlash .55s ease;
+  }
+  @keyframes boardFlash {
+    0% { outline: 3px solid #8dffb0; }
+    100% { outline: 3px solid transparent; }
+  }
+  #toasts {
+    position: fixed; top: 16px; right: 16px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px;
+    width: min(360px, calc(100vw - 24px));
+    pointer-events: none;
+  }
+  .toast {
+    pointer-events: auto;
+    background: #121a2f;
+    color: #eef3ff;
+    border: 1px solid #2a3c66;
+    border-left: 5px solid #8aa0c8;
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 28px rgba(0,0,0,.35);
+    font-size: 13px; line-height: 1.4; font-weight: 650;
+    animation: toastIn .22s ease, toastOut .3s ease 2.6s forwards;
+  }
+  .toast.ok { border-left-color: #22c55e; }
+  .toast.warn { border-left-color: #eab308; }
+  .toast.bad { border-left-color: #ef4444; }
+  .toast.info { border-left-color: #8aa0c8; }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes toastOut {
+    to { opacity: 0; transform: translateX(16px); }
+  }
+  @media print { #toasts { display: none !important; } }
+
+  .mini { font-size: 12px; color: #8ea2cc; margin-top: 14px; line-height: 1.5; }
+  .status { min-height: 18px; font-size: 12px; color: #8dffb0; margin-top: 8px; }
+
+  .stage {
+    padding: 18px;
+    overflow: auto;
+    background: linear-gradient(165deg, #071433 0%, #0b1d4a 42%, #10245c 100%);
+  }
+  .poster {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    background: linear-gradient(165deg, #071433 0%, #0b1d4a 50%, #10245c 100%);
+    border: 2px solid #111;
+    border-radius: 8px;
+    padding: 18px 18px 12px;
+  }
+  .titles { text-align: center; margin-bottom: 10px; color: #fff; }
+  [contenteditable="true"] { outline: none; }
+  [contenteditable="true"]:hover { box-shadow: inset 0 0 0 2px #f0c14a88; }
+  [contenteditable="true"]:focus { box-shadow: inset 0 0 0 2px #f0c14a; background: #fffbe6; color: #111; }
+
+  .title-main {
+    font-weight: 800; font-size: clamp(22px, 3.2vw, 34px);
+    color: #f0c14a;
+    display: inline-block; min-width: 40%;
+  }
+  .sub, .year { margin-top: 4px; }
+  #student { color: #ffd56a; font-weight: 800; }
+  .slogan { color: #f0c14a; font-style: italic; font-weight: 800; text-align: center; margin-top: 10px; }
+
+  table.tkb {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    color: #111;
+    table-layout: fixed;
+  }
+  table.tkb th, table.tkb td {
+    border: 2px solid #111;
+    text-align: center;
+    vertical-align: middle;
+    padding: 7px 5px;
+    font-size: 14px;
+    word-wrap: break-word;
+  }
+  table.tkb th {
+    color: #fff;
+    font-weight: 800;
+    height: 42px;
+  }
+  .t2 { background: #16315f; }
+  .t3 { background: #0f5e5a; }
+  .t4 { background: #1d4ea3; }
+  .t5 { background: #5b2d8a; }
+  .t6 { background: #9b1d3a; }
+  .tiet-h, .tiet { background: #222; color: #fff; font-weight: 800; width: 58px; }
+  .side { color: #fff; font-weight: 800; letter-spacing: .4px; width: 72px; }
+  .sang { background: #16315f; }
+  .chieu { background: #444; }
+  .cell { background: #fff; font-weight: 700; min-height: 42px; }
+  .cell.alt { background: #f3f3f3; }
+  .cell.empty { background: #fafafa; color: #555; font-weight: 500; }
+
+  @media print {
+    @page { size: A4 landscape; margin: 8mm; }
+    .panel { display: none !important; }
+    .app { display: block; }
+    .stage { padding: 0; background: #fff; }
+    .poster {
+      width: 100%;
+      border: 0;
+      background: #fff !important;
+      box-shadow: none;
+      border-radius: 0;
+      padding: 0;
+    }
+    .titles, .title-main, #student, .slogan, .sub, .year { color: #000 !important; }
+    table.tkb th, table.tkb td {
+      border: 1.6pt solid #000 !important;
+      color: #000 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    table.tkb th, .tiet, .tiet-h, .side {
+      background: #e6e6e6 !important;
+      color: #000 !important;
+    }
+    .cell, .cell.alt, .cell.empty { background: #fff !important; color: #000 !important; }
+    [contenteditable="true"]:hover, [contenteditable="true"]:focus {
+      box-shadow: none; background: transparent; color: #000;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+<div class="app">
+  <aside class="panel">
+    <h2>Chỉnh thời khóa biểu</h2>
+    <p class="hint">Bấm vào tiêu đề hoặc từng ô để sửa. Kẻ ô luôn hiện, in đen trắng vẫn rõ. Nút khôi phục về đủ 5 tiết sáng + 5 tiết chiều.</p>
+
+    <label>Tiêu đề</label>
+    <input id="inpTitle" type="text" />
+    <label>Học sinh</label>
+    <input id="inpStudent" type="text" placeholder="(Để trống nếu in chung cho lớp)" />
+    <label>Năm học</label>
+    <input id="inpYear" type="text" />
+    <label>Câu khẩu hiệu</label>
+    <input id="inpSlogan" type="text" placeholder="(Để trống nếu không cần)" />
+
+    <label>Số tiết sáng / chiều</label>
+    <div class="row2">
+      <input id="inpSang" type="text" inputmode="numeric" />
+      <input id="inpChieu" type="text" inputmode="numeric" />
+    </div>
+
+    <label>Tên các thứ (cách nhau bởi | )</label>
+    <input id="inpDays" type="text" />
+
+    <div class="btns">
+      <button onclick="applyMeta()">Áp dụng khung</button>
+      <button class="ghost" onclick="addPeriod('morning')">+ Tiết sáng</button>
+      <button class="ghost" onclick="addPeriod('afternoon')">+ Tiết chiều</button>
+      <button class="ghost" onclick="removePeriod('morning')">− Tiết sáng</button>
+      <button class="ghost" onclick="removePeriod('afternoon')">− Tiết chiều</button>
+      <button class="ghost" onclick="exportJSON()">Tải JSON</button>
+      <button class="ghost" onclick="document.getElementById('fileJSON').click()">Mở JSON</button>
+      <button class="ghost" onclick="window.print()">In / PDF</button>
+      <button class="danger" onclick="resetData()">Khôi phục TKB 9A4</button>
+    </div>
+    <input id="fileJSON" type="file" accept="application/json" hidden onchange="importJSON(event)" />
+    <div class="status" id="status"></div>
+    <div class="mini">Mặc định: 5 tiết sáng, 5 tiết chiều. Ô trống vẫn có khung kẻ để viết tay khi in.</div>
+  </aside>
+
+  <main class="stage">
+    <section class="poster" id="poster">
+      <div class="titles">
+        <div class="title-main" id="title" contenteditable="true"></div>
+        <div class="sub">Học sinh: <span id="student" contenteditable="true"></span></div>
+        <div class="year">Năm học: <span id="year" contenteditable="true"></span></div>
+      </div>
+      <table class="tkb" id="grid"></table>
+      <div class="slogan" id="slogan" contenteditable="true"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const EMPTY5 = ["", "", "", "", ""];
+const DEFAULT_DATA = {
+  title: "TKB LỚP 9A4",
+  student: "",
+  year: "2026 - 2027",
+  slogan: "",
+  days: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6"],
+  morning: [
+    ["CC - Nguyễn Diễn", "GDTC - Nguyễn Thức", "KHTN_L - Nam Cương", "GDĐP - X.Đảm", "Toán - Nguyễn Diễn"],
+    ["Tin - Phương Hoa", "KHTN_H - Minh Ngọc", "Toán - Nguyễn Diễn", "LS&ĐL_S - Trần Hà", "C.nghệ - Nguyễn Hường"],
+    ["NT_Họa - Trung Hiếu", "KHTN_S - Thanh Hoa", "Toán - Nguyễn Diễn", "KHTN_L - Nam Cương", "Văn - Trần Hà"],
+    ["LS&ĐL_S - Trần Hà", "NT_Nhạc - Hồng Nam", "Văn - Trần Hà", "Văn - Trần Hà", "Văn - Trần Hà"],
+    ["GDTC - Nguyễn Thức", "", "", "", "SH - Nguyễn Diễn"]
+  ],
+  afternoon: [
+    ["LS&ĐL_Đ - Thanh Linh", "HĐTN - Đào Thu", "", "NN - Phạm Hà", ""],
+    ["HĐTN - Đào Thu", "HĐTN - Đào Thu", "", "NN - Phạm Hà", ""],
+    ["NN - Phạm Hà", "GDCD - H.Trà", "", "Toán - Nguyễn Diễn", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""]
+  ]
+};
+
+const KEY = "tkb_9a4_editor_v3";
+let data = loadData();
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return structuredClone(DEFAULT_DATA);
+    return normalize({ ...structuredClone(DEFAULT_DATA), ...JSON.parse(raw) });
+  } catch { return structuredClone(DEFAULT_DATA); }
+}
+function normalize(d) {
+  while (d.morning.length < 5) d.morning.push(EMPTY5.slice());
+  while (d.afternoon.length < 5) d.afternoon.push(EMPTY5.slice());
+  return d;
+}
+function saveData() {
+  localStorage.setItem(KEY, JSON.stringify(data));
+  document.getElementById("status").textContent = "Đã lưu lúc " + new Date().toLocaleTimeString("vi-VN");
+}
+function setStatus(msg) { document.getElementById("status").textContent = msg; }
+
+function toast(msg, type="info") {
+  const box = document.getElementById("toasts");
+  const el = document.createElement("div");
+  el.className = "toast " + type;
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+function bump(btn) {
+  if (!btn) return;
+  btn.classList.remove("bump");
+  void btn.offsetWidth;
+  btn.classList.add("bump");
+}
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if (btn) bump(btn);
+});
+
+function fillForm() {
+  document.getElementById("inpTitle").value = data.title;
+  document.getElementById("inpStudent").value = data.student;
+  document.getElementById("inpYear").value = data.year;
+  document.getElementById("inpSlogan").value = data.slogan;
+  document.getElementById("inpSang").value = data.morning.length;
+  document.getElementById("inpChieu").value = data.afternoon.length;
+  document.getElementById("inpDays").value = data.days.join(" | ");
+}
+
+function applyMeta() {
+  data.title = document.getElementById("inpTitle").value.trim() || data.title;
+  data.student = document.getElementById("inpStudent").value.trim();
+  data.year = document.getElementById("inpYear").value.trim();
+  data.slogan = document.getElementById("inpSlogan").value.trim();
+  const days = document.getElementById("inpDays").value.split("|").map(s => s.trim()).filter(Boolean);
+  if (days.length) resizeDays(days);
+  resizeSession("morning", clamp(parseInt(document.getElementById("inpSang").value, 10) || 5, 1, 10));
+  resizeSession("afternoon", clamp(parseInt(document.getElementById("inpChieu").value, 10) || 5, 1, 10));
+  render(); saveData();
+  toast("Đã áp dụng khung thời khóa biểu", "ok");
+}
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+function resizeDays(days) {
+  const n = days.length;
+  const fix = rows => rows.map(r => {
+    const next = r.slice(0, n);
+    while (next.length < n) next.push("");
+    return next;
+  });
+  data.days = days;
+  data.morning = fix(data.morning);
+  data.afternoon = fix(data.afternoon);
+}
+function resizeSession(which, count) {
+  const nDays = data.days.length;
+  const rows = data[which];
+  while (rows.length < count) rows.push(Array(nDays).fill(""));
+  while (rows.length > count) rows.pop();
+}
+function addPeriod(which) {
+  if (data[which].length >= 10) { toast("Tối đa 10 tiết / buổi", "warn"); return setStatus("Tối đa 10 tiết / buổi"); }
+  data[which].push(Array(data.days.length).fill(""));
+  render(); saveData(); fillForm();
+  toast("Đã thêm 1 tiết " + (which==="morning"?"sáng":"chiều"), "ok");
+}
+function removePeriod(which) {
+  if (data[which].length <= 1) { toast("Cần giữ ít nhất 1 tiết", "warn"); return setStatus("Cần giữ ít nhất 1 tiết"); }
+  data[which].pop();
+  render(); saveData(); fillForm();
+  toast("Đã bớt 1 tiết " + (which==="morning"?"sáng":"chiều"), "ok");
+}
+
+function render() {
+  document.getElementById("title").textContent = data.title;
+  
+  // Ẩn tiêu đề tên học sinh/slogan nếu dữ liệu rỗng để in cho đẹp
+  const stuDiv = document.getElementById("student").parentElement;
+  if (data.student.trim()) { stuDiv.style.display = "block"; document.getElementById("student").textContent = data.student; } 
+  else { stuDiv.style.display = "none"; }
+  
+  const sloDiv = document.getElementById("slogan");
+  if (data.slogan.trim()) { sloDiv.style.display = "block"; sloDiv.textContent = data.slogan; } 
+  else { sloDiv.style.display = "none"; }
+
+  document.getElementById("year").textContent = data.year;
+
+  const table = document.getElementById("grid");
+  table.innerHTML = "";
+
+  const thead = document.createElement("thead");
+  const hr = document.createElement("tr");
+  hr.appendChild(th("side", ""));
+  hr.appendChild(th("tiet-h", "Tiết"));
+  data.days.forEach((d, i) => {
+    const el = th("t" + ((i % 5) + 2), d);
+    el.contentEditable = "true";
+    el.onblur = () => { data.days[i] = el.textContent.trim() || data.days[i]; fillForm(); saveData(); };
+    hr.appendChild(el);
+  });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+
+  const tb = document.createElement("tbody");
+  appendSession(tb, "morning", "SÁNG", "sang");
+  appendSession(tb, "afternoon", "CHIỀU", "chieu");
+  table.appendChild(tb);
+}
+
+function appendSession(tb, which, label, sideClass) {
+  data[which].forEach((row, r) => {
+    const tr = document.createElement("tr");
+    if (r === 0) {
+      const side = document.createElement("th");
+      side.className = "side " + sideClass;
+      side.rowSpan = data[which].length;
+      side.textContent = label;
+      tr.appendChild(side);
+    }
+    const so = document.createElement("th");
+    so.className = "tiet";
+    so.textContent = String(r + 1);
+    tr.appendChild(so);
+    row.forEach((text, c) => {
+      const td = document.createElement("td");
+      td.className = "cell" + (r % 2 ? " alt" : "") + (text.trim() ? "" : " empty");
+      td.textContent = text;
+      td.contentEditable = "true";
+      td.oninput = () => {
+        data[which][r][c] = td.textContent.replace(/\u00a0/g, " ").trim();
+        td.classList.toggle("empty", !data[which][r][c]);
+      };
+      td.onblur = saveData;
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+}
+
+function th(cls, text) {
+  const el = document.createElement("th");
+  el.className = cls;
+  el.textContent = text;
+  return el;
+}
+
+["title", "student", "year", "slogan"].forEach(id => {
+  document.getElementById(id).addEventListener("blur", () => {
+    data[id] = document.getElementById(id).textContent.trim();
+    fillForm(); saveData();
+  });
+});
+
+function resetData() {
+  data = structuredClone(DEFAULT_DATA);
+  render(); fillForm(); saveData();
+  document.getElementById("poster").classList.remove("flash");
+  void document.getElementById("poster").offsetWidth;
+  document.getElementById("poster").classList.add("flash");
+  toast("Đã khôi phục TKB 9A4 mới nhất", "ok");
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "thoi-khoa-bieu.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Đã tải file JSON", "ok");
+}
+function importJSON(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      data = normalize({ ...structuredClone(DEFAULT_DATA), ...JSON.parse(reader.result) });
+      render(); fillForm(); saveData();
+      setStatus("Đã nạp file JSON"); toast("Đã nạp file JSON", "ok");
+    } catch { setStatus("File JSON không hợp lệ"); toast("File JSON không hợp lệ", "bad"); }
+  };
+  reader.readAsText(file);
+  ev.target.value = "";
+}
+
+fillForm();
+render();
+</script>
+</body>
+</html>
