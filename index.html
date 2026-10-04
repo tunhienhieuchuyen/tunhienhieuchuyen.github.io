@@ -12569,7 +12569,7 @@ window.VaultApp = {
     const confirmHTML = `<div id="deleteModal" class="fixed inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl animate-scaleIn border border-slate-200 flex flex-col max-h-[90vh]"><div class="flex-grow overflow-y-auto custom-scroll-area min-h-0 p-2"><div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4 border border-rose-200 shrink-0"><i class="ph-fill ph-trash text-3xl text-rose-500"></i></div><h2 class="text-xl font-black mb-2 text-slate-800 shrink-0">Xóa vĩnh viễn?</h2><p class="text-sm text-slate-500 mb-6 break-words">"${window.escapeHTML(e.name)}"</p></div><div class="flex gap-3 flex-shrink-0 mt-2"><button onclick="window.vibrate(10); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-slate-100 font-bold active:scale-95 text-slate-600 transition-all border border-slate-200 hover:brightness-95">Giữ lại</button><button onclick="window.VaultApp.execDeleteEntry('${id}'); document.getElementById('deleteModal').remove()" class="flex-1 py-3.5 rounded-xl bg-rose-500 text-white font-bold active:scale-95 shadow-lg transition-all hover:brightness-110">Xóa Ngay</button></div></div></div>`;
     document.body.insertAdjacentHTML('beforeend', confirmHTML);
   },
-  execDeleteEntry(id) {window.vibrate([30, 50, 30]);if (window.LifeOSMarkVaultDeleted) window.LifeOSMarkVaultDeleted(id);window.VaultStorageLayer.remove(id);this.filterData(window.VaultUI._q);window.showToast('Đã xóa dữ liệu!', 'ph-trash');if (window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'vault-delete', force: true });},
+  execDeleteEntry(id) {window.vibrate([30, 50, 30]);if (window.LifeOSMarkVaultDeleted) window.LifeOSMarkVaultDeleted(id);window.VaultStorageLayer.remove(id);this.filterData(window.VaultUI._q);if (window.LifeOSConfirmVaultDelete) window.LifeOSConfirmVaultDelete(id);else if (window.FirebaseSync) window.FirebaseSync.pushAll({ reason: 'vault-delete', force: true });},
   exportBackup() {
     window.vibrate(20);const d = window.VaultStorageLayer.getData();if (!d.length) {window.showToast('Kho lưu trữ đang trống!', 'ph-warning-circle');return;}
     const b = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }),n = `lifeos_vault_${window.viewingUser || 'data'}_${window.getTodayStr().replace(/-/g, '')}.json`;
@@ -14677,8 +14677,9 @@ body.lifeos-landscape-mini-pc.music-player-active #mini-player {
             vibrate([30, 45, 30]);
             if (window.VaultUI && typeof window.VaultUI.renderVaultCards === 'function')
                 window.VaultUI.renderVaultCards();
-            safeToast('Đã xóa ' + deleted + ' mục đã chọn', 'ph-trash');
-            if (window.FirebaseSync && typeof window.FirebaseSync.pushAll === 'function')
+            if (window.LifeOSConfirmVaultDelete)
+                window.LifeOSConfirmVaultDelete(ids);
+            else if (window.FirebaseSync && typeof window.FirebaseSync.pushAll === 'function')
                 window.FirebaseSync.pushAll({ reason: 'user-delete-vault' });
         }
     };
@@ -44420,6 +44421,54 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
         writeVaultTombs(p, tombs);
         return tombs;
     };
+    function vaultSig(arr) {
+        if (!Array.isArray(arr))
+            return '';
+        var parts = [];
+        arr.forEach(function (x) { x = x || {}; parts.push(String(x.id) + '\n' + (x.updatedAt || x.createdAt || 0) + '\n' + (x.name || '') + '\n' + (x.category || '')); });
+        parts.sort();
+        return parts.join('\u0001');
+    }
+    window.LifeOSConfirmVaultDelete = function (ids) {
+        ids = (Array.isArray(ids) ? ids : [ids]).map(function (id) { return String(id); }).filter(Boolean);
+        var started = Date.now();
+        var label = ids.length > 1 ? (ids.length + ' thẻ') : 'thẻ';
+        function toast(text, icon) { if (window.showToast)
+            window.showToast(text, icon || 'ph-trash'); }
+        toast('Đã xóa ' + label + ' trên máy. Đang xóa trên Firebase…', 'ph-cloud-arrow-up');
+        var push = window.FirebaseSync && window.FirebaseSync.pushAll ? window.FirebaseSync.pushAll({ reason: 'vault-delete', force: true }) : Promise.resolve({ ok: false, error: 'no_sync' });
+        Promise.resolve(push).then(function (res) {
+            var sec = ((Date.now() - started) / 1000).toFixed(1);
+            if (!res || res.ok === false) {
+                toast('Chưa xóa được trên Firebase' + (res && res.error ? ': ' + res.error : '') + '. Thẻ vẫn mất trên máy này.', 'ph-warning');
+                return;
+            }
+            toast('Đã xóa tận gốc trên Firebase (' + sec + ' giây).', 'ph-check-circle');
+            var checks = 2;
+            function watch() {
+                var data = window.VaultStorageLayer && window.VaultStorageLayer.getData ? window.VaultStorageLayer.getData() : [];
+                var back = ids.filter(function (id) { return data.some(function (x) { return x && String(x.id) === id; }); });
+                if (back.length) {
+                    if (window.LifeOSMarkVaultDeleted)
+                        window.LifeOSMarkVaultDeleted(back);
+                    back.forEach(function (id) { if (window.VaultStorageLayer && window.VaultStorageLayer.remove)
+                        window.VaultStorageLayer.remove(id); });
+                    if (window.VaultUI && window.VaultUI.renderVaultCards)
+                        window.VaultUI.renderVaultCards();
+                    toast('Phát hiện thẻ đã xóa bị kéo lại. Đã gỡ và xóa lại.', 'ph-warning');
+                    if (window.FirebaseSync && window.FirebaseSync.pushAll)
+                        window.FirebaseSync.pushAll({ reason: 'vault-delete', force: true });
+                    return;
+                }
+                checks -= 1;
+                if (checks > 0)
+                    setTimeout(watch, 4000);
+                else
+                    toast('Đã canh 8 giây. Thẻ không bị kéo lại.', 'ph-shield-check');
+            }
+            setTimeout(watch, 4000);
+        });
+    };
     function getLocalVault(p) {
         var arr = readJSON(vaultKey(p), []);
         if (!Array.isArray(arr))
@@ -44525,8 +44574,8 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
             throw er;
         } return docToPlain(json); });
     }
-    function restPatch(p, payload, reason) {
-        return __awaiter(this, void 0, void 0, function* () { var token = yield getToken(); var fields = CANONICAL_FIELDS.concat(LEGACY_FIELDS); var headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }; if (token)
+    function restPatch(p, payload, reason, onlyFields) {
+        return __awaiter(this, void 0, void 0, function* () { var token = yield getToken(); var fields = onlyFields && onlyFields.length ? onlyFields : CANONICAL_FIELDS.concat(LEGACY_FIELDS); var headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' }; if (token)
             headers.Authorization = 'Bearer ' + token; var res = yield rawFetch(maskUrl(p, fields), { method: 'PATCH', headers: headers, body: JSON.stringify(plainToDoc(payload)), cache: 'no-store' }); var txt = yield res.text(), json = {}; try {
             json = txt ? JSON.parse(txt) : {};
         }
@@ -44573,20 +44622,54 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
             var V = window.VaultStorageLayer;
             if (V && typeof V.init === 'function' && V._k !== vaultKey(p))
                 V.init(p);
-            if (V && V._k === vaultKey(p) && typeof V.replaceAll === 'function')
-                V.replaceAll(vault);
-            else
-                writeJSON(vaultKey(p), vault);
-            if (window.VaultUI && typeof window.VaultUI.renderVaultCards === 'function')
-                window.VaultUI.renderVaultCards();
+            var curVault = V && typeof V.getData === 'function' ? V.getData() : [];
+            var vaultSame = vaultSig(curVault) === vaultSig(vault);
+            if (!vaultSame) {
+                if (V && V._k === vaultKey(p) && typeof V.replaceAll === 'function')
+                    V.replaceAll(vault);
+                else
+                    writeJSON(vaultKey(p), vault);
+                if (window.VaultUI && typeof window.VaultUI.renderVaultCards === 'function')
+                    window.VaultUI.renderVaultCards();
+            }
             if (typeof window.renderTasksOnly === 'function')
                 window.renderTasksOnly();
         }
         catch (e) { }
     }
     var compactChain = Promise.resolve();
+    var lastCloudVault = [];
+    function fastVaultDelete(reason) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var p = getProfile();
+            state.profile = p;
+            if (!navigator.onLine || !rawFetch)
+                return { ok: false, offline: true };
+            try {
+                var tombs = readVaultTombs(p);
+                var local = dropTombedVault(getLocalVault(p), tombs);
+                var vault = dropTombedVault(mergeCloudFirst(dropTombedVault(lastCloudVault, tombs), local), tombs);
+                var payload = { vault: vault, deletedVaultTombstones: tombs, updatedAt: now() };
+                yield restPatch(p, payload, reason || 'vault-delete-fast', ['vault', 'deletedVaultTombstones', 'updatedAt']);
+                state.pushOk++;
+                state.lastOk = 'vault_delete_fast';
+                state.lastAt = now();
+                state.lastCounts = { vault: vault.length, tombstones: Object.keys(tombs).length, updatedAt: payload.updatedAt };
+                trace('VAULT_DELETE_FAST', { reason: S(reason), counts: state.lastCounts });
+                return { ok: true, fast: true, counts: state.lastCounts };
+            }
+            catch (e) {
+                state.pushFail++;
+                state.lastError = S(e.message || e);
+                trace('VAULT_DELETE_FAST_FAIL', { reason: S(reason), error: state.lastError });
+                return { ok: false, error: state.lastError, status: e.status || 0 };
+            }
+        });
+    }
     function compactRemote(reason) {
-        var job = compactChain.then(function () { return compactRemoteJob(reason); }, function () { return compactRemoteJob(reason); });
+        var useFast = /vault-delete|user-delete-vault/i.test(S(reason));
+        var run = function () { return useFast ? fastVaultDelete(reason) : compactRemoteJob(reason); };
+        var job = compactChain.then(run, run);
         compactChain = job.then(function () { return null; }, function () { return null; });
         return job;
     }
@@ -44605,6 +44688,7 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
                 var cloudTaskSrc = mergeArrays(Array.isArray(cloud.tasks) ? cloud.tasks : [], Array.isArray(cloud.data) ? cloud.data : []);
                 var tasks = mergeCloudFirst(filterTasks(cloudTaskSrc, tombs), filterTasks(getLocalTasks(p), tombs));
                 var cloudVaultSrc = dropTombedVault(mergeArrays(Array.isArray(cloud.vault) ? cloud.vault : [], Array.isArray(cloud.vaultData) ? cloud.vaultData : []), {});
+                lastCloudVault = cloudVaultSrc.slice();
                 var vaultTombs = mergeVaultTombs(readVaultTombs(p), cloud.deletedVaultTombstones || {});
                 writeVaultTombs(p, vaultTombs);
                 cloudVaultSrc = dropTombedVault(cloudVaultSrc, vaultTombs);
@@ -44618,7 +44702,7 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
                 state.lastAt = now();
                 state.lastCounts = { tasks: payload.tasks.length, vault: payload.vault.length, tombstones: Object.keys(tombs).length, updatedAt: payload.updatedAt };
                 trace('COMPACT_REMOTE_OK', { reason: S(reason), counts: state.lastCounts, format: 'deletedTaskTombstones[id]=timestamp_int64' });
-                if (/vault/i.test(S(reason)) && window.showToast)
+                if (!/delete/i.test(S(reason)) && /vault/i.test(S(reason)) && window.showToast)
                     window.showToast('Đã đẩy kho lên Firebase (' + payload.vault.length + ' mục)', 'ph-cloud-check');
                 return { ok: true, counts: state.lastCounts };
             }
@@ -44626,7 +44710,7 @@ html.lifeos-r66-landscape-task-composer #mobile-input{
                 state.pushFail++;
                 state.lastError = S(e.message || e);
                 trace('COMPACT_REMOTE_FAIL', { reason: S(reason), error: state.lastError, status: e.status || 0 });
-                if (/vault/i.test(S(reason)) && window.showToast)
+                if (!/delete/i.test(S(reason)) && /vault/i.test(S(reason)) && window.showToast)
                     window.showToast('Kho chưa lên Firebase: ' + state.lastError, 'ph-warning');
                 return { ok: false, error: state.lastError, status: e.status || 0 };
             }
